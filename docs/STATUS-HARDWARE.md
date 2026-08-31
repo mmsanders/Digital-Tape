@@ -20,7 +20,7 @@ work starts.
 four "Start here" asks cannot be executed as written today, and one of those two has no
 workaround I can apply myself.
 
-**Four `pm-decision` issues filed**, each with options and a recommendation, per Charter §05.
+**Four `pm-decision` issues filed** (#5, #6, #7, #8), each with options and a recommendation, per Charter §05.
 None of them blocks me: for each one I have named the reversible path I will take if no answer
 arrives. **Two items appended to `docs/FOR-MICHAEL.md`** (Q-004, Q-005), both with defaults.
 
@@ -426,10 +426,10 @@ background is that risk realised. Not my ADR to amend, so: flagged, not decided.
 
 | # | Issue | Blocks | My reversible path if unanswered |
 |---|---|---|---|
-| H-01 | Copy target vs. microSD sustained-write floor | Nothing yet; should land before format freeze | Buy candidate cards in WP-05, characterise, report the number |
-| H-06 | Cartridge loading: captive or removable card | WP-24 shell geometry | Design captive, keep a service screw |
-| H-11 | `spec/` freeze vs. living hardware documents | WP-34 (I will not write into a frozen dir) | Draft the budget at `hardware/thermal-budget.draft.md`, move it when told |
-| H-12 | Hardware acceptance sign-off + UHS-I bring-up ownership | WP-37 sign-off, eventually | Write criteria so a third party *could* check them, and mark every result self-reported |
+| H-01 | [#5](https://github.com/mmsanders/Digital-Tape/issues/5) — copy target vs. microSD sustained-write floor | Nothing yet; should land before format freeze | Buy candidate cards in WP-05, characterise, report the number |
+| H-06 | [#6](https://github.com/mmsanders/Digital-Tape/issues/6) — cartridge loading: captive or removable card | WP-24 shell geometry | Design captive, keep a service screw |
+| H-11 | [#7](https://github.com/mmsanders/Digital-Tape/issues/7) — `spec/` freeze vs. living hardware documents | WP-34 (I will not write into a frozen dir) | Draft the budget at `hardware/thermal-budget.draft.md`, move it when told |
+| H-12 | [#8](https://github.com/mmsanders/Digital-Tape/issues/8) — hardware acceptance sign-off + UHS-I bring-up ownership | WP-37 sign-off, eventually | Write criteria so a third party *could* check them, and mark every result self-reported |
 
 ## Questions queued for Michael
 
