@@ -1,0 +1,41 @@
+# build
+build/
+*.o
+*.a
+*.elf
+*.hex
+*.bin
+*.map
+*.su
+compile_commands.json
+
+# host (rust / tauri)
+target/
+node_modules/
+dist/
+
+# python (cadquery)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# kicad
+*-backups/
+*.kicad_prl
+fp-info-cache
+*.bak
+*.kicad_pcb-bak
+*.kicad_sch-bak
+
+# generated hardware output — regenerate, do not commit
+hardware/**/gerbers/
+hardware/**/stl/
+
+# test artifacts — golden fixtures are committed, output is not
+tests/**/out/
+*.wav.actual
+
+# os
+.DS_Store
+Thumbs.db
