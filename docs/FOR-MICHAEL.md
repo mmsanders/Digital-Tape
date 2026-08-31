@@ -9,6 +9,32 @@ outcome, and logs it to `DECISIONS.md` if it was a call rather than a preference
 
 ## Open
 
+### Q-004 — Your tape will remember where you were, but only in your own player
+
+**Needs:** your taste · **Blocks:** nothing — a default will ship
+**Why you and not us:** the mechanism is forced; the feeling it creates is a choice
+
+A real cassette resumes where you left off because the tape is physically sitting at that spot.
+The position belongs to the tape.
+
+We can't do that. The left slot is read-only by design — that is the thing protecting your kids'
+music — so a cartridge played there has no writable surface to record its position on. The fix
+is for the *player* to remember, in its own memory, where each cartridge was.
+
+That works, and it's cheap. But it means the position lives in the player rather than the tape,
+and there will be four players in the house. Take your tape to your brother's player and it
+resumes wherever *he* left that tape, or at the beginning. Bring it back to yours and it's where
+you left it.
+
+Our read is that this is fine and possibly even nice — "my player remembers my tapes" is a rule a
+child can hold. But it's a real departure from how a cassette behaves, so it should be your call
+rather than a side effect of ours.
+
+**Default if you don't pick:** the player remembers, and it remembers the last 64 cartridges.
+Anything older starts from the beginning again.
+
+---
+
 ### Q-002 — Is 90 minutes worth the UHS-I risk?
 
 **Needs:** your call · **Blocks:** nothing yet, but it should land before the format freeze

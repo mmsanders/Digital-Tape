@@ -179,3 +179,29 @@ assuming, which is the same code either way.
 **Cost to reverse.** Low, and it buys optionality that is expensive to add later. The cost paid
 is a handful of extra superblock fields and a mount path that computes instead of assumes —
 both of which the engine needs regardless.
+
+
+---
+
+## ADR-009 — Verification Lead is ChatGPT, with no repository access
+
+**Date:** 2026-08-31 · **Decided by:** PM (Software Charter, revision of 31 Aug)
+
+**Decision.** Stream 2 moves from a Claude Code instance to ChatGPT. Its scope gains adversarial
+spec review. It has no repository access: it receives `spec/` as text and returns findings and
+test source, which the Software Lead lands and runs. Three seam rules govern the exchange —
+recorded verbatim in `CLAUDE.md` §2.
+
+**Rationale (the PM's).** An independent verifier is worth most when it does not share the
+implementer's priors. A verifier built on the same model as the implementer will tend to find the
+same things obvious, and the things it finds obvious are exactly the things nobody checks.
+
+**Cost to reverse.** Low as a swap, high in what it would quietly undo. Moving Stream 2 back to a
+Claude instance would restore repository access and remove the relay described below — a real
+convenience — while giving up the shared-priors argument that is the entire reason for the
+change. The tell that it has been reversed in spirit rather than by decision would be tests that
+stop surprising anyone.
+
+**Consequence not yet resolved.** The charter does not say who carries text across the seam. That
+is the highest-frequency interaction in the project and it now has a human-shaped gap in the
+middle of it. Raised in `docs/REVIEW/software-lead.md` §3.1.

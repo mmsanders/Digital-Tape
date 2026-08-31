@@ -47,11 +47,31 @@ being told.** That heuristic resolves more design questions than escalation does
 | **Michael** | Human | Vision and taste. Format-freeze sign-off. Physical iteration and the feel of the buttons. Aesthetic direction. Parts orders. | Read code, break down tasks, or answer questions that have a defensible default. |
 | **Program Manager** | Cowork | Roadmap and phase gates. `spec/` as source of truth. Cross-stream arbitration. Risk register. Scope calls. | Write, review, or merge code. Hold repo credentials. |
 | **Software Lead** | Claude Code | The repository. Task breakdown, dispatching implementation sub-agents, code review, CI, merges. Streams 1, 3, 4, 5. | Change `spec/`, add engine dependencies, or sign off its own acceptance criteria. |
-| **Verification Lead** | Claude Code | Stream 2. Golden audio fixtures, crash-injection harness, fuzzing, independent acceptance sign-off on every work package. | Report to the Software Lead. **This one reports to the PM.** |
+| **Verification Lead** | **ChatGPT** | Stream 2. Adversarial spec review, golden audio fixtures, crash-injection harness, fuzzing, independent acceptance sign-off on every work package. | Report to the Software Lead. **This one reports to the PM — and it is a different model on purpose.** |
 | **Hardware Lead** | Claude Code | `hardware/`. Schematic, layout, code-defined CAD, BOM, sourcing, thermal. | Touch anything under `engine/` or `firmware/`. |
 
 Nobody grades their own homework. Architecture decisions live one level above the branch
 they would otherwise be made in.
+
+### The seam with Verification — read this twice
+
+The Verification Lead is deliberately **not a Claude instance**. An independent verifier is
+worth most when it does not share the implementer's priors — when what you found obvious is not
+obvious to it, and it asks why. **Expect it to question things you consider settled. That is the
+function, not friction.**
+
+**It has no repository access.** It receives `spec/` as text and returns findings and test
+source; the Software Lead lands and runs them. Three rules govern that seam, and all three are
+easy to violate with good intentions:
+
+1. **Do not show it the engine implementation before it has written the tests for that
+   behaviour.** Reading the code first produces tests that confirm what the code does rather
+   than what it should do, which destroys the entire value of the arrangement.
+2. **If a test it wrote does not compile, fix it mechanically.** Weakening the assertion to make
+   it pass is not a fix. If an assertion genuinely cannot be expressed as written, escalate —
+   do not edit.
+3. **A disagreement about whether a test is correct is a PM escalation**, not a negotiation.
+   Neither side wins by attrition, and you are not the tiebreaker on your own code.
 
 ---
 

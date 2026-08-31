@@ -6,6 +6,21 @@
 
 ## What changed since last time
 
+**Charter revised (31 Aug) and reviewed.** Four changes: the Verification Lead is now ChatGPT
+rather than a Claude instance and has no repository access; a new three-rule seam governs the
+exchange with it; action 02 must resolve two newly-named spec defects before freezing; and those
+two defects are stated with a proposed resolution.
+
+Absorbed into `CLAUDE.md`. My full response is in **`docs/REVIEW/software-lead.md`** — the PM
+asked each lead to file there so it can process all three together.
+
+**Headline from that review:** both defects are real. Defect B's proposed resolution
+(*"`tape_dup` assigns the destination a freshly generated UUID"*) **cannot be implemented as
+written** — the engine has no entropy source and may not acquire one under guardrails 08 and 09.
+The fix is one parameter: the caller supplies the UUID. Defect A's resolution is sound but
+requires a `tape_seek` and a position getter that **are not in the plan's API list at all**,
+despite WP-08's acceptance criteria assuming seek exists.
+
 **Plan Rev B received and checked.** WP-02 and WP-03 are unblocked. Its numbers are internally
 consistent — the 22 KB Side B map figure independently confirms 12-byte index entries, and
 byte rate, tape size, chunk duration and copy rate all reconcile exactly. Adopted as the input
@@ -36,7 +51,8 @@ Phase 1; `run-golden.sh` is **WP-11** runner wiring. Corrected in `PACKAGES/READ
 |---|---|---|
 | WP-01 repo scaffold | Software Lead | Done, unconfirmed |
 | WP-13 gates (early) / WP-11 runner | Software Lead | Wired, 5/5 red as intended |
-| WP-02 `spec/tapefs-v1.md` | Software Lead | **Starting** |
+| Charter review packet | Software Lead | **Filed** — `docs/REVIEW/software-lead.md` |
+| WP-02 `spec/tapefs-v1.md` | Software Lead | Drafting — **will not freeze** pending Verification |
 | WP-03 `spec/engine-api.md` | Software Lead | Next, after WP-02 |
 
 ## Blocked
@@ -59,7 +75,15 @@ not say what happens when a splice would overflow the slot, and there is no scre
 it. Raised as issue #4 — the mechanism is the Software Lead's call, but *what a child
 experiences at the wall* is Michael's, so it is also queued in FOR-MICHAEL.md.
 
-**3. `main` branch protection is not verified.** Plan §03 says "nothing merges to main without
+**3. The Verification seam has no stated mechanism.** The Verification Lead has no repository
+access and receives `spec/` as text — but the charter does not say who carries the text. This is
+the highest-frequency interaction in the project: Stream 2 works against every spec revision and
+signs off every work package. If the transport is a human relaying documents, then the structure
+built to remove Michael as a bottleneck has a human bottleneck at its centre, and Phase 1 should
+be scheduled against the relay rate rather than agent throughput. Detailed in the review packet
+§3.1; **this is the item I would most like answered before Stream 1 starts.**
+
+**4. `main` branch protection is not verified.** Plan §03 says "nothing merges to main without
 your review". Repository settings are not the Software Lead's to change.
 
 ## Acceptance criteria flipped to passing
@@ -69,12 +93,17 @@ WP-01 and the gates above, which are the Software Lead's own claims about its ow
 
 ## What will hurt in three weeks
 
-- **No Verification Lead, and Phase 1 is about to start.** Charter §01 makes this a peer
-  reporting to the PM. WP-10 and WP-11 are its packages and the charter is explicit that tests
-  are written against the spec *before or alongside* the implementation, never after reading
-  it. Every day Stream 1 runs ahead of Stream 2 is a day that ordering is lost, and it cannot
-  be recovered retroactively. **This is the most time-critical gap in the project right now**,
-  because the specs land this week and that is exactly when Stream 2 should pick them up.
+- **The Verification Lead exists on paper but not yet in practice**, and Phase 1 is about to
+  start. The charter is explicit that tests are written against the spec *before or alongside*
+  the implementation, never after reading it, and that ordering cannot be recovered
+  retroactively. It is now also the reviewer that has to attack the two spec defects before the
+  format can freeze — so it is on the critical path twice over.
+- **Rule 1 of the seam is not enforceable as written, because the repository is public.**
+  "Do not show it the engine implementation before it has written the tests" is discipline, and
+  the charter's own reasoning (guardrails 05 and 06) says discipline is the weak form. I have
+  proposed a structural version — engine implementation stays on unmerged branches until Stream
+  2's tests land on `main` — which I can implement unilaterally if the PM approves. Review packet
+  §3.2.
 - **No Hardware Lead.** WP-34 (thermal budget) is a Phase 0 package and is not started. The
   plan is explicit that it is *"written before the schematic, not after"*.
 - **The 90-minute question is open and it touches the format.** Plan §13 ask #02 asks Michael
