@@ -20,8 +20,8 @@ jobs:
           nm --version | head -1
 
       # Every gate runs and reports, rather than stopping at the first failure.
-      # This is expected to fail at Phase 0 — that is the WP-04 acceptance
-      # criterion, not a defect. Guardrails that arrive after the code has been
+      # This is expected to fail at Phase 0 — that is the point of standing the
+      # gates up now, not a defect. Guardrails that arrive after the code has been
       # written are advisory; guardrails that are already failing are load-bearing.
       # Do not "fix" this by relaxing a gate. See docs/STATUS.md.
       - name: Run all gates

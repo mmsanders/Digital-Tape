@@ -22,8 +22,15 @@ depends on GitHub Actions, so "works on my machine" and "works in CI" are the sa
 
 ### These gates are expected to fail at Phase 0
 
-That is the WP-04 acceptance criterion. **Do not relax a gate to make CI green.** The engine
-is empty and there are no fixtures; the gates go green when WP-06 and WP-10 land.
+That is the point of standing them up now (Charter §09 action 04). **Do not relax a gate to
+make CI green.** The engine is empty and there are no fixtures; the gates go green when WP-06
+and WP-10 land.
+
+**Package mapping.** The three audits are **WP-13**'s acceptance criterion — *"zero allocation
+after init, no recursion, no libc file I/O, static budget under 200 KB"* — wired as CI ahead of
+Phase 1 rather than audited at the end of it. `run-golden.sh` is **WP-11** runner wiring only;
+the fixtures themselves are the Verification Lead's. Neither is WP-04, which is Michael's
+transport spike.
 
 ### They have been verified in both directions
 

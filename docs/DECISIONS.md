@@ -87,7 +87,7 @@ export to a GUI tool; the sweep capability is lost outright.
 **Decision.** Gate scripts live in `tools/ci/`, with `.github/workflows/ci.yml` as a thin
 caller. Charter §03 does not name either directory.
 
-**Rationale.** WP-04 requires CI, and it has to live somewhere. Putting the gates in
+**Rationale.** Charter §09 action 04 requires CI, and it has to live somewhere. Putting the gates in
 `tools/ci/` rather than inside the workflow means every gate runs locally exactly as it runs
 in CI, so "works on my machine" and "works in CI" are the same claim. Putting them under
 `engine/` would have been wrong — the golden-suite gate spans `tests/`, which belongs to the
@@ -119,3 +119,63 @@ must state which, in bytes, per subsystem. Raised as a `pm-decision` issue.
 **Cost to reverse.** Trivial today — one line in `tools/ci/audit-memory.sh`. Expensive once
 the engine is written against the looser reading, because tightening it later means finding
 RAM that was already spent.
+
+---
+
+## ADR-007 — Plan Rev B adopted as the numeric input to WP-02 and WP-03
+
+**Date:** 2026-08-31 · **Decided by:** PM (Plan Rev B), checked by Software Lead
+
+**Decision.** The format and API numbers in Plan Rev B §04 and §05 are the input to
+`spec/tapefs-v1.md` and `spec/engine-api.md`. Adopted as given:
+
+| Quantity | Value |
+|---|---|
+| Audio | 44.1 kHz / 16-bit stereo PCM, 176,400 B/s |
+| 90-minute cartridge | 952,560,000 B (~953 MB), 1,817 chunks |
+| Chunk | 512 KiB = 2.9722 s |
+| Superblock | 4 KiB × 2, both ends of the partition |
+| Preroll cache | 512 KiB (~2.97 s) |
+| Index slots | 32 KiB × 4 — two double-buffered per side |
+| Index entry | `{chunk_id, start_offset, length}`, 12 B |
+| Side A store | 952 MB, immutable, below high-water mark |
+| Partitioning | MBR: small FAT32 (README + label art) + raw TAPEFS |
+
+**Rationale.** The numbers reconcile exactly and independently. The plan states the Side B map
+is "about 22 KB"; 1,817 entries × 12 B = 21,804 B = 21.3 KiB. That arithmetic was not given in
+the plan — it confirms the 12-byte entry width rather than assuming it, which is why the entry
+layout can be specified byte-exact rather than guessed.
+
+Checked and consistent: byte rate, tape size, chunk duration, chunk count, copy rate
+(952.56 MB / 30 s = 31.8 MB/s), preroll duration.
+
+**Two things the plan does not resolve.** Both raised rather than assumed — issues #3 and #4.
+Neither blocks WP-02.
+
+**Cost to reverse.** Rises sharply at the format freeze. Before the gate, changing a number is
+an edit to one document. After it, it is a reflash of every cartridge ever written. Region
+sizes will be parameterised from superblock fields specifically so that tape length can change
+without a re-spec — see the open 90-minute question.
+
+---
+
+## ADR-008 — Region sizes are derived from superblock parameters, not hard-coded
+
+**Date:** 2026-08-31 · **Decided by:** Software Lead
+
+**Decision.** `spec/tapefs-v1.md` will state region *offsets and sizes as fields in the
+superblock*, computed at format time from a stored tape length, rather than fixing 952 MB and
+1,817 chunks as constants in the format.
+
+**Rationale.** Plan §13 ask #02 puts the 90-vs-60-minute question to Michael and it is still
+open. 60 minutes changes the Side A store from 952 MB to 635 MB. The plan already lists "format
+params" and "region offsets" among the superblock's contents, so this is reading the plan
+rather than extending it — but making it explicit means the answer arriving late costs a
+format-time constant, not a spec revision and three streams re-reading it.
+
+It also makes the engine's mount path honest: it reads where the regions are instead of
+assuming, which is the same code either way.
+
+**Cost to reverse.** Low, and it buys optionality that is expensive to add later. The cost paid
+is a handful of extra superblock fields and a mount path that computes instead of assumes —
+both of which the engine needs regardless.
