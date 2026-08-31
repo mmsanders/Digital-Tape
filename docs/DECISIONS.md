@@ -77,3 +77,45 @@ tool's cost buys nothing.
 
 **Cost to reverse.** High after the first enclosure spin. Parametric intent does not survive
 export to a GUI tool; the sweep capability is lost outright.
+
+---
+
+## ADR-005 — CI tooling lives in `tools/`, outside the Charter §03 tree
+
+**Date:** 2026-08-31 · **Decided by:** Software Lead · **Flagged for PM review**
+
+**Decision.** Gate scripts live in `tools/ci/`, with `.github/workflows/ci.yml` as a thin
+caller. Charter §03 does not name either directory.
+
+**Rationale.** WP-04 requires CI, and it has to live somewhere. Putting the gates in
+`tools/ci/` rather than inside the workflow means every gate runs locally exactly as it runs
+in CI, so "works on my machine" and "works in CI" are the same claim. Putting them under
+`engine/` would have been wrong — the golden-suite gate spans `tests/`, which belongs to the
+Verification Lead.
+
+This is the reversible path taken under the "never block a whole stream waiting on an answer"
+rule. The PM may rename or relocate it.
+
+**Cost to reverse.** Trivial now — a `git mv` and one path in the workflow. Rises once the
+Hardware Lead adds KiCad ERC/DRC gates alongside these, which the charter anticipates.
+
+---
+
+## ADR-006 — Memory budget counts `.data + .bss`, not `.rodata`
+
+**Date:** 2026-08-31 · **Decided by:** Software Lead · **NEEDS PM CONFIRMATION at WP-03**
+
+**Decision.** The 200 KB static budget in guardrail 08 is enforced against `.data + .bss`.
+`.rodata` is reported but not counted.
+
+**Rationale.** On the target, `.rodata` lives in flash and `.data`/`.bss` consume RAM, and RAM
+is the scarce resource the guardrail exists to protect. The charter says "static budget under
+200 KB" without splitting them, so this is an interpretation, not a reading.
+
+**It may be the wrong one.** If the intent was total static footprint, the gate is currently
+too permissive and a large constant table would sail through. `spec/engine-api.md` (WP-03)
+must state which, in bytes, per subsystem. Raised as a `pm-decision` issue.
+
+**Cost to reverse.** Trivial today — one line in `tools/ci/audit-memory.sh`. Expensive once
+the engine is written against the looser reading, because tightening it later means finding
+RAM that was already spent.
