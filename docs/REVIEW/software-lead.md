@@ -227,6 +227,10 @@ escalations turns out to have been written to a channel nobody reads.
 
 ## 4. Already open, for the PM to see in one place
 
+Full text of the three escalations is mirrored in **`docs/ESCALATIONS.md`** — options,
+recommendations and defaults — so this review does not depend on the PM being able to read
+GitHub issues.
+
 | | |
 |---|---|
 | **Issue #2** | Does the 200 KB static budget include `.rodata`, or is it RAM only? CI enforces RAM-only. Needs an answer at WP-03 |
