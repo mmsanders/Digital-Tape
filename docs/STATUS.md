@@ -1,6 +1,7 @@
 # STATUS
 
 **Updated:** 2026-09-02 · **Phase:** 0→1 · **Updated by:** Software Lead
+**PR #1 is out of draft and ready for PM review.**
 
 ---
 
