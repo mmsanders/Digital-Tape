@@ -18,7 +18,7 @@ Every gate is a standalone script that runs locally exactly as it runs in CI.
 | `audit-stack.py` | Guardrail 08 — max stack depth ≤ 8 KiB from GCC's own `-fstack-usage`/`-fcallgraph-info`. **Subsumes the recursion check**: a cycle makes depth unbounded |
 | `audit-memory.sh` | Guardrail 08 — RAM ≤ 200 KiB, `.rodata` ≤ 32 KiB. Both print every run |
 | `unit.sh` | Software Lead scaffolding self-tests. **Not acceptance** |
-| `run-golden.sh` | Contract 3 — the golden suite. Wiring only; `tests/golden/` is the Verification Lead's |
+| `run-golden.sh` | Contract 3 — the golden suite. Delegates to `tests/harness/run-golden.sh`: manifest-driven, byte-exact comparison, audible diff on failure. Fixtures and manifest are the Verification Lead's |
 
 ### Two archives, and why the gates scope to one
 

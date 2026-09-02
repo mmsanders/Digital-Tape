@@ -32,7 +32,7 @@ Charter §04.
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
 | WP-10 | Crash-injection harness | Verification | 2 | Fault-injection *device* landed (`dev_sim`); harness is theirs |
-| WP-11 | CLI harness and golden-file regression suite | Agent | 2 | Runner wired; fixtures blocked |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **Runner built and proven** (manifest, byte-exact, audible diff). Fixtures + manifest are theirs |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
 | WP-13 | Embedded-readiness audit | Agent | 1 | **Gates rebuilt and green** — funnel, 8 KiB stack, two budgets |
 | WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |

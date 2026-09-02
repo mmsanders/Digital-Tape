@@ -21,6 +21,8 @@ verified against deliberately violating code:
 | `engine/port/dev_sim.c` | Fault injection: power loss after N writes, and torn writes |
 | `engine/port/dev_sd.c` | SD seam, honest stub — fails loudly rather than reading zeroes |
 | `tests/harness/` | Scaffolding, 64 self-test checks passing |
+| `tests/harness/run-golden.sh` | **Golden runner** — manifest-driven, byte-exact, writes an audible diff. Proven end-to-end against synthetic fixtures |
+| `tests/golden/MANIFEST.md` | The contract for returned test source. Answers my own open question rather than leaving it open |
 
 **CI is 6 of 7 green.** Only the golden suite is red, awaiting Verification Lead fixtures — which
 is the correct state, and it resolves the "red forever stops being read" risk I flagged: the
@@ -60,11 +62,13 @@ and are explicitly not acceptance. Nothing can flip until the Verification Lead 
   demonstrably working. But `tests/golden/` is still empty, and WP-06 lands code the moment
   DRAFT-3 arrives. The charter's ordering — tests written against the spec *before or alongside*
   the implementation — is about to be tested for real, and it cannot be recovered retroactively.
-  **The shape of returned test source is still unagreed** (review packet §3.4); the harness is
-  built and waiting.
-- **Rule 1 of the seam is still not structurally enforceable** on a public repo. My proposal —
-  engine implementation stays on unmerged branches until Stream 2's tests for that behaviour land
-  on `main` — has not been answered. It costs a longer branch life in Phase 1 and nothing else.
+  **The shape of returned test source is no longer a question** — `tests/golden/MANIFEST.md`
+  states it, and the runner behind it is proven. What remains is that nobody has agreed to it.
+- **The seam still has no stated transport.** Decisions 001 §0 says Michael hands me spec text,
+  which covers one direction. Nothing says how findings and test source come back, at what
+  cadence, or what happens when Stream 2 is mid-review and Stream 1 is ready. Raised as issue #13
+  together with rule 1's enforceability and the definition of "mechanically" — they are one
+  topic, and it is now the critical path.
 - **No Hardware Lead.** WP-34 (thermal and safety budget) is a Phase 0 package and is not
   started. The plan is explicit that it is written before the schematic, not after.
 - **The fourth caller-owned thing.** The PM asked me to look for where the engine next reaches

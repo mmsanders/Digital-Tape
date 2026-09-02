@@ -329,3 +329,44 @@ gate that lies and a port that cannot exist.
 
 **Cost to reverse.** Low now, and it gets harder to introduce later once the ports have grown.
 The rule to keep: if a gate ever runs over the port archive and fails, the fix is the gate.
+
+---
+
+## ADR-016 — The golden comparison has no tolerance, and none will be added
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** `golden_diff` compares reference and actual WAVs byte for byte. No epsilon, no
+per-case tolerance, no configuration knob for one.
+
+**Rationale.** Contract 3 makes the golden fixtures the *definition* of correct behaviour and
+requires firmware to be bit-identical at 1.0× playback. A tolerance would permit exactly the
+divergence the suite exists to detect — a desktop/firmware mismatch would sit inside the
+allowance and never fail. The moment a tolerance exists, the pressure on a hard failure is to
+widen it rather than to find the bug, and `tests/` §6 already says relaxing a test is a finding
+rather than a licence.
+
+Failures instead get **information**: an audible difference WAV (silence where the outputs agree,
+so you hear only what went wrong), the first differing frame with timestamp and channel, both
+sample values and their delta, how many samples differ, and the peak absolute delta. That
+distinguishes a click at a splice from an inverted channel from a one-frame offset — which is
+what a person actually needs, and which a tolerance would have hidden rather than explained.
+
+**Cost to reverse.** Adding a tolerance later is one parameter and would quietly void contract 3.
+That asymmetry is the reason to refuse it now: the change is cheap and the loss is invisible.
+
+---
+
+## ADR-017 — WAV fixtures outside 44.1 kHz / 16-bit / stereo are rejected, not converted
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** The fixture reader errors on any other rate, width or channel count.
+
+**Rationale.** Guardrail 01 fixes the format and says every other design decision rests on byte
+offset mapping linearly to time. A reader that resampled a 48 kHz fixture would make a
+guardrail-01 violation pass its own test — the most expensive kind of convenience, because the
+suite would then be certifying the thing it was built to prevent.
+
+**Cost to reverse.** Trivial technically. The rule to keep is that a rejected fixture is a
+question about the fixture, never a request for a converter.

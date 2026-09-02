@@ -28,6 +28,12 @@ Test source arriving from the Verification Lead should need only `engine/include
 `tests/harness/harness.h` — no framework dependency. If a returned test needs a shape this
 harness cannot express, that is a finding, not a reason to edit the test.
 
+**The golden runner is built and working.** `tests/harness/run-golden.sh` reads
+`tests/golden/MANIFEST`, runs each case, and compares byte-exactly; failures write a difference
+WAV where agreeing passages are silence. The full contract — manifest format, WAV constraints,
+why the comparison has no tolerance — is in **`tests/golden/MANIFEST.md`**. What is missing is
+fixtures and a manifest, and both are the Verification Lead's.
+
 ## Layout
 
 | Path | |
