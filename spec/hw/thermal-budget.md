@@ -132,6 +132,28 @@ to do quickly.
 What *can* get hot is the thing it does for hours. Playback while charging is only 1.07 W, but
 it is sustained, so it reaches steady state and it is the case that governs.
 
+### Per-device junction temperatures
+
+<!-- BEGIN GENERATED: junction -->
+| Device | θ_JA | τ | P (copy) | **T_j after a 30 s copy** | T_j if held forever | T_j max |
+|---|---:|---:|---:|---:|---:|---:|
+| MCU (RT1062, 196-MAPBGA) | 35 °C/W | 20 s | 590 mW | **41.6 °C** | 70.8 °C | 105 °C |
+| Buck regulator (3V3) | 50 °C/W | 6 s | 250 mW | **38.0 °C** | 62.7 °C | 125 °C |
+| Charger (buck, thermal pad) | 45 °C/W | 8 s | 230 mW | **35.7 °C** | 60.5 °C | 125 °C |
+
+At 25 °C ambient. Hot-room case (35 °C ambient, held indefinitely):
+
+| Device | T_j | Margin to T_j max |
+|---|---:|---:|
+| MCU (RT1062, 196-MAPBGA) | 80.8 °C | **+24.2 K** |
+| Buck regulator (3V3) | 72.7 °C | **+52.3 K** |
+| Charger (buck, thermal pad) | 70.5 °C | **+54.5 K** |
+
+**Why the fast term matters and the lumped model missed it.** The enclosure's time constant is 621 s; a QFN's is 6–20 s. Over a 30 s copy the box barely moves — half a kelvin — while the regulator gets within a few percent of its own steady rise. Averaging the two into one mass reports the box's answer for the die, which is the wrong answer by roughly the entire local rise. Each device is now carried separately, with its own θ_JA and its own τ.
+
+**The result is comfortable, and that is a finding rather than a relief** — it says the sealed enclosure is not the constraint anywhere, so the thermal argument for vents does not exist at any point in the design. Every θ_JA here is `EST` until WP-37 measures it; θ_JA in particular depends on copper pour area, which is a layout output, so these numbers are a budget layout must hit rather than a prediction of what it will do.
+<!-- END GENERATED: junction -->
+
 **The last row is a fault, not a use case** — copy held indefinitely by a stuck firmware state.
 It is in the table because WP-37 tests exactly that for an hour, and because it is the case
 that would justify vents if any case did. It does not: even held, it settles at a survivable
@@ -183,75 +205,168 @@ With (1) and (3) the 35 °C row stops being marginal. Both are in the proposed t
 ## 5. Charge path
 
 **Topology:** switching (buck) charger, thermal-pad package, over a copper pour sized from this
-budget; NTC on the cell, not the board; JEITA enforced **in the charger's own hardware** via its
-thermistor input, so no firmware path can widen the window.
+budget; NTC bonded to the **cell**, not the board; the charge window enforced in the charger's
+own hardware via its thermistor input, so no firmware path can widen it.
 
 | Element | Choice | Why |
 |---|---|---|
-| Charger | Switching buck, ~90% efficient, integrated JEITA thermistor input · `TI BQ25896` class · **UNVERIFIED** | A linear charger dropping 5 V→3.7 V at 500 mA puts **650 mW** into a grain of rice. The switching part puts **47 mW** into a part with a thermal pad. That is a 14× reduction for about a dollar. |
-| Charge current | Resistor-set, 500 mA default | Resistor-set so it can be turned *down* if WP-37 surprises us, without a respin. Rev A hedge. |
-| Cell NTC | 10 kΩ NTC bonded to the cell body | Reads the thing the limit protects. A board-mounted NTC reads the board and reports a number that is wrong in both directions. |
-| Cell protection | Protected cell (PCM) **+** secondary protection IC **+** PTC on the battery line | Three independent layers. The PCM is a component someone else built; the secondary IC is our own guarantee. **UNVERIFIED** part selection. |
-| Cell placement | Rigid compartment, isolated from screw bosses and flex, thermally distant from charger and MCU, never user-accessible | Drop survival and §4 mitigation 2 in the same feature |
-| Copy interlock | Charge suspended for the duration of a copy | §4 mitigation 1 |
+| Charger | Switching buck, ~90 % efficient, thermistor input with JEITA thresholds · `TI BQ25896` class · **UNVERIFIED** | A linear charger dropping 5 V→3.7 V at 500 mA puts **650 mW** into a grain of rice. The switching part puts **47 mW** into a part with a thermal pad. |
+| Charge current | Resistor-set, 500 mA default | So it can be turned *down* if WP-37 surprises us, without a respin |
+| Cell NTC | See §5.1 — **B = 3950 K**, bonded to the cell body | Reads the thing the limit protects. A board-mounted NTC reads the board and is wrong in both directions |
+| Cell protection | Protected cell (PCM) **+** secondary protection IC **+** PTC on the battery line | Three independent layers |
+| Cell placement | Rigid compartment, thermally distant from charger and MCU, never user-accessible | Drop survival and §4 mitigation 2 in one feature |
+| Copy interlock | Charge suspended for the duration of a copy (ADR-102) | §4 mitigation 1 |
+| Deep discharge | Hardware load switch below ~3.2 V, released on charger insert; charger ship mode for storage | Carried from H-10. **Must not add perceptible wake latency** — `acceptance.md`; if it does, that is an escalation, not a trade |
 
-**Deep discharge — carried over from STATUS-HARDWARE H-10.** No hard power-off plus a LiPo plus
-six months in a drawer ends below 2.5 V. The PCM cuts off, which is safe but leaves a degraded
-cell. Rev A carries a **hardware low-voltage latch-off** (load switch releasing the system below
-~3.2 V, re-armed on charger insert) and uses the charger's **ship mode** for storage between
-build and gift. Neither is perceptible in normal use — the device still wakes instantly on a
-button press from any state a child will put it in — so this does not trade against the
-instant-on guardrail. Flagged for PM confirmation in §9.
+### 5.1 The TS network — closing the charger finding
 
----
+`spec/acceptance.md` requires charging suspended below 0 °C and above **45 °C**, in hardware.
+PM Decisions 002-A §1 leaves the mechanism to us and offers three routes. **This is route 1**,
+and it works — but not with the thermistor anyone would reach for first.
 
-## 6. Solenoid path — why one protection is not enough
+The charger's TS thresholds are fixed *fractions of REGN*. What is adjustable is the temperature
+each fraction corresponds to, set by the divider built around the NTC. Two resistors, two
+constraints: put the hot suspend at 45 °C and the cold suspend at 0 °C.
 
-The Hardware Charter is right that this is the best twenty cents in the design, and right that
-it is not a firmware responsibility. It is also incomplete, and the gap is the interesting part.
+<!-- BEGIN GENERATED: charger_design -->
+**The thermistor is the design variable, and the obvious one does not work.**
 
-<!-- BEGIN GENERATED: solenoid -->
-| Quantity | Value | Note |
-|---|---:|---|
-| Coil power while energised | **9.0 W** | 9 V into 9 Ω, ~1.00 A |
-| Energy per actuation | 270 mJ | 30 ms pulse |
-| One-shot ceiling (hardware) | 50 ms | 1.7× the nominal pulse |
-| Worst case a one-shot alone permits | **9.0 W continuous** | a retrigger loop; this is why on-time alone is not enough |
-| Duty backstop ceiling | 0.5% over 10 s | = 0.04 W average, survivable indefinitely |
-| Route B, all four at once | **4.0 A** | unstaggered — the charter's peak-current objection |
-| Route B, staggered 10 ms | **1.00 A** | over 40 ms, imperceptible |
-<!-- END GENERATED: solenoid -->
+| NTC | B (K) | B needed for a 0 / 45 °C fit | Usable? | Best margin |
+|---|---:|---:|---|---:|
+| 103AT class | 3435 | 3162 bare minimum | no — RT2 goes negative | — |
+| B = 3950 K | 3950 | 3162 bare minimum | **yes** | 4.4 K |
+| B = 4250 K | 4250 | 3162 bare minimum | **yes** | 5.7 K |
 
-**The gap.** A one-shot bounds how long a *single* assertion lasts. It says nothing about how
-often assertions may occur. Firmware stuck in a retrigger loop at 100 Hz delivers a 50 ms pulse
-every 10 ms, the coil sees essentially its full 9 W continuously, and the one-shot fires
-correctly the entire time. The exact failure the charter describes — a stuck firmware state
-cooking a coil built for 30 ms pulses — is **fully reachable through a working one-shot.**
+A B = 3435 K thermistor — the 103AT part everyone reaches for — spans *exactly* enough to place both thresholds at 0 °C and 45 °C and **nothing more**. Ask it for any inward margin and the required span exceeds what it can deliver, so the algebra returns a negative RT2. A steeper thermistor is not a refinement here; it is the difference between a design and an arithmetic coincidence.
 
-**Topology: three parts, none of which firmware can reach.**
+**Chosen: a B = 3950 K thermistor**, giving **4.4 K** of inward margin on each limit.
 
-| Part | Job | Cost |
-|---|---|---|
-| Non-retriggerable one-shot (`74HC221` class) | Caps on-time at 50 ms regardless of how long the MCU holds the line | ~$0.20 |
-| RC lockout on the trigger | Enforces a minimum off-time, so retriggers inside the recovery window are ignored | ~$0.02 |
-| PPTC on the solenoid rail (hold ≈ 100 mA, trip ≈ 200 mA) | Average-current backstop. Passes a 30 ms 1 A pulse without noticing; opens within a few hundred ms of sustained conduction | ~$0.15 |
+| Quantity | Value |
+|---|---:|
+| `RT1` (REGN → TS) | **9.76 kΩ**, 1 % |
+| `RT2` (TS → GND, parallel with NTC) | **do not fit** — the solve wants 4.6 MΩ, which is electrically open. Keep the footprint. |
+| NTC | **10 kΩ at 25 °C, B = 3950 K**, 1 %, bonded to the cell |
+| Nominal suspend points | 4.4 °C and 40.6 °C |
+
+Where each charger threshold lands:
+
+| Threshold | Fraction of REGN | Lands at | Meaning |
+|---|---:|---:|---|
+| `VT1` | 73.25 % | **+4.3 °C** | **cold suspend — charging stops** |
+| `VT2` | 68.75 % | **+8.6 °C** | cool — reduced charge current |
+| `VT3` | 48.00 % | **+27.3 °C** | warm — charge voltage −200 mV |
+| `VT5` | 34.75 % | **+40.5 °C** | **hot suspend — charging stops** |
+
+`VT2` and `VT3` are not free parameters — they fall where the divider puts them. They land inside the window and give a reduced-current band and a reduced-voltage band on the way to each cutoff, which is the taper behaviour proposed as T-2. It comes free with this network rather than needing its own circuit.
+
+**On `RT2`: keep the footprint, do not fit the part.** With a steep enough thermistor the solve pushes RT2 into the megohms, which is electrically the same as leaving it out — the network is just `RT1` and the NTC. Fitting a 4.6 MΩ resistor beside a high-impedance sense node buys nothing and invites leakage and noise. The pad stays because RT2 is the one knob that trades margin between the cold and hot thresholds, and rev A is an experiment: if the real cell NTC misbehaves, that pad is how it gets corrected without a respin.
+<!-- END GENERATED: charger_design -->
+
+### 5.2 Worst-case corners
+
+<!-- BEGIN GENERATED: charger_corners -->
+| Suspend threshold | Nominal | Worst-case window | Binding corner | Limit | Verdict |
+|---|---:|---|---:|---:|---|
+| Cold (`VT1`) | +4.3 °C | +2.2 … +6.3 °C | **+2.2 °C** | ≥ 0 °C | **pass** |
+| Hot (`VT5`) | +40.5 °C | +39.1 … +41.9 °C | **+41.9 °C** | ≤ 45 °C | **pass** |
+
+All 32 corners enumerated, not RSS: resistors ±1 %, NTC R25 ±1 %, B ±1 %, comparator ±2 % of REGN.
+
+**Safety is one-sided on each threshold.** Suspending early is harmless — the device declines a charge it could have taken. Suspending late means charging a lithium cell below freezing or above 45 °C. So the binding numbers are the cold window's *minimum* and the hot window's *maximum*, and centring the nominal on 0 / 45 would put half the tolerance band on the wrong side of a safety limit.
+<!-- END GENERATED: charger_corners -->
+
+### 5.3 What this closes, and what it leaves open
+
+**Closed.** A `BQ25896`-class part *can* meet a 45 °C hot-suspend limit, with a deliberately
+designed divider and a steeper thermistor than the obvious one. Route 2 (a different charger)
+and route 3 (a series thermal cutoff) are not needed, and the reduced-current and
+reduced-voltage bands that fall out of the divider give the taper behaviour proposed as T-2 for
+free.
+
+**Open, and it is a live risk.** The threshold fractions above are `UNVERIFIED` — `ti.com` is
+still blocked from this environment, so they come from the part's commonly published values
+rather than a datasheet anyone here has read. **They are inputs, not results.** If the real
+fractions differ, `RT1` changes and the required NTC B may change with it; the method and the
+one-sided-margin argument hold regardless. `hardware/thermal/charger_ts.py` takes them as named
+constants at the top — correcting them is a one-line edit and a re-run.
+
+## 6. Solenoid path — two limits, three layers
+
+`spec/acceptance.md` now carries **two** solenoid limits, because one was not enough:
+
+- **Single pulse** ≤ 50 ms regardless of gate input.
+- **Duty** ≤ 5 % over any rolling 1 s window, enforced in hardware.
+
+The second exists because a one-shot bounds how long a *single* assertion lasts and says nothing
+about how often assertions may occur. PM Decisions 002-A §2 upholds the reviewers' objection on
+how it is met: **a PPTC is history-dependent, so it is a third layer and not the thing that
+meets the limit.** The one-shot and the lockout must meet it deterministically on their own.
+
+<!-- BEGIN GENERATED: solenoid_values -->
+| Element | Part | Nominal | Worst case | Against |
+|---|---|---:|---|---|
+| One-shot pulse | `74HC221` A-half, R = 429 kΩ 1 %, C = 100 nF **C0G** | 30 ms | 25.2 … **34.8 ms** | ≤ 50 ms — **pass**, 1.44× margin |
+| Lockout | `74HC221` B-half, R = 1.71 MΩ 1 %, C = 1 µF **film** | 1200 ms | **1008** … 1392 ms | ≥ 787 ms needed — **pass** |
+| **Resulting duty** | worst pulse over shortest lockout | 2.4 % | **3.34 %** | ≤ 5 % — **pass**, 1.50× margin |
+| Coil average at that duty | | | **0.30 W** | vs 9 W energised |
+
+Timing tolerance is **±16 %**, taken as the arithmetic sum of resistor ±1 %, capacitor ±5 % and the `74HC221` timing constant ±10 % over temperature — not RSS, because these are not independent random variables on one board.
+
+**Neither timing capacitor is X7R, and that is load-bearing.** X7R loses a large fraction of its capacitance under DC bias and over temperature, so a timing network built on one does not have a ±5 % tolerance — it has an unbounded one. Here that would widen the pulse and shorten the lockout, both in the unsafe direction, and it would pass every bench test at room temperature.
+
+**The two halves live in one `74HC221`.** The package is a dual monostable: the A half sets the pulse, the B half is retriggered by A's falling edge and holds the lockout. One part, one footprint, and the lockout cannot be defeated by any gate input because it is downstream of the pulse rather than in front of it.
+
+**Why the lockout capacitor is film and not C0G.** 1 µF C0G does not exist in a practical package — C0G runs out around 100 nF at these sizes. Holding 1.2 s with 100 nF would need a 17 MΩ timing resistor, beyond the part's usable range and badly leakage-sensitive. A 1 µF PPS or polyester film capacitor is stable, buyable in 1206, and brings the resistor back to a sane 1.71 MΩ. This is the kind of substitution that gets made silently at assembly time, so it is written down here as a requirement.
+<!-- END GENERATED: solenoid_values -->
+
+### 6.1 Against the acceptance test
+
+<!-- BEGIN GENERATED: solenoid_test -->
+The acceptance test drives the gate with a continuous 100 Hz square wave and requires average coil current to fall to ≤ 5 % of the energised value within 2 s and stay there.
+
+| Quantity | Worst case |
+|---|---:|
+| Gate input | 100 Hz continuous, 50 % duty — 100 rising edges per second |
+| Pulses the hardware actually allows | 2 in 2 s |
+| Coil on-time in that window | 70 ms |
+| **Average coil duty over 2 s** | **3.48 %** |
+| Limit | ≤ 5 % |
+
+**This is the retrigger loop the one-shot alone does not cover.** A non-retriggerable monostable ignores edges while its output is high, but it accepts the very next edge afterwards — at 100 Hz that is 10 ms later, giving roughly 75 % duty and a coil that cooks while every part behaves exactly as specified. The lockout is what turns 100 edges per second into one pulse per 1.2 s, and it does so with an RC, so no firmware state can shorten it.
+<!-- END GENERATED: solenoid_test -->
+
+### 6.2 The third layer, and what it is not
+
+A **PPTC on the coil rail** (hold ≈ 100 mA) remains, and it is worth its fifteen cents — but as
+a backstop against faults the timing chain cannot see: a shorted FET, a wiring error, a coil
+that fails low-resistance. It is explicitly **not** how the duty limit is met, because a PPTC's
+trip point depends on its own recent history and ambient temperature, so it cannot be given a
+deterministic worst case. The limit is met by the two monostables above; the PPTC catches what
+they cannot.
 
 Plus a flyback diode across each coil and a gate pull-down, so an undriven gate is an off gate
-during reset and brown-out.
+through reset and brown-out.
 
-The PPTC is the part that closes the duty-cycle hole, and it closes it *physically*: it does not
-matter what sequence of edges firmware produces, sustained conduction opens the circuit. Total
-addition over the charter's single one-shot: about **fifteen cents**.
+### 6.3 The cost this imposes, stated plainly
 
-**A note on Route A versus Route B.** The charter counts "four solenoids' worth of peak current"
-against Route B. The table above shows that objection is cheap to retire: **staggering the four
-firings by 10 ms keeps peak current at one solenoid's worth** over a 120 ms sequence nobody can
-perceive, and the one-shots make the stagger a hardware property rather than a firmware promise.
-Route A remains preferable on mechanism and authenticity. It should be chosen for those reasons,
-in WP-04, on how it feels — **not** on a peak-current argument that costs two logic packages to
-make go away. Recorded so the spike is judged on the right axis.
+A 1.2 s lockout means the transport can release **at most once every 1.2 s** in the worst case.
+For the interlock as specified — stop pops play, end-of-tape pops play — that is invisible; the
+solenoid only fires on a release, and two releases inside a second is not a thing a transport
+does. But it is a real behavioural consequence of a safety limit, so it is written down rather
+than discovered.
 
----
+**It is also tunable, and WP-04 is what tunes it.** The lockout scales with the pulse: if the
+mechanism turns out to release reliably in 20 ms rather than 30 ms, the lockout drops to ~0.8 s
+for the same duty. The measured actuation time from the transport spike is the input, and the
+change is one resistor.
+
+### 6.4 On Route A versus Route B
+
+The charter counts "four solenoids' worth of peak current" against Route B.
+**Staggering the four firings by 10 ms holds peak current at one solenoid's worth** over a
+120 ms sequence nobody can perceive, and the one-shots make the stagger a hardware property
+rather than a firmware promise. Route A should win on mechanism and on feel, in WP-04 — not on
+a current argument that costs two logic halves to make go away.
 
 ## 7. Touch temperature, and the limit nobody wrote down
 

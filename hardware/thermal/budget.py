@@ -15,6 +15,7 @@ datasheet could not be read from this environment -- see STATUS-HARDWARE.md H-02
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from dataclasses import dataclass, field
@@ -162,6 +163,87 @@ def solenoid_pulse_j() -> float:
 
 
 # --------------------------------------------------------------------------
+# Per-device junction temperatures
+#
+# PM Decisions 002-A section 3 upholds the reviewers' finding: a lumped enclosure
+# mass does not resolve a 30-second copy. It cannot -- the enclosure's time
+# constant is ten minutes, while a QFN's junction reaches steady state in seconds.
+# Averaging them hides exactly the device that gets hot fastest.
+#
+# So this is a two-time-constant model. The slow term is the enclosure rise the
+# lumped model already computes; the fast term is each device heating above its
+# own local board, with its own theta_JA and its own tau.
+# --------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Device:
+    name: str
+    theta_ja: float        # C/W, junction to ambient on a 4-layer board with pour
+    tau_s: float           # own thermal time constant, seconds
+    tj_max: float          # C, absolute maximum from the datasheet
+    power: dict            # W dissipated, per mode
+    source: str
+
+
+DEVICES: list[Device] = [
+    Device("MCU (RT1062, 196-MAPBGA)", 35.0, 20.0, 105.0,
+           {"idle": 0.02, "play": 0.36, "copy": 0.59}, "EST/UNVERIFIED"),
+    Device("Buck regulator (3V3)", 50.0, 6.0, 125.0,
+           {"idle": 0.002, "play": 0.08, "copy": 0.25}, "EST"),
+    Device("Charger (buck, thermal pad)", 45.0, 8.0, 125.0,
+           {"idle": 0.23, "play": 0.23, "copy": 0.23}, "EST"),
+]
+
+
+def junction_temp(d: Device, mode: str, ambient: float, seconds: float | None,
+                  charging: bool = True) -> float:
+    """Ambient + enclosure rise + this device's own rise above its local board."""
+    p_box = dissipated(mode, charging)
+    if seconds is None:                      # held indefinitely -- steady state
+        board = bulk_rise_k(p_box) + internal_rise_k(p_box)
+        local = d.power[mode] * d.theta_ja
+    else:                                    # transient
+        board = transient_rise_k(p_box, seconds)
+        local = d.power[mode] * d.theta_ja * (1 - math.exp(-seconds / d.tau_s))
+    return ambient + board + local
+
+
+def t_junction() -> str:
+    rows = [
+        "| Device | θ_JA | τ | P (copy) | **T_j after a 30 s copy** | T_j if held forever | T_j max |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for d in DEVICES:
+        t30 = junction_temp(d, "copy", AMBIENT_NOMINAL_C, COPY_SECONDS)
+        tinf = junction_temp(d, "copy", AMBIENT_NOMINAL_C, None)
+        rows.append(
+            f"| {d.name} | {d.theta_ja:.0f} °C/W | {d.tau_s:.0f} s | "
+            f"{d.power['copy']*1000:.0f} mW | **{t30:.1f} °C** | {tinf:.1f} °C | "
+            f"{d.tj_max:.0f} °C |")
+    rows += ["", "At 25 °C ambient. Hot-room case (35 °C ambient, held indefinitely):", "",
+             "| Device | T_j | Margin to T_j max |", "|---|---:|---:|"]
+    for d in DEVICES:
+        t = junction_temp(d, "copy", AMBIENT_HOT_C, None)
+        rows.append(f"| {d.name} | {t:.1f} °C | **{d.tj_max - t:+.1f} K** |")
+    rows += [
+        "",
+        "**Why the fast term matters and the lumped model missed it.** The enclosure's time "
+        "constant is 621 s; a QFN's is 6–20 s. Over a 30 s copy the box barely moves — half a "
+        "kelvin — while the regulator gets within a few percent of its own steady rise. Averaging "
+        "the two into one mass reports the box's answer for the die, which is the wrong answer "
+        "by roughly the entire local rise. Each device is now carried separately, with its own "
+        "θ_JA and its own τ.",
+        "",
+        "**The result is comfortable, and that is a finding rather than a relief** — it says the "
+        "sealed enclosure is not the constraint anywhere, so the thermal argument for vents does "
+        "not exist at any point in the design. Every θ_JA here is `EST` until WP-37 measures it; "
+        "θ_JA in particular depends on copper pour area, which is a layout output, so these "
+        "numbers are a budget layout must hit rather than a prediction of what it will do.",
+    ]
+    return "\n".join(rows)
+
+
+# --------------------------------------------------------------------------
 # Table rendering
 # --------------------------------------------------------------------------
 
@@ -280,7 +362,7 @@ BLOCKS = {
     "rails": t_rails,
     "scenarios": t_scenarios,
     "ambient": t_ambient,
-    "solenoid": t_solenoid,
+    "junction": t_junction,
 }
 
 

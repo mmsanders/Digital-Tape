@@ -8,7 +8,7 @@ CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
 
-.PHONY: all packet-wp04 packet-check thermal thermal-check erc drc check clean tools
+.PHONY: all packet-wp04 packet-check thermal thermal-check charger solenoid erc drc check clean tools
 
 all: packet-wp04 thermal
 
@@ -30,13 +30,24 @@ packet-check:
 	  exit 1; \
 	fi
 
-## thermal — regenerate the tables in spec/hw/thermal-budget.md
+## thermal — regenerate every generated table in spec/hw/thermal-budget.md
 thermal:
 	$(PY) $(THERMAL)/budget.py
+	$(PY) $(THERMAL)/charger_ts.py
+	$(PY) $(THERMAL)/solenoid_timing.py
 
-## thermal-check — fail if the thermal budget is stale (CI gate)
+## thermal-check — fail if any generated table is stale (CI gate)
 thermal-check:
 	$(PY) $(THERMAL)/budget.py --check
+	$(PY) $(THERMAL)/charger_ts.py --check
+	$(PY) $(THERMAL)/solenoid_timing.py --check
+
+## charger / solenoid — print the design analyses without touching the spec
+charger:
+	$(PY) $(THERMAL)/charger_ts.py --report
+
+solenoid:
+	$(PY) $(THERMAL)/solenoid_timing.py --report
 
 ## drc — KiCad design rule check
 drc:

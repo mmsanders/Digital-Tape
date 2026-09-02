@@ -4,6 +4,80 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 3 — 2 Sep 2026, on PM Decisions 002 and 002-A
+
+### The four PR #15 blockers are closed
+
+| # | Finding | Closed by |
+|---|---|---|
+| 1 | Charger: the limit named a mechanism that could not meet it | `thermal-budget.md` §5.1–5.3 — route 1, designed and corner-analysed |
+| 2 | Solenoid: values and worst-case tolerance, PPTC as third layer only | §6 — one-shot + lockout meet the duty limit alone, 1.50× margin |
+| 3 | Transient: lumped mass does not resolve a 30 s copy | §3 — per-device junction temps, two-time-constant model |
+| 4 | Read back the transcribed limits | Below — **four findings, two of which matter** |
+
+All three analyses are **generated, not asserted**: `make -C hardware thermal-check` fails if the
+document drifts from the scripts that produced it.
+
+**The charger finding produced something I did not expect.** A `BQ25896`-class part *can* hold a
+45 °C hot-suspend — but not with the thermistor anyone reaches for first. A B = 3435 K NTC (the
+103AT everyone defaults to) spans **exactly** enough to place both thresholds on 0 °C and 45 °C
+and nothing more; ask it for any tolerance margin and the required span exceeds what it can
+deliver and the algebra returns a **negative resistor**. It needs a **B = 3950 K** part. A design
+centred on the limits would have passed a spreadsheet and shipped half its tolerance band on the
+wrong side of a lithium safety limit, because safety here is one-sided: suspending early is
+harmless, suspending late is not.
+
+### Read-back of `spec/acceptance.md` — four findings
+
+**1. The worst-case thermal test cannot be run on the board as designed.** The criterion says
+*"charge at full rate + copy + all LEDs for one hour"*. ADR-102 suspends charging for the
+duration of a copy — that is the mitigation that bought the JEITA margin back. So the test asks
+for a state the hardware deliberately prevents.
+
+*Not a reason to drop either.* The test is right as a stress case and the interlock is right as
+a behaviour. **Rev A needs a test bypass** — a jumper that defeats the copy-charge interlock so
+WP-37 can force the condition. Added to `board-rev-a.md`. Worth catching now: discovered at
+WP-37 it is a respin, discovered here it is a jumper.
+
+**2. The touch-temperature limit became relative, and a relative limit does not bound touch.**
+Transcribed as *"no external surface above ambient + 15 K"*. At the 35 °C ambient this budget
+designs to, that permits **50 °C** — above the ~48 °C IEC 62368-1 class limit for a plastic
+surface under continuous handling, which is what a child does with this. **Recommend an absolute
+cap alongside the relative one:** ambient + 15 K **and** never above 48 °C. §3 says we pass both
+with ~9 K to spare, so this costs nothing today and stops a future charge-current increase from
+quietly eroding it.
+
+**3. The 85 dB criterion lost the two things that made it checkable.** As proposed it named an
+**IEC 60318-4 ear simulator** and two signals — a full-scale 1 kHz sine *and* the loudest golden
+fixture. It landed as *"an SPL meter and coupler"*. Different couplers read several dB apart on
+the same headphones, and a sine and a music fixture do not give the same number. Since this is
+one of the two measurements Michael witnesses, two people can do it honestly and disagree.
+**Recommend restoring the coupler standard and both signals.**
+
+**4. The taper band (T-2) was dropped — and it turns out not to be needed.** T-2 proposed
+reduced charge current in 0–10 °C and 40–45 °C. It is absent. Flagging it for completeness, but
+**do not re-add it**: §5.1 shows the divider's `VT2` and `VT3` land inside the window and give a
+reduced-current and a reduced-voltage band on the way to each cutoff. The behaviour arrives free
+from the network. A separate criterion would be a second way to say the same thing.
+
+**Not findings, recorded so the read-back is complete.** The solenoid duty limit changed from my
+0.5 % / 10 s to the PM's 5 % / 1 s — deliberate, and the design meets it with 1.50× margin. But
+5 % of a 9 W coil is **0.45 W continuous**, ten times the sustained average my number implied,
+and no solenoid has been chosen yet. **The coil's continuous rating is now a selection
+constraint**, recorded in §6. And the file's header still reads `DRAFT-1` while its hardware
+section carries the DRAFT-2 corrections.
+
+### On the PM's error
+
+The charge window naming the charger's NTC input was the same class of mistake as the preroll
+cache, and the general rule drawn from it — `acceptance.md` states limits, never parts, pins or
+circuits — is the right one. Finding 3 above is that rule applied in the other direction: a limit
+stated without its measurement conditions is not checkable either. **Under-specifying a limit and
+over-specifying it fail the same way** — someone downstream has to guess, and two people guess
+differently.
+
+---
+
 ## Round 2 — 2 Sep 2026, on PM Decisions 001
 
 ### Coverage — every section of the memo, and where it landed

@@ -811,3 +811,152 @@ shipped requirement with no change on our side.
 after — its value is precisely that it was fixed before anyone saw a result. Tape length is a
 superblock field (`nominal_length_s`, ADR-008), so **the answer does not block the format freeze
 or any software**; it changes a format-time constant, not a format.
+
+---
+
+## ADR-110 — Two hardware ADRs are superseded by Software-Lead and PM entries
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead (housekeeping, append-only)
+
+**Decision.** `ADR-106` (`spec/hw` is versioned, not frozen) records the same decision as
+**`ADR-021`**, landed independently by the Software Lead. **`ADR-021` is canonical**; ADR-106
+stands as written but should be read as a duplicate, not a second decision.
+
+`ADR-109` (tape length resolves on measurement, ≥ 2 SKUs at ≥ 35 MB/s → C-90) is **superseded by
+`ADR-018`**: Michael chose C-60 directly, so the rule never fired. Card characterisation survives
+as a *headroom measurement* rather than a gate.
+
+**Rationale.** Two leads recorded the same decisions from opposite ends within a day of each
+other, and an append-only log cannot be edited to fix that. Left alone, a reader nine months from
+now finds two entries for one decision and cannot tell which was acted on. This is the cheap fix
+and the reason the `ADR-1xx` range exists.
+
+**Cost to reverse.** None — it is a pointer.
+
+---
+
+## ADR-111 — The charge window is met by a designed TS divider and a B = 3950 K thermistor
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §1
+
+**Decision.** Route 1. `RT1` = 9.76 kΩ 1 %, `RT2` footprint kept but **not fitted**, and an NTC
+of **B = 3950 K** — not the B = 3435 K 103AT part. Nominal suspend at 4.4 °C and 40.6 °C: a
+**4.4 K inward margin** on each limit, so every tolerance corner lands inside 0 °C / 45 °C.
+
+**Rationale.** The charger's TS thresholds are fixed fractions of REGN; the temperatures they
+correspond to are ours to set. Two resistors, two constraints — but a B = 3435 K thermistor spans
+*exactly* enough to place both thresholds on the limits and nothing more. Ask it for margin and
+the required span exceeds what it can deliver, and the closed form returns a **negative
+resistance**. A steeper thermistor is not a refinement; it is what makes this a design rather
+than an arithmetic coincidence.
+
+The margin is not optional because **safety here is one-sided**. Suspending early is harmless —
+the device declines a charge it could have taken. Suspending late means charging a lithium cell
+below freezing, or above 45 °C. Centring the nominal on the limits ships half the tolerance band
+on the wrong side of a safety limit, and it would pass a spreadsheet.
+
+`VT2` and `VT3` land inside the window and give reduced-current and reduced-voltage bands on the
+way to each cutoff — the taper behaviour proposed as T-2, arriving free from the network.
+
+**Cost to reverse.** Low before layout: three passives and a thermistor. **The threshold
+fractions are `UNVERIFIED`** — `ti.com` is still blocked — so if the real values differ, `RT1`
+moves and the required B may move with it. The method and the one-sided-margin argument hold
+regardless; `hardware/thermal/charger_ts.py` takes the fractions as named constants, so
+correcting them is one line and a re-run.
+
+---
+
+## ADR-112 — Solenoid duty is met by a dual monostable; the PPTC is a third layer
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §2
+
+**Decision.** One `74HC221`: the A half sets a 30 ms pulse (429 kΩ, 100 nF **C0G**), the B half
+holds a 1.2 s lockout (1.71 MΩ, 1 µF **film**). Worst case over ±16 % timing tolerance: pulse
+≤ 34.8 ms against a 50 ms limit, duty **3.34 %** against a 5 % limit. The PPTC stays as a third
+layer against faults the timing chain cannot see — a shorted FET, a wiring error, a coil that
+fails low-resistance — and is **not** how the duty limit is met.
+
+**Rationale.** The reviewers were right that a PPTC is history-dependent and cannot be given a
+deterministic worst case. The two monostables can, and they are in one package, with the lockout
+downstream of the pulse so no gate input can defeat it.
+
+Dielectrics are load-bearing and are written down because they are exactly what gets substituted
+silently at assembly: **X7R is not acceptable in either position** — it loses a large fraction of
+its capacitance under DC bias and over temperature, which would widen the pulse and shorten the
+lockout, both in the unsafe direction, while passing every bench test at room temperature. The
+lockout capacitor is **film** rather than C0G because 1 µF C0G does not exist in a practical
+package.
+
+**Cost to reverse.** Trivial before layout. Note the behavioural cost: a 1.2 s lockout means the
+transport releases at most once per 1.2 s. Invisible for the specified interlock, and it shrinks
+if WP-04 shows the mechanism releases in less than 30 ms — the lockout scales with the pulse, and
+it is one resistor.
+
+---
+
+## ADR-113 — The UHS-I entry gate moves to high-speed 4-bit
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, resolving a conflict between two memos
+
+**Decision.** The rev A entry gate is a 1 GB read and 1 GB write on **each** slot at **high-speed
+4-bit, 3.3 V**, zero CRC retries, with an unmodified reference driver. SDR50 becomes a second,
+optional gate if the 1.8 V circuit is ever populated.
+
+**Rationale.** Decisions 001 §5 set the gate at SDR50. Decisions 002 §1 then made the 1.8 V
+switching circuit unpopulated on rev A. **SDR50 is a UHS-I mode and requires 1.8 V signalling**,
+so a board built to the second memo cannot run the gate set by the first. Neither memo is wrong;
+they were written a day apart and the interaction fell between them.
+
+High-speed 4-bit preserves everything the gate was for: it needs no delay-line tuning, so it
+still tests hardware without depending on software's half, and at C-60 it meets the requirement
+outright at ~29 s.
+
+**Cost to reverse.** Free as text, and it must be settled **before fabrication** — a gate agreed
+after the first failure is not a gate, it is an argument. Raised to the PM rather than resolved
+silently, because it changes a criterion the PM wrote.
+
+---
+
+## ADR-114 — Cartridge contacts are mirrored top-to-bottom, stub ≤ 25 mm, terminated at the card
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 002 §3, 002-A §6), raised by Hardware Lead (H-05)
+
+**Decision.** The carrier routes CMD and DAT to both ends, mirrored **top-to-bottom on the same
+edge** rather than end-to-end. Unused-end stub **≤ 25 mm**, series termination **at the card**,
+TVS at the **slot on the mainboard** and never on the carrier. Hard gold preferred, **ENIG
+acceptable** at family insertion counts. Verified on carrier rev A before the mainboard spin.
+
+**Rationale.** End-to-end mirroring puts a carrier-length unterminated stub on every data line.
+Top-to-bottom reduces it to the unused half of a short mirrored pair. C-60 helps more than any
+termination choice does: the concern was framed at SDR104's 208 MHz, and high-speed 4-bit runs at
+50 MHz. Keeping the TVS off the carrier keeps the cartridge cheap, which matters because there
+will be many cartridges and one mainboard.
+
+**Cost to reverse.** High after the carrier spin — it is the carrier's geometry. Cheap now, which
+is why the carrier spike runs alongside WP-04 rather than waiting for WP-24.
+
+---
+
+## ADR-115 — The codec's second source is the same silicon in a smaller package
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §5
+
+**Decision.** The named second source for `SGTL5000XNBA3` is **`SGTL5000XNLA3R2`** — the 20-pin
+SGTL5000 — not another vendor's codec. `XNBA3` stays specified; order 1c buys eight of each so
+the bench settles it.
+
+**Rationale.** Same die, same I²S, same I²C, same register map. A supply failure costs a
+**footprint change and no firmware work at all** — which is a far better hedge than a different
+vendor's part with a different register map and its own bring-up.
+
+The stock picture argues for it independently. From JLCPCB's parts API, the one vendor domain now
+reachable: the 32-pin part has **74** in stock, the 20-pin has **1205**, and both are `Extended`
+library parts, so assembly depends on stock on the day. The 20-pin's only functional difference
+is a non-selectable I²C address, and we have exactly one codec. PJRC reached the same conclusion
+under supply pressure in 2023.
+
+**Cost to reverse.** Low now, high after layout — the packages are 5 × 5 and 3 × 3, so they are
+not pad-compatible and a late switch is a re-layout of that block. The reason to buy both now is
+precisely that the decision is cheap today and expensive in six weeks. **Open:** the 20-pin
+part's reduced pin complement has not been checked against this design, and that needs a
+datasheet `nxp.com` still will not serve.

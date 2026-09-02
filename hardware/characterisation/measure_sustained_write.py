@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Measure worst-case windowed sustained write on a microSD card.
 
-The 30-second copy criterion (guardrail 10) needs 31.75 MB/s sustained write on
-the destination card. No purchasable UHS-I specification guarantees that -- V30's
-floor is 30 MB/s and V60/V90 are UHS-II ratings that do not apply on a UHS-I host
-(issue #5). So the requirement is met by characterised card models, and this is
-the tool that characterises them.
+Michael chose C-60 as the standard tape (ADR-018), and issue #5 is the finding
+that made that the right call. At 635 MB the copy needs **21.2 MB/s** sustained
+write -- inside every V30 card's guaranteed floor with ~40% margin, on plain
+high-speed 4-bit at 3.3 V, with no 1.8 V switching anywhere.
+
+So this is no longer a gate. It is a **headroom measurement**: it says how much
+room a V30 card actually has above the requirement, and what a C-90 would cost
+(31.75 MB/s, which no UHS-I card specification guarantees -- the original
+finding). Any V30 card should pass; the interesting result would be one that
+does not.
 
 PM Decisions 001 section 1 sets the conditions, and each one exists to defeat a
 way a card looks faster than it is:
@@ -43,8 +48,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REQUIRED_MB_S = 31.75      # 952,560,000 B / 30 s, guardrail 10 at 90 minutes
-BAR_MB_S = 35.0            # PM Decisions 001 section 1: 10% margin over required
+REQUIRED_MB_S = 21.2       # 635,040,000 B / 30 s -- C-60, the standard tape (ADR-018)
+REQUIRED_C90_MB_S = 31.75  # what a C-90 would need, reported as headroom
+BAR_MB_S = 23.3            # 10% over the C-60 requirement
 WINDOW_MB = 64             # granularity of the worst-case window
 DEFAULT_TRANSFER_MB = 1200  # > one 90-minute cartridge (953 MB)
 FILL_TARGET = 0.80
@@ -159,6 +165,7 @@ def run(target: Path, transfer_mb: int, window_mb: int) -> dict:
         "worst_window_mb_s": round(worst, 2),
         "windows_mb_s": [round(w, 2) for w in windows],
         "required_mb_s": REQUIRED_MB_S,
+        "required_c90_mb_s": REQUIRED_C90_MB_S,
         "bar_mb_s": BAR_MB_S,
         "verdict": "PASS" if worst >= BAR_MB_S else "FAIL",
     }
@@ -215,10 +222,14 @@ def main() -> int:
     }
 
     print()
+    hc90 = result["worst_window_mb_s"] / REQUIRED_C90_MB_S
     print(f"  mean          {result['mean_mb_s']:>7.1f} MB/s")
     print(f"  median window {result['median_mb_s']:>7.1f} MB/s")
     print(f"  WORST window  {result['worst_window_mb_s']:>7.1f} MB/s   <-- the number")
     print(f"  verdict       {result['verdict']}")
+    print(f"  C-60 headroom {result['worst_window_mb_s']/REQUIRED_MB_S:>7.2f}x")
+    print(f"  C-90 headroom {hc90:>7.2f}x  "
+          f"({'a C-90 would also copy in 30 s' if hc90 >= 1.0 else 'a C-90 would NOT make 30 s'})")
     if result["verdict"] == "FAIL":
         print(f"  (worst window is {BAR_MB_S - result['worst_window_mb_s']:.1f} MB/s "
               f"under the bar)")

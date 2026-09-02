@@ -12,65 +12,49 @@ file is state, not argument.
 
 ## What changed since last time
 
-**PM Decisions 001 received and acted on.** All four escalations answered. WP-34 unblocked, and
-it is written.
+**The four PR #15 blockers are closed.** All three engineering findings now have generated,
+self-checking analysis — `make -C hardware thermal-check` fails if the document drifts from the
+scripts behind it.
 
-**WP-34 — `spec/hw/thermal-budget.md` rev 0.1.** Estimates only; no measurements exist. It
-found three things:
+**The charger finding produced the sharpest result of the round.** A `BQ25896`-class part *can*
+hold a 45 °C hot-suspend, but **not with the thermistor anyone reaches for first**. A B = 3435 K
+NTC spans exactly enough to place both thresholds on 0 °C and 45 °C and nothing more; ask it for
+any tolerance margin and the algebra returns a **negative resistor**. It needs **B = 3950 K**.
+And the margin is not optional, because safety here is one-sided — suspending early is harmless,
+suspending late means charging a lithium cell out of window. A design centred on the limits would
+have passed review and shipped half its tolerance band on the wrong side of a safety limit.
+ADR-111.
 
-1. **The bulk thermal case is more comfortable than assumed, and the copy is thermally free.**
-   30 seconds against a 621-second enclosure time constant raises bulk temperature ~0.5 K. A
-   sealed case is fine. The charter's ~2.2 W did not count both microSD cards at sustained
-   UHS-I — the real copy figure is 2.74 W — and it does not matter, because of the duration.
-2. **The sustained worst case is not the copy. It is playing while charging**, which is also the
-   most likely thing this device ever does. At 35 °C ambient that lands **within 0.2 K of the
-   45 °C JEITA charge ceiling**. Not a damage problem: a device that silently stops charging on
-   a warm afternoon, with no screen to explain itself. Four mitigations in §4; the cheapest is
-   ADR-102.
-3. **The solenoid one-shot does not close the hole it was specified for.** A retrigger loop
-   delivers essentially full coil power through a correctly functioning one-shot. ADR-101 adds
-   an RC lockout and a PPTC backstop for about fifteen cents.
+**Solenoid:** one `74HC221` does both halves — 30 ms pulse, 1.2 s lockout — meeting the 5 %
+rolling-1 s duty limit at **3.34 % worst case** over ±16 % tolerance, without the PPTC, which is
+now explicitly a third layer. Dielectrics are written into the ADR because X7R here would widen
+the pulse and shorten the lockout, both unsafe, while passing every room-temperature test.
+ADR-112.
 
-The budget is **computed, not asserted** — `hardware/thermal/budget.py` generates its tables and
-`make -C hardware thermal-check` fails if the document drifts from the model.
+**Junction temperatures** are now per-device on a two-time-constant model. The result is
+comfortable — MCU 41.6 °C after a 30 s copy, 80.8 °C held forever in a 35 °C room against a
+105 °C limit — and that is a finding rather than a relief: **the sealed enclosure is not the
+constraint anywhere**, so the thermal argument for vents does not exist at any point.
 
-**WP-05 — parts order drafted, two carts.** Order 1a (~$115) is the six card SKUs and a rated
-reader; it answers issue #5 and should go today. Order 1b (~$152) is the bench build. One of the
-six cards is expected to fail, deliberately: a test where everything passes has not been shown
-to discriminate.
+**C-60 applied.** High-speed 4-bit at 3.3 V is now the primary path on both slots; the 1.8 V
+switching circuit stays on the schematic unpopulated with 0 Ω bypass links. Card characterisation
+drops from a gate to a headroom measurement, and the parts cart moves to V30 / 32 GB.
 
-**WP-04 — packet WP04-01 is built and sendable.** Nine printed carriers, a hook bar and a test
-frame on one plate that fits a 220 × 220 bed, plus the card, the results template and the next
-packet pre-planned against six possible outcomes. Hook depth bracketed 0.6–2.1 mm, wider than
-the charter's suggestion so both endpoints are expected to be obviously wrong. Three
-identical-geometry controls are hidden in the ranking (ADR-104).
+**One cross-memo conflict found and raised rather than resolved silently.** Decisions 001 set the
+rev A entry gate at **SDR50**; Decisions 002 then made the 1.8 V circuit unpopulated. SDR50 is a
+UHS-I mode and needs 1.8 V signalling — so a board built to the second memo cannot run the gate
+set by the first. Gate moved to high-speed 4-bit, which preserves everything it was for. ADR-113.
 
-**`spec/hw/board-rev-a.md` started**, mostly empty by design, carrying the `CHANGES` protocol,
-the notification obligation, the test-point list, and the PM's SDR50 entry gate written down
-**before** fabrication.
+**A vendor domain opened.** JLCPCB is now reachable (five others still are not) and its parts API
+answered two open items at once: the codec is an **`Extended`** library part with **74** in stock
+for the 32-pin variant and **1205** for the 20-pin. That makes the second source obvious and
+cheap — **the same silicon in a smaller package**, costing a footprint change and no firmware
+work. ADR-115.
 
-**Toolchain: CadQuery installed and working.** `make -C hardware` regenerates every artefact
-from source. KiCad deliberately not installed — see Blocked.
-
-**Every ruling in PM Decisions 001 is now logged.** It was cited in eight files but recorded in
-none — `ADR-105`…`ADR-109` fix that, so the decisions survive without the memo. Issues #5–#8 are
-closed with their resolutions, and mirrored into `docs/ESCALATIONS.md`, which had never carried
-the four hardware escalations.
-
-**Two things the memo asked for by name that I had missed**, both now in `spec/hw/board-rev-a.md`
-(rev 0.2): §6 is the card SKU and measurement table §1 asks to live there, and §7 is the USB-C
-cartridge-loading path that follows from the captive-card decision. §7 names **a firmware device
-path that is in no work package** — the cost ADR-105 added. Raised for the PM.
-
-**Hardware ADRs moved to a reserved `ADR-1xx` range.** My first four collided with four of the
-Software Lead's on an unmerged branch; nobody would have seen it until the merge.
-
-**`spec/` restructured per PM Decisions 001 §3.** `spec/hw/` created with its own README;
-the superseded `spec/thermal-budget.md` placeholder deleted; `spec/README.md` now carries the
-two-tier table. **These three touches are transcriptions of the PM's own decision, not Hardware
-Lead spec changes** — flagged rather than assumed, and reversible in one commit.
-
----
+**Four read-back findings on `spec/acceptance.md`**, two of which matter: the worst-case thermal
+test asks for charge-during-copy, which ADR-102 deliberately prevents (rev A now carries a bypass
+link); and the touch-temperature limit became relative, which does not bound touch temperature at
+all. `docs/REVIEW/hardware-lead.md` round 3.
 
 ## In flight
 
