@@ -1,11 +1,17 @@
 # Board rev A — the hardware/firmware contract
 
 **Owner:** Hardware Lead · **Consumed by:** `firmware/prod/` · **Status:** skeleton, accreting
-**Revision:** 0.3, 2 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
+**Revision:** 0.4, 2 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
 
 <!-- CHANGES: every revision adds a block here. Firmware reads this first. -->
 
 ## CHANGES
+
+### 0.4 — 2026-09-02
+**Codec line item changes suffix: `SGTL5000XNBA3` → `SGTL5000XNBA3R2`.** Same die; the reel
+suffix is the one distributors stock (the tray part is what carries the 39-week factory lead
+time and the 490 MOQ). **These are not interchangeable line items** and a BOM saying "SGTL5000"
+is not orderable. No pin, rail or timing change.
 
 ### 0.3 — 2026-09-02
 **Bus decision changed. Firmware should read this one.** C-60 (ADR-018) makes **high-speed
@@ -67,7 +73,7 @@ card slots at UHS-I, LiPo with a switching charger, solenoid driver, LED banks.
 | MCU | i.MX RT1062 (600 MHz, 196-MAPBGA) | `PROPOSED` |
 | Boot flash | QSPI NOR | `PROPOSED` |
 | PSRAM | APS6404L class, QSPI | `PROPOSED` |
-| Codec | **`SGTL5000XNBA3`** (HVQFN32, 5×5 mm, 0.5 mm pitch) | **`ACTIVE` confirmed** — NXP part page, 2 Sep 2026 |
+| Codec | **`SGTL5000XNBA3R2`** — HVQFN32, 5×5 mm, 0.5 mm pitch, **reel** | **`ACTIVE`**; the reel suffix is the one with stock |
 | Codec, second source | **`SGTL5000XNLA3R2`** (QFN-20-EP, 3×3 mm) — *same silicon, smaller package* | See §1.1 |
 | Card slots | 2 × microSD via USDHC1 / USDHC2, **high-speed 4-bit, 3.3 V** | `PROPOSED` |
 | 1.8 V switching | Populated footprints, **parts not fitted**, 0 Ω links bypassing | `PROPOSED` — upside for C-90, not the critical path |

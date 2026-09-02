@@ -12,49 +12,28 @@ file is state, not argument.
 
 ## What changed since last time
 
-**The four PR #15 blockers are closed.** All three engineering findings now have generated,
-self-checking analysis — `make -C hardware thermal-check` fails if the document drifts from the
-scripts behind it.
+**The solenoid limit was restated as power, and my design failed it.** 0.30 W against a 0.25 W
+bound. The real problem was the coil, not the lockout: because the limit must clear a child
+pressing stop and play twice a second, it reduces to **125 mJ per actuation**, and my assumed
+9 W × 30 ms was **270 mJ, 2.2× over**. No lockout fixes that — the energy is spent inside one
+legitimate press. Corrected to a 5 W coil at 15 ms with a 450 ms lockout: 0.174 W at real use,
+0.220 W in a fault, nothing legitimate blocked. **ADR-116 supersedes ADR-112.** The pulse is now
+an explicit placeholder that WP-04 supplies.
 
-**The charger finding produced the sharpest result of the round.** A `BQ25896`-class part *can*
-hold a 45 °C hot-suspend, but **not with the thermistor anyone reaches for first**. A B = 3435 K
-NTC spans exactly enough to place both thresholds on 0 °C and 45 °C and nothing more; ask it for
-any tolerance margin and the algebra returns a **negative resistor**. It needs **B = 3950 K**.
-And the margin is not optional, because safety here is one-sided — suspending early is harmless,
-suspending late means charging a lithium cell out of window. A design centred on the limits would
-have passed review and shipped half its tolerance band on the wrong side of a safety limit.
-ADR-111.
+**Order 1c cancelled.** The 39-week / 490-MOQ figure was the tray variant, factory-direct; the
+reel suffix `SGTL5000XNBA3R2` is stocked in thousands. The codec line item changes suffix
+accordingly — `XNBA3` and `XNBA3R2` are the same die and **not interchangeable line items**.
+Spend reconciles to **~$267**.
 
-**Solenoid:** one `74HC221` does both halves — 30 ms pulse, 1.2 s lockout — meeting the 5 %
-rolling-1 s duty limit at **3.34 % worst case** over ±16 % tolerance, without the PPTC, which is
-now explicitly a third layer. Dielectrics are written into the ADR because X7R here would widen
-the pulse and shorten the lockout, both unsafe, while passing every room-temperature test.
-ADR-112.
+**Domain access: the `www.` prefix was the whole thing.** `www.nxp.com` and `www.lcsc.com` now
+work; bare hostnames all fail, so the allowlist matches exact hosts. `www.findchips.com` answers
+curl but serves a JavaScript shell. `www.ti.com`, `www.octopart.com` and `www.mouser.com` are
+still blocked, and DigiKey returns 403 bot protection exactly as the PM predicted. Also learned:
+**`WebFetch` and `curl` do not share an allowlist** — the working method is curl plus a parser.
 
-**Junction temperatures** are now per-device on a two-time-constant model. The result is
-comfortable — MCU 41.6 °C after a 30 s copy, 80.8 °C held forever in a 35 °C room against a
-105 °C limit — and that is a finding rather than a relief: **the sealed enclosure is not the
-constraint anywhere**, so the thermal argument for vents does not exist at any point.
-
-**C-60 applied.** High-speed 4-bit at 3.3 V is now the primary path on both slots; the 1.8 V
-switching circuit stays on the schematic unpopulated with 0 Ω bypass links. Card characterisation
-drops from a gate to a headroom measurement, and the parts cart moves to V30 / 32 GB.
-
-**One cross-memo conflict found and raised rather than resolved silently.** Decisions 001 set the
-rev A entry gate at **SDR50**; Decisions 002 then made the 1.8 V circuit unpopulated. SDR50 is a
-UHS-I mode and needs 1.8 V signalling — so a board built to the second memo cannot run the gate
-set by the first. Gate moved to high-speed 4-bit, which preserves everything it was for. ADR-113.
-
-**A vendor domain opened.** JLCPCB is now reachable (five others still are not) and its parts API
-answered two open items at once: the codec is an **`Extended`** library part with **74** in stock
-for the 32-pin variant and **1205** for the 20-pin. That makes the second source obvious and
-cheap — **the same silicon in a smaller package**, costing a footprint change and no firmware
-work. ADR-115.
-
-**Four read-back findings on `spec/acceptance.md`**, two of which matter: the worst-case thermal
-test asks for charge-during-copy, which ADR-102 deliberately prevents (rev A now carries a bypass
-link); and the touch-temperature limit became relative, which does not bound touch temperature at
-all. `docs/REVIEW/hardware-lead.md` round 3.
+**The banner and the fabrication gate are in `spec/hw/thermal-budget.md`**, and PR #15 is being
+merged on that basis: three IR-015 findings open, and **no board is fabricated and no cell is
+charged until all three close**.
 
 ## In flight
 

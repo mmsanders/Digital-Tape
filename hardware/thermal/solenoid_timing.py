@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-"""Solenoid protection timing — closes the PR #15 solenoid finding.
+"""Solenoid protection — sized against the sustained-power limit.
 
-`spec/acceptance.md` sets two limits:
-  * single pulse <= 50 ms regardless of gate input
-  * coil duty <= 5 % over any rolling 1 s window, enforced in hardware
+`spec/acceptance.md` DRAFT-3 (PM Decisions 003 §3b) replaces the duty limit with:
 
-PM Decisions 002-A section 2 upholds the reviewers' objection: the PPTC is
-history-dependent, so it is a third layer and NOT the thing that meets the duty
-limit. The one-shot and the RC lockout must meet it deterministically on their
-own, with worst-case tolerance analysis. This computes that.
+    Average coil power <= 0.25 W over any rolling 10 s window, enforced in
+    hardware, not defeatable by firmware.
 
-Topology, in order of who does what:
-  1. 74HC221 non-retriggerable monostable  -> bounds a single pulse
-  2. RC lockout on the trigger             -> bounds minimum off-time
-  3. PPTC on the coil rail                 -> third layer, catches what 1+2 miss
+Power rather than duty, because power is what damages a coil. The PM's own note
+is the important half: the bound must sit **above the fastest legitimate use** --
+a child alternating stop and play about twice a second -- and **below the coil's
+continuous rating**. If those do not leave a gap, the answer is a shorter pulse
+or a lower-power coil, not a looser limit.
+
+That turns the whole thing into an ENERGY budget, and the energy budget is what
+selects the solenoid:
+
+    2 actuations/s sustained x E_pulse <= 0.25 W   ->   E_pulse <= 0.125 J
+
+The previous design here assumed a 9 W coil and a 30 ms pulse -- 0.27 J, which is
+2.2x over that budget. That assumption was mine and it does not survive the limit.
+So the coil is now specified by energy, and the pulse length comes from WP-04
+measuring the shortest pulse that reliably releases the latch, not from assertion.
 """
 
 from __future__ import annotations
@@ -22,125 +29,117 @@ from pathlib import Path
 
 SPEC = Path(__file__).resolve().parents[2] / "spec" / "hw" / "thermal-budget.md"
 
-PULSE_LIMIT_MS = 50.0      # acceptance.md, single pulse
-DUTY_LIMIT = 0.05          # acceptance.md, rolling 1 s
-DUTY_WINDOW_S = 1.0
-TEST_SETTLE_S = 2.0        # acceptance.md verification: settle within 2 s
+POWER_LIMIT_W = 0.25          # acceptance.md DRAFT-3, rolling 10 s
+POWER_WINDOW_S = 10.0
+PULSE_CEILING_MS = 50.0       # single-pulse ceiling, retained from DRAFT-2
+LEGIT_RATE_HZ = 2.0           # the fastest legitimate use the PM names
+DESIGN_TARGET_W = 0.20        # design to this, not to the limit
 
-# 74HC221: tW = 0.7 * Rext * Cext. Spread is dominated by the capacitor and by
-# the IC's own formula constant, not by the resistor.
-R_TOL = 0.01               # 1 % resistor
-C_TOL = 0.05               # C0G/NP0, 5 % -- deliberately not X7R, see the note
-IC_TOL = 0.10              # 74HC221 timing constant spread over temperature
-TIMING_TOL = R_TOL + C_TOL + IC_TOL      # worst case, added not RSS
+TIMING_TOL = 0.16             # 1% R + 5% film/C0G C + 10% 74HC221 constant
 
-PULSE_NOM_MS = 30.0        # what the mechanism is expected to need (WP-04 confirms)
-LOCKOUT_NOM_MS = 1200.0
+# Working point. PULSE_NOM_MS is a PLACEHOLDER until WP-04 measures it.
+COIL_W = 5.0
+PULSE_NOM_MS = 15.0
+LOCKOUT_NOM_MS = 450.0
 
-COIL_W = 9.0               # from budget.py: 9 V into 9 ohm
+ENERGY_BUDGET_J = POWER_LIMIT_W / LEGIT_RATE_HZ
 
 
-def spread(nom: float) -> tuple[float, float]:
-    return nom * (1 - TIMING_TOL), nom * (1 + TIMING_TOL)
+def spread(nom): return nom * (1 - TIMING_TOL), nom * (1 + TIMING_TOL)
 
 
-def worst_duty(pulse_nom: float, lockout_nom: float) -> float:
-    """Worst case: longest possible pulse, shortest possible lockout."""
-    p_max = spread(pulse_nom)[1]
-    l_min = spread(lockout_nom)[0]
-    return p_max / (p_max + l_min)
+def fault_avg_w(coil_w, pulse_nom, lockout_nom):
+    """Worst case: longest pulse, shortest lockout, retriggered forever."""
+    t = spread(pulse_nom)[1] / 1000.0
+    l = spread(lockout_nom)[0] / 1000.0
+    return coil_w * t / (t + l)
 
 
-def min_lockout_for(pulse_nom: float, duty: float = DUTY_LIMIT) -> float:
-    """Smallest nominal lockout whose worst case still meets the duty limit."""
-    p_max = spread(pulse_nom)[1]
-    l_min_needed = p_max * (1 - duty) / duty
-    return l_min_needed / (1 - TIMING_TOL)
+def legit_avg_w(coil_w, pulse_nom, rate_hz=LEGIT_RATE_HZ):
+    return coil_w * spread(pulse_nom)[1] / 1000.0 * rate_hz
+
+
+def min_period_ms(pulse_nom, lockout_nom):
+    return spread(pulse_nom)[1] + spread(lockout_nom)[0]
 
 
 def t_solenoid_values() -> str:
-    p_lo, p_hi = spread(PULSE_NOM_MS)
+    t_lo, t_hi = spread(PULSE_NOM_MS)
     l_lo, l_hi = spread(LOCKOUT_NOM_MS)
-    d = worst_duty(PULSE_NOM_MS, LOCKOUT_NOM_MS)
-    need = min_lockout_for(PULSE_NOM_MS)
-    # Pick real parts: tW = 0.7*R*C
-    # tW = 0.7 * R * C. Pick the capacitor first from what is actually stable and
-    # buyable in the value needed, then let R fall out.
-    c1_nf = 100.0                    # C0G, 0805 -- the top of practical C0G values
-    r1 = PULSE_NOM_MS / 1000.0 / (0.7 * c1_nf * 1e-9)
-    c2_nf = 1000.0                   # 1 uF FILM (PPS/polyester), not C0G -- see note
-    r2 = LOCKOUT_NOM_MS / 1000.0 / (0.7 * c2_nf * 1e-9)
+    fault = fault_avg_w(COIL_W, PULSE_NOM_MS, LOCKOUT_NOM_MS)
+    legit = legit_avg_w(COIL_W, PULSE_NOM_MS)
+    per = min_period_ms(PULSE_NOM_MS, LOCKOUT_NOM_MS)
+    e = COIL_W * PULSE_NOM_MS / 1000.0
+    c1, r1 = 100.0, PULSE_NOM_MS / 1000.0 / (0.7 * 100e-9)
+    c2, r2 = 470.0, LOCKOUT_NOM_MS / 1000.0 / (0.7 * 470e-9)  # film: 470 nF C0G is not a real part
     return "\n".join([
-        "| Element | Part | Nominal | Worst case | Against |",
-        "|---|---|---:|---|---|",
-        f"| One-shot pulse | `74HC221` A-half, R = {r1/1000:.0f} kΩ 1 %, C = {c1_nf:.0f} nF **C0G** | "
-        f"{PULSE_NOM_MS:.0f} ms | {p_lo:.1f} … **{p_hi:.1f} ms** | "
-        f"≤ {PULSE_LIMIT_MS:.0f} ms — **pass**, {PULSE_LIMIT_MS/p_hi:.2f}× margin |",
-        f"| Lockout | `74HC221` B-half, R = {r2/1e6:.2f} MΩ 1 %, C = {c2_nf/1000:.0f} µF **film** | "
-        f"{LOCKOUT_NOM_MS:.0f} ms | **{l_lo:.0f}** … {l_hi:.0f} ms | "
-        f"≥ {need:.0f} ms needed — **pass** |",
-        f"| **Resulting duty** | worst pulse over shortest lockout | "
-        f"{PULSE_NOM_MS/(PULSE_NOM_MS+LOCKOUT_NOM_MS)*100:.1f} % | **{d*100:.2f} %** | "
-        f"≤ {DUTY_LIMIT*100:.0f} % — **pass**, {DUTY_LIMIT/d:.2f}× margin |",
-        f"| Coil average at that duty | | | **{COIL_W*d:.2f} W** | "
-        f"vs {COIL_W:.0f} W energised |",
+        "| Quantity | Value | Against | Verdict |",
+        "|---|---:|---|---|",
+        f"| Energy budget at {LEGIT_RATE_HZ:.0f} Hz sustained | **{ENERGY_BUDGET_J*1000:.0f} mJ** "
+        f"per actuation | {POWER_LIMIT_W:.2f} W ÷ {LEGIT_RATE_HZ:.0f} Hz | the governing number |",
+        f"| Coil, specified by energy | **{COIL_W:.1f} W** | | selection constraint |",
+        f"| Pulse (**placeholder — WP-04 measures this**) | {PULSE_NOM_MS:.0f} ms nominal, "
+        f"{t_lo:.1f}…**{t_hi:.1f} ms** | ≤ {PULSE_CEILING_MS:.0f} ms | "
+        f"**pass**, {PULSE_CEILING_MS/t_hi:.1f}× |",
+        f"| Energy per actuation | **{e*1000:.0f} mJ** | ≤ {ENERGY_BUDGET_J*1000:.0f} mJ | "
+        f"**pass**, {ENERGY_BUDGET_J/e:.2f}× |",
+        f"| Lockout | {LOCKOUT_NOM_MS:.0f} ms nominal, **{l_lo:.0f}**…{l_hi:.0f} ms | | |",
+        f"| Fastest the hardware allows | one per **{per:.0f} ms** | must be ≤ "
+        f"{1000/LEGIT_RATE_HZ:.0f} ms so real use is not blocked | "
+        f"**pass** |",
+        f"| Average at {LEGIT_RATE_HZ:.0f} Hz legitimate use | **{legit:.3f} W** | "
+        f"≤ {POWER_LIMIT_W:.2f} W | **pass** |",
+        f"| Average in a retrigger fault | **{fault:.3f} W** | ≤ {POWER_LIMIT_W:.2f} W | "
+        f"**pass**, {POWER_LIMIT_W/fault:.2f}× |",
         "",
-        f"Timing tolerance is **±{TIMING_TOL*100:.0f} %**, taken as the arithmetic sum of "
-        f"resistor ±{R_TOL*100:.0f} %, capacitor ±{C_TOL*100:.0f} % and the `74HC221` timing "
-        f"constant ±{IC_TOL*100:.0f} % over temperature — not RSS, because these are not "
-        f"independent random variables on one board.",
-        "",
-        "**Neither timing capacitor is X7R, and that is load-bearing.** X7R loses a large "
-        "fraction of its capacitance under DC bias and over temperature, so a timing network "
-        "built on one does not have a ±5 % tolerance — it has an unbounded one. Here that would "
-        "widen the pulse and shorten the lockout, both in the unsafe direction, and it would "
-        "pass every bench test at room temperature.",
-        "",
-        "**The two halves live in one `74HC221`.** The package is a dual monostable: the A half "
-        "sets the pulse, the B half is retriggered by A's falling edge and holds the lockout. "
-        "One part, one footprint, and the lockout cannot be defeated by any gate input because "
-        "it is downstream of the pulse rather than in front of it.",
-        "",
-        "**Why the lockout capacitor is film and not C0G.** 1 µF C0G does not exist in a "
-        "practical package — C0G runs out around 100 nF at these sizes. Holding 1.2 s with "
-        "100 nF would need a 17 MΩ timing resistor, beyond the part's usable range and badly "
-        "leakage-sensitive. A 1 µF PPS or polyester film capacitor is stable, buyable in 1206, "
-        "and brings the resistor back to a sane 1.71 MΩ. This is the kind of substitution that "
-        "gets made silently at assembly time, so it is written down here as a requirement.",
+        f"Timing tolerance ±{TIMING_TOL*100:.0f} %, arithmetic sum not RSS. One `74HC221`: "
+        f"A half sets the pulse (R = {r1/1000:.0f} kΩ, C = {c1:.0f} nF **C0G**), B half holds "
+        f"the lockout (R = {r2/1000:.0f} kΩ, C = {c2:.0f} nF **film**), retriggered by A's "
+        f"falling edge so it sits downstream of the pulse and no gate input can defeat it.",
     ])
 
 
 def t_solenoid_test() -> str:
-    p_hi = spread(PULSE_NOM_MS)[1]
-    l_lo = spread(LOCKOUT_NOM_MS)[0]
-    period = (p_hi + l_lo) / 1000.0
-    pulses = int(TEST_SETTLE_S / period) + 1
-    duty_2s = pulses * p_hi / 1000.0 / TEST_SETTLE_S
-    return "\n".join([
-        "The acceptance test drives the gate with a continuous 100 Hz square wave and requires "
-        "average coil current to fall to ≤ 5 % of the energised value within 2 s and stay there.",
+    rows = [
+        "The limit only means something if it clears real use and still bounds a fault. Both, "
+        "at the working point above:",
         "",
-        "| Quantity | Worst case |",
-        "|---|---:|",
-        f"| Gate input | 100 Hz continuous, 50 % duty — 100 rising edges per second |",
-        f"| Pulses the hardware actually allows | {pulses} in {TEST_SETTLE_S:.0f} s |",
-        f"| Coil on-time in that window | {pulses * p_hi:.0f} ms |",
-        f"| **Average coil duty over 2 s** | **{duty_2s*100:.2f} %** |",
-        f"| Limit | ≤ {DUTY_LIMIT*100:.0f} % |",
+        "| Case | Rate | Average coil power | Against 0.25 W |",
+        "|---|---|---:|---|",
+    ]
+    per = min_period_ms(PULSE_NOM_MS, LOCKOUT_NOM_MS)
+    for label, hz in (("One press", 0.2), ("Brisk use", 1.0),
+                      ("**Child mashing stop/play**", LEGIT_RATE_HZ),
+                      ("Firmware retrigger loop, 100 Hz input", 1000.0 / per)):
+        w = legit_avg_w(COIL_W, PULSE_NOM_MS, hz)
+        rows.append(f"| {label} | {hz:.1f} /s | **{w:.3f} W** | "
+                    f"{'**pass**' if w <= POWER_LIMIT_W else '❌'} |")
+    rows += [
         "",
-        "**This is the retrigger loop the one-shot alone does not cover.** A non-retriggerable "
-        "monostable ignores edges while its output is high, but it accepts the very next edge "
-        "afterwards — at 100 Hz that is 10 ms later, giving roughly 75 % duty and a coil that "
-        "cooks while every part behaves exactly as specified. The lockout is what turns 100 "
-        "edges per second into one pulse per 1.2 s, and it does so with an RC, so no firmware "
-        "state can shorten it.",
-    ])
+        "The last row is the fault case and it is the one the hardware actually bounds: a 100 Hz "
+        f"gate input is throttled by the lockout to one pulse per {per:.0f} ms, whatever firmware "
+        "does. The row above it is a child, and it passes with room — which is the point the "
+        "limit was restated to make.",
+        "",
+        "**Why the coil dropped from 9 W to 5 W.** At 9 W a 30 ms pulse is 270 mJ, and two of "
+        f"those a second is 0.54 W — more than double the limit. No lockout fixes that without "
+        "also blocking the child, because the energy is spent inside a single legitimate "
+        "actuation. The fix has to be the coil or the pulse, exactly as the PM's note says. "
+        "**The 9 W / 30 ms figure was my assumption, not a measurement**, and it is the third "
+        "number this project has found wrong by costing it.",
+        "",
+        "**The pulse length is a placeholder and is marked as one.** WP-04 measures the shortest "
+        "pulse that reliably releases the latch; that number, plus margin, replaces the 15 ms "
+        "above and the lockout resistor follows it. Until then the working point demonstrates "
+        "that a compliant design exists — it does not claim to be the final one.",
+    ]
+    return "\n".join(rows)
 
 
 BLOCKS = {"solenoid_values": t_solenoid_values, "solenoid_test": t_solenoid_test}
 
 
-def render(text: str) -> str:
+def render(text):
     for name, fn in BLOCKS.items():
         pat = re.compile(rf"(<!-- BEGIN GENERATED: {name} -->\n).*?(\n<!-- END GENERATED: {name} -->)", re.DOTALL)
         if not pat.search(text):
@@ -149,7 +148,7 @@ def render(text: str) -> str:
     return text
 
 
-def main() -> int:
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--report", action="store_true")

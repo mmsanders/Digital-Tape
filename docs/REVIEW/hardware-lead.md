@@ -4,6 +4,64 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 4 — 2 Sep 2026, on PM Decisions 003
+
+### The solenoid limit changed and my design failed it — corrected
+
+The restated bound (0.25 W over a rolling 10 s) is better than both numbers it replaced, and
+**my design does not meet it**: 0.30 W worst case. The deeper problem is not the lockout, it is
+the coil. Because the limit must clear a child pressing stop and play twice a second, it reduces
+to **125 mJ per actuation**, and my assumed 9 W coil at 30 ms is **270 mJ — 2.2× over**.
+
+No lockout could have fixed that. The energy is spent inside a *single legitimate actuation*, so
+the only way to comply with the old design was to block the child — exactly what the PM's "not a
+looser limit" clause is written against. Corrected to a 5 W coil at 15 ms with a 450 ms lockout:
+0.174 W at real use, 0.220 W in a retrigger fault, and an actuation permitted every 395 ms against
+a 500 ms real-use period, so nothing legitimate is blocked. **ADR-116 supersedes ADR-112.**
+
+**The pulse length is now explicitly a placeholder.** WP-04 measures the shortest pulse that
+reliably releases the latch. If the mechanism needs more energy than 125 mJ, that is a real
+conflict between a safety limit and a mechanism and it comes back to you — it does not get
+absorbed by widening the limit.
+
+**Three numbers on this project have now been wrong. Two were yours; this one is mine.** The
+generalisable part: a limit expressed as *duty* hides the coil, a limit expressed as *power*
+exposes it. That is why the restatement was worth making.
+
+### The domain access — the `www.` prefix was the whole thing
+
+| Host | Result |
+|---|---|
+| `www.nxp.com` | **works** — 200 on the part path |
+| `www.lcsc.com` | **works** |
+| `www.findchips.com` | **200 to curl**, but a JavaScript shell with no distributor data |
+| `www.digikey.com` | 403 — bot protection, as you predicted |
+| `www.ti.com`, `www.octopart.com`, `www.mouser.com` | still blocked at the proxy |
+
+Bare hostnames all fail; the allowlist matches exact hosts. **Michael's `www.` retry is what
+opened NXP and LCSC**, so the same trick is worth applying to the three still failing.
+
+One thing worth knowing for planning: **`WebFetch` and `curl` do not share an allowlist.**
+`www.findchips.com` answers curl and is refused to WebFetch. So the working method for vendor
+data is curl plus a parser, not the fetch tool — which is how the JLCPCB parts API produced the
+codec stock figures.
+
+**I could not verify the Mouser R2 line myself** and have recorded it in `WP-05.md` as your
+reading rather than as confirmed. It does not change the decision — order 1c is cancelled either
+way.
+
+### Two things I did not change, and why
+
+`spec/acceptance.md` still shows `DRAFT-1` in its header while carrying DRAFT-2 and DRAFT-3
+content. Not mine to edit.
+
+The **absolute touch-temperature cap** raised in round 3 is still open. `ambient + 15 K` permits
+50 °C at 35 °C ambient, above the ~48 °C class limit for plastic a child holds continuously. We
+pass both today with ~9 K to spare, so adding the absolute cap costs nothing now and stops a
+future charge-current increase from eroding it silently.
+
+---
+
 ## Round 3 — 2 Sep 2026, on PM Decisions 002 and 002-A
 
 ### The four PR #15 blockers are closed

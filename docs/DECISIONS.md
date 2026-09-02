@@ -960,3 +960,41 @@ not pad-compatible and a late switch is a re-layout of that block. The reason to
 precisely that the decision is cheap today and expensive in six weeks. **Open:** the 20-pin
 part's reduced pin complement has not been checked against this design, and that needs a
 datasheet `nxp.com` still will not serve.
+
+---
+
+## ADR-116 — The solenoid is specified by energy per actuation, not by pulse width
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 003 §3b ·
+**Supersedes ADR-112**
+
+**Decision.** `spec/acceptance.md` DRAFT-3 bounds average coil power at **0.25 W over any rolling
+10 s window**. Because that must clear a child alternating stop and play twice a second, the
+governing quantity is **energy per actuation ≤ 125 mJ**, and that is what selects the solenoid.
+
+Working point: a **5 W coil**, a **15 ms** pulse (75 mJ) and a **450 ms** lockout. Worst case over
+±16 % timing tolerance: 0.174 W at legitimate 2 Hz use, 0.220 W in a retrigger fault, an actuation
+permitted every 395 ms against the 500 ms real-use period. One `74HC221` still does both halves;
+the PPTC remains a third layer and explicitly does not establish the bound.
+
+**The pulse length is a placeholder.** WP-04 measures the shortest pulse that reliably releases
+the latch; that number plus margin replaces it, and the lockout resistor follows.
+
+**Rationale.** ADR-112 met a 5 %-over-1 s duty limit with a 9 W coil, a 30 ms pulse and a 1.2 s
+lockout. Against the restated limit that is **0.30 W — a fail** — and the deeper problem is that
+9 W × 30 ms is **270 mJ, 2.2× the energy budget**. No lockout could have fixed it: the energy is
+spent inside a *single legitimate actuation*, so the only way to comply was to block the child.
+That is precisely the failure the PM's "not a looser limit" clause is written against, and it
+means the earlier design met a number while missing the intent.
+
+**The 9 W and 30 ms were my assumptions, not measurements.** Three numbers on this project have
+now turned out wrong by being costed rather than asserted; two were the PM's and this one is
+mine. The lesson generalises: a limit expressed as *duty* hides the coil, while a limit expressed
+as *power* exposes it.
+
+**Cost to reverse.** Low today — the coil is not ordered and the timing parts are passives. It
+rises the moment a solenoid is bought or the mechanism is designed around a given force. **The
+open risk is real:** a 5 W coil pulsed 15 ms is a weaker actuator than 9 W pulsed 30 ms, and
+whether it still releases the latch is unknown until WP-04. If the mechanism needs more energy
+than the budget allows, that is a genuine conflict between a safety limit and a mechanism, and it
+goes to the PM — it does not get absorbed by widening the limit.

@@ -1,7 +1,14 @@
 # Thermal and safety budget — WP-34
 
 **Owner:** Hardware Lead · **Status:** living document, versioned not frozen (PM Decisions 001 §3)
-**Revision:** 0.1, 2 Sep 2026 · **Applies to:** production board rev A
+**Revision:** 0.2, 2 Sep 2026 · **Applies to:** production board rev A
+
+> **STATUS: three IR-015 findings open — charger 45 °C enforcement, solenoid sustained-power
+> bound, transient junction temperatures. Numbers in §T-1, §T-2, §T-4 are provisional.**
+>
+> **No board is fabricated and no cell is charged until all three close.** Merging this document
+> is not approving the design (PM Decisions 003 §4).
+
 **Estimates, not measurements.** WP-37 replaces every `EST` in this document with a measured
 number. Until it does, treat the margins as indicative.
 
@@ -24,9 +31,11 @@ Three things, and only the third is what the charter expected.
    inside a sealed box, and in a 35 °C room it lands **within 0.2 K of the 45 °C JEITA charge
    ceiling**. The failure is not damage; it is a device that silently stops charging on a warm
    afternoon, in a product with no screen to explain itself. §4 and §7.
-3. **The solenoid needs two protections, not one.** The charter's hardware one-shot bounds
-   pulse *width* and does nothing about *duty cycle*. A firmware retrigger loop delivers most of
-   the coil's rated power through a correctly functioning one-shot. §6.
+3. **The solenoid limit is an energy budget, and it selects the coil.** The charter's one-shot
+   bounds pulse *width* and does nothing about sustained power. Against DRAFT-3's 0.25 W over
+   10 s, the governing number is **125 mJ per actuation** — because the limit has to clear a
+   child pressing stop and play twice a second. The 9 W coil and 30 ms pulse assumed in rev 0.1
+   were **2.2× over that budget**, and that assumption was mine. §6.
 
 A fourth, smaller: the charter's ~2.2 W worst case did not count both microSD cards at
 sustained UHS-I. With them, the copy case is **2.74 W**. It does not change any conclusion,
@@ -292,47 +301,57 @@ constants at the top — correcting them is a one-line edit and a re-run.
 
 ## 6. Solenoid path — two limits, three layers
 
-`spec/acceptance.md` now carries **two** solenoid limits, because one was not enough:
+`spec/acceptance.md` DRAFT-3 states the bound as **power, not duty**:
 
-- **Single pulse** ≤ 50 ms regardless of gate input.
-- **Duty** ≤ 5 % over any rolling 1 s window, enforced in hardware.
+> Average coil power ≤ **0.25 W over any rolling 10 s window**, enforced in hardware, not
+> defeatable by firmware.
 
-The second exists because a one-shot bounds how long a *single* assertion lasts and says nothing
-about how often assertions may occur. PM Decisions 002-A §2 upholds the reviewers' objection on
-how it is met: **a PPTC is history-dependent, so it is a third layer and not the thing that
-meets the limit.** The one-shot and the lockout must meet it deterministically on their own.
+Power, because power is what damages a coil — pulse width and duty fall out of it. Two earlier
+numbers (50 ms in DRAFT-1, 5 % duty in DRAFT-2) were asserted rather than derived, and both were
+wrong; this one is derived, and **it derives the coil**.
+
+The constraint that gives it teeth is the PM's: the bound must sit **above the fastest legitimate
+use** — a child alternating stop and play about twice a second — and **below the coil's
+continuous rating**. If those two do not leave a gap, the answer is a shorter pulse or a
+lower-power coil, **not a looser limit**. So:
+
+> 2 actuations/s × E_pulse ≤ 0.25 W  →  **E_pulse ≤ 125 mJ**
+
+A PPTC remains a third-layer backstop and **may not be the element that establishes the bound** —
+it is history-dependent and has no deterministic worst case. The two monostables do it alone.
 
 <!-- BEGIN GENERATED: solenoid_values -->
-| Element | Part | Nominal | Worst case | Against |
-|---|---|---:|---|---|
-| One-shot pulse | `74HC221` A-half, R = 429 kΩ 1 %, C = 100 nF **C0G** | 30 ms | 25.2 … **34.8 ms** | ≤ 50 ms — **pass**, 1.44× margin |
-| Lockout | `74HC221` B-half, R = 1.71 MΩ 1 %, C = 1 µF **film** | 1200 ms | **1008** … 1392 ms | ≥ 787 ms needed — **pass** |
-| **Resulting duty** | worst pulse over shortest lockout | 2.4 % | **3.34 %** | ≤ 5 % — **pass**, 1.50× margin |
-| Coil average at that duty | | | **0.30 W** | vs 9 W energised |
+| Quantity | Value | Against | Verdict |
+|---|---:|---|---|
+| Energy budget at 2 Hz sustained | **125 mJ** per actuation | 0.25 W ÷ 2 Hz | the governing number |
+| Coil, specified by energy | **5.0 W** | | selection constraint |
+| Pulse (**placeholder — WP-04 measures this**) | 15 ms nominal, 12.6…**17.4 ms** | ≤ 50 ms | **pass**, 2.9× |
+| Energy per actuation | **75 mJ** | ≤ 125 mJ | **pass**, 1.67× |
+| Lockout | 450 ms nominal, **378**…522 ms | | |
+| Fastest the hardware allows | one per **395 ms** | must be ≤ 500 ms so real use is not blocked | **pass** |
+| Average at 2 Hz legitimate use | **0.174 W** | ≤ 0.25 W | **pass** |
+| Average in a retrigger fault | **0.220 W** | ≤ 0.25 W | **pass**, 1.14× |
 
-Timing tolerance is **±16 %**, taken as the arithmetic sum of resistor ±1 %, capacitor ±5 % and the `74HC221` timing constant ±10 % over temperature — not RSS, because these are not independent random variables on one board.
-
-**Neither timing capacitor is X7R, and that is load-bearing.** X7R loses a large fraction of its capacitance under DC bias and over temperature, so a timing network built on one does not have a ±5 % tolerance — it has an unbounded one. Here that would widen the pulse and shorten the lockout, both in the unsafe direction, and it would pass every bench test at room temperature.
-
-**The two halves live in one `74HC221`.** The package is a dual monostable: the A half sets the pulse, the B half is retriggered by A's falling edge and holds the lockout. One part, one footprint, and the lockout cannot be defeated by any gate input because it is downstream of the pulse rather than in front of it.
-
-**Why the lockout capacitor is film and not C0G.** 1 µF C0G does not exist in a practical package — C0G runs out around 100 nF at these sizes. Holding 1.2 s with 100 nF would need a 17 MΩ timing resistor, beyond the part's usable range and badly leakage-sensitive. A 1 µF PPS or polyester film capacitor is stable, buyable in 1206, and brings the resistor back to a sane 1.71 MΩ. This is the kind of substitution that gets made silently at assembly time, so it is written down here as a requirement.
+Timing tolerance ±16 %, arithmetic sum not RSS. One `74HC221`: A half sets the pulse (R = 214 kΩ, C = 100 nF **C0G**), B half holds the lockout (R = 1368 kΩ, C = 470 nF **film**), retriggered by A's falling edge so it sits downstream of the pulse and no gate input can defeat it.
 <!-- END GENERATED: solenoid_values -->
 
 ### 6.1 Against the acceptance test
 
 <!-- BEGIN GENERATED: solenoid_test -->
-The acceptance test drives the gate with a continuous 100 Hz square wave and requires average coil current to fall to ≤ 5 % of the energised value within 2 s and stay there.
+The limit only means something if it clears real use and still bounds a fault. Both, at the working point above:
 
-| Quantity | Worst case |
-|---|---:|
-| Gate input | 100 Hz continuous, 50 % duty — 100 rising edges per second |
-| Pulses the hardware actually allows | 2 in 2 s |
-| Coil on-time in that window | 70 ms |
-| **Average coil duty over 2 s** | **3.48 %** |
-| Limit | ≤ 5 % |
+| Case | Rate | Average coil power | Against 0.25 W |
+|---|---|---:|---|
+| One press | 0.2 /s | **0.017 W** | **pass** |
+| Brisk use | 1.0 /s | **0.087 W** | **pass** |
+| **Child mashing stop/play** | 2.0 /s | **0.174 W** | **pass** |
+| Firmware retrigger loop, 100 Hz input | 2.5 /s | **0.220 W** | **pass** |
 
-**This is the retrigger loop the one-shot alone does not cover.** A non-retriggerable monostable ignores edges while its output is high, but it accepts the very next edge afterwards — at 100 Hz that is 10 ms later, giving roughly 75 % duty and a coil that cooks while every part behaves exactly as specified. The lockout is what turns 100 edges per second into one pulse per 1.2 s, and it does so with an RC, so no firmware state can shorten it.
+The last row is the fault case and it is the one the hardware actually bounds: a 100 Hz gate input is throttled by the lockout to one pulse per 395 ms, whatever firmware does. The row above it is a child, and it passes with room — which is the point the limit was restated to make.
+
+**Why the coil dropped from 9 W to 5 W.** At 9 W a 30 ms pulse is 270 mJ, and two of those a second is 0.54 W — more than double the limit. No lockout fixes that without also blocking the child, because the energy is spent inside a single legitimate actuation. The fix has to be the coil or the pulse, exactly as the PM's note says. **The 9 W / 30 ms figure was my assumption, not a measurement**, and it is the third number this project has found wrong by costing it.
+
+**The pulse length is a placeholder and is marked as one.** WP-04 measures the shortest pulse that reliably releases the latch; that number, plus margin, replaces the 15 ms above and the lockout resistor follows it. Until then the working point demonstrates that a compliant design exists — it does not claim to be the final one.
 <!-- END GENERATED: solenoid_test -->
 
 ### 6.2 The third layer, and what it is not
@@ -347,18 +366,23 @@ they cannot.
 Plus a flyback diode across each coil and a gate pull-down, so an undriven gate is an off gate
 through reset and brown-out.
 
-### 6.3 The cost this imposes, stated plainly
+### 6.3 What this costs, stated plainly
 
-A 1.2 s lockout means the transport can release **at most once every 1.2 s** in the worst case.
-For the interlock as specified — stop pops play, end-of-tape pops play — that is invisible; the
-solenoid only fires on a release, and two releases inside a second is not a thing a transport
-does. But it is a real behavioural consequence of a safety limit, so it is written down rather
-than discovered.
+**The lockout no longer blocks anything a child does.** At 450 ms nominal the hardware permits an
+actuation every 395 ms worst case, against the 500 ms period of the fastest legitimate use. The
+earlier 1.2 s lockout would have blocked it — that design met a duty limit by making the product
+slower, which is the failure the restated limit exists to prevent.
 
-**It is also tunable, and WP-04 is what tunes it.** The lockout scales with the pulse: if the
-mechanism turns out to release reliably in 20 ms rather than 30 ms, the lockout drops to ~0.8 s
-for the same duty. The measured actuation time from the transport spike is the input, and the
-change is one resistor.
+**The cost moved to the coil.** Specifying by energy means the solenoid is chosen for ≤ 125 mJ per
+actuation rather than for raw force, and a 5 W coil pulsed 15 ms is a weaker actuator than 9 W
+pulsed 30 ms. Whether it still releases the latch is **not something this document can assert** —
+it is what WP-04 measures. If the mechanism needs more energy than the budget allows, that is a
+real conflict between a safety limit and a mechanism, and it goes to the PM rather than being
+absorbed by widening the limit.
+
+**Both numbers here are placeholders and are labelled as such.** WP-04 supplies the pulse; the
+coil follows from the energy budget; the lockout resistor follows from both. What the working
+point demonstrates is that a compliant design *exists* — not that this is it.
 
 ### 6.4 On Route A versus Route B
 
