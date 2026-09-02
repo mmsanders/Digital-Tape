@@ -138,13 +138,18 @@ Running total, per PM Decisions 001 §6 ($150/order, $600 cumulative without ask
 
 | Order | What | Est. | Status |
 |---|---|---:|---|
-| 1a | Six card SKUs + rated reader | ~$115 | Drafted, under authority |
+| 1a | Six card SKUs + rated reader | ~$115 | Drafted, under authority. **Send today** |
 | 1b | Bench build | ~$152 | Drafted, **$2 over** the per-order limit |
+| 1c | Codec buy-ahead, 20 × `SGTL5000XNBA3` | ~$110 | Drafted, under authority. **Send with 1a** |
 | | **Cumulative committed** | **$0** | Nothing ordered yet |
-| | **Cumulative if both placed** | **~$267** | of $600 |
+| | **Cumulative if all three placed** | **~$377** | of $600 |
 
 Order 1b is $2 over. It is a genuinely separate cart from a different vendor with a different
 urgency, not a split to slide under the limit — but it needs a nod rather than an assumption.
+
+**1a and 1c are the two that should not wait.** 1a answers the tape-length question before the
+format freeze; 1c retires a nine-month lead time on a sole-source part for $110. 1b is useless
+until there are printed carriers to put the switches in, so it can wait on Q-006.
 
 ## Acceptance criteria flipped to passing
 
