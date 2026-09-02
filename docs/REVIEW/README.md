@@ -6,7 +6,7 @@ here so it can process them together rather than in four separate conversations.
 | File | Lead | Round 1 (charter rev of 31 Aug) |
 |---|---|---|
 | `software-lead.md` | Software Lead (Claude Code) | Filed |
-| `hardware-lead.md` | Hardware Lead | Not filed — no agent assigned |
+| `hardware-lead.md` | Hardware Lead (Claude Code) | Filed as `STATUS-HARDWARE.md`; round 2 filed here |
 | `verification-lead.md` | Verification Lead (ChatGPT) | Not filed — has no repo access, see note |
 
 **Note on the Verification Lead's file.** Per the charter it has no repository access, so it

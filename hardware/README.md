@@ -1,8 +1,20 @@
 # hardware/ — Hardware Lead
 
-**Hardware Lead assigned 2026-08-31.** Charter received and reviewed; see
-`docs/STATUS-HARDWARE.md` for the review, the open concerns and what is blocked. This
-directory is still empty — nothing is built until the toolchain gap below is closed.
+**Hardware Lead assigned 2026-08-31.** State in `docs/STATUS-HARDWARE.md`; review packets in
+`docs/REVIEW/hardware-lead.md`.
+
+```
+make -C hardware            regenerate every artefact from source
+make -C hardware check      everything that can be checked today
+make -C hardware tools      install CadQuery (read the note about KiCad first)
+```
+
+| Path | What |
+|---|---|
+| `cad/transport/` | Parametric Route A latch — carrier, hook bar, test frame |
+| `packets/wp04-01/` | Print packet: plate, card, results template, blind mapping |
+| `thermal/budget.py` | Generates the tables in `spec/hw/thermal-budget.md` |
+| `characterisation/` | microSD sustained-write measurement (issue #5) |
 
 Access: write here, read on `spec/`. **No access to `engine/` or `firmware/`.**
 
@@ -39,12 +51,16 @@ Probed rather than assumed. Details and the exact evidence are in `docs/STATUS-H
 
 | Need | State | Fixable from here? |
 |---|---|---|
-| CadQuery | Not installed. PyPI **is** reachable | Yes — will install |
-| KiCad + `kicad-cli` | Not installed. `archive.ubuntu.com` offers **7.0.11 only** | Partly |
+| CadQuery | **Installed, 2.8.0.** Working | Done |
+| KiCad + `kicad-cli` | Not installed. `archive.ubuntu.com` offers **7.0.11 only** | Partly — deliberately deferred to WP-26 |
 | `kicad-cli sch erc` | **Needs KiCad 8+.** Not in 7.0. KiCad PPA is 403 through the proxy | **No** |
 | Vendor / distributor / fab web access | **Blocked.** `nxp.com`, `digikey.com`, `octopart.com`, `jlcpcb.com` all 403 at CONNECT | **No** |
 
-The last two are the ones that need someone else. Without KiCad 8+ the charter's "run ERC
+`make -C hardware erc` **fails loudly** with the reason rather than skipping quietly, so the
+gap is visible the day a schematic exists instead of passing green. DRC works on 7.0.11 and is
+wired the same way.
+
+The last two rows are the ones that need someone else. Without KiCad 8+ the charter's "run ERC
 yourself, a clean report is part of the deliverable" becomes a claim rather than an artefact.
 Without vendor access there is no assembler-library check, no errata checklist, no lead times
 and no BOM anyone should order from — all four of which the charter asks for by name.

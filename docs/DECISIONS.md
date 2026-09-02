@@ -205,3 +205,100 @@ stop surprising anyone.
 **Consequence not yet resolved.** The charter does not say who carries text across the seam. That
 is the highest-frequency interaction in the project and it now has a human-shaped gap in the
 middle of it. Raised in `docs/REVIEW/software-lead.md` §3.1.
+
+---
+
+## ADR-010 — Solenoid protection bounds duty cycle, not only pulse width
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead (Charter §05 — decide and log)
+
+**Decision.** The solenoid gate carries three hardware protections, not one: a
+non-retriggerable one-shot (`74HC221` class) capping on-time at 50 ms, an RC lockout enforcing
+a minimum off-time, and a PPTC on the solenoid rail (hold ≈ 100 mA) as an average-current
+backstop. Plus a flyback diode per coil and a gate pull-down.
+
+**Rationale.** The Hardware Charter specifies a hardware one-shot and is right that it is not
+a firmware responsibility. But a one-shot bounds how long a *single* assertion lasts and says
+nothing about how often assertions may occur. Firmware stuck in a retrigger loop at 100 Hz
+delivers a 50 ms pulse every 10 ms; the coil sees essentially its full 9 W continuously and the
+one-shot fires correctly throughout. **The exact failure the charter describes — a stuck
+firmware state cooking a coil built for 30 ms pulses — is reachable through a working
+one-shot.** The PPTC closes that hole physically: no sequence of edges can defeat it, because
+sustained conduction opens the circuit.
+
+Cost over the charter's single one-shot: about fifteen cents.
+
+**Cost to reverse.** Trivial before layout, expensive after. These are three small parts and a
+rail; adding them post-layout means finding board area next to a switching node. Removing them
+later is a schematic edit — but doing so re-opens a failure mode whose consequence is a burnt
+part inside a sealed enclosure in a child's hands.
+
+---
+
+## ADR-011 — Charging is suspended for the duration of a copy
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** The charger is inhibited while a copy is in progress, via a control line the
+charger already has.
+
+**Rationale.** `spec/hw/thermal-budget.md` §3 shows the copy is thermally free — 30 seconds
+against a 621-second enclosure time constant raises the bulk temperature about half a kelvin.
+The sustained case that governs is playback while charging, and at 35 °C ambient that lands
+within 0.2 K of the 45 °C JEITA charge ceiling. Removing the highest-power mode from the
+sustained set costs one control line and is imperceptible: nobody notices 30 seconds missing
+from a 90-minute charge.
+
+This is the cheapest thermal margin in the design, and it is available only because the copy is
+required to be fast — guardrail 10 buys a thermal result as a side effect.
+
+**Cost to reverse.** Near zero. One line in firmware and one net. Worth reversing only if
+measurement shows the margin is larger than estimated, which WP-37 will say.
+
+---
+
+## ADR-012 — The bench build validates function, not copy time
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** Card sustained-write characterisation runs on a PC with a rated reader, not on
+the Teensy bench build. The bench build owns hot-swap detect, the LED row, the button matrix,
+the interlock and the solenoid one-shot — everything in WP-18 and WP-20 except the throughput
+number.
+
+**Rationale.** The Teensy 4.1 has one 4-bit SDIO port. A second card hangs off SPI at roughly
+10–20 MB/s, so a bench copy of a 90-minute cartridge takes 60–95 s regardless of how good the
+cards are. That is a property of the bench platform, not a finding about the design, and a
+criterion the platform cannot meet is a criterion that will be quietly relaxed.
+
+Running the characterisation on a PC is also simply better: it is available the day the cards
+arrive rather than after WP-17, and it removes our own untested driver from the measurement.
+
+**Cost to reverse.** None — this is a routing decision about where a measurement happens.
+The consequence to watch is WP-18's acceptance criteria, which currently read as though the
+bench proves the copy time. Raised for the PM in `docs/REVIEW/hardware-lead.md`.
+
+---
+
+## ADR-013 — Print sweeps carry hidden controls and blind labels
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** Every print-run packet embosses labels unrelated to the swept parameter, and
+includes duplicate copies of one variant at spread bed positions, ranked blind alongside the
+real variants. The mapping lives in the repository, never on the card.
+
+**Rationale.** Two failure modes, both invisible without this. If the labels encode the
+parameter, the ranker ranks by expectation rather than by feel — and Michael is the instrument,
+so biasing him corrupts the only measurement we have. And a 0.3 mm step in hook depth is within
+range of the variation a printer produces across its own bed, so without duplicates a scatter
+is indistinguishable from a signal. The duplicates test the print and the ranker with the same
+parts and no extra trip.
+
+The counter-intuitive payoff: when the controls scatter, the correct next sweep is **coarser**,
+not finer. Without controls the instinct after an inconclusive plate is to refine, which walks
+further into the noise and costs another week.
+
+**Cost to reverse.** Zero — it is a convention in `build_packet.py`, about twenty lines.
+Abandoning it costs the ability to tell a result from noise, which is the whole reason the
+library loop exists.
