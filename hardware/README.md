@@ -1,8 +1,15 @@
 # hardware/ — Hardware Lead
 
-**No Hardware Lead agent is assigned yet.** This directory is scaffolded and empty.
+**Hardware Lead assigned 2026-08-31.** Charter received and reviewed; see
+`docs/STATUS-HARDWARE.md` for the review, the open concerns and what is blocked. This
+directory is still empty — nothing is built until the toolchain gap below is closed.
 
 Access: write here, read on `spec/`. **No access to `engine/` or `firmware/`.**
+
+Reporting: `docs/STATUS-HARDWARE.md`, updated on every merge that touches `hardware/`.
+Escalation: `pm-decision` issues for the PM, `docs/FOR-MICHAEL.md` for taste and hands.
+Scope: WP-04, WP-22–27, WP-29, WP-30, WP-34, WP-37 (plus WP-05, per the charter's ask #04 —
+see the scope note in `docs/STATUS-HARDWARE.md`).
 
 ## Everything hardware is source
 
@@ -25,10 +32,22 @@ library and comes back with the answer instead of one data point.
 - **Print run packets** — per library trip: an STL set, a plate layout, what to measure on each
   variant, and where to record it. **Michael should never have to decide what to print**
 
-## Needs, when the agent is stood up
+## Environment needs — verified 2026-08-31, and not yet met
 
-KiCad, CadQuery and `kicad-cli` in the environment so it can run ERC and DRC itself rather
-than proposing a board nobody checked. Web access for datasheets, availability and pricing.
+Probed rather than assumed. Details and the exact evidence are in `docs/STATUS-HARDWARE.md`
+(H-02, H-03).
+
+| Need | State | Fixable from here? |
+|---|---|---|
+| CadQuery | Not installed. PyPI **is** reachable | Yes — will install |
+| KiCad + `kicad-cli` | Not installed. `archive.ubuntu.com` offers **7.0.11 only** | Partly |
+| `kicad-cli sch erc` | **Needs KiCad 8+.** Not in 7.0. KiCad PPA is 403 through the proxy | **No** |
+| Vendor / distributor / fab web access | **Blocked.** `nxp.com`, `digikey.com`, `octopart.com`, `jlcpcb.com` all 403 at CONNECT | **No** |
+
+The last two are the ones that need someone else. Without KiCad 8+ the charter's "run ERC
+yourself, a clean report is part of the deliverable" becomes a claim rather than an artefact.
+Without vendor access there is no assembler-library check, no errata checklist, no lead times
+and no BOM anyone should order from — all four of which the charter asks for by name.
 
 ## Caveat
 

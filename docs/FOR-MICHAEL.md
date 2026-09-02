@@ -9,6 +9,59 @@ outcome, and logs it to `DECISIONS.md` if it was a call rather than a preference
 
 ## Open
 
+### Q-006 — What is the library's 3D printer, actually?
+
+**Needs:** your hands and about ten minutes of asking · **Blocks:** WP-04, the critical path
+**From:** Hardware Lead
+
+The whole mechanical plan is built on sending you to the library with one plate that answers a
+question, instead of one part that produces a data point. To do that I have to hand you a file
+that machine will actually accept, and right now I'd be guessing.
+
+Whatever you can find out, in rough order of how much it changes what I send you:
+
+- **What machine is it?** Make and model. A photo of the front of it is a perfect answer.
+- **What can you print in?** Most library makerspaces are PLA-only. If PETG or ABS is on the
+  menu that matters a lot later — see below.
+- **How do they take the job?** Do you hand them a file and they slice it, or do you slice it
+  yourself and bring G-code? Is there a machine there you can drive?
+- **Is there a time limit per print or per session?** Two hours and four hours are different
+  designs on my end.
+- **How long from drop-off to part in hand?** If it's same-day, the plan works as written. If
+  it's "come back Thursday", I should be designing bigger, less frequent sweeps.
+
+**Why the material question matters more than it sounds.** You'll be ranking how the buttons
+*click*, and PLA is a prototyping plastic — it creeps under a spring and it will not feel the
+same as whatever the final part is made of. Your ranking is still the right way to find the
+answer; I just want to print the top two or three in the real material and have you confirm
+the winner still wins, before I commit the enclosure around it.
+
+**My default if you'd rather not chase this:** PLA, 0.2 mm layers, plates that fit in four
+hours, and I send you an STL plus a 3MF plus a picture of how it should sit on the bed —
+rather than G-code, which only works if I know the machine.
+
+---
+
+### Q-005 — What can I spend, and above what number should I ask first?
+
+**Needs:** your wallet · **Blocks:** nothing — a conservative default is in force
+**From:** Hardware Lead
+
+You place the parts orders, so you set the ceiling. I need two numbers before I draft one:
+
+1. A rough budget for hardware across the whole project. The plan carries three board spins,
+   and a run of assembled boards is the single biggest line item in this project by a distance.
+2. The figure above which I should put an order in front of you *before* proposing it, rather
+   than just handing you a prepared cart.
+
+Neither answer blocks me — I would just rather find out now than have you open a cart with a
+number on it you weren't expecting.
+
+**My default if you'd rather not decide:** I flag anything over $150, I keep the bench build
+(WP-05) deliberately cheap, and I assume nothing about board spins until you've seen a quote.
+
+---
+
 ### Q-004 — Your tape will remember where you were, but only in your own player
 
 **Needs:** your taste · **Blocks:** nothing — a default will ship
@@ -93,4 +146,23 @@ sign-off once the Verification Lead has had an independent read.*
 
 ## Answered
 
-*(nothing yet)*
+### Q-006 — Library printer
+**Answered 2 Sep:** not yet checked; proceed on the default — PLA, 0.2 mm, four-hour
+plates, STL + 3MF + bed picture, no G-code. Re-slice if details arrive.
+
+### Q-005 — Spending
+**Answered 2 Sep:** every order comes to Michael first, as a checkout-ready cart with
+a one-line justification. Running total in STATUS.md. Logged as ADR.
+
+### Q-004 — Resume position
+**Answered 2 Sep:** the player remembers, last 64 cartridges, across days; resumes
+2 s early. Accepted as a deliberate departure from the tape metaphor. Logged as ADR.
+
+### Q-003 — The wall
+**Answered 2 Sep:** record button won't hold down, plus a green/yellow/red record
+light showing Side B headroom; red coincides with the button refusing. Logged as ADR.
+
+### Q-002 — Tape length
+**Answered 2 Sep:** C-60 is the standard. C-90 and longer permitted by the format
+with slower copy. Do nothing that closes off longer lengths. Logged as ADR.
+
