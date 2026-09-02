@@ -84,24 +84,33 @@ Lead spec changes** — flagged rather than assumed, and reversible in one commi
 
 ## Blocked
 
-**H-02, vendor egress — confirmed hard, and it cost a real finding to work around.** Six
-supplied URLs were tried directly (NXP ×3, DigiKey, Mouser, JLCPCB) plus two PCN mirrors: **all
-blocked at the proxy's CONNECT layer**, via WebFetch and via curl. This is the environment's
-network policy, not a link problem — no set of URLs fixes it. General web *search* works, which
-is the only reason the codec question moved at all.
+**The codec question is closed, and WP-26 is unblocked.** Specify **`SGTL5000XNBA3`**, not
+`XNAA3`. The aggregator's `Obsolete` was correct but attached to the wrong suffix: NXP PCN
+202201003DN discontinues `XNAA3`/`R2` with migration to `XNBA3`/`R2`. The last open risk — the
+April 2025 bulk EOL notice, whose part list is in no search snippet — was cleared by text search
+of two independent mirrors, both zero hits for `SGTL`. PJRC corroborates from the other side:
+Audio Shield Rev D2 existed because of 32-pin shortages in Jan 2023, back on Rev D since Feb
+2025 and widely stocked.
 
-**The codec scare mostly resolved, and the resolution is instructive.** The aggregator's
-`Obsolete` looks correct but attached to the wrong suffix: NXP PCN **202201003DN** discontinues
-**`SGTL5000XNAA3`/`R2`** with migration to **`XNBA3`/`R2`**. PJRC independently corroborates —
-Audio Shield Rev D2 (Jan 2023) existed because of 32-pin SGTL5000 shortages, and they are back
-on Rev D as of Feb 2025, widely stocked. **The family is alive; the suffix most search results
-point at is dead** — which is precisely what "check every part before layout" is for, and it
-would have reached a BOM as `XNAA3` otherwise. Recorded as `UNVERIFIED` in
-`spec/hw/board-rev-a.md` §1: it is search-derived, not read from a primary document.
+**A BOM written from search hits would have said `XNAA3`.** That is the failure "check every
+part before layout" is written to catch, caught before layout. Two items carried into WP-26 in
+`board-rev-a.md` §1: the punch→sawn QFN land pattern must come from the current datasheet, and
+32-pin vs 20-pin is still open.
 
-**One narrow question left:** is any SGTL5000 variant in **PDN 202504001DN** (16 Apr 2025)? Its
-last-time-buy window has already closed, so this one matters immediately if the answer is yes.
-Everything else in `spec/hw/` and `WP-05.md` still carries `UNVERIFIED`.
+Precisely: *no EOL notice found against `XNBA3`* — not the same as a positive `Active` reading,
+which nobody has seen. Stock, lead time and JLCPCB tier are unchecked and **do not block WP-26**;
+they bite at WP-27 and are tracked there.
+
+**H-02, vendor egress — confirmed hard, and it is the standing constraint.** Six supplied URLs
+were tried directly (NXP ×3, DigiKey, Mouser, JLCPCB) plus two PCN mirrors: **all blocked at the
+proxy's CONNECT layer**, by WebFetch and by curl. This is the environment's network policy, not
+a link problem, and no set of URLs works around it. General web *search* does work, which is the
+only reason the codec moved at all — but search finds documents, not stock figures or library
+tiers, and sourcing needs both. **Every remaining part number carries `UNVERIFIED`.**
+
+Sourcing is a standing responsibility of this role and it is currently human-mediated per part.
+Allowlisting `nxp.com`, `digikey.com`, `mouser.com` and `jlcpcb.com` is the fix; the alternative
+is a person in the loop for every line of the BOM.
 
 **H-03, ERC — unchanged.** Only KiCad 7.0.11 is installable; `kicad-cli sch erc` needs KiCad 8.
 `make -C hardware erc` now **fails loudly** with the reason rather than skipping quietly, so the

@@ -65,31 +65,42 @@ card slots at UHS-I, LiPo with a switching charger, solenoid driver, LED banks.
 | Charger | Switching buck with hardware JEITA · `spec/hw/thermal-budget.md` §5 | `PROPOSED` |
 | Solenoid driver | One-shot + RC lockout + PPTC · `thermal-budget.md` §6 | `PROPOSED` |
 
-> **Codec risk — mostly resolved, and the resolution is a warning.**
+> **Codec — resolved. Specify `SGTL5000XNBA3`, not `XNAA3`.**
 >
-> The `Obsolete` reading on a distributor aggregator appears to be **correct but attached to the
-> wrong suffix**. NXP PCN **202201003DN** is titled *"Discontinuation Notification with Product
-> Migration for SGTL5000XNAA3/R2 Due to ASECL Punch QFN Line End-of-Service"* — so
-> **`SGTL5000XNAA3` and `XNAA3R2` are discontinued** (punch-QFN assembly line retired, effective
-> ~March 2022), **with migration to `SGTL5000XNBA3` / `XNBA3R2`** in a sawn-QFN package.
+> The aggregator's `Obsolete` was correct but attached to the wrong suffix. NXP PCN
+> **202201003DN** is titled *"Discontinuation Notification with Product Migration for
+> SGTL5000XNAA3/R2 Due to ASECL Punch QFN Line End-of-Service"*: the **`XNAA3`/`R2` suffix is
+> discontinued** (punch-QFN assembly line retired, effective ~March 2022), **migrating to
+> `SGTL5000XNBA3`/`R2`** in a sawn-QFN package.
 >
-> Independent corroboration: PJRC cut Audio Shield **Rev D2 in January 2023 because of shortages
-> on the 32-pin SGTL5000**, moving to the 20-pin part, and returned to Rev D in February 2025.
-> The shield is widely stocked today, so the WP-05 bench build is not at risk.
+> **No SGTL5000 variant appears in PDN 202504001DN** (16 Apr 2025, the bulk EOL notice whose
+> part list is not in any search snippet). Confirmed 2 Sep by text search of two independent
+> mirrors — Richardson RFPD and DigiKey — both returning zero hits for `SGTL`. That was the last
+> open risk, and it is closed.
 >
-> **The part family is alive. The specific suffix that most search results point at is dead.**
-> That is exactly the failure the charter's "check every part against the assembler's library
-> before layout" rule exists to catch, and it would have reached a BOM as `SGTL5000XNAA3` without
-> this check.
+> Corroboration from the other direction: PJRC cut Audio Shield **Rev D2 in Jan 2023 because of
+> 32-pin SGTL5000 shortages**, and returned to **Rev D in Feb 2025**, widely stocked. The part is
+> being bought in volume today.
 >
-> `UNVERIFIED — derived from search summaries, not from a primary document.` `nxp.com`, both
-> distributors and two PCN mirrors are all blocked from this environment (STATUS-HARDWARE H-02).
+> **The family is alive; the suffix most search results point at is dead.** A BOM written from
+> those hits would have said `XNAA3`. Caught before layout, which is the entire point of the
+> rule.
 >
-> **One question remains, and it is narrow:** NXP issued **PDN 202504001DN** on 16 April 2025
-> (plus an update, `202504001DNU01`) discontinuing an unpublished list of parts. Whether any
-> SGTL5000 variant is on that list is the only thing standing between this and a settled choice.
-> Six- or nine-month last-time-buy windows from that issue date have **already closed**, so if
-> it is on the list the answer matters immediately rather than eventually.
+> **Two things to carry into WP-26:**
+>
+> 1. **Check the footprint.** `XNAA3` → `XNBA3` is punch QFN → **sawn** QFN. Same pin count, but
+>    terminal geometry can differ; the land pattern must come from the current datasheet, not
+>    from a library part that predates the migration.
+> 2. **32-pin vs 20-pin is still open.** `XNBA3` is the 32-pin part and the direct migration
+>    path. `SGTL5000XNLA3` is the 20-pin variant PJRC moved to during the shortage — smaller and
+>    cheaper, but **its I²C address is not configurable**. We have exactly one codec, so that
+>    costs nothing, and the 20-pin part deserves a look when the datasheet is readable.
+>
+> **Evidence status.** Lifecycle: *no EOL notice found against `XNBA3`* — which is not the same
+> as a positive `Active` reading from NXP's part page, and nobody has seen one. Stock, lead time
+> and JLCPCB library tier remain unchecked. **None of those block WP-26**, which needs the right
+> part and package, not a stock figure; they bite at WP-27 (layout, DFM, assembly BOM) and are
+> tracked there.
 
 ---
 
@@ -237,7 +248,9 @@ hardware half is settled and can proceed.
 | # | Item | Blocked on |
 |---|---|---|
 | 1 | Every pin assignment | WP-26 schematic capture |
-| 2 | Is any SGTL5000 variant in PDN **202504001DN** (16 Apr 2025)? Everything else about the codec is answered | Distributor access — H-02 |
+| 2 | ~~SGTL5000 lifecycle~~ — **closed 2 Sep.** `XNBA3` specified; no EOL notice against it | — |
+| 2a | `XNBA3` positive lifecycle + longevity date, stock, lead time, JLCPCB tier | WP-27, needs distributor access — H-02 |
+| 2b | Sawn-QFN land pattern from the current datasheet; 32-pin vs 20-pin decision | WP-26 |
 | 3 | Charger, one-shot and protection part numbers confirmed orderable | Distributor access — H-02 |
 | 4 | Cell placement fixed relative to charger and MCU | `thermal-budget.md` §4 — a layout constraint, must land before layout |
 | 5 | Cartridge edge-connector geometry and stub length | Cartridge spike; STATUS-HARDWARE H-05 |

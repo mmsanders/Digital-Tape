@@ -19,6 +19,7 @@ Newest round at the top. Do not edit a previous round; supersede it.
 | §6 | Q-005, $150/order, $600 cumulative, running total | `FOR-MICHAEL.md` Q-005 · `STATUS-HARDWARE.md` **Spending** · item 11 below |
 | §7 | Q-006; and do not conflate "does the geometry work" with "does it survive" | `FOR-MICHAEL.md` Q-006 · `WP-04.md` A-1 (200 cycles, PLA) vs A-4 (1000 cycles, final material) |
 | §8 | Independent review on request | Requested in PR #15 for the solenoid protection circuit |
+| — | *(not in the memo)* The codec question, raised round 1 as H-02's concrete consequence | **Closed.** `SGTL5000XNBA3` specified; `board-rev-a.md` §1 |
 | §9.1 | Order the cards now | `WP-05.md` order 1a drafted — **Michael places it** |
 | §9.2 | Write the thermal budget, send for review | `spec/hw/thermal-budget.md` rev 0.1 ✓ |
 | §9.3 | Build the WP-04 packet | `hardware/packets/wp04-01/` ✓ — waiting on Q-006 |
@@ -140,9 +141,10 @@ corroborates independently, and the shield is stocked, so order 1b is safe. **Th
 alive and the aggregator was right about the wrong suffix** — a BOM written from search hits
 would have said `XNAA3`.
 
-**Recommendation.** One question left, and it is narrow enough to be worth someone's two
-minutes: **is any SGTL5000 variant in PDN 202504001DN (16 Apr 2025)?** Its last-time-buy window
-has closed, so a yes matters now rather than later.
+**Closed 2 Sep.** The last open risk — whether any SGTL5000 variant sits in PDN 202504001DN —
+was cleared by text search of two independent mirrors, both zero hits for `SGTL`. **Specify
+`XNBA3`.** WP-26 is unblocked; the residual checks (positive lifecycle reading, stock, lead
+time, JLCPCB tier) do not gate schematic capture and are tracked against WP-27.
 
 **The general fix matters more than this part.** Sourcing is a standing Hardware Lead
 responsibility and it is permanently human-mediated at this rate. Either allowlist
