@@ -60,18 +60,36 @@ card slots at UHS-I, LiPo with a switching charger, solenoid driver, LED banks.
 | MCU | i.MX RT1062 (600 MHz, 196-MAPBGA) | `PROPOSED` |
 | Boot flash | QSPI NOR | `PROPOSED` |
 | PSRAM | APS6404L class, QSPI | `PROPOSED` |
-| Codec | SGTL5000 | `PROPOSED` — **and see the risk note below** |
+| Codec | SGTL5000 — **`XNBA3` suffix, not `XNAA3`** | `PROPOSED` — see the risk note below |
 | Card slots | 2 × microSD via USDHC1 / USDHC2, UHS-I | `PROPOSED` |
 | Charger | Switching buck with hardware JEITA · `spec/hw/thermal-budget.md` §5 | `PROPOSED` |
 | Solenoid driver | One-shot + RC lockout + PPTC · `thermal-budget.md` §6 | `PROPOSED` |
 
-> **Codec risk.** A distributor aggregator lists the SGTL5000 as `Obsolete` while NXP's
-> longevity programme is quoted as assuring supply. Those cannot both be true and **I cannot
-> resolve it** — `nxp.com` and every distributor are blocked from this environment
-> (STATUS-HARDWARE H-02). If it is obsolete, that is a schematic-level change and it is far
-> cheaper now than at order time. Someone with distributor access should check this before
-> WP-26 starts. It is also the codec on the Teensy Audio Shield in WP-05, so the bench build
-> inherits the same question.
+> **Codec risk — mostly resolved, and the resolution is a warning.**
+>
+> The `Obsolete` reading on a distributor aggregator appears to be **correct but attached to the
+> wrong suffix**. NXP PCN **202201003DN** is titled *"Discontinuation Notification with Product
+> Migration for SGTL5000XNAA3/R2 Due to ASECL Punch QFN Line End-of-Service"* — so
+> **`SGTL5000XNAA3` and `XNAA3R2` are discontinued** (punch-QFN assembly line retired, effective
+> ~March 2022), **with migration to `SGTL5000XNBA3` / `XNBA3R2`** in a sawn-QFN package.
+>
+> Independent corroboration: PJRC cut Audio Shield **Rev D2 in January 2023 because of shortages
+> on the 32-pin SGTL5000**, moving to the 20-pin part, and returned to Rev D in February 2025.
+> The shield is widely stocked today, so the WP-05 bench build is not at risk.
+>
+> **The part family is alive. The specific suffix that most search results point at is dead.**
+> That is exactly the failure the charter's "check every part against the assembler's library
+> before layout" rule exists to catch, and it would have reached a BOM as `SGTL5000XNAA3` without
+> this check.
+>
+> `UNVERIFIED — derived from search summaries, not from a primary document.` `nxp.com`, both
+> distributors and two PCN mirrors are all blocked from this environment (STATUS-HARDWARE H-02).
+>
+> **One question remains, and it is narrow:** NXP issued **PDN 202504001DN** on 16 April 2025
+> (plus an update, `202504001DNU01`) discontinuing an unpublished list of parts. Whether any
+> SGTL5000 variant is on that list is the only thing standing between this and a settled choice.
+> Six- or nine-month last-time-buy windows from that issue date have **already closed**, so if
+> it is on the list the answer matters immediately rather than eventually.
 
 ---
 
@@ -219,7 +237,7 @@ hardware half is settled and can proceed.
 | # | Item | Blocked on |
 |---|---|---|
 | 1 | Every pin assignment | WP-26 schematic capture |
-| 2 | SGTL5000 lifecycle status confirmed | Distributor access — H-02 |
+| 2 | Is any SGTL5000 variant in PDN **202504001DN** (16 Apr 2025)? Everything else about the codec is answered | Distributor access — H-02 |
 | 3 | Charger, one-shot and protection part numbers confirmed orderable | Distributor access — H-02 |
 | 4 | Cell placement fixed relative to charger and MCU | `thermal-budget.md` §4 — a layout constraint, must land before layout |
 | 5 | Cartridge edge-connector geometry and stub length | Cartridge spike; STATUS-HARDWARE H-05 |

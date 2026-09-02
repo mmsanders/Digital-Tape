@@ -130,8 +130,25 @@ NXP's longevity programme is quoted as assuring supply. I cannot resolve it, bec
 it means reading `nxp.com` and a stock page. It is the codec in the one-board architecture *and*
 on the Teensy Audio Shield in order 1b, so both builds inherit the question.
 
-**Recommendation.** Someone with distributor access spends five minutes on this before WP-26.
-It is the cheapest possible time to discover a codec change.
+**Update, 2 Sep.** Six vendor URLs were supplied and tried directly; **all blocked at the
+proxy's CONNECT layer**, by WebFetch and by curl, along with two PCN mirrors. The policy is the
+constraint, not the links.
+
+Web *search* did most of the job anyway. NXP PCN **202201003DN** discontinues
+**`SGTL5000XNAA3`/`R2`** with migration to **`XNBA3`/`R2`**; PJRC's Audio Shield Rev D2 history
+corroborates independently, and the shield is stocked, so order 1b is safe. **The family is
+alive and the aggregator was right about the wrong suffix** — a BOM written from search hits
+would have said `XNAA3`.
+
+**Recommendation.** One question left, and it is narrow enough to be worth someone's two
+minutes: **is any SGTL5000 variant in PDN 202504001DN (16 Apr 2025)?** Its last-time-buy window
+has closed, so a yes matters now rather than later.
+
+**The general fix matters more than this part.** Sourcing is a standing Hardware Lead
+responsibility and it is permanently human-mediated at this rate. Either allowlist
+`nxp.com`, `digikey.com`, `mouser.com`, `jlcpcb.com` in the environment's network policy, or
+accept that every part needs a human lookup and let me publish a standing checklist for
+batching them.
 
 **Default:** every part number in `spec/hw/` and `docs/PACKAGES/WP-05.md` carries `UNVERIFIED`,
 and Michael finds out at checkout — which is the wrong place.

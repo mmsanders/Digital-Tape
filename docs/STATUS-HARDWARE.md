@@ -84,13 +84,24 @@ Lead spec changes** — flagged rather than assumed, and reversible in one commi
 
 ## Blocked
 
-**H-02, vendor egress — unchanged, and it now has a name attached.** No distributor,
-manufacturer or fab domain is reachable. The concrete consequence has arrived: **a distributor
-aggregator lists the SGTL5000 as `Obsolete`** while NXP's longevity programme is quoted as
-assuring supply. I cannot resolve it. It is the codec in the one-board architecture and on the
-Teensy Audio Shield in order 1b, so both builds inherit the question. Five minutes from anyone
-with distributor access settles it, and now is the cheapest time. Every part number in
-`spec/hw/` and `WP-05.md` carries `UNVERIFIED`.
+**H-02, vendor egress — confirmed hard, and it cost a real finding to work around.** Six
+supplied URLs were tried directly (NXP ×3, DigiKey, Mouser, JLCPCB) plus two PCN mirrors: **all
+blocked at the proxy's CONNECT layer**, via WebFetch and via curl. This is the environment's
+network policy, not a link problem — no set of URLs fixes it. General web *search* works, which
+is the only reason the codec question moved at all.
+
+**The codec scare mostly resolved, and the resolution is instructive.** The aggregator's
+`Obsolete` looks correct but attached to the wrong suffix: NXP PCN **202201003DN** discontinues
+**`SGTL5000XNAA3`/`R2`** with migration to **`XNBA3`/`R2`**. PJRC independently corroborates —
+Audio Shield Rev D2 (Jan 2023) existed because of 32-pin SGTL5000 shortages, and they are back
+on Rev D as of Feb 2025, widely stocked. **The family is alive; the suffix most search results
+point at is dead** — which is precisely what "check every part before layout" is for, and it
+would have reached a BOM as `XNAA3` otherwise. Recorded as `UNVERIFIED` in
+`spec/hw/board-rev-a.md` §1: it is search-derived, not read from a primary document.
+
+**One narrow question left:** is any SGTL5000 variant in **PDN 202504001DN** (16 Apr 2025)? Its
+last-time-buy window has already closed, so this one matters immediately if the answer is yes.
+Everything else in `spec/hw/` and `WP-05.md` still carries `UNVERIFIED`.
 
 **H-03, ERC — unchanged.** Only KiCad 7.0.11 is installable; `kicad-cli sch erc` needs KiCad 8.
 `make -C hardware erc` now **fails loudly** with the reason rather than skipping quietly, so the
