@@ -6,7 +6,7 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ## Round 2 — 2 Sep 2026, on PM Decisions 001
 
-Eight items. Six are answerable yes/no; two are notifications that need nothing.
+Eleven items. Six are answerable yes/no; two are notifications that need nothing.
 **Nothing here is blocking** — every item names what ships if nobody answers.
 
 ### 1. WP-18's acceptance criteria assume the bench can prove the copy time. It cannot.
@@ -21,7 +21,7 @@ quietly relaxed, and then nobody is sure what the bench was supposed to prove.
 
 **Recommendation.** Reword WP-18 to own function (hot-swap detect, LED row, copy *correctness*)
 and explicitly not throughput. Card characterisation moves to a PC with a rated reader
-(ADR-012), which is available the day the cards arrive rather than after WP-17.
+(ADR-103), which is available the day the cards arrive rather than after WP-17.
 
 **Default:** I proceed as if this is agreed, and mark WP-18's throughput line as out of scope.
 
@@ -44,7 +44,7 @@ whether or not they are recorded upstream. That is the wrong way round and is wh
 
 ### 3. The solenoid one-shot, as specified, does not close the hole it was for
 
-**Notification, not a question.** Logged as ADR-013's neighbour, ADR-010. A one-shot bounds
+**Notification, not a question.** Logged as ADR-104's neighbour, ADR-101. A one-shot bounds
 pulse *width*; a firmware retrigger loop at 100 Hz still delivers essentially full coil power
 through a correctly functioning one-shot. Adding an RC lockout and a PPTC average-current
 backstop costs about fifteen cents and closes it physically.
@@ -57,7 +57,7 @@ correct when firmware is wrong, which is exactly the thing a second reader catch
 
 **What it is.** `thermal-budget.md` §4: at 35 °C ambient, playing while charging sits ~0.2 K
 under the 45 °C JEITA ceiling. The cutoff fires, correctly, and charging stops. There is no
-screen. ADR-011 (suspend charging during a copy) and JEITA tapering remove most of this, but a
+screen. ADR-102 (suspend charging during a copy) and JEITA tapering remove most of this, but a
 hot room still reaches it.
 
 **Why it matters.** Guardrail 03 means the only available explanation is physical.
@@ -128,6 +128,44 @@ fine on 7.0.11 and is wired the same way.
 
 **Default:** ERC becomes a claim rather than an artefact at WP-26, and the loud failure is the
 best I can do about it from here.
+
+### 9. Captive cards added a firmware path that is in no work package
+
+**What it is.** ADR-105 (issue #6, captive) means `tapectl` and the GUI reach the card *through
+the player* over USB-C. That requires a firmware device path exposing a mounted cartridge to a
+host. **It is not in WP-01…WP-37.** The board half is settled — USB-C carries data, recorded in
+`spec/hw/board-rev-a.md` §7 — but the firmware and `host/` halves have no owner and no package.
+
+**Why it matters.** This is the cost the decision added, and I flagged it as a cost when I
+raised the issue. It is cheap to scope now and expensive to discover in Phase 4 with the
+cartridge shell already drawn around the assumption. Whether it is USB mass storage over the raw
+partition or something narrower is the Software Lead's call, not mine.
+
+**Recommendation.** Add a package for it, or fold it into WP-14/WP-15 explicitly.
+
+**Default:** the board carries USB-C data regardless, so hardware proceeds — and the gap surfaces
+when someone tries to load a cartridge.
+
+### 10. Two leads picked the same ADR numbers, and would again
+
+**What it is.** My first four decisions logged as `ADR-010`–`013`. So did four of the Software
+Lead's, on an unmerged branch. Nobody would have noticed until the merge, in an append-only file
+whose entries are referenced by number from a dozen places.
+
+**What I did.** Renumbered mine to **`ADR-101`–`104`** and reserved **`ADR-1xx` for the Hardware
+Lead**, with the reasoning in `DECISIONS.md`. Picking `018`+ instead would have fixed this
+instance and left the next collision in place.
+
+**Recommendation.** Confirm the range, and give the Verification Lead one too. This is the
+reversible path under Charter §05 — one `sed` collapses it if you would rather not.
+
+### 11. The spending total is in `STATUS-HARDWARE.md`, not `STATUS.md`
+
+**Minor, flagging rather than assuming.** Decisions 001 §6 says to keep the running total in
+`STATUS.md`. That file is the Software Lead's and I do not write to it, so the total is in
+`docs/STATUS-HARDWARE.md` under **Spending**. If you want one number in one place across all
+streams, say so and I will ask the Software Lead to mirror it — but two leads writing the same
+table is how it goes stale.
 
 ---
 

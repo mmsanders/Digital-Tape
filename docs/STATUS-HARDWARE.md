@@ -26,9 +26,9 @@ found three things:
    most likely thing this device ever does. At 35 °C ambient that lands **within 0.2 K of the
    45 °C JEITA charge ceiling**. Not a damage problem: a device that silently stops charging on
    a warm afternoon, with no screen to explain itself. Four mitigations in §4; the cheapest is
-   ADR-011.
+   ADR-102.
 3. **The solenoid one-shot does not close the hole it was specified for.** A retrigger loop
-   delivers essentially full coil power through a correctly functioning one-shot. ADR-010 adds
+   delivers essentially full coil power through a correctly functioning one-shot. ADR-101 adds
    an RC lockout and a PPTC backstop for about fifteen cents.
 
 The budget is **computed, not asserted** — `hardware/thermal/budget.py` generates its tables and
@@ -43,7 +43,7 @@ to discriminate.
 frame on one plate that fits a 220 × 220 bed, plus the card, the results template and the next
 packet pre-planned against six possible outcomes. Hook depth bracketed 0.6–2.1 mm, wider than
 the charter's suggestion so both endpoints are expected to be obviously wrong. Three
-identical-geometry controls are hidden in the ranking (ADR-013).
+identical-geometry controls are hidden in the ranking (ADR-104).
 
 **`spec/hw/board-rev-a.md` started**, mostly empty by design, carrying the `CHANGES` protocol,
 the notification obligation, the test-point list, and the PM's SDR50 entry gate written down
@@ -51,6 +51,19 @@ the notification obligation, the test-point list, and the PM's SDR50 entry gate 
 
 **Toolchain: CadQuery installed and working.** `make -C hardware` regenerates every artefact
 from source. KiCad deliberately not installed — see Blocked.
+
+**Every ruling in PM Decisions 001 is now logged.** It was cited in eight files but recorded in
+none — `ADR-105`…`ADR-109` fix that, so the decisions survive without the memo. Issues #5–#8 are
+closed with their resolutions, and mirrored into `docs/ESCALATIONS.md`, which had never carried
+the four hardware escalations.
+
+**Two things the memo asked for by name that I had missed**, both now in `spec/hw/board-rev-a.md`
+(rev 0.2): §6 is the card SKU and measurement table §1 asks to live there, and §7 is the USB-C
+cartridge-loading path that follows from the captive-card decision. §7 names **a firmware device
+path that is in no work package** — the cost ADR-105 added. Raised for the PM.
+
+**Hardware ADRs moved to a reserved `ADR-1xx` range.** My first four collided with four of the
+Software Lead's on an unmerged branch; nobody would have seen it until the merge.
 
 **`spec/` restructured per PM Decisions 001 §3.** `spec/hw/` created with its own README;
 the superseded `spec/thermal-budget.md` placeholder deleted; `spec/README.md` now carries the

@@ -13,6 +13,18 @@ Each item states a recommendation and what ships by default if nobody answers. N
 | [3](https://github.com/mmsanders/Digital-Tape/issues/3) | The 512 KiB preroll does not fit the 200 KB engine budget | Caller-provided buffer |
 | [4](https://github.com/mmsanders/Digital-Tape/issues/4) | Side B can only grow to 1.50× before the index slot overflows | Refuse the splice; record won't hold down |
 
+## Resolved — hardware, answered by PM Decisions 001 (1 Sep)
+
+Recorded here because this file is the PM's readable copy and these four were never mirrored
+into it. All are closed on GitHub; the decisions are logged as ADRs.
+
+| # | Question | Resolution | ADR |
+|---|---|---|---|
+| [5](https://github.com/mmsanders/Digital-Tape/issues/5) | The 30 s copy needs 31.75 MB/s sustained write, and no UHS-I specification guarantees it | Characterise six SKUs; ≥2 at ≥35 MB/s worst case → 90 min stands, else 60 min | ADR-109 |
+| [6](https://github.com/mmsanders/Digital-Tape/issues/6) | Captive or removable microSD in the cartridge | **Captive.** Loading over USB-C through the player. Serviceable by an adult with a driver, not by a fingernail | ADR-105 |
+| [7](https://github.com/mmsanders/Digital-Tape/issues/7) | `spec/` is frozen but two hardware documents inside it must keep changing | `spec/hw/` versioned, not frozen. Notification, not approval. **Limits stay in `spec/acceptance.md`** | ADR-106 |
+| [8](https://github.com/mmsanders/Digital-Tape/issues/8) | Who signs off hardware acceptance, and who owns UHS-I bring-up | Sign-off splits three ways; bring-up splits at an SDR50 entry gate | ADR-107, ADR-108 |
+
 ---
 
 ## #2 — Does the 200 KB static budget include `.rodata`, or is it RAM only?

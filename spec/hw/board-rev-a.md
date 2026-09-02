@@ -1,11 +1,18 @@
 # Board rev A — the hardware/firmware contract
 
 **Owner:** Hardware Lead · **Consumed by:** `firmware/prod/` · **Status:** skeleton, accreting
-**Revision:** 0.1, 2 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
+**Revision:** 0.2, 2 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
 
 <!-- CHANGES: every revision adds a block here. Firmware reads this first. -->
 
 ## CHANGES
+
+### 0.2 — 2026-09-02
+**No pin, rail or timing changes** — nothing for firmware to act on. Added §6 (characterised
+media: the card SKU and measurement table PM Decisions 001 §1 asks to live here) and §7 (USB-C
+and the cartridge loading path, following from ADR-105 captive card). §7 names a firmware device
+path that is **not in any work package today**; that is the one line in this revision the
+Software Lead should read.
 
 ### 0.1 — 2026-09-02
 First issue. **No pin assignments yet** — nothing below is bindable. The document exists now
@@ -159,7 +166,55 @@ cannot meet 30 s for a 90-minute cartridge at all** — the charter already pric
 90-minute format; it is a different format. That is the same trade Q-002 puts to Michael, arriving
 from the electrical side.
 
-## 6. Open items
+## 6. Characterised media
+
+**PM Decisions 001 §1 names this file as where card SKUs live**, alongside the measured numbers
+and the date measured. Empty until order 1a lands.
+
+A card model is not a part here — **an exact SKU with its revision is**. SD manufacturers revise
+controllers silently inside a part number, so "an A2 V30 card" is not a specification and a
+requirement met by one can break in the field with no change on our side. The recorded baseline
+is the only thing that makes a later re-test meaningful.
+
+| Role | SKU | Revision / CID | Worst-case windowed write | Measured | Verdict |
+|---|---|---|---|---|---|
+| *(none characterised yet)* | | | | | |
+
+**Conditions** (fixed in advance by ADR-109, so the rule cannot be relitigated once someone has
+a number they like): card filled to ~80%, transfer ≥ 1200 MB, worst 64 MB window reported rather
+than average. Run with `hardware/characterisation/measure_sustained_write.py`; every result
+commits its full per-window series to `hardware/characterisation/results/`, not just a verdict.
+
+**Decision rule.** ≥ 2 SKUs at ≥ 35 MB/s worst case → the 90-minute cartridge stands. Otherwise
+60 minutes becomes the standard tape, which also drops the bus requirement to SDR50 and retires
+the hardest electrical work on this board.
+
+Tape length is a superblock field (`nominal_length_s`, ADR-008), so **this answer does not block
+the format freeze or any software** — it sets a format-time constant, not a format.
+
+## 7. USB-C and the cartridge loading path
+
+**The cartridge's microSD is captive (ADR-105).** `tapectl` and the GUI therefore reach the card
+**through the player**: the production board exposes the device itself as the cartridge over
+USB-C. There is no path in which a card is removed from a cartridge and put in a reader.
+
+`PROPOSED`, and it carries an obligation this document should not let anyone forget:
+
+| | |
+|---|---|
+| Board | USB-C for charging **and** data. The data path is not optional and not a debug port. |
+| Firmware | A device path exposing the mounted cartridge to a host. **Not in any work package today.** |
+| `host/` | `tapectl` and the GUI target that path rather than a block device on a reader. |
+
+**The middle row is the cost ADR-105 added and nobody has scoped.** It is cheap to plan now and
+expensive to discover in Phase 4 with the shell already drawn. Raised for the PM in
+`docs/REVIEW/hardware-lead.md`; flagged here because this is the document firmware reads.
+
+Whether that path is USB mass storage over the raw partition or something narrower is the
+Software Lead's call, not mine — but the board must carry USB-C data either way, so the
+hardware half is settled and can proceed.
+
+## 8. Open items
 
 | # | Item | Blocked on |
 |---|---|---|
@@ -169,3 +224,5 @@ from the electrical side.
 | 4 | Cell placement fixed relative to charger and MCU | `thermal-budget.md` §4 — a layout constraint, must land before layout |
 | 5 | Cartridge edge-connector geometry and stub length | Cartridge spike; STATUS-HARDWARE H-05 |
 | 6 | Power-up timing constraints measured | Rev A bring-up |
+| 7 | Card SKUs characterised and recorded in §6 | Order 1a arriving |
+| 8 | The USB-C device path in §7 scoped into a work package | **PM** — it is the cost ADR-105 added |

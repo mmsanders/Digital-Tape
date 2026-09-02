@@ -7,6 +7,13 @@ matters most nine months from now.
 
 **Format:** `## ADR-NNN — title` / **Date** / **Decision** / **Rationale** / **Cost to reverse**
 
+**Numbering.** `ADR-0xx` is the shared sequence. **`ADR-1xx` is reserved for Hardware Lead
+decisions.** Two leads appending numbers to one append-only file pick the same number and only
+find out at merge — which already happened once: the Hardware Lead's first four decisions were
+`ADR-010`–`013`, and so are four of the Software Lead's. A separate range removes the class of
+problem rather than the instance. This is the reversible path taken under Charter §05; the PM
+may collapse it back with one `sed`, and the Verification Lead should claim a range too.
+
 ---
 
 ## ADR-001 — One monorepo, not four
@@ -208,7 +215,7 @@ middle of it. Raised in `docs/REVIEW/software-lead.md` §3.1.
 
 ---
 
-## ADR-010 — Solenoid protection bounds duty cycle, not only pulse width
+## ADR-101 — Solenoid protection bounds duty cycle, not only pulse width
 
 **Date:** 2026-09-02 · **Decided by:** Hardware Lead (Charter §05 — decide and log)
 
@@ -235,7 +242,7 @@ part inside a sealed enclosure in a child's hands.
 
 ---
 
-## ADR-011 — Charging is suspended for the duration of a copy
+## ADR-102 — Charging is suspended for the duration of a copy
 
 **Date:** 2026-09-02 · **Decided by:** Hardware Lead
 
@@ -257,7 +264,7 @@ measurement shows the margin is larger than estimated, which WP-37 will say.
 
 ---
 
-## ADR-012 — The bench build validates function, not copy time
+## ADR-103 — The bench build validates function, not copy time
 
 **Date:** 2026-09-02 · **Decided by:** Hardware Lead
 
@@ -280,7 +287,7 @@ bench proves the copy time. Raised for the PM in `docs/REVIEW/hardware-lead.md`.
 
 ---
 
-## ADR-013 — Print sweeps carry hidden controls and blind labels
+## ADR-104 — Print sweeps carry hidden controls and blind labels
 
 **Date:** 2026-09-02 · **Decided by:** Hardware Lead
 
@@ -302,3 +309,151 @@ further into the noise and costs another week.
 **Cost to reverse.** Zero — it is a convention in `build_packet.py`, about twenty lines.
 Abandoning it costs the ability to tell a result from noise, which is the whole reason the
 library loop exists.
+
+---
+
+## ADR-105 — The cartridge's microSD is captive
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §2), raised by Hardware Lead (issue #6)
+
+**Decision.** The microSD inside a cartridge is captive. `tapectl` and the GUI reach the card
+**through the player over USB-C** — the production board exposes the device itself as the
+cartridge. Removing the card is not a workflow the design supports.
+
+Serviceable, **not** tool-free: an adult with a driver may open the shell to replace a failed
+card. A curious six-year-old with a fingernail may not. **Where those two requirements fight,
+the six-year-old wins.**
+
+**Rationale.** A loose microSD in a child's hands is a lost microSD, and a shell that opens
+becomes a container for something else and then a shell with nothing in it. The cartridge exists
+so the storage is an object you can hold, label and pass around — it is the object, not a costume
+around a memory card. It also settles the shell design in the direction the vision already
+points, and removes an ESD path a child can touch.
+
+**Cost to reverse.** High after WP-24. The shell, the sealing, the drop case and the carrier PCB
+all follow from it. Reversing also strands the USB-C loading path in firmware and `host/` — which
+is the cost this decision *adds*: a device path that is not in any work package today and needs
+scoping. That obligation is recorded in `spec/hw/board-rev-a.md` §7.
+
+---
+
+## ADR-106 — `spec/hw/` is versioned, not frozen; limits stay upstream
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §3), raised by Hardware Lead (issue #7)
+
+**Decision.** Two tiers. `spec/` stays PM-owned and frozen at the Phase 0 gate
+(`tapefs-v1.md`, `engine-api.md`, `acceptance.md`). **`spec/hw/` is Hardware-Lead-owned and
+versioned, with no PM gate** (`board-rev-a.md`, `thermal-budget.md`).
+
+The obligation on `board-rev-a.md` is **notification, not approval**: any change to a pin, a
+rail, or a timing constraint lands as a PR naming the Software Lead as reviewer, carrying a
+`CHANGES` block listing exactly what moved. Firmware acknowledges by merging.
+`thermal-budget.md` has no code consumer and needs no protocol at all.
+
+**But limits move upstream.** The JEITA window, the solenoid on-time and duty ceilings, the
+85 dB cap and the touch-temperature limit belong in `spec/acceptance.md`, PM-owned and frozen.
+**Measurements live with the Hardware Lead; the numbers a unit must not exceed do not.**
+
+**Rationale.** Both hardware documents are specified to change repeatedly after the freeze —
+estimates become measurements, a revision moves a pin. Under a blanket freeze every thermocouple
+reading is an escalation, which grinds or, far more likely, gets quietly ignored. That is the
+"spec that drifts to describe whatever got built" failure arriving through the front door with
+the rule's blessing. The cut is at the *consumer*, not the document: what needed protecting was
+firmware's ability to trust a pin map, and notification protects that where a freeze could not.
+
+**Cost to reverse.** Low — a directory move and a paragraph. The thing that would be expensive
+to recover is the notification habit, which only works if it is never batched.
+
+---
+
+## ADR-107 — Hardware acceptance sign-off splits three ways by consequence
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §4), raised by Hardware Lead (issue #8)
+
+**Decision.**
+
+- **Criteria and paperwork → Verification Lead.** Its authority extends to reviewing whether a
+  hardware acceptance test proves what it claims, **before** the test is run. It does not run the
+  test and does not touch hardware.
+- **Safety measurements → Michael witnesses.** WP-19's SPL check and WP-37's thermal run.
+  Scheduled when he is around, not reported afterward.
+- **Everything else → self-reported with data attached.** A chart and a raw log, not "passed".
+
+Standing convention regardless: any result outside the first two categories is marked
+**`SELF-REPORTED — no independent confirmation`**. Permanent practice, not a placeholder until
+someone is assigned.
+
+**Rationale.** ADR-003 says nobody grades their own homework, but the Verification Lead's scope
+is `tests/` — golden fixtures, crash injection, fuzzing — and none of those tools touch a
+thermocouple, an SPL meter or a latch counter. The failure mode with a self-designed hardware
+test is almost always the **criterion**, not the measurement, which is why review lands before
+the run rather than after it. The two witnessed tests are the only ones whose failure can hurt a
+child; a second pair of eyes on an SPL meter is the entire mechanism.
+
+**Cost to reverse.** Low to reverse, high to undo. Collapsing it saves a scheduling round and
+forfeits the only independent check on the two safety criteria — and the damage would not be
+visible until a unit is in a child's hands.
+
+---
+
+## ADR-108 — UHS-I bring-up is split at a testable gate
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §5), raised by Hardware Lead (issue #8)
+
+**Decision.** Hardware Lead owns the bring-up procedure, the test points, the fallback strategy,
+and delivering a board that passes an entry gate. Software Lead owns the driver, delay-line
+tuning, and the throughput number. The gate:
+
+> On rev A, an **unmodified reference driver** — NXP's SDK USDHC example — completes a 1 GB read
+> and a 1 GB write on **each** slot at **SDR50** with **zero CRC retries**.
+
+Fails the gate → hardware, and it is the Hardware Lead's call whether that is layout, power
+integrity, or a respin. Passes and throughput still misses → software. Both remain jointly
+accountable for the copy-time criterion.
+
+**Rationale.** UHS-I bring-up is the hardest electrical thing on the board and the item most
+likely to consume a spin, and it sits exactly between two owners. Without a gate, "is it the
+layout or the tuning?" has no answer and both parties can point at the other while the schedule
+burns. SDR50 rather than SDR104 because SDR104 depends on delay-line tuning, which is software's
+half — **a gate that requires the other party's work to pass is not a gate.** SDR50 is also
+sufficient for the requirement: the 90-minute copy needs 63% of a 50 MB/s bus.
+
+**Cost to reverse.** Trivial as text, but it must exist **before fabrication** — written into
+`spec/hw/board-rev-a.md` §5 while the board can still be changed to make the gate reachable.
+Agreed after the first failure it is no longer a gate, it is an argument.
+
+---
+
+## ADR-109 — Tape length resolves on measurement, not argument
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §1), raised by Hardware Lead (issue #5)
+
+**Decision.** Six candidate microSD SKUs are characterised under fixed conditions — card filled
+to ~80%, transfer at least as long as a real copy, **worst-case windowed** write reported rather
+than average. Then:
+
+- **≥ 2 SKUs sustain ≥ 35 MB/s worst-case** (10% over the 31.75 MB/s requirement) → **90 minutes
+  stands.**
+- **Otherwise → 60 minutes becomes the standard tape.** 635 MB at 21.2 MB/s sits inside the V30
+  floor with ~40% margin, and drops the bus requirement from SDR104 to SDR50 — retiring the
+  highest-risk electrical work on the board as a side effect.
+
+BOM discipline: **exact SKUs with revision, not model families**, recorded in
+`spec/hw/board-rev-a.md` with the measured numbers and the date measured.
+
+**Rationale.** On a UHS-I host there is no purchasable specification that guarantees the copy
+target: V30's floor is 30 MB/s, below the requirement, and V60/V90 are UHS-II ratings that do
+not apply when a card falls back to UHS-I. So the requirement is met by characterised models,
+and a rule fixed in advance stops the decision being relitigated once someone has a number they
+like. The test conditions each defeat a specific way a card looks faster than it is — an empty
+card writes to clean blocks, a short transfer measures the SLC cache, and an average hides the
+stall that produces the dropout.
+
+Recording the SKU **and revision** is the whole defence against a silent controller change
+inside a part number, which is a real and common failure in SD cards and would otherwise break a
+shipped requirement with no change on our side.
+
+**Cost to reverse.** The rule itself is free to change before the cards arrive and expensive
+after — its value is precisely that it was fixed before anyone saw a result. Tape length is a
+superblock field (`nominal_length_s`, ADR-008), so **the answer does not block the format freeze
+or any software**; it changes a format-time constant, not a format.

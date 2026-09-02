@@ -57,8 +57,15 @@ You place the parts orders, so you set the ceiling. I need two numbers before I 
 Neither answer blocks me — I would just rather find out now than have you open a cart with a
 number on it you weren't expecting.
 
-**My default if you'd rather not decide:** I flag anything over $150, I keep the bench build
-(WP-05) deliberately cheap, and I assume nothing about board spins until you've seen a quote.
+**The PM has set a default while you think about it** (Decisions 001 §6), so nothing is
+blocked: **$150 per order, $600 cumulative, without asking.** Above either, I propose first.
+That sits inside the plan's ~$1,590 across roughly eight orders and it covers the card buy
+outright. A running total lives in `docs/STATUS-HARDWARE.md`.
+
+**So this is now a confirm-or-change, not a blocker.** The first two carts come to ~$267 of
+that $600 — six memory cards and a reader (~$115), and the bench build (~$152). The second is
+$2 over the per-order line, which is the sort of thing I would rather you waved through once
+than have me ask about every time.
 
 ---
 
