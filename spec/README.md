@@ -1,33 +1,36 @@
 # spec/ — the source of truth
 
-**Owner: Program Manager. Frozen at the Phase 0 gate.**
+**Owner: Program Manager.** Authored by the PM; the Software Lead lands the text mechanically
+and does not edit it (ADR-010). If landed text looks wrong, that is a `pm-decision` issue, not a
+fix in the PR.
 
-Code conforms to these documents. When implementation reveals a spec is wrong — and it will,
-two or three times — the fix is a PM escalation that updates the spec first and the code
-second. **Never the reverse.** A spec that drifts to describe whatever got built is not a
-specification, it is a changelog, and three streams are reading it as truth.
+Code conforms to these documents. When implementation reveals a spec is wrong — and it will —
+the fix is a PM escalation that updates the spec first and the code second. **Never the reverse.**
 
-Any change to a file in this directory is escalation trigger #1. No exceptions, including
-typos that look load-bearing and typos that do not.
+Any change to a file here is escalation trigger #1.
+
+| File | Revision | Status |
+|---|---|---|
+| `tapefs-v1.md` | **DRAFT-3** (2 Sep) | For adversarial review; **not frozen** |
+| `engine-api.md` | **DRAFT-3** (2 Sep) | For adversarial review; **not frozen** |
+| `acceptance.md` | **DRAFT-1** (2 Sep) | Freezes with the format at the Phase 0 gate |
+| `thermal-budget.md` | — | Superseded by `spec/hw/` — Hardware Lead owned |
+
+DRAFT-3 incorporates verification findings V-001…V-022, issues #2/#3/#4/#13/#14, the round-1
+review packet, and Michael's answers to Q-002/003/004.
+
+## The two rules that govern the format
+
+**Rule 1 — The engine computes.** The caller owns anything that needs entropy, hardware
+knowledge, or memory beyond the engine's budget.
+
+**Rule 2 — Identity and validity are written last**, after the content they describe.
 
 ## Two tiers
 
-Established by **PM Decisions 001 §3**. This directory is frozen; `spec/hw/` is not.
+`spec/` is PM-owned and frozen. `spec/hw/` is Hardware-Lead-owned and versioned, with
+notification-not-approval on `board-rev-a.md` (ADR-021).
 
-| Path | Owner | Status | Contents |
-|---|---|---|---|
-| `spec/` | PM | **Frozen** at the Phase 0 gate. Changes are escalation trigger #1. | `tapefs-v1.md`, `engine-api.md`, `acceptance.md` |
-| `spec/hw/` | **Hardware Lead** | **Versioned, not frozen.** No PM gate. | `board-rev-a.md`, `thermal-budget.md` |
+## Next gate
 
-The cut is at the *consumer*, not the document. `board-rev-a.md` carries a notification
-obligation to the Software Lead instead of a PM gate; see `spec/hw/README.md`. **Limits stay
-here**: the numbers a unit must not exceed are PM-owned even when the measurement against them
-is not.
-
-| File | Fills in | Status |
-|---|---|---|
-| `tapefs-v1.md` | WP-02 | Written |
-| `engine-api.md` | WP-03 | Written |
-| `acceptance.md` | WP-02/03, then per package | Not written — **7 hardware limits proposed**, `spec/hw/thermal-budget.md` §8 |
-| `hw/thermal-budget.md` | WP-34, Hardware Lead | Rev 0.1 — estimates, no measurements yet |
-| `hw/board-rev-a.md` | WP-26 onward, Hardware Lead | Rev 0.1 — skeleton, nothing `FROZEN` |
+**Q-001, the format freeze**, happens after the Verification Lead's DRAFT-3 pass — not before.

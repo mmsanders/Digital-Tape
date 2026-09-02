@@ -7,6 +7,7 @@ build/
 *.bin
 *.map
 *.su
+*.ci
 compile_commands.json
 
 # host (rust / tauri)

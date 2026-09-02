@@ -146,11 +146,34 @@ You will not be asked to read the spec. You will be asked about the handful of c
 it that you can feel rather than verify — how long a cartridge holds, what happens when you
 yank one mid-record, and whether Side B behaves the way you pictured.
 
-*Now unblocked — Plan Rev B arrived 31 Aug. The spec is being written; you will get it for
-sign-off once the Verification Lead has had an independent read.*
+**Update 2 Sep — this moves out again, and that is the right call.** The Verification Lead read
+DRAFT-3 and returned **four blocker findings against it**, two of which I confirmed against my
+own code. Freezing a format the verifier has already shown to be broken would mean reflashing
+every cartridge later to fix something we knew about today.
+
+DRAFT-4 is with the PM. You will get the format for sign-off after that, not before.
 
 ---
 
 ## Answered
 
-*(nothing yet)*
+### Q-006 — Library printer
+**Answered 2 Sep:** not yet checked; proceed on the default — PLA, 0.2 mm, four-hour
+plates, STL + 3MF + bed picture, no G-code. Re-slice if details arrive.
+
+### Q-005 — Spending
+**Answered 2 Sep:** every order comes to Michael first, as a checkout-ready cart with
+a one-line justification. Running total in STATUS.md. Logged as ADR.
+
+### Q-004 — Resume position
+**Answered 2 Sep:** the player remembers, last 64 cartridges, across days; resumes
+2 s early. Accepted as a deliberate departure from the tape metaphor. Logged as ADR.
+
+### Q-003 — The wall
+**Answered 2 Sep:** record button won't hold down, plus a green/yellow/red record
+light showing Side B headroom; red coincides with the button refusing. Logged as ADR.
+
+### Q-002 — Tape length
+**Answered 2 Sep:** C-60 is the standard. C-90 and longer permitted by the format
+with slower copy. Do nothing that closes off longer lengths. Logged as ADR.
+

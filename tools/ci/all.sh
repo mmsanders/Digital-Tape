@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Every gate, in order, reporting all of them rather than stopping at the first.
-# One command runs everything (Stream 2 done-when).
 set -uo pipefail
 cd "$(dirname "$0")" || exit 2
 
-gates=(build.sh audit-allocation.sh audit-recursion.py audit-memory.sh run-golden.sh)
+gates=(build.sh audit-allocation.sh audit-indirect.sh audit-stack.py
+       audit-memory.sh verify-gates.sh unit.sh run-golden.sh)
 failed=()
 
 for g in "${gates[@]}"; do

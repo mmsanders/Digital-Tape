@@ -14,11 +14,11 @@ Charter §04.
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
-| WP-02 | TAPEFS v1 specification | Agent | spec | Unblocked, next |
-| WP-03 | Engine API specification | Agent | spec | Unblocked, next |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 built** — waiting on Q-006 |
-| WP-05 | Parts order #1 | You | hardware | **Drafted** — two carts, waiting on Michael |
-| WP-34 | Thermal and safety budget | Agent | hardware | **Rev 0.1 issued** — estimates, unconfirmed |
+| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-3 landed 2 Sep |
+| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-3 landed 2 Sep |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 built** — Q-006 answered, ready to send |
+| WP-05 | Parts order #1 | You | hardware | **Carts drafted** — every order goes to Michael (Decisions 002 §4) |
+| WP-34 | Thermal and safety budget | Hardware | hardware | **Rev 0.2** — estimates; three review findings closing |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
 **Gate:** Michael signs off the TAPEFS spec. After this, format changes cost real rework.
@@ -27,14 +27,14 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Blocked on WP-02/03 |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Blocked on WP-02/03 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path done** (60 refusal checks). Commit path held by structural Rule 1 |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Next, after WP-10 tests reach `main` |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
-| WP-10 | Crash-injection harness | Agent | 2 | **No Verification Lead assigned** |
-| WP-11 | CLI harness and golden-file regression suite | Agent | 2 | Runner wired; fixtures blocked |
+| WP-10 | Crash-injection harness | Verification | 2 | **Infrastructure landed and running in CI**; DRAFT-3 unblocks its adapters |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **Runner built and proven** (manifest, byte-exact, audible diff). Fixtures + manifest are theirs |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates wired and failing** |
+| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates rebuilt and green** — funnel, 8 KiB stack, two budgets |
 | WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.

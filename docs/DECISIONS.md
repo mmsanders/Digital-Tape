@@ -215,6 +215,360 @@ middle of it. Raised in `docs/REVIEW/software-lead.md` §3.1.
 
 ---
 
+## ADR-010 — Spec authorship is the PM's; the Software Lead lands text mechanically
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §0)
+
+**Decision.** The charter contradicted itself — §1 made `spec/` PM-owned, §9 told the Software
+Lead to author WP-02 and WP-03. Settled: the PM authors, the Software Lead lands the text
+mechanically and does not edit it. WP-02 and WP-03 close as PM-delivered.
+
+**Rationale.** A spec authored by the implementer bends toward the implementation, and three
+streams read it as truth. The same argument that makes the Verification Lead a different model.
+
+**Cost to reverse.** Low mechanically, high in what it protects. The tell that it has been
+reversed in practice rather than by decision is spec text that starts matching the code's
+convenience — which is invisible until a stream implements against it and is surprised.
+
+---
+
+## ADR-011 — Two static budgets, both asserted
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §1), from issue #2
+
+**Decision.** RAM 200 KiB (`.data` + `.bss` + the engine instance) and flash 32 KiB (`.rodata`).
+Both printed on every CI run.
+
+**Rationale.** My recommendation was "A now, C later", on the grounds that the flash number was
+a guess until there was a board. The PM's counter is correct: the RT1062 carries external QSPI
+flash in megabytes, and 32 KiB is generous for a CRC table (1 KiB, now measured at exactly that),
+a fade curve and resampling coefficients combined. A generous ceiling that exists beats a precise
+one that doesn't — and it closes the risk I raised myself, that a large constant table sails
+through a RAM-only gate.
+
+**Cost to reverse.** Trivial as numbers. Expensive as a habit: `.rodata` approaching 32 KiB is an
+escalation, not a reason to raise the ceiling.
+
+---
+
+## ADR-012 — The on-card preroll region is deleted
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §2), from issue #3
+
+**Decision.** The 512 KiB on-card preroll region is removed from the format, `preroll_frames`
+leaves the superblock, and `tape_mount` gains an optional warm-start buffer — in practice the
+caller's play ring.
+
+**Rationale.** My analysis stopped one step early. I argued the buffer should be caller-owned;
+the PM observed the on-card region cannot do its job at all. It lives on the cartridge, so it
+cannot be read until the card is initialised — and card initialisation is precisely the
+100–500 ms it existed to hide. Once the card is up, an ordinary indexed read is just as fast.
+
+Instant-on comes from two places instead, neither a format feature: retaining the play ring
+across sleep, and starting card init on the cartridge-detect switch rather than the play press,
+so human hand-travel time hides the latency. Both are firmware behaviours.
+
+**Cost to reverse.** Reinstating a region in a frozen format is a format revision. But the
+region bought nothing, so there is nothing to reinstate it for.
+
+---
+
+## ADR-013 — An index entry describes a run, not a chunk
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §3), from issue #4
+
+**Decision.** `entry := { first_chunk_id, start_frame, frame_count }` over *consecutive* chunk
+ids, with `frame_count` allowed to exceed `CHUNK_FRAMES`.
+
+**Rationale.** I offered "refuse the splice" or "grow the slot", and objected to growing the slot
+myself because it moves the wall rather than removing it. The PM took neither and changed what an
+entry means. A pristine 90-minute tape was burning 1,817 entries before a child had done
+anything; it is now **one**. Headroom goes from 1.5× to roughly 4,000 splices after a re-spool,
+and re-spool becomes genuinely restorative — which finally gives it a user-facing purpose instead
+of being invisible housekeeping.
+
+Critically, **the commit path does not change**. My objection to coalescing — that the commit
+path is where "clever" is a liability and must stay simple enough to reason about under crash
+injection — is respected completely. The only new arithmetic is that the allocator hands out
+contiguous runs (natural for a bump allocator) and a mid-run splice splits an entry in two.
+
+**Cost to reverse.** High after the freeze — it is the index format. Cheap now, and it removes a
+wall rather than moving it.
+
+---
+
+## ADR-014 — Decidable CI gates replace disassembly parsing
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §4), from issues #11 and #12
+
+**Decision.** Guardrail 09 is enforced by funnelling every indirect call through three
+`static inline` wrappers in `engine/src/dev.h`, gated at the source, with a link-time backstop
+against function addresses in data sections. Guardrail 08's recursion clause is replaced by a
+max stack depth of **8 KiB**, measured from `-fstack-usage` and `-fcallgraph-info`.
+
+**Rationale.** The invariant I wrote ("at most two indirect call sites") was not the invariant I
+wanted (*every indirect call targets a `tape_dev` callback*), and no regex over disassembly can
+decide the second. Likewise "no recursion" is a proxy for a bounded stack; measuring depth
+directly subsumes it and yields a number worth reading in review.
+
+`dev_write` asserts its function pointer is non-`NULL` in debug builds via `__builtin_trap` —
+not `assert()`, which reaches libc file I/O that guardrail 08 forbids. In release it dereferences
+and dies. Guardrail 06 wants a loud crash; a `NULL` check returning an error code quietly would
+defeat it.
+
+**Cost to reverse.** Low. But the gates are leaned on for nine months, and the source-level check
+fails with a filename and a line number rather than a hex offset — which is the difference
+between a gate people fix and a gate people disable.
+
+---
+
+## ADR-015 — Ports are outside the engine and outside its gates
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** `engine/src` builds `libtape.a`, subject to every gate. `engine/port` builds
+`libtape_port.a`, subject to none of them.
+
+**Rationale.** The file-backed port is libc file I/O by definition, which guardrail 08 forbids
+*in the engine*. That is not a conflict — it is the block-device boundary doing its job, and the
+engine never learns a file exists. Keeping them in one archive would force a choice between a
+gate that lies and a port that cannot exist.
+
+**Cost to reverse.** Low now, and it gets harder to introduce later once the ports have grown.
+The rule to keep: if a gate ever runs over the port archive and fails, the fix is the gate.
+
+---
+
+## ADR-016 — The golden comparison has no tolerance, and none will be added
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** `golden_diff` compares reference and actual WAVs byte for byte. No epsilon, no
+per-case tolerance, no configuration knob for one.
+
+**Rationale.** Contract 3 makes the golden fixtures the *definition* of correct behaviour and
+requires firmware to be bit-identical at 1.0× playback. A tolerance would permit exactly the
+divergence the suite exists to detect — a desktop/firmware mismatch would sit inside the
+allowance and never fail. The moment a tolerance exists, the pressure on a hard failure is to
+widen it rather than to find the bug, and `tests/` §6 already says relaxing a test is a finding
+rather than a licence.
+
+Failures instead get **information**: an audible difference WAV (silence where the outputs agree,
+so you hear only what went wrong), the first differing frame with timestamp and channel, both
+sample values and their delta, how many samples differ, and the peak absolute delta. That
+distinguishes a click at a splice from an inverted channel from a one-frame offset — which is
+what a person actually needs, and which a tolerance would have hidden rather than explained.
+
+**Cost to reverse.** Adding a tolerance later is one parameter and would quietly void contract 3.
+That asymmetry is the reason to refuse it now: the change is cheap and the loss is invisible.
+
+---
+
+## ADR-017 — WAV fixtures outside 44.1 kHz / 16-bit / stereo are rejected, not converted
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** The fixture reader errors on any other rate, width or channel count.
+
+**Rationale.** Guardrail 01 fixes the format and says every other design decision rests on byte
+offset mapping linearly to time. A reader that resampled a 48 kHz fixture would make a
+guardrail-01 violation pass its own test — the most expensive kind of convenience, because the
+suite would then be certifying the thing it was built to prevent.
+
+**Cost to reverse.** Trivial technically. The rule to keep is that a rejected fixture is a
+question about the fixture, never a request for a converter.
+
+---
+
+## ADR-018 — C-60 is the standard cartridge
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-002), specified by PM (Decisions 003, tapefs §2)
+
+**Decision.** `nominal_length_s` = 3600. 635 MB, 1 211 chunks, ~29 s copy on plain high-speed
+4-bit. C-90 and C-120 are permitted by the format and copy more slowly; the label says what a
+cartridge is.
+
+**Rationale.** The 30-second copy no longer requires UHS-I at all. That removes the hardest
+electrical risk on the board — 1.8 V switching, the voltage-switch sequence, tuned delay
+lines — from the critical path for the headline requirement, and demotes SDR50 from
+"must work" to optional upside.
+
+**Cost to reverse.** A format-time constant, not a re-spec — which is exactly what ADR-008 was
+for. Region sizes derive from `nominal_length_s` at format time, so changing the standard length
+costs nothing already written.
+
+---
+
+## ADR-019 — Resume position is device-side, `(uuid, side)` → frames
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-004)
+
+**Decision.** The player remembers the last 64 cartridges, keyed `(cartridge_uuid, side)`,
+position in frames as u32. Checkpoint every 10 s and on every transport state change; resume
+2 s early. LRU eviction. Promote clears `(uuid, A)`; reset B clears `(uuid, B)`.
+
+**Rationale.** Forced: the source slot is read-only, so a cartridge played there has no writable
+surface. Michael accepted the consequence explicitly — a tape resumes where *this player* left
+it, not where the tape was last played — as a deliberate departure from the cassette metaphor
+rather than a side effect.
+
+Frames rather than bytes was the round-1 packet's recommendation, adopted: a `u32` of frames
+has 12× headroom against the longest reachable timeline, where bytes would have had 3.0×.
+
+**Cost to reverse.** Low while it is 64 entries in flash. It becomes expensive only if a second
+consumer of the UUID appears, which `tapefs` §11 forbids by naming the position table as its
+sole sanctioned consumer.
+
+---
+
+## ADR-020 — The record light shows Side B headroom
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-003)
+
+**Decision.** Colour from `tape_status().entries_free` as a fraction of `TAPE_MAX_ENTRIES`:
+green ≥ 25 % free, yellow < 25 %, red at 0. At red the record button does not hold — the
+solenoid releases it. Off while not armed.
+
+**Rationale.** My recommendation was the button refusing to hold, reusing an interlock the child
+already knows. Michael took that and added warning before the wall, which is better: a rule you
+meet without warning is a rule you experience as the device breaking. With run-length entries
+(ADR-013) a child will realistically never reach red.
+
+**Cost to reverse.** Low. `entries_free` is already in `tape_status`, and the thresholds are
+firmware constants.
+
+---
+
+## ADR-021 — `spec/` has two tiers
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 003)
+
+**Decision.** `spec/` is PM-owned and frozen. `spec/hw/` is Hardware-Lead-owned and versioned,
+with notification-not-approval on `board-rev-a.md`.
+
+**Rationale.** The single-tier rule made every measurement a PM escalation, which would have
+made the thermal budget stale by design — it has to track reality as boards are measured.
+
+**Cost to reverse.** Low, but the tiers must stay legible: a document that moves tiers silently
+is worse than either arrangement, because a reader cannot tell whose sign-off it carries.
+
+---
+
+## ADR-022 — Structural Rule 1: implementation waits on `main` for its tests
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 003 §1b), proposed by Software Lead
+
+**Decision.** Engine implementation stays on unmerged branches until the Verification Lead's
+tests for that behaviour have landed on `main`, so `main` carries spec → tests → implementation
+in that order.
+
+**Rationale.** Rule 1 as originally written was discipline, and the charter's own reasoning
+(guardrails 05 and 06) says discipline is the weak form. The PM's honest caveat is worth keeping
+attached: branches on a public repo are still world-readable, so this makes the ordering
+**auditable**, not the code unreadable. Combined with the verifier's standing instruction not to
+open `engine/`, that is enough.
+
+**Cost to reverse.** Low mechanically. What it would cost is the evidence: once implementation
+merges ahead of tests, no later inspection can tell whether a test was written against the spec
+or against the code.
+
+---
+
+## ADR-023 — Ports return their own codes, not `tape_result`
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** Block-device callbacks return 0 on success and non-zero on failure, using
+port-local codes in `engine/port/port.h`. They do not return `tape_result`.
+
+**Rationale.** `spec/engine-api.md` §3 says exactly this, and the engine maps any non-zero to
+`TAPE_ERR_IO`. My provisional header had ports returning engine error codes and had invented
+`TAPE_ERR_RANGE` and `TAPE_ERR_NOT_IMPLEMENTED`, neither of which exists in DRAFT-3's enum.
+Landing DRAFT-3 exposed both, which is the spec-upstream-of-code contract working.
+
+**Cost to reverse.** Trivial now. The rule worth keeping: a port that needs a new *engine* error
+code is a spec finding, not a header edit.
+
+---
+
+## ADR-024 — The engine holds no static buffers; all RAM is in the caller's instance
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** No `static` mutable storage in `engine/src`. Index staging and the candidate index
+live in `struct tape`, sized by `tape_instance_size()`.
+
+**Rationale.** Found by the memory gate once it began counting `tape_instance_size()` per
+`engine-api` §4: `.bss` was 98 KB of `static` buffers in the mount path. They were not
+allocation, so they passed every other gate — but they are engine-owned RAM outside the caller's
+instance, and worse, **they break reentrancy**. `tape_dup(src, dst)` mounts two cartridges at
+once and would have had them overwrite each other's index.
+
+That bug would not have appeared until duplicate was implemented, and it would have looked like
+media corruption rather than a shared buffer.
+
+**Cost to reverse.** Low now, and the gate keeps it reversed: RAM went from 197 KB (96 % of
+budget, with the dominant term uncounted) to 148 KB (72 %), all of it in the instance.
+
+---
+
+## ADR-025 — One fault injector, and it is the Verification Lead's
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 004 §4), from issue #16
+
+**Decision.** `engine/port/dev_sim.c` loses its power-loss and torn-write modes and becomes a
+pass-through that counts operations. All fault injection is
+`tests/crash/fault_block_device.[ch]`, which models flush-required and write-through durability
+as selectable modes.
+
+**Rationale — and it generalises, which is why it is written at length.**
+
+This is not a preference between two implementations. One of them is **structurally incapable of
+detecting a whole class of bug.**
+
+`tapefs` §8's entire safety argument is an *ordering over flushes* — chunks, flush, entries,
+flush, header, flush — and §13 lists "a flush that returns success means data has reached media"
+as an **assumption**, not a fact. A simulator in which every completed write is durable cannot
+fail any test that depends on a flush having actually happened. It would report the commit
+ordering as safe whether or not it was.
+
+The proof is already on the record: the verifier found exactly that defect in DRAFT-1 by
+reading — V-004, a commit protocol with no final flush. My simulator could never have caught it,
+however many cases were run through it. Keeping both would have meant half the crash coverage
+running against a model that cannot fail.
+
+**The transferable rule:** a test double that can only produce outcomes the code already handles
+is not coverage, it is decoration. Before adding a second convenient simulator, ask which class
+of failure it is incapable of producing.
+
+**Cost to reverse.** Low to re-add modes; high in what it would quietly cost. The tell that this
+has been reversed in spirit is a crash suite that runs green faster than it used to.
+
+---
+
+## ADR-026 — Every gate must be proven able to go red
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 004 §6), from the `.bss` finding
+
+**Decision.** `tools/ci/verify-gates.sh` plants a real violation for each guardrail gate, asserts
+it goes red, removes it, and asserts it goes green. It runs in CI. Adding a gate means adding its
+red case.
+
+**Rationale.** The allocation gate ran green for two rounds while 98 KB of `static` buffers sat
+in `.bss`. It was asking *"is anything malloc'd?"* when guardrail 08's intent is *"does the
+engine's RAM fit, and is it all in the caller's instance?"* Nothing was malloc'd. The gate was
+simultaneously correct and useless, and nothing in a green run could have told anyone.
+
+**A gate that measures the wrong quantity reads as green.** The remedy is not "write better
+gates" — it is that a gate never observed failing has not been tested, and green from an
+untested gate is indistinguishable from green from a broken one.
+
+Verified: 11/11, including the `.bss` case that motivated it.
+
+**Cost to reverse.** Trivial to delete, and its absence is invisible — which is the argument for
+keeping it. The failure mode it prevents produced a reentrancy bug that would have surfaced as
+media corruption months later.
+
 ## ADR-101 — Solenoid protection bounds duty cycle, not only pulse width
 
 **Date:** 2026-09-02 · **Decided by:** Hardware Lead (Charter §05 — decide and log)
