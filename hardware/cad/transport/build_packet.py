@@ -24,7 +24,10 @@ from __future__ import annotations
 
 import json
 import random
+import re
+import shutil
 import sys
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -42,6 +45,41 @@ BED_X, BED_Y = 220.0, 220.0
 MARGIN = 12.0
 PITCH_X, PITCH_Y = 26.0, 30.0
 SEED = 20260902          # fixed, so the plate is reproducible from source
+
+
+# The plate is a committed artefact -- Michael downloads it, he cannot run `make`.
+# So it has to be byte-identical on every rebuild, or it shows as modified forever
+# and a real geometry change hides in the noise. Two sources of drift, neither of
+# them the mesh:
+#   * 3MF is a zip, and a zip stores each entry's mtime
+#   * CadQuery stamps a <metadata name="CreationDate"> into the model XML
+# Both are pinned below. The vertex data is already deterministic, so with these
+# fixed a rebuild that changes anything has genuinely changed the geometry.
+EPOCH = (2026, 9, 2, 0, 0, 0)
+FIXED_CREATION_DATE = b"2026-09-02T00:00:00.000000"
+_CREATION_DATE = re.compile(
+    rb'(<metadata name="CreationDate">)(.*?)(</metadata>)', re.DOTALL)
+
+
+def normalise_3mf(path: Path) -> None:
+    """Rewrite a 3MF so that rebuilding it produces identical bytes."""
+    tmp = path.with_suffix(".3mf.tmp")
+    with zipfile.ZipFile(path) as src:
+        entries = sorted(src.infolist(), key=lambda i: i.filename)
+        payload = {i.filename: src.read(i.filename) for i in entries}
+
+    for name, data in payload.items():
+        if name.endswith(".model"):
+            payload[name] = _CREATION_DATE.sub(
+                rb"\1" + FIXED_CREATION_DATE + rb"\3", data)
+
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as dst:
+        for info in entries:
+            fixed = zipfile.ZipInfo(info.filename, date_time=EPOCH)
+            fixed.compress_type = zipfile.ZIP_DEFLATED
+            fixed.external_attr = info.external_attr
+            dst.writestr(fixed, payload[info.filename])
+    shutil.move(str(tmp), str(path))
 
 
 def placed(seed: int = SEED):
@@ -108,6 +146,7 @@ def build():
 
     plate = cq.Compound.makeCompound(solids)
     exporters.export(plate, str(OUT / "plate.3mf"))
+    normalise_3mf(OUT / "plate.3mf")
     exporters.export(plate, str(OUT / "plate.stl"))
 
     pbb = plate.BoundingBox()

@@ -8,13 +8,27 @@ CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
 
-.PHONY: all packet-wp04 thermal thermal-check erc drc check clean tools
+.PHONY: all packet-wp04 packet-check thermal thermal-check erc drc check clean tools
 
 all: packet-wp04 thermal
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
 	$(PY) $(CAD)/build_packet.py
+
+## packet-check — fail if the committed plate is not what the source produces
+##
+## The plate is committed because Michael downloads it and cannot run `make`.
+## That only works if it is reproducible, so this proves it is.
+packet-check:
+	@$(PY) $(CAD)/build_packet.py >/dev/null
+	@if git diff --quiet -- packets/ 2>/dev/null; then \
+	  echo "OK  committed plate matches source"; \
+	else \
+	  echo "FAIL committed plate differs from what the source produces:"; \
+	  git diff --stat -- packets/; \
+	  exit 1; \
+	fi
 
 ## thermal — regenerate the tables in spec/hw/thermal-budget.md
 thermal:
@@ -58,6 +72,7 @@ check: thermal-check
 	@$(PY) -c "import cadquery" 2>/dev/null && echo "OK  cadquery present" \
 	  || { echo "FAIL cadquery missing: pip install cadquery"; exit 1; }
 	@$(PY) $(CAD)/build_packet.py >/dev/null && echo "OK  WP04-01 plate rebuilds and fits the bed"
+	@$(MAKE) --no-print-directory packet-check
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
 	@$(MAKE) --no-print-directory drc
