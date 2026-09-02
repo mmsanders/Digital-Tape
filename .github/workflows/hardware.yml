@@ -1,0 +1,33 @@
+name: hardware
+
+on:
+  push:
+    branches: ["**"]
+    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+  pull_request:
+    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+  workflow_dispatch:
+
+# For the Hardware Lead (PM Decisions 002-HW §2). Runs only when hardware/
+# changes, so board checks do not gate engine work and vice versa.
+jobs:
+  erc-drc:
+    name: KiCad ERC / DRC
+    runs-on: ubuntu-latest
+    container:
+      # Pinned. A floating tag would change the rule set under a board that
+      # passed yesterday, and "the DRC changed" is not a debuggable failure.
+      image: ghcr.io/kicad/kicad:8.0
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versions
+        run: kicad-cli --version
+      - run: ./tools/ci/audit-hardware.sh
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kicad-reports
+          path: build/hardware/
+          if-no-files-found: ignore

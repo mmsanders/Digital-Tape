@@ -139,8 +139,12 @@ You will not be asked to read the spec. You will be asked about the handful of c
 it that you can feel rather than verify — how long a cartridge holds, what happens when you
 yank one mid-record, and whether Side B behaves the way you pictured.
 
-*Now unblocked — Plan Rev B arrived 31 Aug. The spec is being written; you will get it for
-sign-off once the Verification Lead has had an independent read.*
+**Update 2 Sep — this moves out again, and that is the right call.** The Verification Lead read
+DRAFT-3 and returned **four blocker findings against it**, two of which I confirmed against my
+own code. Freezing a format the verifier has already shown to be broken would mean reflashing
+every cartridge later to fix something we knew about today.
+
+DRAFT-4 is with the PM. You will get the format for sign-off after that, not before.
 
 ---
 

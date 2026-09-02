@@ -3,6 +3,11 @@
 #
 # Undefined symbol references in the engine archive are the check. If the engine
 # never references malloc, it cannot call it, on any target, in any build.
+#
+# Scope is libtape.a only, never libtape_port.a. The ports are outside the
+# engine proper: the file-backed port IS libc file I/O, which is the whole point
+# of the block-device boundary. Running this over the ports would fail, and the
+# fix would be the gate, not the port.
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 2
 

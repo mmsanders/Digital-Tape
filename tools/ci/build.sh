@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# CI gate 1 — the engine builds clean at -Werror.
+# CI gate 1 — the engine, the ports and the harness build clean at -Werror.
 set -uo pipefail
-cd "$(dirname "$0")/../../engine" || exit 2
+cd "$(dirname "$0")/../.." || exit 2
 
 echo "== gate: build =="
-if make all; then
-  echo "PASS  engine builds"
-  exit 0
+if ! make -C engine all; then
+  echo "FAIL  engine or ports do not build"
+  exit 1
 fi
-echo "FAIL  engine does not build"
-echo "      Expected until WP-06. A guardrail that arrives after the code is"
-echo "      advisory; a guardrail already failing is load-bearing."
-exit 1
+if ! make -C tests all; then
+  echo "FAIL  test harness does not build"
+  exit 1
+fi
+echo "PASS  engine, ports and harness build"
