@@ -7,6 +7,13 @@ matters most nine months from now.
 
 **Format:** `## ADR-NNN — title` / **Date** / **Decision** / **Rationale** / **Cost to reverse**
 
+**Numbering.** `ADR-0xx` is the shared sequence. **`ADR-1xx` is reserved for Hardware Lead
+decisions.** Two leads appending numbers to one append-only file pick the same number and only
+find out at merge — which already happened once: the Hardware Lead's first four decisions were
+`ADR-010`–`013`, and so are four of the Software Lead's. A separate range removes the class of
+problem rather than the instance. This is the reversible path taken under Charter §05; the PM
+may collapse it back with one `sed`, and the Verification Lead should claim a range too.
+
 ---
 
 ## ADR-001 — One monorepo, not four
@@ -561,3 +568,433 @@ Verified: 11/11, including the `.bss` case that motivated it.
 **Cost to reverse.** Trivial to delete, and its absence is invisible — which is the argument for
 keeping it. The failure mode it prevents produced a reentrancy bug that would have surfaced as
 media corruption months later.
+
+## ADR-101 — Solenoid protection bounds duty cycle, not only pulse width
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead (Charter §05 — decide and log)
+
+**Decision.** The solenoid gate carries three hardware protections, not one: a
+non-retriggerable one-shot (`74HC221` class) capping on-time at 50 ms, an RC lockout enforcing
+a minimum off-time, and a PPTC on the solenoid rail (hold ≈ 100 mA) as an average-current
+backstop. Plus a flyback diode per coil and a gate pull-down.
+
+**Rationale.** The Hardware Charter specifies a hardware one-shot and is right that it is not
+a firmware responsibility. But a one-shot bounds how long a *single* assertion lasts and says
+nothing about how often assertions may occur. Firmware stuck in a retrigger loop at 100 Hz
+delivers a 50 ms pulse every 10 ms; the coil sees essentially its full 9 W continuously and the
+one-shot fires correctly throughout. **The exact failure the charter describes — a stuck
+firmware state cooking a coil built for 30 ms pulses — is reachable through a working
+one-shot.** The PPTC closes that hole physically: no sequence of edges can defeat it, because
+sustained conduction opens the circuit.
+
+Cost over the charter's single one-shot: about fifteen cents.
+
+**Cost to reverse.** Trivial before layout, expensive after. These are three small parts and a
+rail; adding them post-layout means finding board area next to a switching node. Removing them
+later is a schematic edit — but doing so re-opens a failure mode whose consequence is a burnt
+part inside a sealed enclosure in a child's hands.
+
+---
+
+## ADR-102 — Charging is suspended for the duration of a copy
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** The charger is inhibited while a copy is in progress, via a control line the
+charger already has.
+
+**Rationale.** `spec/hw/thermal-budget.md` §3 shows the copy is thermally free — 30 seconds
+against a 621-second enclosure time constant raises the bulk temperature about half a kelvin.
+The sustained case that governs is playback while charging, and at 35 °C ambient that lands
+within 0.2 K of the 45 °C JEITA charge ceiling. Removing the highest-power mode from the
+sustained set costs one control line and is imperceptible: nobody notices 30 seconds missing
+from a 90-minute charge.
+
+This is the cheapest thermal margin in the design, and it is available only because the copy is
+required to be fast — guardrail 10 buys a thermal result as a side effect.
+
+**Cost to reverse.** Near zero. One line in firmware and one net. Worth reversing only if
+measurement shows the margin is larger than estimated, which WP-37 will say.
+
+---
+
+## ADR-103 — The bench build validates function, not copy time
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** Card sustained-write characterisation runs on a PC with a rated reader, not on
+the Teensy bench build. The bench build owns hot-swap detect, the LED row, the button matrix,
+the interlock and the solenoid one-shot — everything in WP-18 and WP-20 except the throughput
+number.
+
+**Rationale.** The Teensy 4.1 has one 4-bit SDIO port. A second card hangs off SPI at roughly
+10–20 MB/s, so a bench copy of a 90-minute cartridge takes 60–95 s regardless of how good the
+cards are. That is a property of the bench platform, not a finding about the design, and a
+criterion the platform cannot meet is a criterion that will be quietly relaxed.
+
+Running the characterisation on a PC is also simply better: it is available the day the cards
+arrive rather than after WP-17, and it removes our own untested driver from the measurement.
+
+**Cost to reverse.** None — this is a routing decision about where a measurement happens.
+The consequence to watch is WP-18's acceptance criteria, which currently read as though the
+bench proves the copy time. Raised for the PM in `docs/REVIEW/hardware-lead.md`.
+
+---
+
+## ADR-104 — Print sweeps carry hidden controls and blind labels
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead
+
+**Decision.** Every print-run packet embosses labels unrelated to the swept parameter, and
+includes duplicate copies of one variant at spread bed positions, ranked blind alongside the
+real variants. The mapping lives in the repository, never on the card.
+
+**Rationale.** Two failure modes, both invisible without this. If the labels encode the
+parameter, the ranker ranks by expectation rather than by feel — and Michael is the instrument,
+so biasing him corrupts the only measurement we have. And a 0.3 mm step in hook depth is within
+range of the variation a printer produces across its own bed, so without duplicates a scatter
+is indistinguishable from a signal. The duplicates test the print and the ranker with the same
+parts and no extra trip.
+
+The counter-intuitive payoff: when the controls scatter, the correct next sweep is **coarser**,
+not finer. Without controls the instinct after an inconclusive plate is to refine, which walks
+further into the noise and costs another week.
+
+**Cost to reverse.** Zero — it is a convention in `build_packet.py`, about twenty lines.
+Abandoning it costs the ability to tell a result from noise, which is the whole reason the
+library loop exists.
+
+---
+
+## ADR-105 — The cartridge's microSD is captive
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §2), raised by Hardware Lead (issue #6)
+
+**Decision.** The microSD inside a cartridge is captive. `tapectl` and the GUI reach the card
+**through the player over USB-C** — the production board exposes the device itself as the
+cartridge. Removing the card is not a workflow the design supports.
+
+Serviceable, **not** tool-free: an adult with a driver may open the shell to replace a failed
+card. A curious six-year-old with a fingernail may not. **Where those two requirements fight,
+the six-year-old wins.**
+
+**Rationale.** A loose microSD in a child's hands is a lost microSD, and a shell that opens
+becomes a container for something else and then a shell with nothing in it. The cartridge exists
+so the storage is an object you can hold, label and pass around — it is the object, not a costume
+around a memory card. It also settles the shell design in the direction the vision already
+points, and removes an ESD path a child can touch.
+
+**Cost to reverse.** High after WP-24. The shell, the sealing, the drop case and the carrier PCB
+all follow from it. Reversing also strands the USB-C loading path in firmware and `host/` — which
+is the cost this decision *adds*: a device path that is not in any work package today and needs
+scoping. That obligation is recorded in `spec/hw/board-rev-a.md` §7.
+
+---
+
+## ADR-106 — `spec/hw/` is versioned, not frozen; limits stay upstream
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §3), raised by Hardware Lead (issue #7)
+
+**Decision.** Two tiers. `spec/` stays PM-owned and frozen at the Phase 0 gate
+(`tapefs-v1.md`, `engine-api.md`, `acceptance.md`). **`spec/hw/` is Hardware-Lead-owned and
+versioned, with no PM gate** (`board-rev-a.md`, `thermal-budget.md`).
+
+The obligation on `board-rev-a.md` is **notification, not approval**: any change to a pin, a
+rail, or a timing constraint lands as a PR naming the Software Lead as reviewer, carrying a
+`CHANGES` block listing exactly what moved. Firmware acknowledges by merging.
+`thermal-budget.md` has no code consumer and needs no protocol at all.
+
+**But limits move upstream.** The JEITA window, the solenoid on-time and duty ceilings, the
+85 dB cap and the touch-temperature limit belong in `spec/acceptance.md`, PM-owned and frozen.
+**Measurements live with the Hardware Lead; the numbers a unit must not exceed do not.**
+
+**Rationale.** Both hardware documents are specified to change repeatedly after the freeze —
+estimates become measurements, a revision moves a pin. Under a blanket freeze every thermocouple
+reading is an escalation, which grinds or, far more likely, gets quietly ignored. That is the
+"spec that drifts to describe whatever got built" failure arriving through the front door with
+the rule's blessing. The cut is at the *consumer*, not the document: what needed protecting was
+firmware's ability to trust a pin map, and notification protects that where a freeze could not.
+
+**Cost to reverse.** Low — a directory move and a paragraph. The thing that would be expensive
+to recover is the notification habit, which only works if it is never batched.
+
+---
+
+## ADR-107 — Hardware acceptance sign-off splits three ways by consequence
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §4), raised by Hardware Lead (issue #8)
+
+**Decision.**
+
+- **Criteria and paperwork → Verification Lead.** Its authority extends to reviewing whether a
+  hardware acceptance test proves what it claims, **before** the test is run. It does not run the
+  test and does not touch hardware.
+- **Safety measurements → Michael witnesses.** WP-19's SPL check and WP-37's thermal run.
+  Scheduled when he is around, not reported afterward.
+- **Everything else → self-reported with data attached.** A chart and a raw log, not "passed".
+
+Standing convention regardless: any result outside the first two categories is marked
+**`SELF-REPORTED — no independent confirmation`**. Permanent practice, not a placeholder until
+someone is assigned.
+
+**Rationale.** ADR-003 says nobody grades their own homework, but the Verification Lead's scope
+is `tests/` — golden fixtures, crash injection, fuzzing — and none of those tools touch a
+thermocouple, an SPL meter or a latch counter. The failure mode with a self-designed hardware
+test is almost always the **criterion**, not the measurement, which is why review lands before
+the run rather than after it. The two witnessed tests are the only ones whose failure can hurt a
+child; a second pair of eyes on an SPL meter is the entire mechanism.
+
+**Cost to reverse.** Low to reverse, high to undo. Collapsing it saves a scheduling round and
+forfeits the only independent check on the two safety criteria — and the damage would not be
+visible until a unit is in a child's hands.
+
+---
+
+## ADR-108 — UHS-I bring-up is split at a testable gate
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §5), raised by Hardware Lead (issue #8)
+
+**Decision.** Hardware Lead owns the bring-up procedure, the test points, the fallback strategy,
+and delivering a board that passes an entry gate. Software Lead owns the driver, delay-line
+tuning, and the throughput number. The gate:
+
+> On rev A, an **unmodified reference driver** — NXP's SDK USDHC example — completes a 1 GB read
+> and a 1 GB write on **each** slot at **SDR50** with **zero CRC retries**.
+
+Fails the gate → hardware, and it is the Hardware Lead's call whether that is layout, power
+integrity, or a respin. Passes and throughput still misses → software. Both remain jointly
+accountable for the copy-time criterion.
+
+**Rationale.** UHS-I bring-up is the hardest electrical thing on the board and the item most
+likely to consume a spin, and it sits exactly between two owners. Without a gate, "is it the
+layout or the tuning?" has no answer and both parties can point at the other while the schedule
+burns. SDR50 rather than SDR104 because SDR104 depends on delay-line tuning, which is software's
+half — **a gate that requires the other party's work to pass is not a gate.** SDR50 is also
+sufficient for the requirement: the 90-minute copy needs 63% of a 50 MB/s bus.
+
+**Cost to reverse.** Trivial as text, but it must exist **before fabrication** — written into
+`spec/hw/board-rev-a.md` §5 while the board can still be changed to make the gate reachable.
+Agreed after the first failure it is no longer a gate, it is an argument.
+
+---
+
+## ADR-109 — Tape length resolves on measurement, not argument
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 001 §1), raised by Hardware Lead (issue #5)
+
+**Decision.** Six candidate microSD SKUs are characterised under fixed conditions — card filled
+to ~80%, transfer at least as long as a real copy, **worst-case windowed** write reported rather
+than average. Then:
+
+- **≥ 2 SKUs sustain ≥ 35 MB/s worst-case** (10% over the 31.75 MB/s requirement) → **90 minutes
+  stands.**
+- **Otherwise → 60 minutes becomes the standard tape.** 635 MB at 21.2 MB/s sits inside the V30
+  floor with ~40% margin, and drops the bus requirement from SDR104 to SDR50 — retiring the
+  highest-risk electrical work on the board as a side effect.
+
+BOM discipline: **exact SKUs with revision, not model families**, recorded in
+`spec/hw/board-rev-a.md` with the measured numbers and the date measured.
+
+**Rationale.** On a UHS-I host there is no purchasable specification that guarantees the copy
+target: V30's floor is 30 MB/s, below the requirement, and V60/V90 are UHS-II ratings that do
+not apply when a card falls back to UHS-I. So the requirement is met by characterised models,
+and a rule fixed in advance stops the decision being relitigated once someone has a number they
+like. The test conditions each defeat a specific way a card looks faster than it is — an empty
+card writes to clean blocks, a short transfer measures the SLC cache, and an average hides the
+stall that produces the dropout.
+
+Recording the SKU **and revision** is the whole defence against a silent controller change
+inside a part number, which is a real and common failure in SD cards and would otherwise break a
+shipped requirement with no change on our side.
+
+**Cost to reverse.** The rule itself is free to change before the cards arrive and expensive
+after — its value is precisely that it was fixed before anyone saw a result. Tape length is a
+superblock field (`nominal_length_s`, ADR-008), so **the answer does not block the format freeze
+or any software**; it changes a format-time constant, not a format.
+
+---
+
+## ADR-110 — Two hardware ADRs are superseded by Software-Lead and PM entries
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead (housekeeping, append-only)
+
+**Decision.** `ADR-106` (`spec/hw` is versioned, not frozen) records the same decision as
+**`ADR-021`**, landed independently by the Software Lead. **`ADR-021` is canonical**; ADR-106
+stands as written but should be read as a duplicate, not a second decision.
+
+`ADR-109` (tape length resolves on measurement, ≥ 2 SKUs at ≥ 35 MB/s → C-90) is **superseded by
+`ADR-018`**: Michael chose C-60 directly, so the rule never fired. Card characterisation survives
+as a *headroom measurement* rather than a gate.
+
+**Rationale.** Two leads recorded the same decisions from opposite ends within a day of each
+other, and an append-only log cannot be edited to fix that. Left alone, a reader nine months from
+now finds two entries for one decision and cannot tell which was acted on. This is the cheap fix
+and the reason the `ADR-1xx` range exists.
+
+**Cost to reverse.** None — it is a pointer.
+
+---
+
+## ADR-111 — The charge window is met by a designed TS divider and a B = 3950 K thermistor
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §1
+
+**Decision.** Route 1. `RT1` = 9.76 kΩ 1 %, `RT2` footprint kept but **not fitted**, and an NTC
+of **B = 3950 K** — not the B = 3435 K 103AT part. Nominal suspend at 4.4 °C and 40.6 °C: a
+**4.4 K inward margin** on each limit, so every tolerance corner lands inside 0 °C / 45 °C.
+
+**Rationale.** The charger's TS thresholds are fixed fractions of REGN; the temperatures they
+correspond to are ours to set. Two resistors, two constraints — but a B = 3435 K thermistor spans
+*exactly* enough to place both thresholds on the limits and nothing more. Ask it for margin and
+the required span exceeds what it can deliver, and the closed form returns a **negative
+resistance**. A steeper thermistor is not a refinement; it is what makes this a design rather
+than an arithmetic coincidence.
+
+The margin is not optional because **safety here is one-sided**. Suspending early is harmless —
+the device declines a charge it could have taken. Suspending late means charging a lithium cell
+below freezing, or above 45 °C. Centring the nominal on the limits ships half the tolerance band
+on the wrong side of a safety limit, and it would pass a spreadsheet.
+
+`VT2` and `VT3` land inside the window and give reduced-current and reduced-voltage bands on the
+way to each cutoff — the taper behaviour proposed as T-2, arriving free from the network.
+
+**Cost to reverse.** Low before layout: three passives and a thermistor. **The threshold
+fractions are `UNVERIFIED`** — `ti.com` is still blocked — so if the real values differ, `RT1`
+moves and the required B may move with it. The method and the one-sided-margin argument hold
+regardless; `hardware/thermal/charger_ts.py` takes the fractions as named constants, so
+correcting them is one line and a re-run.
+
+---
+
+## ADR-112 — Solenoid duty is met by a dual monostable; the PPTC is a third layer
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §2
+
+**Decision.** One `74HC221`: the A half sets a 30 ms pulse (429 kΩ, 100 nF **C0G**), the B half
+holds a 1.2 s lockout (1.71 MΩ, 1 µF **film**). Worst case over ±16 % timing tolerance: pulse
+≤ 34.8 ms against a 50 ms limit, duty **3.34 %** against a 5 % limit. The PPTC stays as a third
+layer against faults the timing chain cannot see — a shorted FET, a wiring error, a coil that
+fails low-resistance — and is **not** how the duty limit is met.
+
+**Rationale.** The reviewers were right that a PPTC is history-dependent and cannot be given a
+deterministic worst case. The two monostables can, and they are in one package, with the lockout
+downstream of the pulse so no gate input can defeat it.
+
+Dielectrics are load-bearing and are written down because they are exactly what gets substituted
+silently at assembly: **X7R is not acceptable in either position** — it loses a large fraction of
+its capacitance under DC bias and over temperature, which would widen the pulse and shorten the
+lockout, both in the unsafe direction, while passing every bench test at room temperature. The
+lockout capacitor is **film** rather than C0G because 1 µF C0G does not exist in a practical
+package.
+
+**Cost to reverse.** Trivial before layout. Note the behavioural cost: a 1.2 s lockout means the
+transport releases at most once per 1.2 s. Invisible for the specified interlock, and it shrinks
+if WP-04 shows the mechanism releases in less than 30 ms — the lockout scales with the pulse, and
+it is one resistor.
+
+---
+
+## ADR-113 — The UHS-I entry gate moves to high-speed 4-bit
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, resolving a conflict between two memos
+
+**Decision.** The rev A entry gate is a 1 GB read and 1 GB write on **each** slot at **high-speed
+4-bit, 3.3 V**, zero CRC retries, with an unmodified reference driver. SDR50 becomes a second,
+optional gate if the 1.8 V circuit is ever populated.
+
+**Rationale.** Decisions 001 §5 set the gate at SDR50. Decisions 002 §1 then made the 1.8 V
+switching circuit unpopulated on rev A. **SDR50 is a UHS-I mode and requires 1.8 V signalling**,
+so a board built to the second memo cannot run the gate set by the first. Neither memo is wrong;
+they were written a day apart and the interaction fell between them.
+
+High-speed 4-bit preserves everything the gate was for: it needs no delay-line tuning, so it
+still tests hardware without depending on software's half, and at C-60 it meets the requirement
+outright at ~29 s.
+
+**Cost to reverse.** Free as text, and it must be settled **before fabrication** — a gate agreed
+after the first failure is not a gate, it is an argument. Raised to the PM rather than resolved
+silently, because it changes a criterion the PM wrote.
+
+---
+
+## ADR-114 — Cartridge contacts are mirrored top-to-bottom, stub ≤ 25 mm, terminated at the card
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 002 §3, 002-A §6), raised by Hardware Lead (H-05)
+
+**Decision.** The carrier routes CMD and DAT to both ends, mirrored **top-to-bottom on the same
+edge** rather than end-to-end. Unused-end stub **≤ 25 mm**, series termination **at the card**,
+TVS at the **slot on the mainboard** and never on the carrier. Hard gold preferred, **ENIG
+acceptable** at family insertion counts. Verified on carrier rev A before the mainboard spin.
+
+**Rationale.** End-to-end mirroring puts a carrier-length unterminated stub on every data line.
+Top-to-bottom reduces it to the unused half of a short mirrored pair. C-60 helps more than any
+termination choice does: the concern was framed at SDR104's 208 MHz, and high-speed 4-bit runs at
+50 MHz. Keeping the TVS off the carrier keeps the cartridge cheap, which matters because there
+will be many cartridges and one mainboard.
+
+**Cost to reverse.** High after the carrier spin — it is the carrier's geometry. Cheap now, which
+is why the carrier spike runs alongside WP-04 rather than waiting for WP-24.
+
+---
+
+## ADR-115 — The codec's second source is the same silicon in a smaller package
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 002-A §5
+
+**Decision.** The named second source for `SGTL5000XNBA3` is **`SGTL5000XNLA3R2`** — the 20-pin
+SGTL5000 — not another vendor's codec. `XNBA3` stays specified; order 1c buys eight of each so
+the bench settles it.
+
+**Rationale.** Same die, same I²S, same I²C, same register map. A supply failure costs a
+**footprint change and no firmware work at all** — which is a far better hedge than a different
+vendor's part with a different register map and its own bring-up.
+
+The stock picture argues for it independently. From JLCPCB's parts API, the one vendor domain now
+reachable: the 32-pin part has **74** in stock, the 20-pin has **1205**, and both are `Extended`
+library parts, so assembly depends on stock on the day. The 20-pin's only functional difference
+is a non-selectable I²C address, and we have exactly one codec. PJRC reached the same conclusion
+under supply pressure in 2023.
+
+**Cost to reverse.** Low now, high after layout — the packages are 5 × 5 and 3 × 3, so they are
+not pad-compatible and a late switch is a re-layout of that block. The reason to buy both now is
+precisely that the decision is cheap today and expensive in six weeks. **Open:** the 20-pin
+part's reduced pin complement has not been checked against this design, and that needs a
+datasheet `nxp.com` still will not serve.
+
+---
+
+## ADR-116 — The solenoid is specified by energy per actuation, not by pulse width
+
+**Date:** 2026-09-02 · **Decided by:** Hardware Lead, closing PM Decisions 003 §3b ·
+**Supersedes ADR-112**
+
+**Decision.** `spec/acceptance.md` DRAFT-3 bounds average coil power at **0.25 W over any rolling
+10 s window**. Because that must clear a child alternating stop and play twice a second, the
+governing quantity is **energy per actuation ≤ 125 mJ**, and that is what selects the solenoid.
+
+Working point: a **5 W coil**, a **15 ms** pulse (75 mJ) and a **450 ms** lockout. Worst case over
+±16 % timing tolerance: 0.174 W at legitimate 2 Hz use, 0.220 W in a retrigger fault, an actuation
+permitted every 395 ms against the 500 ms real-use period. One `74HC221` still does both halves;
+the PPTC remains a third layer and explicitly does not establish the bound.
+
+**The pulse length is a placeholder.** WP-04 measures the shortest pulse that reliably releases
+the latch; that number plus margin replaces it, and the lockout resistor follows.
+
+**Rationale.** ADR-112 met a 5 %-over-1 s duty limit with a 9 W coil, a 30 ms pulse and a 1.2 s
+lockout. Against the restated limit that is **0.30 W — a fail** — and the deeper problem is that
+9 W × 30 ms is **270 mJ, 2.2× the energy budget**. No lockout could have fixed it: the energy is
+spent inside a *single legitimate actuation*, so the only way to comply was to block the child.
+That is precisely the failure the PM's "not a looser limit" clause is written against, and it
+means the earlier design met a number while missing the intent.
+
+**The 9 W and 30 ms were my assumptions, not measurements.** Three numbers on this project have
+now turned out wrong by being costed rather than asserted; two were the PM's and this one is
+mine. The lesson generalises: a limit expressed as *duty* hides the coil, while a limit expressed
+as *power* exposes it.
+
+**Cost to reverse.** Low today — the coil is not ordered and the timing parts are passives. It
+rises the moment a solenoid is bought or the mechanism is designed around a given force. **The
+open risk is real:** a 5 W coil pulsed 15 ms is a weaker actuator than 9 W pulsed 30 ms, and
+whether it still releases the latch is unknown until WP-04. If the mechanism needs more energy
+than the budget allows, that is a genuine conflict between a safety limit and a mechanism, and it
+goes to the PM — it does not get absorbed by widening the limit.

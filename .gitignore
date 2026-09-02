@@ -33,6 +33,13 @@ fp-info-cache
 hardware/**/gerbers/
 hardware/**/stl/
 
+# ...except the plate itself. A print packet is handed to a human who cannot run
+# `make`, so `packets/*/plate.3mf` is committed on purpose. The per-part STLs
+# beside it stay ignored: they are only for reprinting one variant, and anyone
+# who needs one can regenerate the packet.
+!hardware/packets/*/plate.3mf
+!hardware/packets/*/plate.stl
+
 # test artifacts — golden fixtures are committed, output is not
 tests/**/out/
 *.wav.actual
