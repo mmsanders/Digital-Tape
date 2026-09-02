@@ -26,11 +26,21 @@ optimisation that destroys it, which is exactly why they're written down.
 | 05 | **Side A immutability is structural.** | Enforced by allocation below a high-water mark, not by a runtime flag someone can clear. Do not "simplify" it into a boolean. |
 | 06 | **The source slot has no write function.** | Constructed with a null write pointer so a write attempt is a crash in test, not a corruption in the field. Not a permission check. Not an `if`. |
 | 07 | **Every card change is one atomic commit.** | Chunks written and flushed, then a single-block index write with sequence and CRC. There is no acceptable intermediate state and no "we'll add journaling in v2". |
-| 08 | **No allocation in the engine after init.** | Applies to the desktop build too, not just firmware. No malloc, no recursion, no libc file I/O. Static budget under 200 KB, asserted in CI. |
+| 08 | **No allocation in the engine after init.** | Applies to the desktop build too, not just firmware. No malloc, no libc file I/O. **Two budgets, both asserted in CI: RAM 200 KiB (`.data`+`.bss`+the engine instance), flash 32 KiB (`.rodata`).** Max stack depth 8 KiB — recursion falls out of that, it is not a separate rule. |
 | 09 | **The engine knows nothing about hardware.** | No codec chip, no buttons, no LEDs, no board. Two function pointers for block read and write are the entire coupling. If the engine needs a new hardware concept, the design is wrong. |
 | 10 | **Copy under 30 s is a requirement.** | Not a goal, not a stretch. If a design choice makes it unreachable, that choice is wrong. The fallback ladder in the plan is the only sanctioned retreat. |
 | 11 | **Output is capped in the volume register.** | 85 dB against specified headphones, set at the codec, re-asserted every boot, and unreachable from any user control. The users are children. |
 | 12 | **One engine, three consumers.** | CLI, GUI and firmware all link the same C library. If firmware reimplements a behaviour the engine already has, that is a bug even when it works. |
+
+### The principle
+
+> **The engine computes. The caller owns anything that needs entropy, hardware
+> knowledge, or memory beyond the engine's budget.**
+
+It has correctly predicted three answers already — the preroll buffer, the
+cartridge UUID, and the format epoch — twice before the question was asked. When
+the engine seems to need something it cannot have, this is usually why, and the
+answer is usually a parameter.
 
 ### The tiebreaker
 
@@ -46,12 +56,36 @@ being told.** That heuristic resolves more design questions than escalation does
 |---|---|---|---|
 | **Michael** | Human | Vision and taste. Format-freeze sign-off. Physical iteration and the feel of the buttons. Aesthetic direction. Parts orders. | Read code, break down tasks, or answer questions that have a defensible default. |
 | **Program Manager** | Cowork | Roadmap and phase gates. `spec/` as source of truth. Cross-stream arbitration. Risk register. Scope calls. | Write, review, or merge code. Hold repo credentials. |
-| **Software Lead** | Claude Code | The repository. Task breakdown, dispatching implementation sub-agents, code review, CI, merges. Streams 1, 3, 4, 5. | Change `spec/`, add engine dependencies, or sign off its own acceptance criteria. |
+| **Software Lead** | Claude Code | The repository. Task breakdown, dispatching implementation sub-agents, code review, CI, merges. Streams 1, 3, 4, 5. | **Author `spec/`** — see below — add engine dependencies, or sign off its own acceptance criteria. |
 | **Verification Lead** | **ChatGPT** | Stream 2. Adversarial spec review, golden audio fixtures, crash-injection harness, fuzzing, independent acceptance sign-off on every work package. | Report to the Software Lead. **This one reports to the PM — and it is a different model on purpose.** |
 | **Hardware Lead** | Claude Code | `hardware/`. Schematic, layout, code-defined CAD, BOM, sourcing, thermal. | Touch anything under `engine/` or `firmware/`. |
 
 Nobody grades their own homework. Architecture decisions live one level above the branch
 they would otherwise be made in.
+
+### Spec authorship is the PM's, not the Software Lead's
+
+The charter once said both. It is settled: **the PM authors `spec/`; the Software
+Lead lands the text mechanically and does not edit it.** A spec authored by the
+implementer bends toward the implementation, and three streams read it as truth.
+
+Landing is not licence. If landed text looks wrong, that is a finding for the PM,
+not an edit — escalation trigger #1, unchanged.
+
+### Requesting independent review
+
+Include the exact phrase **`Request Independent Review`** in a PR description or
+comment. It is not automatic and it is not a gate. Worth a day for: the commit
+path, the allocator, crash-recovery logic, Side A immutability, or a CI gate you
+are not sure is decidable.
+
+| Request | Self-service? |
+|---|---|
+| CI, tooling, host tooling, firmware integration, hardware docs | Yes |
+| Engine PRs whose behaviour is already covered by landed tests | Yes |
+| Engine PRs implementing behaviour the verifier has not yet written tests for | **No — escalate to the PM** |
+
+A refusal in the third category is the system working, not a misconfiguration.
 
 ### The seam with Verification — read this twice
 
@@ -129,7 +163,11 @@ deliberately low — a wrong architectural call compounds for months; asking cos
 
 **How.** Append to `docs/FOR-MICHAEL.md` for anything needing his taste or his hands.
 Everything else: open a GitHub issue labelled `pm-decision` with the options and your
-recommendation, and keep working on something else. **Never block a whole stream waiting on
+recommendation, and keep working on something else. The PM confirmed it reads issues directly,
+so issues are the channel — do not mirror them into files.
+
+Every escalation carries a recommendation **and a default that ships if nobody answers.** That
+is why none of them have blocked anything. **Never block a whole stream waiting on
 an answer** — take the reversible path, log it, flag it for review.
 
 ---
@@ -140,6 +178,11 @@ Per-stream, from the charter. A PR containing any of these is closed, not discus
 
 - **engine/** — any dependency beyond libc; any `#ifdef` naming a board, chip or peripheral;
   any API that returns a heap pointer; any code path that writes to a side bound read-only.
+- **engine/ indirect calls** — anything outside `engine/src/dev.h` that dereferences a
+  `tape_dev` member, or any function address stored in a data section. Guardrail 09's real
+  invariant is *every indirect call targets a `tape_dev` callback*; it is enforced by funnelling
+  all three through `dev_read`/`dev_write`/`dev_flush` and gating on the source. If you want to
+  call `d->read` directly, that is the gate working.
 - **tests/** — relaxing a test because it is hard to pass. That is a finding, not a licence.
   Report it up; do not negotiate it sideways with Stream 1.
 - **host/** — features beyond loading cartridges. It is not a music manager, a tag editor, a

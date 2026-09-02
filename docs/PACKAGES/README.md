@@ -14,8 +14,8 @@ Charter §04.
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
-| WP-02 | TAPEFS v1 specification | Agent | spec | Unblocked, next |
-| WP-03 | Engine API specification | Agent | spec | Unblocked, next |
+| WP-02 | TAPEFS v1 specification | **PM** | spec | **Closed — PM-delivered** (ADR-010). DRAFT-3 pending |
+| WP-03 | Engine API specification | **PM** | spec | **Closed — PM-delivered** (ADR-010). DRAFT-3 pending |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | Not started |
 | WP-05 | Parts order #1 | You | hardware | Not started |
 | WP-34 | Thermal and safety budget | Agent | hardware | No Hardware Lead assigned |
@@ -27,14 +27,14 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Blocked on WP-02/03 |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Blocked on WP-02/03 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Device layer done.** Superblock + index commit held for DRAFT-3 |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Held for DRAFT-3 |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
-| WP-10 | Crash-injection harness | Agent | 2 | **No Verification Lead assigned** |
+| WP-10 | Crash-injection harness | Verification | 2 | Fault-injection *device* landed (`dev_sim`); harness is theirs |
 | WP-11 | CLI harness and golden-file regression suite | Agent | 2 | Runner wired; fixtures blocked |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates wired and failing** |
+| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates rebuilt and green** — funnel, 8 KiB stack, two budgets |
 | WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.

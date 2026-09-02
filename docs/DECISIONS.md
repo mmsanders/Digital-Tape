@@ -205,3 +205,127 @@ stop surprising anyone.
 **Consequence not yet resolved.** The charter does not say who carries text across the seam. That
 is the highest-frequency interaction in the project and it now has a human-shaped gap in the
 middle of it. Raised in `docs/REVIEW/software-lead.md` §3.1.
+
+---
+
+## ADR-010 — Spec authorship is the PM's; the Software Lead lands text mechanically
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §0)
+
+**Decision.** The charter contradicted itself — §1 made `spec/` PM-owned, §9 told the Software
+Lead to author WP-02 and WP-03. Settled: the PM authors, the Software Lead lands the text
+mechanically and does not edit it. WP-02 and WP-03 close as PM-delivered.
+
+**Rationale.** A spec authored by the implementer bends toward the implementation, and three
+streams read it as truth. The same argument that makes the Verification Lead a different model.
+
+**Cost to reverse.** Low mechanically, high in what it protects. The tell that it has been
+reversed in practice rather than by decision is spec text that starts matching the code's
+convenience — which is invisible until a stream implements against it and is surprised.
+
+---
+
+## ADR-011 — Two static budgets, both asserted
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §1), from issue #2
+
+**Decision.** RAM 200 KiB (`.data` + `.bss` + the engine instance) and flash 32 KiB (`.rodata`).
+Both printed on every CI run.
+
+**Rationale.** My recommendation was "A now, C later", on the grounds that the flash number was
+a guess until there was a board. The PM's counter is correct: the RT1062 carries external QSPI
+flash in megabytes, and 32 KiB is generous for a CRC table (1 KiB, now measured at exactly that),
+a fade curve and resampling coefficients combined. A generous ceiling that exists beats a precise
+one that doesn't — and it closes the risk I raised myself, that a large constant table sails
+through a RAM-only gate.
+
+**Cost to reverse.** Trivial as numbers. Expensive as a habit: `.rodata` approaching 32 KiB is an
+escalation, not a reason to raise the ceiling.
+
+---
+
+## ADR-012 — The on-card preroll region is deleted
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §2), from issue #3
+
+**Decision.** The 512 KiB on-card preroll region is removed from the format, `preroll_frames`
+leaves the superblock, and `tape_mount` gains an optional warm-start buffer — in practice the
+caller's play ring.
+
+**Rationale.** My analysis stopped one step early. I argued the buffer should be caller-owned;
+the PM observed the on-card region cannot do its job at all. It lives on the cartridge, so it
+cannot be read until the card is initialised — and card initialisation is precisely the
+100–500 ms it existed to hide. Once the card is up, an ordinary indexed read is just as fast.
+
+Instant-on comes from two places instead, neither a format feature: retaining the play ring
+across sleep, and starting card init on the cartridge-detect switch rather than the play press,
+so human hand-travel time hides the latency. Both are firmware behaviours.
+
+**Cost to reverse.** Reinstating a region in a frozen format is a format revision. But the
+region bought nothing, so there is nothing to reinstate it for.
+
+---
+
+## ADR-013 — An index entry describes a run, not a chunk
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §3), from issue #4
+
+**Decision.** `entry := { first_chunk_id, start_frame, frame_count }` over *consecutive* chunk
+ids, with `frame_count` allowed to exceed `CHUNK_FRAMES`.
+
+**Rationale.** I offered "refuse the splice" or "grow the slot", and objected to growing the slot
+myself because it moves the wall rather than removing it. The PM took neither and changed what an
+entry means. A pristine 90-minute tape was burning 1,817 entries before a child had done
+anything; it is now **one**. Headroom goes from 1.5× to roughly 4,000 splices after a re-spool,
+and re-spool becomes genuinely restorative — which finally gives it a user-facing purpose instead
+of being invisible housekeeping.
+
+Critically, **the commit path does not change**. My objection to coalescing — that the commit
+path is where "clever" is a liability and must stay simple enough to reason about under crash
+injection — is respected completely. The only new arithmetic is that the allocator hands out
+contiguous runs (natural for a bump allocator) and a mid-run splice splits an entry in two.
+
+**Cost to reverse.** High after the freeze — it is the index format. Cheap now, and it removes a
+wall rather than moving it.
+
+---
+
+## ADR-014 — Decidable CI gates replace disassembly parsing
+
+**Date:** 2026-09-01 · **Decided by:** PM (Decisions 001 §4), from issues #11 and #12
+
+**Decision.** Guardrail 09 is enforced by funnelling every indirect call through three
+`static inline` wrappers in `engine/src/dev.h`, gated at the source, with a link-time backstop
+against function addresses in data sections. Guardrail 08's recursion clause is replaced by a
+max stack depth of **8 KiB**, measured from `-fstack-usage` and `-fcallgraph-info`.
+
+**Rationale.** The invariant I wrote ("at most two indirect call sites") was not the invariant I
+wanted (*every indirect call targets a `tape_dev` callback*), and no regex over disassembly can
+decide the second. Likewise "no recursion" is a proxy for a bounded stack; measuring depth
+directly subsumes it and yields a number worth reading in review.
+
+`dev_write` asserts its function pointer is non-`NULL` in debug builds via `__builtin_trap` —
+not `assert()`, which reaches libc file I/O that guardrail 08 forbids. In release it dereferences
+and dies. Guardrail 06 wants a loud crash; a `NULL` check returning an error code quietly would
+defeat it.
+
+**Cost to reverse.** Low. But the gates are leaned on for nine months, and the source-level check
+fails with a filename and a line number rather than a hex offset — which is the difference
+between a gate people fix and a gate people disable.
+
+---
+
+## ADR-015 — Ports are outside the engine and outside its gates
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** `engine/src` builds `libtape.a`, subject to every gate. `engine/port` builds
+`libtape_port.a`, subject to none of them.
+
+**Rationale.** The file-backed port is libc file I/O by definition, which guardrail 08 forbids
+*in the engine*. That is not a conflict — it is the block-device boundary doing its job, and the
+engine never learns a file exists. Keeping them in one archive would force a choice between a
+gate that lies and a port that cannot exist.
+
+**Cost to reverse.** Low now, and it gets harder to introduce later once the ports have grown.
+The rule to keep: if a gate ever runs over the port archive and fails, the fix is the gate.
