@@ -6,7 +6,8 @@ Side A is what you were given; Side B is what you make of it. The users are chil
 **This project is defined by what it refuses to do.** Almost none of its requirements are
 about capability and almost all of them are about restraint. Read §1 before writing code.
 
-Governed by: Software Charter (Plan Rev B, WP-01 – WP-37).
+Governed by: Software Charter **Rev C** (2 Sep) · Plan Rev B · WP-01 – WP-37.
+Specs: `spec/tapefs-v1.md` and `spec/engine-api.md` **DRAFT-3**, `spec/acceptance.md` DRAFT-1.
 
 ---
 
@@ -32,15 +33,27 @@ optimisation that destroys it, which is exactly why they're written down.
 | 11 | **Output is capped in the volume register.** | 85 dB against specified headphones, set at the codec, re-asserted every boot, and unreachable from any user control. The users are children. |
 | 12 | **One engine, three consumers.** | CLI, GUI and firmware all link the same C library. If firmware reimplements a behaviour the engine already has, that is a bug even when it works. |
 
-### The principle
+### The two rules
+
+**Rule 1 — the principle.**
 
 > **The engine computes. The caller owns anything that needs entropy, hardware
 > knowledge, or memory beyond the engine's budget.**
 
-It has correctly predicted three answers already — the preroll buffer, the
-cartridge UUID, and the format epoch — twice before the question was asked. When
-the engine seems to need something it cannot have, this is usually why, and the
-answer is usually a parameter.
+It has correctly predicted four answers — the warm-start buffer, the cartridge
+UUID, the format epoch, and the absence of any clock or timeout. When the engine
+seems to need something it cannot have, this is usually why, and the answer is
+usually a parameter.
+
+**Rule 2 — identity and validity are written last**, after the content they
+describe (`spec/tapefs-v1.md` §0). Format, duplicate and promote all write the
+audio and the index first, and the superblock that makes them valid last. A
+cartridge interrupted mid-operation is recognisably *unfinished*, never silently
+wrong.
+
+**No clock, ever.** Progress callbacks carry `blocks_done, blocks_total` and
+nothing else. Do not add `timeout_ms` to any engine call — it will look like a
+bug fix during SD bring-up, and it is a guardrail violation.
 
 ### The tiebreaker
 
@@ -94,16 +107,26 @@ worth most when it does not share the implementer's priors — when what you fou
 obvious to it, and it asks why. **Expect it to question things you consider settled. That is the
 function, not friction.**
 
-**It has no repository access.** It receives `spec/` as text and returns findings and test
-source; the Software Lead lands and runs them. Three rules govern that seam, and all three are
+**Transport.** Findings and test source come back through the public
+`mmsanders/Digital-Tape-Verification` repo, which the PM and the Software Lead both read
+directly — pull test source from there into `tests/`. Spec text goes *in* the other way, pasted
+by Michael once per draft, because its ChatGPT has no browsing. The human is on the
+once-per-draft path only, so Phase 1 schedules against agent throughput. Three rules govern that seam, and all three are
 easy to violate with good intentions:
 
-1. **Do not show it the engine implementation before it has written the tests for that
-   behaviour.** Reading the code first produces tests that confirm what the code does rather
-   than what it should do, which destroys the entire value of the arrangement.
-2. **If a test it wrote does not compile, fix it mechanically.** Weakening the assertion to make
-   it pass is not a fix. If an assertion genuinely cannot be expressed as written, escalate —
-   do not edit.
+1. **Structural Rule 1 — engine implementation stays on unmerged branches** until Stream 2's
+   tests for that behaviour have landed on `main`. `main` carries spec → tests → implementation,
+   in that order, permanently and visibly. Branches on a public repo are still world-readable,
+   so this makes the ordering *auditable* rather than the code unreadable — combined with the
+   verifier's standing instruction not to open `engine/`, that is enough, and strictly better
+   than discipline alone.
+2. **If a test it wrote does not compile, fix it mechanically.** A fix is **mechanical if it
+   cannot change whether the test passes against a correct implementation** — include paths,
+   symbol renames, harness plumbing, type widths that do not change a comparison, formatting.
+   Anything touching an assertion's value, tolerance, ordering or scope is not; nor is deleting
+   a case, marking one skipped, or narrowing an input range.
+   **A test calling an API the spec does not define is a spec finding, routed to the PM.** Never
+   add the call to make it build.
 3. **A disagreement about whether a test is correct is a PM escalation**, not a negotiation.
    Neither side wins by attrition, and you are not the tiebreaker on your own code.
 
@@ -113,6 +136,7 @@ easy to violate with good intentions:
 
 ```
 spec/          frozen. PM-owned. changes need PM sign-off
+spec/hw/       Hardware-Lead-owned and versioned (ADR-021)
 engine/        Stream 1 — portable C99, no OS, no allocation
 tests/         Stream 2 — Verification Lead owns this outright
 host/          Stream 3 — tapectl CLI + Tauri GUI over engine FFI

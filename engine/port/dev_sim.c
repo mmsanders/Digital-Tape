@@ -19,7 +19,7 @@ static int sim_write(void *ctx, uint32_t lba, uint32_t count, const void *buf)
     int rc;
 
     if (st->dead) {
-        return TAPE_ERR_IO;
+        return TAPE_DEV_ERR_IO;
     }
 
     for (i = 0; i < count; i++) {
@@ -32,7 +32,7 @@ static int sim_write(void *ctx, uint32_t lba, uint32_t count, const void *buf)
                     n = TAPE_BLOCK_SIZE;
                 }
                 rc = st->inner->read(st->inner->ctx, lba + i, 1u, block);
-                if (rc != TAPE_OK) {
+                if (rc != TAPE_DEV_OK) {
                     st->dead = 1;
                     return rc;
                 }
@@ -40,17 +40,17 @@ static int sim_write(void *ctx, uint32_t lba, uint32_t count, const void *buf)
                 (void)st->inner->write(st->inner->ctx, lba + i, 1u, block);
             }
             st->dead = 1;
-            return TAPE_ERR_IO;
+            return TAPE_DEV_ERR_IO;
         }
 
         rc = st->inner->write(st->inner->ctx, lba + i, 1u,
                               (const unsigned char *)buf + (size_t)i * TAPE_BLOCK_SIZE);
-        if (rc != TAPE_OK) {
+        if (rc != TAPE_DEV_OK) {
             return rc;
         }
         st->writes_seen++;
     }
-    return TAPE_OK;
+    return TAPE_DEV_OK;
 }
 
 static int sim_flush(void *ctx)
@@ -59,13 +59,13 @@ static int sim_flush(void *ctx)
 
     st->flushes_seen++;
     if (st->dead) {
-        return TAPE_ERR_IO;
+        return TAPE_DEV_ERR_IO;
     }
     return st->inner->flush(st->inner->ctx);
 }
 
-void tape_dev_sim_bind(struct tape_dev_sim *st, struct tape_dev *dev,
-                       const struct tape_dev *inner)
+void tape_dev_sim_bind(struct tape_dev_sim *st, tape_dev *dev,
+                       const tape_dev *inner)
 {
     memset(st, 0, sizeof *st);
     st->inner = inner;

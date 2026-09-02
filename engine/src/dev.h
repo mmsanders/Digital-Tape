@@ -39,13 +39,13 @@
 #  define TAPE_TRAP_IF(cond) ((void)0)
 #endif
 
-static inline int dev_read(const struct tape_dev *d,
+static inline int dev_read(const tape_dev *d,
                            uint32_t lba, uint32_t count, void *buf)
 {
     return d->read(d->ctx, lba, count, buf);
 }
 
-static inline int dev_write(const struct tape_dev *d,
+static inline int dev_write(const tape_dev *d,
                             uint32_t lba, uint32_t count, const void *buf)
 {
     /* Debug: trap at the call. Release: dereference NULL and die. Never an
@@ -54,7 +54,7 @@ static inline int dev_write(const struct tape_dev *d,
     return d->write(d->ctx, lba, count, buf);
 }
 
-static inline int dev_flush(const struct tape_dev *d)
+static inline int dev_flush(const tape_dev *d)
 {
     return d->flush(d->ctx);
 }

@@ -10,14 +10,14 @@
  * switch sequence, tuned delay lines — it is absorbed here, behind the same
  * three callbacks. Nothing about UHS-I reaches the engine (guardrail 09).
  *
- * The stub returns TAPE_ERR_NOT_IMPLEMENTED rather than pretending, so a build
+ * The stub returns TAPE_DEV_ERR_NOT_IMPLEMENTED rather than pretending, so a build
  * that accidentally links it fails loudly instead of silently reading zeroes.
  */
 
 #ifndef TAPE_PORT_DEV_SD_H
 #define TAPE_PORT_DEV_SD_H
 
-#include "tape_dev.h"
+#include "port.h"
 
 struct tape_dev_sd {
     unsigned slot;      /* 0 = source (left, read-only), 1 = work (right) */
@@ -30,6 +30,6 @@ struct tape_dev_sd {
  * this in must preserve that, and tests/fuzz (WP-36) asserts no transport input
  * sequence produces a write transaction on slot 0.
  */
-int tape_dev_sd_bind(struct tape_dev_sd *st, struct tape_dev *dev, unsigned slot);
+int tape_dev_sd_bind(struct tape_dev_sd *st, tape_dev *dev, unsigned slot);
 
 #endif /* TAPE_PORT_DEV_SD_H */

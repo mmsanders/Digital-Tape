@@ -15,7 +15,7 @@
 #define TAPE_PORT_DEV_FILE_H
 
 #include <stdio.h>
-#include "tape_dev.h"
+#include "port.h"
 
 struct tape_dev_file {
     FILE    *fp;
@@ -26,14 +26,14 @@ struct tape_dev_file {
 /*
  * Open an existing image. `writable` false produces a device with write == NULL
  * — the source slot, by construction rather than by a flag (guardrail 06).
- * Returns TAPE_OK, or TAPE_ERR_IO.
+ * Returns TAPE_DEV_OK, or TAPE_DEV_ERR_IO.
  */
-int tape_dev_file_open(struct tape_dev_file *st, struct tape_dev *dev,
+int tape_dev_file_open(struct tape_dev_file *st, tape_dev *dev,
                        const char *path, int writable);
 
 /* Create (or truncate) an image of `blocks` blocks, zero-filled, and open it
-   writable. Returns TAPE_OK, or TAPE_ERR_IO. */
-int tape_dev_file_create(struct tape_dev_file *st, struct tape_dev *dev,
+   writable. Returns TAPE_DEV_OK, or TAPE_DEV_ERR_IO. */
+int tape_dev_file_create(struct tape_dev_file *st, tape_dev *dev,
                          const char *path, uint32_t blocks);
 
 int tape_dev_file_close(struct tape_dev_file *st);

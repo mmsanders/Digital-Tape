@@ -1,79 +1,70 @@
 # STATUS
 
-**Updated:** 2026-09-02 · **Phase:** 0→1 · **Updated by:** Software Lead
-**PR #1 is out of draft and ready for PM review.**
+**Updated:** 2026-09-02 · **Phase:** 1 (engine) · **Updated by:** Software Lead
+**Charter Rev C · specs DRAFT-3 · CI 6/7 green**
 
 ---
 
 ## What changed since last time
 
-**PM Decisions 001 and 002 absorbed.** All five open escalations are decided; `ESCALATIONS.md`
-is deleted (the PM confirmed it reads issues directly, so mirroring was redundant).
+**DRAFT-3 landed**, mechanically and byte-identical to the PM's files (verified with `cmp`).
+`spec/tapefs-v1.md`, `spec/engine-api.md`, and the new `spec/acceptance.md`.
 
-**Stream 1 has started.** Everything Decisions 002 clears for work is built, and every gate is
-verified against deliberately violating code:
+**The Verification Lead's infrastructure is in the repo.** Its crash harness and fault block
+device were pulled from `Digital-Tape-Verification` per the new transport rule and **built and
+passed unmodified** — no mechanical fix was needed. They now run in CI. This is the first time
+the seam has actually carried anything, and it worked.
 
-| Landed | |
-|---|---|
-| `engine/include/tape_dev.h` | Block device interface. Provisional pending DRAFT-3; carries only what Decisions 001/002 state |
-| `engine/src/dev.h` | The three `static inline` wrappers — the only sanctioned indirect calls |
-| `engine/src/crc32.c` | CRC-32/ISO-HDLC. 1 KiB table in `.rodata`, exactly the PM's estimate |
-| `engine/port/dev_file.c` | File-backed device |
-| `engine/port/dev_sim.c` | Fault injection: power loss after N writes, and torn writes |
-| `engine/port/dev_sd.c` | SD seam, honest stub — fails loudly rather than reading zeroes |
-| `tests/harness/` | Scaffolding, 64 self-test checks passing |
-| `tests/harness/run-golden.sh` | **Golden runner** — manifest-driven, byte-exact, writes an audible diff. Proven end-to-end against synthetic fixtures |
-| `tests/golden/MANIFEST.md` | The contract for returned test source. Answers my own open question rather than leaving it open |
+**WP-06 read path is implemented**: superblock parse, the §4.1 two-copy protocol, version
+refusal before repair, `state`, full geometry validation, §5.2 index validation, and §7
+`free_next` derivation. 60 checks cover **every refusal path in §4.1 and §5.2** — the WP-06
+acceptance criterion — including the one §5.2 calls out by name: a Side A run that *starts*
+below `a_high_water` and *ends* above it, which a first-chunk-only check would accept.
 
-**CI is 6 of 7 green.** Only the golden suite is red, awaiting Verification Lead fixtures — which
-is the correct state, and it resolves the "red forever stops being read" risk I flagged: the
-build gate now goes green independently of the fixtures.
+**The commit path is deliberately not written.** Structural Rule 1 (ADR-022): it waits for
+WP-10's tests on `main`.
 
-**WP-02 and WP-03 close as PM-delivered** (ADR-010). Spec authorship is the PM's; I land text
-mechanically and do not edit it.
+**CI split into four jobs** so the build goes green independently of the golden suite, and a
+**KiCad ERC/DRC gate** is wired for the Hardware Lead — it skips cleanly with no boards and
+fails loudly if boards exist without `kicad-cli`.
 
 ## In flight
 
 | Work | Owner | State |
 |---|---|---|
-| Block device + three ports | Software Lead | **Done**, unconfirmed |
-| CI gates rebuilt (#11, #12) | Software Lead | **Done**, verified both directions |
-| CRC-32 + vectors | Software Lead | **Done**, pinned against zlib |
-| WP-06 block device layer | Software Lead | Device layer done; superblock and index commit **held for DRAFT-3** |
-| WP-07 allocator, copy-on-write B | Software Lead | Held for DRAFT-3 |
+| DRAFT-3 landing | Software Lead | **Done** |
+| WP-06 read path | Software Lead | **Done**, unconfirmed |
+| WP-06 commit path | Software Lead | **Held** by structural Rule 1 |
+| WP-07 allocator, CoW Side B | Software Lead | Next, after WP-10 tests land |
+| WP-10 crash harness | Verification | Infrastructure landed; DRAFT-3 unblocks its adapters |
+| WP-11 golden suite | Verification | Runner built and proven; fixtures owed |
 
 ## Blocked
 
-Nothing is blocked. **Held by instruction**, per Decisions 002: index layout, the commit
-protocol, mount, promote, re-spool, duplicate, and the record path all wait for DRAFT-3 (2–3 days
-out). Building the commit path twice would cost more than waiting.
-
-**`main` branch protection is still not verified.** Plan §03 says nothing merges without
-Michael's review. Repository settings are not the Software Lead's to change.
+**Nothing.** Branch protection is on (Michael), so that item closes.
 
 ## Acceptance criteria flipped to passing
 
-**None.** The 64 self-test checks are the Software Lead's own claims about its own scaffolding
-and are explicitly not acceptance. Nothing can flip until the Verification Lead signs it off.
+**None.** The 129 self-test checks are the Software Lead's own claims about its own code and are
+explicitly not acceptance. `spec/acceptance.md` requires the Verification Lead's independent
+confirmation, and nothing has had it.
 
 ## What will hurt in three weeks
 
-- **The Verification Lead has reviewed a spec but has not yet written a test.** Its DRAFT-1
-  review found 22 issues including two that destroy a cartridge, so the arrangement is
-  demonstrably working. But `tests/golden/` is still empty, and WP-06 lands code the moment
-  DRAFT-3 arrives. The charter's ordering — tests written against the spec *before or alongside*
-  the implementation — is about to be tested for real, and it cannot be recovered retroactively.
-  **The shape of returned test source is no longer a question** — `tests/golden/MANIFEST.md`
-  states it, and the runner behind it is proven. What remains is that nobody has agreed to it.
-- **The seam still has no stated transport.** Decisions 001 §0 says Michael hands me spec text,
-  which covers one direction. Nothing says how findings and test source come back, at what
-  cadence, or what happens when Stream 2 is mid-review and Stream 1 is ready. Raised as issue #13
-  together with rule 1's enforceability and the definition of "mechanically" — they are one
-  topic, and it is now the critical path.
-- **No Hardware Lead.** WP-34 (thermal and safety budget) is a Phase 0 package and is not
-  started. The plan is explicit that it is written before the schematic, not after.
-- **The fourth caller-owned thing.** The PM asked me to look for where the engine next reaches
-  for something it should have been handed. Two candidates from building the device layer, both
-  logged for when DRAFT-3 lands: the engine has no clock, so anything wanting elapsed time during
-  a long `tape_dup` or re-spool must take it as a parameter; and `tape_dev.block_count` is
-  currently the device's claim about itself, which mount must validate rather than trust.
+- **Two real defects were found by my own gates this round, and both were invisible to every
+  other check.** `.bss` held 98 KB of `static` buffers in the mount path — not allocation, so
+  every existing gate passed them, but engine-owned RAM outside the caller's instance and a
+  **reentrancy bug**: `tape_dup(src, dst)` mounts two cartridges and they would have overwritten
+  each other's index. It would have surfaced when duplicate was implemented, looking like media
+  corruption. Caught only because the memory gate started counting `tape_instance_size()`.
+  The lesson worth keeping: a gate that measures the wrong quantity reads as green.
+- **RAM is at 72 % before the record path exists.** Two index arrays are 48 KiB each and
+  dominate. The commit path needs staging, and `TAPE_MAX_ENTRIES` is an engine memory constraint
+  rather than a media one (`engine-api` §4). If it gets tight, the honest lever is that constant,
+  not the budget.
+- **The golden suite is still the only red gate**, and it is red for a good reason. But WP-11's
+  fixtures are now the last thing standing between the engine and a cross-target contract that
+  can actually fail.
+- **`engine/port/dev_sim.c` and the verifier's `fault_block_device.c` overlap**, and theirs is
+  better: it models flush-required durability, where mine assumes every completed write is
+  durable. Raised as issue #16 with a recommendation to retire mine.

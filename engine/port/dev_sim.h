@@ -13,7 +13,7 @@
  * Two failure shapes, because they are genuinely different:
  *
  *   POWER LOSS   after N block-writes the device stops accepting writes and
- *                returns TAPE_ERR_IO forever. Blocks already written stay
+ *                returns TAPE_DEV_ERR_IO forever. Blocks already written stay
  *                written. This models the plug being pulled.
  *
  *   TORN WRITE   the Nth write lands partially: `torn_bytes` of the block are
@@ -26,7 +26,7 @@
 #ifndef TAPE_PORT_DEV_SIM_H
 #define TAPE_PORT_DEV_SIM_H
 
-#include "tape_dev.h"
+#include "port.h"
 
 enum tape_sim_mode {
     TAPE_SIM_HEALTHY = 0,
@@ -35,7 +35,7 @@ enum tape_sim_mode {
 };
 
 struct tape_dev_sim {
-    const struct tape_dev *inner;
+    const tape_dev *inner;
 
     enum tape_sim_mode mode;
     uint32_t fail_after_writes;  /* writes allowed before the fault */
@@ -53,8 +53,8 @@ struct tape_dev_sim {
  * wrapping the source slot must not manufacture a write path that guardrail 06
  * says does not exist.
  */
-void tape_dev_sim_bind(struct tape_dev_sim *st, struct tape_dev *dev,
-                       const struct tape_dev *inner);
+void tape_dev_sim_bind(struct tape_dev_sim *st, tape_dev *dev,
+                       const tape_dev *inner);
 
 void tape_dev_sim_arm(struct tape_dev_sim *st, enum tape_sim_mode mode,
                       uint32_t fail_after_writes, uint32_t torn_bytes);

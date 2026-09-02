@@ -1,4 +1,4 @@
-name: engine gates
+name: engine
 
 on:
   push:
@@ -6,25 +6,55 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Separate jobs, not one script, so each result is legible on its own. The build
+# going green must not be hidden behind the golden suite going red -- a
+# permanently-red pipeline stops being read, and then the first real failure
+# arrives against a background of red.
 jobs:
-  gates:
-    name: engine gates (golden suite red until WP-10 fixtures land)
+  build:
+    name: build (-Werror)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Toolchain
-        run: |
-          cc --version
-          objdump --version | head -1
-          nm --version | head -1
+        run: cc --version | head -1; objdump --version | head -1
+      - run: ./tools/ci/build.sh
 
-      # Every gate runs and reports, rather than stopping at the first failure.
-      # Six of seven gates pass. The golden suite is red because tests/golden/
-      # is empty, and those fixtures are the Verification Lead's (WP-10/WP-11) —
-      # not something this repo can or should satisfy on its own.
-      #
-      # Do not "fix" that by relaxing a gate, and do not let red become the
-      # background: every other gate is green, so a new failure here is real.
-      - name: Run all gates
-        run: ./tools/ci/all.sh
+  gates:
+    name: guardrail gates
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C engine all
+      # Guardrail 08 and 09, all decidable. See tools/README.md.
+      - name: allocation (no malloc, no libc file I/O)
+        run: ./tools/ci/audit-allocation.sh
+      - name: indirect calls funnel through dev.h
+        run: ./tools/ci/audit-indirect.sh
+      - name: stack depth <= 8 KiB
+        run: python3 tools/ci/audit-stack.py
+      - name: memory budgets (RAM 200 KiB, .rodata 32 KiB)
+        run: ./tools/ci/audit-memory.sh
+
+  unit:
+    name: scaffolding + verifier infrastructure
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C engine all
+      - run: ./tools/ci/unit.sh
+
+  golden:
+    name: golden suite (awaiting WP-11 fixtures)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C engine all && make -C tests all
+      # Red until the Verification Lead's fixtures and manifest land. That is
+      # the only expected red in this pipeline; every other job above is green,
+      # so a new failure anywhere else is a real signal.
+      # Do not "fix" this by relaxing a gate.
+      - run: ./tools/ci/run-golden.sh

@@ -370,3 +370,135 @@ suite would then be certifying the thing it was built to prevent.
 
 **Cost to reverse.** Trivial technically. The rule to keep is that a rejected fixture is a
 question about the fixture, never a request for a converter.
+
+---
+
+## ADR-018 — C-60 is the standard cartridge
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-002), specified by PM (Decisions 003, tapefs §2)
+
+**Decision.** `nominal_length_s` = 3600. 635 MB, 1 211 chunks, ~29 s copy on plain high-speed
+4-bit. C-90 and C-120 are permitted by the format and copy more slowly; the label says what a
+cartridge is.
+
+**Rationale.** The 30-second copy no longer requires UHS-I at all. That removes the hardest
+electrical risk on the board — 1.8 V switching, the voltage-switch sequence, tuned delay
+lines — from the critical path for the headline requirement, and demotes SDR50 from
+"must work" to optional upside.
+
+**Cost to reverse.** A format-time constant, not a re-spec — which is exactly what ADR-008 was
+for. Region sizes derive from `nominal_length_s` at format time, so changing the standard length
+costs nothing already written.
+
+---
+
+## ADR-019 — Resume position is device-side, `(uuid, side)` → frames
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-004)
+
+**Decision.** The player remembers the last 64 cartridges, keyed `(cartridge_uuid, side)`,
+position in frames as u32. Checkpoint every 10 s and on every transport state change; resume
+2 s early. LRU eviction. Promote clears `(uuid, A)`; reset B clears `(uuid, B)`.
+
+**Rationale.** Forced: the source slot is read-only, so a cartridge played there has no writable
+surface. Michael accepted the consequence explicitly — a tape resumes where *this player* left
+it, not where the tape was last played — as a deliberate departure from the cassette metaphor
+rather than a side effect.
+
+Frames rather than bytes was the round-1 packet's recommendation, adopted: a `u32` of frames
+has 12× headroom against the longest reachable timeline, where bytes would have had 3.0×.
+
+**Cost to reverse.** Low while it is 64 entries in flash. It becomes expensive only if a second
+consumer of the UUID appears, which `tapefs` §11 forbids by naming the position table as its
+sole sanctioned consumer.
+
+---
+
+## ADR-020 — The record light shows Side B headroom
+
+**Date:** 2026-09-02 · **Decided by:** Michael (Q-003)
+
+**Decision.** Colour from `tape_status().entries_free` as a fraction of `TAPE_MAX_ENTRIES`:
+green ≥ 25 % free, yellow < 25 %, red at 0. At red the record button does not hold — the
+solenoid releases it. Off while not armed.
+
+**Rationale.** My recommendation was the button refusing to hold, reusing an interlock the child
+already knows. Michael took that and added warning before the wall, which is better: a rule you
+meet without warning is a rule you experience as the device breaking. With run-length entries
+(ADR-013) a child will realistically never reach red.
+
+**Cost to reverse.** Low. `entries_free` is already in `tape_status`, and the thresholds are
+firmware constants.
+
+---
+
+## ADR-021 — `spec/` has two tiers
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 003)
+
+**Decision.** `spec/` is PM-owned and frozen. `spec/hw/` is Hardware-Lead-owned and versioned,
+with notification-not-approval on `board-rev-a.md`.
+
+**Rationale.** The single-tier rule made every measurement a PM escalation, which would have
+made the thermal budget stale by design — it has to track reality as boards are measured.
+
+**Cost to reverse.** Low, but the tiers must stay legible: a document that moves tiers silently
+is worse than either arrangement, because a reader cannot tell whose sign-off it carries.
+
+---
+
+## ADR-022 — Structural Rule 1: implementation waits on `main` for its tests
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 003 §1b), proposed by Software Lead
+
+**Decision.** Engine implementation stays on unmerged branches until the Verification Lead's
+tests for that behaviour have landed on `main`, so `main` carries spec → tests → implementation
+in that order.
+
+**Rationale.** Rule 1 as originally written was discipline, and the charter's own reasoning
+(guardrails 05 and 06) says discipline is the weak form. The PM's honest caveat is worth keeping
+attached: branches on a public repo are still world-readable, so this makes the ordering
+**auditable**, not the code unreadable. Combined with the verifier's standing instruction not to
+open `engine/`, that is enough.
+
+**Cost to reverse.** Low mechanically. What it would cost is the evidence: once implementation
+merges ahead of tests, no later inspection can tell whether a test was written against the spec
+or against the code.
+
+---
+
+## ADR-023 — Ports return their own codes, not `tape_result`
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** Block-device callbacks return 0 on success and non-zero on failure, using
+port-local codes in `engine/port/port.h`. They do not return `tape_result`.
+
+**Rationale.** `spec/engine-api.md` §3 says exactly this, and the engine maps any non-zero to
+`TAPE_ERR_IO`. My provisional header had ports returning engine error codes and had invented
+`TAPE_ERR_RANGE` and `TAPE_ERR_NOT_IMPLEMENTED`, neither of which exists in DRAFT-3's enum.
+Landing DRAFT-3 exposed both, which is the spec-upstream-of-code contract working.
+
+**Cost to reverse.** Trivial now. The rule worth keeping: a port that needs a new *engine* error
+code is a spec finding, not a header edit.
+
+---
+
+## ADR-024 — The engine holds no static buffers; all RAM is in the caller's instance
+
+**Date:** 2026-09-02 · **Decided by:** Software Lead
+
+**Decision.** No `static` mutable storage in `engine/src`. Index staging and the candidate index
+live in `struct tape`, sized by `tape_instance_size()`.
+
+**Rationale.** Found by the memory gate once it began counting `tape_instance_size()` per
+`engine-api` §4: `.bss` was 98 KB of `static` buffers in the mount path. They were not
+allocation, so they passed every other gate — but they are engine-owned RAM outside the caller's
+instance, and worse, **they break reentrancy**. `tape_dup(src, dst)` mounts two cartridges at
+once and would have had them overwrite each other's index.
+
+That bug would not have appeared until duplicate was implemented, and it would have looked like
+media corruption rather than a shared buffer.
+
+**Cost to reverse.** Low now, and the gate keeps it reversed: RAM went from 197 KB (96 % of
+budget, with the dominant term uncounted) to 148 KB (72 %), all of it in the instance.
