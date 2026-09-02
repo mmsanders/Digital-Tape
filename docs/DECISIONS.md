@@ -502,3 +502,62 @@ media corruption rather than a shared buffer.
 
 **Cost to reverse.** Low now, and the gate keeps it reversed: RAM went from 197 KB (96 % of
 budget, with the dominant term uncounted) to 148 KB (72 %), all of it in the instance.
+
+---
+
+## ADR-025 — One fault injector, and it is the Verification Lead's
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 004 §4), from issue #16
+
+**Decision.** `engine/port/dev_sim.c` loses its power-loss and torn-write modes and becomes a
+pass-through that counts operations. All fault injection is
+`tests/crash/fault_block_device.[ch]`, which models flush-required and write-through durability
+as selectable modes.
+
+**Rationale — and it generalises, which is why it is written at length.**
+
+This is not a preference between two implementations. One of them is **structurally incapable of
+detecting a whole class of bug.**
+
+`tapefs` §8's entire safety argument is an *ordering over flushes* — chunks, flush, entries,
+flush, header, flush — and §13 lists "a flush that returns success means data has reached media"
+as an **assumption**, not a fact. A simulator in which every completed write is durable cannot
+fail any test that depends on a flush having actually happened. It would report the commit
+ordering as safe whether or not it was.
+
+The proof is already on the record: the verifier found exactly that defect in DRAFT-1 by
+reading — V-004, a commit protocol with no final flush. My simulator could never have caught it,
+however many cases were run through it. Keeping both would have meant half the crash coverage
+running against a model that cannot fail.
+
+**The transferable rule:** a test double that can only produce outcomes the code already handles
+is not coverage, it is decoration. Before adding a second convenient simulator, ask which class
+of failure it is incapable of producing.
+
+**Cost to reverse.** Low to re-add modes; high in what it would quietly cost. The tell that this
+has been reversed in spirit is a crash suite that runs green faster than it used to.
+
+---
+
+## ADR-026 — Every gate must be proven able to go red
+
+**Date:** 2026-09-02 · **Decided by:** PM (Decisions 004 §6), from the `.bss` finding
+
+**Decision.** `tools/ci/verify-gates.sh` plants a real violation for each guardrail gate, asserts
+it goes red, removes it, and asserts it goes green. It runs in CI. Adding a gate means adding its
+red case.
+
+**Rationale.** The allocation gate ran green for two rounds while 98 KB of `static` buffers sat
+in `.bss`. It was asking *"is anything malloc'd?"* when guardrail 08's intent is *"does the
+engine's RAM fit, and is it all in the caller's instance?"* Nothing was malloc'd. The gate was
+simultaneously correct and useless, and nothing in a green run could have told anyone.
+
+**A gate that measures the wrong quantity reads as green.** The remedy is not "write better
+gates" — it is that a gate never observed failing has not been tested, and green from an
+untested gate is indistinguishable from green from a broken one.
+
+Verified: 11/11, including the `.bss` case that motivated it.
+
+**Cost to reverse.** Trivial to delete, and its absence is invisible — which is the argument for
+keeping it. The failure mode it prevents produced a reentrancy bug that would have surfaced as
+media corruption months later.

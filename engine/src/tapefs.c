@@ -4,6 +4,46 @@
  *
  * Everything here is pure: it takes bytes and produces structures or refusals.
  * No device access, so it is trivially testable against synthetic media.
+ *
+ * ============================================================================
+ *  PROVISIONAL — DO NOT EXTEND THESE RULES UNTIL DRAFT-4  (PM Decisions 004 §5)
+ * ============================================================================
+ *
+ * Five verifier findings against DRAFT-3 land directly on this file. Two are
+ * blockers and both are CONFIRMED present in this code, with the spec's own
+ * repro values:
+ *
+ *   V3-001  blocker  tape_entry_last_chunk() computes in u32 and wraps before
+ *                    any bounds test. Confirmed: first=0, start_frame=131071,
+ *                    frame_count=0xFFFFFFFF gives last_chunk_id == 0, when the
+ *                    true value is 32768. Zero is the MOST permissive result
+ *                    possible -- it passes the `last < first` guard below and
+ *                    every bound including a_high_water. A CRC-correct index
+ *                    claiming a 4-billion-frame run validates as a single chunk
+ *                    at position 0. On Side A this defeats immutability.
+ *                    Fix needs checked 64-bit intermediates; DRAFT-4 defines it.
+ *
+ *   V3-004  blocker  The geometry inequality accepts equality, so the last
+ *                    chunk's final block can BE the mirror superblock.
+ *                    Confirmed: block_count 6144, chunk store ends at 6144,
+ *                    mirror at 6143 -- and tape_sb_check_geometry accepts it.
+ *                    Filling that chunk overwrites the mirror; a superblock
+ *                    update overwrites referenced audio.
+ *
+ *   V3-005  major    DRAFT-3 has NO normative index-slot selection algorithm.
+ *                    What pick_live_index() does in mount.c was invented here.
+ *
+ *   V3-006  major    §4.1 orders repair before the version check while also
+ *                    forbidding any touch of unsupported media. This code
+ *                    encodes one of two incompatible orders.
+ *
+ *   V3-009  major    Engine invariant 4 contradicts tape_reset_side_b, which
+ *                    aliases Side A chunks below a_high_water by design.
+ *
+ * These are NOT fixed here on purpose. The spec is upstream of the code
+ * (contract 1): DRAFT-4 changes the rules, and guessing the fix now would mean
+ * implementing a rule that is not normative and may differ. The bugs are real
+ * and the exposure is bounded -- nothing writes to media yet.
  */
 
 #include <string.h>
@@ -28,7 +68,11 @@ uint64_t tape_rd64(const unsigned char *p)
 
 uint32_t tape_entry_last_chunk(const struct tape_entry *e)
 {
-    /* spec §5.1. frame_count >= 1 is a validity precondition, so the -1 cannot
+    /* PROVISIONAL — V3-001 blocker. This is DRAFT-3 §5.1 transcribed directly,
+       and the direct transcription is the bug: every operand is u32, so the
+       expression wraps before any caller can test it. Left as written because
+       the spec is upstream of the code and DRAFT-4 defines the widening rule.
+       spec §5.1. frame_count >= 1 is a validity precondition, so the -1 cannot
        underflow on a valid entry; callers check frame_count first. */
     return e->first_chunk_id
          + (e->start_frame + e->frame_count - 1u) / TAPE_CHUNK_FRAMES;
@@ -100,7 +144,12 @@ tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_coun
     if (sb->total_chunks < 1u)                              { return TAPE_ERR_GEOMETRY; }
     if (sb->a_high_water > sb->total_chunks)                { return TAPE_ERR_GEOMETRY; }
 
-    /* 64-bit, so a large total_chunks cannot wrap into a passing value. */
+    /* 64-bit, so a large total_chunks cannot wrap into a passing value.
+       PROVISIONAL — V3-004 blocker: `>` accepts equality, and at equality the
+       last chunk's final block IS the mirror superblock at block_count - 1.
+       The verifier's fix is `<= block_count - 1` with a prior
+       `block_count > lba_chunk_base` check. Not applied here: DRAFT-4 owns the
+       inequality, and changing it now would move the refusal tests off-spec. */
     chunk_end = (uint64_t)sb->lba_chunk_base
               + (uint64_t)sb->total_chunks * (uint64_t)TAPE_CHUNK_BLOCKS;
     if (chunk_end > (uint64_t)block_count)                  { return TAPE_ERR_GEOMETRY; }
@@ -159,7 +208,8 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
 
         /* spec §5.2: for Side A the bound is the LAST chunk of each run, not the
            first. This is the check that keeps the sandbox out of the music, and
-           an off-by-one at the end of a run is exactly how it would fail. */
+           an off-by-one at the end of a run is exactly how it would fail.
+           PROVISIONAL — V3-001 defeats this check via the u32 wrap above. */
         if (side == (uint8_t)TAPE_SIDE_A && last >= sb->a_high_water) {
             return TAPE_ERR_NO_VALID_INDEX;
         }

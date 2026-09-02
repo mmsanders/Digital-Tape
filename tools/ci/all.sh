@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(dirname "$0")" || exit 2
 
 gates=(build.sh audit-allocation.sh audit-indirect.sh audit-stack.py
-       audit-memory.sh unit.sh run-golden.sh)
+       audit-memory.sh verify-gates.sh unit.sh run-golden.sh)
 failed=()
 
 for g in "${gates[@]}"; do

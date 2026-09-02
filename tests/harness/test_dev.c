@@ -82,52 +82,28 @@ int main(void)
     }
     CHECK_EQ_INT(tape_dev_file_close(&f), TAPE_DEV_OK);
 
-    /* --- simulator: power loss --- */
+    /* --- counter pass-through, and guardrail 06 through wrapping --- */
     CHECK_EQ_INT(tape_dev_file_open(&f, &dev, path, 1), TAPE_DEV_OK);
     {
         struct tape_dev_sim sim;
         tape_dev sd;
         tape_dev_sim_bind(&sim, &sd, &dev);
         CHECK(sd.write != NULL);
-        tape_dev_sim_arm(&sim, TAPE_SIM_POWER_LOSS, 2u, 0u);
 
         fill(w, 0x22);
         CHECK_EQ_INT(sd.write(sd.ctx, 10u, 1u, w), TAPE_DEV_OK);
-        CHECK_EQ_INT(sd.write(sd.ctx, 11u, 1u, w), TAPE_DEV_OK);
-        /* Third write is past the limit: dies, and stays dead. */
-        CHECK_EQ_INT(sd.write(sd.ctx, 12u, 1u, w), TAPE_ERR_IO);
-        CHECK_EQ_INT(sd.write(sd.ctx, 13u, 1u, w), TAPE_ERR_IO);
-        CHECK_EQ_U32(sim.writes_seen, 2u);
-        CHECK(sim.dead != 0);
-
-        /* What landed before the cut is still there; what did not, is not. */
-        CHECK_EQ_INT(dev.read(dev.ctx, 11u, 1u, r), TAPE_DEV_OK);
+        CHECK_EQ_INT(sd.read(sd.ctx, 10u, 1u, r), TAPE_DEV_OK);
         CHECK_MEM_EQ(r, w, TAPE_BLOCK_SIZE);
-        CHECK_EQ_INT(dev.read(dev.ctx, 12u, 1u, r), TAPE_DEV_OK);
-        {
-            unsigned char zero[TAPE_BLOCK_SIZE];
-            memset(zero, 0, sizeof zero);
-            CHECK_MEM_EQ(r, zero, TAPE_BLOCK_SIZE);
-        }
-    }
+        CHECK_EQ_INT(sd.flush(sd.ctx), TAPE_DEV_OK);
+        CHECK_EQ_U32(sim.writes_seen, 1u);
+        CHECK_EQ_U32(sim.reads_seen, 1u);
+        CHECK_EQ_U32(sim.flushes_seen, 1u);
 
-    /* --- simulator: torn write --- */
-    {
-        struct tape_dev_sim sim;
-        tape_dev sd;
-        unsigned char before[TAPE_BLOCK_SIZE];
-
-        fill(before, 0x33);
-        CHECK_EQ_INT(dev.write(dev.ctx, 20u, 1u, before), TAPE_DEV_OK);
-
-        tape_dev_sim_bind(&sim, &sd, &dev);
-        tape_dev_sim_arm(&sim, TAPE_SIM_TORN_WRITE, 0u, 100u);
-        fill(w, 0x44);
-        CHECK_EQ_INT(sd.write(sd.ctx, 20u, 1u, w), TAPE_ERR_IO);
-
-        CHECK_EQ_INT(dev.read(dev.ctx, 20u, 1u, r), TAPE_DEV_OK);
-        CHECK_MEM_EQ(r, w, 100u);                       /* the part that landed */
-        CHECK_MEM_EQ(r + 100, before + 100, TAPE_BLOCK_SIZE - 100u); /* and the part that did not */
+        /* Counting is how engine-api invariant 12 gets asserted: tape_render
+           must perform zero block-device calls. */
+        tape_dev_sim_reset(&sim);
+        CHECK_EQ_U32(sim.writes_seen, 0u);
+        CHECK_EQ_U32(sim.reads_seen, 0u);
     }
     CHECK_EQ_INT(tape_dev_file_close(&f), TAPE_DEV_OK);
     (void)remove(path);

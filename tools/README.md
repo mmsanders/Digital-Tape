@@ -17,7 +17,8 @@ Every gate is a standalone script that runs locally exactly as it runs in CI.
 | `audit-indirect.sh` | Guardrail 09 — all `tape_dev` access funnels through `engine/src/dev.h`, plus a link-time backstop against function pointers in data sections |
 | `audit-stack.py` | Guardrail 08 — max stack depth ≤ 8 KiB from GCC's own `-fstack-usage`/`-fcallgraph-info`. **Subsumes the recursion check**: a cycle makes depth unbounded |
 | `audit-memory.sh` | Guardrail 08 — RAM ≤ 200 KiB, `.rodata` ≤ 32 KiB. Both print every run |
-| `unit.sh` | Software Lead scaffolding self-tests. **Not acceptance** |
+| `verify-gates.sh` | **The meta-gate.** Plants a real violation for each gate above, asserts it goes red, removes it, asserts it goes green. A gate that has never failed has not been tested |
+| `unit.sh` | Software Lead scaffolding self-tests plus the Verification Lead's crash infrastructure. **Not acceptance** |
 | `run-golden.sh` | Contract 3 — the golden suite. Delegates to `tests/harness/run-golden.sh`: manifest-driven, byte-exact comparison, audible diff on failure. Fixtures and manifest are the Verification Lead's |
 
 ### Two archives, and why the gates scope to one
@@ -42,10 +43,10 @@ scaffold rather than by it failing:
 - **"No recursion" was a proxy.** The requirement is a bounded stack. Measuring depth directly
   gives a number worth reading in review, and recursion falls out for free.
 
-### Verified in both directions
+### Verified in both directions, now automatically
 
-Every gate is checked against deliberately violating code, not only against a clean tree — a
-gate that only fails on an empty repo proves nothing. Confirmed catches: a direct `d->read()`
+`verify-gates.sh` does this in CI rather than by hand each round. 11/11 checks: each gate goes
+red on a real violation and green without it. Confirmed catches: a direct `d->read()`
 call in `engine/src`; a static function-pointer table in `.data.rel.ro`; mutual recursion
 (including the tail-call form the optimiser emits as `jmp`); a 12 KB call chain; a 300 KB
 `.bss`; a 40 KB `.rodata`; `malloc` and `fopen` references. VLAs are rejected at compile time by

@@ -4,6 +4,28 @@
  *
  * The order of refusals in tape_mount is itself normative and each step has a
  * test that exercises its refusal path (spec/acceptance.md, WP-06).
+ *
+ * PROVISIONAL — DO NOT EXTEND THE MOUNT RULES UNTIL DRAFT-4 (PM Decisions 004 §5).
+ *
+ *   V3-005  major  DRAFT-3 has no normative index-slot selection algorithm.
+ *                  DRAFT-1 had one; it was dropped in restructuring. Everything
+ *                  pick_live_index() below does -- higher sequence wins, equal
+ *                  sequence must be byte-identical, neither valid is
+ *                  NO_VALID_INDEX -- was INVENTED HERE by analogy with §4.1.
+ *                  It is reasonable and it is not normative. Two conforming
+ *                  implementations could mount different generations after the
+ *                  same crash, which is precisely what a crash oracle cannot
+ *                  tolerate.
+ *
+ *   V3-006  major  §4.1 says use the one valid copy and rewrite the other, then
+ *                  says an unsupported version must touch nothing and never
+ *                  trigger repair. Both cannot hold. resolve_superblock() below
+ *                  picks the no-mutation reading -- it selects a candidate,
+ *                  then checks version -- which happens to be the safe half,
+ *                  but it is a choice between contradictory text, not
+ *                  conformance to it.
+ *
+ * See engine/src/tapefs.c for V3-001, V3-004 and V3-009.
  */
 
 #include <string.h>
@@ -147,9 +169,12 @@ static tape_result load_slot(struct tape *t, uint32_t lba, uint8_t side,
     return tape_index_parse(hdr, t->entry_bytes, side, &t->sb, out);
 }
 
-/* Pick the live slot for a side: higher sequence with a valid CRC. Equal and
-   both valid but differing is TAPE_ERR_INCONSISTENT, which format makes
-   unreachable by leaving exactly one valid slot per side (§9.6). */
+/* PROVISIONAL — V3-005: this algorithm is not in DRAFT-3. It is invented by
+   analogy with the §4.1 superblock rules. Pick the live slot for a side: higher
+   sequence with a valid CRC. Equal and both valid but differing is
+   TAPE_ERR_INCONSISTENT, which format makes unreachable by leaving exactly one
+   valid slot per side (§9.6). DRAFT-4 is expected to make this normative, and
+   it may not match. */
 static tape_result pick_live_index(struct tape *t, tape_side side)
 {
     /* The scratch index is the instance's second index buffer (§4). It is free

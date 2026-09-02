@@ -1,5 +1,7 @@
 # spec/engine-api.md — Tape Engine API v1.0
 
+> **STATUS: DRAFT-3. NOT FROZEN. Four blocker findings open — see Digital-Tape-Verification `findings/spec-review-draft3.md`. DRAFT-4 pending PM disposition.**
+
 **Revision:** DRAFT-3 · **Issued:** 2 Sep 2026 · **Status:** for adversarial review; not frozen
 **Owner:** Program Manager. Changes require PM sign-off.
 **Companion:** `spec/tapefs-v1.md` DRAFT-3, normative for everything on media.

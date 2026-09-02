@@ -55,6 +55,19 @@ wrong.
 nothing else. Do not add `timeout_ms` to any engine call — it will look like a
 bug fix during SD bring-up, and it is a guardrail violation.
 
+### When a gate has never gone red, confirm it can
+
+A gate that measures the wrong quantity reads as green. The allocation gate ran
+green for two rounds while 98 KB of `static` buffers sat in `.bss` — it was
+asking *"is anything malloc'd?"* when guardrail 08's actual intent is *"does the
+engine's RAM fit, and is it all in the caller's instance?"* Nothing was
+malloc'd. The gate was right and useless at the same time.
+
+So every guardrail gate is proven able to fail: `tools/ci/verify-gates.sh`
+plants a real violation for each one, asserts it goes red, removes it, and
+asserts it goes green. It runs in CI. **Adding a gate means adding its red
+case.**
+
 ### The tiebreaker
 
 When a decision is genuinely ambiguous, the tiebreaker is **not** which option is more

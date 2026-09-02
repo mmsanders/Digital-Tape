@@ -37,6 +37,17 @@ jobs:
       - name: memory budgets (RAM 200 KiB, .rodata 32 KiB)
         run: ./tools/ci/audit-memory.sh
 
+  meta:
+    name: gates can go red
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # A gate that has never gone red is a gate nobody has tested. This plants
+      # a real violation for each one and asserts it fails. See PM Decisions
+      # 004 §6 and tools/ci/verify-gates.sh.
+      - run: ./tools/ci/verify-gates.sh
+
   unit:
     name: scaffolding + verifier infrastructure
     needs: build

@@ -1,5 +1,7 @@
 # spec/tapefs-v1.md — TAPEFS v1.0
 
+> **STATUS: DRAFT-3. NOT FROZEN. Four blocker findings open — see Digital-Tape-Verification `findings/spec-review-draft3.md`. DRAFT-4 pending PM disposition.**
+
 **Revision:** DRAFT-3 · **Issued:** 2 Sep 2026 · **Status:** for adversarial review; not frozen
 **Owner:** Program Manager. Changes require PM sign-off (escalation trigger #1).
 **Supersedes:** DRAFT-1 (31 Aug). Incorporates verification findings V-001…V-022, issues #3, #4, #14, and Michael's answers to Q-002, Q-003, Q-004.
