@@ -1,70 +1,72 @@
 # STATUS
 
-**Updated:** 2026-09-02 · **Phase:** 1 (engine) · **Updated by:** Software Lead
-**Charter Rev C · specs DRAFT-3 · CI 6/7 green**
+**Updated:** 2026-09-02 · **Phase:** 1 (engine), held · **Updated by:** Software Lead
+**Charter Rev C · specs DRAFT-3, NOT FROZEN, four blockers open · CI 7/8 green**
 
 ---
 
 ## What changed since last time
 
-**DRAFT-3 landed**, mechanically and byte-identical to the PM's files (verified with `cmp`).
-`spec/tapefs-v1.md`, `spec/engine-api.md`, and the new `spec/acceptance.md`.
+**PR #17 merged**, with both of Decisions 004's conditions met. `main` now carries DRAFT-3
+rather than my stale WP-02 draft — which is the more important half of the merge, because until
+now anyone reading `main` was reading the wrong spec.
 
-**The Verification Lead's infrastructure is in the repo.** Its crash harness and fault block
-device were pulled from `Digital-Tape-Verification` per the new transport rule and **built and
-passed unmodified** — no mechanical fix was needed. They now run in CI. This is the first time
-the seam has actually carried anything, and it worked.
+**Both DRAFT-3 blockers confirmed against this code**, not taken on trust:
 
-**WP-06 read path is implemented**: superblock parse, the §4.1 two-copy protocol, version
-refusal before repair, `state`, full geometry validation, §5.2 index validation, and §7
-`free_next` derivation. 60 checks cover **every refusal path in §4.1 and §5.2** — the WP-06
-acceptance criterion — including the one §5.2 calls out by name: a Side A run that *starts*
-below `a_high_water` and *ends* above it, which a first-chunk-only check would accept.
+- **V3-001** — `last_chunk_id` wraps to **0** on the spec's own repro values, where the true
+  value is 32768. Zero is the most permissive result available: it passes the `last < first`
+  guard *and* every bound including `a_high_water`. A CRC-correct index claiming a
+  4-billion-frame run validates as one chunk at position 0. On Side A that defeats immutability.
+- **V3-004** — the geometry check accepts a chunk store whose last block *is* the mirror
+  superblock. Confirmed numerically.
 
-**The commit path is deliberately not written.** Structural Rule 1 (ADR-022): it waits for
-WP-10's tests on `main`.
+Neither is fixed. The spec is upstream of the code; DRAFT-4 owns the rules. Both are marked
+PROVISIONAL at the head of `tapefs.c` and `mount.c` and at each affected check.
 
-**CI split into four jobs** so the build goes green independently of the golden suite, and a
-**KiCad ERC/DRC gate** is wired for the Hardware Lead — it skips cleanly with no boards and
-fails loudly if boards exist without `kicad-cli`.
+**One fault injector, not two** (#16 closed). `dev_sim` lost its durability model. The reasoning
+is ADR-025 and it generalises: a simulator where every completed write is durable is
+*structurally incapable* of failing any test that depends on a flush having happened — and the
+verifier found exactly that defect in DRAFT-1 by reading.
+
+**Every gate is now proven able to go red.** `tools/ci/verify-gates.sh`, 11/11, in CI.
 
 ## In flight
 
 | Work | Owner | State |
 |---|---|---|
-| DRAFT-3 landing | Software Lead | **Done** |
-| WP-06 read path | Software Lead | **Done**, unconfirmed |
+| DRAFT-4 | PM | **The critical path.** 4 blockers + 11 majors; days, not hours |
+| WP-06 validity/mount rules | Software Lead | **Held** by Decisions 004 §5 until DRAFT-4 |
 | WP-06 commit path | Software Lead | **Held** by structural Rule 1 |
-| WP-07 allocator, CoW Side B | Software Lead | Next, after WP-10 tests land |
-| WP-10 crash harness | Verification | Infrastructure landed; DRAFT-3 unblocks its adapters |
-| WP-11 golden suite | Verification | Runner built and proven; fixtures owed |
+| WP-10 crash harness | Verification | Infrastructure in CI; adapters need DRAFT-4 |
+| WP-11 golden suite | Verification | Runner proven; fixtures owed |
 
 ## Blocked
 
-**Nothing.** Branch protection is on (Michael), so that item closes.
+Nothing is blocked in the sense of idle. Everything downstream of the format rules is **held by
+instruction**, which is different and correct: five findings land on the read path, and building
+further on rules that are about to change would be work done twice.
 
 ## Acceptance criteria flipped to passing
 
-**None.** The 129 self-test checks are the Software Lead's own claims about its own code and are
-explicitly not acceptance. `spec/acceptance.md` requires the Verification Lead's independent
-confirmation, and nothing has had it.
+**None**, and one moved backwards. WP-06's criterion says every §4.1 and §5.2 mount rule has a
+refusal test — 60 checks do that, but §5.2 and §4.1 are two of the sections DRAFT-4 is expected
+to change materially, so those tests encode rules that are provisional. Nothing has the
+Verification Lead's independent confirmation.
 
 ## What will hurt in three weeks
 
-- **Two real defects were found by my own gates this round, and both were invisible to every
-  other check.** `.bss` held 98 KB of `static` buffers in the mount path — not allocation, so
-  every existing gate passed them, but engine-owned RAM outside the caller's instance and a
-  **reentrancy bug**: `tape_dup(src, dst)` mounts two cartridges and they would have overwritten
-  each other's index. It would have surfaced when duplicate was implemented, looking like media
-  corruption. Caught only because the memory gate started counting `tape_instance_size()`.
-  The lesson worth keeping: a gate that measures the wrong quantity reads as green.
-- **RAM is at 72 % before the record path exists.** Two index arrays are 48 KiB each and
-  dominate. The commit path needs staging, and `TAPE_MAX_ENTRIES` is an engine memory constraint
-  rather than a media one (`engine-api` §4). If it gets tight, the honest lever is that constant,
-  not the budget.
-- **The golden suite is still the only red gate**, and it is red for a good reason. But WP-11's
-  fixtures are now the last thing standing between the engine and a cross-target contract that
-  can actually fail.
-- **`engine/port/dev_sim.c` and the verifier's `fault_block_device.c` overlap**, and theirs is
-  better: it models flush-required durability, where mine assumes every completed write is
-  durable. Raised as issue #16 with a recommendation to retire mine.
+- **The format has four open blockers and Q-001 has moved out again.** That is the right call —
+  freezing a format the verifier has shown to be broken means reflashing cartridges later for
+  something we knew today — but the Phase 0 gate is now the longest-standing open item in the
+  project, and everything in Streams 1, 3, 4 and 5 sits behind it.
+- **Two rounds, two silent-desync failures.** The unversioned charter, then a stale spec on
+  `main` that three streams would have read as truth. Both were caught by someone noticing, not
+  by a mechanism. The charter now carries a revision and the specs now carry a status banner;
+  there is still nothing that *detects* the next instance.
+- **V3-005 is the one I would watch.** DRAFT-3 has no index-slot selection algorithm at all, so
+  what `pick_live_index` does was invented by analogy. It is reasonable and it is not normative,
+  and two conforming implementations could mount different generations after the same crash —
+  which is precisely the thing a crash oracle cannot tolerate.
+- **RAM is at 72 % before the commit and record paths add their state.** Two index arrays
+  dominate at 48 KiB each. If it tightens, the honest lever is `TAPE_MAX_ENTRIES` — an engine
+  memory constraint, not a media one — not the budget.
