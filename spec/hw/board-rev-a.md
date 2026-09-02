@@ -60,47 +60,51 @@ card slots at UHS-I, LiPo with a switching charger, solenoid driver, LED banks.
 | MCU | i.MX RT1062 (600 MHz, 196-MAPBGA) | `PROPOSED` |
 | Boot flash | QSPI NOR | `PROPOSED` |
 | PSRAM | APS6404L class, QSPI | `PROPOSED` |
-| Codec | SGTL5000 — **`XNBA3` suffix, not `XNAA3`** | `PROPOSED` — see the risk note below |
+| Codec | **`SGTL5000XNBA3`** (HVQFN32, 5×5 mm, 0.5 mm pitch) | **`ACTIVE` confirmed** — NXP part page, 2 Sep 2026 |
 | Card slots | 2 × microSD via USDHC1 / USDHC2, UHS-I | `PROPOSED` |
 | Charger | Switching buck with hardware JEITA · `spec/hw/thermal-budget.md` §5 | `PROPOSED` |
 | Solenoid driver | One-shot + RC lockout + PPTC · `thermal-budget.md` §6 | `PROPOSED` |
 
-> **Codec — resolved. Specify `SGTL5000XNBA3`, not `XNAA3`.**
+> **Codec — confirmed `ACTIVE` from NXP's own part page (2 Sep 2026). Specify
+> `SGTL5000XNBA3`.** First primary-source confirmation of any part on this board.
 >
-> The aggregator's `Obsolete` was correct but attached to the wrong suffix. NXP PCN
-> **202201003DN** is titled *"Discontinuation Notification with Product Migration for
-> SGTL5000XNAA3/R2 Due to ASECL Punch QFN Line End-of-Service"*: the **`XNAA3`/`R2` suffix is
-> discontinued** (punch-QFN assembly line retired, effective ~March 2022), **migrating to
-> `SGTL5000XNBA3`/`R2`** in a sawn-QFN package.
+> | | `SGTL5000XNBA3` | `SGTL5000XNBA3R2` |
+> |---|---|---|
+> | Status | **ACTIVE** | **ACTIVE** |
+> | 12NC | 935430641557 | 935430641518 |
+> | Packing | Tray, bakeable, drypack | Reel 13", drypack |
+> | Min order qty | **490** | **5000** |
+> | NXP direct stock | 257 | — |
+> | **Factory lead time** | **39 weeks** | **39 weeks** |
+> | Budgetary price | $3.47 @ 1K | $3.47 @ 1K |
 >
-> **No SGTL5000 variant appears in PDN 202504001DN** (16 Apr 2025, the bulk EOL notice whose
-> part list is not in any search snippet). Confirmed 2 Sep by text search of two independent
-> mirrors — Richardson RFPD and DigiKey — both returning zero hits for `SGTL`. That was the last
-> open risk, and it is closed.
+> **Package: HVQFN32** — plastic, thermal-enhanced, very thin quad flat, no leads; 32 terminals;
+> **0.5 mm pitch; 5 × 5 × 0.85 mm body**. Operating range **−40 °C to +85 °C**. Analog supply
+> 1.62–3.6 V. Supplied in drypack and bakeable, so it is moisture-sensitive and the assembler
+> must handle it accordingly — a line for the WP-27 assembly notes.
 >
-> Corroboration from the other direction: PJRC cut Audio Shield **Rev D2 in Jan 2023 because of
-> 32-pin SGTL5000 shortages**, and returned to **Rev D in Feb 2025**, widely stocked. The part is
-> being bought in volume today.
+> This closes the lifecycle question that ran from round 1. The `Obsolete` on the aggregator was
+> real but attached to `XNAA3`, discontinued by PCN 202201003DN when its punch-QFN line retired;
+> `XNBA3` is NXP's own migration path and reads `ACTIVE` today. **A BOM written from search hits
+> would have said `XNAA3`.**
 >
-> **The family is alive; the suffix most search results point at is dead.** A BOM written from
-> those hits would have said `XNAA3`. Caught before layout, which is the entire point of the
-> rule.
+> **Two findings larger than the question they came from:**
 >
-> **Two things to carry into WP-26:**
+> **1. The lead time is 39 weeks, and this part is sole-source.** Nine months against a Phase 5
+> that plans 8–12 weeks and 2–3 board spins. If we ever need to *order* this part rather than
+> pull it from distributor stock, the schedule is gone. See `docs/PACKAGES/WP-05.md` order 1c —
+> the fix is cheap and it is to buy them now, long before a board exists.
 >
-> 1. **Check the footprint.** `XNAA3` → `XNBA3` is punch QFN → **sawn** QFN. Same pin count, but
->    terminal geometry can differ; the land pattern must come from the current datasheet, not
->    from a library part that predates the migration.
-> 2. **32-pin vs 20-pin is still open.** `XNBA3` is the 32-pin part and the direct migration
->    path. `SGTL5000XNLA3` is the 20-pin variant PJRC moved to during the shortage — smaller and
->    cheaper, but **its I²C address is not configurable**. We have exactly one codec, so that
->    costs nothing, and the 20-pin part deserves a look when the datasheet is readable.
+> **2. NXP direct is not a channel we can use.** Minimum order 490 (tray) or 5000 (reel) against
+> a project that needs perhaps twenty. We buy through a distributor who breaks trays, which makes
+> the distributor stock check a real dependency rather than a formality.
 >
-> **Evidence status.** Lifecycle: *no EOL notice found against `XNBA3`* — which is not the same
-> as a positive `Active` reading from NXP's part page, and nobody has seen one. Stock, lead time
-> and JLCPCB library tier remain unchecked. **None of those block WP-26**, which needs the right
-> part and package, not a stock figure; they bite at WP-27 (layout, DFM, assembly BOM) and are
-> tracked there.
+> **One item still open, and it is new.** The page lists a **Product Change Notice against
+> `XNBA3`, issued 2025-04-16, effective 2025-05-26** — the same issue date as PDN 202504001DN,
+> which contains no SGTL parts. A PCN is not a discontinuation, and the part reads `ACTIVE`, so
+> this is very likely a process or assembly-site change. But its *content* is unread, and if it
+> touches the package or the moisture-sensitivity level it lands on the footprint and the
+> assembly notes. Worth one look before layout, not before schematic capture.
 
 ---
 
@@ -248,9 +252,11 @@ hardware half is settled and can proceed.
 | # | Item | Blocked on |
 |---|---|---|
 | 1 | Every pin assignment | WP-26 schematic capture |
-| 2 | ~~SGTL5000 lifecycle~~ — **closed 2 Sep.** `XNBA3` specified; no EOL notice against it | — |
-| 2a | `XNBA3` positive lifecycle + longevity date, stock, lead time, JLCPCB tier | WP-27, needs distributor access — H-02 |
-| 2b | Sawn-QFN land pattern from the current datasheet; 32-pin vs 20-pin decision | WP-26 |
+| 2 | ~~SGTL5000 lifecycle~~ — **closed.** `XNBA3` confirmed `ACTIVE`, 39-week lead time, HVQFN32 | — |
+| 2a | **Distributor stock for a buy-ahead of ~20 codecs.** 39-week factory lead time on a sole-source part | **Blocked** — H-02. Order 1c |
+| 2b | Content of the PCN against `XNBA3` (2025-04-16). Package or MSL change would hit the footprint | Before layout — H-02 |
+| 2c | 32-pin `XNBA3` vs 20-pin `XNLA3`; land pattern from the current datasheet | WP-26 |
+| 2d | **RT1062 lead time and MOQ — unknown, and it is the other sole-source part** | **Blocked** — H-02 |
 | 3 | Charger, one-shot and protection part numbers confirmed orderable | Distributor access — H-02 |
 | 4 | Cell placement fixed relative to charger and MCU | `thermal-budget.md` §4 — a layout constraint, must land before layout |
 | 5 | Cartridge edge-connector geometry and stub length | Cartridge spike; STATUS-HARDWARE H-05 |

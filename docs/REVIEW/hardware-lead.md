@@ -141,10 +141,23 @@ corroborates independently, and the shield is stocked, so order 1b is safe. **Th
 alive and the aggregator was right about the wrong suffix** — a BOM written from search hits
 would have said `XNAA3`.
 
-**Closed 2 Sep.** The last open risk — whether any SGTL5000 variant sits in PDN 202504001DN —
-was cleared by text search of two independent mirrors, both zero hits for `SGTL`. **Specify
-`XNBA3`.** WP-26 is unblocked; the residual checks (positive lifecycle reading, stock, lead
-time, JLCPCB tier) do not gate schematic capture and are tracked against WP-27.
+**Closed 2 Sep, from a primary source.** A human saved NXP's `XNBA3` part page as a PDF and it
+answered everything: **`ACTIVE`**, 12NC 935430641557, HVQFN32 5 × 5 mm / 0.5 mm pitch, −40 °C to
++85 °C. **Specify `XNBA3`.** WP-26 is unblocked.
+
+**It also produced two things worth the PM's attention**, neither of which was the question:
+**39-week factory lead time on a sole-source part**, against a Phase 5 planning 2–3 spins in
+8–12 weeks; and **NXP direct MOQ of 490** against a project needing twenty, so our only supply
+route is distributor stock. Order 1c (~$110, twenty pieces) retires the first for the price of a
+takeaway dinner and I have drafted it rather than escalating. If distributors hold no stock, a
+second-source codec becomes architectural and I will raise it then.
+
+**The same question is unasked for the RT1062**, which is the other sole-source part and is the
+board itself.
+
+**The method here is the finding.** Search got it most of the way; one human-saved PDF finished
+it and surfaced a schedule risk nobody had costed. That works for one part. It does not work for
+a BOM.
 
 **The general fix matters more than this part.** Sourcing is a standing Hardware Lead
 responsibility and it is permanently human-mediated at this rate. Either allowlist

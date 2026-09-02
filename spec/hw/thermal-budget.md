@@ -309,6 +309,7 @@ measurement.
 | 3 | Low-voltage latch-off confirmed as compatible with the instant-on guardrail | **PM** — recommendation in §5 |
 | 4 | Board→air coupling measured; it is the weakest estimate here | WP-37 |
 | 5 | microSD current measured alongside throughput | WP-05 characterisation |
+| 5a | ~~Codec operating range~~ — **confirmed −40 °C to +85 °C** from NXP's part page. Against §4's ~45 °C sustained worst case, ~40 K of margin | Closed |
 | 6 | Charger, secondary protection and solenoid part numbers confirmed orderable | **Blocked** — no distributor access, H-02 |
 
 ## Revision history

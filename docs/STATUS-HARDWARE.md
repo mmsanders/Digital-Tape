@@ -84,33 +84,43 @@ Lead spec changes** — flagged rather than assumed, and reversible in one commi
 
 ## Blocked
 
-**The codec question is closed, and WP-26 is unblocked.** Specify **`SGTL5000XNBA3`**, not
-`XNAA3`. The aggregator's `Obsolete` was correct but attached to the wrong suffix: NXP PCN
-202201003DN discontinues `XNAA3`/`R2` with migration to `XNBA3`/`R2`. The last open risk — the
-April 2025 bulk EOL notice, whose part list is in no search snippet — was cleared by text search
-of two independent mirrors, both zero hits for `SGTL`. PJRC corroborates from the other side:
-Audio Shield Rev D2 existed because of 32-pin shortages in Jan 2023, back on Rev D since Feb
-2025 and widely stocked.
+**Codec confirmed `ACTIVE` from NXP's own part page — the first primary-source confirmation of
+any part on this board.** Specify **`SGTL5000XNBA3`**, 12NC 935430641557, **HVQFN32**, 5 × 5 ×
+0.85 mm, 0.5 mm pitch, −40 °C to +85 °C. The `Obsolete` on the aggregator was real but attached
+to `XNAA3`, retired with its punch-QFN line; `XNBA3` is NXP's own migration path. **A BOM written
+from search hits would have said `XNAA3`.** WP-26 is unblocked.
 
-**A BOM written from search hits would have said `XNAA3`.** That is the failure "check every
-part before layout" is written to catch, caught before layout. Two items carried into WP-26 in
-`board-rev-a.md` §1: the punch→sawn QFN land pattern must come from the current datasheet, and
-32-pin vs 20-pin is still open.
+**Two findings larger than the question that produced them.**
 
-Precisely: *no EOL notice found against `XNBA3`* — not the same as a positive `Active` reading,
-which nobody has seen. Stock, lead time and JLCPCB tier are unchecked and **do not block WP-26**;
-they bite at WP-27 and are tracked there.
+**1. The lead time is 39 weeks on a sole-source part.** Nine months, against a Phase 5 that plans
+8–12 weeks and 2–3 spins. If we ever have to *order* this codec rather than pull it from a
+distributor's shelf, the schedule is gone and no amount of good layout recovers it. **Order 1c
+(~$110, twenty pieces) converts that into a box in a drawer** and is the cheapest schedule
+insurance available anywhere on this project. Drafted; it should go with order 1a.
+
+**2. NXP direct is not a channel we can use.** Minimum order 490 (tray) or 5000 (reel) against a
+project needing perhaps twenty. The whole supply route is "a distributor happens to have stock",
+which is true until it isn't — and I cannot check whether it is true now (H-02). If distributors
+hold none, a second-source codec becomes an architectural question and a `pm-decision` issue.
+Not raised yet, because $110 probably retires it.
+
+**The same question is open for the RT1062 and nobody has asked it.** It is the other sole-source
+part and it *is* the board. Lead time and MOQ unknown.
+
+One new item, small: NXP lists a **PCN against `XNBA3` issued 2025-04-16**. A PCN is not a
+discontinuation and the part reads `ACTIVE`, so it is very likely a process or site change — but
+its content is unread, and a package or moisture-sensitivity change would land on the footprint.
+One look before layout, not before schematic capture.
 
 **H-02, vendor egress — confirmed hard, and it is the standing constraint.** Six supplied URLs
 were tried directly (NXP ×3, DigiKey, Mouser, JLCPCB) plus two PCN mirrors: **all blocked at the
-proxy's CONNECT layer**, by WebFetch and by curl. This is the environment's network policy, not
-a link problem, and no set of URLs works around it. General web *search* does work, which is the
-only reason the codec moved at all — but search finds documents, not stock figures or library
-tiers, and sourcing needs both. **Every remaining part number carries `UNVERIFIED`.**
+proxy's CONNECT layer**, by WebFetch and by curl. This is the environment's network policy, not a
+link problem. General web *search* works and got the lifecycle question most of the way; **a PDF
+of the part page, saved by a human, finished it and produced both findings above.** That is the
+current working method, and it does not scale to a BOM.
 
-Sourcing is a standing responsibility of this role and it is currently human-mediated per part.
-Allowlisting `nxp.com`, `digikey.com`, `mouser.com` and `jlcpcb.com` is the fix; the alternative
-is a person in the loop for every line of the BOM.
+Allowlisting `nxp.com`, `digikey.com`, `mouser.com` and `jlcpcb.com` is the fix. Every remaining
+part number carries `UNVERIFIED`.
 
 **H-03, ERC — unchanged.** Only KiCad 7.0.11 is installable; `kicad-cli sch erc` needs KiCad 8.
 `make -C hardware erc` now **fails loudly** with the reason rather than skipping quietly, so the
