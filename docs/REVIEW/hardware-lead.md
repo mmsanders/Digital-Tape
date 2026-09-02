@@ -6,6 +6,28 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ## Round 2 — 2 Sep 2026, on PM Decisions 001
 
+### Coverage — every section of the memo, and where it landed
+
+| Memo | Ruling | Where it lives now |
+|---|---|---|
+| §1 | Issue #5, option A approved; buy cards without waiting; ≥2 SKUs ≥35 MB/s → 90 min | **ADR-109** · `WP-05.md` · `measure_sustained_write.py` · SKU table at `board-rev-a.md` §6 |
+| §1 | `nominal_length_s` is a superblock field, so length blocks neither the freeze nor software | ADR-109 · `board-rev-a.md` §6 |
+| §2 | Issue #6, captive; serviceable by an adult, not a fingernail | **ADR-105** · `board-rev-a.md` §7 · item 9 below |
+| §3 | Issue #7, two tiers; notification not approval; **limits move upstream** | **ADR-106** · `spec/hw/README.md` · `spec/README.md` · limits proposed in `thermal-budget.md` §8 |
+| §4 | Issue #8a, sign-off splits three ways; `SELF-REPORTED` is standing convention | **ADR-107** · sign-off sections of `WP-04.md` and `WP-05.md` |
+| §5 | Issue #8b, ownership plus the SDR50 entry gate | **ADR-108** · `board-rev-a.md` §5, written before fabrication |
+| §6 | Q-005, $150/order, $600 cumulative, running total | `FOR-MICHAEL.md` Q-005 · `STATUS-HARDWARE.md` **Spending** · item 11 below |
+| §7 | Q-006; and do not conflate "does the geometry work" with "does it survive" | `FOR-MICHAEL.md` Q-006 · `WP-04.md` A-1 (200 cycles, PLA) vs A-4 (1000 cycles, final material) |
+| §8 | Independent review on request | Requested in PR #15 for the solenoid protection circuit |
+| §9.1 | Order the cards now | `WP-05.md` order 1a drafted — **Michael places it** |
+| §9.2 | Write the thermal budget, send for review | `spec/hw/thermal-budget.md` rev 0.1 ✓ |
+| §9.3 | Build the WP-04 packet | `hardware/packets/wp04-01/` ✓ — waiting on Q-006 |
+| §9.4 | Characterise the cards when they land | Tool built and smoke-tested — **waits on parts** |
+| §9.5 | Move `board-rev-a.md` into `spec/hw/`, start it early | rev 0.2 ✓ |
+
+Nothing in the memo is unaddressed. §9.1 and §9.4 need Michael and physical parts; everything
+else is done or is an item below.
+
 Eleven items. Six are answerable yes/no; two are notifications that need nothing.
 **Nothing here is blocking** — every item names what ships if nobody answers.
 
