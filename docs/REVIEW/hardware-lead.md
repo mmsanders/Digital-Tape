@@ -4,6 +4,57 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 7 — 3 Sep 2026, IR-018 round 2
+
+**Five more findings, all correct, all fixed, no disputes.** Two blockers, both the same
+shape as the first round's: a way to reach PASS without doing the experiment.
+
+**IR-018-07 is the one to read, and it invalidated my previous fix.** I closed round 1's blocker
+by qualifying cuts on a DAT0-low sample. But in native 4-bit mode **DAT0 is a data line during
+the payload** and is low whenever the current bit is zero; the protocol's busy indication is a
+*distinct phase* entered only after the data-response token is accepted. So my "proof" of a
+mid-write cut was consistent with a cut landing mid-payload — the exact thing it was supposed to
+rule out. And in SPI mode the indication is on MISO, which I had not considered because I never
+stated the bus mode.
+
+Qualification is now from protocol state: complete payload, accepted response token, observed
+busy entry, indication still asserted at the cut, with the bus mode and sensed line declared and
+checked.
+
+**IR-018-06:** the 1 000 minimum was read from the plan file, so `--cuts 0` passed on an empty
+run. **My own happy-path test demonstrated a PASS with three cuts and I did not notice what that
+implied.** The threshold now lives in code; tests inject a policy rather than lowering the bar
+through the production file format.
+
+**IR-018-09** is the one with the worst incentive: planned attempts and required qualifying were
+the same number, so one honest miss made PASS unreachable — while the cut offsets make misses
+*expected*. The tool was pushing an operator toward editing data. Now separate, with a 1.5×
+surplus and an auditable `--extend`.
+
+**IR-018-10** stings: I wrote that fix last round and **the edit silently failed to apply**, so
+the published procedure still could not run. CI now executes the documented commands end to end.
+
+### What I am taking from three rounds
+
+Round 5 I wrote up a gate that passed on malformed XML. Round 6, a safety tool with no test.
+Round 7, a threshold an operator could set to zero and a "proof" that proved something adjacent
+to what it claimed. **Not one of these was an error in the engineering** — the thermal maths, the
+TS network, the classification logic have all held. Every one was an error in *what the check was
+asking*.
+
+Two habits, adopted rather than intended:
+
+1. **Write the red case first and commit it.** Already done for the atomicity judge.
+2. **When I add a threshold or a proof, ask what the cheapest way to satisfy it without doing the
+   work would be** — and then check whether my own tests do exactly that. Mine did, twice.
+
+I would also rather this be said plainly: the independent review has found five things in two
+rounds that I did not, and the two blockers were both real. That is the arrangement working, and
+it is a good argument for putting the schematic through the same treatment before layout rather
+than after.
+
+---
+
 ## Round 6 — 3 Sep 2026, on independent review IR-018
 
 **Five findings, all correct, all fixed. No disputes.** Detail is in the PR #18 thread; the

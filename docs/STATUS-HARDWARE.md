@@ -12,34 +12,35 @@ file is state, not argument.
 
 ## What changed since last time
 
-**Independent review IR-018 found five defects in the media-atomicity tooling. All five were
-correct and all five are fixed.** The blocker: the procedure could return **PASS having never cut
-a card mid-write** — open-loop cut timing, and a judge that accepted no evidence any cut
-intersected a write. That PASS is what the format's single-block commit assumption would have
-rested on.
+**A second round of independent review found five more defects in the atomicity tooling. All
+five were correct; two were blockers.** Both blockers were the same shape as the first round's —
+a route to PASS without doing the experiment.
 
-Fixed by making the card's busy signal the oracle — `DAT0` low at the instant of the cut is the
-card stating it was mid-commit — and by reporting **attempted** and **qualifying** cuts
-separately, with the 1 000 threshold applying to qualifying only.
+**The threshold was operator-supplied.** `plan --cuts 0` produced an empty schedule with a
+requirement of zero, and an empty result set passed. My own happy-path test demonstrated a PASS
+with three cuts. The 1 000 minimum now lives in code as a policy object; tests inject their own
+rather than lowering the bar through the production file format.
 
-**The finding I would not have made myself:** `OLD = N−1` assumed the previous iteration
-completed, which is exactly what power-cut testing cannot assume. A card still holding *N−2*
-would have been reported corrupt. Every trial now establishes the old image rather than inferring
-it.
+**And my previous fix did not prove what it claimed.** I had qualified cuts on a DAT0-low sample,
+but in 4-bit mode DAT0 is a *data line* during the payload — low whenever the current bit is zero
+— while the busy indication is a distinct phase after the data-response token. A cut landing
+mid-payload satisfied it. Qualification is now from protocol state, with the bus mode and sensed
+line declared and checked.
 
-**A standing rule, adopted.** Twice in two rounds the defect was not in the analysis but in what
-the check was *asking* — a reproducibility gate that passed on malformed XML, then a safety tool
-with no test whose default failure was to pass. Anything I build that can say PASS now ships with
-its red case committed: `make -C hardware atomicity-test` runs 27 checks and then re-runs them
-with the classifier mutated to always say `NEW`, asserting it goes red.
+Also fixed: results are bound to card SKU, revision and CID with a plan digest; planned attempts
+and required qualifying are now separate numbers, so an honest miss no longer makes PASS
+unreachable (it was pushing operators toward editing data); and the published procedure — which
+could not run, because my previous edit to it silently failed to apply — is now executed
+end-to-end by CI.
 
-**One consequence for the schedule:** no atomicity PASS can support format freeze until the rig
-firmware is reviewable — true single-block raw writes, captured timing, clean power removal, and
-cache bypass on re-read. Stated in `WP-05.md` rather than left implicit.
+**43 checks, and the red case still bites.**
 
-**The print packet was broken and it was my bug** (previous round, unchanged): malformed XML from
-an octal-escape collision, plus an object off the bed. Rev 2 regenerates from source, needs only
-162 × 65 mm, and both failure modes now have gates.
+**The pattern across three rounds is worth naming.** None of these were errors in the
+engineering — the thermal maths, the TS network and the classification logic have all held.
+Every one was an error in *what the check was asking*. Two habits adopted: write the red case
+first and commit it, and when adding a threshold or a proof, ask what the cheapest way to satisfy
+it without doing the work would be — then check whether my own tests do exactly that. Mine did,
+twice.
 
 ## In flight
 
