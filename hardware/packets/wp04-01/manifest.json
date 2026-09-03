@@ -1,7 +1,8 @@
 {
   "packet": "WP04-01",
   "work_package": "WP-04",
-  "built": "2026-09-02",
+  "built": "2026-09-03",
+  "revision": 2,
   "swept_parameter": "hook_depth (mm)",
   "bracket_mm": [
     0.6,
@@ -9,15 +10,19 @@
   ],
   "seed": 20260902,
   "blind": true,
-  "bed_mm": [
-    220.0,
-    220.0
+  "bed_assumed_mm": [
+    180.0,
+    180.0
   ],
   "plate_extent_mm": [
-    190.0,
-    197.5
+    150.0,
+    53.0
   ],
-  "fits_bed": true,
+  "minimum_bed_mm": [
+    162,
+    65
+  ],
+  "xml_valid": true,
   "print_settings_assumed": {
     "material": "PLA",
     "layer_mm": 0.2,
@@ -25,93 +30,130 @@
     "perimeters": 3,
     "infill_pct": 40,
     "supports": "none required -- every overhang is <= 45 degrees by design",
-    "note": "Assumed pending Q-006. Regenerate once the machine is known."
+    "note": "Michael's answer to Q-006 (Decisions 002 \u00a72)."
   },
   "parts": [
     {
-      "label": "D",
+      "part": "test-frame",
       "x": 12.0,
       "y": 12.0,
+      "w": 30.0,
+      "h": 26.0
+    },
+    {
+      "part": "carrier-X-onside",
+      "x": 46.0,
+      "y": 12.0,
+      "w": 14.0,
+      "h": 23.0,
+      "label": "X",
       "hook_depth": 1.2,
       "carrier_clearance": 0.2,
-      "role": "bed-control",
-      "note": "duplicate of M, far bed corner"
+      "role": "orientation-probe",
+      "note": "same as M, printed on its side"
     },
     {
-      "label": "R",
-      "x": 38.0,
-      "y": 12.0,
-      "hook_depth": 0.9,
-      "carrier_clearance": 0.2,
-      "role": "variant",
-      "note": ""
-    },
-    {
-      "label": "T",
+      "part": "carrier-W",
       "x": 64.0,
       "y": 12.0,
-      "hook_depth": 1.5,
-      "carrier_clearance": 0.2,
-      "role": "variant",
-      "note": ""
-    },
-    {
-      "label": "K",
-      "x": 12.0,
-      "y": 42.0,
-      "hook_depth": 0.6,
-      "carrier_clearance": 0.2,
-      "role": "variant",
-      "note": "expected too shallow -- should not hold"
-    },
-    {
+      "w": 14.0,
+      "h": 11.6,
       "label": "W",
-      "x": 38.0,
-      "y": 42.0,
       "hook_depth": 2.1,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": "expected too deep -- stiff, reluctant to release"
     },
     {
+      "part": "carrier-B",
+      "x": 82.0,
+      "y": 12.0,
+      "w": 14.0,
+      "h": 11.3,
       "label": "B",
-      "x": 64.0,
-      "y": 42.0,
       "hook_depth": 1.8,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": ""
     },
     {
-      "label": "M",
+      "part": "carrier-R",
+      "x": 100.0,
+      "y": 12.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "R",
+      "hook_depth": 0.9,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": ""
+    },
+    {
+      "part": "carrier-D",
+      "x": 118.0,
+      "y": 12.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "D",
+      "hook_depth": 1.2,
+      "carrier_clearance": 0.2,
+      "role": "bed-control",
+      "note": "duplicate of M, far bed corner"
+    },
+    {
+      "part": "carrier-T",
+      "x": 136.0,
+      "y": 12.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "T",
+      "hook_depth": 1.5,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": ""
+    },
+    {
+      "part": "carrier-K",
       "x": 12.0,
-      "y": 72.0,
+      "y": 42.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "K",
+      "hook_depth": 0.6,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": "expected too shallow -- should not hold"
+    },
+    {
+      "part": "carrier-M",
+      "x": 30.0,
+      "y": 42.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "M",
       "hook_depth": 1.2,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": "centre of the bracket"
     },
     {
+      "part": "carrier-H",
+      "x": 48.0,
+      "y": 42.0,
+      "w": 14.0,
+      "h": 11.0,
       "label": "H",
-      "x": 64.0,
-      "y": 72.0,
       "hook_depth": 1.2,
       "carrier_clearance": 0.2,
       "role": "bed-control",
       "note": "duplicate of M, near bed corner"
     },
     {
-      "label": "X",
-      "x": 90.0,
-      "y": 12.0,
-      "hook_depth": 1.2,
-      "carrier_clearance": 0.2,
-      "role": "orientation-probe",
-      "note": "same as M, printed on its side"
+      "part": "hook-bar",
+      "x": 66.0,
+      "y": 42.0,
+      "w": 70.0,
+      "h": 5.0
     }
-  ],
-  "common_parts": [
-    "hook-bar",
-    "test-frame"
   ]
 }

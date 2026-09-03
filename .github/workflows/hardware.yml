@@ -31,3 +31,16 @@ jobs:
           name: kicad-reports
           path: build/hardware/
           if-no-files-found: ignore
+
+  packet:
+    name: print packet is printable
+    runs-on: ubuntu-latest
+    # Deliberately NOT the KiCad container: this gate is pure stdlib and should
+    # stay fast. It catches the two ways a packet can be broken on arrival --
+    # a 3MF no slicer will open, and geometry off the edge of the bed. Both
+    # shipped once. A packet that will not open is exactly as broken as a
+    # schematic that fails ERC, and only one of those was checked before.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plate opens and sits on the bed
+        run: make -C hardware packet-validate

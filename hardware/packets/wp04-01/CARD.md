@@ -7,7 +7,8 @@ Hardware Lead · 2 Sep 2026 · WP-04, the transport spike
 
 ## What this is
 
-Nine little buttons, one long bar, and a frame to hold them. They are all the same
+Nine little buttons, one long bar, and a frame to hold them. It all fits on a
+small printer — a Prusa Mini or an A1 mini is plenty. They are all the same
 except for **one hidden dimension** — how deep the little hook on the side of each
 button is. That hook is what catches the bar and holds the button down, the way a
 cassette player's play button stays down until you hit stop.
@@ -19,6 +20,7 @@ knew which one was supposed to win, you would find that it did.**
 
 | | |
 |---|---|
+| **Bed needed** | **at least 162 × 65 mm** — check this before you leave the house |
 | File | `plate.3mf` (or `plate.stl`) |
 | Material | Whatever the library has. PLA is fine. |
 | Layer height | 0.2 mm |

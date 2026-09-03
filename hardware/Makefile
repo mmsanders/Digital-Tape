@@ -8,13 +8,31 @@ CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
 
-.PHONY: all packet-wp04 packet-check thermal thermal-check charger solenoid erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate thermal thermal-check charger solenoid erc drc check clean tools
 
 all: packet-wp04 thermal
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
 	$(PY) $(CAD)/build_packet.py
+
+## packet-validate — the plate must open in a slicer and sit on the bed
+##
+## A packet that will not open is exactly as broken as a schematic that fails ERC,
+## and until now only one of those was checked. The 3MF that shipped had malformed
+## XML from an octal-escape collision in a regex replacement, and an object at
+## Y = -11 mm because the old bounds check tested only the far edges.
+packet-validate:
+	@$(PY) -c "import sys, json, zipfile, xml.etree.ElementTree as ET; \
+	p='packets/wp04-01/plate.3mf'; z=zipfile.ZipFile(p); \
+	[ET.fromstring(z.read(e)) for e in ('[Content_Types].xml','_rels/.rels','3D/3dmodel.model')]; \
+	ns={'m':'http://schemas.microsoft.com/3dmanufacturing/core/2015/02'}; \
+	r=ET.fromstring(z.read('3D/3dmodel.model')); \
+	vs=[(float(v.get('x')),float(v.get('y'))) for v in r.findall('.//m:vertex',ns)]; \
+	bad=[c for c in vs if c[0]<-0.001 or c[1]<-0.001]; \
+	sys.exit('FAIL %d vertices at negative X/Y' % len(bad)) if bad else None; \
+	m=json.load(open('packets/wp04-01/manifest.json')); \
+	print('OK  plate.3mf is well-formed, all geometry on the bed, needs %dx%d mm' % tuple(m['minimum_bed_mm']))"
 
 ## packet-check — fail if the committed plate is not what the source produces
 ##
@@ -84,6 +102,7 @@ check: thermal-check
 	  || { echo "FAIL cadquery missing: pip install cadquery"; exit 1; }
 	@$(PY) $(CAD)/build_packet.py >/dev/null && echo "OK  WP04-01 plate rebuilds and fits the bed"
 	@$(MAKE) --no-print-directory packet-check
+	@$(MAKE) --no-print-directory packet-validate
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
 	@$(MAKE) --no-print-directory drc
