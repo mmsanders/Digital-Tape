@@ -3,11 +3,15 @@
 **Owner:** Hardware Lead · **Status:** living document, versioned not frozen (PM Decisions 001 §3)
 **Revision:** 0.2, 2 Sep 2026 · **Applies to:** production board rev A
 
-> **STATUS: three IR-015 findings open — charger 45 °C enforcement, solenoid sustained-power
-> bound, transient junction temperatures. Numbers in §T-1, §T-2, §T-4 are provisional.**
+> **STATUS: three IR-015 findings — charger 45 °C enforcement, solenoid sustained-power bound,
+> transient junction temperatures. Numbers in §T-1, §T-2, §T-4 are provisional.**
 >
-> **No board is fabricated and no cell is charged until all three close.** Merging this document
-> is not approving the design (PM Decisions 003 §4).
+> **A response is filed against each** (§5.1–5.3, §6, §3; `ADR-111`, `ADR-116`, and the
+> per-device junction model). **They are not closed until the PM or a reviewer accepts them** —
+> the author of a response does not get to mark it accepted.
+>
+> **No board is fabricated and no cell is charged until all three are accepted.** Merging this
+> document is not approving the design (PM Decisions 003 §4).
 
 **Estimates, not measurements.** WP-37 replaces every `EST` in this document with a measured
 number. Until it does, treat the margins as indicative.

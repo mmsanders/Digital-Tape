@@ -4,6 +4,91 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 5 — 3 Sep 2026, on PM Decisions 004
+
+### The broken plate was mine, and the root cause is worth knowing
+
+`plate.3mf` had malformed XML and no slicer would have opened it. Root cause:
+
+```python
+_CREATION_DATE.sub(rb"\1" + b"2026-09-02T...", data)
+```
+
+The regex replacement **template** parser reads `\1` followed by `2` and `0` as one token:
+`\120` is an **octal escape**, `0o120` = `'P'`. Group 1 — the opening
+`<metadata name="CreationDate">` tag — was replaced by the letter `P`, leaving the orphaned
+closing tag you found. It only appeared because I was making the file byte-reproducible, which
+is the kind of irony worth writing down.
+
+**A second, independent bug:** object 8 at Y = −11 mm. My bounds check tested `xmax`/`ymax`
+only, so anything at negative coordinates passed. Hand-placed pitch coordinates put it there.
+
+Both are now impossible rather than fixed — geometry is shelf-packed from measured bounding
+boxes, `validate()` checks all four edges per object and **refuses to write** a broken packet,
+and `check_3mf()` parses every XML entry after writing. Plus `make -C hardware packet-validate`
+and a CI job, per your §2.4.
+
+**Rev 2 needs a bed of only 162 × 65 mm**, laid out for 180 × 180, and the card carries the
+bed-size line. Thank you for the stopgap — Michael should use rev 2 rather than `plate-FIXED`,
+because rev 2 regenerates from source and the stopgap does not.
+
+**The general lesson, which is why this is in the review packet rather than just the commit.**
+I had a reproducibility gate on that file and it passed happily on malformed XML, because it
+only asked *"are the bytes the same each time?"* — never *"is the file valid?"* That is the same
+failure mode as the allocation gate that ran green over 98 KB of `.bss`: a gate measuring the
+wrong quantity reads as green. `CLAUDE.md` §1 already says every gate must be proven able to go
+red. **My packet gate had never been shown a broken packet.** Now it has.
+
+### The three IR-015 findings — responses are filed and merged
+
+Your §3 lists them as still open, which I think predates the PR #15 merge. All three have
+responses on `main`:
+
+| Finding | Response |
+|---|---|
+| Charger 45 °C | `thermal-budget.md` §5.1–5.3 — route 1, TS divider designed, 32 corners enumerated. **ADR-111** |
+| Solenoid | §6 — restated against your 0.25 W bound; my earlier design **failed it**, corrected. **ADR-116 supersedes ADR-112** |
+| Transient thermal | §3 — per-device junction temps, two-time-constant model |
+
+**They are not closed, and I have not marked them closed** — the author of a response does not
+get to accept it. The banner now says exactly that, and the fabrication gate stands unchanged.
+What I need is a read, not a decision.
+
+The charger one is worth your attention even at a glance: a `BQ25896` holds a 45 °C hot-suspend
+**only with a B = 3950 K thermistor**. The obvious 103AT part spans exactly enough to place both
+thresholds on the limits and nothing more, so asking for any tolerance margin returns a
+*negative resistor*. Margin is not optional because safety is one-sided here.
+
+### Media atomicity — added, plus one thing the criterion misses
+
+Procedure, rig spec and tooling are in `WP-05.md` and
+`hardware/characterisation/media_atomicity.py`. Self-tested against an injected tear.
+
+Two design notes worth your eye:
+
+**The pattern is a repeated counter, not random data.** Iteration *N* fills all 512 bytes with
+the word *N*; old is all *N−1*, new is all *N*. A tear is then visible wherever the boundary
+falls, which random data would not guarantee.
+
+**The neighbouring blocks are checked too, and that is outside your criterion.** An SD card's
+FTL can garbage-collect during a power cut and damage blocks *nobody wrote*. That is equally
+fatal to the format, it is a documented SD failure mode, and the same rig catches it for free in
+the same run. If it fires it is a blocker on the same terms.
+
+**One boundary question.** The rig's Teensy sketch is bench instrumentation, not product
+firmware, so I have treated it as mine and put it under `hardware/`. If you read `firmware/` as
+covering anything running on a microcontroller, say so and it becomes a handover — the analysis
+tool is unaffected either way.
+
+### Still carried forward
+
+The **absolute touch-temperature cap** from round 3, unchanged. `ambient + 15 K` permits 50 °C
+at the 35 °C ambient this budget designs to, above the ~48 °C class limit for plastic a child
+holds continuously. We pass both today with ~9 K to spare, so adding the absolute cap costs
+nothing now and stops a future charge-current increase eroding it silently.
+
+---
+
 ## Round 4 — 2 Sep 2026, on PM Decisions 003
 
 ### The solenoid limit changed and my design failed it — corrected

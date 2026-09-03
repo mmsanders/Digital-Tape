@@ -12,28 +12,36 @@ file is state, not argument.
 
 ## What changed since last time
 
-**The solenoid limit was restated as power, and my design failed it.** 0.30 W against a 0.25 W
-bound. The real problem was the coil, not the lockout: because the limit must clear a child
-pressing stop and play twice a second, it reduces to **125 mJ per actuation**, and my assumed
-9 W × 30 ms was **270 mJ, 2.2× over**. No lockout fixes that — the energy is spent inside one
-legitimate press. Corrected to a 5 W coil at 15 ms with a 450 ms lockout: 0.174 W at real use,
-0.220 W in a fault, nothing legitimate blocked. **ADR-116 supersedes ADR-112.** The pulse is now
-an explicit placeholder that WP-04 supplies.
+**The print packet was broken and it was my bug.** `plate.3mf` had malformed XML that no slicer
+would open. Root cause: a regex replacement template where `\1` followed by `20` parsed as the
+**octal escape** `\120` = `'P'`, eating the opening `<metadata>` tag. It was introduced by the
+change that made the file byte-reproducible. A second, independent bug put one object at
+Y = −11 mm, off the bed, because my bounds check tested only the far edges.
 
-**Order 1c cancelled.** The 39-week / 490-MOQ figure was the tray variant, factory-direct; the
-reel suffix `SGTL5000XNBA3R2` is stocked in thousands. The codec line item changes suffix
-accordingly — `XNBA3` and `XNBA3R2` are the same die and **not interchangeable line items**.
-Spend reconciles to **~$267**.
+**Both are now impossible rather than fixed.** Geometry is shelf-packed from measured bounding
+boxes; `validate()` checks all four edges per object and refuses to write a broken packet;
+`check_3mf()` parses every XML entry after writing; `make -C hardware packet-validate` re-checks
+the committed artefact and a CI job runs it. **Rev 2 needs a bed of only 162 × 65 mm** and the
+card says so.
 
-**Domain access: the `www.` prefix was the whole thing.** `www.nxp.com` and `www.lcsc.com` now
-work; bare hostnames all fail, so the allowlist matches exact hosts. `www.findchips.com` answers
-curl but serves a JavaScript shell. `www.ti.com`, `www.octopart.com` and `www.mouser.com` are
-still blocked, and DigiKey returns 403 bot protection exactly as the PM predicted. Also learned:
-**`WebFetch` and `curl` do not share an allowlist** — the working method is curl plus a parser.
+**The gate I had was measuring the wrong thing.** It asked "are the bytes identical each time?"
+and never "is the file valid?", so it passed happily on malformed XML — the same failure as an
+allocation gate running green over 98 KB of `.bss`. `CLAUDE.md` §1 says every gate must be proven
+able to go red; mine had never been shown a broken packet.
 
-**The banner and the fabrication gate are in `spec/hw/thermal-budget.md`**, and PR #15 is being
-merged on that basis: three IR-015 findings open, and **no board is fabricated and no cell is
-charged until all three close**.
+**Media atomicity added** — the criterion, the rig spec and `media_atomicity.py`, self-tested
+against an injected tear. It also checks the **neighbouring blocks**, which the criterion does
+not ask for: an FTL can garbage-collect during a power cut and damage blocks nobody wrote, which
+is equally fatal and free to catch in the same run.
+
+**The three IR-015 findings have responses on `main`** (ADR-111, ADR-116, and the per-device
+junction model) and PM Decisions 004 §3 predates that merge. **They are not closed** — I have not
+marked them so, because the author of a response does not accept it. The fabrication gate stands.
+
+**`board-rev-a.md` §2 now carries a real pin map** — signal names, directions and pulls, no pin
+numbers. Firmware can start against it. Two rows matter most: `SOL_REQ` vs `SOL_GATE` (firmware
+asks, hardware allows) and `CHG_INHIBIT`, which must be released on every copy exit path
+including errors, or the device silently refuses to charge.
 
 ## In flight
 
