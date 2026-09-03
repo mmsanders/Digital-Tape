@@ -4,6 +4,55 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 6 — 3 Sep 2026, on independent review IR-018
+
+**Five findings, all correct, all fixed. No disputes.** Detail is in the PR #18 thread; the
+part worth carrying up here is what the blocker says about how I build gates.
+
+**IR-018-01 (blocker): the atomicity procedure could return PASS having never cut a card
+mid-write.** Cuts were open-loop delays from one nominal write time, and the judge accepted no
+evidence that any cut intersected a write. A thousand cuts landing after completion all classify
+NEW and the tool was happy — certifying a card while testing nothing, and that PASS is what the
+format's single-block commit assumption would have rested on.
+
+Fixed by making the card's own busy signal the oracle: SD holds `DAT0` low during a write, so
+`DAT0` low at the instant of the cut is the card stating it was mid-commit. Attempted and
+qualifying cuts are now separate numbers and the 1 000 threshold applies to qualifying only.
+
+**IR-018-04 is the one I would not have found.** `OLD = N−1` assumes iteration *N−1* completed —
+precisely what power-cut testing cannot assume. A card still holding *N−2* would have been
+reported CORRUPT, so a perfectly atomic card could fail. Every trial now establishes the old
+image by writing *N−1* cleanly and verifying it, rather than inferring it.
+
+The other three: row count masquerading as cut count, neighbour checking that failed open when
+the field was absent, and no committed test for a tool whose failure mode is a PASS nobody
+earned.
+
+### The pattern across two rounds, which is the actual finding
+
+Round 5 was me writing up how a reproducibility gate passed on malformed XML because it asked
+"are the bytes identical?" and never "is the file valid?". **In the same PR I shipped a safety
+tool with no test at all**, and its default failure was also to pass. Twice now the defect has
+not been in the analysis — the thermal maths, the classification logic — but in **what the check
+was asking**.
+
+So I am adopting a standing rule for anything I build that can say PASS: **write the red case
+first, and commit it.** `make -C hardware atomicity-test` now runs the suite and then runs it
+again with `classify()` mutated to always return `NEW`, asserting it goes red. That is the
+`CLAUDE.md` §1 rule applied to hardware tooling rather than to engine gates, and it is where it
+should have been from the start.
+
+### One thing the review surfaced that changes a deliverable
+
+**No atomicity PASS can support format freeze until the rig firmware is reviewable.** It must
+issue a true single-block raw write rather than a filesystem write that touches metadata,
+capture transaction timing, remove power cleanly rather than brown out, and **bypass caches on
+re-read** — a readback through a stale controller cache returns the new pattern whether or not
+it ever reached the media. That last one produces a confident wrong answer rather than a visible
+failure, and it is now stated in `WP-05.md` rather than left implicit.
+
+---
+
 ## Round 5 — 3 Sep 2026, on PM Decisions 004
 
 ### The broken plate was mine, and the root cause is worth knowing

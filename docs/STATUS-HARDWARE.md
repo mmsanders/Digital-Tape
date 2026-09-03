@@ -12,36 +12,34 @@ file is state, not argument.
 
 ## What changed since last time
 
-**The print packet was broken and it was my bug.** `plate.3mf` had malformed XML that no slicer
-would open. Root cause: a regex replacement template where `\1` followed by `20` parsed as the
-**octal escape** `\120` = `'P'`, eating the opening `<metadata>` tag. It was introduced by the
-change that made the file byte-reproducible. A second, independent bug put one object at
-Y = −11 mm, off the bed, because my bounds check tested only the far edges.
+**Independent review IR-018 found five defects in the media-atomicity tooling. All five were
+correct and all five are fixed.** The blocker: the procedure could return **PASS having never cut
+a card mid-write** — open-loop cut timing, and a judge that accepted no evidence any cut
+intersected a write. That PASS is what the format's single-block commit assumption would have
+rested on.
 
-**Both are now impossible rather than fixed.** Geometry is shelf-packed from measured bounding
-boxes; `validate()` checks all four edges per object and refuses to write a broken packet;
-`check_3mf()` parses every XML entry after writing; `make -C hardware packet-validate` re-checks
-the committed artefact and a CI job runs it. **Rev 2 needs a bed of only 162 × 65 mm** and the
-card says so.
+Fixed by making the card's busy signal the oracle — `DAT0` low at the instant of the cut is the
+card stating it was mid-commit — and by reporting **attempted** and **qualifying** cuts
+separately, with the 1 000 threshold applying to qualifying only.
 
-**The gate I had was measuring the wrong thing.** It asked "are the bytes identical each time?"
-and never "is the file valid?", so it passed happily on malformed XML — the same failure as an
-allocation gate running green over 98 KB of `.bss`. `CLAUDE.md` §1 says every gate must be proven
-able to go red; mine had never been shown a broken packet.
+**The finding I would not have made myself:** `OLD = N−1` assumed the previous iteration
+completed, which is exactly what power-cut testing cannot assume. A card still holding *N−2*
+would have been reported corrupt. Every trial now establishes the old image rather than inferring
+it.
 
-**Media atomicity added** — the criterion, the rig spec and `media_atomicity.py`, self-tested
-against an injected tear. It also checks the **neighbouring blocks**, which the criterion does
-not ask for: an FTL can garbage-collect during a power cut and damage blocks nobody wrote, which
-is equally fatal and free to catch in the same run.
+**A standing rule, adopted.** Twice in two rounds the defect was not in the analysis but in what
+the check was *asking* — a reproducibility gate that passed on malformed XML, then a safety tool
+with no test whose default failure was to pass. Anything I build that can say PASS now ships with
+its red case committed: `make -C hardware atomicity-test` runs 27 checks and then re-runs them
+with the classifier mutated to always say `NEW`, asserting it goes red.
 
-**The three IR-015 findings have responses on `main`** (ADR-111, ADR-116, and the per-device
-junction model) and PM Decisions 004 §3 predates that merge. **They are not closed** — I have not
-marked them so, because the author of a response does not accept it. The fabrication gate stands.
+**One consequence for the schedule:** no atomicity PASS can support format freeze until the rig
+firmware is reviewable — true single-block raw writes, captured timing, clean power removal, and
+cache bypass on re-read. Stated in `WP-05.md` rather than left implicit.
 
-**`board-rev-a.md` §2 now carries a real pin map** — signal names, directions and pulls, no pin
-numbers. Firmware can start against it. Two rows matter most: `SOL_REQ` vs `SOL_GATE` (firmware
-asks, hardware allows) and `CHG_INHIBIT`, which must be released on every copy exit path
-including errors, or the device silently refuses to charge.
+**The print packet was broken and it was my bug** (previous round, unchanged): malformed XML from
+an octal-escape collision, plus an object off the bed. Rev 2 regenerates from source, needs only
+162 × 65 mm, and both failure modes now have gates.
 
 ## In flight
 
