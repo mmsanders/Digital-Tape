@@ -104,7 +104,7 @@ erc:
 ## asserts the suite catches it, per CLAUDE.md section 1.
 atomicity-test:
 	@cd $(CHAR) && $(PY) test_media_atomicity.py >/dev/null \
-	  && echo "OK  atomicity judge: 27 checks pass"
+	  && echo "OK  atomicity judge: 43 checks pass, incl. end-to-end CLI"
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
 
