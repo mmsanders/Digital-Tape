@@ -44,3 +44,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Plate opens and sits on the bed
         run: make -C hardware packet-validate
+      - name: Media-atomicity judge, and proof it can go red
+        run: make -C hardware atomicity-test

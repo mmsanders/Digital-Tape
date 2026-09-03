@@ -8,7 +8,7 @@ CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
 
-.PHONY: all packet-wp04 packet-check packet-validate thermal thermal-check charger solenoid erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test thermal thermal-check charger solenoid erc drc check clean tools
 
 all: packet-wp04 thermal
 
@@ -96,6 +96,18 @@ erc:
 	  echo "SKIP erc: no schematic yet. This gate goes live at WP-26."; \
 	fi
 
+## atomicity-test — the media-atomicity judge, and proof it can go red
+##
+## This tool decides whether the format's central physical assumption holds, so a
+## regression in it fails OPEN: a PASS nobody earned. IR-018-05. The --mutate run
+## patches classify() to always return NEW -- the most plausible fail-open -- and
+## asserts the suite catches it, per CLAUDE.md section 1.
+atomicity-test:
+	@cd $(CHAR) && $(PY) test_media_atomicity.py >/dev/null \
+	  && echo "OK  atomicity judge: 27 checks pass"
+	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
+	  && echo "OK  atomicity judge: proven able to go red"
+
 ## check — everything that can be checked today
 check: thermal-check
 	@$(PY) -c "import cadquery" 2>/dev/null && echo "OK  cadquery present" \
@@ -105,6 +117,7 @@ check: thermal-check
 	@$(MAKE) --no-print-directory packet-validate
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
+	@$(MAKE) --no-print-directory atomicity-test
 	@$(MAKE) --no-print-directory drc
 	@$(MAKE) --no-print-directory erc
 
