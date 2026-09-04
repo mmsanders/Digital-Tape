@@ -8,7 +8,7 @@ CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test thermal thermal-check charger solenoid erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid erc drc check clean tools
 
 all: packet-wp04 thermal
 
@@ -118,6 +118,19 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
 
+## spec-check — spec/hw content and revision must move together
+##
+## board-rev-a.md is what firmware/prod writes against, and its value rests on the
+## document changing first with an explicit notification. A silent pin swap between
+## revisions is how a week of bring-up goes to a problem that is not in the code.
+## This turns that promise into a gate. PM Decisions 005 section 5.
+spec-check:
+	@$(PY) spec_manifest.py
+
+## spec-bless — record an intended revision bump
+spec-bless:
+	@$(PY) spec_manifest.py --bless
+
 ## check — everything that can be checked today
 check: thermal-check
 	@$(PY) -c "import cadquery" 2>/dev/null && echo "OK  cadquery present" \
@@ -128,6 +141,7 @@ check: thermal-check
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
 	@$(MAKE) --no-print-directory atomicity-test
+	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
 	@$(MAKE) --no-print-directory erc
 

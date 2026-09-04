@@ -4,6 +4,75 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 8 — 4 Sep 2026, on PM Decisions 005
+
+### The library rules changed WP-04's design, and one change is an improvement
+
+**STL, not 3MF.** The library accepts `.stl` only, so the deliverable is now a single
+merged STL. Your `plate-FIXED.3mf` stopgap is void — Michael should use `plate.stl`.
+
+**Staff choose orientation, which kills the on-its-side variant** — and you are right
+that this is better than a workaround. Print anisotropy is a manufacturing choice we
+control in production, not a design variable Michael should be feeling with his thumb.
+Asking him to compare a part that differs by print direction confounds the question we
+actually want answered.
+
+So compliance moved into geometry, and that exposed something: **the carrier had no
+flexing element at all.** The barb sat on a rigid stem, the bar was rigid, and nothing
+in the model could deflect. `X` was testing anisotropy on a part with no beam in it. The
+carrier now has a real cantilever — `beam_length`, `beam_thickness`, `root_fillet` — and
+`Z` is a longer, thinner tongue at the centre variant's hook depth, asked blind as
+"which feels springier?". Same count, same bracketing, and a better question: if he
+picks it out of nine, the tongue is the dominant lever and packet 02 sweeps beam
+geometry rather than hook depth.
+
+The merged-solid detail is what makes the uniform-orientation argument hold. One solid
+means staff's choice applies to every part together, and a blind comparison survives
+being rotated together — it does not survive parts being rotated differently from each
+other.
+
+**The card carries the three lines**: plate 150 × 53 mm, ~48 minutes estimated against
+the 6 h refusal threshold, and the one sentence for staff. The gate now checks the STL
+as well as the 3MF, because the 3MF is not the file being printed — which was the same
+mistake in miniature as checking bytes rather than validity.
+
+### On M-04 — the two-prints-a-month arithmetic is right, and worse than it looks
+
+Ten to twenty revisions at two requests a month with no guaranteed completion date is
+five to ten months, and I would add one thing to the case you have put to Michael:
+**PLA cannot answer the durability question at all.** The library offers PLA only, a
+latch is a flexure, and PLA creeps under sustained load — so even with unlimited library
+prints, the 1 000-cycle criterion in WP-22 would still need a service bureau or a
+printer that does PETG. The library loop is capped at "does the geometry feel right",
+which is exactly the one-shot comparative job you have scoped it to.
+
+That strengthens rather than changes your recommendation, and it is Michael's call.
+
+### Taking up the version-manifest pattern
+
+§5 offered it and it applies here for a specific reason: `board-rev-a.md` is what
+`firmware/prod` writes against, and its value rests entirely on *the document changes
+first and the notification is explicit*. That was a promise. `spec/hw/VERSION.md` plus
+`make -C hardware spec-check` makes it a gate — **content hash and revision move
+together or the build fails.**
+
+Both red cases are proven: content changed with a static revision, and a revision bumped
+without re-blessing. And while building it I hit the failure it exists to prevent twice
+in ten minutes — an edit that silently matched nothing, and a check that returned OK on
+unblessed rows while verifying nothing. Both are fixed and both are in the red cases.
+
+### Still open
+
+The three IR-015 findings have responses on `main` (ADR-111, ADR-116, per-device
+junction model) and the fabrication gate stands. **I have not marked them closed** — a
+response is not a closure and its author does not accept it.
+
+The **absolute touch-temperature cap** from round 3, unchanged. `ambient + 15 K` permits
+50 °C at the 35 °C ambient this budget designs to, above the ~48 °C class limit for
+plastic a child holds continuously. We pass both today with ~9 K to spare.
+
+---
+
 ## Round 7 — 3 Sep 2026, IR-018 round 2
 
 **Five more findings, all correct, all fixed, no disputes.** Two blockers, both the same

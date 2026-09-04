@@ -3,9 +3,9 @@ name: hardware
 on:
   push:
     branches: ["**"]
-    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "spec/hw/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
   pull_request:
-    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "spec/hw/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
   workflow_dispatch:
 
 # For the Hardware Lead (PM Decisions 002-HW §2). Runs only when hardware/
@@ -46,3 +46,5 @@ jobs:
         run: make -C hardware packet-validate
       - name: Media-atomicity judge, and proof it can go red
         run: make -C hardware atomicity-test
+      - name: spec/hw content and revision agree
+        run: make -C hardware spec-check

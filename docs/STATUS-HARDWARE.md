@@ -12,35 +12,33 @@ file is state, not argument.
 
 ## What changed since last time
 
-**A second round of independent review found five more defects in the atomicity tooling. All
-five were correct; two were blockers.** Both blockers were the same shape as the first round's —
-a route to PASS without doing the experiment.
+**WP-04 rev 3 is rebuilt for the library's actual rules and is ready to send.** The
+library takes `.stl` only and its staff choose orientation, so the deliverable is a
+**single merged STL** and the on-its-side variant is gone. The card carries the plate
+size (150 × 53 mm), the print-time estimate (~48 minutes against a 6 h refusal
+threshold) and the one line for staff: *any orientation is acceptable provided all parts
+are printed in the same one.*
 
-**The threshold was operator-supplied.** `plan --cuts 0` produced an empty schedule with a
-requirement of zero, and an empty result set passed. My own happy-path test demonstrated a PASS
-with three cuts. The 1 000 minimum now lives in code as a policy object; tests inject their own
-rather than lowering the bar through the production file format.
+**Removing print orientation as a variable exposed a real gap:** the carrier had no
+flexing element at all — a rigid barb on a rigid stem, with a variant testing anisotropy
+on a part with no beam in it. It now has a proper cantilever, and `Z` probes beam
+compliance at the centre variant's hook depth. If Michael picks it out of nine blind,
+packet 02 sweeps beam geometry instead of hook depth.
 
-**And my previous fix did not prove what it claimed.** I had qualified cuts on a DAT0-low sample,
-but in 4-bit mode DAT0 is a *data line* during the payload — low whenever the current bit is zero
-— while the busy indication is a distinct phase after the data-response token. A cut landing
-mid-payload satisfied it. Qualification is now from protocol state, with the bus mode and sensed
-line declared and checked.
+**Order 1a is checkout-ready** at `docs/FOR-MICHAEL-ORDER-1A.md`, written for Michael
+rather than the PM: ~$115, V30 not A2, 64 GB rather than 128 (a C-60 tape is 635 MB, so
+even 32 GB is ten times what a tape needs), and an explicit note that brand
+substitutions are fine so long as it says V30.
 
-Also fixed: results are bound to card SKU, revision and CID with a plan digest; planned attempts
-and required qualifying are now separate numbers, so an honest miss no longer makes PASS
-unreachable (it was pushing operators toward editing data); and the published procedure — which
-could not run, because my previous edit to it silently failed to apply — is now executed
-end-to-end by CI.
+**`spec/hw` now has a version manifest and gate.** `board-rev-a.md` is what firmware
+writes against and its value rests on *the document changes first, and the notification
+is explicit* — previously a promise, now a gate: content hash and revision move together
+or the build fails. Both drift modes are proven red.
 
-**43 checks, and the red case still bites.**
-
-**The pattern across three rounds is worth naming.** None of these were errors in the
-engineering — the thermal maths, the TS network and the classification logic have all held.
-Every one was an error in *what the check was asking*. Two habits adopted: write the red case
-first and commit it, and when adding a threshold or a proof, ask what the cheapest way to satisfy
-it without doing the work would be — then check whether my own tests do exactly that. Mine did,
-twice.
+**One thing to add to M-04's case:** the library offers PLA only, and PLA creeps under
+sustained load. So even with unlimited library prints, WP-22's 1 000-cycle criterion
+would still need a service bureau or a PETG-capable printer. The library loop is capped
+at "does the geometry feel right" regardless of the two-per-month limit.
 
 ## In flight
 
