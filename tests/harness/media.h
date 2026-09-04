@@ -28,6 +28,8 @@ struct media {
     uint32_t block_count;
     int      writable;
     uint32_t reads;
+    uint32_t writes;      /* so a test can assert "writes nothing" */
+    uint32_t flushes;
 };
 
 static void wr32(unsigned char *p, uint32_t v)
@@ -67,8 +69,31 @@ static int med_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     return TAPE_DEV_OK;
 }
 static int med_write(void *ctx, uint32_t lba, uint32_t count, const void *src)
-{ (void)ctx; (void)lba; (void)count; (void)src; return TAPE_DEV_ERR_IO; }
-static int med_flush(void *ctx) { (void)ctx; return TAPE_DEV_OK; }
+{
+    struct media *m = (struct media *)ctx;
+    const unsigned char *sp = (const unsigned char *)src;
+    uint32_t i;
+
+    m->writes += count;
+    if (lba > m->block_count || count > m->block_count - lba) {
+        return TAPE_DEV_ERR_RANGE;
+    }
+    for (i = 0; i < count; i++) {
+        uint32_t b = lba + i;
+        if (b == m->block_count - 1u) {
+            memcpy(m->mirror, sp + (size_t)i * TAPE_BLOCK_SIZE, TAPE_BLOCK_SIZE);
+        } else if (b < MED_HEAD_BLOCKS) {
+            memcpy(m->head[b], sp + (size_t)i * TAPE_BLOCK_SIZE, TAPE_BLOCK_SIZE);
+        }
+    }
+    return TAPE_DEV_OK;
+}
+static int med_flush(void *ctx)
+{
+    struct media *m = (struct media *)ctx;
+    m->flushes++;
+    return TAPE_DEV_OK;
+}
 
 static void med_bind(struct media *m, tape_dev *dev)
 {
@@ -80,6 +105,25 @@ static void med_bind(struct media *m, tape_dev *dev)
 }
 
 /* Write a superblock into `blk`, then fix its CRC. */
+/*
+ * DRAFT-4 §4.1 phase 2 requires total_chunks >= ceil(nominal_length_s * 44100 /
+ * CHUNK_FRAMES) — the store must cover the label. Test media is deliberately
+ * tiny, so the label has to be tiny too: with 4 chunks the largest honest label
+ * is 11 s. A fixture claiming C-60 on 4 chunks is now correctly refused, which
+ * is the check working.
+ */
+/* Little-endian read, so a test can inspect what the engine wrote back. */
+static uint32_t med_rd32(const unsigned char *p)
+{
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8)
+         | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
+static uint32_t med_max_label_s(uint32_t total_chunks)
+{
+    return (uint32_t)(((uint64_t)total_chunks * TAPE_CHUNK_FRAMES) / TAPE_SAMPLE_RATE);
+}
+
 static void med_sb(unsigned char *blk, uint32_t total_chunks, uint32_t a_high_water,
                    uint32_t block_count, uint32_t generation, uint8_t state)
 {
@@ -95,7 +139,7 @@ static void med_sb(unsigned char *blk, uint32_t total_chunks, uint32_t a_high_wa
     wr16(blk + 40, TAPE_CHANNELS);
     wr16(blk + 42, 16);
     wr32(blk + 44, TAPE_CHUNK_BYTES);
-    wr32(blk + 48, 3600);                        /* C-60 */
+    wr32(blk + 48, med_max_label_s(total_chunks));  /* honest label for this store */
     wr32(blk + 52, total_chunks);
     wr32(blk + 56, a_high_water);
     wr32(blk + 60, TAPE_INDEX_SLOT_BYTES);

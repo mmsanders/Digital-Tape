@@ -27,11 +27,14 @@ typedef enum {
     TAPE_ERR_VERSION,             /* version_major != 1; nothing touched */
     TAPE_ERR_GEOMETRY,            /* fails the tapefs §4.1 geometry checks */
     TAPE_ERR_INCOMPLETE,          /* superblock state == WRITE_IN_PROGRESS */
-    TAPE_ERR_INCONSISTENT,        /* two valid copies, equal generation, differing */
+    TAPE_ERR_INCONSISTENT,        /* two valid copies that cannot be ordered: equal
+                                     sb_generation and not byte-identical (superblock),
+                                     or equal sequence at all (index) */
     TAPE_ERR_NO_VALID_INDEX,
     TAPE_ERR_READ_ONLY,           /* write against write == NULL, or against Side A */
     TAPE_ERR_CARTRIDGE_FULL,
     TAPE_ERR_INDEX_FULL,
+    TAPE_ERR_DEST_TOO_SMALL,      /* tape_dup: destination cannot hold the source timeline */
     TAPE_ERR_SEQUENCE_EXHAUSTED,
     TAPE_ERR_NOT_MOUNTED,
     TAPE_ERR_BUSY,                /* the §10 state matrix forbids this call now */

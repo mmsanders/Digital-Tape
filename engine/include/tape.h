@@ -9,8 +9,9 @@
  * for that behaviour have landed on main, so main carries spec, then tests, then
  * implementation, in that order.
  *
- *   Implemented   tape_instance_size, tape_init, tape_mount (read path),
- *                 tape_unmount, tape_get_info, tape_set_side, tape_tell
+ *   Implemented   tape_instance_size, tape_init, tape_mount (all three phases
+ *                 including repair), tape_unmount, tape_get_info, tape_set_side,
+ *                 tape_tell, and the WP-07 allocator (tape_alloc_run)
  *   Declared,     everything else. Calling one is a link error, which is the
  *   not defined   intended loud failure rather than a silent stub.
  *
@@ -39,6 +40,10 @@
 #define TAPE_INDEX_SLOT_BYTES 65536u
 #define TAPE_INDEX_ENTRY_BYTES   12u
 #define TAPE_MAX_ENTRIES       4096u
+/* spec/tapefs-v1.md §5.4. Position is 64-bit with 32 fractional bits, so the
+   whole part holds 32 bits of frames; media declaring more is rejected at mount
+   rather than becoming unseekable later. */
+#define TAPE_MAX_TOTAL_FRAMES  0xFFFFFFFFu
 
 /* Region LBAs, normative in spec/tapefs-v1.md §3. */
 #define TAPE_LBA_SUPERBLOCK      0u
@@ -53,6 +58,20 @@
 #define TAPE_STATE_WRITE_IN_PROGRESS 1u
 
 typedef enum { TAPE_SIDE_A = 0, TAPE_SIDE_B = 1 } tape_side;
+
+/*
+ * Warm start (spec §5, §12). A validated descriptor, not a bare pointer: a ring
+ * retained from cartridge X side A must not be rendered into a mount of
+ * cartridge Y side B. A mismatch DISABLES warm start rather than failing the
+ * mount — a wrong buffer costs instant-on, never correctness.
+ */
+typedef struct {
+    const void *data;         /* frames, same layout as tape_render output */
+    uint32_t    valid_frames;
+    uint32_t    start_frame;  /* timeline frame the first sample represents */
+    uint8_t     uuid[16];
+    tape_side   side;
+} tape_warm_start;
 
 typedef struct tape tape;
 
@@ -72,7 +91,7 @@ tape_result tape_init(void *mem, size_t mem_len,
 /* --- lifecycle (§5) --------------------------------------------------------- */
 
 tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
-                       const void *warm_start, size_t warm_start_len);
+                       const tape_warm_start *warm);   /* warm may be NULL */
 tape_result tape_unmount(tape *t, uint64_t *out_position_frame);
 
 typedef struct {
@@ -84,6 +103,7 @@ typedef struct {
     uint32_t entry_count, entries_free;
     bool     writable;
     bool     needs_repair;              /* one copy invalid; device is read-only */
+    bool     warm_start_used;
 } tape_info;
 
 tape_result tape_get_info(const tape *t, tape_info *out);
@@ -123,10 +143,21 @@ tape_result tape_abort(tape *t);
    bug fix during SD bring-up and it is a guardrail violation. */
 typedef void (*tape_progress_fn)(void *user, uint32_t blocks_done, uint32_t blocks_total);
 
+/* respool, promote and dup share one incremental contract: each call does at
+   most block_budget blocks of work and sets *more_work while any remains. A
+   ~30 s blocking call in an engine that must service audio and has no clock was
+   never going to work. */
 tape_result tape_reset_side_b(tape *t);
-tape_result tape_promote(tape *t, tape_progress_fn cb, void *user);
+tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
+                         tape_progress_fn cb, void *user);
 tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work);
-tape_result tape_dup(tape *src, tape *dst, const uint8_t new_uuid[16], uint32_t epoch,
+/* The destination is a DEVICE, not a mount. A blank card and an interrupted copy
+   are both unmountable by design, so a mounted dst made "re-run to finish"
+   impossible to perform (spec §9.5). */
+tape_result tape_dup(tape *src, const tape_dev *dst_dev,
+                     const uint8_t new_uuid[16], uint32_t epoch,
+                     uint32_t dst_nominal_length_s,
+                     uint32_t block_budget, bool *more_work,
                      tape_progress_fn cb, void *user);
 tape_result tape_format(const tape_dev *dev, const uint8_t uuid[16], uint32_t epoch,
                         const char *label, uint32_t nominal_length_s);

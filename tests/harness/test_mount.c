@@ -20,6 +20,7 @@
    TAPE_ERR_GEOMETRY instead, because §4.1 validates geometry before it reads an
    index — which is the correct order, and worth stating since it caught me. */
 #define CHUNKS     4u
+#define MED_A_HIGH_WATER CHUNKS
 #define BLOCKS  (TAPE_LBA_CHUNK_BASE + CHUNKS * TAPE_CHUNK_BLOCKS + 1u)
 
 static struct media MED;
@@ -53,7 +54,7 @@ static tape_result mount_side(tape_side side, tape **out)
     rc = tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY, REC, sizeof REC, &t);
     if (rc != TAPE_OK) { return rc; }
     if (out != NULL) { *out = t; }
-    return tape_mount(t, side, 0u, NULL, 0u);
+    return tape_mount(t, side, 0u, NULL);
 }
 
 static tape_result mount_a(void) { return mount_side(TAPE_SIDE_A, NULL); }
@@ -76,7 +77,7 @@ int main(void)
         CHECK_EQ_U32((uint32_t)info.total_frames, 1000u);
         CHECK_EQ_U32(info.entry_count, 1u);
         CHECK_EQ_U32(info.entries_free, TAPE_MAX_ENTRIES - 1u);
-        CHECK_EQ_U32(info.nominal_length_s, 3600u);      /* C-60 */
+        CHECK_EQ_U32(info.nominal_length_s, med_max_label_s(CHUNKS));
         CHECK(!info.writable);                            /* read-only device */
         CHECK(!info.needs_repair);
         CHECK_EQ_U32((uint32_t)tape_tell(t), 0u);
@@ -110,18 +111,22 @@ int main(void)
     /* both valid, different generation -> the higher wins */
     build_valid();
     med_sb(MED.mirror, CHUNKS, CHUNKS, BLOCKS, 7u, TAPE_STATE_VALID);
-    wr32(MED.mirror + 48, 5400u);       /* C-90 label, only in the mirror */
+    /* A distinguishing label, kept honest: 5 s needs 2 chunks and the store has
+       4. The first version of this test used a C-90 label as the marker and the
+       new label-coverage check correctly refused it — the marker was itself
+       invalid media. */
+    wr32(MED.mirror + 48, 5u);
     med_fix_sb_crc(MED.mirror);
     {
         tape *t = NULL; tape_info info;
         CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
         CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
-        CHECK_EQ_U32(info.nominal_length_s, 5400u);   /* generation 7 chosen */
+        CHECK_EQ_U32(info.nominal_length_s, 5u);      /* generation 7 chosen */
     }
 
     /* both valid, equal generation, differing bytes -> INCONSISTENT */
     build_valid();
-    wr32(MED.mirror + 48, 7200u);
+    wr32(MED.mirror + 48, 5u);
     med_fix_sb_crc(MED.mirror);
     CHECK_EQ_INT(mount_a(), TAPE_ERR_INCONSISTENT);
 
@@ -291,7 +296,7 @@ int main(void)
         med_bind(&MED, &dev);
         CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
                                REC, sizeof REC, &t), TAPE_OK);
-        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 999999u, NULL, 0u), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 999999u, NULL), TAPE_OK);
         CHECK_EQ_U32((uint32_t)tape_tell(t), 1000u);
     }
 
@@ -306,6 +311,198 @@ int main(void)
                                REC, sizeof REC, &t), TAPE_ERR_INVALID_ARG);
         CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, 1024u,
                                REC, sizeof REC, &t), TAPE_ERR_INVALID_ARG);
+    }
+
+    /* ================= DRAFT-4 =================================== */
+
+    /* --- V3-001: the 64-bit run extent. The spec's own repro values. --- */
+    {
+        static const ent wrap[1] = { { 0u, 131071u, 0xFFFFFFFFu } };
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, wrap, 1u);
+        /* In u32 this wrapped to last == 0 — the most permissive value there is,
+           passing every bound including a_high_water. In 64-bit it is 32768,
+           past total_chunks, and refused. */
+        CHECK_EQ_INT(mount_a(), TAPE_ERR_NO_VALID_INDEX);
+    }
+
+    /* --- V3-004: geometry at EXACT equality with the mirror block is refused.
+           Named in acceptance.md WP-06. --- */
+    {
+        uint32_t bc = TAPE_LBA_CHUNK_BASE + CHUNKS * TAPE_CHUNK_BLOCKS; /* end == block_count */
+        build_valid();
+        MED.block_count = bc;
+        med_sb(MED.head[0], CHUNKS, CHUNKS, bc, 1u, TAPE_STATE_VALID);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        CHECK_EQ_INT(mount_a(), TAPE_ERR_GEOMETRY);
+
+        /* One block short is the accepted case — proving the check is an
+           off-by-one boundary and not a blanket refusal. */
+        build_valid();
+        CHECK_EQ_INT(mount_a(), TAPE_OK);
+    }
+
+    /* --- the store must cover the label (§2) --- */
+    build_valid();
+    wr32(MED.head[0] + 48, med_max_label_s(CHUNKS) + 1u);   /* one second too long */
+    med_fix_sb_crc(MED.head[0]);
+    memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+    CHECK_EQ_INT(mount_a(), TAPE_ERR_GEOMETRY);
+
+    /* --- §5.3: both slots valid at EQUAL sequence is refused, unconditionally.
+           Named in acceptance.md WP-06. My DRAFT-3-era rule accepted this when
+           the two were byte-identical; DRAFT-4 does not, and is right — equal
+           sequence is unreachable through §8, so it means media fault or an
+           implementation bug either way. --- */
+    {
+        static const ent one[1] = { { 0u, 0u, 100u } };
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 5u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_A1, 0u, 5u, one, 1u);   /* byte-identical */
+        CHECK_EQ_INT(mount_a(), TAPE_ERR_INCONSISTENT);
+    }
+
+    /* --- §4.1: a version_major = 2 mount with one torn copy WRITES NOTHING.
+           Named in acceptance.md WP-06, and the reason the three phases exist:
+           repairing unsupported media is how an old reader downgrades new
+           media. --- */
+    {
+        tape_dev dev; tape *t = NULL;
+        build_valid();
+        MED.writable = 1;                                   /* writable device */
+        wr16(MED.head[0] + 8, 2u);                          /* v2 primary */
+        med_fix_sb_crc(MED.head[0]);
+        memset(MED.mirror, 0, TAPE_BLOCK_SIZE);             /* torn partner */
+        MED.writes = 0u; MED.flushes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_VERSION);
+        CHECK_EQ_U32(MED.writes, 0u);        /* the whole point */
+        CHECK_EQ_U32(MED.flushes, 0u);
+    }
+
+    /* --- phase 3 DOES repair a v1 cartridge with one torn copy, and does not
+           bump sb_generation: repair restores an existing logical state. --- */
+    {
+        tape_dev dev; tape *t = NULL; tape_info info;
+        build_valid();
+        MED.writable = 1;
+        memset(MED.mirror, 0, TAPE_BLOCK_SIZE);
+        MED.writes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_U32(MED.writes, 1u);                        /* the mirror */
+        CHECK_MEM_EQ(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        CHECK_EQ_U32(med_rd32(MED.mirror + 12), 1u);        /* generation unchanged */
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.needs_repair);                            /* repaired */
+    }
+
+    /* --- and a read-only device is never repaired, only reported --- */
+    {
+        tape *t = NULL; tape_info info;
+        build_valid();
+        memset(MED.mirror, 0, TAPE_BLOCK_SIZE);
+        MED.writes = 0u;
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_U32(MED.writes, 0u);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(info.needs_repair);
+    }
+
+    /* --- §5.1: entry ranges must not overlap --- */
+    {
+        /* Two entries both fully referencing chunk 0. Every other check passes:
+           the CRC is right, both runs are in bounds, and total_frames matches
+           the sum. §9.3's phase-2 reasoning breaks on exactly this. */
+        static const ent dup2[2] = { { 0u, 0u, TAPE_CHUNK_FRAMES },
+                                     { 0u, 0u, TAPE_CHUNK_FRAMES } };
+        /* Disjoint frame ranges inside one shared chunk: legal, and what a
+           splice produces when it splits a run. */
+        static const ent split[2] = { { 0u, 0u,    1000u },
+                                      { 0u, 1000u, 1000u } };
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, dup2, 2u);
+        CHECK_EQ_INT(mount_a(), TAPE_ERR_NO_VALID_INDEX);
+
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, split, 2u);
+        CHECK_EQ_INT(mount_a(), TAPE_OK);
+
+        /* The case §5.1's "Equivalently:" aggregate formula does NOT catch:
+           two entries covering the same 1000 frames of chunk 0. total_frames is
+           2000, the aggregate bound is 131072, so the aggregate passes it —
+           while the pairwise rule refuses. Filed as a finding; the pairwise rule
+           is what is implemented. */
+        {
+            static const ent same[2] = { { 0u, 0u, 1000u }, { 0u, 0u, 1000u } };
+            build_valid();
+            med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, same, 2u);
+            CHECK_EQ_INT(mount_a(), TAPE_ERR_NO_VALID_INDEX);
+        }
+    }
+
+    /* --- Rule 3: Side B may REFERENCE chunks owned by Side A. This is the
+           reset-B shape, and DRAFT-3's invariant 4 made it unmountable. --- */
+    {
+        static const ent low[1] = { { 0u, 0u, 1000u } };
+        tape *t = NULL;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 3u, low, 1u);   /* B -> chunk 0 */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+        /* and free_next is not raised by a reference below the mark (§7) */
+        {
+            tape_info info;
+            CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+            CHECK_EQ_U32(info.free_chunks, CHUNKS - MED_A_HIGH_WATER);
+        }
+    }
+
+    /* --- warm start: validated, and a mismatch disables it rather than failing
+           the mount (V3-016) --- */
+    {
+        static int16_t ring[256];
+        tape_warm_start w;
+        tape_dev dev; tape *t = NULL; tape_info info;
+
+        build_valid();
+        med_bind(&MED, &dev);
+        w.data = ring; w.valid_frames = 128u; w.start_frame = 0u;
+        w.side = TAPE_SIDE_A;
+        memset(w.uuid, 0xAB, 16);                      /* matches the fixture */
+
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(info.warm_start_used);
+
+        /* wrong cartridge -> ignored, mount still succeeds */
+        memset(w.uuid, 0x11, 16);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /* wrong side -> ignored */
+        memset(w.uuid, 0xAB, 16);
+        w.side = TAPE_SIDE_B;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /* resume outside the ring's range -> ignored */
+        w.side = TAPE_SIDE_A;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 500u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /* no descriptor at all is fine */
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
     }
 
     return TAPE_TEST_REPORT("mount read path");

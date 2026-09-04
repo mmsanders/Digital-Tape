@@ -45,12 +45,12 @@ drift. It points at the manifest instead.
 
 | Work | Owner | State |
 |---|---|---|
-| DRAFT-5 bundle + manifest gate | Software Lead | **On `main`** — the canonical publication point |
+| DRAFT-5 bundle + manifest gate | Software Lead | **On `main`** (#21) — the canonical publication point |
 | Read path reconciliation to DRAFT-5 | Software Lead | **Not started.** Engine is DRAFT-4-era |
 | WP-06 sub-criteria 06a–06f | Software Lead | Not started |
 | WP-07 allocator | Software Lead | Done against DRAFT-4; needs the Rule 3 re-read |
 | WP-06/07 commit paths | Software Lead | **Held** by structural Rule 1 |
-| WP-06/07 read+alloc paths | Software Lead | On `claude/new-project-setup-fooeic`, PR #20 — also held, and no longer holding anything up |
+| WP-06/07 read+alloc paths | Software Lead | PR #20, rebased onto the DRAFT-5 `main` — held by structural Rule 1, and no longer holding anything up |
 | WP-10 crash injection | Verification | Infrastructure in CI; adapters owed |
 | WP-11 golden suite | Verification | Runner proven; fixtures owed. **The only red gate** |
 

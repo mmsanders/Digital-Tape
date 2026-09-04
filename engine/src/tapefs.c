@@ -5,45 +5,10 @@
  * Everything here is pure: it takes bytes and produces structures or refusals.
  * No device access, so it is trivially testable against synthetic media.
  *
- * ============================================================================
- *  PROVISIONAL — DO NOT EXTEND THESE RULES UNTIL DRAFT-4  (PM Decisions 004 §5)
- * ============================================================================
- *
- * Five verifier findings against DRAFT-3 land directly on this file. Two are
- * blockers and both are CONFIRMED present in this code, with the spec's own
- * repro values:
- *
- *   V3-001  blocker  tape_entry_last_chunk() computes in u32 and wraps before
- *                    any bounds test. Confirmed: first=0, start_frame=131071,
- *                    frame_count=0xFFFFFFFF gives last_chunk_id == 0, when the
- *                    true value is 32768. Zero is the MOST permissive result
- *                    possible -- it passes the `last < first` guard below and
- *                    every bound including a_high_water. A CRC-correct index
- *                    claiming a 4-billion-frame run validates as a single chunk
- *                    at position 0. On Side A this defeats immutability.
- *                    Fix needs checked 64-bit intermediates; DRAFT-4 defines it.
- *
- *   V3-004  blocker  The geometry inequality accepts equality, so the last
- *                    chunk's final block can BE the mirror superblock.
- *                    Confirmed: block_count 6144, chunk store ends at 6144,
- *                    mirror at 6143 -- and tape_sb_check_geometry accepts it.
- *                    Filling that chunk overwrites the mirror; a superblock
- *                    update overwrites referenced audio.
- *
- *   V3-005  major    DRAFT-3 has NO normative index-slot selection algorithm.
- *                    What pick_live_index() does in mount.c was invented here.
- *
- *   V3-006  major    §4.1 orders repair before the version check while also
- *                    forbidding any touch of unsupported media. This code
- *                    encodes one of two incompatible orders.
- *
- *   V3-009  major    Engine invariant 4 contradicts tape_reset_side_b, which
- *                    aliases Side A chunks below a_high_water by design.
- *
- * These are NOT fixed here on purpose. The spec is upstream of the code
- * (contract 1): DRAFT-4 changes the rules, and guessing the fix now would mean
- * implementing a rule that is not normative and may differ. The bugs are real
- * and the exposure is bounded -- nothing writes to media yet.
+ * DRAFT-4 reconciled. Five rules changed from DRAFT-3 and are implemented here as
+ * written: 64-bit run extents (V3-001), the new entry-overlap validity rule,
+ * three-phase mount with writes only in phase 3 (V3-006), normative index-slot
+ * selection (V3-005), and geometry reserving the mirror block (V3-004).
  */
 
 #include <string.h>
@@ -66,16 +31,92 @@ uint64_t tape_rd64(const unsigned char *p)
     return (uint64_t)tape_rd32(p) | ((uint64_t)tape_rd32(p + 4) << 32);
 }
 
-uint32_t tape_entry_last_chunk(const struct tape_entry *e)
+uint64_t tape_entry_last_chunk(const struct tape_entry *e)
 {
-    /* PROVISIONAL — V3-001 blocker. This is DRAFT-3 §5.1 transcribed directly,
-       and the direct transcription is the bug: every operand is u32, so the
-       expression wraps before any caller can test it. Left as written because
-       the spec is upstream of the code and DRAFT-4 defines the widening rule.
-       spec §5.1. frame_count >= 1 is a validity precondition, so the -1 cannot
-       underflow on a valid entry; callers check frame_count first. */
-    return e->first_chunk_id
-         + (e->start_frame + e->frame_count - 1u) / TAPE_CHUNK_FRAMES;
+    /* spec §5.1 DRAFT-4, checked 64-bit. Every operand is widened BEFORE any
+       arithmetic, and the result is never narrowed here — callers compare in
+       64-bit and narrow only after the bounds test. frame_count >= 1 is a
+       validity precondition checked before this is called, so the -1 cannot
+       underflow. */
+    uint64_t span = (uint64_t)e->start_frame + (uint64_t)e->frame_count - 1u;
+    return (uint64_t)e->first_chunk_id + span / TAPE_CHUNK_FRAMES;
+}
+
+/*
+ * Flattened position of an entry's first frame, in a chunk-major address space:
+ * chunk_id * CHUNK_FRAMES + start_frame. In that space an entry is a single
+ * contiguous interval, so "chunk extents may share chunks only where their frame
+ * ranges are disjoint" becomes exactly "the intervals do not overlap".
+ */
+static uint64_t entry_begin(const struct tape_entry *e)
+{
+    return (uint64_t)e->first_chunk_id * TAPE_CHUNK_FRAMES + (uint64_t)e->start_frame;
+}
+
+static uint64_t entry_end(const struct tape_entry *e)
+{
+    return entry_begin(e) + (uint64_t)e->frame_count;
+}
+
+/* Iterative heapsort by flattened start. Iterative because guardrail 08 caps
+   stack depth and forbids recursion; in place because the engine allocates
+   nothing. O(n log n) matters: n can be 4096 and mount is on the wake-to-audio
+   path (guardrail 04), where an O(n^2) scan would cost real milliseconds. */
+static void sift_down(struct tape_entry *a, uint32_t root, uint32_t n)
+{
+    for (;;) {
+        uint32_t child = 2u * root + 1u;
+        uint32_t swap  = root;
+        if (child >= n) { return; }
+        if (entry_begin(&a[swap]) < entry_begin(&a[child])) { swap = child; }
+        if (child + 1u < n && entry_begin(&a[swap]) < entry_begin(&a[child + 1u])) {
+            swap = child + 1u;
+        }
+        if (swap == root) { return; }
+        {
+            struct tape_entry tmp = a[root];
+            a[root] = a[swap];
+            a[swap] = tmp;
+        }
+        root = swap;
+    }
+}
+
+/*
+ * spec §5.1's overlap rule, implemented as its PAIRWISE statement.
+ *
+ * The section also offers an "Equivalently:" aggregate formula. It is not
+ * equivalent — it is strictly weaker, and it is circular (it is phrased in terms
+ * of free_next, which §7 derives from the live index, which requires validity to
+ * have been settled first). Two entries each covering frames 0..1000 of chunk 0
+ * pass the aggregate and fail this. Filed as issue #19; ADR-027 records why the
+ * pairwise rule is what ships.
+ */
+tape_result tape_index_check_overlap(struct tape_index *idx, struct tape_index *scratch)
+{
+    struct tape_entry *a = scratch->entries;
+    uint32_t n = idx->entry_count;
+    uint32_t i;
+
+    if (n < 2u) { return TAPE_OK; }
+
+    for (i = 0; i < n; i++) { a[i] = idx->entries[i]; }
+
+    i = n / 2u;
+    while (i > 0u) { i--; sift_down(a, i, n); }
+    for (i = n; i > 1u; ) {
+        struct tape_entry tmp;
+        i--;
+        tmp = a[0]; a[0] = a[i]; a[i] = tmp;
+        sift_down(a, 0u, i);
+    }
+
+    for (i = 1u; i < n; i++) {
+        if (entry_end(&a[i - 1u]) > entry_begin(&a[i])) {
+            return TAPE_ERR_NO_VALID_INDEX;
+        }
+    }
+    return TAPE_OK;
 }
 
 static const unsigned char SB_MAGIC[8] = {
@@ -138,21 +179,32 @@ tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_coun
     if (sb->lba_chunk_base != TAPE_LBA_CHUNK_BASE) { return TAPE_ERR_GEOMETRY; }
 
     /* The caller's block_count is untrusted; these checks defend against it as
-       much as against the card (spec §4.1, issue #14 candidate 5). */
+       much as against the card (spec §4.1 phase 2). */
     if (block_count == 0u)                                  { return TAPE_ERR_GEOMETRY; }
     if (sb->lba_superblock_mirror != block_count - 1u)      { return TAPE_ERR_GEOMETRY; }
     if (sb->total_chunks < 1u)                              { return TAPE_ERR_GEOMETRY; }
     if (sb->a_high_water > sb->total_chunks)                { return TAPE_ERR_GEOMETRY; }
+    if ((uint64_t)block_count <= (uint64_t)sb->lba_chunk_base) { return TAPE_ERR_GEOMETRY; }
 
-    /* 64-bit, so a large total_chunks cannot wrap into a passing value.
-       PROVISIONAL — V3-004 blocker: `>` accepts equality, and at equality the
-       last chunk's final block IS the mirror superblock at block_count - 1.
-       The verifier's fix is `<= block_count - 1` with a prior
-       `block_count > lba_chunk_base` check. Not applied here: DRAFT-4 owns the
-       inequality, and changing it now would move the refusal tests off-spec. */
+    /* DRAFT-4: the mirror block is RESERVED, so the chunk store must end at or
+       before block_count - 1, not at block_count. DRAFT-3 allowed equality,
+       which put the last chunk's final block exactly on the mirror: filling that
+       chunk destroys the mirror, and repairing the mirror destroys referenced
+       audio (V3-004). All 64-bit, so a large total_chunks cannot wrap into a
+       passing value. */
     chunk_end = (uint64_t)sb->lba_chunk_base
               + (uint64_t)sb->total_chunks * (uint64_t)TAPE_CHUNK_BLOCKS;
-    if (chunk_end > (uint64_t)block_count)                  { return TAPE_ERR_GEOMETRY; }
+    if (chunk_end > (uint64_t)block_count - 1u)             { return TAPE_ERR_GEOMETRY; }
+
+    /* DRAFT-4: the store must cover the label (§2). Without this a cartridge
+       labelled C-60 with 100 chunks mounts clean, and §2's guarantee that a
+       cartridge holds the time printed on it is unenforced. Ceiling division,
+       64-bit throughout. */
+    {
+        uint64_t need = ((uint64_t)sb->nominal_length_s * TAPE_SAMPLE_RATE
+                         + TAPE_CHUNK_FRAMES - 1u) / TAPE_CHUNK_FRAMES;
+        if ((uint64_t)sb->total_chunks < need)              { return TAPE_ERR_GEOMETRY; }
+    }
 
     return TAPE_OK;
 }
@@ -193,7 +245,7 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
 
     for (i = 0; i < count; i++) {
         const unsigned char *e = entries + (size_t)i * TAPE_INDEX_ENTRY_BYTES;
-        uint32_t last;
+        uint64_t last;
 
         out->entries[i].first_chunk_id = tape_rd32(e);
         out->entries[i].start_frame    = tape_rd32(e + 4);
@@ -202,15 +254,16 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
         if (out->entries[i].frame_count < 1u)                  { return TAPE_ERR_NO_VALID_INDEX; }
         if (out->entries[i].start_frame >= TAPE_CHUNK_FRAMES)  { return TAPE_ERR_NO_VALID_INDEX; }
 
+        /* Compared in 64-bit and never narrowed (§5.1 DRAFT-4). */
         last = tape_entry_last_chunk(&out->entries[i]);
-        if (last < out->entries[i].first_chunk_id)             { return TAPE_ERR_NO_VALID_INDEX; }
-        if (last >= sb->total_chunks)                          { return TAPE_ERR_NO_VALID_INDEX; }
+        if (last >= (uint64_t)sb->total_chunks)                { return TAPE_ERR_NO_VALID_INDEX; }
 
         /* spec §5.2: for Side A the bound is the LAST chunk of each run, not the
            first. This is the check that keeps the sandbox out of the music, and
            an off-by-one at the end of a run is exactly how it would fail.
-           PROVISIONAL — V3-001 defeats this check via the u32 wrap above. */
-        if (side == (uint8_t)TAPE_SIDE_A && last >= sb->a_high_water) {
+           There is deliberately NO Side B lower bound — Rule 3: Side B may
+           reference chunks it does not own, which is what reset-B produces. */
+        if (side == (uint8_t)TAPE_SIDE_A && last >= (uint64_t)sb->a_high_water) {
             return TAPE_ERR_NO_VALID_INDEX;
         }
 
@@ -218,6 +271,11 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
     }
 
     if (sum != out->total_frames) {
+        return TAPE_ERR_NO_VALID_INDEX;
+    }
+    /* §5.4: media declaring more than the position representation can address is
+       rejected at mount rather than becoming unseekable later (V3-010). */
+    if (out->total_frames > (uint64_t)TAPE_MAX_TOTAL_FRAMES) {
         return TAPE_ERR_NO_VALID_INDEX;
     }
     return TAPE_OK;
@@ -235,9 +293,12 @@ uint32_t tape_derive_free_next(const struct tape_index *idx, const struct tape_s
         return next;
     }
     for (i = 0; i < idx->entry_count; i++) {
-        uint32_t last = tape_entry_last_chunk(&idx->entries[i]);
-        if (last + 1u > next) {
-            next = last + 1u;
+        uint64_t last = tape_entry_last_chunk(&idx->entries[i]);
+        /* Entries referencing only Side A chunks yield last + 1 <= a_high_water
+           and so do not raise free_next (§7). Validity has already bounded last
+           below total_chunks, so the narrowing here is safe. */
+        if (last + 1u > (uint64_t)next) {
+            next = (uint32_t)(last + 1u);
         }
     }
     return next;

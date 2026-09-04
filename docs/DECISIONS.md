@@ -1078,3 +1078,37 @@ own branches from here.
 **Cost to reverse.** None; this is a branching convention, not a mechanism. The cost of *not*
 adopting it is a repeat, and it recurs every time a spec revision arrives mid-work-package —
 which, on current cadence, is every round.
+
+---
+
+## ADR-027 — The entry-overlap rule is implemented pairwise, not by the aggregate formula
+
+**Date:** 2026-09-03 · **Decided by:** Software Lead · **Finding filed as issue #19, now closed**
+
+> **Confirmed by DRAFT-5.** §5.1's note V4-002 deletes the "Equivalently:" scalar test outright,
+> on both grounds filed — not equivalent, and circular via `free_next`. The interval model is now
+> the normative rule, and the spec observes that it "depends on nothing but the entry array and
+> `CHUNK_FRAMES`, so it can be evaluated in phase 2 of slot validation with no ordering hazard."
+> No code change follows; this entry stands as written.
+
+**Decision.** `tapefs` §5.1's new overlap requirement is implemented as its precise statement —
+no two entries' frame ranges may intersect — by flattening each entry to an interval in
+chunk-major space (`chunk_id × CHUNK_FRAMES + start_frame`), sorting, and scanning adjacent
+pairs. The section's "Equivalently:" aggregate formula is **not** implemented.
+
+**Rationale.** The two are not equivalent, and the aggregate is strictly weaker. Two entries each
+covering frames 0–1000 of chunk 0 give `total_frames = 2000` against an aggregate bound of
+131 072 — the aggregate passes media the pairwise rule refuses, and that is precisely the
+two-entries-on-one-chunk shape §9.3's phase-2 argument depends on excluding.
+
+It is also circular: the aggregate is phrased in terms of `free_next`, which §7 derives from the
+*live* index — and an index is only live once §5.2 has judged it valid. A validity rule cannot
+depend on a value that only exists after validity is settled.
+
+**Cost to reverse.** Low. If the PM makes the aggregate normative instead, the pairwise check is
+deleted and media that overlaps within a chunk starts mounting — which is why the finding is
+filed rather than silently resolved in the implementer's favour.
+
+Sorting is an iterative heapsort in the caller's scratch index: recursion is forbidden
+(guardrail 08), allocation is forbidden, and mount is on the wake-to-audio path, where an O(n²)
+scan over 4 096 entries would cost real milliseconds.

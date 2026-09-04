@@ -5,27 +5,16 @@
  * The order of refusals in tape_mount is itself normative and each step has a
  * test that exercises its refusal path (spec/acceptance.md, WP-06).
  *
- * PROVISIONAL — DO NOT EXTEND THE MOUNT RULES UNTIL DRAFT-4 (PM Decisions 004 §5).
+ * DRAFT-4 reconciled. Mount is three phases and ONLY PHASE 3 WRITES:
  *
- *   V3-005  major  DRAFT-3 has no normative index-slot selection algorithm.
- *                  DRAFT-1 had one; it was dropped in restructuring. Everything
- *                  pick_live_index() below does -- higher sequence wins, equal
- *                  sequence must be byte-identical, neither valid is
- *                  NO_VALID_INDEX -- was INVENTED HERE by analogy with §4.1.
- *                  It is reasonable and it is not normative. Two conforming
- *                  implementations could mount different generations after the
- *                  same crash, which is precisely what a crash oracle cannot
- *                  tolerate.
+ *   1  selection   read both superblock copies, pick a candidate. No writes.
+ *   2  admission   version, then state, then geometry. No writes.
+ *   3  repair      rewrite the invalid copy from the candidate. Writes.
  *
- *   V3-006  major  §4.1 says use the one valid copy and rewrite the other, then
- *                  says an unsupported version must touch nothing and never
- *                  trigger repair. Both cannot hold. resolve_superblock() below
- *                  picks the no-mutation reading -- it selects a candidate,
- *                  then checks version -- which happens to be the safe half,
- *                  but it is a choice between contradictory text, not
- *                  conformance to it.
- *
- * See engine/src/tapefs.c for V3-001, V3-004 and V3-009.
+ * The ordering is the point. DRAFT-3 let repair precede the version check, which
+ * meant a v1 engine could write to v2 media it is forbidden to touch (V3-006).
+ * A version_major = 2 mount now writes nothing at all, including no mirror
+ * repair, and acceptance.md WP-06 names that as a required test.
  */
 
 #include <string.h>
@@ -76,12 +65,14 @@ static tape_result read_block(struct tape *t, uint32_t lba, unsigned char *dst)
 }
 
 /*
- * spec §4.1 two-copy protocol. Resolution order is normative:
- *   validity -> pick copy -> version -> state -> geometry
- * Version is checked BEFORE any repair: an unsupported version is not
- * corruption, and repairing it is how a v1 reader would downgrade v2 media.
+ * spec §4.1, phases 1 and 2. No writes happen anywhere in this function; repair
+ * is phase 3 and is a separate call, so that the "writes nothing" guarantee is
+ * structural rather than a matter of reading the control flow carefully.
+ *
+ * On return, *repair_lba is the block to rewrite if phase 3 runs, or UINT32_MAX
+ * if both copies were valid.
  */
-static tape_result resolve_superblock(struct tape *t)
+static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
 {
     unsigned char pri[TAPE_BLOCK_SIZE], mir[TAPE_BLOCK_SIZE];
     struct tape_sb sb_pri, sb_mir;
@@ -89,6 +80,7 @@ static tape_result resolve_superblock(struct tape *t)
     const struct tape_sb *chosen;
     bool pri_ok, mir_ok;
 
+    *repair_lba = 0xFFFFFFFFu;
     if (t->dev.block_count == 0u) {
         return TAPE_ERR_GEOMETRY;
     }
@@ -124,24 +116,52 @@ static tape_result resolve_superblock(struct tape *t)
         t->needs_repair = false;
     } else {
         chosen = pri_ok ? &sb_pri : &sb_mir;
-        /* One copy invalid. A writable device may be repaired; a read-only one
-           never is, and reports the fact instead (§4.1). Repair itself is a
-           write and therefore waits for the commit path. */
+        /* Exactly one valid: it is the candidate, and the partner is recorded as
+           needing repair. Whether repair actually happens is phase 3's business
+           and depends on passing phase 2 first. */
         t->needs_repair = true;
+        *repair_lba = pri_ok ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
+        memcpy(t->block, pri_ok ? pri : mir, TAPE_BLOCK_SIZE);
     }
 
     t->sb = *chosen;
 
+    /* --- phase 2: admission, in this order. Still no writes. --- */
+
+    /* 1. An unsupported version is not corruption. Nothing is written and no
+          repair happens — repairing it is exactly how an old reader downgrades
+          new media. This must come before everything else. */
     if (t->sb.version_major != 1u) { return TAPE_ERR_VERSION; }
+
+    /* 2. version_minor > 0 mounts read-only. */
+    if (t->sb.version_minor > 0u) { t->writable = false; }
+
+    /* 3. An interrupted duplicate or format. */
     if (t->sb.state == TAPE_STATE_WRITE_IN_PROGRESS) { return TAPE_ERR_INCOMPLETE; }
 
+    /* 4. Geometry, all in 64-bit, against an untrusted block_count. */
     rc = tape_sb_check_geometry(&t->sb, t->dev.block_count);
     if (rc != TAPE_OK) { return rc; }
 
-    /* version_minor > 0 mounts read-only (§4.1). */
-    if (t->sb.version_minor > 0u) {
-        t->writable = false;
-    }
+    return TAPE_OK;
+}
+
+/*
+ * spec §4.1 phase 3 — the only phase that writes.
+ *
+ * Runs only if the candidate passed phase 2, exactly one copy was structurally
+ * valid, and the device is writable. sb_generation is NOT incremented: repair
+ * restores a copy of an existing logical state, it does not create a new one.
+ */
+static tape_result repair_superblock(struct tape *t, uint32_t repair_lba)
+{
+    if (repair_lba == 0xFFFFFFFFu) { return TAPE_OK; }   /* nothing to repair */
+    if (t->dev.write == NULL)      { return TAPE_OK; }   /* read-only: skip, report */
+
+    if (dev_write(&t->dev, repair_lba, 1u, t->block) != 0) { return TAPE_ERR_IO; }
+    if (dev_flush(&t->dev) != 0)                           { return TAPE_ERR_IO; }
+
+    t->needs_repair = false;
     return TAPE_OK;
 }
 
@@ -169,12 +189,20 @@ static tape_result load_slot(struct tape *t, uint32_t lba, uint8_t side,
     return tape_index_parse(hdr, t->entry_bytes, side, &t->sb, out);
 }
 
-/* PROVISIONAL — V3-005: this algorithm is not in DRAFT-3. It is invented by
-   analogy with the §4.1 superblock rules. Pick the live slot for a side: higher
-   sequence with a valid CRC. Equal and both valid but differing is
-   TAPE_ERR_INCONSISTENT, which format makes unreachable by leaving exactly one
-   valid slot per side (§9.6). DRAFT-4 is expected to make this normative, and
-   it may not match. */
+/*
+ * spec §5.3 index-slot selection, now normative. It performs NO WRITES.
+ *
+ * Reconciliation note: my DRAFT-3-era invented rule differed in one place. It
+ * accepted two valid slots at equal `sequence` when they were byte-identical.
+ * DRAFT-4 says equal sequence is TAPE_ERR_INCONSISTENT unconditionally. The
+ * spec wins, and it is the better rule: equal sequence is unreachable through
+ * §8, so it means media fault or implementation bug, and byte-identity would
+ * have quietly accepted a card that had somehow produced two live generations.
+ *
+ * The invalid partner is NEVER repaired. It is the normal resting state after
+ * format (§9.6) and after every commit (§8), and repairing it would destroy the
+ * fallback the commit protocol depends on — which is also how promote recovers.
+ */
 static tape_result pick_live_index(struct tape *t, tape_side side)
 {
     /* The scratch index is the instance's second index buffer (§4). It is free
@@ -204,14 +232,8 @@ static tape_result pick_live_index(struct tape *t, tape_side side)
         return TAPE_OK;
     }
     if (cand->sequence == t->live.sequence) {
-        if (cand->entry_count != t->live.entry_count
-            || cand->total_frames != t->live.total_frames
-            || memcmp(cand->entries, t->live.entries,
-                      (size_t)cand->entry_count * sizeof(struct tape_entry)) != 0) {
-            return TAPE_ERR_INCONSISTENT;
-        }
-        t->live_slot = 0u;
-        return TAPE_OK;
+        /* §5.3: equal sequence is inconsistent regardless of content. */
+        return TAPE_ERR_INCONSISTENT;
     }
     if (cand->sequence > t->live.sequence) {
         t->live = *cand;
@@ -223,20 +245,31 @@ static tape_result pick_live_index(struct tape *t, tape_side side)
 }
 
 tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
-                       const void *warm_start, size_t warm_start_len)
+                       const tape_warm_start *warm)
 {
+    uint32_t repair_lba;
     tape_result rc;
 
     if (t == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (side != TAPE_SIDE_A && side != TAPE_SIDE_B) { return TAPE_ERR_INVALID_ARG; }
-    if (warm_start == NULL && warm_start_len != 0u)  { return TAPE_ERR_INVALID_ARG; }
 
     t->mounted = false;
+    t->warm_start_used = false;
 
-    rc = resolve_superblock(t);
+    /* Phases 1 and 2. Any refusal from here returns before phase 3 exists. */
+    rc = resolve_superblock(t, &repair_lba);
     if (rc != TAPE_OK) { return rc; }
 
+    /* Phase 3. Only reached by media that passed admission. */
+    rc = repair_superblock(t, repair_lba);
+    if (rc != TAPE_OK) { return rc; }
+
+    /* §5.3 index-slot selection, then §5.1's overlap rule against the selected
+       index. Scratch is free at mount and is the sort's working space. */
     rc = pick_live_index(t, side);
+    if (rc != TAPE_OK) { return rc; }
+
+    rc = tape_index_check_overlap(&t->live, &t->scratch);
     if (rc != TAPE_OK) { return rc; }
 
     t->side      = side;
@@ -248,11 +281,20 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
     t->position_frame = (resume_frame > t->live.total_frames)
                       ? t->live.total_frames : resume_frame;
 
-    /* The warm-start buffer is the caller's retained play ring from before
-       sleep. The engine borrows it; it never owns it (Rule 1). Rendering from
-       it is the play path and lands with WP-08. */
-    (void)warm_start;
-    (void)warm_start_len;
+    /*
+     * Warm start (§5, §12). Validated, and a mismatch DISABLES it rather than
+     * failing the mount: a ring retained from cartridge X side A rendered into a
+     * mount of cartridge Y side B is the failure this descriptor exists to
+     * prevent (V3-016), and a wrong buffer should cost instant-on, not the
+     * cartridge. The engine borrows the buffer; it never owns it (Rule 1).
+     */
+    if (warm != NULL && warm->data != NULL && warm->valid_frames > 0u
+        && warm->side == side
+        && memcmp(warm->uuid, t->sb.cartridge_uuid, 16) == 0
+        && (uint64_t)warm->start_frame <= t->position_frame
+        && t->position_frame < (uint64_t)warm->start_frame + warm->valid_frames) {
+        t->warm_start_used = true;
+    }
 
     t->mounted = true;
     return TAPE_OK;
@@ -290,6 +332,7 @@ tape_result tape_get_info(const tape *t, tape_info *out)
     /* Side A refuses writes at the API boundary regardless of the device. */
     out->writable         = t->writable && (t->side == TAPE_SIDE_B);
     out->needs_repair     = t->needs_repair;
+    out->warm_start_used  = t->warm_start_used;
     return TAPE_OK;
 }
 
@@ -305,6 +348,8 @@ tape_result tape_set_side(tape *t, tape_side side)
        record path exists; there is none yet, so nothing to refuse. */
     {
         tape_result rc = pick_live_index(t, side);
+        if (rc != TAPE_OK) { return rc; }
+        rc = tape_index_check_overlap(&t->live, &t->scratch);
         if (rc != TAPE_OK) { return rc; }
     }
     t->side           = side;

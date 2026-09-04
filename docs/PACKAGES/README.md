@@ -14,8 +14,8 @@ Charter §04.
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
-| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-5 bundle landed 4 Sep |
-| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-5 bundle landed 4 Sep |
+| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-5 bundle on `main` 4 Sep (#21), under `verify-spec-bundle.sh` |
+| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-5 bundle on `main` 4 Sep (#21), under `verify-spec-bundle.sh` |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 built** — Q-006 answered, ready to send |
 | WP-05 | Parts order #1 | You | hardware | **Carts drafted** — every order goes to Michael (Decisions 002 §4) |
 | WP-34 | Thermal and safety budget | Hardware | hardware | **Rev 0.2** — estimates; three review findings closing |
