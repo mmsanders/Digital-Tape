@@ -1081,15 +1081,55 @@ which, on current cadence, is every round.
 
 ---
 
+## ADR-031 — The spec gate's probes read the bundle instead of naming it
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `verify-gates.sh`'s revision probe derives both the revision it overwrites and the
+manifest hash it rewrites from `spec/VERSION.md` at run time. The planted wrong value is
+`DRAFT-0`, which no bundle will ever be called. If either derived value comes back empty the
+probe reports itself broken instead of running.
+
+**Rationale.** As first written the probe contained the literal strings `DRAFT-5` and
+`7a53869c…c773941`. DRAFT-6 arrived the same day. A hardcoded probe stops planting anything the
+moment the bundle moves, and every bundle after it inherits an edit somebody has to remember —
+on a document that has changed four times in three days.
+
+It would at least have failed loudly rather than silently: with nothing planted the gate stays
+green and `expect_red_saying` reports BROKEN. That is the right failure direction and it is still
+the wrong maintenance burden. The empty-value guard exists because the two failure modes are not
+symmetrical — an empty revision makes the `sed` match *every* line, and an empty hash makes it a
+no-op; both leave a probe that claims to plant something and does not.
+
+**Cost to reverse.** Zero. The general form is strictly better than the specific one here,
+because the value being tested is defined in a file the test can read.
+
+---
+
+## ADR-032 — `spec/README.md` no longer restates revisions
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `spec/README.md`'s table lists status and freeze scope only. Revisions live in
+`spec/VERSION.md`, which the gate enforces.
+
+**Rationale.** It carried its own revision column, and that column said DRAFT-4 while `main` was
+publishing DRAFT-3 — a fourth copy of the same claim, drifting, inside the round whose entire
+subject was drift. A fact written in two places is a fact that can disagree with itself, and only
+one of the two had a mechanism behind it.
+
+**Cost to reverse.** Zero, and it would reintroduce the failure by construction.
+
+---
+
 ## ADR-027 — The entry-overlap rule is implemented pairwise, not by the aggregate formula
 
 **Date:** 2026-09-03 · **Decided by:** Software Lead · **Finding filed as issue #19, now closed**
 
-> **Confirmed by DRAFT-5.** §5.1's note V4-002 deletes the "Equivalently:" scalar test outright,
-> on both grounds filed — not equivalent, and circular via `free_next`. The interval model is now
-> the normative rule, and the spec observes that it "depends on nothing but the entry array and
-> `CHUNK_FRAMES`, so it can be evaluated in phase 2 of slot validation with no ordering hazard."
-> No code change follows; this entry stands as written.
+> **Confirmed by DRAFT-5 and unchanged in DRAFT-6.** §5.1's note V4-002 deletes the
+> "Equivalently:" scalar test outright, on both grounds filed — not equivalent, and circular via
+> `free_next`. The interval model is the normative rule and can be evaluated in slot validation
+> with no ordering hazard. No code change follows; this entry stands as written.
 
 **Decision.** `tapefs` §5.1's new overlap requirement is implemented as its precise statement —
 no two entries' frame ranges may intersect — by flattening each entry to an interval in

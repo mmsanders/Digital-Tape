@@ -1,18 +1,18 @@
 # spec/tapefs-v1.md — TAPEFS v1.0
 
-> **STATUS: DRAFT-5. NOT FROZEN.** All fourteen DRAFT-4 findings dispositioned (PM Decisions 007).
+> **STATUS: DRAFT-6. NOT FROZEN.** All fifteen DRAFT-5 findings dispositioned (PM Decisions 008).
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-5 · **Issued:** 4 Sep 2026 · **Status:** freeze candidate for §§1–8; §9–§10 remain open
+**Revision:** DRAFT-6 · **Issued:** 4 Sep 2026 · **Status:** freeze candidate for §§1–8; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off (escalation trigger #1).
-**Supersedes:** DRAFT-4 (2 Sep). Incorporates all fourteen findings V4-001…V4-014 per PM Decisions 007.
+**Supersedes:** DRAFT-5 (4 Sep). Incorporates all fifteen findings V5-001…V5-015 per PM Decisions 008.
 
 This is the on-media format for a Digital Tape Player cartridge. It is normative and byte-exact. Where it is ambiguous, that is a defect — report it.
 
 **No prose-only patch.** From DRAFT-5 onward a change to this document is accepted only when it lands as a change to a reference algorithm, a table, an interval model, or an enumerated state — with the prose following. A finding that can only be answered by rewording is a documentation defect and is batched, not drafted.
 
-**Newest normative text, least scrutinised, attack first:** §4.3 (effective writability), §5.1's interval model, and §9.3's `promote_stage` machinery. The last of these is a **new superblock field** and is the largest structural change since DRAFT-3.
+**Newest normative text, least scrutinised, attack first:** §4.1's **four-phase mount** (index selection now precedes repair, so no failing mount writes), §4.5 (counter headroom), §8's **durability convention**, and §9.5's empty-source branch. The mount restructure is the largest change in DRAFT-6 and it moves text that three previous rounds had already reviewed in a different order.
 
 ---
 
@@ -152,9 +152,9 @@ There is no preroll cache. Instant-on is not a format feature (§12).
 
 > **Why a new field.** DRAFT-4 asked the recovery logic to infer "is a promote in flight, and how far did it get?" from the shapes of the two indices alone. The verifier showed the enumeration was incomplete (V4-003) and that the documented re-run could fail on a cartridge whose staging copy was already durable (V4-004). Both are symptoms of the same thing: **an intermediate state that is not self-identifying.** Every argument for "this shape can only arise from promote" was a reachability argument, and reachability arguments are what have failed most often on this project. Two u32 in reserved space, written by superblock writes that already happen, make the state say what it is. Zero extra writes, zero extra flushes.
 
-### 4.1 Mount — selection, admission, then repair
+### 4.1 Mount — four phases, and only the last one writes
 
-DRAFT-3 ordered repair before the version check, which meant a v1 engine could write to v2 media it was forbidden to touch (V3-006). The three phases are now explicit and **only phase 3 writes**.
+DRAFT-3 ordered repair before the version check, which meant a v1 engine could write to v2 media it was forbidden to touch (V3-006). DRAFT-5 then ordered repair before the *indices* were validated, so a mount destined to fail could still write (V5-003). The four phases are now explicit and **only phase 4 writes**.
 
 **Phase 1 — selection. No writes.**
 Read both copies. A copy is *structurally valid* iff its magic matches and its CRC verifies.
@@ -184,27 +184,36 @@ Read both copies. A copy is *structurally valid* iff its magic matches and its C
 
 `block_count` is caller-supplied and **untrusted**. These checks exist to defend against it as much as against the media.
 
-**Phase 3 — repair. The only phase that writes.**
-Performed only if the candidate passed phase 2, exactly one copy was structurally valid, and **the mount is effectively writable (§4.3)**. Rewrite the invalid copy from the candidate; flush.
+**Phase 3 — index selection and validation. No writes.** §4.2.
+
+**Phase 4 — repair. The only phase that writes.**
+Performed only if the candidate passed phases 2 **and 3**, exactly one superblock copy was structurally valid, and **the mount is effectively writable (§4.3)**. Rewrite the invalid copy from the candidate; flush.
+
+**A repair failure is not fatal and does not fault the instance.** If the write or flush fails, the mount **succeeds** with `needs_repair = true`. Nothing the mount depends on was being changed — repair only makes a second copy agree with the candidate already selected — so the cartridge is exactly as readable as it was, and refusing to mount would deny a child their music to fix a redundancy they cannot hear. `engine-api` §7.2's quarantine covers calls that change logical state; this one does not.
+
+> **Repair moved behind index validation in DRAFT-6 (V5-003).** DRAFT-5 repaired the superblock before the indices had been looked at, so a mount destined to fail on its indices could still write. Now **no mount that is going to fail writes anything**, which is what invariant 26 claims and could not previously deliver. The two phases are independent — repair concerns the superblock, selection concerns index slots — so the reorder costs nothing.
 
 **`sb_generation` is not incremented by repair.** Repair restores a copy of an existing logical state; it does not create a new one. Generation increments once per logical update, and a logical update writes **mirror first, flush, then primary, flush**.
 
 Where repair is skipped, `tape_get_info` reports `needs_repair`. A recoverable cartridge still mounts in the source slot.
 
-### 4.2 Index selection and derivation
+### 4.2 Phase 3 — index selection, validation, and the stage oracle
 
-After phase 3, mount performs §5.3 index-slot selection and §5.2 validation — **including §5.1's interval-disjointness requirement** — **for both sides, not only the requested one.** Then it derives `free_next` per §7 and seeks to the caller's `resume_frame` clamped to the timeline.
+**No writes.** Mount performs §5.3 index-slot selection and §5.2 validation — **including §5.1's interval-disjointness requirement** — **for both sides, not only the requested one.** Then, in this order:
+
+1. **Side A has no selectable index** (`TAPE_ERR_NO_VALID_INDEX` or `TAPE_ERR_INCONSISTENT` for that side) → **the mount fails with that error, whichever side was requested.** §5.3: a cartridge whose Side A cannot be selected is unusable.
+2. **Side B has no selectable index** → the mount **enters degraded-B** (§4.4) if Side A was requested, and returns `TAPE_ERR_NO_VALID_INDEX` if Side B was requested. **The stage oracle in step 3 is skipped** — every row of §9.3.3 constrains a live Side B index, so with none present it can match nothing, and `promote_stage` is instead resolved by §8's stage clearing on the `tape_reset_side_b` that recovers the cartridge.
+3. **`promote_stage == 1`, and not degraded-B — the stage oracle.** The live A and B indices must match **exactly one** row of §9.3.3. If they match none → **`TAPE_ERR_INCONSISTENT`. Zero writes. No repair.**
+4. Derive `free_next` per §7 — or `a_high_water` in degraded-B — and seek to the caller's `resume_frame` clamped to the timeline.
+
+> **Step 2 runs before step 3 for a reason.** DRAFT-6's first cut ordered them the other way, so a cartridge that was **both** stage-1 and degraded-B failed the oracle and returned `TAPE_ERR_INCONSISTENT`. That cartridge is reachable — a promote interrupted between §9.3 steps 4 and 6, followed by later damage to both B slots — and the consequence was total: `tape_reset_side_b` is the only recovery and it needs a successful mount, so **the whole of Side A's music was unreachable forever** on a cartridge whose Side A was intact. Degraded-B first; the stage resolves itself on recovery.
+
+> **Step 3 is V5-003.** `engine-api` invariant 25 and `acceptance.md` WP-10 both required a mount to reject stage-1 media matching no resume row, and the mount algorithm never performed the check — only a later `tape_promote` did. Two conforming mounts could disagree, the crafted-media oracle had no implementable source, and worse: **§8's stage clearing would have wiped the evidence.** An ordinary `tape_arm` on that cartridge clears `promote_stage` before anything reports the fault, so the corruption becomes permanently invisible. The check has to be at mount, before any write, and it now is.
 
 **Both sides, because both are needed:**
 
 - `free_next` (§7) is defined over the **live Side B index**, so a Side-A mount that had not selected Side B could not compute it. `tape_respool` and `tape_promote` are both permitted from a Side-A mount and both allocate from `free_next`; with `free_next` degenerated to `a_high_water` they would allocate straight over Side B's live chunks, violating invariant 10.
 - §9.3.1's adopt-in-place is safe only because Side A's entries satisfy §5.2's Side-A bound `last < a_high_water`. That bound has to have been *evaluated* for the argument to hold, and on a Side-B mount it would not have been.
-
-**Outcomes:**
-
-- **Side A has no valid index** (`TAPE_ERR_NO_VALID_INDEX` or `TAPE_ERR_INCONSISTENT` for that side) → **the mount fails with that error, whichever side was requested.** §5.3: a cartridge whose Side A cannot be selected is unusable.
-- **Side A valid, Side B not** → **a mount requesting Side A succeeds**, with **`free_next = a_high_water`**. This is the state `tape_reset_side_b` exists to recover, and it can only be recovered from a successful mount. **A mount requesting Side B returns `TAPE_ERR_NO_VALID_INDEX`**, and `tape_set_side(TAPE_SIDE_B)` on the Side-A mount returns the same (`engine-api` §5) — without that, two calls reach a mounted state with no live index for the mounted side, where `total_frames`, `tape_tell` and `max_pos` are all undefined.
-- Both valid → `free_next` per §7.
 
 ### 4.3 Effective writability
 
@@ -221,6 +230,53 @@ It is computed once at mount, stored in the instance, and exposed as `tape_info.
 > The raw `dev.write != NULL` test survives *inside* `dev_write` as a last-line assertion (`engine-api.md` §3). It is no longer the permission model.
 
 **Scope note — format and duplicate are outside this predicate.** `tape_format` and `tape_dup` take a raw `tape_dev`, not a mount. They read no version from the destination and are gated only on `dst_dev->write != NULL`. This is deliberate: the version barrier protects media you intend to keep using from *silent partial* writes by an engine that does not understand it. Erasing a cartridge is neither silent nor partial — it is what the work slot and the copy button are for, and a v1 player must be able to reclaim any card the household owns. A v2 cartridge placed in the work slot and copied over is destroyed on purpose.
+
+### 4.4 Degraded-B
+
+A mount whose **Side A is selectable and Side B is not** succeeds on Side A and is **degraded-B**. `tape_info` reports it (`side_b_valid == false`), and:
+
+| Call | Result in degraded-B |
+|---|---|
+| `tape_reset_side_b` | **Permitted** — it is the recovery, and it needs only Side A's index. On success the mount leaves degraded-B |
+| `tape_promote`, `tape_respool` | **`TAPE_ERR_NO_VALID_INDEX`, zero writes.** Both read `B.total_frames` and B's live entries on their first line |
+| `tape_set_side(TAPE_SIDE_B)` | `TAPE_ERR_NO_VALID_INDEX` |
+| `tape_arm` | `TAPE_ERR_READ_ONLY` — the mounted side is A, which the existing Side-A rule already refuses |
+| Everything else | Unchanged |
+
+`free_next = a_high_water` in this state.
+
+> **V5-004.** DRAFT-5 introduced this mount deliberately, so that `tape_reset_side_b` had a state to be called from, and then left `promote` and `respool` marked `W` in the matrix with no definition of what they do without a live B index. An implementation could dereference absent state, silently treat B as empty and *write*, or invent an error. "Silently treat B as empty" is the dangerous one: promote of an empty B erases Side A.
+
+
+### 4.5 Counter headroom
+
+`sequence` and `sb_generation` are u32 and neither wraps (§10). **Every logical operation states, before its first write, how many of each it will consume, and refuses with `TAPE_ERR_SEQUENCE_EXHAUSTED` and zero writes if the headroom is not there.**
+
+| Operation | `sequence` needed | `sb_generation` needed |
+|---|---|---|
+| **`tape_arm`** | **1** — the commit it authorises | 0, **+1 if stage clearing applies** (§8) |
+| `tape_commit` | 0 — reserved at arm | 0 |
+| `tape_reset_side_b` | 1 | 0, +1 if stage clearing applies |
+| `tape_respool` | **2** — at most two passes | 0, +1 if stage clearing applies |
+| `tape_promote`, FRESH | **4** — A and B in phase 1, A and B in phase 2 | **2** — step 4, and step 9 or step 5's decline write |
+| `tape_promote`, RESUME at step 5 | 2 | **1** — step 4 has already happened; only step 9 *or* the decline write remains |
+| `tape_promote`, RESUME at step 8 | 1 | 1 |
+| `tape_promote`, RESUME at step 9 | 0 | 1 |
+| `tape_promote`, NOTHING TO DO | 0 | 0 |
+| `tape_format`, `tape_dup` | destination's own, reset to 1 and 2 | see §9.5/§9.6 — reset to 1, with a boundary fallback |
+
+**Headroom is available iff, computed in 64-bit:**
+
+```
+(uint64_t)live_sequence   + (uint64_t)sequence_needed   <= 0xFFFFFFFD
+(uint64_t)sb_generation   + (uint64_t)generation_needed <= 0xFFFFFFFD
+```
+
+**In 64-bit, and with the two counters' requirements counted separately.** DRAFT-6's first cut wrote one unqualified predicate with a single `needed`: in `uint32_t`, `0xFFFFFFFC + 4` wraps to `0` and the check *passes*, so promote would then commit `0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF, 0x00000000` — writing the two values §10 forbids and leaving §5.3's "higher `sequence` is live" selecting the **older** slot. `acceptance.md` WP-10 crafts exactly `sequence == 0xFFFFFFFC`, and a u32 implementation would have passed the test written to catch it.
+
+**Recording reserves at `tape_arm`, not at `tape_commit`.** The child records three minutes, `tape_service` writes the chunks, and only then would a commit-time check discover there is no sequence left — refusing with zero writes and losing everything recorded, which contradicts §9.1's promise that the child keeps what they recorded. The refusal has to happen before the record light comes on.
+
+> **V5-015.** DRAFT-5 defined exhaustion per commit, so a promote beginning with `sequence == 0xFFFFFFFC` could commit phase-1's A index and then be forced to refuse phase-1's B index — **after media had changed**, leaving a cartridge in a state whose only specified completion path could never run. "136 years at one commit per second" is a comfort, not a validation rule: crafted media reaches the boundary immediately, and WP-10 will craft it. Preflighting the whole logical operation makes the refusal total and the media untouched.
 
 ---
 
@@ -279,7 +335,7 @@ This is checkable from index metadata alone; **no chunk is read.** An implementa
 
 **Two entries may share a chunk**, and must be able to: a splice trim leaves two entries whose frame ranges fall in the same chunk on either side of the cut. What they may not do is claim the same physical frame twice. **The requirement is per index, not across sides** — Side B referencing chunks Side A also references is the copy-on-write mechanism (Rule 3) and is required, not merely tolerated.
 
-> **V4-002.** DRAFT-4 stated the rule in prose and then offered a scalar "equivalently" — a bound on `total_frames` against a count of referenced chunks. It was not equivalent: two one-frame entries at the same physical frame give `total_frames = 2` against a permitted `CHUNK_FRAMES`, and pass. It was also **circular**: for Side B the expression depended on `free_next`, which §7 derives only from an already-validated live index, while non-overlap is part of deciding validity. The scalar test is deleted. The interval model above depends on nothing but the entry array and `CHUNK_FRAMES`, so it can be evaluated in phase 2 of slot validation with no ordering hazard.
+> **V4-002.** DRAFT-4 stated the rule in prose and then offered a scalar "equivalently" — a bound on `total_frames` against a count of referenced chunks. It was not equivalent: two one-frame entries at the same physical frame give `total_frames = 2` against a permitted `CHUNK_FRAMES`, and pass. It was also **circular**: for Side B the expression depended on `free_next`, which §7 derives only from an already-validated live index, while non-overlap is part of deciding validity. The scalar test is deleted. The interval model above depends on nothing but the entry array and `CHUNK_FRAMES`, so it can be evaluated as part of §5.2 slot validity — mount phase 3 — with no ordering hazard.
 
 Frames lie contiguously across the run: the first chunk contributes from `start_frame`, every intermediate chunk contributes all 131 072, the last is truncated by `frame_count`.
 
@@ -376,9 +432,19 @@ Before step 5 the inactive slot's block 0 holds the previous generation's header
 
 **Flush** means the data has reached media: on SD, the card has left the busy state, not merely accepted the blocks.
 
-**Bounded cost.** For a recording commit, step 1's chunk data has already been written and flushed by `tape_service` before `tape_commit` is callable (`engine-api.md` §7). A commit therefore writes **at most 97 blocks** — 96 entry blocks at `TAPE_MAX_ENTRIES`, plus block 0 — and performs **exactly two flushes**. This bound is why `tape_commit` is a synchronous call with no budget (`engine-api.md` §7, V4-008); the measured worst case is a firmware criterion in `acceptance.md`.
+### 8.1 The durability convention — what a crash boundary actually means
 
-**Stage clearing — an interrupted promote must not poison ordinary use.** `tape_arm`, `tape_reset_side_b` and `tape_respool` must, **after their own preconditions have passed and before their first index or chunk write**, check `promote_stage`. If it is 1, they write the superblock with `promote_stage = 0`, `promote_staging_chunk = 0`, `a_high_water` **unchanged** and `sb_generation` + 1 — mirror, flush, primary, flush — and only then proceed. `tape_promote` does **not** do this; it resumes per §9.3.3.
+**A successful flush implies every preceding write is durable. The absence of a flush implies nothing.** A device may persist a block the instant it is written — write-through media, or a card that simply got there first — and `engine-api` §3 permits it.
+
+**Therefore every crash boundary that lies between a write and its flush admits *both* outcomes**: the state with that block durable, and the state without. Every recovery table in §9 is read that way, and `acceptance.md` WP-10 runs each such boundary in **both** durability modes.
+
+> **V5-010.** DRAFT-5's tables classified states by whether a flush had *completed*, which quietly assumed a completed-but-unflushed write cannot already be durable. It can. On a write-through device, cutting power after `tape_dup` step 1's mirror write but before its flush leaves the new `WRITE_IN_PROGRESS` mirror durable, so mount returns `TAPE_ERR_INCOMPLETE` — a safe and correct outcome that the table listed as "the old cartridge, unchanged" and an exhaustive runner would have failed. The mirror case is worse in the other direction: on blank media, the final `VALID` mirror write landing before its flush produces a **completed cartridge** where the table permitted only `TAPE_ERR_BAD_MAGIC`.
+>
+> Nothing about the protocol changes. The ordering in §8 is what makes both outcomes safe — that is the whole point of writing identity last. What changes is that the tables now say so, and the test runner covers both.
+
+**Bounded cost.** For a recording commit, step 1's chunk data has already been written and flushed by `tape_service` before `tape_commit` is callable (`engine-api.md` §7). A commit that accepted frames therefore writes **at most 97 blocks** — 96 entry blocks at `TAPE_MAX_ENTRIES`, plus block 0 — and performs **exactly two flushes**. **A commit with zero accepted frames writes and flushes nothing** (`engine-api` §7.1). This bound is why `tape_commit` is a synchronous call with no budget (`engine-api.md` §7, V4-008); the measured worst case is a firmware criterion in `acceptance.md`.
+
+**Stage clearing — an interrupted promote must not poison ordinary use.** `tape_arm`, `tape_reset_side_b` and `tape_respool` must, **after their own preconditions have passed — including §4.5's counter headroom, which counts both the clearing write and the commit each call authorises — and before their first index or chunk write**, check `promote_stage`. If it is 1, they write the superblock with `promote_stage = 0`, `promote_staging_chunk = 0`, `a_high_water` **unchanged** and `sb_generation` + 1 — mirror, flush, primary, flush — and only then proceed. `tape_promote` does **not** do this; it resumes per §9.3.3.
 
 > **Why.** After §9.3 step 4 the cartridge is valid, playable, and both sides reference the staging run. Nothing stopped a child recording on Side B from there — and no ordinary operation writes the superblock, so `promote_stage` stayed 1 while B's index moved. Every later `tape_promote` then matched no row of §9.3.3 and returned `TAPE_ERR_INCONSISTENT` with zero writes: **one power loss during one superblock write, followed by entirely normal use, permanently disabled promote and reported it as a media fault.** Re-spool made it permanent rather than fixing it, because re-spool guarantees B ends as a single run at a *different* start. Clearing the stage at the three entry points that can precede an index commit lands every stage-1 state on a terminating classification in §9.3.0, and it costs one superblock update, once.
 >
@@ -410,7 +476,9 @@ Every commit must leave an index satisfying §5.2, **including interval disjoint
 
 ### 9.2 Reset Side B
 
-Copy the live Side A index into Side B's inactive slot with `side` = 1 and `sequence` + 1; commit per §8. **Moves no audio** — the resulting Side B references Side A's chunks, which Rule 3 permits. Sub-second.
+Copy the live Side A index into Side B's inactive slot with `side` = 1 and `sequence` + 1; commit per §8.
+
+**In degraded-B (§4.4) neither B slot is valid, so "inactive" is undefined.** The destination is then **B0**, written directly as §9.6 step 3 does, with `sequence` = the cartridge's highest live `sequence` + 1. This is the one call §4.4 authorises and it must be unambiguous. **Moves no audio** — the resulting Side B references Side A's chunks, which Rule 3 permits. Sub-second.
 
 Clears any device-side stored position for `(uuid, B)` (§11).
 
@@ -426,7 +494,9 @@ Evaluated at the first call of an operation, after mount state is known, **befor
 
 | Condition | Class | Action |
 |---|---|---|
+| Side B has no selectable index (degraded-B, §4.4) | — | `TAPE_ERR_NO_VALID_INDEX`, `*more_work = false`, **zero writes** |
 | Side B `total_frames == 0` | — | `TAPE_ERR_INVALID_ARG`, `*more_work = false`, **zero writes** |
+| §4.5 counter headroom unavailable for the class below | — | `TAPE_ERR_SEQUENCE_EXHAUSTED`, `*more_work = false`, **zero writes** |
 | `promote_stage == 1` | **RESUME** | §9.3.3 |
 | `promote_stage == 0` and A's and B's live entry arrays are **byte-identical** | **NOTHING TO DO** | `TAPE_OK`, `*more_work = false`, **zero writes** |
 | otherwise | **FRESH** | §9.3.1 |
@@ -531,7 +601,7 @@ Pass 1 achieves compaction, which is what re-spool exists for. **The downward pa
 >
 > DRAFT-4's first cut gave this example with `free_next = 11`, which cannot occur: a two-chunk run ending at chunk 10 would need `frame_count > CHUNK_FRAMES` with `last = 10`, contradicting §5.1. It then concluded that pass 2 declines. Both the arithmetic and the conclusion were wrong, and `acceptance.md` WP-12 required reproducing a state that cannot exist. Corrected in both documents.
 
-**Precondition:** for a non-empty side, a pass-1 destination satisfying (a) and (b) must exist, else `TAPE_ERR_CARTRIDGE_FULL` and nothing changes. Pass 2 has no precondition beyond the test it performs itself.
+**Preconditions:** the mount must not be degraded-B (§4.4), else `TAPE_ERR_NO_VALID_INDEX` and zero writes; §4.5's headroom must be available, else `TAPE_ERR_SEQUENCE_EXHAUSTED` and zero writes; and for a non-empty side, a pass-1 destination satisfying (a) and (b) must exist, else `TAPE_ERR_CARTRIDGE_FULL` and nothing changes. Pass 2 has no precondition beyond the test it performs itself.
 
 **Re-spool does not always reduce the leak.** If pass 2 declines, pass 1 has moved the timeline up and stranded its old chunks — strictly more allocated-but-unreachable space than before. That is acceptable because it is bounded and the next re-spool or promote reclaims it, but it is a real property and it should not be described as though re-spool always frees space.
 
@@ -556,12 +626,19 @@ Copies **Side A** — the music — from the source slot to the work slot. The d
 
 **Write order:**
 
-Let `len_A = ⌈src_A.total_frames / CHUNK_FRAMES⌉`.
+Let `len_A = ⌈src_A.total_frames / CHUNK_FRAMES⌉`. **`len_A` may be zero** — see step 3.
 
-1. **If a structurally valid superblock exists on the destination**, write it with `state = WRITE_IN_PROGRESS`, `sb_generation` incremented, and **`promote_stage = 0`, `promote_staging_chunk = 0`** — mirror, flush, primary, flush. From here the destination does not mount as audio. *(On blank media there is nothing to invalidate; skip.)*
+1. **If a structurally valid superblock exists on the destination**, write it with `state = WRITE_IN_PROGRESS`, `sb_generation` incremented, and **`promote_stage = 0`, `promote_staging_chunk = 0`** — mirror, flush, primary, flush. From here the destination does not mount as audio.
+   - *On blank media there is nothing to invalidate; skip.*
+   - **Boundary fallback (§4.5).** If the destination's existing `sb_generation` is ≥ 0xFFFFFFFD, incrementing it is not available. Write **512 zero bytes** to the mirror, flush, then to the primary, flush, instead. The destination is then `TAPE_ERR_BAD_MAGIC` — unmountable, which is all step 1 is for — and the rest of the operation and its crash table treat it as blank media.
 2. Write **A0, A1, B0 and B1** block 0 as 512 zero bytes each; flush.
-3. Write the source's Side A timeline, **compacted, to `[0, len_A)`** on the destination; flush. Then write **A0** — its entry array (one entry `{0, 0, src_A.total_frames}`), flush, then its block 0 with `side = 0` and `sequence = 1`, flush — and **B0** with the same entry array but `side = 1` and `sequence = 2`. *(`side` must match the slot, per §5.2; a literal "identical to A0" would leave the destination's Side B unselectable — and under §4.2 that cartridge would mount on Side A only, contradicting this section's own promise that the destination gets a clean Side B.)*
-4. Write the destination superblock with `state = VALID`, **`sb_generation = 1`**, **`a_high_water = len_A`**, `promote_stage = 0`, `promote_staging_chunk = 0`, the **caller-supplied fresh `cartridge_uuid`**, the caller-supplied `format_epoch`, and the destination's own geometry — mirror, flush, primary, flush. **This is the commit and the identity assignment, and it is last** (Rule 2).
+3. **If `src_A.total_frames > 0`:** write the source's Side A timeline, **compacted, to `[0, len_A)`** on the destination; flush. Then write **A0** — its entry array (one entry `{0, 0, src_A.total_frames}`), flush, then its block 0 with `side = 0`, `entry_count = 1` and `sequence = 1`, flush — and **B0** the same way — entry array, flush, block 0 with `side = 1` and `sequence = 2`, flush.
+   **If `src_A.total_frames == 0`:** copy no chunks. Write **A0** and **B0** as valid **zero-entry** headers — `entry_count = 0`, `total_frames = 0`, CRC over the header alone, `side` 0 and 1, `sequence` 1 and 2 — exactly as `tape_format` §9.6 step 3 does.
+4. Write the destination superblock with `state = VALID`, **`sb_generation = 1`**, **`a_high_water = len_A`** (zero for an empty source), `promote_stage = 0`, `promote_staging_chunk = 0`, the **caller-supplied fresh `cartridge_uuid`**, the caller-supplied `format_epoch`, and the destination's own geometry — mirror, flush, primary, flush. **This is the commit and the identity assignment, and it is last** (Rule 2).
+
+> **V5-002, a blocker, and the second time this class has bitten.** DRAFT-5 defined step 3 unconditionally as "one entry `{0, 0, src_A.total_frames}`". On a **freshly formatted source** — a perfectly ordinary, valid cartridge — that entry has `frame_count == 0`, which §5.2 and `engine-api` invariant 6 forbid. Every precondition passed, `len_A` was 0, capacity was satisfied vacuously, and step 4 then committed `state = VALID`. The result: `tape_dup` **returns `TAPE_OK` having destroyed a reusable destination and replaced it with a cartridge whose Side A has no selectable index** — which §5.3 calls unusable. A child copying a blank tape would have lost the tape they copied onto.
+>
+> This is the same shape as V4-005's empty re-spool and §9.3.0's empty promote: the zero case falls outside the sentence that describes the general case, and the general case happens to be destructive. **Every operation in §9 now states its empty behaviour explicitly**, and `acceptance.md` asserts all four together so the family is visible rather than three separate footnotes.
 
 > **DRAFT-5's first cut left three holes here, each of which produced a cartridge `tape_dup` reported as successful and the player could not read.**
 >
@@ -569,14 +646,19 @@ Let `len_A = ⌈src_A.total_frames / CHUNK_FRAMES⌉`.
 
 **Permitted remount outcomes after a crash:**
 
-| Crash point | Result |
+**Read every row under §8.1's durability convention:** a row whose crash point precedes a flush permits the outcomes on *both* sides of that write.
+
+| Crash point | Permitted results |
 |---|---|
-| Inside step 1, before the mirror flush, reusable destination | The destination's old cartridge, unchanged |
-| Inside step 1, after the mirror flush, reusable destination | `TAPE_ERR_INCOMPLETE` — the mirror carries `WRITE_IN_PROGRESS` at the higher generation and wins selection. Re-run `tape_dup` |
-| After 1, before 4, reusable destination | `TAPE_ERR_INCOMPLETE`. Re-run `tape_dup` |
-| Inside step 4, reusable destination | `TAPE_ERR_INCOMPLETE` — mirror is gen 1 `VALID`, primary still gen *n+1* `WRITE_IN_PROGRESS`, and the higher generation wins. Re-run `tape_dup`. Same generation-goes-backwards reasoning as §9.6 |
-| Blank destination, before step 4's mirror flush | `TAPE_ERR_BAD_MAGIC`. Re-run `tape_dup` |
-| **Blank destination, after step 4's mirror flush, before the primary** | **The completed copy.** Exactly one structurally valid superblock exists and both indices are durable, so §4.1 selects the mirror; phase 3 repairs the primary on an effectively writable mount, and a non-writable mount reports `needs_repair` |
+| Inside step 1's mirror write, reusable destination | The destination's old cartridge unchanged, **or** `TAPE_ERR_INCOMPLETE` if the new mirror is already durable |
+| Step 1's mirror durable, primary not | `TAPE_ERR_INCOMPLETE` — the mirror carries `WRITE_IN_PROGRESS` at the higher generation and wins selection. Re-run |
+| After 1, before 4, reusable destination | `TAPE_ERR_INCOMPLETE`. Re-run |
+| Inside step 4, reusable destination | `TAPE_ERR_INCOMPLETE` — mirror is gen 1 `VALID`, primary still gen *n+1* `WRITE_IN_PROGRESS`, higher generation wins. Re-run. Same generation-goes-backwards reasoning as §9.6 |
+| Step 1's boundary fallback: mirror zeroed, primary not | **The destination's old cartridge, unchanged** — one copy is still structurally valid and wins selection; on an effectively writable mount phase 4 repairs the mirror, otherwise `needs_repair` |
+| Step 1's boundary fallback: both zeroed — **from here the destination is blank media and the rows below apply** | `TAPE_ERR_BAD_MAGIC`. Re-run |
+| Blank destination (or after the fallback zeroed both), before step 4's mirror write completes | `TAPE_ERR_BAD_MAGIC`. Re-run |
+| Blank destination (or after the fallback), inside step 4's mirror write | `TAPE_ERR_BAD_MAGIC`, **or** the completed copy if that mirror is already durable |
+| Blank destination (or after the fallback), mirror durable, primary not | **The completed copy.** One structurally valid superblock, both indices durable; §4.1 selects the mirror, phase 4 repairs the primary on an effectively writable mount, a non-writable mount reports `needs_repair` |
 | After 4 | The completed copy |
 
 Re-running `tape_dup` to finish is possible precisely because it takes a device rather than a mount.
@@ -589,7 +671,7 @@ Destructive and ordered (V3-008). The caller supplies UUID, epoch, label and `no
 
 **Preconditions, before any write:** `dev->write == NULL` → `TAPE_ERR_READ_ONLY`; `GEOMETRY_OK(nominal_length_s, dev->block_count)` (§2.1) → else `TAPE_ERR_GEOMETRY`. Both write nothing.
 
-1. **If a structurally valid superblock exists**, write it with `state = WRITE_IN_PROGRESS`, `sb_generation` incremented, and **`promote_stage = 0`, `promote_staging_chunk = 0`** — **mirror, flush, then primary, flush**, matching §4.1 and §9.5. *(Clearing the stage here matters: media carrying a damaged `promote_stage` would otherwise remount from an interrupted format as `TAPE_ERR_UNSUPPORTED_STATE`, an outcome `acceptance.md`'s format oracle does not permit.)* From here the cartridge does not mount. *On blank media there is nothing to invalidate — skip.*
+1. **If a structurally valid superblock exists**, write it with `state = WRITE_IN_PROGRESS`, `sb_generation` incremented, and **`promote_stage = 0`, `promote_staging_chunk = 0`** — **mirror, flush, then primary, flush**, matching §4.1 and §9.5. *(Clearing the stage here matters: media carrying a damaged `promote_stage` would otherwise remount from an interrupted format as `TAPE_ERR_UNSUPPORTED_STATE`, an outcome `acceptance.md`'s format oracle does not permit.)* **Boundary fallback (§4.5): if the existing `sb_generation` is ≥ 0xFFFFFFFD, write 512 zero bytes to the mirror, flush, then the primary, flush, instead** — the media is then blank for the rest of this operation and for the table below. From here the cartridge does not mount. *On blank media there is nothing to invalidate — skip.*
 2. Write A1 and B1 block 0 as 512 zero bytes each; flush.
 3. Write A0 and B0 headers — valid, empty, `entry_count` 0, `total_frames` 0, `sequence` 1 and 2 respectively, CRC over the header alone; flush.
 4. Write the **mirror** superblock: `state = VALID`, `sb_generation = 1`, `a_high_water = 0`, `promote_stage = 0`, `promote_staging_chunk = 0`; flush.
@@ -601,20 +683,29 @@ Destructive and ordered (V3-008). The caller supplies UUID, epoch, label and `no
 
 **Permitted remount outcomes after a crash:**
 
-| Crash point | Result |
+**Read every row under §8.1's durability convention.**
+
+| Crash point | Permitted results |
 |---|---|
-| Inside step 1, before the mirror flush, reusable media | The old cartridge, unchanged |
-| Inside step 1, after the mirror flush, reusable media | `TAPE_ERR_INCOMPLETE` — the mirror carries `WRITE_IN_PROGRESS` at the higher generation and wins selection. Re-run format |
-| After 1, before 5, reusable media | `TAPE_ERR_INCOMPLETE` — the primary still holds the step-1 `WRITE_IN_PROGRESS` at the higher generation and wins selection. Re-run format |
-| Blank media, before step 4's flush | **`TAPE_ERR_BAD_MAGIC`** — no valid superblock has ever existed. This is the one case where "remount succeeds" cannot hold, and `acceptance.md` WP-10 permits it explicitly |
-| **Blank media, after step 4's flush, before step 5** | **The new empty cartridge.** Exactly one structurally valid superblock exists — the mirror — and both empty indices are durable, so §4.1 phase 1 selects it and phase 2 passes. **On an effectively writable mount phase 3 repairs the primary and `needs_repair` is false; on a non-writable mount it mounts with `needs_repair` true** *(V4-014)* |
+| Inside step 1's mirror write, reusable media | The old cartridge unchanged, **or** `TAPE_ERR_INCOMPLETE` if the new mirror is already durable |
+| Step 1's mirror durable, primary not, reusable media | `TAPE_ERR_INCOMPLETE`. Re-run format |
+| After 1, before 5, reusable media | `TAPE_ERR_INCOMPLETE` — the primary holds the step-1 `WRITE_IN_PROGRESS` at the higher generation and wins selection. Re-run format |
+| Step 1's boundary fallback: mirror zeroed, primary not | **The old cartridge, unchanged** — one copy is still structurally valid and wins selection; on an effectively writable mount phase 4 repairs the mirror, otherwise `needs_repair` |
+| Step 1's boundary fallback: both zeroed — **from here the media is blank and the rows below apply** | `TAPE_ERR_BAD_MAGIC`. Re-run format |
+| Blank media (or after the fallback zeroed both), before step 4's mirror write completes | **`TAPE_ERR_BAD_MAGIC`** — no valid superblock has ever existed. This is the one case where "remount succeeds" cannot hold, and `acceptance.md` WP-10 permits it explicitly |
+| Blank media (or after the fallback), inside step 4's mirror write | `TAPE_ERR_BAD_MAGIC`, **or** the new empty cartridge if that mirror is already durable |
+| **Blank media (or after the fallback), step 4's mirror durable, before step 5** | **The new empty cartridge.** One structurally valid superblock, both empty indices durable; §4.1 phase 1 selects it and phase 2 passes. **On an effectively writable mount phase 4 repairs the primary and `needs_repair` is false; on a non-writable mount it mounts with `needs_repair` true** *(V4-014)* |
 | After 5 | The new empty cartridge |
 
 ---
 
 ## 10. Sequence exhaustion
 
-`sequence` and `sb_generation` are u32. At one commit per second that is 136 years. On reaching 0xFFFFFFFE the engine returns `TAPE_ERR_SEQUENCE_EXHAUSTED` and refuses further commits. Neither wraps.
+`sequence` and `sb_generation` are u32 and **neither wraps**. 0xFFFFFFFE and 0xFFFFFFFF are never written.
+
+**Exhaustion is checked per logical operation, not per commit** — see §4.5. An operation whose full headroom is unavailable returns `TAPE_ERR_SEQUENCE_EXHAUSTED` **before its first write**, so a cartridge is never advanced partway into a state it cannot leave.
+
+At one commit per second, reaching the boundary honestly takes 136 years. That is not a validation rule; crafted media reaches it in one write, and `acceptance.md` WP-10 crafts it for every operation.
 
 ---
 
