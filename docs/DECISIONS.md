@@ -998,3 +998,83 @@ open risk is real:** a 5 W coil pulsed 15 ms is a weaker actuator than 9 W pulse
 whether it still releases the latch is unknown until WP-04. If the mechanism needs more energy
 than the budget allows, that is a genuine conflict between a safety limit and a mechanism, and it
 goes to the PM — it does not get absorbed by widening the limit.
+
+---
+
+## ADR-028 — The spec bundle is verified by a manifest gate, and the gate runs on every PR
+
+**Date:** 2026-09-04 · **Owner:** Software Lead · **Source:** PM Decisions 007 §1
+
+**Decision.** `spec/VERSION.md` is the manifest for the spec bundle — each file's revision and
+SHA-256 — and `tools/ci/verify-spec-bundle.sh` fails a build when any spec file's content or
+revision drifts from it. Both are PM-authored; the script was extracted verbatim from the fenced
+block in `VERSION.md` rather than retyped. It is wired as its own CI job, and it runs on **every**
+PR rather than only PRs touching `spec/`.
+
+**Rationale.** On 4 Sep the PM found `main` publishing `tapefs-v1.md` and `engine-api.md` at
+DRAFT-3 and `acceptance.md` at DRAFT-1 — three documents whose own headers each claimed to be
+versioned in step. Third silent desync on this project, third catch by a human happening to look.
+A header that asserts consistency is not a mechanism.
+
+The path filter is the deliberate deviation from the PM's wording. A `paths: spec/**` trigger only
+ever catches drift a PR *introduces*; the failure this exists to prevent was drift already sitting
+on `main`, which no such PR would touch. Running it unconditionally is a superset of what was
+asked and costs about a second, with no build step to wait on.
+
+**Cost to reverse.** Near zero — delete one job and one script. The manifest would survive as
+documentation, which is exactly the state that failed.
+
+---
+
+## ADR-029 — The spec gate's revision check is proven red *independently* of its hash check
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `tools/ci/verify-gates.sh` plants three separate violations against the spec gate,
+not one: a one-byte content edit, a revision drift **with the manifest hash updated to match**,
+and an emptied manifest. The revision probe asserts not merely that the gate went red but that it
+said `is DRAFT-3, bundle is DRAFT-5`.
+
+**Rationale.** The gate has two independent checks and the obvious probe only exercises one. A
+revision string is content, so a `DRAFT-5` → `DRAFT-3` edit breaks that file's hash too: check 1
+fires, the gate goes red, the probe passes, and check 2 is never executed. That matters because
+check 2 compares two `sed` extractions and **two empty strings compare equal** — a typo in either
+pattern makes it unconditionally green while the aggregate probe still shows red. This is ADR-026's
+failure mode one level down: a *probe* that measures the wrong quantity reads as green just as
+readily as a gate that does.
+
+The empty-manifest probe covers the third shape: `awk` matches nothing, `sha256sum -c` is handed
+an empty list, and a gate with nothing to check must not report success.
+
+Because these probes mutate PM-owned files, `verify-gates.sh` backs `spec/` up before any probe
+runs and restores it from an `EXIT` trap, and the hashes are re-verified after the run.
+
+**Cost to reverse.** Zero, and reversing it is the wrong move: the re-hash step is what makes the
+revision check testable at all. Note the asymmetry — re-hashing to satisfy a *probe*, inside a
+script that restores the originals, is the opposite of re-hashing to satisfy a *failing landing*,
+which Decisions 007 §1 names as the one failure mode that turns this gate into a rubber stamp.
+
+---
+
+## ADR-030 — The spec bundle lands on its own branch, ahead of the engine work that was queued behind it
+
+**Date:** 2026-09-04 · **Owner:** Software Lead · **Authorised by:** Michael
+
+**Decision.** The DRAFT-5 bundle and its gate land on `main` in a PR containing **no `engine/` or
+`tests/` diff**. The WP-06 read path and WP-07 allocator stay on `claude/new-project-setup-fooeic`
+and rebase onto the new `main`.
+
+**Rationale.** They had been on one branch, so they were one PR, and that PR could not merge:
+structural Rule 1 holds engine implementation off `main` until Stream 2's tests for that behaviour
+land there, and Stream 2's WP-06 tests have not. Merging would have breached the rule; not merging
+left `main` publishing DRAFT-3, which is the exact failure Decisions 007 was written to end.
+
+The general lesson is worth more than the fix. **`main` is the canonical publication point for
+`spec/` (`VERSION.md`), so spec must never be able to queue behind code.** A document that three
+streams read as truth cannot be gated on an implementer's branch state — and structural Rule 1
+guarantees that branch is the slowest-moving thing in the repository. Spec changes travel on their
+own branches from here.
+
+**Cost to reverse.** None; this is a branching convention, not a mechanism. The cost of *not*
+adopting it is a repeat, and it recurs every time a spec revision arrives mid-work-package —
+which, on current cadence, is every round.
