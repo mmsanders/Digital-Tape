@@ -23,16 +23,26 @@ packet-wp04:
 ## XML from an octal-escape collision in a regex replacement, and an object at
 ## Y = -11 mm because the old bounds check tested only the far edges.
 packet-validate:
-	@$(PY) -c "import sys, json, zipfile, xml.etree.ElementTree as ET; \
-	p='packets/wp04-01/plate.3mf'; z=zipfile.ZipFile(p); \
+	@$(PY) -c "import sys, json, zipfile, struct, os, xml.etree.ElementTree as ET; \
+	d='packets/wp04-01'; \
+	z=zipfile.ZipFile(d+'/plate.3mf'); \
 	[ET.fromstring(z.read(e)) for e in ('[Content_Types].xml','_rels/.rels','3D/3dmodel.model')]; \
 	ns={'m':'http://schemas.microsoft.com/3dmanufacturing/core/2015/02'}; \
 	r=ET.fromstring(z.read('3D/3dmodel.model')); \
 	vs=[(float(v.get('x')),float(v.get('y'))) for v in r.findall('.//m:vertex',ns)]; \
 	bad=[c for c in vs if c[0]<-0.001 or c[1]<-0.001]; \
 	sys.exit('FAIL %d vertices at negative X/Y' % len(bad)) if bad else None; \
-	m=json.load(open('packets/wp04-01/manifest.json')); \
-	print('OK  plate.3mf is well-formed, all geometry on the bed, needs %dx%d mm' % tuple(m['minimum_bed_mm']))"
+	p=d+'/plate.stl'; n=os.path.getsize(p); \
+	h=open(p,'rb').read(84); \
+	t=struct.unpack('<I', h[80:84])[0]; \
+	sys.exit('FAIL STL declares zero triangles') if t==0 else None; \
+	sys.exit('FAIL STL length %d != %d triangles' % (n,t)) if n != 84+t*50 else None; \
+	m=json.load(open(d+'/manifest.json')); \
+	sys.exit('FAIL library deliverable is not plate.stl') if m.get('library_deliverable')!='plate.stl' else None; \
+	sys.exit('FAIL estimated print time %.1f h exceeds the library limit' % m['estimated_print_hours']) \
+	  if m['estimated_print_hours'] >= m['library_job_limit_hours'] else None; \
+	print('OK  plate.stl %d triangles, plate.3mf well-formed, all geometry on the bed' % t); \
+	print('OK  needs %dx%d mm, ~%.1f h print, within the library 6 h limit' % (m['minimum_bed_mm'][0], m['minimum_bed_mm'][1], m['estimated_print_hours']))"
 
 ## packet-check — fail if the committed plate is not what the source produces
 ##

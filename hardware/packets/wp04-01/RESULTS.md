@@ -33,11 +33,20 @@ Tick what is true. Leave blank if you did not get to it.
 | **W** | | | | | |
 | **D** | | | | | |
 | **H** | | | | | |
+| **Z** | | | | | |
 
-**X** — the one that looks like it was printed lying on its side. Not part of the
-ranking, I just need to know:
+## 4. One of them is springier — can you spot it?
 
-- [ ] latches   - [ ] pops   - [ ] the hook snapped off
+One of the nine has its hook on a longer, thinner arm, so it should flex more. The
+rest differ only in hook depth.
+
+**Which letter, if any, feels springier than the others?** ________
+
+- [ ] I could not tell — they all felt about equally springy
+
+*(Either answer is useful. If you can pick it out, the springiness of the arm matters
+more than the hook depth and I am sweeping the wrong thing. If you cannot, hook depth
+is the right variable and I carry on.)*
 
 ---
 

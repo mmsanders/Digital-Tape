@@ -7,11 +7,14 @@ Hardware Lead · 2 Sep 2026 · WP-04, the transport spike
 
 ## What this is
 
-Nine little buttons, one long bar, and a frame to hold them. It all fits on a
-small printer — a Prusa Mini or an A1 mini is plenty. They are all the same
+Nine little buttons, one long bar, and a frame to hold them. It all fits easily on
+the library's Prusa MK3, and on any small printer. They are nearly all the same
 except for **one hidden dimension** — how deep the little hook on the side of each
 button is. That hook is what catches the bar and holds the button down, the way a
 cassette player's play button stays down until you hit stop.
+
+**One of the nine is different in another way**: its hook sits on a longer, thinner
+springy arm. See question 4.
 
 I have not told you which is which, and the letters are shuffled on purpose. **If you
 knew which one was supposed to win, you would find that it did.**
@@ -20,12 +23,20 @@ knew which one was supposed to win, you would find that it did.**
 
 | | |
 |---|---|
-| **Bed needed** | **at least 162 × 65 mm** — check this before you leave the house |
-| File | `plate.3mf` (or `plate.stl`) |
-| Material | Whatever the library has. PLA is fine. |
-| Layer height | 0.2 mm |
-| Supports | **None.** Nothing on this plate needs them. |
-| Rough time | 2–3 hours |
+| **File to submit** | **`plate.stl`** — the library only accepts `.stl` |
+| **Plate size** | **150 × 53 mm** (bed needed: 162 × 65 mm) |
+| **Estimated print time** | **about 48 minutes** — well under the library's 6 h limit |
+| Material | PLA — that is all the library offers, and it is fine for this |
+| Layer height | Staff decide. 0.2 mm if they ask you |
+| Supports | None needed |
+
+> **One line for the library staff, and it is the important one:**
+>
+> **"Any orientation is acceptable, provided all parts are printed in the same one."**
+>
+> They choose orientation, and that is fine — the test is a comparison between the
+> parts, so it survives them all being rotated together. What it would not survive is
+> parts being rotated differently from each other. Saying this costs them nothing.
 
 Nothing to arrange, rotate or choose. If the machine wants something this plate does
 not give it, that is my mistake and I want to hear about it — it means I have the

@@ -37,6 +37,13 @@ from cadquery import exporters
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import latch  # noqa: E402
 
+# Shasta Public Libraries, Original Prusa i3 MK3: 250 x 210 x 210 mm build volume,
+# PLA only, .stl only, staff choose orientation, jobs over 6 h may be refused.
+# We keep laying out for the small common bed -- it costs nothing and an A1 mini
+# is 180 x 180 if Michael buys one.
+PRINT_RATE_MM3_S = 11.0     # EST, MK3 at 0.2 mm with perimeters and travel
+MAX_JOB_HOURS = 6.0         # library refusal threshold
+
 OUT = Path(__file__).resolve().parents[2] / "packets" / "wp04-01"
 
 # Library-machine assumptions. Q-006 replaces these with facts; until then they
@@ -140,9 +147,37 @@ def check_3mf(path: Path) -> None:
                 raise SystemExit(f"3MF entry {entry} is not well-formed XML: {e}")
 
 
+def check_stl(path: Path, plate) -> None:
+    """Non-empty, parseable, and the bounding box logged. IR/Decisions 005 section 2.4.
+
+    An STL that will not open is exactly as broken as a schematic that fails ERC,
+    and this is now the file the library actually prints.
+    """
+    size = path.stat().st_size
+    if size < 1000:
+        raise SystemExit(f"STL is {size} bytes -- effectively empty")
+    with path.open("rb") as fh:
+        head = fh.read(84)
+    if len(head) < 84:
+        raise SystemExit("STL is shorter than a binary STL header")
+    tri = int.from_bytes(head[80:84], "little")
+    expected = 84 + tri * 50
+    if tri == 0:
+        raise SystemExit("STL declares zero triangles")
+    if size != expected:
+        raise SystemExit(f"STL length {size} != header's {tri} triangles ({expected})")
+    b = plate.BoundingBox()
+    print(f"  STL ok: {tri} triangles, {size/1024:.0f} KiB, bbox "
+          f"{b.xlen:.1f} x {b.ylen:.1f} x {b.zlen:.1f} mm")
+
+
+def print_time_hours(plate) -> float:
+    return plate.Volume() / PRINT_RATE_MM3_S / 3600.0
+
+
 def parts_and_probe(seed: int = SEED):
     variants = latch.packet_01_variants()
-    probe = latch.orientation_probe()
+    probe = latch.beam_probe()
     rng = random.Random(seed)
     rng.shuffle(variants)
     return variants, probe
@@ -161,13 +196,13 @@ def build():
         items.append((f"carrier-{v.label}", part.val()))
         meta[f"carrier-{v.label}"] = v.dict()
 
-    # The probe prints on its side on purpose -- rotate, drop to the bed, and never
-    # let the packer reorient it. Only translation is applied from here on.
-    pr = latch.carrier(probe).rotate((0, 0, 0), (1, 0, 0), 90)
-    pr = pr.translate((0, 0, -pr.val().BoundingBox().zmin))
-    exporters.export(pr, str(OUT / "stl" / f"carrier-{probe.label}-onside.stl"))
-    items.append((f"carrier-{probe.label}-onside", pr.val()))
-    meta[f"carrier-{probe.label}-onside"] = probe.dict()
+    # The probe prints FLAT, like everything else. Its difference is geometric --
+    # a longer, thinner cantilever -- because print direction is a setting the
+    # library controls and we do not.
+    pr = latch.carrier(probe)
+    exporters.export(pr, str(OUT / "stl" / f"carrier-{probe.label}.stl"))
+    items.append((f"carrier-{probe.label}", pr.val()))
+    meta[f"carrier-{probe.label}"] = probe.dict()
 
     bar = latch.hook_bar()
     exporters.export(bar, str(OUT / "stl" / "hook-bar.stl"))
@@ -185,10 +220,19 @@ def build():
         raise SystemExit("plate does not fit the bed -- refusing to write a broken packet")
 
     plate = cq.Compound.makeCompound([shape for _, shape, *_ in placed])
+
+    # THE library deliverable is the merged STL. One file containing every part in
+    # its intended relative position, because the library chooses orientation and a
+    # single merged solid forces that choice to apply to all parts uniformly -- a
+    # blind comparison survives being rotated together, not part by part.
+    exporters.export(plate, str(OUT / "plate.stl"))
+    check_stl(OUT / "plate.stl", plate)
+
+    # The 3MF is ours, not the library's: it cannot open one. Kept because it is
+    # the format our own slicer previews use, and gated because it shipped broken.
     exporters.export(plate, str(OUT / "plate.3mf"))
     normalise_3mf(OUT / "plate.3mf")
     check_3mf(OUT / "plate.3mf")
-    exporters.export(plate, str(OUT / "plate.stl"))
 
     pbb = plate.BoundingBox()
     need_x, need_y = pbb.xmax + MARGIN, pbb.ymax + MARGIN
@@ -200,13 +244,17 @@ def build():
 
     manifest = {
         "packet": "WP04-01", "work_package": "WP-04",
-        "built": date.today().isoformat(), "revision": 2,
+        "built": date.today().isoformat(), "revision": 3,
         "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1],
         "seed": SEED, "blind": True,
         "bed_assumed_mm": [BED_X, BED_Y],
         "plate_extent_mm": [round(pbb.xmax, 1), round(pbb.ymax, 1)],
         "minimum_bed_mm": [round(need_x), round(need_y)],
         "xml_valid": True,
+        "stl_validated": True,
+        "library_deliverable": "plate.stl",
+        "estimated_print_hours": round(print_time_hours(plate), 1),
+        "library_job_limit_hours": MAX_JOB_HOURS,
         "print_settings_assumed": {
             "material": "PLA", "layer_mm": 0.2, "nozzle_mm": 0.4,
             "perimeters": 3, "infill_pct": 40,
@@ -218,7 +266,7 @@ def build():
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
     lines = [
-        "# Plate map — packet WP04-01 (rev 2)", "",
+        "# Plate map — packet WP04-01 (rev 3)", "",
         f"Fits a **{round(need_x)} × {round(need_y)} mm** bed. Laid out for "
         f"{BED_X:.0f} × {BED_Y:.0f} mm — a Prusa Mini or Bambu A1 mini.", "",
         "The letter is **not** related to hook depth; the mapping is in `manifest.json` and",
@@ -233,11 +281,15 @@ def build():
               "parts more than the swept parameter is, and the next sweep needs coarser steps."]
     (OUT / "plate-map.md").write_text("\n".join(lines) + "\n")
 
-    print(f"packet WP04-01 rev 2 -> {OUT}")
+    print(f"packet WP04-01 rev 3 -> {OUT}")
     print(f"  {len(placed)} objects, all inside the bed")
     print(f"  extent {pbb.xmax:.1f} x {pbb.ymax:.1f} mm; needs a bed of at least "
           f"{round(need_x)} x {round(need_y)} mm")
-    print(f"  3MF XML validated")
+    hrs = print_time_hours(plate)
+    print(f"  estimated print time {hrs:.1f} h "
+          f"({'within' if hrs < MAX_JOB_HOURS else 'OVER'} the library's "
+          f"{MAX_JOB_HOURS:.0f} h limit)")
+    print(f"  library deliverable: plate.stl")
     return 0
 
 
