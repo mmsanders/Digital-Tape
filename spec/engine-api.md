@@ -1,13 +1,13 @@
 # spec/engine-api.md — Tape Engine API v1.0
 
-> **STATUS: DRAFT-5. NOT FROZEN.** All fourteen DRAFT-4 findings dispositioned (PM Decisions 007).
+> **STATUS: DRAFT-6. NOT FROZEN.** All fifteen DRAFT-5 findings dispositioned (PM Decisions 008).
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-5 · **Issued:** 4 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
+**Revision:** DRAFT-6 · **Issued:** 4 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off.
-**Supersedes:** DRAFT-4 (2 Sep). Incorporates V4-001…V4-014 per PM Decisions 007.
-**Companion:** `spec/tapefs-v1.md` DRAFT-5, normative for everything on media.
+**Supersedes:** DRAFT-5 (4 Sep). Incorporates V5-001…V5-015 per PM Decisions 008.
+**Companion:** `spec/tapefs-v1.md` DRAFT-6, normative for everything on media.
 
 C99. No operating system. No dynamic allocation, ever. No recursion. No libc file I/O. No floating point in the audio path. No clock. The only coupling to the outside world is the block device in §3.
 
@@ -41,13 +41,16 @@ typedef enum {
   TAPE_ERR_INCONSISTENT,       /* two valid copies that cannot be ordered: equal sb_generation and
                                   not byte-identical (superblock), or equal sequence at all (index);
                                   or promote_stage == 1 with index shapes matching no resume row */
-  TAPE_ERR_NO_VALID_INDEX,
+  TAPE_ERR_NO_VALID_INDEX,     /* also: a B-dependent call on a degraded-B mount (tapefs §4.4) */
   TAPE_ERR_READ_ONLY,          /* the mount is not effectively writable (§3.1), a raw destination
                                   device has write == NULL, or tape_arm against Side A */
   TAPE_ERR_CARTRIDGE_FULL,
   TAPE_ERR_INDEX_FULL,
   TAPE_ERR_DEST_TOO_SMALL,     /* tape_dup: destination cannot hold the source timeline */
-  TAPE_ERR_SEQUENCE_EXHAUSTED,
+  TAPE_ERR_SEQUENCE_EXHAUSTED, /* tapefs §4.5 headroom unavailable for this whole operation;
+                                  refused before its first write */
+  TAPE_ERR_FAULTED,            /* a write or flush failed with indeterminate durability; the
+                                  instance is quarantined until unmount. §7.2 */
   TAPE_ERR_NOT_MOUNTED,
   TAPE_ERR_BUSY,               /* the state matrix in §10 forbids this call now */
   TAPE_ERR_UNDERRUN,           /* tape_render was short because the play ring was short */
@@ -155,25 +158,35 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
 tape_result tape_unmount(tape *t, uint64_t *out_position_frame);
 ```
 
-`tape_mount` runs `tapefs` §4.1 in full — selection, admission, then repair — then §5.3 index-slot selection and §5.2 validity **including interval disjointness, for both sides regardless of which was requested** (`tapefs` §4.2), then derives `free_next`, then seeks to `resume_frame` clamped to the timeline. `at_end` and `at_start` are cleared.
+`tape_mount` runs `tapefs` §4.1's **four phases in order**: (1) superblock selection, (2) admission, (3) index-slot selection and §5.2 validity **for both sides regardless of which was requested**, including interval disjointness, the degraded-B branch and the stage oracle (`tapefs` §4.2), then (4) repair — **the only phase that writes.** It then derives `free_next` and seeks to `resume_frame` clamped to the timeline. `at_end` and `at_start` are cleared.
+
+> Repair is **last**, after the indices have been validated (V5-003). DRAFT-5 repaired before looking at any index, so a mount destined to fail on `TAPE_ERR_NO_VALID_INDEX` or the stage oracle had already written the mirror — which is what invariant 26 forbids and could not previously deliver.
 
 A cartridge whose **Side A** has no selectable index fails the mount whichever side was asked for. A cartridge whose **Side B** has none mounts on **Side A** with `free_next = a_high_water` — the only state `tape_reset_side_b` can be called from — and returns `TAPE_ERR_NO_VALID_INDEX` to a mount that asked for Side B.
 
-**Warm start is used only if every one of these holds**, computed in 64-bit:
+**Warm start is used only if this algorithm reaches `use`.** It is ordered, and the order is normative — **no field is read until the descriptor itself is known non-NULL:**
 
 ```c
-end = (uint64_t)warm->start_frame + (uint64_t)warm->valid_frames;
+if (warm == NULL)                                             goto cold;
+if (warm->data == NULL)                                       goto cold;
+if (warm->valid_frames == 0)                                  goto cold;
+if ((uint64_t)warm->data_bytes
+        < (uint64_t)warm->valid_frames * FRAME_BYTES)         goto cold;
 
-warm != NULL
-&& warm->valid_frames > 0
-&& (uint64_t)warm->data_bytes >= (uint64_t)warm->valid_frames * FRAME_BYTES
-&& end <= total_frames
-&& (uint64_t)warm->start_frame <= resume_frame && resume_frame < end
-&& memcmp(warm->uuid, mounted uuid, 16) == 0
-&& warm->side == mounted side
+end = (uint64_t)warm->start_frame + (uint64_t)warm->valid_frames;   /* checked 64-bit */
+if (end > total_frames)                                       goto cold;
+if (resume_frame < (uint64_t)warm->start_frame
+        || resume_frame >= end)                               goto cold;
+if (memcmp(warm->uuid, mounted_uuid, 16) != 0)                goto cold;
+if (warm->side != mounted_side)                               goto cold;
+use:   warm_start_used = true;  goto done;
+cold:  warm_start_used = false; /* descriptor ignored; mount proceeds normally */
+done:
 ```
 
-Otherwise the descriptor is ignored, `tape_get_info` reports `warm_start_used = false`, and the mount proceeds normally. **A wrong buffer costs instant-on, never correctness.**
+**A wrong buffer costs instant-on, never correctness.**
+
+> **V5-007.** DRAFT-5 wrote the rule as an unordered list of predicates that *began* by computing `end` from `warm->start_frame` — while the API expressly permits `warm == NULL`, which is the ordinary cold-mount case. Read as written it dereferenced a null pointer on every cold boot. And `data` itself was never checked: a descriptor with correct metadata, positive `valid_frames`, sufficient `data_bytes` and `data == NULL` passed every listed predicate and sent the renderer to address zero. Both are now impossible to read wrong, because the rule is a sequence rather than a conjunction.
 
 > **V4-011.** DRAFT-4 wrote the containment test as prose over 32-bit fields. A direct C evaluation of `start_frame + valid_frames` wraps for `start_frame` near `UINT32_MAX`, so a stale ring could be accepted for a range it does not cover — exactly the defect WP-11's seventh mutation exists to catch, admitted by the spec that defines the mutation. The checked-64-bit rule the format uses for media extents now applies here too. `data_bytes` is new: without it the engine had no way to know the caller's buffer was big enough for the `valid_frames` it claimed, and principle 1 says the caller owns the buffer — but it does not say the engine must take its dimensions on trust.
 
@@ -191,7 +204,9 @@ typedef struct {
   uint32_t entry_count, entries_free;
   uint16_t version_minor;       /* NEW: why writable may be false on a writable device */
   bool     writable;            /* effective_writable, §3.1 */
-  bool     needs_repair;        /* one superblock copy invalid; mount not effectively writable */
+  bool     side_b_valid;        /* false in degraded-B (tapefs §4.4) */
+  bool     needs_repair;        /* one superblock copy invalid, and either the mount is not
+                                   effectively writable or the phase-4 repair write failed */
   bool     warm_start_used;
 } tape_info;
 
@@ -199,7 +214,21 @@ tape_result tape_get_info(const tape *t, tape_info *out);
 tape_result tape_set_side(tape *t, tape_side side);
 ```
 
-`tape_set_side` commits nothing and discards nothing; `TAPE_ERR_BUSY` if a recording is armed or frames are owed, and **`TAPE_ERR_NO_VALID_INDEX` if the requested side had no selectable index at mount** (`tapefs` §4.2). Without that second refusal a Side-A mount of a cartridge with a damaged Side B could switch to a side with no live index at all. It does not implicitly commit — implicit commits are how a child loses work they did not mean to keep.
+`tape_set_side` commits nothing and discards nothing; `TAPE_ERR_BUSY` if a recording is armed or frames are owed, and **`TAPE_ERR_NO_VALID_INDEX` if the requested side has no live index *now*** — that is, `TAPE_SIDE_B` while `tape_info.side_b_valid` is false (`tapefs` §4.4). **Keyed to the current state, not to mount-time**, so that a successful `tape_reset_side_b` immediately makes Side B reachable rather than requiring an eject and reinsert. Without that second refusal a Side-A mount of a cartridge with a damaged Side B could switch to a side with no live index at all.
+
+**The side-switch transition is normative.** On success:
+
+| | After `tape_set_side` |
+|---|---|
+| `position` | **0** |
+| `at_end`, `at_start` | both **cleared** |
+| `play_ring` | **invalidated.** The caller must run `tape_service` before `tape_render` returns frames; until it does, `tape_render` returns `*rendered = 0` — with `TAPE_ERR_UNDERRUN` where §6.3 would otherwise have rendered, and `TAPE_OK` in the cases §6.3 returns early anyway (empty timeline, `rate_q16_16 == 0`) |
+| `warm_start_used` | **false** |
+| `tape_info.total_frames`, `entry_count`, `entries_free` | those of the newly mounted side |
+
+> **V5-013.** DRAFT-5 said only that `tape_set_side` "commits nothing and discards nothing", which left the position, the endpoint flags and the ring undefined across a switch. Mount Side A at frame 1000 with `at_end` set, switch to a 100-frame Side B: an implementation could keep and clamp the number, reset it, or try a stored resume; keep or clear the flag; keep or drop buffered frames. **The stale ring is the one that hurts** — it plays audio from the *other side* for up to 372 ms.
+>
+> Position resets to 0 because that is what flipping a tape over does. The device-side position table (`tapefs` §11) is the caller's, so firmware restores its own bookmark with a `tape_seek` immediately after — Principle 1, and it keeps the engine free of a table it has no business owning. It does not implicitly commit — implicit commits are how a child loses work they did not mean to keep.
 
 ---
 
@@ -207,7 +236,7 @@ tape_result tape_set_side(tape *t, tape_side side);
 
 ```c
 tape_result tape_seek(tape *t, uint64_t frame);   /* beyond end clamps; TAPE_OK */
-uint64_t    tape_tell(const tape *t);             /* whole frames, truncated */
+tape_result tape_tell(const tape *t, uint64_t *out_frame);   /* whole frames, truncated */
 tape_result tape_set_rate(tape *t, int32_t rate_q16_16);
 
 tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *rendered);
@@ -225,6 +254,8 @@ tape_result tape_status(const tape *t, tape_status_t *out);
 `rate_q16_16` is signed 16.16 fixed point; `0x00010000` is 1.0×; negative plays in reverse; **zero is stopped**. The engine accepts instantaneous rates only. The scrub spool-up ramp is owned by firmware and specified as a rate-versus-time schedule in `acceptance.md`, so it can be golden-tested by driving `tape_set_rate` from a table.
 
 **`tape_seek` and `tape_set_rate` clear `at_end` and `at_start`.** Without that, reversing away from either boundary would be impossible.
+
+> **`tape_tell` gained a result and an out-parameter (V5-009).** §2 says every call returns `tape_result` and §10's *Not mounted* row requires `TAPE_ERR_NOT_MOUNTED` from every ordinary call — but the DRAFT-5 signature returned a bare `uint64_t` with no error channel, so the document contradicted itself and an implementation had to invent a sentinel or return a stale position. This is an ABI change inside the freeze candidate, which is exactly why it is better found now.
 
 ### 6.1 Position representation
 
@@ -248,12 +279,15 @@ if (step > 0) {
 } else if (step < 0) {
     uint64_t s = (uint64_t)(-step);
     at_end = false;                                       /* moving away from the end */
-    if (position <= s) { position = 0; at_start = true; }
-    else                 position -= s;
+    if      (position == 0) at_start = true;              /* already on frame 0: stop AFTER emitting it */
+    else if (position <= s) position = 0;                 /* land ON frame 0; it is emitted next pass */
+    else                    position -= s;
 }
 ```
 
 **Each direction clears the other's flag.** Without that, `at_start` set by a reverse pass that reached 0 would remain true while the playhead advanced forward under an already-positive rate — `tape_set_rate` was the only thing that cleared it, and the caller has no reason to call it — so `tape_status` would report "at the start of the tape" from the middle of it.
+
+> **`at_start` is set only when the playhead was *already* at 0, never on the step that lands there.** DRAFT-6's first cut set it on the landing step, and because §6.3 tests the flag *before* emitting, **frame 0 was never rendered.** Traced on `[0, 1000, 2000]` at −1.0× from the end: 2000, 1000, stop — the first frame of every tape silently dropped on every rewind, and `acceptance.md` WP-08's own reverse golden unachievable against the normative algorithm. The emit-then-advance order (V4-010) requires the boundary flag to describe where the playhead *is*, not where it just arrived; that distinction is the whole fix.
 
 > **V4-009.** DRAFT-4 tested `position > max_pos - s`. With a one-frame timeline (`max_pos = 2^32`), `position = 0` and `rate_q16_16 = INT32_MAX`, `s ≈ 2^47`, so `max_pos - s` **wraps** as unsigned, the comparison is false, and the code executed `position += s` — leaving `position > max_pos` and the next `i` out of range. A valid API input walked straight through the clamp that exists to stop exactly that. Comparing without subtracting the step from the endpoint removes the wrap; the `position >= max_pos` disjunct handles an already-at-or-past-end position and the empty timeline.
 
@@ -264,7 +298,8 @@ if (step > 0) {
 if (total_frames == 0) { at_end = true; return TAPE_OK; }  /* empty: checked first, see §11 */
 if (rate_q16_16 == 0)   return TAPE_OK;                    /* stopped: no frames, no flag change */
 
-if (step < 0 && position >= max_pos) position = max_pos - 1; /* snap onto the last frame */
+if (step < 0 && position >= max_pos)
+    position = ((uint64_t)(total_frames - 1)) << 32;         /* snap onto the last frame, grid-aligned */
 
 for (n = 0; n < frames; n++) {
     if (step > 0 && position >= max_pos) { at_end = true; break; }
@@ -286,7 +321,9 @@ for (n = 0; n < frames; n++) {
 
 > **V4-010.** DRAFT-4 said "the clamp is evaluated **before** each sample is fetched" and put the update pseudocode above the fetch rule. Read literally, the position advanced before the first fetch, so the first frame after a seek was *N+1* — contradicting `tape_seek`'s own "lands on the specified frame". Two conforming renderers would have differed by one frame at every seek and at stream start, which means golden PCM could not be frozen at all. The ordering is now in one algorithm rather than distributed across three sections, and the seek-then-render case is a normative example in `acceptance.md` WP-08.
 
-**The snap.** With a negative rate and `position == max_pos` there is no frame under the playhead — `i` would be `total_frames`. Snapping to `max_pos − 1` puts the playhead on the last frame with `f = 0xFFFFFFFF`; since `i + 1` is beyond the end, `b = a` and the emitted sample is that frame exactly, with no interpolation artefact. This is what makes "press rewind at the end of the tape" work.
+**The snap.** With a negative rate and `position == max_pos` there is no frame under the playhead — `i` would be `total_frames`. The playhead snaps to **`(total_frames − 1) << 32`**: the last frame, with `f = 0`, exactly on the frame grid. This is what makes "press rewind at the end of the tape" work.
+
+> **V5-005.** DRAFT-5 snapped to `max_pos − 1`, which is the last frame with `f = 0xFFFFFFFF` — one fixed-point unit short of the grid. The first emitted sample was right, and **every sample after it was wrong.** With frames `[0, 1000, 2000]` at −1.0×, the loop emitted 2000, then advanced to `(2<<32) − 1` and interpolated frames 1 and 2 at `f = 0xFFFFFFFF`, emitting **1999**, then **999** — instead of 2000, 1000, 0. Reverse playback was permanently off-grid by one LSB, audible as a shifted, duplicated smear, and a golden fixture taken from DRAFT-5 would have **frozen the defect as the reference**. Snapping to the grid costs nothing and fixes every subsequent sample, because from a grid-aligned position an integral rate stays grid-aligned.
 
 **Return value.** `TAPE_ERR_UNDERRUN` is returned **only** when the shortfall was caused by the play ring not holding the frames the position range required. A shortfall caused by `at_end`, `at_start` or `rate == 0` returns `TAPE_OK`. The caller fills the remainder with silence in either case, but only one of them is a problem.
 
@@ -307,7 +344,7 @@ tape_result tape_commit(tape *t);
 tape_result tape_abort(tape *t);
 ```
 
-`tape_arm` fails with `TAPE_ERR_READ_ONLY` on Side A or a mount that is not effectively writable, and `TAPE_ERR_INDEX_FULL` if `entries_free` is insufficient for the requested mode.
+`tape_arm` fails with `TAPE_ERR_READ_ONLY` on Side A or a mount that is not effectively writable, `TAPE_ERR_INDEX_FULL` if `entries_free` is insufficient for the requested mode, and **`TAPE_ERR_SEQUENCE_EXHAUSTED` if `tapefs` §4.5's headroom for the commit this arm authorises — plus the stage-clearing write, where one applies — is unavailable.** All three write nothing. **The sequence is reserved at arm, not at commit**: discovering at commit that no sequence remains would refuse *after* the child had recorded, and lose the recording.
 
 **`tape_arm`, `tape_reset_side_b` and `tape_respool` clear a stale `promote_stage` after their own preconditions have passed and before their first index or chunk write** (`tapefs` §8). The ordering matters: clearing it earlier would make `tape_arm`'s `TAPE_ERR_READ_ONLY` and `TAPE_ERR_INDEX_FULL` refusals, and `tape_respool`'s `TAPE_ERR_CARTRIDGE_FULL`, write a superblock before refusing — and all three are specified to write nothing. It is one superblock update, it happens at most once after an interrupted promote, and it is what stops an interrupted promote from permanently disabling promote on a cartridge that is otherwise in daily use. It is deliberately **not** in `tape_commit`, so §7.1's 97-block bound stands.
 
@@ -319,9 +356,32 @@ tape_result tape_abort(tape *t);
 
 **`tape_commit` refuses while frames are owed.** If `rec_ring` is non-empty it returns `TAPE_ERR_BUSY`; the caller runs `tape_service` until `frames_owed` clears, then commits.
 
-`tape_commit` then executes `tapefs` §8 **in full, including the final flush, and returns only after it.** It has no budget and no continuation. By the time it is callable all chunk data is already durable, so it writes **at most 97 blocks and performs exactly two flushes** (`tapefs` §8). On failure, `TAPE_ERR_IO`; the on-media state is indeterminate until remount, where `tapefs` §4.1 and §5.3 resolve it.
+**A commit with zero accepted frames is a zero-write no-op**, in all three record modes, returning `TAPE_OK`. The index, the timeline and `sequence` are unchanged. **Like any commit it disarms**, returning the instance to *Mounted, idle* — otherwise the only way out of the armed state after an empty commit would be `tape_abort`.
+
+> **V5-008.** The matrix allows `tape_commit` straight after `tape_arm`, and DRAFT-5 never said what an empty one does. `tapefs` §9.1's "overwrite replaces the timeline from the current position" reads as permission to **truncate everything after the playhead**, while an empty commit equally reads as nothing happening. So pressing record and instantly releasing could either preserve the rest of the tape or delete it, depending on whose engine you had. There is no "erase from here" feature in this product and a child brushing the record button must not discover one — the no-op is both the safe answer and the only one a six-year-old could predict.
+
+Otherwise `tape_commit` executes `tapefs` §8 **in full, including the final flush, and returns only after it.** It has no budget and no continuation. By the time it is callable all chunk data is already durable, so it writes **at most 97 blocks and performs exactly two flushes** (`tapefs` §8). On failure, **the instance goes to `FAULTED` (§7.2)** and returns `TAPE_ERR_IO`: the on-media state is indeterminate until remount, and §7.2 exists so that no mutator can run in between.
 
 Once `tape_commit` has been called it does not return until it is done, so `tape_feed` cannot be called during it and there is no state in which `tape_abort` could interrupt it. **`tape_abort` discards owed frames and pending chunks before a commit, never during one.** The next mount reclaims the pending chunks, because `free_next` is derived.
+
+### 7.2 `TAPE_ERR_FAULTED` — the quarantine state
+
+**Any write or flush that fails leaves the durability of that write unknown.** The engine cannot tell whether the block landed, and it cannot find out without re-reading and re-selecting — which is exactly what a mount does.
+
+**So: any call on a mounted instance that receives a non-zero return from `dev_write` or `dev_flush` *against that instance's own device* puts the instance into `FAULTED` before returning `TAPE_ERR_IO`.**
+
+Two exclusions, both because nothing about the instance's media became indeterminate:
+
+- **`tape_mount`'s phase-4 repair** (`tapefs` §4.1). It changes no logical state; the mount succeeds with `needs_repair = true`.
+- **A `tape_dup` failure against the *destination* device.** The source was never written. Faulting it would kill the audio a child is listening to because the card in the *other* slot was pulled — the operation ends and the instance returns to *Mounted, idle*.
+
+**In `FAULTED`, exactly four calls are permitted**: `tape_status` / `tape_get_info` / `tape_tell`, `tape_render` (which touches the ring only, and will underrun once the ring drains), **`tape_abort`** (which discards in-memory owed frames and pending chunks and touches no media — without it `frames_owed` could never clear), and `tape_unmount`. **Every other call returns `TAPE_ERR_FAULTED` and performs zero block operations** — `tape_service` included, since it is the one that would touch the media whose state is unknown. **The Faulted state overrides every other mounted state**, including the armed rows. The only exit is `tape_unmount` followed by a fresh `tape_mount`, which re-runs `tapefs` §4.1 and resolves the media honestly.
+
+> **V5-001, a blocker.** DRAFT-5 said an errored long-operation continuation "ends the operation" and returned the instance to *Mounted, idle* — where the matrix permits every mutator — while simultaneously saying the selected on-media generation is indeterminate until remount. Those two sentences are not compatible.
+>
+> The concrete loss: re-spool with old B at `[10,12)` and a pass-1 destination of `[12,14)`. The new B header write completes; its flush fails. The header may or may not be durable. The instance still holds the *old* B index and the old `free_next`, so an immediately permitted `tape_arm` + `tape_feed` allocates chunk 12 — **and overwrites the live re-spooled generation** if the header did land. A recoverable I/O error followed by an ordinary, expressly permitted API call destroys audio.
+>
+> "The next mount resolves it" is a real property of the on-media format and it is **not a safety rule while the API permits mutation before that mount**. Quarantine is the smallest thing that closes the gap: no re-read, no new state machine on media, and the recovery is the one operation that was always going to be correct.
 
 > **V4-008.** DRAFT-4 carried a "Commit in progress" row in the state matrix and a rule that `tape_abort` was permitted during a commit and took effect if the index header block had not yet been written — while `tape_commit` had no budget, no `more_work`, and no defined asynchronous return. Reaching that row required concurrent re-entry, which this API neither permits nor defines. One implementation would have made commit synchronous and left the row unreachable; another would have invented asynchronous semantics. **Synchronous is the honest reading**, because the operation it describes is bounded at 97 blocks — this is not the 30-second copy that forced `tape_promote` incremental. The row and the abort rule are deleted rather than specified, and `acceptance.md` adds a measured worst-case commit latency as a firmware criterion so the assumption behind "bounded" is a number and not a belief.
 
@@ -343,7 +403,7 @@ out = (int16_t)s;
 **Variable-rate playback.** Let `i = position >> 32`, `f = (uint32_t)position`, `a` = frame `i`, `b` = frame `i + 1` per channel. If `i + 1` is beyond the last frame, `b = a` (§6.3).
 
 ```c
-int64_t  d = (int64_t)(b - a) * (int64_t)f;      /* |d| < 2^48 */
+int64_t  d = ((int64_t)b - (int64_t)a) * (int64_t)f;   /* both cast BEFORE subtracting; |d| < 2^48 */
 int64_t  q;
 if (d >= 0) {
     q = (int64_t)((uint64_t)d >> 32);            /* logical shift of a non-negative value */
@@ -356,7 +416,11 @@ out = (int16_t)((int32_t)a + (int32_t)q);
 
 Channels independent with the same `f`. No rounding. No anti-aliasing, no pitch preservation, no crossfade — the aliasing is the intended sound.
 
-**Why not `>> 32` on the product.** `d` is negative whenever `b < a`, and right-shifting a negative signed integer is **implementation-defined in C99**. DRAFT-4's single-line formula demanded flooring in prose and expressed it with an operator that is not required to floor, so a desktop build and an embedded build could legitimately emit different PCM for the same cartridge — violating the cross-target contract and making golden bytes unfreezable (V4-013). The formulation above computes the same floored quotient using only unsigned shifts and is portable across every freestanding C99 target. Verified equal to the arithmetic-shift result over the full `(b − a, f)` domain by exhaustive comparison in the golden suite.
+**Why not `>> 32` on the product.** `d` is negative whenever `b < a`, and right-shifting a negative signed integer is **implementation-defined in C99**. DRAFT-4's single-line formula demanded flooring in prose and expressed it with an operator that is not required to floor, so a desktop build and an embedded build could legitimately emit different PCM for the same cartridge — violating the cross-target contract and making golden bytes unfreezable (V4-013). The formulation above computes the same floored quotient using only unsigned shifts and is portable across every freestanding C99 target.
+
+**Full-domain equivalence is established here, by proof, not by execution** *(V5-012)*. Let `d` be the product. For `d ≥ 0`, `(uint64_t)d >> 32` is exactly `⌊d / 2³²⌋` by definition of unsigned shift. For `d < 0`, put `m = −d` (defined, since `|d| < 2⁴⁸`); then `(m + 2³² − 1) >> 32 = ⌈m / 2³²⌉`, and `−⌈m / 2³²⌉ = ⌊−m / 2³²⌋ = ⌊d / 2³²⌋`. Both branches therefore equal `⌊d / 2³²⌋`, which is what an arithmetic shift computes where one exists. `m + 2³² − 1 < 2⁴⁹` cannot overflow `uint64_t`. `acceptance.md` WP-11's gate is a **finite differential test over a defined boundary set**, which is a check on the implementation, not on this identity.
+
+**Both operands are cast before the subtraction (V5-006).** `int16_t` promotes to `int`, and a conforming C99 target may have a **16-bit** `int` — on which `b - a` with `b = 32767, a = -32768` overflows *before* the conversion to `int64_t`, and signed overflow is undefined. DRAFT-5 cast the difference rather than the operands, so the formulation written to fix a portability defect (V4-013) contained a second one. The two-toolchain gate in `acceptance.md` WP-11 must include a configuration where integer-promotion width is visible.
 
 **No clamp is needed on the result.** With `f/2^32 ∈ [0, 1)`, `a + q` lies in `[min(a,b), max(a,b)]`, which is inside `int16` range by construction. Adding a clamp here would hide an arithmetic bug rather than prevent one.
 
@@ -391,9 +455,13 @@ Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, b
 - a further call to **that same function** advances it;
 - a call to **either of the other two** returns `TAPE_ERR_BUSY`.
 
+**`block_budget == 0` is `TAPE_ERR_INVALID_ARG`** with no state change, on the initiating call and on every continuation — checked **after** the state matrix and the effective-writability predicate, so a zero budget on a read-only mount still returns `TAPE_ERR_READ_ONLY`. Zero is smaller than any non-empty job and "at most zero blocks of work" permits no progress forever, which contradicts the requirement that the loop terminate *(V5-011)*.
+
+**No re-entry.** While any engine callback is executing — today that is only `tape_progress_fn` — **every engine call on that instance returns `TAPE_ERR_BUSY` with no state change**, including the matching continuation, **except the four calls that touch neither media nor operation state: `tape_render`, `tape_status`, `tape_get_info` and `tape_tell`.** Those stay allowed, because `tape_render` is serviced from an interrupt and the whole point of the in-progress rows is that audio does not stop during a copy — banning it would put a dropout in every progress callback. A progress callback that called its own operation back would otherwise be classified as an allowed continuation, and two invocations would advance and mutate the same continuation state, recursing until the 8 KiB stack budget is gone *(V5-014)*. Callbacks are for driving an LED row; they are not a place to run the engine.
+
 **Argument stability.** On a continuation call, every argument except `block_budget`, `more_work`, `cb` and `user` must equal the value passed to the initiating call — for `tape_dup` that includes `dst_dev` (compared by `ctx`), `new_uuid`, `epoch` and `dst_nominal_length_s`. A mismatch returns `TAPE_ERR_INVALID_ARG`, performs no work, and leaves the operation in progress.
 
-**Termination on error.** **Any return from a continuation call to the operation's own function**, other than `TAPE_OK` and `TAPE_ERR_INVALID_ARG`, ends the operation: `*more_work` is set false and the instance returns to *Mounted, idle*. Media is left in whatever state it reached, which `tapefs` §4.1 and §5.3 resolve on the next mount.
+**Termination on error.** **Any return from a continuation call to the operation's own function**, other than `TAPE_OK` and `TAPE_ERR_INVALID_ARG`, ends the operation: `*more_work` is set false. Where the failure was a device write or flush, the instance goes to **`FAULTED`** (§7.2), not to *Mounted, idle* — an indeterminate write must not be followed by a permitted mutation. Where it was not (`TAPE_ERR_SEQUENCE_EXHAUSTED`, `TAPE_ERR_CARTRIDGE_FULL`, and the other zero-write refusals), the instance returns to *Mounted, idle*, because nothing was written and nothing is indeterminate.
 
 **A `TAPE_ERR_BUSY` returned to any *other* call has no effect on the operation in progress.** That is the whole point of the in-progress rows: nine calls plus the two sibling long operations return `BUSY` there, and if `BUSY` terminated the operation, a stray `tape_seek` from a copy screen would silently cancel a 30-second `tape_dup` and the caller's next call would restart it from the beginning.
 
@@ -417,7 +485,13 @@ Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, b
 
 **Normative.** Every row is reachable and every cell is exercised by `acceptance.md`.
 
-**B** = `TAPE_ERR_BUSY`; **✓** = allowed; **W** = requires **effective writability** (§3.1), else `TAPE_ERR_READ_ONLY`.
+**B** = `TAPE_ERR_BUSY`; **✓** = allowed; **W** = requires **effective writability** (§3.1), else `TAPE_ERR_READ_ONLY`; **RO** = `TAPE_ERR_READ_ONLY`; **N** = `TAPE_ERR_NO_VALID_INDEX`; **F** = `TAPE_ERR_FAULTED`.
+
+**ᴮ** — `set_side` refuses only `TAPE_SIDE_B`; `tape_set_side(TAPE_SIDE_A)` on the already-mounted side is `✓`.
+
+**Degraded-B** (`tapefs` §4.4) is a mount whose Side B has no selectable index. `tape_reset_side_b` is the only B-touching call permitted, because it is the recovery and needs only Side A's index; `promote`, `respool` and `set_side(B)` refuse with zero writes. `tape_arm` is `RO` because the mounted side is A.
+
+**Faulted** (§7.2) is quarantine after an indeterminate write or flush failure. **Its row overrides every other mounted row** — an instance can be armed with frames owed *and* faulted, and the faulted answer is the one that applies. `tape_render` stays allowed: it touches only the ring, and it will underrun once the ring drains, which is the audible signal that the tape stopped. **`tape_abort` is allowed** — it discards in-memory owed frames and pending chunks and touches no media, and without it `frames_owed` could never clear. **`tape_service` is forbidden**, because it is the call that would touch the media whose state is unknown. The only exit is `tape_unmount`.
 
 > **W is about the mount, not the mounted side.** DRAFT-4's first cut marked these RO and defined `TAPE_ERR_READ_ONLY` as "write against `write == NULL`, or against Side A" — which forbade `tape_promote` from a Side-A mount and forbade `tape_dup` outright, since duplicating writes the destination's Side A by definition. The Side-A rule applies to `tape_arm` and `tape_feed` only: those write *the mounted side*. `reset_b`, `promote` and `dup` write regions chosen by the operation, not by what is mounted. DRAFT-5 additionally makes `W` include the version-minor condition (§3.1), which is V4-001.
 
@@ -426,12 +500,14 @@ Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, b
 | State ↓ / Call → | seek | set_rate | render | service | status / info / tell | arm | feed | commit | abort | set_side | reset_b | promote | respool | dup (as src) | unmount |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Mounted, idle | ✓ | ✓ | ✓ | ✓ | ✓ | W+SideB | B | B | B | ✓ | W | W | W | ✓ | ✓ |
+| **Mounted, idle, degraded-B** | ✓ | ✓ | ✓ | ✓ | ✓ | RO | B | B | B | **N**ᴮ | W | **N** | **N** | ✓ | ✓ |
 | Playing (rate ≠ 0) | ✓ | ✓ | ✓ | ✓ | ✓ | W+SideB | B | B | B | B | B | B | B | ✓ | ✓ |
 | Armed, no frames owed | **B** | **B** | ✓ | ✓ | ✓ | B | ✓ | ✓ | ✓ | B | B | B | B | B | B |
 | Armed, frames owed | **B** | **B** | ✓ | ✓ | ✓ | B | ✓ | **B** | ✓ | B | B | B | B | B | B |
 | **Respool in progress** | B | B | ✓ | ✓ | ✓ | B | B | B | B | B | B | B | **✓** | B | B |
 | **Promote in progress** | B | B | ✓ | ✓ | ✓ | B | B | B | B | B | B | **✓** | B | B | B |
 | **Dup in progress** | B | B | ✓ | ✓ | ✓ | B | B | B | B | B | B | B | B | **✓** | B |
+| **Faulted (§7.2)** — overrides every row above | F | F | ✓ | **F** | ✓ | F | F | F | **✓** | F | F | F | F | F | ✓ |
 | Not mounted | `TAPE_ERR_NOT_MOUNTED` for all except `tape_mount`, `tape_format`, `tape_init`, and `tape_dup` on the destination device |
 
 **There is no "commit in progress" row.** `tape_commit` is synchronous (§7.1), so no state exists between its call and its return.
@@ -459,7 +535,7 @@ Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, b
 | Render on an empty timeline, **any rate including 0** | `*rendered` = 0, `TAPE_OK`, `at_end` set — the empty check precedes the rate check (§6.3) |
 | Reverse render from `position == 0` | Emits frame 0 once, then `at_start` is set and the loop stops: `*rendered` = 1 |
 | Reverse render with `at_start` already set | `*rendered` = 0, `TAPE_OK` |
-| Reverse render from `position == max_pos` | Snaps to `max_pos − 1` and emits the last frame first (§6.3) |
+| Reverse render from `position == max_pos` | Snaps to **`(total_frames − 1) << 32`** — the last frame, grid-aligned — and emits it first (§6.3) |
 | Splice into an empty side | Creates the first entry at position 0 |
 | Splice at exact end | Append |
 | Overwrite at end | Append |
@@ -486,6 +562,7 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 10. **Every re-spool and promote write destination is disjoint from the live set of both sides at the moment of that write.**
 11. **After a promote that reached `tapefs` §9.3.2 step 9**, `a_high_water` equals the timeline's chunk count, `promote_stage == 0`, and no allocated chunk is unreachable.
 11a. **After any `tape_promote` returning `TAPE_OK`** — including the decline at step 5 and the NOTHING TO DO classification — `promote_stage == 0` and **both live indices have byte-identical entry arrays**. *(Invariant 11 alone was false for the decline path: with `a_high_water = 2`, Side B one entry at chunk 3 spanning five chunks, adopt-in-place raises the water line to 8, step 5 finds `[0,5)` overlapping the live set `[3,8)` and declines — leaving `a_high_water = 8` against a five-chunk timeline, and chunks `[0,3)` allocated and unreachable. Both of 11's clauses false, with `TAPE_OK` returned. It is stated over entry arrays rather than "the same single run" because §5.2 admits a multi-entry Side A on crafted media.)*
+11c. **A degraded-B mount performs zero writes from `tape_promote` and `tape_respool`** (`tapefs` §4.4); only `tape_reset_side_b` may write.
 11b. **Side A's live index, on any cartridge this engine wrote, has at most one entry.** Side A is written only by `tapefs` §9.3.1 step 2, §9.3.2 step 7, §9.5 step 3 and §9.6 step 3, and every one of those writes zero or one entry. Several arguments in §9.3 already lean on this; it is stated so they do not have to lean on it silently. **Mount does not enforce it** — §5.2 places no entry-count bound on Side A — so it is not assertable over arbitrary media, and §9.3.3's rows test "single entry" directly rather than assuming it.
 12. `free_next` equals `max(a_high_water, max over live-B entries of last + 1)` — recomputed at mount, never stored.
 13. No allocator symbol links into the engine.
@@ -499,10 +576,15 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 21. Promote writes below `a_high_water` only in phase 2, only after both live indices reference the staging run, and only after the explicit disjointness check in `tapefs` §9.3 step 5 passes.
 22. `tape_promote` on a Side B with `total_frames == 0` returns `TAPE_ERR_INVALID_ARG` and writes nothing.
 23. **No block write occurs on a mount whose `effective_writable` (§3.1) is false** — including superblock repair. Asserted by the simulator, not only by inspection.
-24. **`tape_commit` performs at most 97 block writes and exactly two flushes**, and returns only after the second.
-25. **`promote_stage` on media is 1 only after `tapefs` §9.3 step 4 and before either step 9 or a stage-clearing write (`tapefs` §8)**, and `promote_staging_chunk` is the staging run's first chunk whenever it is 1. Every mount with `promote_stage == 1` matches **exactly one** row of §9.3.3 — the three rows partition the space because **rows 2 and 3 both require `S > 0`** — row 1 against row 2 and row 1 against row 3 by `S`, row 2 against row 3 by whether B's entry array is identical to A's. *(Row 3's `H > len` implies `S > 0` only through the engine's own `H = S + len`, which is a reachability argument and fails on crafted media; the explicit guard does not.)*
+24. **`tape_commit` performs at most 97 block writes and at most two flushes** — exactly two when any frame was accepted, returning only after the second; **zero of each for the no-op commit** of §7 (V5-008).
+25. **`promote_stage` on media is 1 only after `tapefs` §9.3 step 4 and before either step 9 or a stage-clearing write (`tapefs` §8)**, and `promote_staging_chunk` is the staging run's first chunk whenever it is 1. Every **non-degraded-B** mount with `promote_stage == 1` matches **exactly one** row of §9.3.3 — a degraded-B mount skips the oracle by construction (`tapefs` §4.2 step 2), since every row constrains a live Side B index, and its stage is resolved by §8's clearing write on the recovering `tape_reset_side_b` — the three rows partition the space because **rows 2 and 3 both require `S > 0`** — row 1 against row 2 and row 1 against row 3 by `S`, row 2 against row 3 by whether B's entry array is identical to A's. *(Row 3's `H > len` implies `S > 0` only through the engine's own `H = S + len`, which is a reachability argument and fails on crafted media; the explicit guard does not.)*
 25a. **`tape_arm`, `tape_reset_side_b` and `tape_respool` leave `promote_stage == 0`** on any effectively writable mount, after their own preconditions pass and before their first index or chunk write (`tapefs` §8, stage clearing). **No index commit by any of those three occurs on media with `promote_stage == 1`.** `tape_promote`'s own phase-2 commits (`tapefs` §9.3.2 steps 7–8) are the sole exception and are by design — `promote_stage` is 1 from step 4 until step 9, which is precisely the window those two commits fall in.
-26. **A mount that fails admission (`TAPE_ERR_VERSION`, `TAPE_ERR_UNSUPPORTED_STATE`, `TAPE_ERR_INCOMPLETE`, `TAPE_ERR_GEOMETRY`) performs zero writes.**
+26. **A mount that fails, for any reason, performs zero writes** — admission (`TAPE_ERR_VERSION`, `TAPE_ERR_UNSUPPORTED_STATE`, `TAPE_ERR_INCOMPLETE`, `TAPE_ERR_GEOMETRY`) *and* index selection (`TAPE_ERR_NO_VALID_INDEX`, `TAPE_ERR_INCONSISTENT`, including the stage oracle). `tapefs` §4.1's phase 4 is the only phase that writes and it runs after both. *(DRAFT-5 repaired before validating the indices, so this invariant was false for every index failure; V5-003.)*
+27. **After any `dev_write` or `dev_flush` failure against the *mounted* device, in any call on a mounted instance other than `tape_mount`'s phase-4 repair, the instance is `FAULTED`** (§7.2) and performs zero further block operations until `tape_unmount`. No mutator is reachable between an indeterminate write and the mount that resolves it. *(Phase-4 repair failure is excluded because it changes no logical state — `tapefs` §4.1. A `tape_dup` destination failure is excluded because the source's media is determinate — §7.2.)*
+28. **No engine call other than `tape_render`, `tape_status`, `tape_get_info` and `tape_tell` executes while an engine callback is active on the same instance** — every other one returns `TAPE_ERR_BUSY` with no state change (§9.1). The four exempt calls mutate no operation state and touch no media. This is also what bounds the §4 stack budget in the presence of callbacks.
+29. **Every logical operation preflights its full `sequence` and `sb_generation` headroom** (`tapefs` §4.5) and refuses with `TAPE_ERR_SEQUENCE_EXHAUSTED` and zero writes if it is unavailable. No cartridge is advanced partway into a state whose completion is impossible.
+30. **Every operation defines its empty-input behaviour.** `tape_promote` → `TAPE_ERR_INVALID_ARG`, `tape_respool` → `TAPE_OK`, and `tape_commit` with zero accepted frames → `TAPE_OK`, each **performing zero writes**. `tape_dup` with an empty source **writes**, and must produce a valid, mountable, empty destination (`tapefs` §9.5 step 3) — it is a copy, not a refusal.
+31. **`tape_set_side` leaves position 0, both endpoint flags clear, and the play ring invalidated** (§5). No frame from the previous side is ever rendered after a side switch.
 
 ---
 

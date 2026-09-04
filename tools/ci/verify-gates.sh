@@ -161,10 +161,26 @@ restore_spec
 # 2. Revision drift with the hash kept consistent. Without re-hashing, check 1
 #    fires first and check 2 is never exercised -- and check 2 compares two
 #    sed extractions, which agree trivially if both come back empty.
-sed -i 's/^\*\*Revision:\*\* DRAFT-5/**Revision:** DRAFT-3/' spec/tapefs-v1.md
-sed -i "s/7a53869c17cf12bcaf83af177d09d444b1d9b06e5a252e8c30290f4e1c773941/$(sha256sum spec/tapefs-v1.md | cut -d' ' -f1)/" spec/VERSION.md
-expect_red_saying "is DRAFT-3, bundle is DRAFT-5" "spec bundle (revision)" \
-    ./tools/ci/verify-spec-bundle.sh
+#
+#    Both the current revision and the hash to rewrite are read out of the
+#    manifest rather than written here. A probe that names DRAFT-5 stops
+#    planting anything the day DRAFT-6 lands, and every bundle after that has
+#    to remember to come back and edit it. The bundle changes roughly weekly;
+#    this file should not have to.
+SPEC_REV=$(sed -n 's/.*\*\*Bundle:\*\* \([A-Z0-9-]*\).*/\1/p' spec/VERSION.md | head -1)
+SPEC_HASH=$(awk -F'|' '/^\| `spec\/tapefs-v1\.md`/ { gsub(/[` ]/,"",$4); print $4 }' spec/VERSION.md)
+if [ -z "$SPEC_REV" ] || [ -z "$SPEC_HASH" ]; then
+  # An empty revision would make the sed below match every line, and an empty
+  # hash would make it a no-op. Either way the probe stops planting what it
+  # claims to plant, so say so rather than running it.
+  echo "  BROKEN spec bundle (revision) — cannot read revision/hash out of spec/VERSION.md"
+  fail=$((fail+1)); failed+=("spec bundle (revision)")
+else
+  sed -i "s/^\*\*Revision:\*\* $SPEC_REV/**Revision:** DRAFT-0/" spec/tapefs-v1.md
+  sed -i "s/$SPEC_HASH/$(sha256sum spec/tapefs-v1.md | cut -d' ' -f1)/" spec/VERSION.md
+  expect_red_saying "is DRAFT-0, bundle is $SPEC_REV" "spec bundle (revision)" \
+      ./tools/ci/verify-spec-bundle.sh
+fi
 restore_spec
 
 # 3. An empty manifest. The awk matches nothing, sha256sum -c is handed an
