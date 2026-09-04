@@ -55,13 +55,21 @@ revision drift; and an empty manifest. VLAs are rejected at compile time by `-Wv
 audit runs.
 
 **The spec gate needed three probes, not one.** It has two independent checks, and a revision
-string is *content*, so planting a `DRAFT-5` → `DRAFT-3` drift also breaks that file's hash —
-check 1 fires, the gate goes red, and check 2 is never exercised even if it is broken. Which it
-could be: check 2 compares two `sed` extractions, and two empty strings compare equal. So the
-revision probe re-hashes `VERSION.md` to keep check 1 green, and the assertion is not merely
-"red" but red *saying* `is DRAFT-3, bundle is DRAFT-5`. The third probe empties the manifest, so
+string is *content*, so planting a revision drift also breaks that file's hash — check 1 fires,
+the gate goes red, and check 2 is never exercised even if it is broken. Which it could be:
+check 2 compares two `sed` extractions, and two empty strings compare equal. So the revision
+probe re-hashes `VERSION.md` to keep check 1 green, and the assertion is not merely "red" but red
+*saying* `is DRAFT-0, bundle is <the current revision>`. The third probe empties the manifest, so
 `awk` matches nothing and `sha256sum -c` is handed nothing to check — the "a gate that cannot
 run reads green" shape, planted deliberately. It goes red.
+
+**The revision probe reads the bundle rather than naming it.** Both the revision it overwrites
+and the hash it rewrites come out of `spec/VERSION.md` at run time; `DRAFT-0` is the planted
+wrong value because no bundle will ever be called that. A probe that spelled out `DRAFT-5` would
+have stopped planting anything the day DRAFT-6 landed, and every bundle after it would have had
+to remember to come back and edit this file. The bundle changes about weekly. If either value
+comes back empty the probe reports itself broken rather than running — an empty revision would
+make its `sed` match every line, and an empty hash would make it a no-op.
 
 The probes mutate PM-owned files, so `verify-gates.sh` backs `spec/` up before anything runs and
 restores it from an `EXIT` trap. The hashes are re-verified after every meta-gate run.
@@ -75,5 +83,10 @@ script now goes through a wrapper that treats a grep exit ≥ 2 as a broken gate
 
 The memory audit measures the archive. The authoritative number for firmware is the linked
 image's map file, which also accounts for stack and for what the toolchain elided. That gate
-gets added when Stream 4 links. The RAM budget will also gain the engine instance from
-`tape_instance_size()` once DRAFT-3 defines it.
+gets added when Stream 4 links.
+
+The RAM budget still measures `.data + .bss` only. `engine-api` §4 and `acceptance.md` WP-13
+define the gate as `.data + .bss + tape_instance_size()` **summed**, and require the gate to
+**print the measured `tape_instance_size()`** rather than merely assert a ceiling — so the §5.1
+disjointness scratch shows up as a number instead of as a surprise. Owed with the read-path
+reconciliation.

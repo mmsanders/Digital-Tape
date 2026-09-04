@@ -1,6 +1,6 @@
 # spec/VERSION.md — the spec bundle manifest
 
-**Bundle:** DRAFT-5 · **Issued:** 4 Sep 2026 · **Owner:** Program Manager
+**Bundle:** DRAFT-6 · **Issued:** 4 Sep 2026 · **Owner:** Program Manager
 
 `Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
 
@@ -8,15 +8,15 @@
 
 | File | Revision | SHA-256 |
 |---|---|---|
-| `spec/tapefs-v1.md` | DRAFT-5 | `7a53869c17cf12bcaf83af177d09d444b1d9b06e5a252e8c30290f4e1c773941` |
-| `spec/engine-api.md` | DRAFT-5 | `9ea681cac2354d9c9b4c27d5812007bc62ae8e59b831c55df84746e138cbf7a7` |
-| `spec/acceptance.md` | DRAFT-5 | `86bb05db55c30adf9f386561a28112fa2a15cae5d059685fe20d133a39f8e941` |
+| `spec/tapefs-v1.md` | DRAFT-6 | `696ec41c62ec02250455a1ec8ba1afad01e4aaeb84cd5fe2914c9bf5d3c98056` |
+| `spec/engine-api.md` | DRAFT-6 | `4faabc9135d30355ca029afacf2ea8069da4811a1df61e167a6e1fae9337f6fd` |
+| `spec/acceptance.md` | DRAFT-6 | `f470442d712f1f5ebe96dd7d31705a449338e143b427248e9909e617173bf086` |
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
 ## Why this file exists
 
-On **4 September 2026**, `main` published:
+On **4 September 2026**, before this file existed, `main` published:
 
 - `spec/tapefs-v1.md` at **DRAFT-3**
 - `spec/engine-api.md` at **DRAFT-3**
