@@ -20,6 +20,18 @@ jobs:
         run: cc --version | head -1; objdump --version | head -1
       - run: ./tools/ci/build.sh
 
+  spec:
+    name: spec bundle matches VERSION.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # PM Decisions 007 §1 asks for this on every PR touching spec/. It runs on
+      # every PR instead, which is a superset and costs a second: a path filter
+      # would only ever catch drift a PR introduced, and the failure it exists
+      # to prevent was drift already sitting on main. It needs no build, so it
+      # does not wait on `build`.
+      - run: ./tools/ci/verify-spec-bundle.sh
+
   gates:
     name: guardrail gates
     needs: build

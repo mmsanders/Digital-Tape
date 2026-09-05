@@ -13,6 +13,7 @@ Every gate is a standalone script that runs locally exactly as it runs in CI.
 | Gate | Enforces |
 |---|---|
 | `build.sh` | Engine, ports and harness compile clean at `-Werror`, C99 |
+| `verify-spec-bundle.sh` | The spec bundle on `main` matches `spec/VERSION.md` — every file's SHA-256 and all three revision strings. PM-authored; landed verbatim from the fenced block in `spec/VERSION.md` |
 | `audit-allocation.sh` | Guardrail 08 — no malloc family, no libc file I/O, by undefined-symbol reference. **Engine archive only** |
 | `audit-indirect.sh` | Guardrail 09 — all `tape_dev` access funnels through `engine/src/dev.h`, plus a link-time backstop against function pointers in data sections |
 | `audit-stack.py` | Guardrail 08 — max stack depth ≤ 8 KiB from GCC's own `-fstack-usage`/`-fcallgraph-info`. **Subsumes the recursion check**: a cycle makes depth unbounded |
@@ -45,12 +46,33 @@ scaffold rather than by it failing:
 
 ### Verified in both directions, now automatically
 
-`verify-gates.sh` does this in CI rather than by hand each round. 11/11 checks: each gate goes
+`verify-gates.sh` does this in CI rather than by hand each round. 15/15 checks: each gate goes
 red on a real violation and green without it. Confirmed catches: a direct `d->read()`
 call in `engine/src`; a static function-pointer table in `.data.rel.ro`; mutual recursion
 (including the tail-call form the optimiser emits as `jmp`); a 12 KB call chain; a 300 KB
-`.bss`; a 40 KB `.rodata`; `malloc` and `fopen` references. VLAs are rejected at compile time by
-`-Wvla` before the audit runs.
+`.bss`; a 40 KB `.rodata`; `malloc` and `fopen` references; a one-byte edit to a spec file; a
+revision drift; and an empty manifest. VLAs are rejected at compile time by `-Wvla` before the
+audit runs.
+
+**The spec gate needed three probes, not one.** It has two independent checks, and a revision
+string is *content*, so planting a revision drift also breaks that file's hash — check 1 fires,
+the gate goes red, and check 2 is never exercised even if it is broken. Which it could be:
+check 2 compares two `sed` extractions, and two empty strings compare equal. So the revision
+probe re-hashes `VERSION.md` to keep check 1 green, and the assertion is not merely "red" but red
+*saying* `is DRAFT-0, bundle is <the current revision>`. The third probe empties the manifest, so
+`awk` matches nothing and `sha256sum -c` is handed nothing to check — the "a gate that cannot
+run reads green" shape, planted deliberately. It goes red.
+
+**The revision probe reads the bundle rather than naming it.** Both the revision it overwrites
+and the hash it rewrites come out of `spec/VERSION.md` at run time; `DRAFT-0` is the planted
+wrong value because no bundle will ever be called that. A probe that spelled out `DRAFT-5` would
+have stopped planting anything the day DRAFT-6 landed, and every bundle after it would have had
+to remember to come back and edit this file. The bundle changes about weekly. If either value
+comes back empty the probe reports itself broken rather than running — an empty revision would
+make its `sed` match every line, and an empty hash would make it a no-op.
+
+The probes mutate PM-owned files, so `verify-gates.sh` backs `spec/` up before anything runs and
+restores it from an `EXIT` trap. The hashes are re-verified after every meta-gate run.
 
 **One gate bug worth remembering.** `audit-indirect.sh` reported PASS while the engine called a
 callback directly: the search pattern began with `-`, grep parsed it as an option, exited 2, and
@@ -61,5 +83,10 @@ script now goes through a wrapper that treats a grep exit ≥ 2 as a broken gate
 
 The memory audit measures the archive. The authoritative number for firmware is the linked
 image's map file, which also accounts for stack and for what the toolchain elided. That gate
-gets added when Stream 4 links. The RAM budget will also gain the engine instance from
-`tape_instance_size()` once DRAFT-3 defines it.
+gets added when Stream 4 links.
+
+The RAM budget still measures `.data + .bss` only. `engine-api` §4 and `acceptance.md` WP-13
+define the gate as `.data + .bss + tape_instance_size()` **summed**, and require the gate to
+**print the measured `tape_instance_size()`** rather than merely assert a ceiling — so the §5.1
+disjointness scratch shows up as a number instead of as a surprise. Owed with the read-path
+reconciliation.

@@ -1,72 +1,82 @@
 # STATUS
 
-**Updated:** 2026-09-02 · **Phase:** 1 (engine), held · **Updated by:** Software Lead
-**Charter Rev C · specs DRAFT-3, NOT FROZEN, four blockers open · CI 7/8 green**
+**Updated:** 2026-09-04 · **Phase:** 1 (engine) · **Updated by:** Software Lead
+**Charter Rev C · spec bundle DRAFT-6 on `main` · CI 8/9 green**
 
 ---
 
 ## What changed since last time
 
-**PR #17 merged**, with both of Decisions 004's conditions met. `main` now carries DRAFT-3
-rather than my stale WP-02 draft — which is the more important half of the merge, because until
-now anyone reading `main` was reading the wrong spec.
+**DRAFT-6 is on `main`**, the second bundle to land today. All four files `cmp`-verified against
+the PM's copies; the three hashes were checked against the manifest before anything was copied
+and again after. The banner is inside the hashed content, so nothing was added or edited.
+`docs/FOR-MICHAEL.md` is the PM's rewrite, landed the same way.
 
-**Both DRAFT-3 blockers confirmed against this code**, not taken on trust:
+**The gate held across a bundle change** — which is the first evidence it does anything. It went
+green on DRAFT-6 without an edit, and `verify-spec-bundle.sh` is still byte-identical to the
+fenced block in `VERSION.md`.
 
-- **V3-001** — `last_chunk_id` wraps to **0** on the spec's own repro values, where the true
-  value is 32768. Zero is the most permissive result available: it passes the `last < first`
-  guard *and* every bound including `a_high_water`. A CRC-correct index claiming a
-  4-billion-frame run validates as one chunk at position 0. On Side A that defeats immutability.
-- **V3-004** — the geometry check accepts a chunk store whose last block *is* the mirror
-  superblock. Confirmed numerically.
+**The meta-gate's revision probe did not, and is fixed** (ADR-031). It named `DRAFT-5` and the
+DRAFT-5 hash in two `sed` commands, so from today it would have planted nothing — the gate would
+stay green and the probe would report BROKEN. That is the right failure direction and the wrong
+maintenance burden on a document that has moved four times in three days. It now reads the
+current revision and hash out of `VERSION.md` and plants `DRAFT-0`, a value no bundle will ever
+carry, and refuses to run at all if either derived value is empty. 15/15.
 
-Neither is fixed. The spec is upstream of the code; DRAFT-4 owns the rules. Both are marked
-PROVISIONAL at the head of `tapefs.c` and `mount.c` and at each affected check.
-
-**One fault injector, not two** (#16 closed). `dev_sim` lost its durability model. The reasoning
-is ADR-025 and it generalises: a simulator where every completed write is durable is
-*structurally incapable* of failing any test that depends on a flush having happened — and the
-verifier found exactly that defect in DRAFT-1 by reading.
-
-**Every gate is now proven able to go red.** `tools/ci/verify-gates.sh`, 11/11, in CI.
+**`spec/README.md` stopped restating revisions** (ADR-032). Its own table said DRAFT-4 while
+`main` published DRAFT-3 — a fourth copy of the same claim, drifting, inside the round about
+drift. Status and freeze scope only now; revisions live in the manifest that has a gate behind it.
 
 ## In flight
 
 | Work | Owner | State |
 |---|---|---|
-| DRAFT-4 | PM | **The critical path.** 4 blockers + 11 majors; days, not hours |
-| WP-06 validity/mount rules | Software Lead | **Held** by Decisions 004 §5 until DRAFT-4 |
-| WP-06 commit path | Software Lead | **Held** by structural Rule 1 |
-| WP-10 crash harness | Verification | Infrastructure in CI; adapters need DRAFT-4 |
-| WP-11 golden suite | Verification | Runner proven; fixtures owed |
+| DRAFT-6 bundle | Software Lead | **On `main`**, gate green |
+| Read-path reconciliation to DRAFT-6 | Software Lead | **Not started, and the delta grew** — see below |
+| WP-06 sub-criteria 06a–06h | Software Lead | Not started. **Eight now, not six** |
+| WP-06/07 read+alloc paths | Software Lead | PR #20, built against DRAFT-4. Held by structural Rule 1 |
+| WP-06/07 commit paths | Software Lead | **Held** by structural Rule 1 |
+| WP-10 crash injection | Verification | Infrastructure in CI. DRAFT-6 adds two durability modes and counter boundaries to its scope |
+| WP-11 golden suite | Verification | Runner proven; fixtures owed. **The only red gate** |
 
 ## Blocked
 
-Nothing is blocked in the sense of idle. Everything downstream of the format rules is **held by
-instruction**, which is different and correct: five findings land on the read path, and building
-further on rules that are about to change would be work done twice.
+Nothing. The commit path is held by instruction, not blocked.
 
 ## Acceptance criteria flipped to passing
 
-**None**, and one moved backwards. WP-06's criterion says every §4.1 and §5.2 mount rule has a
-refusal test — 60 checks do that, but §5.2 and §4.1 are two of the sections DRAFT-4 is expected
-to change materially, so those tests encode rules that are provisional. Nothing has the
-Verification Lead's independent confirmation.
+**None.** 118 self-test checks on `main`, 206 counting PR #20 — all of them the Software Lead's
+claims about its own code. `acceptance.md` requires the Verification Lead's independent
+confirmation. Nothing has had it, so nothing has flipped.
 
 ## What will hurt in three weeks
 
-- **The format has four open blockers and Q-001 has moved out again.** That is the right call —
-  freezing a format the verifier has shown to be broken means reflashing cartridges later for
-  something we knew today — but the Phase 0 gate is now the longest-standing open item in the
-  project, and everything in Streams 1, 3, 4 and 5 sits behind it.
-- **Two rounds, two silent-desync failures.** The unversioned charter, then a stale spec on
-  `main` that three streams would have read as truth. Both were caught by someone noticing, not
-  by a mechanism. The charter now carries a revision and the specs now carry a status banner;
-  there is still nothing that *detects* the next instance.
-- **V3-005 is the one I would watch.** DRAFT-3 has no index-slot selection algorithm at all, so
-  what `pick_live_index` does was invented by analogy. It is reasonable and it is not normative,
-  and two conforming implementations could mount different generations after the same crash —
-  which is precisely the thing a crash oracle cannot tolerate.
-- **RAM is at 72 % before the commit and record paths add their state.** Two index arrays
-  dominate at 48 KiB each. If it tightens, the honest lever is `TAPE_MAX_ENTRIES` — an engine
-  memory constraint, not a media one — not the budget.
+- **The engine is now two revisions behind, and the gap is structural rather than cosmetic.**
+  `tape_mount` gains a **fourth phase, with repair last** (V5-003) — my implementation splits
+  repair out of selection but still runs it before index validation, so invariant 26 is false in
+  my code today for every index failure. That is a reordering of the function this round's whole
+  read path is built around, not a parameter change.
+- **A new engine state exists that I have no code for.** `TAPE_ERR_FAULTED` (§7.2) quarantines an
+  instance after any indeterminate write or flush, overrides every other row of the state matrix,
+  and permits exactly four calls. It closes a path where a recoverable I/O error followed by an
+  ordinary permitted call destroys audio. It is not a code, it is a state machine.
+- **One ABI change landed inside the freeze candidate.** `tape_tell` is now
+  `tape_result tape_tell(const tape *, uint64_t *)`. The old bare-`uint64_t` signature could not
+  return `TAPE_ERR_NOT_MOUNTED`, so the document contradicted itself. Cheap now, expensive after
+  three consumers link against it — which is the argument for finding it here.
+- **Two arithmetic fixes invalidate any renderer prototype**, and would have been frozen into the
+  goldens: reverse-from-end snaps to `(total_frames − 1) << 32` rather than `max_pos − 1`, and
+  `at_start` is set only when the playhead was *already* at 0 — DRAFT-6's own first cut set it on
+  the landing step, which never rendered frame 0 at all. Both are pre-fixture, which is the cheap
+  time.
+- **RAM was 72 % before the disjointness scratch, the commit path and the record path.** WP-13
+  now requires the gate to **print** the measured `tape_instance_size()`, not just assert the
+  ceiling, and the memory audit does not yet include it at all. Owed with the reconciliation. If
+  the sum crosses 200 KiB the answer is escalation, not a smaller `TAPE_MAX_ENTRIES` — 4 096
+  entries is roughly two thousand splices, a child's editing budget and therefore a product
+  number.
+- **The PM's own note is the one worth acting on.** Of the 37 defects found in DRAFT-6's first
+  cut, two were introduced by the fixes for the verifier's DRAFT-5 findings. The most dangerous
+  text on this project is whatever was written last, in a hurry, to close a hole someone just
+  found. That applies to my patches as squarely as to the PM's drafts, and it is the argument for
+  reconciling the read path deliberately rather than fast.

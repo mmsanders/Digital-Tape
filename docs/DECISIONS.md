@@ -1001,6 +1001,127 @@ goes to the PM — it does not get absorbed by widening the limit.
 
 ---
 
+## ADR-028 — The spec bundle is verified by a manifest gate, and the gate runs on every PR
+
+**Date:** 2026-09-04 · **Owner:** Software Lead · **Source:** PM Decisions 007 §1
+
+**Decision.** `spec/VERSION.md` is the manifest for the spec bundle — each file's revision and
+SHA-256 — and `tools/ci/verify-spec-bundle.sh` fails a build when any spec file's content or
+revision drifts from it. Both are PM-authored; the script was extracted verbatim from the fenced
+block in `VERSION.md` rather than retyped. It is wired as its own CI job, and it runs on **every**
+PR rather than only PRs touching `spec/`.
+
+**Rationale.** On 4 Sep the PM found `main` publishing `tapefs-v1.md` and `engine-api.md` at
+DRAFT-3 and `acceptance.md` at DRAFT-1 — three documents whose own headers each claimed to be
+versioned in step. Third silent desync on this project, third catch by a human happening to look.
+A header that asserts consistency is not a mechanism.
+
+The path filter is the deliberate deviation from the PM's wording. A `paths: spec/**` trigger only
+ever catches drift a PR *introduces*; the failure this exists to prevent was drift already sitting
+on `main`, which no such PR would touch. Running it unconditionally is a superset of what was
+asked and costs about a second, with no build step to wait on.
+
+**Cost to reverse.** Near zero — delete one job and one script. The manifest would survive as
+documentation, which is exactly the state that failed.
+
+---
+
+## ADR-029 — The spec gate's revision check is proven red *independently* of its hash check
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `tools/ci/verify-gates.sh` plants three separate violations against the spec gate,
+not one: a one-byte content edit, a revision drift **with the manifest hash updated to match**,
+and an emptied manifest. The revision probe asserts not merely that the gate went red but that it
+said `is DRAFT-3, bundle is DRAFT-5`.
+
+**Rationale.** The gate has two independent checks and the obvious probe only exercises one. A
+revision string is content, so a `DRAFT-5` → `DRAFT-3` edit breaks that file's hash too: check 1
+fires, the gate goes red, the probe passes, and check 2 is never executed. That matters because
+check 2 compares two `sed` extractions and **two empty strings compare equal** — a typo in either
+pattern makes it unconditionally green while the aggregate probe still shows red. This is ADR-026's
+failure mode one level down: a *probe* that measures the wrong quantity reads as green just as
+readily as a gate that does.
+
+The empty-manifest probe covers the third shape: `awk` matches nothing, `sha256sum -c` is handed
+an empty list, and a gate with nothing to check must not report success.
+
+Because these probes mutate PM-owned files, `verify-gates.sh` backs `spec/` up before any probe
+runs and restores it from an `EXIT` trap, and the hashes are re-verified after the run.
+
+**Cost to reverse.** Zero, and reversing it is the wrong move: the re-hash step is what makes the
+revision check testable at all. Note the asymmetry — re-hashing to satisfy a *probe*, inside a
+script that restores the originals, is the opposite of re-hashing to satisfy a *failing landing*,
+which Decisions 007 §1 names as the one failure mode that turns this gate into a rubber stamp.
+
+---
+
+## ADR-030 — The spec bundle lands on its own branch, ahead of the engine work that was queued behind it
+
+**Date:** 2026-09-04 · **Owner:** Software Lead · **Authorised by:** Michael
+
+**Decision.** The DRAFT-5 bundle and its gate land on `main` in a PR containing **no `engine/` or
+`tests/` diff**. The WP-06 read path and WP-07 allocator stay on `claude/new-project-setup-fooeic`
+and rebase onto the new `main`.
+
+**Rationale.** They had been on one branch, so they were one PR, and that PR could not merge:
+structural Rule 1 holds engine implementation off `main` until Stream 2's tests for that behaviour
+land there, and Stream 2's WP-06 tests have not. Merging would have breached the rule; not merging
+left `main` publishing DRAFT-3, which is the exact failure Decisions 007 was written to end.
+
+The general lesson is worth more than the fix. **`main` is the canonical publication point for
+`spec/` (`VERSION.md`), so spec must never be able to queue behind code.** A document that three
+streams read as truth cannot be gated on an implementer's branch state — and structural Rule 1
+guarantees that branch is the slowest-moving thing in the repository. Spec changes travel on their
+own branches from here.
+
+**Cost to reverse.** None; this is a branching convention, not a mechanism. The cost of *not*
+adopting it is a repeat, and it recurs every time a spec revision arrives mid-work-package —
+which, on current cadence, is every round.
+
+---
+
+## ADR-031 — The spec gate's probes read the bundle instead of naming it
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `verify-gates.sh`'s revision probe derives both the revision it overwrites and the
+manifest hash it rewrites from `spec/VERSION.md` at run time. The planted wrong value is
+`DRAFT-0`, which no bundle will ever be called. If either derived value comes back empty the
+probe reports itself broken instead of running.
+
+**Rationale.** As first written the probe contained the literal strings `DRAFT-5` and
+`7a53869c…c773941`. DRAFT-6 arrived the same day. A hardcoded probe stops planting anything the
+moment the bundle moves, and every bundle after it inherits an edit somebody has to remember —
+on a document that has changed four times in three days.
+
+It would at least have failed loudly rather than silently: with nothing planted the gate stays
+green and `expect_red_saying` reports BROKEN. That is the right failure direction and it is still
+the wrong maintenance burden. The empty-value guard exists because the two failure modes are not
+symmetrical — an empty revision makes the `sed` match *every* line, and an empty hash makes it a
+no-op; both leave a probe that claims to plant something and does not.
+
+**Cost to reverse.** Zero. The general form is strictly better than the specific one here,
+because the value being tested is defined in a file the test can read.
+
+---
+
+## ADR-032 — `spec/README.md` no longer restates revisions
+
+**Date:** 2026-09-04 · **Owner:** Software Lead
+
+**Decision.** `spec/README.md`'s table lists status and freeze scope only. Revisions live in
+`spec/VERSION.md`, which the gate enforces.
+
+**Rationale.** It carried its own revision column, and that column said DRAFT-4 while `main` was
+publishing DRAFT-3 — a fourth copy of the same claim, drifting, inside the round whose entire
+subject was drift. A fact written in two places is a fact that can disagree with itself, and only
+one of the two had a mechanism behind it.
+
+**Cost to reverse.** Zero, and it would reintroduce the failure by construction.
+
+---
+
 ## ADR-117 — The cartridge opens with a clasp and a blade slot, not a screw
 
 **Date:** 2026-09-05 · **Decided by:** Michael (issue #6, via PM Decisions 006 §2), designed by
@@ -1081,3 +1202,4 @@ left thin, uncertainty and what-would-change-this, are the two the audit actuall
 
 **Cost to reverse.** Near zero as a format. High as a process: dropping it puts a safety sign-off
 back in the hands of the party with an interest in it passing.
+

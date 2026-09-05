@@ -2,8 +2,56 @@
 
 The question queue. Things that need your taste or your hands — nothing else blocks on you.
 
-Newest at the top. When you answer, the Software Lead moves the item to **Answered** with the
-outcome, and logs it to `DECISIONS.md` if it was a call rather than a preference.
+*Rewritten by the PM 4 Sep 2026 after the fourth review round (DRAFT-6).*
+
+---
+
+## Answers you asked for
+
+### The printer — your four questions
+
+**Does the A1 have an enclosure? Is it extra?**
+No, and no — because Bambu doesn't sell one for this line. The A1 and A1 mini are open-frame by design, and the A1 mini's own FAQ says outright: *"We don't recommend enclosing the A1 mini."* That isn't a gap you'd be filling with an accessory; it's a design position.
+
+**One thing I got wrong, and it matters.** I told you a home printer would give us PETG *and* nylon for the latch. **The A1 line does not run nylon.** Bambu supports *"PLA, PETG, TPU, and their corresponding support filaments"* and explicitly does not recommend *"ABS, ASA, PC, PA, and PET"* — `PA` is nylon — because the hotend tops out at 300 °C and the bed at 80 °C. PETG and TPU are still exactly right for a cartridge shell, and §"the clasp" below explains why nylon turns out not to be needed. But I asserted it and it was wrong.
+
+**Can I iterate in one colour and print the final in multicolour?**
+Yes, with one caveat worth designing around: **a tight fit tuned in one filament isn't guaranteed to fit in another.** Pigment loading changes how a plastic flows and shrinks, so a snap that's perfect in grey can be tight or loose in red — and that's between *colours of the same brand*, before you change brands. Multicolour also purges material at every tool change, so those prints are slower and waste more.
+
+The fix is a design rule, not a workflow rule: **tune the clasp in the filament the real cartridges will use**, and make the retention come from a chamfer and a defined interference rather than a knife-edge fit, so a few hundredths of shrinkage gets absorbed instead of being fatal. That's in the Hardware Lead's brief.
+
+**Can we outsource the important mechanism to better material and do everything else at home?**
+Yes — SLS/MJF nylon from a print service is genuinely better for a small flexure than any FDM part, because it's isotropic and FDM fails along its layer lines. It's a normal split and it stays available to us.
+
+**But I don't think we'll need it**, for the reason in the next answer. Hold it in reserve rather than budgeting for it.
+
+**Verdict: the A1 combo is a good buy and the missing enclosure costs us nothing**, since everything we want to print is PLA, PETG or TPU. The combo's AMS Lite is a convenience for the final look, not a requirement for the engineering.
+
+---
+
+### The cartridge shell — you chose the clasp, and I think you can have it
+
+**Your instinct is right, and here's the argument nobody had made yet: how often does a parent actually open a cartridge?**
+
+Count it honestly. Once at assembly, to put the card in. Once more to load the *first* cartridge from a computer. After that — never, because **every cartridge after the first is loaded by the copy button**, which is the whole point of the device. So a cartridge gets opened **one to three times in its life**, not weekly.
+
+That changes the problem completely. A clasp that has to survive thousands of openings is a hard fatigue problem in any printed plastic, and PLA creep would rule it out. **A clasp that has to survive five openings with margin is an ordinary fit problem**, and PETG handles it comfortably. The nylon we can't print is a solution to a problem we don't have.
+
+So: **no screw, a continuous lip with a lead-in chamfer, and a tongue-and-groove seam on an edge chamfer** to hide the parting line and keep the two halves registered. I've asked the Hardware Lead for a stated cycle target — I proposed 20 openings with retention still within 20 % of first-cycle, roughly ten times the real life — plus the strain number that decides whether PETG creeps, and a plate of variants using the same blind-comparison process as the button packet.
+
+**One thing I've added that you didn't ask for.** The opening feature has to be something **a child can't work**. A fingernail recess is a recess a five-year-old finds, and a loose microSD is a choking hazard. Two points of pressure at once, or a thin slot on the back face, is the shape to aim at.
+
+### The sealed cartridge — feasible, and I recommend against it
+
+Your own question is the one that decides it: *how would we get the card in in the first place?*
+
+The firmware side works. The chip has USB device capability and mass-storage support is well-trodden on it — call it a work package of weeks, not a tweak. But:
+
+1. **A sealed cartridge is assembled with the card inside, so when that card dies the cartridge is landfill.** A microSD in a child's hands will die. This is meant to be an object a family keeps.
+2. **A computer will offer to format it.** Our format lives in a partition type no desktop recognises, and Windows volunteers to "fix" those. The person clicking Yes will be a parent trying to help.
+3. **It buys almost nothing over the clasp.** The clasp already gives you the sealed look and the near-invisible seam. Sealing only adds that a *parent* can't open it either — and the parent is the one person who needs to.
+
+**The clasp doesn't close this door.** If the assessment comes back saying a printed clasp can't hold a card safely at a size a child can hold, the trade changes and I'll bring it back. Until then, USB loading is a Phase 5 enhancement we can add later without touching the shell.
 
 ---
 
@@ -33,211 +81,92 @@ Three things worth knowing before you pick:
   once. Not by enough to change the safety case.
 - **Smaller prints faster**, which matters while you are getting two library prints a month.
 
-**Default if you don't pick:** 86 × 54 × 12 mm.
+**Default if you don't pick:** 86 × 54 × 12 mm. Nothing waits on this — the clasp is
+designed, the variants are on the plate, and the size can move afterwards.
 
 ---
 
-### Q-007 — A correction: a home printer will not give us nylon
+### Q-007 — One more argument for the combo, from the shell design
 
-**Needs:** nothing from you — this is me telling you something I got wrong
-**Blocks:** nothing. It does not change the printer recommendation
+**Needs:** nothing from you — this is an addendum, not a question
+**Blocks:** nothing
 
-You were told (Decisions 005 §3) that buying a printer would let us print the latch in PETG
-*and* nylon. **PETG yes. Nylon no.** The A1 line runs PLA, PETG and TPU and explicitly does not
-do nylon — it needs a hotter bed and an enclosed chamber, and Bambu does not sell an enclosure
-for the A1.
+The PM's printer answer above already covers the nylon correction, and I have nothing to add
+to it. Two things came out of designing the clasp that bear on the same decision.
 
-**It changes almost nothing, and here is why.** Nylon is good at one thing we thought we needed:
-surviving thousands of flexes. The PM's insight about the cartridge — *you will open it once or
-twice in its life, not weekly, because every cartridge after the first is copied by the device
-itself* — means the shell does not need that. It is designed for PETG throughout and PETG is
-comfortable.
+**TPU turns out to be load-bearing, not a nice-to-have.** The clasp uses a thin rubbery lip
+round the inside of the seam. Its job is to soak up the variation between one print and the
+next — it is exactly what stops a clasp being tight in grey and loose in red, which is the
+caveat the PM flags above. Without it the design still works, but with much less room for the
+plastic to come out slightly different on a different day.
 
-**Where it does still bite: the transport latch.** That one clicks every time somebody presses
-play, for years, so it genuinely is a fatigue part. If the plate says the latch is marginal, we
-send **that one small part** to a print service in nylon and print everything else at home.
-That is a normal split and it costs about the price of a takeaway.
+**The library cannot print TPU and the A1 can.** So that part is on the critical path for the
+clasp's tolerance and today we simply cannot make it. That is a more concrete argument for the
+combo than "more materials would be nice".
 
-**One thing that is worth a pound of prevention:** TPU. The cartridge design uses a thin rubbery
-lip to soak up the variation between prints — it is what stops the clasp from being tight in
-one colour and loose in another. **The library cannot print it and the A1 can.** That is a more
-concrete argument for the combo than "more materials would be nice".
-
----
-
-### Q-004 — Your tape will remember where you were, but only in your own player
-
-**Needs:** your taste · **Blocks:** nothing — a default will ship
-**Why you and not us:** the mechanism is forced; the feeling it creates is a choice
-
-A real cassette resumes where you left off because the tape is physically sitting at that spot.
-The position belongs to the tape.
-
-We can't do that. The left slot is read-only by design — that is the thing protecting your kids'
-music — so a cartridge played there has no writable surface to record its position on. The fix
-is for the *player* to remember, in its own memory, where each cartridge was.
-
-That works, and it's cheap. But it means the position lives in the player rather than the tape,
-and there will be four players in the house. Take your tape to your brother's player and it
-resumes wherever *he* left that tape, or at the beginning. Bring it back to yours and it's where
-you left it.
-
-Our read is that this is fine and possibly even nice — "my player remembers my tapes" is a rule a
-child can hold. But it's a real departure from how a cassette behaves, so it should be your call
-rather than a side effect of ours.
-
-**Default if you don't pick:** the player remembers, and it remembers the last 64 cartridges.
-Anything older starts from the beginning again.
+**And the one place nylon does still bite is the transport latch, not the shell.** The shell
+gets opened once or twice ever. The latch clicks every time somebody presses play, for years —
+that one genuinely is a fatigue part. If the button plate comes back saying the latch is
+marginal, we send **that one small part** to a print service in nylon and print everything else
+at home. Exactly the split the PM describes holding in reserve, and it is about the price of a
+takeaway.
 
 ---
 
-### Q-002 — Is 90 minutes worth the UHS-I risk?
+### M-04 — The printer decision, now with the facts
 
-**Needs:** your call · **Blocks:** nothing yet, but it should land before the format freeze
-**From:** Plan Rev B §13, ask #02 — restated here because it now touches the format spec
+**Needs:** your call and ~$450 · **Blocks:** nothing this week; the mechanism from about October
 
-You were already asked this in the plan. Raising it again only because it has become
-time-sensitive: a 90-minute tape is 952 MB and needs the board's hardest circuit (1.8 V UHS-I
-switching) to hit the 30-second copy. A 60-minute tape is 635 MB and hits 29 s on the safe,
-boring interface with no 1.8 V switching at all.
+Everything above. **A1 combo, $449** in a March 2026 tracker — check current pricing. The library stays useful for exactly one thing: the WP-04 button packet, which is a single print whose answer is *comparative*, so it survives someone else choosing the settings.
 
-The format spec is being written so this can change without a re-spec — region sizes come from
-a number stored on the card at format time, not from a constant. So it is genuinely not
-blocking. But it is cheaper to answer before the freeze than after, and it trades a real
-engineering risk against twenty minutes of tape.
-
-*No recommendation from here — this is a taste-and-risk trade, not an engineering one.*
+**Default if you don't decide:** the library, two prints a month, and the latch work stretches into next spring.
 
 ---
 
-### Q-003 — What should the device do when a tape can't get any longer?
+### M-01 — The print packet still isn't ready
 
-**Needs:** your taste · **Blocks:** nothing — a default will ship if you'd rather not decide
-**Why you and not us:** the mechanism is ours; what a child feels at the wall is yours
+**Needs:** nothing from you yet · **Blocks:** WP-04 and everything mechanical
 
-Side B's timeline can grow to about 1.5× the original length before its index runs out of room
-(a 90-minute tape can become roughly 135 minutes of spliced-up mess). A child splicing
-enthusiastically will eventually hit that.
-
-There is no screen to explain it. So the options are all physical: refuse the splice with a
-distinct sound, refuse it silently, or let the record button simply not hold down — the same
-way it already refuses to stay down without play. That last one has the advantage of reusing a
-rule the child already knows.
-
-Our default if you don't pick: **record won't hold down**, matching the existing interlock.
+**Done as of 5 Sep — packet WP04-01 rev 4, and it is with you.** All five: merged `.stl`, the on-its-side variant dropped for a geometric one, and the card carries the plate size (150 × 149 mm), the time estimate (~1 h 40) and the orientation line. **The cartridge-shell variants are on the same plate** — together they are 1.6 h against the 6 h limit, so one print really is worth two. *(The PM's original text follows.)* Unchanged and still on the Hardware Lead: re-export as a single merged `.stl` (the library takes STL only, so `plate-FIXED.3mf` is void), drop the on-its-side variant, put the bounding box, time estimate and *"any orientation is fine provided all the parts get the same one"* on the card. I've asked them to put the cartridge-shell variants on the same plate if they fit inside six hours — one library print is worth two.
 
 ---
 
-### Q-001 — Format freeze sign-off (Phase 0 gate)
+### M-02 — Vendor domains
 
-**Needs:** your sign-off · **Blocks:** Streams 1, 2, 3, 4, 5 — i.e. all of them
-**Status:** not ready to put in front of you yet
+**Needs:** two minutes in the environment settings · **Blocks:** the Hardware Lead's BOM work
 
-Once `spec/tapefs-v1.md` exists, you get one look at the cartridge format before it freezes.
-This is the one decision where a late change costs real rework: the byte layout is what three
-streams implement against, and changing it after firmware exists means reflashing every
-cartridge that was ever written.
+The Hardware Lead found the pattern: **the allowlist matches exact hosts, so the `www.` prefix is the whole thing.** `www.nxp.com` and `www.lcsc.com` work; bare hostnames don't. Still blocked: **`www.ti.com`, `www.octopart.com`, `www.mouser.com`**, and DigiKey returns bot protection regardless. Add those three with the `www.`, plus `www.digikey.com` and `www.jlcpcb.com` in case they behave differently.
 
-You will not be asked to read the spec. You will be asked about the handful of choices inside
-it that you can feel rather than verify — how long a cartridge holds, what happens when you
-yank one mid-record, and whether Side B behaves the way you pictured.
+---
 
-**Update 2 Sep — this moves out again, and that is the right call.** The Verification Lead read
-DRAFT-3 and returned **four blocker findings against it**, two of which I confirmed against my
-own code. Freezing a format the verifier has already shown to be broken would mean reflashing
-every cartridge later to fix something we knew about today.
+### M-03 — Approve parts order 1a
 
-DRAFT-4 is with the PM. You will get the format for sign-off after that, not before.
+**Needs:** your wallet · **Blocks:** the bench build
+
+Unchanged. ~$267 of the $600 budget. Order 1c stays cancelled.
+
+---
+
+### Q-001 — Format freeze (Phase 0 gate) — **held one round, by you, correctly**
+
+**Status:** one verification round away
+
+You held the signature and raised the bar, and it was the right call. The verifier's report met the letter of my condition — two blockers, neither in the sections I proposed freezing — and I brought you the condition instead of the signature. You declined it because eight *major* defects were still sitting in those sections.
+
+Two of them justify the decision on their own: **reverse playback was off by one fixed-point unit**, so rewinding produced a smeared, duplicated sound and a reference recording taken from that draft would have frozen the defect as correct; and one function's signature contradicted its own document so no implementation could satisfy both.
+
+**The standard is now: no blockers *and* no majors** in the sections being frozen. One more verification pass measures against it.
 
 ---
 
 ## Answered
 
-### Q-006 — Library printer
-**Answered 2 Sep:** not yet checked; proceed on the default — PLA, 0.2 mm, four-hour
-plates, STL + 3MF + bed picture, no G-code. Re-slice if details arrive.
-
-### Q-005 — Spending
-**Answered 2 Sep:** every order comes to Michael first, as a checkout-ready cart with
-a one-line justification. Running total in STATUS.md. Logged as ADR.
-
-### Q-004 — Resume position
-**Answered 2 Sep:** the player remembers, last 64 cartridges, across days; resumes
-2 s early. Accepted as a deliberate departure from the tape metaphor. Logged as ADR.
-
-### Q-003 — The wall
-**Answered 2 Sep:** record button won't hold down, plus a green/yellow/red record
-light showing Side B headroom; red coincides with the button refusing. Logged as ADR.
-
-### Q-002 — Tape length
-**Answered 2 Sep:** C-60 is the standard. C-90 and longer permitted by the format
-with slower copy. Do nothing that closes off longer lengths. Logged as ADR.
+- **Safety sign-off (issue #8):** you witness the loudness and thermal measurements; the Verification Lead separately audits the method and the raw numbers without being in the room. Two checks, neither of them the person who built it. The Hardware Lead now has to write results so a stranger can audit them.
+- **Cartridge shell (issue #6):** clasp, no screw, near-invisible seam. Sealed-USB assessed and set aside as a later enhancement.
+- **Q-006 library printer, Q-005 spending, Q-004 resume position, Q-003 the wall, Q-002 tape length** — all as previously recorded.
 
 ---
 
-### Q-005 — What can I spend, and above what number should I ask first?
+## This round, in one paragraph
 
-**Needs:** your wallet · **Blocks:** nothing — a conservative default is in force
-**From:** Hardware Lead
-
-You place the parts orders, so you set the ceiling. I need two numbers before I draft one:
-
-1. A rough budget for hardware across the whole project. The plan carries three board spins,
-   and a run of assembled boards is the single biggest line item in this project by a distance.
-2. The figure above which I should put an order in front of you *before* proposing it, rather
-   than just handing you a prepared cart.
-
-Neither answer blocks me — I would just rather find out now than have you open a cart with a
-number on it you weren't expecting.
-
-**The PM has set a default while you think about it** (Decisions 001 §6), so nothing is
-blocked: **$150 per order, $600 cumulative, without asking.** Above either, I propose first.
-That sits inside the plan's ~$1,590 across roughly eight orders and it covers the card buy
-outright. A running total lives in `docs/STATUS-HARDWARE.md`.
-
-**So this is now a confirm-or-change, not a blocker.** The first two carts come to ~$267 of
-that $600 — six memory cards and a reader (~$115), and the bench build (~$152). The second is
-$2 over the per-order line, which is the sort of thing I would rather you waved through once
-than have me ask about every time.
-
----
-
-**ANSWERED (Decisions 002 §4).** Every order comes to you first as a checkout-ready cart with a one-line justification. Running total in `docs/STATUS-HARDWARE.md`; three carts drafted, ~$400.
-
----
-
-### Q-006 — What is the library's 3D printer, actually?
-
-**Needs:** your hands and about ten minutes of asking · **Blocks:** WP-04, the critical path
-**From:** Hardware Lead
-
-The whole mechanical plan is built on sending you to the library with one plate that answers a
-question, instead of one part that produces a data point. To do that I have to hand you a file
-that machine will actually accept, and right now I'd be guessing.
-
-Whatever you can find out, in rough order of how much it changes what I send you:
-
-- **What machine is it?** Make and model. A photo of the front of it is a perfect answer.
-- **What can you print in?** Most library makerspaces are PLA-only. If PETG or ABS is on the
-  menu that matters a lot later — see below.
-- **How do they take the job?** Do you hand them a file and they slice it, or do you slice it
-  yourself and bring G-code? Is there a machine there you can drive?
-- **Is there a time limit per print or per session?** Two hours and four hours are different
-  designs on my end.
-- **How long from drop-off to part in hand?** If it's same-day, the plan works as written. If
-  it's "come back Thursday", I should be designing bigger, less frequent sweeps.
-
-**Why the material question matters more than it sounds.** You'll be ranking how the buttons
-*click*, and PLA is a prototyping plastic — it creeps under a spring and it will not feel the
-same as whatever the final part is made of. Your ranking is still the right way to find the
-answer; I just want to print the top two or three in the real material and have you confirm
-the winner still wins, before I commit the enclosure around it.
-
-**My default if you'd rather not chase this:** PLA, 0.2 mm layers, plates that fit in four
-hours, and I send you an STL plus a 3MF plus a picture of how it should sit on the bed —
-rather than G-code, which only works if I know the machine.
-
----
-
-**ANSWERED (Decisions 002 §2).** You chose the defaults: PLA, 0.2 mm, four-hour plates, STL + 3MF + a bed picture, no G-code. Packet WP04-01 is built on exactly those and is ready to go. If you learn more about the machine it re-slices in one command.
-
+The verifier found **15 defects in DRAFT-5: 2 blockers, 13 majors.** Both blockers were ways a child could lose a cartridge by ordinary use — copying a *blank* tape destroyed the tape you copied onto, and pulling a card at the wrong moment let the next ordinary action overwrite live audio. Both are closed. My own audit then found **37 more in my own draft, six of them blockers** — including one where **rewinding never reached the first frame of the tape**, and one where a cartridge could become permanently unreadable while its music was perfectly intact. Two of those six were introduced by my fixes for the verifier's findings, which is the pattern I'd watch if I were you: on this project the most dangerous text is whatever was written last, in a hurry, to close a hole someone just found.

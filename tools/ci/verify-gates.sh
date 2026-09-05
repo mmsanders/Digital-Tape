@@ -23,7 +23,20 @@ cd "$(dirname "$0")/../.." || exit 2
 PROBE=engine/src/_gateprobe.c
 pass=0; fail=0; failed=()
 
-cleanup() { rm -f "$PROBE"; rm -rf build/engine; make -C engine all >/dev/null 2>&1 || true; }
+# The spec-bundle probes mutate PM-owned files. Back them up before anything
+# runs and restore unconditionally, so an interrupted run cannot leave a
+# corrupted spec on disk -- the one thing worse than an untested gate here.
+SPECBAK=$(mktemp -d)
+SPECS=(spec/tapefs-v1.md spec/engine-api.md spec/acceptance.md spec/VERSION.md)
+cp "${SPECS[@]}" "$SPECBAK/" 2>/dev/null || true
+restore_spec() { for f in "${SPECS[@]}"; do
+  [ -f "$SPECBAK/$(basename "$f")" ] && cp "$SPECBAK/$(basename "$f")" "$f"
+done; }
+
+cleanup() {
+  rm -f "$PROBE"; rm -rf build/engine; make -C engine all >/dev/null 2>&1 || true
+  restore_spec; rm -rf "$SPECBAK"
+}
 trap cleanup EXIT
 
 rebuild() { rm -rf build/engine; make -C engine all >/dev/null 2>&1; }
@@ -38,6 +51,26 @@ expect() {
     pass=$((pass+1))
   else
     echo "  BROKEN $name — expected $want, gate exited $status"
+    printf '        %s\n' "$out" | head -6
+    fail=$((fail+1)); failed+=("$name")
+  fi
+}
+
+# expect_red_saying <pattern> <name> <gate command...>
+#
+# Exit status alone is not enough for a gate with more than one check: a spec
+# file's revision string is part of its content, so planting a revision drift
+# also breaks its hash, and check 1 firing would mask a check 2 that is broken.
+# This asserts the gate went red *for the reason the probe planted*.
+expect_red_saying() {
+  local pat=$1 name=$2; shift 2
+  local out status
+  out=$("$@" 2>&1); status=$?
+  if [ $status -ne 0 ] && printf '%s\n' "$out" | grep -qF -- "$pat"; then
+    echo "  ok    $name — goes red on demand, and says why"
+    pass=$((pass+1))
+  else
+    echo "  BROKEN $name — expected red mentioning '$pat', gate exited $status"
     printf '        %s\n' "$out" | head -6
     fail=$((fail+1)); failed+=("$name")
   fi
@@ -112,6 +145,51 @@ EOF
 rebuild
 expect red "memory (flash budget)" ./tools/ci/audit-memory.sh
 
+# --- spec bundle: the manifest gate ------------------------------------------
+# Not a guardrail gate. It is the mechanism from spec/VERSION.md that exists
+# because main published three step-versioned documents at two revisions and
+# nothing noticed. The same rule applies to it as to the others, and it has an
+# extra failure mode: two checks, where the first can mask the second. So each
+# is planted on its own.
+
+# 1. Content drift -- one byte, which is the case the PM tested before sending.
+printf 'x' >> spec/acceptance.md
+expect_red_saying "spec/acceptance.md: FAILED" "spec bundle (content)" \
+    ./tools/ci/verify-spec-bundle.sh
+restore_spec
+
+# 2. Revision drift with the hash kept consistent. Without re-hashing, check 1
+#    fires first and check 2 is never exercised -- and check 2 compares two
+#    sed extractions, which agree trivially if both come back empty.
+#
+#    Both the current revision and the hash to rewrite are read out of the
+#    manifest rather than written here. A probe that names DRAFT-5 stops
+#    planting anything the day DRAFT-6 lands, and every bundle after that has
+#    to remember to come back and edit it. The bundle changes roughly weekly;
+#    this file should not have to.
+SPEC_REV=$(sed -n 's/.*\*\*Bundle:\*\* \([A-Z0-9-]*\).*/\1/p' spec/VERSION.md | head -1)
+SPEC_HASH=$(awk -F'|' '/^\| `spec\/tapefs-v1\.md`/ { gsub(/[` ]/,"",$4); print $4 }' spec/VERSION.md)
+if [ -z "$SPEC_REV" ] || [ -z "$SPEC_HASH" ]; then
+  # An empty revision would make the sed below match every line, and an empty
+  # hash would make it a no-op. Either way the probe stops planting what it
+  # claims to plant, so say so rather than running it.
+  echo "  BROKEN spec bundle (revision) — cannot read revision/hash out of spec/VERSION.md"
+  fail=$((fail+1)); failed+=("spec bundle (revision)")
+else
+  sed -i "s/^\*\*Revision:\*\* $SPEC_REV/**Revision:** DRAFT-0/" spec/tapefs-v1.md
+  sed -i "s/$SPEC_HASH/$(sha256sum spec/tapefs-v1.md | cut -d' ' -f1)/" spec/VERSION.md
+  expect_red_saying "is DRAFT-0, bundle is $SPEC_REV" "spec bundle (revision)" \
+      ./tools/ci/verify-spec-bundle.sh
+fi
+restore_spec
+
+# 3. An empty manifest. The awk matches nothing, sha256sum -c is handed an
+#    empty list, and a gate that has nothing to check must not report success
+#    -- this is the "gate cannot run reads green" shape, planted deliberately.
+grep -v '^| `spec/' spec/VERSION.md > "$SPECBAK/empty.md" && mv "$SPECBAK/empty.md" spec/VERSION.md
+expect red "spec bundle (empty manifest)" ./tools/ci/verify-spec-bundle.sh
+restore_spec
+
 # --- and green again, with the probe gone ------------------------------------
 rm -f "$PROBE"
 rebuild
@@ -119,6 +197,7 @@ expect green "allocation"                    ./tools/ci/audit-allocation.sh
 expect green "indirect funnel"               ./tools/ci/audit-indirect.sh
 expect green "stack"                         python3 tools/ci/audit-stack.py
 expect green "memory"                        ./tools/ci/audit-memory.sh
+expect green "spec bundle"                   ./tools/ci/verify-spec-bundle.sh
 
 echo
 echo "======================================"
