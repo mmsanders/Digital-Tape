@@ -1,23 +1,53 @@
 {
   "packet": "WP04-01",
-  "work_package": "WP-04",
-  "built": "2026-09-02",
-  "swept_parameter": "hook_depth (mm)",
-  "bracket_mm": [
-    0.6,
-    2.1
+  "work_packages": [
+    "WP-04",
+    "WP-24"
+  ],
+  "built": "2026-09-05",
+  "revision": 4,
+  "experiments": [
+    {
+      "work_package": "WP-04",
+      "parts": "carrier-*, hook-bar, test-frame",
+      "swept_parameter": "hook_depth (mm)",
+      "bracket_mm": [
+        0.6,
+        2.1
+      ]
+    },
+    {
+      "work_package": "WP-24",
+      "parts": "shell-base-*, shell-lid-*",
+      "swept_parameter": "interference (mm)",
+      "bracket_mm": [
+        0.15,
+        0.45
+      ]
+    }
   ],
   "seed": 20260902,
   "blind": true,
-  "bed_mm": [
-    220.0,
-    220.0
+  "not_on_plate": {
+    "tpu-lip.stl": "TPU; the library runs PLA only"
+  },
+  "bed_assumed_mm": [
+    180.0,
+    180.0
   ],
   "plate_extent_mm": [
-    190.0,
-    197.5
+    150.0,
+    149.0
   ],
-  "fits_bed": true,
+  "minimum_bed_mm": [
+    162,
+    161
+  ],
+  "xml_valid": true,
+  "stl_validated": true,
+  "library_deliverable": "plate.stl",
+  "estimated_print_hours": 1.6,
+  "library_job_limit_hours": 6.0,
   "print_settings_assumed": {
     "material": "PLA",
     "layer_mm": 0.2,
@@ -25,93 +55,215 @@
     "perimeters": 3,
     "infill_pct": 40,
     "supports": "none required -- every overhang is <= 45 degrees by design",
-    "note": "Assumed pending Q-006. Regenerate once the machine is known."
+    "note": "Michael's answer to Q-006 (Decisions 002 \u00a72)."
   },
   "parts": [
     {
-      "label": "D",
+      "part": "shell-base-G",
       "x": 12.0,
       "y": 12.0,
-      "hook_depth": 1.2,
-      "carrier_clearance": 0.2,
-      "role": "bed-control",
-      "note": "duplicate of M, far bed corner"
-    },
-    {
-      "label": "R",
-      "x": 38.0,
-      "y": 12.0,
-      "hook_depth": 0.9,
-      "carrier_clearance": 0.2,
+      "w": 62.0,
+      "h": 28.0,
+      "label": "G",
+      "interference": 0.25,
       "role": "variant",
       "note": ""
     },
     {
-      "label": "T",
-      "x": 64.0,
+      "part": "shell-base-Q",
+      "x": 78.0,
       "y": 12.0,
-      "hook_depth": 1.5,
-      "carrier_clearance": 0.2,
+      "w": 62.0,
+      "h": 28.0,
+      "label": "Q",
+      "interference": 0.45,
       "role": "variant",
-      "note": ""
+      "note": "expected to crack in PLA; comfortable in PETG"
     },
     {
-      "label": "K",
+      "part": "shell-base-A",
       "x": 12.0,
-      "y": 42.0,
-      "hook_depth": 0.6,
-      "carrier_clearance": 0.2,
+      "y": 44.0,
+      "w": 62.0,
+      "h": 28.0,
+      "label": "A",
+      "interference": 0.35,
       "role": "variant",
-      "note": "expected too shallow -- should not hold"
+      "note": "at PLA's permissible strain"
     },
     {
+      "part": "shell-base-N",
+      "x": 78.0,
+      "y": 44.0,
+      "w": 62.0,
+      "h": 28.0,
+      "label": "N",
+      "interference": 0.15,
+      "role": "variant",
+      "note": "expected too loose -- should rattle or fall open"
+    },
+    {
+      "part": "shell-lid-1",
+      "x": 12.0,
+      "y": 76.0,
+      "w": 62.0,
+      "h": 28.0
+    },
+    {
+      "part": "shell-lid-2",
+      "x": 78.0,
+      "y": 76.0,
+      "w": 62.0,
+      "h": 28.0
+    },
+    {
+      "part": "test-frame",
+      "x": 12.0,
+      "y": 108.0,
+      "w": 30.0,
+      "h": 26.0
+    },
+    {
+      "part": "carrier-W",
+      "x": 46.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.6,
       "label": "W",
-      "x": 38.0,
-      "y": 42.0,
       "hook_depth": 2.1,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": "expected too deep -- stiff, reluctant to release"
     },
     {
-      "label": "B",
+      "part": "carrier-B",
       "x": 64.0,
-      "y": 42.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.3,
+      "label": "B",
       "hook_depth": 1.8,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": ""
     },
     {
-      "label": "M",
-      "x": 12.0,
-      "y": 72.0,
+      "part": "carrier-R",
+      "x": 82.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "R",
+      "hook_depth": 0.9,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": ""
+    },
+    {
+      "part": "carrier-D",
+      "x": 100.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "D",
       "hook_depth": 1.2,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
+      "carrier_clearance": 0.2,
+      "role": "bed-control",
+      "note": "duplicate of M, far bed corner"
+    },
+    {
+      "part": "carrier-T",
+      "x": 118.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "T",
+      "hook_depth": 1.5,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": ""
+    },
+    {
+      "part": "carrier-K",
+      "x": 136.0,
+      "y": 108.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "K",
+      "hook_depth": 0.6,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
+      "carrier_clearance": 0.2,
+      "role": "variant",
+      "note": "expected too shallow -- should not hold"
+    },
+    {
+      "part": "carrier-M",
+      "x": 12.0,
+      "y": 138.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "M",
+      "hook_depth": 1.2,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
       "carrier_clearance": 0.2,
       "role": "variant",
       "note": "centre of the bracket"
     },
     {
+      "part": "carrier-H",
+      "x": 30.0,
+      "y": 138.0,
+      "w": 14.0,
+      "h": 11.0,
       "label": "H",
-      "x": 64.0,
-      "y": 72.0,
       "hook_depth": 1.2,
+      "beam_length": 8.0,
+      "beam_thickness": 1.6,
+      "root_fillet": 0.6,
       "carrier_clearance": 0.2,
       "role": "bed-control",
       "note": "duplicate of M, near bed corner"
     },
     {
-      "label": "X",
-      "x": 90.0,
-      "y": 12.0,
+      "part": "carrier-Z",
+      "x": 48.0,
+      "y": 138.0,
+      "w": 14.0,
+      "h": 11.0,
+      "label": "Z",
       "hook_depth": 1.2,
+      "beam_length": 13.0,
+      "beam_thickness": 1.0,
+      "root_fillet": 0.6,
       "carrier_clearance": 0.2,
-      "role": "orientation-probe",
-      "note": "same as M, printed on its side"
+      "role": "beam-probe",
+      "note": "same hook depth as the centre variant, much springier tongue"
+    },
+    {
+      "part": "hook-bar",
+      "x": 66.0,
+      "y": 138.0,
+      "w": 70.0,
+      "h": 5.0
     }
-  ],
-  "common_parts": [
-    "hook-bar",
-    "test-frame"
   ]
 }

@@ -57,6 +57,62 @@ The firmware side works. The chip has USB device capability and mass-storage sup
 
 ## Open
 
+### Q-008 — How big is a cartridge, and does it have to look like a cassette?
+
+**Needs:** your taste · **Blocks:** nothing — a working number is in use
+**Why you and not us:** this is the one shell decision that is genuinely aesthetic
+
+I have designed the clasp — the thing that holds the two halves of the cartridge together
+without a screw, that you asked for. It works. But I had to pick an outside size to draw it, and
+I picked **86 × 54 × 12 mm** for a reason that is defensible and not yours: 86 × 54 is a credit
+card, so it is a shape a child's hand already knows, and 12 mm is about a cassette's thickness.
+
+**The good news is that this is a free choice.** The maths that decides whether the plastic
+survives has no length term in it — it depends on the wall section and how far the lip bends,
+not on how big the box is. So changing the size moves how *hard* it is to open (bigger is
+harder) and changes nothing about whether it lasts. You can pick this on taste and I will not
+have to redo anything.
+
+Three things worth knowing before you pick:
+
+- **A real cassette is 100 × 64 × 12 mm.** If "it should feel like a cassette" matters more to
+  you than "it should fit a small hand", that is the number, and it costs nothing.
+- **Bigger is harder for a child to pull open**, slightly, because there is more lip to peel at
+  once. Not by enough to change the safety case.
+- **Smaller prints faster**, which matters while you are getting two library prints a month.
+
+**Default if you don't pick:** 86 × 54 × 12 mm. Nothing waits on this — the clasp is
+designed, the variants are on the plate, and the size can move afterwards.
+
+---
+
+### Q-007 — One more argument for the combo, from the shell design
+
+**Needs:** nothing from you — this is an addendum, not a question
+**Blocks:** nothing
+
+The PM's printer answer above already covers the nylon correction, and I have nothing to add
+to it. Two things came out of designing the clasp that bear on the same decision.
+
+**TPU turns out to be load-bearing, not a nice-to-have.** The clasp uses a thin rubbery lip
+round the inside of the seam. Its job is to soak up the variation between one print and the
+next — it is exactly what stops a clasp being tight in grey and loose in red, which is the
+caveat the PM flags above. Without it the design still works, but with much less room for the
+plastic to come out slightly different on a different day.
+
+**The library cannot print TPU and the A1 can.** So that part is on the critical path for the
+clasp's tolerance and today we simply cannot make it. That is a more concrete argument for the
+combo than "more materials would be nice".
+
+**And the one place nylon does still bite is the transport latch, not the shell.** The shell
+gets opened once or twice ever. The latch clicks every time somebody presses play, for years —
+that one genuinely is a fatigue part. If the button plate comes back saying the latch is
+marginal, we send **that one small part** to a print service in nylon and print everything else
+at home. Exactly the split the PM describes holding in reserve, and it is about the price of a
+takeaway.
+
+---
+
 ### M-04 — The printer decision, now with the facts
 
 **Needs:** your call and ~$450 · **Blocks:** nothing this week; the mechanism from about October
@@ -71,7 +127,7 @@ Everything above. **A1 combo, $449** in a March 2026 tracker — check current p
 
 **Needs:** nothing from you yet · **Blocks:** WP-04 and everything mechanical
 
-Unchanged and still on the Hardware Lead: re-export as a single merged `.stl` (the library takes STL only, so `plate-FIXED.3mf` is void), drop the on-its-side variant, put the bounding box, time estimate and *"any orientation is fine provided all the parts get the same one"* on the card. I've asked them to put the cartridge-shell variants on the same plate if they fit inside six hours — one library print is worth two.
+**Done as of 5 Sep — packet WP04-01 rev 4, and it is with you.** All five: merged `.stl`, the on-its-side variant dropped for a geometric one, and the card carries the plate size (150 × 149 mm), the time estimate (~1 h 40) and the orientation line. **The cartridge-shell variants are on the same plate** — together they are 1.6 h against the 6 h limit, so one print really is worth two. *(The PM's original text follows.)* Unchanged and still on the Hardware Lead: re-export as a single merged `.stl` (the library takes STL only, so `plate-FIXED.3mf` is void), drop the on-its-side variant, put the bounding box, time estimate and *"any orientation is fine provided all the parts get the same one"* on the card. I've asked them to put the cartridge-shell variants on the same plate if they fit inside six hours — one library print is worth two.
 
 ---
 

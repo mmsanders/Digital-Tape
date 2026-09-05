@@ -3,9 +3,9 @@ name: hardware
 on:
   push:
     branches: ["**"]
-    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "spec/hw/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
   pull_request:
-    paths: ["hardware/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "spec/hw/**", "tools/ci/audit-hardware.sh", ".github/workflows/hardware.yml"]
   workflow_dispatch:
 
 # For the Hardware Lead (PM Decisions 002-HW §2). Runs only when hardware/
@@ -31,3 +31,48 @@ jobs:
           name: kicad-reports
           path: build/hardware/
           if-no-files-found: ignore
+
+  packet:
+    name: print packet is printable
+    runs-on: ubuntu-latest
+    # Deliberately NOT the KiCad container: this gate is pure stdlib and should
+    # stay fast. It catches the two ways a packet can be broken on arrival --
+    # a 3MF no slicer will open, and geometry off the edge of the bed. Both
+    # shipped once. A packet that will not open is exactly as broken as a
+    # schematic that fails ERC, and only one of those was checked before.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plate opens and sits on the bed
+        run: make -C hardware packet-validate
+      - name: Media-atomicity judge, and proof it can go red
+        run: make -C hardware atomicity-test
+      - name: Clasp tables in spec/hw/cartridge-shell.md are not stale
+        run: make -C hardware mech-check
+      - name: spec/hw content and revision agree
+        run: make -C hardware spec-check
+
+  cad:
+    name: CAD rebuilds, and the geometry matches the analysis
+    runs-on: ubuntu-latest
+    # Split from `packet` because it needs CadQuery, which is a large install.
+    # Keeping it separate means the fast stdlib gates stay fast and a CadQuery
+    # packaging problem cannot hide a real packet failure behind it.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CadQuery
+        run: pip install --quiet cadquery
+      # The plate is a COMMITTED artefact -- Michael downloads it and cannot run
+      # `make`. That only works if it is reproducible from source, and until now
+      # nothing checked it: a hand-edited plate, or a source change nobody
+      # rebuilt, would both have gone unnoticed.
+      - name: Committed plate is what the source produces
+        run: make -C hardware packet-check
+      # cartridge-shell.md makes three claims that are geometric, not textual --
+      # the sweep is blind, the bead seats free when closed, and it still
+      # retains when withdrawn. --mutate proves the checks can go red, per
+      # CLAUDE.md section 1: adding a gate means adding its red case.
+      - name: Shell geometry realises the analysis, and can go red
+        run: make -C hardware shell-test
