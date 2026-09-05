@@ -27,14 +27,14 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-4** — 102 checks, PR #20. Reconciliation to DRAFT-6 plus sub-criteria 06a–06h is next. Commit path held by structural Rule 1 |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done** — 46 checks on Rule 3. Reset-B's commit held by structural Rule 1 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-6** — four-phase mount, both sides, degraded-B, stage oracle. 260 checks, sub-criteria 06a–06h exercised. PR #20. Commit path held by structural Rule 1 |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done against DRAFT-6** — 46 checks on Rule 3; `tapefs` §7 unchanged since DRAFT-4, re-read, no code follows. Reset-B's commit held by structural Rule 1 |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
 | WP-10 | Crash-injection harness | Verification | 2 | **Infrastructure landed and running in CI**; DRAFT-6 adds both durability modes and the counter boundaries to its scope |
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **Runner built and proven** (manifest, byte-exact, audible diff). Fixtures + manifest are theirs |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates rebuilt and green** — funnel, 8 KiB stack, two budgets |
+| WP-13 | Embedded-readiness audit | Agent | 1 | **Green, with numbers**: `tape_instance_size()` 156 456 B (76 % of 200 KiB), stack 1 536 / 8 192, `.rodata` 1 040 / 32 768. Funnel and allocator gates green |
 | WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.
