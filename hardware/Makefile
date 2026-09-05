@@ -7,10 +7,12 @@ PY      := python3
 CAD     := cad/transport
 THERMAL := thermal
 CHAR    := characterisation
+MECH    := mech
+SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test erc drc check clean tools
 
-all: packet-wp04 thermal
+all: packet-wp04 thermal mech
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
@@ -69,6 +71,32 @@ thermal-check:
 	$(PY) $(THERMAL)/budget.py --check
 	$(PY) $(THERMAL)/charger_ts.py --check
 	$(PY) $(THERMAL)/solenoid_timing.py --check
+
+## mech — regenerate every generated table in spec/hw/cartridge-shell.md
+mech:
+	$(PY) $(MECH)/clasp.py
+
+## mech-check — fail if the clasp tables are stale (CI gate)
+mech-check:
+	$(PY) $(MECH)/clasp.py --check
+
+## clasp — print the clasp analysis without touching the spec
+clasp:
+	$(PY) $(MECH)/clasp.py --report
+
+## shell-test — the shell geometry must realise the analysis, and prove it can fail
+##
+## cartridge-shell.md makes three claims that are geometric, not textual: the sweep
+## is blind (every base identical outside), the bead seats free when closed (which
+## is the whole creep argument), and it still retains when withdrawn. A document
+## cannot hold itself to those. The --mutate run makes the groove too shallow to
+## seat the bead -- a part that prints, assembles and feels right while holding the
+## wall deflected for years -- and asserts the checks catch it, per CLAUDE.md §1.
+shell-test:
+	@cd $(SHELL_CAD) && $(PY) test_shell.py >/dev/null \
+	  && echo "OK  shell geometry: 22 checks pass, incl. closed-assembly boolean"
+	@cd $(SHELL_CAD) && $(PY) test_shell.py --mutate >/dev/null \
+	  && echo "OK  shell geometry: proven able to go red"
 
 ## charger / solenoid — print the design analyses without touching the spec
 charger:
@@ -132,7 +160,7 @@ spec-bless:
 	@$(PY) spec_manifest.py --bless
 
 ## check — everything that can be checked today
-check: thermal-check
+check: thermal-check mech-check
 	@$(PY) -c "import cadquery" 2>/dev/null && echo "OK  cadquery present" \
 	  || { echo "FAIL cadquery missing: pip install cadquery"; exit 1; }
 	@$(PY) $(CAD)/build_packet.py >/dev/null && echo "OK  WP04-01 plate rebuilds and fits the bed"
@@ -140,6 +168,7 @@ check: thermal-check
 	@$(MAKE) --no-print-directory packet-validate
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
+	@$(MAKE) --no-print-directory shell-test
 	@$(MAKE) --no-print-directory atomicity-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
@@ -154,4 +183,4 @@ tools:
 	@echo "See hardware/README.md before installing it."
 
 clean:
-	rm -rf packets/wp04-01/stl packets/wp04-01/plate.stl packets/wp04-01/plate.3mf
+	rm -rf packets/wp04-01/stl packets/wp04-01/plate.stl packets/wp04-01/plate.3mf packets/wp04-01/tpu-lip.stl

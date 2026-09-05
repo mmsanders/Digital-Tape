@@ -7,9 +7,16 @@ an answer -- no arranging, no orientation choice, no support decision.
 
     make -C hardware packet-wp04
 
+**One plate, two experiments** (PM Decisions 006 §2 and §4). Michael gets two
+library prints a month, so the WP-04 latch sweep and the WP-24 cartridge-clasp
+sweep share a bed. They are independent: different parts, different letters,
+different questions, and neither ranking can contaminate the other. What they
+share is a trip.
+
 Outputs into hardware/packets/wp04-01/:
-    plate.3mf        every part positioned on one bed -- this is the file to print
-    plate.stl        same, for a slicer that will not take 3MF
+    plate.stl        THE library deliverable -- one merged solid, all parts
+    plate.3mf        our own preview; the library cannot open 3MF
+    tpu-lip.stl      the TPU variant. NOT on the plate -- the library is PLA-only
     stl/<part>.stl   individual parts, if something needs reprinting alone
     manifest.json    the blind mapping. NOT for the card -- see below
     plate-map.md     which letter sits where on the bed
@@ -35,7 +42,9 @@ import cadquery as cq
 from cadquery import exporters
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "cartridge"))
 import latch  # noqa: E402
+import shell  # noqa: E402
 
 # Shasta Public Libraries, Original Prusa i3 MK3: 250 x 210 x 210 mm build volume,
 # PLA only, .stl only, staff choose orientation, jobs over 6 h may be refused.
@@ -183,6 +192,14 @@ def parts_and_probe(seed: int = SEED):
     return variants, probe
 
 
+def shell_variants(seed: int = SEED + 1):
+    """The WP-24 clasp sweep. Shuffled with its own seed so the two experiments
+    on this plate cannot correlate through a shared shuffle."""
+    v = shell.packet_variants()
+    random.Random(seed).shuffle(v)
+    return v
+
+
 def build():
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "stl").mkdir(exist_ok=True)
@@ -203,6 +220,26 @@ def build():
     exporters.export(pr, str(OUT / "stl" / f"carrier-{probe.label}.stl"))
     items.append((f"carrier-{probe.label}", pr.val()))
     meta[f"carrier-{probe.label}"] = probe.dict()
+
+    # --- WP-24: the cartridge clasp sweep, sharing this plate ---------------
+    for sv in shell_variants():
+        part = shell.base(sv)
+        exporters.export(part, str(OUT / "stl" / f"shell-base-{sv.label}.stl"))
+        items.append((f"shell-base-{sv.label}", part.val()))
+        meta[f"shell-base-{sv.label}"] = sv.dict()
+
+    # Two lids, identical. They are the control: if the ranking tracks the lid
+    # rather than the base, the shared part is wearing and the sweep is
+    # measuring that instead of the interference.
+    for lid_label in ("1", "2"):
+        part = shell.lid(lid_label)
+        exporters.export(part, str(OUT / "stl" / f"shell-lid-{lid_label}.stl"))
+        items.append((f"shell-lid-{lid_label}", part.val()))
+
+    # The TPU lip cannot go on this plate: the library runs PLA only, and a
+    # merged STL carries one material for every part in it. It ships as its own
+    # file and waits for a machine that runs TPU.
+    exporters.export(shell.tpu_lip(), str(OUT / "tpu-lip.stl"))
 
     bar = latch.hook_bar()
     exporters.export(bar, str(OUT / "stl" / "hook-bar.stl"))
@@ -243,10 +280,17 @@ def build():
                      "w": round(w, 1), "h": round(h, 1), **meta.get(name, {})})
 
     manifest = {
-        "packet": "WP04-01", "work_package": "WP-04",
-        "built": date.today().isoformat(), "revision": 3,
-        "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1],
+        "packet": "WP04-01", "work_packages": ["WP-04", "WP-24"],
+        "built": date.today().isoformat(), "revision": 4,
+        "experiments": [
+            {"work_package": "WP-04", "parts": "carrier-*, hook-bar, test-frame",
+             "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1]},
+            {"work_package": "WP-24", "parts": "shell-base-*, shell-lid-*",
+             "swept_parameter": "interference (mm)",
+             "bracket_mm": [min(shell.SWEEP_INTERFERENCE), max(shell.SWEEP_INTERFERENCE)]},
+        ],
         "seed": SEED, "blind": True,
+        "not_on_plate": {"tpu-lip.stl": "TPU; the library runs PLA only"},
         "bed_assumed_mm": [BED_X, BED_Y],
         "plate_extent_mm": [round(pbb.xmax, 1), round(pbb.ymax, 1)],
         "minimum_bed_mm": [round(need_x), round(need_y)],
@@ -266,7 +310,10 @@ def build():
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
     lines = [
-        "# Plate map — packet WP04-01 (rev 3)", "",
+        "# Plate map — packet WP04-01 (rev 4)", "",
+        "**Two experiments, one plate.** `carrier-*`, `hook-bar` and `test-frame` are the",
+        "WP-04 latch sweep. `shell-base-*` and `shell-lid-*` are the WP-24 cartridge clasp",
+        "sweep. They share a bed and nothing else.", "",
         f"Fits a **{round(need_x)} × {round(need_y)} mm** bed. Laid out for "
         f"{BED_X:.0f} × {BED_Y:.0f} mm — a Prusa Mini or Bambu A1 mini.", "",
         "The letter is **not** related to hook depth; the mapping is in `manifest.json` and",
@@ -281,7 +328,7 @@ def build():
               "parts more than the swept parameter is, and the next sweep needs coarser steps."]
     (OUT / "plate-map.md").write_text("\n".join(lines) + "\n")
 
-    print(f"packet WP04-01 rev 3 -> {OUT}")
+    print(f"packet WP04-01 rev 4 -> {OUT}")
     print(f"  {len(placed)} objects, all inside the bed")
     print(f"  extent {pbb.xmax:.1f} x {pbb.ymax:.1f} mm; needs a bed of at least "
           f"{round(need_x)} x {round(need_y)} mm")

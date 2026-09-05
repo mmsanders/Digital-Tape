@@ -9,6 +9,62 @@ outcome, and logs it to `DECISIONS.md` if it was a call rather than a preference
 
 ## Open
 
+### Q-008 — How big is a cartridge, and does it have to look like a cassette?
+
+**Needs:** your taste · **Blocks:** nothing — a working number is in use
+**Why you and not us:** this is the one shell decision that is genuinely aesthetic
+
+I have designed the clasp — the thing that holds the two halves of the cartridge together
+without a screw, that you asked for. It works. But I had to pick an outside size to draw it, and
+I picked **86 × 54 × 12 mm** for a reason that is defensible and not yours: 86 × 54 is a credit
+card, so it is a shape a child's hand already knows, and 12 mm is about a cassette's thickness.
+
+**The good news is that this is a free choice.** The maths that decides whether the plastic
+survives has no length term in it — it depends on the wall section and how far the lip bends,
+not on how big the box is. So changing the size moves how *hard* it is to open (bigger is
+harder) and changes nothing about whether it lasts. You can pick this on taste and I will not
+have to redo anything.
+
+Three things worth knowing before you pick:
+
+- **A real cassette is 100 × 64 × 12 mm.** If "it should feel like a cassette" matters more to
+  you than "it should fit a small hand", that is the number, and it costs nothing.
+- **Bigger is harder for a child to pull open**, slightly, because there is more lip to peel at
+  once. Not by enough to change the safety case.
+- **Smaller prints faster**, which matters while you are getting two library prints a month.
+
+**Default if you don't pick:** 86 × 54 × 12 mm.
+
+---
+
+### Q-007 — A correction: a home printer will not give us nylon
+
+**Needs:** nothing from you — this is me telling you something I got wrong
+**Blocks:** nothing. It does not change the printer recommendation
+
+You were told (Decisions 005 §3) that buying a printer would let us print the latch in PETG
+*and* nylon. **PETG yes. Nylon no.** The A1 line runs PLA, PETG and TPU and explicitly does not
+do nylon — it needs a hotter bed and an enclosed chamber, and Bambu does not sell an enclosure
+for the A1.
+
+**It changes almost nothing, and here is why.** Nylon is good at one thing we thought we needed:
+surviving thousands of flexes. The PM's insight about the cartridge — *you will open it once or
+twice in its life, not weekly, because every cartridge after the first is copied by the device
+itself* — means the shell does not need that. It is designed for PETG throughout and PETG is
+comfortable.
+
+**Where it does still bite: the transport latch.** That one clicks every time somebody presses
+play, for years, so it genuinely is a fatigue part. If the plate says the latch is marginal, we
+send **that one small part** to a print service in nylon and print everything else at home.
+That is a normal split and it costs about the price of a takeaway.
+
+**One thing that is worth a pound of prevention:** TPU. The cartridge design uses a thin rubbery
+lip to soak up the variation between prints — it is what stops the clasp from being tight in
+one colour and loose in another. **The library cannot print it and the A1 can.** That is a more
+concrete argument for the combo than "more materials would be nice".
+
+---
+
 ### Q-004 — Your tape will remember where you were, but only in your own player
 
 **Needs:** your taste · **Blocks:** nothing — a default will ship

@@ -18,7 +18,7 @@ from pathlib import Path
 
 HW = Path(__file__).resolve().parents[1] / "spec" / "hw"
 MANIFEST = HW / "VERSION.md"
-TRACKED = ("board-rev-a.md", "thermal-budget.md")
+TRACKED = ("board-rev-a.md", "thermal-budget.md", "cartridge-shell.md")
 ROW = re.compile(r"^\| `(?P<f>[\w.-]+)` \| (?P<rev>[\d.]+) \| `(?P<sha>[0-9a-f]{64}|AUTO)` \|$",
                  re.M)
 

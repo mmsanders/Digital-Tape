@@ -1,7 +1,7 @@
 # Thermal and safety budget — WP-34
 
 **Owner:** Hardware Lead · **Status:** living document, versioned not frozen (PM Decisions 001 §3)
-**Revision:** 0.2, 2 Sep 2026 · **Applies to:** production board rev A
+**Revision:** 0.3, 5 Sep 2026 · **Applies to:** production board rev A
 
 > **STATUS: three IR-015 findings — charger 45 °C enforcement, solenoid sustained-power bound,
 > transient junction temperatures. Numbers in §T-1, §T-2, §T-4 are provisional.**
@@ -454,9 +454,30 @@ measurement.
 | 5 | microSD current measured alongside throughput | WP-05 characterisation |
 | 5a | ~~Codec operating range~~ — **confirmed −40 °C to +85 °C** from NXP's part page. Against §4's ~45 °C sustained worst case, ~40 K of margin | Closed |
 | 6 | Charger, secondary protection and solenoid part numbers confirmed orderable | **Blocked** — no distributor access, H-02 |
+| 7 | **WP-37's results are recorded to `hardware/measurements/TEMPLATE.md`** — see below | WP-37 |
+
+### What "done" means for WP-37 changed
+
+PM Decisions 006 §5, from Michael's answer to issue #8: the thermal limits are **witnessed by
+Michael and independently audited by the Verification Lead** — method and raw data, not
+physical presence. Two checks, and neither of them the person who built the thing.
+
+That is a constraint on *format*, not only on process, and it binds before the measurement
+rather than after. An auditor who was not in the room cannot see where a thermocouple sat,
+cannot tell a settled reading from a drifting one, and **cannot distinguish a 0.2 K margin from
+a 0.2 K instrument error** — which matters here more than anywhere else in this document,
+because §4's worst sustained case lands 0.2 K from the JEITA ceiling. A result reported without
+its uncertainty would make that margin unauditable and therefore worthless.
+
+So every `EST` in this document is replaced by a record in `hardware/measurements/`, carrying
+procedure, instrument and revision, conditions, raw readings, the derivation, **and the
+uncertainty**. The template's last two sections — uncertainty, and what would change this
+result — are the ones that make the audit possible and the ones most likely to be left thin.
 
 ## Revision history
 
 | Rev | Date | Change |
 |---|---|---|
+| 0.3 | 2026-09-05 | §9: WP-37's results are recorded to `hardware/measurements/TEMPLATE.md`, per PM Decisions 006 §5. No number in this document changed. |
+| 0.2 | 2026-09-03 | **Row added retrospectively at 0.3 — it was missing.** 0.2 carried the three IR-015 responses: the charger's 45 °C mechanism and its TS divider (§5.1–§5.3), the solenoid restated as an energy budget (§6, ADR-116), and per-device junction temperatures through the copy transient (§3). The banner and §8's proposed limits arrived with it. |
 | 0.1 | 2026-09-02 | First issue. Estimates only; no measurements exist yet. |

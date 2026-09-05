@@ -4,6 +4,195 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 9 — 5 Sep 2026, on PM Decisions 006
+
+### Michael can have the clasp, and your reframing is the reason
+
+**Accepted, and it is the load-bearing insight of the whole assessment.** A cartridge is opened
+one to three times in its life because every cartridge after the first is copied by the device.
+That converts a fatigue problem no printed material solves into an interference fit PETG does
+comfortably — and it is why the nylon correction in §1 costs this package nothing. **Nylon's
+advantage is fatigue life in a small flexure, and this flexure does not need any.**
+
+Deliverable: `spec/hw/cartridge-shell.md`, generated from `hardware/mech/clasp.py`. Answers to
+your five asks, and the two places I disagreed.
+
+### Where I disagree with you, both times about corners and about force
+
+**1. A continuous perimeter lip does not work on a rectangular box.** You are right about
+spreading the load and right that it gives the seam. It fails at the corners: a rectangle cannot
+open at a corner by bending, only by stretching, and stretching is effectively rigid. A lip
+running through the corners breaks rather than releases.
+
+The fix keeps both halves of what you wanted: **the seam is continuous and the engagement is
+not.** Tongue-and-groove runs the whole perimeter — that hides it and registers the halves —
+while the retaining interference lives only on the two long walls, stopping 9 mm short of each
+corner. Michael sees an unbroken line; the mechanism sees two compliant runs and four rigid
+corners doing alignment.
+
+**2. Retention force cannot separate a child from an adult, and I have not designed a number
+that pretends it can.** The joint takes ~124 N to pull apart. A determined seven-year-old with
+*something to grip* can reach 80 N. That is a factor of 1.5 and I will not present it as a
+safety margin.
+
+What actually separates them is that **there is nothing to grip**. The seam is flush, so the only
+force a child can bring is a pinch on a smooth 12 mm slab — about 20 N, a 6× margin. That turns
+your ask #4 into a rule rather than a number: **any feature giving a fingernail purchase on the
+parting line converts the 20 N case into the 80 N case and spends the entire margin.** It rules
+out the recessed thumb-notch every battery cover uses, and it is why the answer is a 0.9 mm blade
+slot rather than a recess.
+
+Your "two points of pressure at once" is a good instinct that does not survive the dimensions: a
+five-year-old's hand spans about 130 mm and the cartridge is 86 mm, so it is a motion a child
+*can* make. **A tool a child does not have in hand is a better filter than a motion a child
+cannot make.** The parent's low-force path is geometric, not muscular — a blade unzips one 14 mm
+span where a pull must deflect both full runs at once, about 10 : 1.
+
+### The strain number you asked for, and the better answer behind it
+
+**0.75 % peak while opening, 0.086 % at rest.** The second is the one that decides creep, and the
+answer to "does PETG creep at the deflection you chose" is that **the design does not hold the
+deflection**: the groove is deeper than the bead is proud, so the wall returns undeflected. The
+opening strain exists for about a second, once or twice in the cartridge's life.
+
+That is a geometric claim, not a textual one, so it is checked by a boolean rather than a
+paragraph — `test_shell.py` intersects the closed assembly and asserts zero volume, for every
+variant. The mutation run makes the groove too shallow to seat the bead and asserts the checks
+go red. **That failure mode prints, assembles, latches and feels correct while holding the wall
+deflected for years**, and nothing but a boolean catches it.
+
+### Your cycle target: accepted, and it is the criterion that cannot fail
+
+**20 cycles at ≤ 20 % force loss, unchanged.** I have no argument for moving it and ten times the
+realistic life is right for an object children handle.
+
+**But I would rather say plainly that it will pass than bank it as a gate.** Twenty one-second
+excursions to 0.75 % strain, spread over years, is not a fatigue duty in any thermoplastic. It
+costs Michael four minutes. So three more, and these can fail:
+
+- **S-2 — 90 days closed, at 23 °C and at 45 °C.** The cartridge spends ~100 % of its life
+  closed. This is where creep would show, and the 45 °C leg is a cartridge left in a car.
+- **S-3 — 1.0 m drop, six faces and four corners, card retained.** A 25 g cartridge arrives with
+  ~0.25 J; stopping in half a millimetre puts peak contact force in the hundreds of newtons,
+  **above the joint's own pull-apart force**. Not all of that separates the halves, but it is
+  close enough that the outcome is not predictable from the static numbers — and a cartridge
+  that springs open on impact is the choking hazard ADR-105 exists to prevent, arriving by a
+  route no cycle count looks down.
+- **S-4 — a 30 N pinch held 10 s does not open it.** The safety-critical one, and deliberately
+  falsifiable. 30 N was chosen partly because a $10 luggage scale reads it, which is what makes
+  the raw data auditable under §5.
+
+**One finding that goes with S-2 and belongs in whatever the family is told:** PETG's heat
+deflection is around 70 °C and a closed car in summer reaches it. **A cartridge left on a
+dashboard may deform**, and a deformed cartridge is one whose clasp no longer holds. Not a
+reason to change material — every printable option we can run has it — but it needs a line in
+WP-25 and a sentence to Michael.
+
+### TPU is doing a job, not an experiment
+
+You offered it as worth one experiment. It is worth more, and the reason is a split of duties:
+the PETG bead gives **retention**, a hard stop at a defined interference; the TPU lip gives
+**preload**, ~22 N round the perimeter soaking up the ±0.15 mm of print variation. Two jobs, two
+materials, and the tolerance lands on the one with 400 % elongation to spend. **That is what
+makes the clasp survive the colour change §1 warns about.**
+
+The shape is the whole trick and the obvious version fails: a 1 mm TPU gasket squashed 0.2 mm
+over this perimeter develops several hundred newtons and would hold the shell open. The same
+rubber as a **thin lip in bending** develops 22 N. Same material, same displacement, two orders
+of magnitude apart.
+
+**And it cannot be printed at the library** — PLA only, and a merged STL carries one material
+for every part in it. `tpu-lip.stl` ships beside the plate and waits. That is a more concrete
+argument for the A1 combo than "more materials would be nice": **this part is on the critical
+path for the clasp's tolerance and today we cannot make it.**
+
+### One plate, two experiments — and it was nearly free
+
+Per §4. WP04-01 rev 4 carries the latch sweep and the clasp sweep: **1.6 h against the 6 h limit,
+150 × 149 mm against a conservative 180 × 180 bed.** Different letters, different seeds, nothing
+shared but the bed. Two lids act as a control in WP-04's sense — if the ranking tracks the lid
+rather than the base, the shared part is wearing and the sweep is measuring that.
+
+**One line on the card had to change, and I am flagging it rather than doing it quietly.**
+Decisions 005 §2 fixed the staff line as *"any orientation is acceptable, provided all parts are
+printed in the same one."* That is still first and still the one protecting the experiment. But
+the plate now carries open box-shaped parts, and **an inverted tray prints badly**, so a second
+line says the plate is laid out flat and that the boxes need supports if turned. It completes
+your line rather than replacing it — say so if you read it differently.
+
+### The sealed cartridge: agreed against, and my number is 6 weeks ± 2
+
+Your trigger for reconsidering — *"if a printed clasp cannot hold a card safely at a size a child
+can hold"* — is not met.
+
+I would add a fourth reason to your three. **Sealing does not remove the shell problem, it
+relocates it.** A sealed cartridge still needs a seam, a parting line, retention to hold itself
+together during assembly, and a drop case. Everything in §2–§6 is still required. What sealing
+removes is one 0.9 mm slot; what it costs is the ability to replace a dead card. Bad trade.
+
+**6 weeks ± 2**, broken down in `cartridge-shell.md` §10. **The ± 2 is almost entirely the host,
+not the USB stack** — TAPEFS sits in partition 2 with a type byte no desktop recognises, Windows
+volunteers to repair unrecognised volumes, and the person clicking *Yes* is a parent trying to
+help. Enumeration is the easy part.
+
+**Treat that number as an outside estimate and have the Software Lead correct it.** Firmware is
+not my stream and I am sizing someone else's work, which is exactly the kind of number that
+should be checked rather than inherited.
+
+### §5, and what "auditable by someone not in the room" actually costs
+
+Recorded as ADR-118 with a format in `hardware/measurements/TEMPLATE.md`. The part worth naming:
+**it binds before the measurement, not after.** An auditor who was not present cannot tell a
+settled reading from a drifting one — and `thermal-budget.md` §4's worst sustained case lands
+**0.2 K from the JEITA ceiling**, so a result reported without its uncertainty makes that margin
+unauditable. Nobody can tell a 0.2 K margin from a 0.2 K instrument error. The two template
+sections most likely to be left thin, uncertainty and what-would-change-this, are the two the
+audit actually needs.
+
+### Three things I found in my own work this round
+
+**The bases were four different heights.** A deeper bead has a taller lead-in ramp, and the first
+draft let it push the wall up: 8.4, 8.4, 8.6, 8.8 mm. In a **blind** sweep that is not cosmetic —
+the deepest variant was visibly the tallest. Every shared dimension is now derived from the
+worst-case variant and `test_shell.py` asserts the bases are bbox-identical.
+
+**I had the ramp-angle convention backwards in prose.** I wrote "degrees from the seam plane";
+virtual work says the angle in that formula is from the *pull axis*, and the two readings invert
+every force in the file. The numbers were right and the naming was wrong — which is worse than
+it sounds, because the wrong name would have propagated into the CAD. There is now an assertion
+that the factor increases with angle and that a face past `atan(1/µ)` is unopenable. It also gave
+a better fact than the one I had written: **self-locking starts at 70.7°, not 90°.**
+
+**The tempting simplification would have invalidated the analysis silently.** The lid's tongue
+fouls the un-thinned corner walls; the obvious fix is to thin the whole rim. That moves the
+flexing span from 6.0 mm to 3.2 mm, and strain goes as its square — **0.75 % becomes 2.6 %**,
+past PETG's permissible and far past PLA's. It would have printed, assembled and felt right. The
+tongue has ears instead, and `test_shell.py` probes the wall section from the floor to the bead.
+
+**The pattern is the same one as rounds 5–8 and I want it on the record again:** none of these
+was an error in the engineering. All three were errors in what a check or a name was *asking*.
+
+### Two defects in already-shipped documents
+
+Found while working, not by review. **`CARD.md`'s headline still said "Print `plate.3mf`"** while
+its own table said `plate.stl` — the rev-3 change updated the table and missed the first line, so
+the one instruction Michael reads first was the wrong one. **`WP-04.md` had a duplicated heading
+and a live paragraph describing the on-its-side variant** deleted two revisions earlier. Both
+fixed. The second is the argument for `spec/hw/VERSION.md` in miniature: it survived two
+revisions of a document I wrote myself.
+
+### Still open, unchanged
+
+The **three IR-015 findings** and the fabrication gate — no board fabricated, no cell charged,
+until all three are accepted, and **I do not get to mark my own responses accepted**. **Order 1a**
+still with Michael; 1c stays cancelled. Media atomicity is more load-bearing under §8.1's two
+durability modes and the tooling is ready for the cards.
+
+New and small: **`thermal-budget.md` had no revision-history row for 0.2.** Reconstructed at 0.3
+and marked as reconstructed.
+
+---
+
 ## Round 8 — 4 Sep 2026, on PM Decisions 005
 
 ### The library rules changed WP-04's design, and one change is an improvement

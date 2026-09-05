@@ -16,7 +16,7 @@ Charter §04.
 | WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
 | WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-3 landed 2 Sep |
 | WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-3 landed 2 Sep |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 built** — Q-006 answered, ready to send |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 4 built and sendable** — nothing blocking |
 | WP-05 | Parts order #1 | You | hardware | **Carts drafted** — every order goes to Michael (Decisions 002 §4) |
 | WP-34 | Thermal and safety budget | Hardware | hardware | **Rev 0.2** — estimates; three review findings closing |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
@@ -65,7 +65,7 @@ Charter §04.
 |---|---|---|---|---|
 | WP-22 | Transport mechanism, production design | You | hardware | Blocked on WP-04 |
 | WP-23 | Enclosure CAD | Either | hardware | Not started |
-| WP-24 | Cartridge shell and carrier PCB | Either | hardware | Not started — captive card per issue #6 |
+| WP-24 | Cartridge shell and carrier PCB | Either | hardware | **In flight** — clasp assessment delivered (ADR-117); variants share the WP04-01 plate |
 | WP-25 | Abuse testing | You | hardware | Blocked |
 
 **Milestone:** a Teensy-based unit in a finished printed case. A reasonable place to stop.
@@ -75,11 +75,11 @@ Charter §04.
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-26 | Schematic capture and review | Agent | hardware | Not started — codec question first |
-| WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not started |
+| WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not started — results format now fixed by ADR-118 |
 | WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked |
 | WP-29 | Bring-up and rev B | Either | 5 | Blocked |
 | WP-30 | Power budget and runtime validation | Either | 5 | Blocked |
-| WP-37 | Thermal validation and abuse | Either | 5 | Blocked |
+| WP-37 | Thermal validation and abuse | Either | 5 | Blocked — results format now fixed by ADR-118 |
 
 ## Phase 6 — family rollout · 3 weeks
 
