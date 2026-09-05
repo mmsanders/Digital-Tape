@@ -80,7 +80,7 @@ int main(void)
         CHECK_EQ_U32(info.nominal_length_s, med_max_label_s(CHUNKS));
         CHECK(!info.writable);                            /* read-only device */
         CHECK(!info.needs_repair);
-        CHECK_EQ_U32((uint32_t)tape_tell(t), 0u);
+        { uint64_t pos = 0xDEADu; CHECK_EQ_INT(tape_tell(t, &pos), TAPE_OK); CHECK_EQ_U32((uint32_t)pos, 0u); }
         /* Side A refuses writes at the API boundary even on a writable device. */
         CHECK_EQ_INT(tape_unmount(t, NULL), TAPE_OK);
         CHECK_EQ_INT(tape_unmount(t, NULL), TAPE_ERR_NOT_MOUNTED);
@@ -111,22 +111,29 @@ int main(void)
     /* both valid, different generation -> the higher wins */
     build_valid();
     med_sb(MED.mirror, CHUNKS, CHUNKS, BLOCKS, 7u, TAPE_STATE_VALID);
-    /* A distinguishing label, kept honest: 5 s needs 2 chunks and the store has
-       4. The first version of this test used a C-90 label as the marker and the
-       new label-coverage check correctly refused it — the marker was itself
-       invalid media. */
-    wr32(MED.mirror + 48, 5u);
+    /*
+     * The marker has to be a field that is NOT load-bearing, and finding one
+     * took three attempts. A C-90 label failed DRAFT-4's label-coverage check.
+     * A 5 s label then failed DRAFT-6's stricter rule, which requires the stored
+     * total_chunks to EQUAL what nominal_length_s derives — 5 s derives 2
+     * chunks against a 4-chunk store. Both times the marker was itself invalid
+     * media and the engine was right to refuse it.
+     *
+     * `label` at offset 88 is advisory by definition (§4) and reaches
+     * tape_info, so it distinguishes the two copies without changing geometry.
+     */
+    memcpy(MED.mirror + 88, "GENERATION SEVEN", 16);
     med_fix_sb_crc(MED.mirror);
     {
         tape *t = NULL; tape_info info;
         CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
         CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
-        CHECK_EQ_U32(info.nominal_length_s, 5u);      /* generation 7 chosen */
+        CHECK_EQ_INT(memcmp(info.label, "GENERATION SEVEN", 16), 0);  /* gen 7 won */
     }
 
     /* both valid, equal generation, differing bytes -> INCONSISTENT */
     build_valid();
-    wr32(MED.mirror + 48, 5u);
+    memcpy(MED.mirror + 88, "GENERATION SEVEN", 16);
     med_fix_sb_crc(MED.mirror);
     CHECK_EQ_INT(mount_a(), TAPE_ERR_INCONSISTENT);
 
@@ -297,7 +304,7 @@ int main(void)
         CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
                                REC, sizeof REC, &t), TAPE_OK);
         CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 999999u, NULL), TAPE_OK);
-        CHECK_EQ_U32((uint32_t)tape_tell(t), 1000u);
+        { uint64_t pos = 0; CHECK_EQ_INT(tape_tell(t, &pos), TAPE_OK); CHECK_EQ_U32((uint32_t)pos, 1000u); }
     }
 
     /* ---- tape_init argument checks ---- */
@@ -313,7 +320,7 @@ int main(void)
                                REC, sizeof REC, &t), TAPE_ERR_INVALID_ARG);
     }
 
-    /* ================= DRAFT-4 =================================== */
+    /* ================= reconciled at DRAFT-4 ===================== */
 
     /* --- V3-001: the 64-bit run extent. The spec's own repro values. --- */
     {
@@ -342,9 +349,22 @@ int main(void)
         CHECK_EQ_INT(mount_a(), TAPE_OK);
     }
 
-    /* --- the store must cover the label (§2) --- */
+    /* --- the store must EQUAL what the label derives (§2.1, DRAFT-6) ---
+           DRAFT-4 asked only that the store COVER the label. Equality closes the
+           gap where two cartridges both read "C-60" with different capacities
+           and nothing says which is right. Both directions are refused. */
     build_valid();
-    wr32(MED.head[0] + 48, med_max_label_s(CHUNKS) + 1u);   /* one second too long */
+    wr32(MED.head[0] + 48, med_max_label_s(CHUNKS) + 1u);   /* label too long */
+    med_fix_sb_crc(MED.head[0]);
+    memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+    CHECK_EQ_INT(mount_a(), TAPE_ERR_GEOMETRY);
+
+    /* A label SHORT enough to derive fewer chunks than the store holds is now
+       refused too — that is the half DRAFT-4 accepted. 8 s derives 3 chunks
+       against a 4-chunk store. (9, 10 and 11 s all derive 4 and still mount:
+       the rule is about the derived count, not the second count.) */
+    build_valid();
+    wr32(MED.head[0] + 48, 8u);
     med_fix_sb_crc(MED.head[0]);
     memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
     CHECK_EQ_INT(mount_a(), TAPE_ERR_GEOMETRY);
@@ -470,7 +490,8 @@ int main(void)
 
         build_valid();
         med_bind(&MED, &dev);
-        w.data = ring; w.valid_frames = 128u; w.start_frame = 0u;
+        w.data = ring; w.data_bytes = (uint32_t)sizeof ring;
+        w.valid_frames = 128u; w.start_frame = 0u;
         w.side = TAPE_SIDE_A;
         memset(w.uuid, 0xAB, 16);                      /* matches the fixture */
 
@@ -501,6 +522,542 @@ int main(void)
 
         /* no descriptor at all is fine */
         CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+    }
+
+    /* ================= reconciled at DRAFT-6 ===================== */
+    /*
+     * Eight sub-criteria, acceptance.md WP-06a..WP-06h. Where one needs a call
+     * that structural Rule 1 holds off this branch — tape_arm above all — the
+     * mount half is exercised and the gap is named rather than skipped quietly.
+     */
+
+    /* --- WP-06a: effective writability on v1.1 media (V4-001) --------------
+     * The blocker. §4.1 phase 2 declared a version_minor > 0 cartridge
+     * read-only, and every write authorisation in the API was defined solely by
+     * dev.write != NULL. On a WRITABLE device the matrix therefore still
+     * permitted reset_b, promote, respool and arm against v1.1 media — a v1
+     * engine committing v1 structures onto media whose newer semantics it does
+     * not understand. The barrier was written in one document and enforced in
+     * neither.
+     */
+    {
+        tape_dev dev; tape *t = NULL; tape_info info;
+        build_valid();
+        MED.writable = 1;                       /* a device that CAN write */
+        med_sb_minor(MED.head[0], 1u);          /* ...and media it may not */
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        memset(MED.mirror, 0, TAPE_BLOCK_SIZE); /* one torn copy: repair is due */
+        MED.writes = 0u; MED.flushes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32(info.version_minor, 1u);   /* why writable is false */
+        CHECK(!info.writable);                  /* effective_writable, §4.3 */
+        /* Repair is SKIPPED, not refused: TAPE_OK with needs_repair true. */
+        CHECK(info.needs_repair);
+        CHECK_EQ_U32(MED.writes, 0u);           /* invariant 23 */
+        CHECK_EQ_U32(MED.flushes, 0u);
+    }
+
+    /* The converse, so the predicate is a conjunction and not a rename of one
+       term: v1.0 on the same writable device IS effectively writable, and does
+       repair. */
+    {
+        tape_dev dev; tape *t = NULL; tape_info info;
+        build_valid();
+        MED.writable = 1;
+        memset(MED.mirror, 0, TAPE_BLOCK_SIZE);
+        MED.writes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(info.writable);
+        CHECK_EQ_U32(info.version_minor, 0u);
+        CHECK_EQ_U32(MED.writes, 1u);
+        CHECK(!info.needs_repair);
+    }
+
+    /* --- WP-06b: undefined field values (V4-012) ---------------------------
+     * A CRC-correct superblock with state = 2 previously passed admission — the
+     * only test was `state == WRITE_IN_PROGRESS` — so damaged or future values
+     * FAILED OPEN and the cartridge mounted read-write with its transaction
+     * state unknown. Both copies identical, so this is admission and not
+     * selection.
+     */
+    {
+        tape_dev dev; tape *t = NULL;
+        build_valid();
+        MED.writable = 1;
+        med_sb_state(MED.head[0], 2u);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        MED.writes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_UNSUPPORTED_STATE);
+        CHECK_EQ_U32(MED.writes, 0u);
+        CHECK_EQ_U32(MED.flushes, 0u);
+
+        /* Same for promote_stage. */
+        build_valid();
+        MED.writable = 1;
+        med_sb_stage(MED.head[0], 2u, 0u);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        MED.writes = 0u;
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_UNSUPPORTED_STATE);
+        CHECK_EQ_U32(MED.writes, 0u);
+
+        /* 0 and 1 remain the only accepted values, for both fields. Note that
+           state = 1 is INCOMPLETE, not UNSUPPORTED_STATE: it is defined, and
+           the difference is the whole point of the new code. */
+        build_valid();
+        med_sb_state(MED.head[0], TAPE_STATE_VALID);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        CHECK_EQ_INT(mount_a(), TAPE_OK);
+        build_valid();
+        med_sb_state(MED.head[0], TAPE_STATE_WRITE_IN_PROGRESS);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        CHECK_EQ_INT(mount_a(), TAPE_ERR_INCOMPLETE);
+    }
+
+    /* --- WP-06c: the disjointness check reads NO chunk ---------------------
+     * The overlap cases themselves are above. What is new is the cost claim:
+     * §5.1 says the rule is checkable from index metadata alone, and mount is on
+     * the wake-to-audio path (guardrail 04), so "no chunk is read" is a budget
+     * commitment and not a stylistic note.
+     */
+    {
+        static const ent split[2] = { { 0u, 0u,    1000u },
+                                      { 0u, 1000u, 1000u } };
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, split, 2u);
+        MED.chunk_reads = 0u;
+        CHECK_EQ_INT(mount_a(), TAPE_OK);
+        CHECK_EQ_U32(MED.chunk_reads, 0u);
+    }
+    /* and a Side B index referencing chunks Side A also references is ACCEPTED
+       — required by Rule 3, not merely tolerated; the rule is per index. */
+    {
+        static const ent shared[1] = { { 0u, 0u, 1000u } };
+        tape *t = NULL;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 3u, shared, 1u);   /* same chunk as A */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+    }
+
+    /* --- WP-06d: the fixture builder's own label invariant ------------------
+     * Asserted rather than commented, because if med_max_label_s ever stops
+     * satisfying the equality rule then every fixture in this file starts
+     * failing with TAPE_ERR_GEOMETRY and the cause is the harness, not the
+     * engine. A test suite should say which of the two it is.
+     */
+    CHECK(med_check_label(CHUNKS));
+
+    /* --- WP-06f: both-side mount and degraded-B (§4.2, §4.4, V5-004) -------
+     * The dangerous reading DRAFT-5 permitted was "silently treat B as empty" —
+     * and promote of an empty B ERASES SIDE A.
+     */
+    {
+        tape *t = NULL; tape_info info;
+
+        /* Side A unselectable fails the mount whichever side was requested. */
+        build_valid();
+        med_invalidate(&MED, TAPE_LBA_INDEX_A0);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, NULL), TAPE_ERR_NO_VALID_INDEX);
+        build_valid();
+        med_invalidate(&MED, TAPE_LBA_INDEX_A0);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, NULL), TAPE_ERR_NO_VALID_INDEX);
+
+        /* Side B unselectable: a Side-B REQUEST is refused... */
+        build_valid();
+        med_invalidate(&MED, TAPE_LBA_INDEX_B0);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, NULL), TAPE_ERR_NO_VALID_INDEX);
+
+        /* ...and a Side-A request mounts DEGRADED-B, with free_next pinned to
+           a_high_water because there is no live B index to derive it from. */
+        build_valid();
+        med_invalidate(&MED, TAPE_LBA_INDEX_B0);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.side_b_valid);
+        /* a_high_water == CHUNKS here, so nothing is free above the mark. */
+        CHECK_EQ_U32(info.free_chunks, 0u);
+
+        /* set_side(B) is refused while degraded; set_side(A) is allowed. */
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_B), TAPE_ERR_NO_VALID_INDEX);
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_A), TAPE_OK);
+    }
+
+    /* A Side-A mount of a cartridge with a RECORDED Side B derives free_next
+       from SIDE B's live index. The failure mode this guards is a respool or
+       promote issued from that Side-A mount allocating straight over Side B's
+       live chunks (invariant 10). */
+    {
+        static const ent a1[1] = { { 0u, 0u, 1000u } };
+        static const ent b1[1] = { { 1u, 0u, TAPE_CHUNK_FRAMES + 1u } };  /* ends chunk 2 */
+        tape *t = NULL; tape_info info;
+        build_valid();
+        wr32(MED.head[0] + 56, 1u);                 /* a_high_water = 1 */
+        med_fix_sb_crc(MED.head[0]);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, a1, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 3u, b1, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);   /* side A mounted */
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(info.side_b_valid);
+        /* free_next is 3, from B — not 1, from a_high_water. 4 - 3 = 1 free. */
+        CHECK_EQ_U32(info.free_chunks, 1u);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 1000u);      /* A's timeline */
+    }
+
+    /* --- both sides selected, and neither clobbers the other ---------------
+     * Phase 3 selects Side A and then Side B into two buffers, and slot 1 is
+     * parsed over slot 0's result in the SAME buffer. The tempting alternative
+     * — parse slot 1 into the other side's buffer, which really is free during
+     * Side A's selection — silently destroys Side A's already-selected index
+     * during Side B's, because by then it is not free at all.
+     *
+     * Nothing else in this file catches that: §5.3's resting state after every
+     * commit is exactly one valid slot, so every other fixture leaves the
+     * partner invalid and the second parse never happens. This one gives BOTH
+     * Side B slots valid content and then asks what Side A's timeline is.
+     */
+    {
+        static const ent a1[1]   = { { 0u, 0u, 1000u } };
+        static const ent b_old[1]= { { 1u, 0u,  100u } };
+        static const ent b_new[1]= { { 2u, 0u,  200u } };
+        tape *t = NULL; tape_info info;
+
+        build_valid();
+        wr32(MED.head[0] + 56, 1u);                 /* a_high_water = 1 */
+        med_fix_sb_crc(MED.head[0]);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, a1, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 3u, b_old, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B1, 1u, 9u, b_new, 1u);   /* both valid */
+
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 1000u);   /* SIDE A, intact */
+        CHECK_EQ_U32(info.entry_count, 1u);
+        /* B's higher sequence won, and free_next comes from it: chunk 2 is B's
+           last, so free_next is 3 and one chunk of four is free. */
+        CHECK(info.side_b_valid);
+        CHECK_EQ_U32(info.free_chunks, 1u);
+
+        /* And the same the other way round: mount B, Side A must still be
+           selectable and correct on a switch. */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 200u);    /* B, higher sequence */
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_A), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 1000u);
+    }
+
+    /* The slot-0-wins path, which is the one that costs a reload. Both slots
+       valid, slot 0 higher: the engine must end up holding slot 0's entries and
+       not slot 1's, which is only true if the reload actually happened. */
+    {
+        static const ent hi[1] = { { 0u, 0u, 700u } };
+        static const ent lo[1] = { { 0u, 0u, 300u } };
+        tape *t = NULL; tape_info info;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 9u, hi, 1u);   /* slot 0, higher */
+        med_index(&MED, TAPE_LBA_INDEX_A1, 0u, 5u, lo, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 700u);
+    }
+
+    /* --- WP-06g: a failing mount writes NOTHING, and the stage oracle -------
+     * (V5-003.) Invariant 25 and WP-10 both required a mount to reject stage-1
+     * media matching no resume row, and the mount algorithm never performed the
+     * check — only a later tape_promote did. Worse: §8's stage clearing would
+     * have ERASED THE EVIDENCE, because an ordinary tape_arm clears
+     * promote_stage before anything reported the fault.
+     *
+     * All of these run on a WRITABLE device with one torn superblock copy, so
+     * repair is due and would happen if phase 4 ran before phase 3. Every one
+     * asserts zero writes. That is the assertion DRAFT-5 could not satisfy.
+     */
+    {
+        tape_dev dev; tape *t = NULL;
+        /* N = 1000 frames -> len = 1 chunk. */
+        static const ent at0[1] = { { 0u, 0u, 1000u } };
+        static const ent at1[1] = { { 1u, 0u, 1000u } };
+        static const ent at2[1] = { { 2u, 0u, 1000u } };
+        static const ent at1_big[1] = { { 1u, 0u, 2000u } };
+        static const ent two[2] = { { 0u, 0u, 1000u }, { 2u, 0u, 1000u } };
+        unsigned k;
+
+        /* stage_media: a_high_water = H, promote_stage = 1, staging chunk = S,
+           Side A from `ea`, Side B from `eb`. */
+#define STAGE_MEDIA(H, S, ea, na, eb, nb)                                      \
+        do {                                                                   \
+            build_valid();                                                     \
+            MED.writable = 1;                                                  \
+            wr32(MED.head[0] + 56, (H));                                       \
+            med_sb_stage(MED.head[0], TAPE_PROMOTE_STAGE_PHASE1, (S));         \
+            memset(MED.mirror, 0, TAPE_BLOCK_SIZE);   /* torn: repair is due */\
+            med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, (ea), (na));            \
+            med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 2u, (eb), (nb));            \
+            MED.writes = 0u; MED.flushes = 0u;                                 \
+            med_bind(&MED, &dev);                                              \
+            CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY, \
+                                   REC, sizeof REC, &t), TAPE_OK);             \
+        } while (0)
+
+        /* Row 1 — phase 1 landed, phase 2 not committed. A = {S,0,N}, B == A. */
+        STAGE_MEDIA(2u, 1u, at1, 1u, at1, 1u);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+
+        /* Row 2 — phase 2 committed A only. A = {0,0,N}, B = {S,0,N}, S > 0. */
+        STAGE_MEDIA(2u, 1u, at0, 1u, at1, 1u);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+
+        /* Row 3 — phase 2 committed both. A = {0,0,N}, B == A, S > 0, H > len. */
+        STAGE_MEDIA(2u, 1u, at0, 1u, at0, 1u);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+
+        /*
+         * The S == 0 partition case, called out by §9.3.3 by name. It is the
+         * ORDINARY FIRST-USE PATH: format leaves a_high_water = 0, the first
+         * Side B recording allocates from free_next = 0 giving {0,0,N}, and
+         * adopt-in-place makes S = 0. Without the `S > 0` guards on rows 2 and
+         * 3 this matched more than one row, falsifying invariant 25.
+         *
+         * It must mount, and it must mount by row 1 alone.
+         */
+        STAGE_MEDIA(2u, 0u, at0, 1u, at0, 1u);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+
+        /* Four crafted cases that match NO row. Each must return
+           TAPE_ERR_INCONSISTENT having written nothing at all. */
+        {
+            /* (a) A at a chunk that is neither S nor 0. */
+            STAGE_MEDIA(3u, 1u, at2, 1u, at2, 1u);
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_INCONSISTENT);
+            CHECK_EQ_U32(MED.writes, 0u); CHECK_EQ_U32(MED.flushes, 0u);
+
+            /* (b) Row 2's shape but N differs between the sides. */
+            STAGE_MEDIA(2u, 1u, at0, 1u, at1_big, 1u);
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_INCONSISTENT);
+            CHECK_EQ_U32(MED.writes, 0u);
+
+            /* (c) Row 3's shape but H == len, so the H > len guard bites. */
+            STAGE_MEDIA(1u, 1u, at0, 1u, at0, 1u);
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_INCONSISTENT);
+            CHECK_EQ_U32(MED.writes, 0u);
+
+            /* (d) Side A with two entries — no row admits a multi-entry A. */
+            STAGE_MEDIA(3u, 1u, two, 2u, two, 2u);
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_ERR_INCONSISTENT);
+            CHECK_EQ_U32(MED.writes, 0u);
+        }
+
+        /*
+         * A cartridge that is BOTH stage-1 and degraded-B must MOUNT. DRAFT-6's
+         * own first cut ran the oracle before the degraded-B branch, and since
+         * every row constrains a live Side B index, this returned
+         * TAPE_ERR_INCONSISTENT — permanently unmountable, with the whole of
+         * Side A's music unreachable forever on a cartridge whose Side A was
+         * intact. tape_reset_side_b is the only recovery and it needs a
+         * successful mount.
+         */
+        STAGE_MEDIA(3u, 1u, at2, 1u, at2, 1u);   /* a shape matching NO row */
+        med_invalidate(&MED, TAPE_LBA_INDEX_B0); /* ...and no live B at all */
+        MED.writes = 0u;
+        {
+            tape_info info;
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+            CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+            CHECK(!info.side_b_valid);
+        }
+
+        /*
+         * The general assertion behind all of the above (invariant 26): across
+         * every refusal, on a writable device with a repair pending, mount
+         * writes nothing. Phase 4 is the only phase that writes and it runs
+         * after phases 2 AND 3.
+         */
+        for (k = 0; k < 6u; k++) {
+            tape_result want = TAPE_OK;
+            build_valid();
+            MED.writable = 1;
+            switch (k) {
+            case 0: wr16(MED.head[0] + 8, 2u); med_fix_sb_crc(MED.head[0]);
+                    want = TAPE_ERR_VERSION; break;
+            case 1: med_sb_state(MED.head[0], 2u);
+                    want = TAPE_ERR_UNSUPPORTED_STATE; break;
+            case 2: med_sb_state(MED.head[0], TAPE_STATE_WRITE_IN_PROGRESS);
+                    want = TAPE_ERR_INCOMPLETE; break;
+            case 3: wr32(MED.head[0] + 52, 0u); med_fix_sb_crc(MED.head[0]);
+                    want = TAPE_ERR_GEOMETRY; break;
+            case 4: med_invalidate(&MED, TAPE_LBA_INDEX_A0);
+                    want = TAPE_ERR_NO_VALID_INDEX; break;
+            default: {
+                    static const ent one[1] = { { 0u, 0u, 100u } };
+                    med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 5u, one, 1u);
+                    med_index(&MED, TAPE_LBA_INDEX_A1, 0u, 5u, one, 1u);
+                    want = TAPE_ERR_INCONSISTENT; break;
+                }
+            }
+            /* Tear the mirror in every case, so repair is genuinely pending. */
+            memset(MED.mirror, 0, TAPE_BLOCK_SIZE);
+            MED.writes = 0u; MED.flushes = 0u;
+            med_bind(&MED, &dev);
+            CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                                   REC, sizeof REC, &t), TAPE_OK);
+            CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), want);
+            CHECK_EQ_U32(MED.writes, 0u);
+            CHECK_EQ_U32(MED.flushes, 0u);
+        }
+#undef STAGE_MEDIA
+    }
+
+    /* --- WP-06h: the Not-mounted contract (V5-009) -------------------------
+     * §10's Not-mounted row, which no work package previously exercised. The
+     * old bare-uint64_t tape_tell had no error channel at all, so an
+     * implementation had to invent a sentinel.
+     */
+    {
+        tape_dev dev; tape *t = NULL; tape_info info;
+        uint64_t pos = 0x5A5Au;
+        build_valid();
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+
+        /* Before any mount. */
+        CHECK_EQ_INT(tape_tell(t, &pos), TAPE_ERR_NOT_MOUNTED);
+        CHECK_EQ_U32((uint32_t)pos, 0x5A5Au);        /* left untouched */
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_ERR_NOT_MOUNTED);
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_A), TAPE_ERR_NOT_MOUNTED);
+        CHECK_EQ_INT(tape_unmount(t, NULL), TAPE_ERR_NOT_MOUNTED);
+
+        /* And after unmount. */
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 0u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_unmount(t, NULL), TAPE_OK);
+        pos = 0x5A5Au;
+        CHECK_EQ_INT(tape_tell(t, &pos), TAPE_ERR_NOT_MOUNTED);
+        CHECK_EQ_U32((uint32_t)pos, 0x5A5Au);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_ERR_NOT_MOUNTED);
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_A), TAPE_ERR_NOT_MOUNTED);
+
+        /* A null out-parameter is an argument error, not a crash. */
+        CHECK_EQ_INT(tape_tell(t, NULL), TAPE_ERR_INVALID_ARG);
+        CHECK_EQ_INT(tape_tell(NULL, &pos), TAPE_ERR_INVALID_ARG);
+    }
+
+    /* --- V5-013: the side-switch transition is normative -------------------
+     * DRAFT-5 said only "commits nothing and discards nothing", leaving
+     * position, the endpoint flags and the ring undefined across a switch. The
+     * stale ring is the one that hurts: it plays audio from the OTHER SIDE for
+     * up to 372 ms. Position resets to 0 because that is what flipping a tape
+     * over does; the bookmark is the caller's (§11, Principle 1).
+     */
+    {
+        static const ent a1[1] = { { 0u, 0u, 1000u } };
+        static const ent b1[1] = { { 1u, 0u, 100u } };
+        tape *t = NULL; tape_info info; uint64_t pos;
+        build_valid();
+        wr32(MED.head[0] + 56, 1u);                 /* a_high_water = 1 */
+        med_fix_sb_crc(MED.head[0]);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, a1, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 3u, b1, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        /* Mount at frame 500 of a 1000-frame Side A. */
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 500u, NULL), TAPE_OK);
+        pos = 0; CHECK_EQ_INT(tape_tell(t, &pos), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)pos, 500u);
+
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_B), TAPE_OK);
+        pos = 0xFFFFu; CHECK_EQ_INT(tape_tell(t, &pos), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)pos, 0u);                   /* position resets */
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);                      /* and warm start drops */
+        CHECK_EQ_U32((uint32_t)info.total_frames, 100u);   /* B's timeline now */
+        CHECK_EQ_U32(info.entry_count, 1u);
+
+        /* And back, without a commit and without a discard. */
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_A), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 1000u);
+        pos = 0xFFFFu; CHECK_EQ_INT(tape_tell(t, &pos), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)pos, 0u);
+    }
+
+    /* --- V5-007 / V4-011: the warm-start algorithm is ORDERED --------------
+     * DRAFT-5 wrote it as an unordered predicate list that BEGAN by computing an
+     * end frame from warm->start_frame, while the API expressly permits
+     * warm == NULL — the ordinary cold mount. Read as written it dereferenced a
+     * null pointer on every cold boot. And `data` was never checked, so a
+     * descriptor with correct metadata and data == NULL sent the renderer to
+     * address zero.
+     */
+    {
+        static int16_t ring[256];
+        tape_warm_start w;
+        tape_dev dev; tape *t = NULL; tape_info info;
+
+        build_valid();
+        med_bind(&MED, &dev);
+        CHECK_EQ_INT(tape_init(INST, sizeof INST, &dev, PLAY, sizeof PLAY,
+                               REC, sizeof REC, &t), TAPE_OK);
+
+        /* The two pointer cases. Both must cold-mount cleanly. */
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, NULL), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        w.data = NULL; w.data_bytes = (uint32_t)sizeof ring;
+        w.valid_frames = 128u; w.start_frame = 0u; w.side = TAPE_SIDE_A;
+        memset(w.uuid, 0xAB, 16);
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /* data_bytes one byte short of valid_frames * 4 — the caller's buffer
+           dimensions, which the engine no longer takes on trust. */
+        w.data = ring;
+        w.data_bytes = 128u * TAPE_FRAME_BYTES - 1u;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /* Exactly enough is accepted: the boundary is >=, not >. */
+        w.data_bytes = 128u * TAPE_FRAME_BYTES;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(info.warm_start_used);
+
+        /* valid_frames == 0. */
+        w.valid_frames = 0u;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.warm_start_used);
+
+        /*
+         * start_frame near UINT32_MAX with non-zero valid_frames. In u32
+         * start_frame + valid_frames WRAPS, so a stale ring is accepted for a
+         * range it does not cover — WP-11's seventh mutation, admitted by the
+         * spec that defines the mutation (V4-011). resume_frame 10 sits inside
+         * the wrapped range [4294967291, 4) and outside the real one.
+         */
+        w.data = ring; w.data_bytes = (uint32_t)sizeof ring;
+        w.valid_frames = 8u; w.start_frame = 0xFFFFFFFBu;
+        CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
         CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
         CHECK(!info.warm_start_used);
     }

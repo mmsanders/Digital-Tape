@@ -1,14 +1,17 @@
 /*
  * tapefs.c — on-media parsing and validation.
- * Normative: spec/tapefs-v1.md DRAFT-3 §4, §4.1, §5, §5.2, §7.
+ * Normative: spec/tapefs-v1.md DRAFT-6 §2, §2.1, §4, §4.1, §5, §5.2, §7.
  *
  * Everything here is pure: it takes bytes and produces structures or refusals.
  * No device access, so it is trivially testable against synthetic media.
  *
- * DRAFT-4 reconciled. Five rules changed from DRAFT-3 and are implemented here as
- * written: 64-bit run extents (V3-001), the new entry-overlap validity rule,
- * three-phase mount with writes only in phase 3 (V3-006), normative index-slot
- * selection (V3-005), and geometry reserving the mirror block (V3-004).
+ * DRAFT-6 reconciled. Since DRAFT-4: geometry is now ONE predicate (§2.1
+ * GEOMETRY_OK) used at mount, dup and format, and the superblock's stored
+ * total_chunks must EQUAL the value that predicate derives from its own
+ * nominal_length_s rather than merely cover it; the superblock carries
+ * promote_stage and promote_staging_chunk; and the disjointness sort works over
+ * a permutation array rather than a copy of the entry array, so mount can hold
+ * both sides' indices inside the 200 KiB budget.
  */
 
 #include <string.h>
@@ -33,7 +36,7 @@ uint64_t tape_rd64(const unsigned char *p)
 
 uint64_t tape_entry_last_chunk(const struct tape_entry *e)
 {
-    /* spec §5.1 DRAFT-4, checked 64-bit. Every operand is widened BEFORE any
+    /* spec §5.1, checked 64-bit. Every operand is widened BEFORE any
        arithmetic, and the result is never narrowed here — callers compare in
        64-bit and narrow only after the bounds test. frame_count >= 1 is a
        validity precondition checked before this is called, so the -1 cannot
@@ -62,21 +65,22 @@ static uint64_t entry_end(const struct tape_entry *e)
    stack depth and forbids recursion; in place because the engine allocates
    nothing. O(n log n) matters: n can be 4096 and mount is on the wake-to-audio
    path (guardrail 04), where an O(n^2) scan would cost real milliseconds. */
-static void sift_down(struct tape_entry *a, uint32_t root, uint32_t n)
+static void sift_down(const struct tape_entry *e, uint16_t *p, uint32_t root, uint32_t n)
 {
     for (;;) {
         uint32_t child = 2u * root + 1u;
         uint32_t swap  = root;
         if (child >= n) { return; }
-        if (entry_begin(&a[swap]) < entry_begin(&a[child])) { swap = child; }
-        if (child + 1u < n && entry_begin(&a[swap]) < entry_begin(&a[child + 1u])) {
+        if (entry_begin(&e[p[swap]]) < entry_begin(&e[p[child]])) { swap = child; }
+        if (child + 1u < n
+            && entry_begin(&e[p[swap]]) < entry_begin(&e[p[child + 1u]])) {
             swap = child + 1u;
         }
         if (swap == root) { return; }
         {
-            struct tape_entry tmp = a[root];
-            a[root] = a[swap];
-            a[swap] = tmp;
+            uint16_t tmp = p[root];
+            p[root] = p[swap];
+            p[swap] = tmp;
         }
         root = swap;
     }
@@ -85,34 +89,38 @@ static void sift_down(struct tape_entry *a, uint32_t root, uint32_t n)
 /*
  * spec §5.1's overlap rule, implemented as its PAIRWISE statement.
  *
- * The section also offers an "Equivalently:" aggregate formula. It is not
- * equivalent — it is strictly weaker, and it is circular (it is phrased in terms
- * of free_next, which §7 derives from the live index, which requires validity to
- * have been settled first). Two entries each covering frames 0..1000 of chunk 0
- * pass the aggregate and fail this. Filed as issue #19; ADR-027 records why the
- * pairwise rule is what ships.
+ * DRAFT-4 also offered an "Equivalently:" aggregate formula. It was not
+ * equivalent — strictly weaker, and circular: phrased in terms of free_next,
+ * which §7 derives from the live index, which requires validity to have been
+ * settled first. Two entries each covering frames 0..1000 of chunk 0 passed the
+ * aggregate and fail this. Filed as issue #19; DRAFT-5's V4-002 deleted the
+ * aggregate, so this pairwise check is now the normative rule (ADR-027).
+ *
+ * The sort permutes an array of u16 ENTRY INDICES rather than copying entries.
+ * That is what §5.1 names as the permitted bounded method, and it is what makes
+ * holding both sides' indices affordable: a third tape_index would be 49 KiB.
  */
-tape_result tape_index_check_overlap(struct tape_index *idx, struct tape_index *scratch)
+tape_result tape_index_check_overlap(const struct tape_index *idx, uint16_t *perm)
 {
-    struct tape_entry *a = scratch->entries;
+    const struct tape_entry *e = idx->entries;
     uint32_t n = idx->entry_count;
     uint32_t i;
 
     if (n < 2u) { return TAPE_OK; }
 
-    for (i = 0; i < n; i++) { a[i] = idx->entries[i]; }
+    for (i = 0; i < n; i++) { perm[i] = (uint16_t)i; }
 
     i = n / 2u;
-    while (i > 0u) { i--; sift_down(a, i, n); }
+    while (i > 0u) { i--; sift_down(e, perm, i, n); }
     for (i = n; i > 1u; ) {
-        struct tape_entry tmp;
+        uint16_t tmp;
         i--;
-        tmp = a[0]; a[0] = a[i]; a[i] = tmp;
-        sift_down(a, 0u, i);
+        tmp = perm[0]; perm[0] = perm[i]; perm[i] = tmp;
+        sift_down(e, perm, 0u, i);
     }
 
     for (i = 1u; i < n; i++) {
-        if (entry_end(&a[i - 1u]) > entry_begin(&a[i])) {
+        if (entry_end(&e[perm[i - 1u]]) > entry_begin(&e[perm[i]])) {
             return TAPE_ERR_NO_VALID_INDEX;
         }
     }
@@ -157,12 +165,55 @@ tape_result tape_sb_parse(const unsigned char *blk, struct tape_sb *out)
     memcpy(out->label, blk + 88, 32);
     out->label[32] = '\0';
     out->format_epoch         = tape_rd32(blk + 120);
+    out->promote_stage        = tape_rd32(blk + 124);
+    out->promote_staging_chunk= tape_rd32(blk + 128);
+    return TAPE_OK;
+}
+
+/*
+ * spec §2.1 GEOMETRY_OK — ONE predicate, stated once, used in three places:
+ * mount (§4.1 phase 2), tape_dup (§9.5) and tape_format (§9.6). DRAFT-4 stated
+ * it only at mount, so the two operations that CREATE geometry could begin
+ * destroying media before discovering the geometry was impossible (V4-006).
+ *
+ * On success *out_total_chunks receives the derived chunk count — which is the
+ * value a format must write and the value a mount must find already there.
+ * All arithmetic 64-bit; failure is TAPE_ERR_GEOMETRY and zero writes.
+ */
+tape_result tape_geometry_ok(uint32_t nominal_length_s, uint32_t block_count,
+                             uint32_t *out_total_chunks)
+{
+    uint64_t frames, chunks, chunk_end;
+
+    /* 1. §2's derivation, with §2's own rejections. */
+    if (nominal_length_s == 0u) { return TAPE_ERR_GEOMETRY; }
+    frames = (uint64_t)nominal_length_s * (uint64_t)TAPE_SAMPLE_RATE;
+    if (frames > (uint64_t)TAPE_MAX_TOTAL_FRAMES) { return TAPE_ERR_GEOMETRY; }
+    /* Ceiling. DRAFT-3 truncated, so a "C-60" held 3599.28 s — twenty-eight
+       hundredths of a second short of its own label (V3-012). */
+    chunks = (frames + TAPE_CHUNK_FRAMES - 1u) / TAPE_CHUNK_FRAMES;
+    if (chunks == 0u || chunks > 0xFFFFFFFFu) { return TAPE_ERR_GEOMETRY; }
+
+    /* 2. */
+    if ((uint64_t)block_count <= (uint64_t)TAPE_LBA_CHUNK_BASE) { return TAPE_ERR_GEOMETRY; }
+
+    /* 3. The final block is RESERVED for the superblock mirror, so the store
+       must end at or before block_count - 1, not at block_count. DRAFT-3 allowed
+       equality, which put the last chunk's final block exactly on the mirror:
+       filling that chunk destroys the mirror, and repairing the mirror destroys
+       referenced audio (V3-004). Because LBA_CHUNK_BASE is 2048 and the last
+       fixed metadata block is 519, this also subsumes every fixed LBA. */
+    chunk_end = (uint64_t)TAPE_LBA_CHUNK_BASE + chunks * (uint64_t)TAPE_CHUNK_BLOCKS;
+    if (chunk_end > (uint64_t)block_count - 1u) { return TAPE_ERR_GEOMETRY; }
+
+    if (out_total_chunks != NULL) { *out_total_chunks = (uint32_t)chunks; }
     return TAPE_OK;
 }
 
 tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_count)
 {
-    uint64_t chunk_end;
+    uint32_t derived;
+    tape_result rc;
 
     /* Fixed constants, spec §1. */
     if (sb->sample_rate      != TAPE_SAMPLE_RATE)      { return TAPE_ERR_GEOMETRY; }
@@ -180,31 +231,24 @@ tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_coun
 
     /* The caller's block_count is untrusted; these checks defend against it as
        much as against the card (spec §4.1 phase 2). */
-    if (block_count == 0u)                                  { return TAPE_ERR_GEOMETRY; }
-    if (sb->lba_superblock_mirror != block_count - 1u)      { return TAPE_ERR_GEOMETRY; }
-    if (sb->total_chunks < 1u)                              { return TAPE_ERR_GEOMETRY; }
-    if (sb->a_high_water > sb->total_chunks)                { return TAPE_ERR_GEOMETRY; }
-    if ((uint64_t)block_count <= (uint64_t)sb->lba_chunk_base) { return TAPE_ERR_GEOMETRY; }
+    if (block_count == 0u)                             { return TAPE_ERR_GEOMETRY; }
+    if (sb->lba_superblock_mirror != block_count - 1u) { return TAPE_ERR_GEOMETRY; }
+    if (sb->total_chunks < 1u)                         { return TAPE_ERR_GEOMETRY; }
+    if (sb->a_high_water > sb->total_chunks)           { return TAPE_ERR_GEOMETRY; }
 
-    /* DRAFT-4: the mirror block is RESERVED, so the chunk store must end at or
-       before block_count - 1, not at block_count. DRAFT-3 allowed equality,
-       which put the last chunk's final block exactly on the mirror: filling that
-       chunk destroys the mirror, and repairing the mirror destroys referenced
-       audio (V3-004). All 64-bit, so a large total_chunks cannot wrap into a
-       passing value. */
-    chunk_end = (uint64_t)sb->lba_chunk_base
-              + (uint64_t)sb->total_chunks * (uint64_t)TAPE_CHUNK_BLOCKS;
-    if (chunk_end > (uint64_t)block_count - 1u)             { return TAPE_ERR_GEOMETRY; }
-
-    /* DRAFT-4: the store must cover the label (§2). Without this a cartridge
-       labelled C-60 with 100 chunks mounts clean, and §2's guarantee that a
-       cartridge holds the time printed on it is unenforced. Ceiling division,
-       64-bit throughout. */
-    {
-        uint64_t need = ((uint64_t)sb->nominal_length_s * TAPE_SAMPLE_RATE
-                         + TAPE_CHUNK_FRAMES - 1u) / TAPE_CHUNK_FRAMES;
-        if ((uint64_t)sb->total_chunks < need)              { return TAPE_ERR_GEOMETRY; }
-    }
+    /*
+     * DRAFT-6: GEOMETRY_OK must hold, AND the stored total_chunks must EQUAL the
+     * value the predicate derives from the superblock's own nominal_length_s.
+     *
+     * DRAFT-4 asked only that the store COVER the label. Equality closes the gap
+     * where a cartridge carries a store larger than its own geometry predicate
+     * produces and then disagrees with a freshly formatted one of the same
+     * label — two cartridges reading "C-60" with different capacities, and
+     * nothing to say which is right.
+     */
+    rc = tape_geometry_ok(sb->nominal_length_s, block_count, &derived);
+    if (rc != TAPE_OK)              { return rc; }
+    if (sb->total_chunks != derived) { return TAPE_ERR_GEOMETRY; }
 
     return TAPE_OK;
 }

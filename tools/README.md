@@ -85,8 +85,9 @@ The memory audit measures the archive. The authoritative number for firmware is 
 image's map file, which also accounts for stack and for what the toolchain elided. That gate
 gets added when Stream 4 links.
 
-The RAM budget still measures `.data + .bss` only. `engine-api` §4 and `acceptance.md` WP-13
-define the gate as `.data + .bss + tape_instance_size()` **summed**, and require the gate to
-**print the measured `tape_instance_size()`** rather than merely assert a ceiling — so the §5.1
-disjointness scratch shows up as a number instead of as a surprise. Owed with the read-path
-reconciliation.
+**Correction.** An earlier revision of this file said the RAM gate measured `.data + .bss` alone
+and owed `tape_instance_size()`. It does not and never did: `audit-memory.sh` links a probe
+against the archive, prints the measured instance size on every run, and sums it into the budget
+exactly as `engine-api` §4 and WP-13 require. The stale sentence was carried forward without being
+checked against the script beside it — the same class of error as a spec header asserting its own
+consistency, and the reason `tape_instance_size()` is a printed number rather than a claim.

@@ -1152,3 +1152,81 @@ filed rather than silently resolved in the implementer's favour.
 Sorting is an iterative heapsort in the caller's scratch index: recursion is forbidden
 (guardrail 08), allocation is forbidden, and mount is on the wake-to-audio path, where an O(n²)
 scan over 4 096 entries would cost real milliseconds.
+
+---
+
+## ADR-033 — Both sides' indices live in the instance; the disjointness sort gets a permutation array
+
+**Date:** 2026-09-05 · **Owner:** Software Lead · **Source:** `tapefs` §4.2, §5.1
+
+**Decision.** `struct tape` holds `idx[2]` — the live index of **both** sides — and §5.1's
+disjointness sort works over a `uint16_t` permutation array rather than a copy of the entry array.
+`tape_instance_size()` is **156 456 bytes, 76 % of the 200 KiB budget.**
+
+**Rationale.** DRAFT-6's phase 3 selects and validates both sides whichever was requested, and it
+must: `free_next` is defined over the live **Side B** index, so a Side-A mount that had not
+selected B could not compute it — while `tape_respool` and `tape_promote` are both permitted from
+a Side-A mount and both allocate from it. Degenerating it to `a_high_water` allocates straight
+over Side B's live chunks (invariant 10). The stage oracle compares both arrays too.
+
+The arithmetic then decides the rest. A `tape_index` is 49 KiB. Keeping the old *live + scratch*
+pair and adding a second side would have been three of them, 147 KiB before the 48 KiB of raw
+entry bytes — over budget on its own. §5.1 names the way out: the sort only needs to order
+`entry_count` **indices**, which is 8 KiB at the maximum. So the third index becomes a
+permutation array and the freed buffer holds the other side.
+
+**Cost to reverse.** Moderate. The permutation sort is a drop-in for the entry-copy sort, but
+`TAPE_LIVE(t)` is now the only name for the mounted side's index and callers reach through it.
+Reversing would mean reintroducing a name that can disagree with `idx[side]`.
+
+---
+
+## ADR-034 — Both index slots are parsed into one buffer, and the winner is re-read
+
+**Date:** 2026-09-05 · **Owner:** Software Lead
+
+**Decision.** `select_side` parses slot 0 and then slot 1 into the *same* buffer, remembering only
+slot 0's `sequence`, and re-reads slot 0 when it wins. That costs one extra slot read — at most 97
+blocks, one or two in practice — in the both-valid, slot-0-wins case.
+
+**Rationale.** The cheaper-looking design is to parse slot 1 into the *other* side's buffer, which
+genuinely is free during Side A's selection. **I wrote it that way first and it is wrong:** phase 3
+selects A and then B, so during Side B's selection that buffer holds Side A's already-selected
+index. A cartridge with two valid Side B slots would have had Side A's index silently overwritten
+by a Side B slot — silently, because the result still parses as a valid index.
+
+Every test passed. §5.3's resting state after every commit is *exactly one valid slot*, so every
+fixture in the suite leaves the partner invalid and the second parse never happened. The condition
+needs a cartridge mid-generation on a side nobody is mounting, which is not a shape a
+refusal-path suite naturally produces. `tests/harness/test_mount.c` now builds it deliberately,
+and the test was verified to go red against the reintroduced bug before being kept.
+
+A third index buffer would remove the reload and cost 49 KiB against a budget already at 76 %.
+**The reload is the cheaper mistake to make**, and the honest one to state.
+
+**Cost to reverse.** Low, and the reason to keep it is written into the function: the comment names
+the wrong design and why it looks right.
+
+---
+
+## ADR-035 — `tape_info.writable` is about the mount, never about the mounted side
+
+**Date:** 2026-09-05 · **Owner:** Software Lead · **Source:** `engine-api` §3.1, §10
+
+**Decision.** `tape_get_info` reports `effective_writable` — `(dev.write != NULL) && (version_minor
+== 0)` — unmodified. It previously reported `writable && side == TAPE_SIDE_B`.
+
+**Rationale.** Two separate rules had been folded into one field. §10 is explicit: `W` is about the
+mount, and the Side-A rule belongs to `tape_arm` and `tape_feed` alone, because those write *the
+mounted side*. `reset_b`, `promote` and `dup` write regions chosen by the operation — and `dup`
+writes the destination's Side A **by definition**, so a side-qualified `writable` reads as if
+duplicating were forbidden outright.
+
+The version term is the other half, and it was V4-001, the round's blocker: `tapefs` §4.1 declared a
+`version_minor > 0` cartridge read-only while every write authorisation in the API was defined
+solely by `dev.write != NULL`. On a writable device a v1 engine was still authorised to commit v1
+structures onto v1.1 media. **The compatibility barrier existed in prose and in no code path.** It
+is one variable now, computed once at mount, and phase-4 repair consults it too.
+
+**Cost to reverse.** Low in code, high in meaning — the two rules would refuse to stay separated
+again, and the last time they were merged the result was a blocker.

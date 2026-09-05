@@ -1,42 +1,55 @@
 # STATUS
 
-**Updated:** 2026-09-04 · **Phase:** 1 (engine) · **Updated by:** Software Lead
+**Updated:** 2026-09-05 · **Phase:** 1 (engine) · **Updated by:** Software Lead
 **Charter Rev C · spec bundle DRAFT-6 on `main` · CI 8/9 green**
 
 ---
 
 ## What changed since last time
 
-**DRAFT-6 is on `main`**, the second bundle to land today. All four files `cmp`-verified against
-the PM's copies; the three hashes were checked against the manifest before anything was copied
-and again after. The banner is inside the hashed content, so nothing was added or edited.
-`docs/FOR-MICHAEL.md` is the PM's rewrite, landed the same way.
+**The read path is reconciled to DRAFT-6.** Mount is four phases and only the last one writes;
+both sides are selected and validated whichever was requested; degraded-B is decided **before** the
+stage oracle; the oracle itself is implemented against §9.3.3's three rows including both `S > 0`
+guards. 260 checks, up from 102.
 
-**The gate held across a bundle change** — which is the first evidence it does anything. It went
-green on DRAFT-6 without an edit, and `verify-spec-bundle.sh` is still byte-identical to the
-fenced block in `VERSION.md`.
+**WP-06's eight sub-criteria are exercised** — 06a effective writability on v1.1 media, 06b
+undefined field values, 06c disjointness with zero chunk reads asserted, 06d geometry, 06e stale
+`promote_stage` (mount half; the `tape_arm` half is held), 06f both-side mount and degraded-B, 06g
+mount-writes-nothing-when-it-fails, 06h the Not-mounted contract.
 
-**The meta-gate's revision probe did not, and is fixed** (ADR-031). It named `DRAFT-5` and the
-DRAFT-5 hash in two `sed` commands, so from today it would have planted nothing — the gate would
-stay green and the probe would report BROKEN. That is the right failure direction and the wrong
-maintenance burden on a document that has moved four times in three days. It now reads the
-current revision and hash out of `VERSION.md` and plants `DRAFT-0`, a value no bundle will ever
-carry, and refuses to run at all if either derived value is empty. 15/15.
+**Invariant 26 is now true rather than claimed.** Every refusal path runs on a writable device with
+a torn mirror — repair genuinely pending — and asserts zero writes and zero flushes. That is the
+assertion DRAFT-5's ordering could not satisfy.
 
-**`spec/README.md` stopped restating revisions** (ADR-032). Its own table said DRAFT-4 while
-`main` published DRAFT-3 — a fourth copy of the same claim, drifting, inside the round about
-drift. Status and freeze scope only now; revisions live in the manifest that has a gate behind it.
+**The number the PM asked for: `tape_instance_size()` is 156 456 bytes, 76 % of 200 KiB**, printed
+by WP-13's gate on every run. Holding both sides cost 8 KiB net, not 49: §5.1's sort only needs to
+order entry *indices*, so the third index buffer became a permutation array and the freed one holds
+the other side (ADR-033). Stack is 1 536 of 8 192 bytes; `.rodata` 1 040 of 32 768.
+
+**I introduced a defect in this work and caught it before it shipped** (ADR-034). `select_side`
+parsed the second slot into the *other side's* buffer — free during Side A's selection, and holding
+Side A's selected index during Side B's. A cartridge with two valid Side B slots would have had
+Side A's index silently replaced by a Side B slot. **All 245 checks passed**, because §5.3's
+resting state is exactly one valid slot, so no fixture in the suite had a valid partner. The test
+that catches it was written afterwards and verified to go red against the reintroduced bug.
+
+**One correction.** I reported to the PM that the RAM gate measured `.data + .bss` alone and owed
+`tape_instance_size()`. It does not and never did — `audit-memory.sh` has linked a probe and summed
+the instance since it was written. I carried a stale sentence forward from my own README without
+reading the script beside it, which is the same class of error as a spec header asserting its own
+consistency.
 
 ## In flight
 
 | Work | Owner | State |
 |---|---|---|
 | DRAFT-6 bundle | Software Lead | **On `main`**, gate green |
-| Read-path reconciliation to DRAFT-6 | Software Lead | **Not started, and the delta grew** — see below |
-| WP-06 sub-criteria 06a–06h | Software Lead | Not started. **Eight now, not six** |
-| WP-06/07 read+alloc paths | Software Lead | PR #20, built against DRAFT-4. Held by structural Rule 1 |
+| WP-06 read path, DRAFT-6 | Software Lead | **Done**, unconfirmed. PR #20 |
+| WP-06 sub-criteria 06a–06h | Software Lead | **Exercised**, unconfirmed |
+| WP-07 allocator | Software Lead | **Done**, unconfirmed. `tapefs` §7 and Rule 3 are unchanged in DRAFT-6; re-read and no code follows |
 | WP-06/07 commit paths | Software Lead | **Held** by structural Rule 1 |
-| WP-10 crash injection | Verification | Infrastructure in CI. DRAFT-6 adds two durability modes and counter boundaries to its scope |
+| `TAPE_ERR_FAULTED` quarantine | Software Lead | State plumbed, no producer yet — see below |
+| WP-10 crash injection | Verification | Infrastructure in CI. DRAFT-6 adds both durability modes and the §4.5 counter boundaries |
 | WP-11 golden suite | Verification | Runner proven; fixtures owed. **The only red gate** |
 
 ## Blocked
@@ -45,38 +58,26 @@ Nothing. The commit path is held by instruction, not blocked.
 
 ## Acceptance criteria flipped to passing
 
-**None.** 118 self-test checks on `main`, 206 counting PR #20 — all of them the Software Lead's
-claims about its own code. `acceptance.md` requires the Verification Lead's independent
-confirmation. Nothing has had it, so nothing has flipped.
+**None.** 364 self-test checks are the Software Lead's claims about its own code. `acceptance.md`
+requires the Verification Lead's independent confirmation and nothing has had it.
 
 ## What will hurt in three weeks
 
-- **The engine is now two revisions behind, and the gap is structural rather than cosmetic.**
-  `tape_mount` gains a **fourth phase, with repair last** (V5-003) — my implementation splits
-  repair out of selection but still runs it before index validation, so invariant 26 is false in
-  my code today for every index failure. That is a reordering of the function this round's whole
-  read path is built around, not a parameter change.
-- **A new engine state exists that I have no code for.** `TAPE_ERR_FAULTED` (§7.2) quarantines an
-  instance after any indeterminate write or flush, overrides every other row of the state matrix,
-  and permits exactly four calls. It closes a path where a recoverable I/O error followed by an
-  ordinary permitted call destroys audio. It is not a code, it is a state machine.
-- **One ABI change landed inside the freeze candidate.** `tape_tell` is now
-  `tape_result tape_tell(const tape *, uint64_t *)`. The old bare-`uint64_t` signature could not
-  return `TAPE_ERR_NOT_MOUNTED`, so the document contradicted itself. Cheap now, expensive after
-  three consumers link against it — which is the argument for finding it here.
-- **Two arithmetic fixes invalidate any renderer prototype**, and would have been frozen into the
-  goldens: reverse-from-end snaps to `(total_frames − 1) << 32` rather than `max_pos − 1`, and
-  `at_start` is set only when the playhead was *already* at 0 — DRAFT-6's own first cut set it on
-  the landing step, which never rendered frame 0 at all. Both are pre-fixture, which is the cheap
-  time.
-- **RAM was 72 % before the disjointness scratch, the commit path and the record path.** WP-13
-  now requires the gate to **print** the measured `tape_instance_size()`, not just assert the
-  ceiling, and the memory audit does not yet include it at all. Owed with the reconciliation. If
-  the sum crosses 200 KiB the answer is escalation, not a smaller `TAPE_MAX_ENTRIES` — 4 096
-  entries is roughly two thousand splices, a child's editing budget and therefore a product
-  number.
-- **The PM's own note is the one worth acting on.** Of the 37 defects found in DRAFT-6's first
-  cut, two were introduced by the fixes for the verifier's DRAFT-5 findings. The most dangerous
-  text on this project is whatever was written last, in a hurry, to close a hole someone just
-  found. That applies to my patches as squarely as to the PM's drafts, and it is the argument for
-  reconciling the read path deliberately rather than fast.
+- **`FAULTED` has no producer, and that is honest rather than finished.** §7.2 quarantines an
+  instance after any indeterminate write or flush on the mounted device, overrides every mounted
+  row, and permits four calls. The read path has exactly one write — phase-4 repair — and §4.1
+  explicitly excludes it, because it changes no logical state. So the state, the error code and the
+  refusals are plumbed and nothing can currently reach them. **It becomes real with the commit
+  path, which structural Rule 1 holds**, and WP-12a's eleven `F` cells are what will prove it.
+- **RAM is 76 % before the commit and record paths add their state.** The remaining headroom is
+  48 KiB and one more `tape_index`-sized structure would exhaust it. If it tightens the answer is
+  escalation, not a smaller `TAPE_MAX_ENTRIES` — 4 096 entries is roughly two thousand splices, a
+  child's editing budget and therefore a product number.
+- **Nothing yet checks that code matches the bundle it claims to implement.** The manifest gate
+  covers `spec/` against itself. The engine claiming DRAFT-6 in a header comment is a claim, and
+  this round it was wrong twice in a row before anyone noticed. I do not have a decidable gate for
+  this and I am not sure one exists; it is the honest gap in the gate set.
+- **The PM's calibration note applies to me too.** Two of the six blockers in DRAFT-6's own audit
+  were introduced by fixes for the previous round's findings. My `select_side` defect is the same
+  shape: written last, under the most pressure, to close a hole that had just been found. The
+  suite caught it only because I went looking for what the fixtures could not see.

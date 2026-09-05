@@ -1,7 +1,7 @@
 /*
  * tape.h — Digital Tape engine, public API.
  *
- * Normative: spec/engine-api.md DRAFT-3. Where this header and the spec differ,
+ * Normative: spec/engine-api.md DRAFT-6. Where this header and the spec differ,
  * the spec is right and this is a defect.
  *
  * Implementation status. The engine is built against structural Rule 1: engine
@@ -9,9 +9,10 @@
  * for that behaviour have landed on main, so main carries spec, then tests, then
  * implementation, in that order.
  *
- *   Implemented   tape_instance_size, tape_init, tape_mount (all three phases
- *                 including repair), tape_unmount, tape_get_info, tape_set_side,
- *                 tape_tell, and the WP-07 allocator (tape_alloc_run)
+ *   Implemented   tape_instance_size, tape_init, tape_mount (all four phases,
+ *                 both sides, degraded-B and the stage oracle), tape_unmount,
+ *                 tape_get_info, tape_set_side, tape_tell, and the WP-07
+ *                 allocator (tape_alloc_run)
  *   Declared,     everything else. Calling one is a link error, which is the
  *   not defined   intended loud failure rather than a silent stub.
  *
@@ -53,9 +54,14 @@
 #define TAPE_LBA_INDEX_B1      392u
 #define TAPE_LBA_CHUNK_BASE   2048u
 
-/* Superblock `state`, spec §4. */
+/* Superblock `state`, spec §4. NO OTHER VALUE IS DEFINED — an undefined one is
+   TAPE_ERR_UNSUPPORTED_STATE at mount, not a value to interpret (V4-012). */
 #define TAPE_STATE_VALID             0u
 #define TAPE_STATE_WRITE_IN_PROGRESS 1u
+
+/* Superblock `promote_stage`, spec §4 offset 124. Same rule: {0, 1} only. */
+#define TAPE_PROMOTE_STAGE_NONE      0u
+#define TAPE_PROMOTE_STAGE_PHASE1    1u
 
 typedef enum { TAPE_SIDE_A = 0, TAPE_SIDE_B = 1 } tape_side;
 
@@ -64,9 +70,19 @@ typedef enum { TAPE_SIDE_A = 0, TAPE_SIDE_B = 1 } tape_side;
  * retained from cartridge X side A must not be rendered into a mount of
  * cartridge Y side B. A mismatch DISABLES warm start rather than failing the
  * mount — a wrong buffer costs instant-on, never correctness.
+ *
+ * `data_bytes` is the caller's buffer size and it is checked. Principle 1 says
+ * the caller owns the buffer; it does not say the engine takes its dimensions on
+ * trust, and without this field the engine had no way to know the buffer was big
+ * enough for the valid_frames it claimed (V4-011).
+ *
+ * The whole descriptor is optional: `warm == NULL` is the ordinary cold mount,
+ * and §5's algorithm is ORDERED so that no field is read until the pointer is
+ * known non-NULL.
  */
 typedef struct {
     const void *data;         /* frames, same layout as tape_render output */
+    uint32_t    data_bytes;   /* size of the buffer at `data` */
     uint32_t    valid_frames;
     uint32_t    start_frame;  /* timeline frame the first sample represents */
     uint8_t     uuid[16];
@@ -101,8 +117,13 @@ typedef struct {
     uint64_t total_frames;              /* of the mounted side */
     uint32_t total_chunks, free_chunks;
     uint32_t entry_count, entries_free;
-    bool     writable;
-    bool     needs_repair;              /* one copy invalid; device is read-only */
+    uint16_t version_minor;             /* why `writable` may be false on a device
+                                           that can perfectly well write */
+    bool     writable;                  /* effective_writable, §3.1 */
+    bool     side_b_valid;              /* false in degraded-B (tapefs §4.4) */
+    bool     needs_repair;              /* one superblock copy invalid, and either the
+                                           mount is not effectively writable or the
+                                           phase-4 repair write failed */
     bool     warm_start_used;
 } tape_info;
 
@@ -112,7 +133,12 @@ tape_result tape_set_side(tape *t, tape_side side);
 /* --- transport (§6) --------------------------------------------------------- */
 
 tape_result tape_seek(tape *t, uint64_t frame);   /* beyond end clamps; TAPE_OK */
-uint64_t    tape_tell(const tape *t);
+/* DRAFT-6 (V5-009): this returns tape_result, not a bare uint64_t. §2 says every
+   call returns tape_result and §10's Not-mounted row requires
+   TAPE_ERR_NOT_MOUNTED from every ordinary call — which the old signature had no
+   channel for, so an implementation had to invent a sentinel or return a stale
+   position. On refusal *out_frame is left untouched. */
+tape_result tape_tell(const tape *t, uint64_t *out_frame);
 tape_result tape_set_rate(tape *t, int32_t rate_q16_16);
 
 tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *rendered);

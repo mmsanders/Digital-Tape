@@ -28,6 +28,8 @@ struct media {
     uint32_t block_count;
     int      writable;
     uint32_t reads;
+    uint32_t chunk_reads; /* reads at or above LBA_CHUNK_BASE. WP-06c asserts the
+                             disjointness check reads NO chunk during mount */
     uint32_t writes;      /* so a test can assert "writes nothing" */
     uint32_t flushes;
 };
@@ -53,6 +55,16 @@ static int med_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     uint32_t i;
 
     m->reads++;
+    /* The chunk REGION only. The superblock mirror sits at block_count-1, which
+       is above LBA_CHUNK_BASE and is emphatically not a chunk — counting it
+       would make WP-06c's "reads no chunk" assertion fail on every mount, for
+       the wrong reason. */
+    if (lba >= TAPE_LBA_CHUNK_BASE) {
+        uint32_t i2, last = m->block_count - 1u;
+        for (i2 = 0; i2 < count; i2++) {
+            if (lba + i2 < last) { m->chunk_reads++; }
+        }
+    }
     if (lba > m->block_count || count > m->block_count - lba) {
         return TAPE_DEV_ERR_RANGE;
     }
@@ -119,9 +131,30 @@ static uint32_t med_rd32(const unsigned char *p)
          | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
 }
 
+/*
+ * The largest label this store honestly carries.
+ *
+ * DRAFT-6 §4.1 phase 2 step 5 requires the stored total_chunks to EQUAL the
+ * value GEOMETRY_OK derives from nominal_length_s, not merely to cover it. The
+ * floor below satisfies that exactly, and not by luck: with
+ * L = floor(tc * CHUNK_FRAMES / SAMPLE_RATE), the derived
+ * ceil(L * SAMPLE_RATE / CHUNK_FRAMES) is <= tc because L <= tc*CF/SR, and
+ * >= tc because L > tc*CF/SR - 1 gives L*SR/CF > tc - SR/CF > tc - 1. So it is
+ * exactly tc. med_check_label() asserts it rather than leaving that as a
+ * comment, because a fixture that is wrong in two ways tells you nothing about
+ * which one the engine caught.
+ */
 static uint32_t med_max_label_s(uint32_t total_chunks)
 {
     return (uint32_t)(((uint64_t)total_chunks * TAPE_CHUNK_FRAMES) / TAPE_SAMPLE_RATE);
+}
+
+static int med_check_label(uint32_t total_chunks)
+{
+    uint32_t L = med_max_label_s(total_chunks);
+    uint64_t derived = ((uint64_t)L * TAPE_SAMPLE_RATE + TAPE_CHUNK_FRAMES - 1u)
+                     / TAPE_CHUNK_FRAMES;
+    return L > 0u && derived == (uint64_t)total_chunks;
 }
 
 static void med_sb(unsigned char *blk, uint32_t total_chunks, uint32_t a_high_water,
@@ -192,6 +225,32 @@ static void med_index(struct media *m, uint32_t lba, uint8_t side, uint32_t sequ
 static void med_invalidate(struct media *m, uint32_t lba)
 {
     memset(m->head[lba], 0, TAPE_BLOCK_SIZE);
+}
+
+/* --- DRAFT-6 superblock fields, set after med_sb and before the CRC fix ------ */
+
+/* §4 offsets 124 and 128. `stage` is deliberately a raw uint32 so a fixture can
+   plant an UNDEFINED value (WP-06b) as easily as a defined one. */
+static void med_sb_stage(unsigned char *blk, uint32_t stage, uint32_t staging_chunk)
+{
+    wr32(blk + 124, stage);
+    wr32(blk + 128, staging_chunk);
+    med_fix_sb_crc(blk);
+}
+
+/* §4 offset 10. version_minor > 0 makes the mount not effectively writable
+   (§4.3) on a device that can write perfectly well — WP-06a. */
+static void med_sb_minor(unsigned char *blk, uint16_t minor)
+{
+    wr16(blk + 10, minor);
+    med_fix_sb_crc(blk);
+}
+
+/* §4 offset 16, raw, so a fixture can plant state = 2 (WP-06b). */
+static void med_sb_state(unsigned char *blk, uint8_t state)
+{
+    blk[16] = state;
+    med_fix_sb_crc(blk);
 }
 
 #endif /* TAPE_TEST_MEDIA_H */
