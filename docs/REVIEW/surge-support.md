@@ -31,6 +31,26 @@ Treated as a fresh verifier against the first-cut DRAFT-8 text, not against DRAF
 
 Bundle gate: green, forced red with a one-byte flip on `acceptance.md`, restored green.
 
+## Simulated verifier pass (third pass, 6 Sep evening)
+
+Directed the way the DRAFT-7 review was directed: newest text first (§4.6, phase 4 stale repair, §4.5 zero-needed, §9.5/§9.6 classification), then the promote step bodies and crash tables, then invariants. What that pass would have filed against the second-cut DRAFT-8, and what changed:
+
+| Would-have-been | Severity | Claim | Fix now in the files |
+|---|---|---|---|
+| **S8-001** | blocker-shaped consistency | §9.3.1 step 4 and §9.3.2 steps 5-decline and 9 still said *mirror, flush, primary, flush* after §4.6 and §9.3.4 required partner-first. The document already names this class: an implementer reading the steps literally ships the old order. | Step bodies now cite §4.6. |
+| **S8-002** | major, crash oracle | Equal-generation-divergent zero-both had no mid-write row. After the mirror is zeroed the primary — one of the two previously unorderable copies — is the sole valid superblock. Remount is that old cartridge; re-run takes the template path. An exhaustive runner had no permitted outcome. | Row added to both format and duplicate tables. |
+| **S8-003** | question | V7-001's other fix (refuse mutators until two current copies exist) was not explicitly rejected, so a reviewer could file it as an open alternative. | §4.6 now rejects it: stalls a child on a flaky partner write. WP-10 two-interruption closure is the test. |
+| **S8-004** | doc, candidate | §4.3 still said "no mirror repair"; phase 4 now repairs a stale partner too. Invariant 7 / WP-10 "repair advanced neither" named only the invalid-copy shape. | Wording aligned. Fallback parenthetical no longer pretends the increment path sees equal-generation-divergent copies. |
+
+Traces that survived and were *not* turned into findings:
+
+- V7-001's two-interruption promote: after a torn partner-first first-write the candidate is untouched; after a durable first-write the new generation wins even if the candidate then tears; phase-4 repair of the leftover stale partner does not increment `sb_generation`. Mutators with `needs_repair` still cannot roll selection backwards.
+- Zero-needed: `sequence_needed == 0` / `generation_needed == 1` (RESUME-at-step-5 decline) still consults generation and still refuses at `sb_generation ≥ 0xFFFFFFFD`. Only the unused counter is skipped.
+- Classification-as-plan: a destination that is both divergent and too small is refused, not erased.
+- Format/dup identity commits remain mirror-then-primary; their tables still work because generation goes backwards on purpose.
+
+Still not a freeze recommendation. This pass is surge pretending to be the lead. The lead has not signed.
+
 ## What this branch does not do
 
 - Does not freeze. Does not flip the banner.
