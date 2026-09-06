@@ -4,6 +4,60 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 11a — 6 Sep 2026, a CI failure I caused and then hid from myself
+
+Filed separately from Round 11 because it is not a response to anyone's finding. It is a defect
+in my own work and in how I verified it.
+
+### The failure
+
+`thermal-check` went **red in CI and green on this machine, on the same commit**.
+
+**Python 3.12 changed `sum()` to compensated summation for floats.** More accurate, and it
+changes the last bit — and the playback load subtotal lands on exactly **739.5 mW**. So 3.11
+rendered `740 mW`, 3.12 rendered `739 mW`, and a committed artefact that CI checks was
+simultaneously fresh and stale depending on where you ran it.
+
+**The gate was right both times.** Nothing was broken except that the number was never a
+function of the inputs alone. Per-load integer microwatts are identical on 3.10 through 3.13, so
+the arithmetic is now integer and the rounding rule explicit. Six rows shift by 1 mW; no
+temperature, margin or conclusion moves. ADR-123.
+
+### The part that is actually about me
+
+**I hid the failure from myself with a grep.** My final verification before pushing was:
+
+```
+make --no-print-directory check 2>&1 | grep -E "^(OK|FAIL)" | tail -6
+```
+
+`thermal budget is STALE` does not start with `OK` or `FAIL`. Neither does most of make's error
+output, and `tail -6` discarded what was left. **I filtered my own gate's failure out of my own
+verification**, in the same session as a review whose central finding was a gate that could not
+report. The gate worked. The pipeline into my eyes did not.
+
+I have no mechanism to propose for this one, and I am suspicious of inventing one. The honest
+statement is narrower: **when the point of a command is to find out whether something failed, do
+not pipe it through anything.** Read it.
+
+### The second-order defect: the gate would not say what was wrong
+
+CI printed `thermal budget is STALE: run make -C hardware thermal` and nothing else. That is the
+half of a gate that tells you to look without telling you where, and diagnosing a one-milliwatt
+difference from it cost a full round-trip.
+
+All four generators now print a unified diff on staleness. The diff would have named the row and
+the value immediately.
+
+### And the environment was never pinned
+
+The hardware CI job used whatever Python the runner image ships. For jobs that *check committed
+artefacts*, that is a dependency nobody declared. Pinned to 3.11 — which does not fix the
+underlying fragility, and is not meant to; the integer quantisation does that. It stops a runner
+image upgrade from being a silent input to a document.
+
+---
+
 ## Round 11 — 6 Sep 2026, independent review of the solenoid circuit (IR-018-11…15)
 
 **All five accepted. None disputed. The disposition — do not accept the solenoid response yet —

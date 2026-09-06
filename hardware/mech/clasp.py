@@ -550,6 +550,27 @@ def render(text: str) -> str:
     return text
 
 
+def _show_stale(current: str, updated: str, who: str) -> None:
+    """Print WHAT is stale, not just that something is.
+
+    A gate that says "STALE" and nothing else costs a full round-trip to
+    diagnose -- which is exactly what happened when a one-milliwatt rounding
+    difference between Python 3.11 and 3.12 turned this check red in CI and
+    green on the author's machine. The diff would have said so immediately.
+    """
+    import difflib
+    print(f"{who}: the committed document does not match the generator:",
+          file=sys.stderr)
+    diff = difflib.unified_diff(current.splitlines(), updated.splitlines(),
+                                fromfile="committed", tofile="generated",
+                                lineterm="", n=1)
+    for i, line in enumerate(diff):
+        if i > 60:
+            print("  ... (truncated)", file=sys.stderr)
+            break
+        print(f"  {line}", file=sys.stderr)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
@@ -564,6 +585,7 @@ def main() -> int:
     new = render(cur)
     if a.check:
         if cur != new:
+            _show_stale(cur, new, 'clasp.py')
             print("clasp tables STALE", file=sys.stderr)
             return 1
         print("clasp tables up to date")

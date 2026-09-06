@@ -97,20 +97,47 @@ COPY_SECONDS = 30.0                  # guardrail 10
 # Derived
 # --------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Deterministic milliwatts.
+#
+# This document is a COMMITTED ARTEFACT checked by CI, so every number in it has
+# to be a function of the inputs and nothing else. It was not: Python 3.12
+# changed `sum()` to compensated (Neumaier) summation for floats, which is more
+# accurate and changes the last bit -- and the playback load subtotal lands
+# exactly on 739.5 mW. So 3.11 rendered "740 mW" and 3.12 rendered "739 mW", the
+# committed file was stale on the CI runner and fresh on this machine, and the
+# gate was right both times.
+#
+# Rounding half-to-even at a .5 boundary is not the problem; depending on which
+# side of that boundary a float sum lands is. So: quantise each load to integer
+# microwatts, aggregate in integers, and round half-UP explicitly at the end.
+# Per-load microwatts are identical on 3.10, 3.11, 3.12 and 3.13.
+def mw(watts: float) -> int:
+    """Watts -> integer milliwatts, half-up, version-independent."""
+    return (uw(watts) + 500) // 1000
+
+
+def uw(watts: float) -> int:
+    """Watts -> integer microwatts. The quantisation point."""
+    return round(watts * 1e6)
+
+
 def enclosure_area_m2() -> float:
     w, d, h = (x / 1000.0 for x in ENCLOSURE_MM)
     return 2 * (w * d + w * h + d * h)
 
 
 def rail_totals(mode: str) -> dict[str, float]:
-    out: dict[str, float] = {}
+    """Per-rail totals, summed in integer microwatts so the result does not
+    depend on the interpreter's float summation strategy."""
+    out: dict[str, int] = {}
     for load in LOADS:
-        out[load.rail] = out.get(load.rail, 0.0) + load.watts(mode)
-    return out
+        out[load.rail] = out.get(load.rail, 0) + uw(load.watts(mode))
+    return {rail: micro / 1e6 for rail, micro in out.items()}
 
 
 def load_watts(mode: str) -> float:
-    return sum(load.watts(mode) for load in LOADS)
+    return sum(uw(load.watts(mode)) for load in LOADS) / 1e6
 
 
 def buck_loss(mode: str) -> float:
@@ -218,7 +245,7 @@ def t_junction() -> str:
         tinf = junction_temp(d, "copy", AMBIENT_NOMINAL_C, None)
         rows.append(
             f"| {d.name} | {d.theta_ja:.0f} °C/W | {d.tau_s:.0f} s | "
-            f"{d.power['copy']*1000:.0f} mW | **{t30:.1f} °C** | {tinf:.1f} °C | "
+            f"{mw(d.power['copy'])} mW | **{t30:.1f} °C** | {tinf:.1f} °C | "
             f"{d.tj_max:.0f} °C |")
     rows += ["", "At 25 °C ambient. Hot-room case (35 °C ambient, held indefinitely):", "",
              "| Device | T_j | Margin to T_j max |", "|---|---:|---:|"]
@@ -252,26 +279,26 @@ def t_loads() -> str:
             "|---|---|---:|---:|---:|---|"]
     for l in LOADS:
         rows.append(
-            f"| {l.name} | `{l.rail}` | {l.watts('idle')*1000:.0f} mW | "
-            f"{l.watts('play')*1000:.0f} mW | **{l.watts('copy')*1000:.0f} mW** | {l.source} |")
+            f"| {l.name} | `{l.rail}` | {mw(l.watts('idle'))} mW | "
+            f"{mw(l.watts('play'))} mW | **{mw(l.watts('copy'))} mW** | {l.source} |")
     rows.append(
-        f"| **Load subtotal** | | **{load_watts('idle')*1000:.0f} mW** | "
-        f"**{load_watts('play')*1000:.0f} mW** | **{load_watts('copy')*1000:.0f} mW** | |")
+        f"| **Load subtotal** | | **{mw(load_watts('idle'))} mW** | "
+        f"**{mw(load_watts('play'))} mW** | **{mw(load_watts('copy'))} mW** | |")
     for mode in ("idle", "play", "copy"):
         pass
     rows.append(
-        f"| Buck loss @ {BUCK_EFFICIENCY*100:.0f}% | `VBAT` | {buck_loss('idle')*1000:.0f} mW | "
-        f"{buck_loss('play')*1000:.0f} mW | {buck_loss('copy')*1000:.0f} mW | EST |")
+        f"| Buck loss @ {BUCK_EFFICIENCY*100:.0f}% | `VBAT` | {mw(buck_loss('idle'))} mW | "
+        f"{mw(buck_loss('play'))} mW | {mw(buck_loss('copy'))} mW | EST |")
     rows.append(
-        f"| Charger loss @ {CHARGER_EFFICIENCY*100:.0f}% | `+5V` | {charger_loss()*1000:.0f} mW | "
-        f"{charger_loss()*1000:.0f} mW | {charger_loss()*1000:.0f} mW | EST |")
+        f"| Charger loss @ {CHARGER_EFFICIENCY*100:.0f}% | `+5V` | {mw(charger_loss())} mW | "
+        f"{mw(charger_loss())} mW | {mw(charger_loss())} mW | EST |")
     rows.append(
-        f"| Cell I²R @ {CELL_ESR_OHM*1000:.0f} mΩ | `VBAT` | {cell_loss()*1000:.0f} mW | "
-        f"{cell_loss()*1000:.0f} mW | {cell_loss()*1000:.0f} mW | EST |")
+        f"| Cell I²R @ {CELL_ESR_OHM*1000:.0f} mΩ | `VBAT` | {mw(cell_loss())} mW | "
+        f"{mw(cell_loss())} mW | {mw(cell_loss())} mW | EST |")
     rows.append(
         f"| **Total in the box, charging** | | "
-        f"**{dissipated('idle', True)*1000:.0f} mW** | "
-        f"**{dissipated('play', True)*1000:.0f} mW** | "
+        f"**{mw(dissipated('idle', True))} mW** | "
+        f"**{mw(dissipated('play', True))} mW** | "
         f"**{dissipated('copy', True):.2f} W** | |")
     return "\n".join(rows)
 
@@ -281,7 +308,7 @@ def t_rails() -> str:
     rails = sorted({l.rail for l in LOADS})
     for r in rails:
         i, p, c = (rail_totals(m).get(r, 0.0) for m in ("idle", "play", "copy"))
-        rows.append(f"| `{r}` | {i*1000:.0f} mW | {p*1000:.0f} mW | {c*1000:.0f} mW |")
+        rows.append(f"| `{r}` | {mw(i)} mW | {mw(p)} mW | {mw(c)} mW |")
     return "\n".join(rows)
 
 
@@ -377,6 +404,27 @@ def render(text: str) -> str:
     return text
 
 
+def _show_stale(current: str, updated: str, who: str) -> None:
+    """Print WHAT is stale, not just that something is.
+
+    A gate that says "STALE" and nothing else costs a full round-trip to
+    diagnose -- which is exactly what happened when a one-milliwatt rounding
+    difference between Python 3.11 and 3.12 turned this check red in CI and
+    green on the author's machine. The diff would have said so immediately.
+    """
+    import difflib
+    print(f"{who}: the committed document does not match the generator:",
+          file=sys.stderr)
+    diff = difflib.unified_diff(current.splitlines(), updated.splitlines(),
+                                fromfile="committed", tofile="generated",
+                                lineterm="", n=1)
+    for i, line in enumerate(diff):
+        if i > 60:
+            print("  ... (truncated)", file=sys.stderr)
+            break
+        print(f"  {line}", file=sys.stderr)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
@@ -390,6 +438,7 @@ def main() -> int:
 
     if args.check:
         if current != updated:
+            _show_stale(current, updated, 'budget.py')
             print("thermal budget is STALE: run `make -C hardware thermal`",
                   file=sys.stderr)
             return 1

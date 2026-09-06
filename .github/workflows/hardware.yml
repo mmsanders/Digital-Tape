@@ -42,6 +42,16 @@ jobs:
     # schematic that fails ERC, and only one of those was checked before.
     steps:
       - uses: actions/checkout@v4
+      # PINNED, and it is not cosmetic. Python 3.12 changed `sum()` to
+      # compensated summation for floats, which moved a load subtotal across a
+      # 0.5 mW rounding boundary -- so a committed document was stale on the
+      # runner and fresh on the author's machine. The generators now quantise to
+      # integer microwatts so that specific class is gone, but a committed
+      # artefact checked by CI should not depend on whatever the runner image
+      # happens to ship either way.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Plate opens and sits on the bed
         run: make -C hardware packet-validate
       - name: Media-atomicity judge, and proof it can go red

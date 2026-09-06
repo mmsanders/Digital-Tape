@@ -1348,3 +1348,39 @@ this review were about a gate nobody ran; a red case in an unreachable gate is t
 
 **Cost to reverse.** Zero, and it would restore a state where a safety limit could go red in a
 generated table while every automated job stayed green.
+
+---
+
+## ADR-123 — Generated documents are quantised, version-pinned, and say what is stale
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, after a CI failure on `a73bb92`
+
+**Decision.** Every displayed milliwatt in `thermal-budget.md` is computed by quantising each
+load to **integer microwatts**, aggregating in integers, and rounding **half-up** at the end.
+Every generator's `--check` prints a **unified diff** of what differs, not just that something
+does. The hardware CI job **pins Python to 3.11** rather than using the runner's default.
+
+**Rationale.** `thermal-check` went red in CI and green on this machine, on the same commit.
+
+**Python 3.12 changed `sum()` to compensated (Neumaier) summation for floats.** It is more
+accurate and it changes the last bit — and the playback load subtotal lands on exactly
+**739.5 mW**. So 3.11 rendered `740 mW`, 3.12 rendered `739 mW`, and a document that is a
+committed artefact checked by CI was simultaneously fresh and stale depending on where you ran
+it. **The gate was right both times**, which is the uncomfortable part: nothing was wrong except
+that the number was never a function of the inputs alone.
+
+Rounding half-to-even at a boundary is fine. *Depending on which side of the boundary a float
+sum lands* is not. Per-load integer microwatts are identical on 3.10, 3.11, 3.12 and 3.13.
+
+**Six rows shift by 1 mW** as a consequence of the explicit half-up rule. No temperature, margin
+or conclusion moves; the shifts are on values already marked EST, far inside their own
+uncertainty. Recorded in the document's revision history rather than allowed to appear as
+unexplained churn.
+
+**The diagnosis cost a full round-trip because the gate would not say what was wrong.** It
+printed `STALE` and the remedy, and nothing else. A gate that detects drift but will not name it
+is only half a gate — the half that tells you to look, without telling you where. Every
+generator now prints the diff.
+
+**Cost to reverse.** Zero, and it would restore a state where a committed artefact's contents
+depend on the interpreter that happened to render them.

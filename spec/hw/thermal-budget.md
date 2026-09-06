@@ -95,12 +95,12 @@ It is also the step the charter's 8 K figure omits entirely — 8 K is a case-to
 | Load | Rail | Idle | Playback | **Copy** | Source |
 |---|---|---:|---:|---:|---|
 | i.MX RT1062 @ 600 MHz | `+3V3` | 20 mW | 363 mW | **594 mW** | EST |
-| PSRAM (APS6404L QSPI) | `+3V3` | 0 mW | 49 mW | **99 mW** | EST/UNVERIFIED |
-| QSPI flash | `+3V3` | 0 mW | 26 mW | **49 mW** | EST/UNVERIFIED |
-| SGTL5000 + headphone amp | `+3V3A` | 0 mW | 116 mW | **16 mW** | EST |
-| microSD, source slot | `+3V3` | 0 mW | 148 mW | **660 mW** | EST |
+| PSRAM (APS6404L QSPI) | `+3V3` | 0 mW | 50 mW | **99 mW** | EST/UNVERIFIED |
+| QSPI flash | `+3V3` | 0 mW | 26 mW | **50 mW** | EST/UNVERIFIED |
+| SGTL5000 + headphone amp | `+3V3A` | 0 mW | 116 mW | **17 mW** | EST |
+| microSD, source slot | `+3V3` | 0 mW | 149 mW | **660 mW** | EST |
 | microSD, destination slot | `+3V3` | 0 mW | 0 mW | **726 mW** | EST |
-| LED banks | `+3V3` | 0 mW | 33 mW | **82 mW** | EST |
+| LED banks | `+3V3` | 0 mW | 33 mW | **83 mW** | EST |
 | +1V8 rail quiescent | `+1V8` | 0 mW | 4 mW | **14 mW** | EST |
 | **Load subtotal** | | **20 mW** | **740 mW** | **2242 mW** | |
 | Buck loss @ 90% | `VBAT` | 2 mW | 82 mW | 249 mW | EST |
@@ -116,7 +116,7 @@ By rail:
 |---|---:|---:|---:|
 | `+1V8` | 0 mW | 4 mW | 14 mW |
 | `+3V3` | 20 mW | 620 mW | 2211 mW |
-| `+3V3A` | 0 mW | 116 mW | 16 mW |
+| `+3V3A` | 0 mW | 116 mW | 17 mW |
 <!-- END GENERATED: rails -->
 
 **Assumptions worth challenging.** Audio is treated as muted during a copy — the device is not
@@ -537,6 +537,7 @@ result — are the ones that make the audit possible and the ones most likely to
 
 | Rev | Date | Change |
 |---|---|---|
+| 0.4a | 2026-09-06 | **Six load rows move by 1 mW.** The generator now quantises to integer microwatts and rounds half-up, because `sum()` over floats changed in Python 3.12 and the playback subtotal sat exactly on 739.5 mW — the committed document was stale on the CI runner and fresh on the author's machine, and the gate was right both times. **No temperature, margin or conclusion changed**; the shifts are ~1 mW on values already marked EST. |
 | 0.4 | 2026-09-06 | **§6 reworked after independent review IR-018-11…15, and T-4 withdrawn.** The previous solenoid working point (5.0 W, 15 ms, 450 ms) **failed** the 0.25 W limit at **0.330 W** once the electrical corners were included; the old model bounded only timing corners on a nominal coil label. Coil power is now bounded by `V²/R` at the rail, winding and cold-copper corners; the fault and usability claims use **opposite** timing corners; the lockout RC is inside the part's specified `R_EXT` range, which the old 1368 kΩ was not; and the criteria are executable and gated in CI. **A new response, not a closure.** |
 | 0.3 | 2026-09-05 | §9: WP-37's results are recorded to `hardware/measurements/TEMPLATE.md`, per PM Decisions 006 §5. No number in this document changed. |
 | 0.2 | 2026-09-03 | **Row added retrospectively at 0.3 — it was missing.** 0.2 carried the three IR-015 responses: the charger's 45 °C mechanism and its TS divider (§5.1–§5.3), the solenoid restated as an energy budget (§6, ADR-116), and per-device junction temperatures through the copy transient (§3). The banner and §8's proposed limits arrived with it. |
