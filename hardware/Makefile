@@ -120,7 +120,7 @@ packet-duplicates:
 ## which the old model called a 1.14x pass and the corrected model rejects twice.
 solenoid-test:
 	@cd $(THERMAL) && $(PY) test_solenoid.py >/dev/null \
-	  && echo "OK  solenoid criteria: 17 checks pass, incl. the old working point"
+	  && echo "OK  solenoid criteria: 24 checks pass, incl. the old point and the handoff race"
 	@cd $(THERMAL) && $(PY) test_solenoid.py --mutate >/dev/null \
 	  && echo "OK  solenoid criteria: proven able to go red"
 

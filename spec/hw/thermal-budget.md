@@ -1,15 +1,16 @@
 # Thermal and safety budget — WP-34
 
 **Owner:** Hardware Lead · **Status:** living document, versioned not frozen (PM Decisions 001 §3)
-**Revision:** 0.4, 6 Sep 2026 · **Applies to:** production board rev A
+**Revision:** 0.5, 6 Sep 2026 · **Applies to:** production board rev A
 
 > **STATUS: three IR-015 findings — charger 45 °C enforcement, solenoid sustained-power bound,
 > transient junction temperatures. Numbers in §T-1 and §T-2 are provisional; T-4 is withdrawn.**
 >
-> **The solenoid response was reviewed and rejected (IR-018-11…15) and has been reworked.** The
-> previous working point failed the limit once the electrical corners were included. The rework
-> is in §6; it is a new response, not a closure, and the reviewer's disposition stands until
-> they or the PM accept it.
+> **The solenoid response has now been reviewed and rejected twice** — IR-018-11…15, then
+> IR-018-16…17. The first found the working point failed the limit once the electrical corners
+> were included; the second found the pulse-to-lockout handoff could be raced and that the
+> timing tolerance was not bound to a part or a rail. §6 is reworked for both and its verdict is
+> **PROVISIONAL, not pass**. It is a response, not a closure.
 >
 > **A response is filed against each** (§5.1–5.3, §6, §3; `ADR-111`, `ADR-116`, and the
 > per-device junction model). **They are not closed until the PM or a reviewer accepts them** —
@@ -330,7 +331,9 @@ A PPTC remains a third-layer backstop and **may not be the element that establis
 it is history-dependent and has no deterministic worst case. The two monostables do it alone.
 
 <!-- BEGIN GENERATED: solenoid_values -->
-> **Reworked after independent review IR-018-11…15.** The previous working point (5.0 W, 15 ms, 450 ms) **fails** once the electrical corners are included: **0.330 W against a 0.25 W limit**, where the old model reported 0.220 W and a 1.14× pass. It also blocked legitimate use at the slow timing corner. Both are corrected below; **the response is not closed and I do not accept it.**
+> **VERDICT: PROVISIONAL.** The inequalities below hold at the assumed corners. **One corner is not yet bound to a real part** (IR-018-16), so this is not a PASS and the document does not claim one. See *What is still open*.
+
+> **Reworked twice after independent review — IR-018-11…15, then IR-018-16…17.** The original working point (5.0 W, 15 ms, 450 ms) **fails** once the electrical corners are included: **0.330 W against 0.25 W**, where the first model reported 0.220 W and a 1.14× pass. The second review then found the pulse-to-lockout handoff could be raced. **The response remains open and I do not accept it.**
 
 ### The coil is bounded by its corners, not by its label
 
@@ -353,23 +356,40 @@ So a **3.5 W** nominal coil is a **4.75 W** coil for the purposes of this limit.
 | Coil, **worst case** | **4.75 W** | the number the limit is about | |
 | Pulse (**placeholder — WP-04 measures this**) | 10 ms nominal, 8.0…**12.0 ms** | ≤ 50 ms | **pass**, 4.2× |
 | Energy per actuation, worst case | **57 mJ** | ≤ 125 mJ | **pass**, 2.19× |
-| Lockout | 386 ms nominal, 309…463 ms | | |
-| **Fastest** the hardware can fire | one per **321 ms** | bounds fault power | |
-| **Slowest** a press can be locked out | **475 ms** | must be < 500 ms so real use is never blocked | **pass**, 25 ms spare |
+| **Inhibit (B)** | 390 ms nominal, 312…468 ms | spans the WHOLE cycle, not the tail | see topology |
+| **Fastest** the hardware can fire | one per **312 ms** | bounds fault power | |
+| **Slowest** a press can be locked out | **468 ms** | must be < 500 ms so real use is never blocked | **pass**, 32 ms spare |
 | Average at 2 Hz legitimate use | **0.114 W** | ≤ 0.25 W | **pass**, 2.2× |
-| Average in a retrigger fault, rolling 10 s | **0.183 W** | ≤ 0.25 W | **pass**, 1.37× |
+| Average in a retrigger fault, rolling 10 s | **0.188 W** | ≤ 0.25 W | **pass**, 1.33× |
 
 Timing tolerance **±20 %**, arithmetic sum not RSS: ±14 % for the one-shot itself (its *guaranteed* spread over temperature, not a typical), ±1 % resistor, ±5 % capacitor. The previous stack allocated only 10 % to the IC and was therefore tighter than the part it was modelling.
 
-### The part, and why the previous RC was never inside it
+### The topology, and why the handoff cannot be raced
 
-**One `74HC221` dual non-retriggerable monostable.** The A half sets the pulse (R = 143 kΩ, C = 100 nF **C0G**); the B half holds the lockout (R = 551 kΩ, C = 1 µF **film**), **triggered once by A's falling edge** so it sits downstream of the pulse and no gate input can defeat it.
+**This changed after IR-018-17.** The previous arrangement fired the coil from A and triggered B from **A's falling edge**, gating admission on *neither A nor B active*. B's output only asserts after propagation, so between A releasing and B asserting there is a finite window in which a request edge is admitted — and a firmware fault is not phase-constrained, so it can present an edge exactly there. **One extra pulse inside the lockout invalidates the minimum period the whole 0.25 W proof rests on.**
 
-**Both resistors are inside the family's specified 2…1000 kΩ range, and the previous ones were not:** the old 450 ms lockout on 470 nF needed **1368 kΩ**, above the limit, so that working point was never inside the part's envelope. Moving the lockout capacitor to 1 µF brings the resistor back to a specified value.
+So B is now triggered by the **same edge that triggers A**, and its period spans the **entire cycle** rather than the tail after the pulse. Admission is gated on **B alone**:
 
-**The wording is also corrected.** A 74HC221 is **non-retriggerable** — the previous text said the B half was *"retriggered by A's falling edge"*, which describes the opposite behaviour. It is triggered once per accepted pulse, and that is the property the lockout depends on.
+```
+request edge --+--> A (non-retriggerable, pulse)    --> coil driver
+               |
+               +--> B (non-retriggerable, inhibit)  --> admission gate
 
-> **`R_EXT` limits and the ±14 % IC spread are taken from the datasheets the reviewer > cited** (Nexperia 74HCT221 Rev. 4; TI CD74HC221 Rev. F). **I cannot fetch them > myself** — vendor egress reaches neither, gap H-02 — so these numbers are second-hand > and must be confirmed against the exact orderable variant before WP-26. That is a > real open item, not a formality: the family's variants differ here.
+admit = NOT B          one term, one output, no handoff
+```
+
+There is no A→B handoff to race: **B is asserted before A ends** (312 ms at its shortest against a 12.00 ms pulse including propagation) and stays asserted long after. The only remaining window is the propagation delay at the very start, before B asserts — and **A is already triggered and non-retriggerable through it**, so no second coil pulse can occur there either.
+
+That is a structural argument, not a statistical one, and it is checked: `b_covers_a()` asserts the inequality at opposite corners with propagation included, and `test_solenoid.py` has a red case that fails when the inhibit does not outlast the pulse — which is exactly the old topology.
+
+### The part, and the rail
+
+**Candidate: 74HC221 (HC, 2..6 V) -- exact orderable variant NOT yet bound.** A half sets the pulse (R = 143 kΩ, C = 100 nF **C0G**); B half sets the inhibit (R = 557 kΩ, C = 1 µF **film**). Both resistors are inside the family's specified 2…1000 kΩ range; the original 450 ms lockout on 470 nF needed **1368 kΩ** and was not.
+
+**The logic rail is 3.3 V** (`board-rev-a` §1), and that is a binding constraint IR-018-16 was right to demand. It **excludes the 74HCT221 outright** — that part is 4.5…5.5 V — and it means the HC family's supply-dependent K-factor applies. Any timing figure quoted at 5 V is not a figure for this circuit.
+
+**74HC221 devices are non-retriggerable**, and the design depends on it: it is what makes the propagation window at the start harmless.
+
 <!-- END GENERATED: solenoid_values -->
 
 ### 6.1 Against the acceptance test
@@ -379,8 +399,8 @@ The limit only means something if it clears real use and still bounds a fault. *
 
 | Claim | Corner used | Value | Against |
 |---|---|---:|---|
-| A fault is bounded | **fastest**: longest pulse, *shortest* lockout | one per 321 ms | 0.183 W ≤ 0.25 W |
-| Real use is never blocked | **slowest**: longest pulse, *longest* lockout | 475 ms | < 500 ms |
+| A fault is bounded | **fastest**: longest pulse, *shortest* lockout | one per 312 ms | 0.188 W ≤ 0.25 W |
+| Real use is never blocked | **slowest**: longest pulse, *longest* lockout | 468 ms | < 500 ms |
 
 **The previous version checked the fast corner for both**, and reported 395 ms against the 500 ms period. At the slow corner the same design held the inhibit for **539 ms** — so a legitimate press arriving 500 ms after the last one would have been silently dropped. IR-018-12.
 
@@ -389,9 +409,9 @@ The limit only means something if it clears real use and still bounds a fault. *
 | One press | 0.2 /s | **0.011 W** | **pass** |
 | Brisk use | 1.0 /s | **0.057 W** | **pass** |
 | **Child mashing stop/play** | 2.0 /s | **0.114 W** | **pass** |
-| Firmware retrigger loop, 100 Hz input | 3.1 /s | **0.178 W** | **pass** |
+| Firmware retrigger loop, 100 Hz input | 3.2 /s | **0.183 W** | **pass** |
 
-The last row is the fault case: a 100 Hz gate input is throttled by the lockout to one pulse per 321 ms whatever firmware does. It is evaluated over a **finite rolling 10 s window** rather than as an asymptotic duty ratio — 0.183 W against 0.178 W — because the criterion is a window and a window can align worse than the ratio implies.
+The last row is the fault case: a 100 Hz gate input is throttled by the lockout to one pulse per 312 ms whatever firmware does. It is evaluated over a **finite rolling 10 s window** rather than as an asymptotic duty ratio — 0.188 W against 0.183 W — because the criterion is a window and a window can align worse than the ratio implies.
 
 ### The design is a boundary, not a point
 
@@ -399,21 +419,25 @@ The last row is the fault case: a 100 Hz gate input is throttled by the lockout 
 
 | Pulse, nominal | Lockout, nominal | Slowest inhibit | Largest **nominal** coil |
 |---:|---:|---:|---:|
-| 8 ms | 388 ms | 475 ms | **5.99 W** |
-| 10 ms | 386 ms | 475 ms | **4.79 W** ← **committed** |
-| 12 ms | 384 ms | 475 ms | **3.99 W** |
-| 15 ms | 381 ms | 475 ms | **3.30 W** |
-| 20 ms | 376 ms | 475 ms | **2.47 W** |
+| 8 ms | 388 ms | 465 ms | **5.81 W** |
+| 10 ms | 386 ms | 463 ms | **4.65 W** ← **committed** |
+| 12 ms | 384 ms | 461 ms | **3.87 W** |
+| 15 ms | 381 ms | 457 ms | **3.10 W** |
+| 20 ms | 376 ms | 451 ms | **2.26 W** |
 
-At the placeholder 15 ms the ceiling is **3.30 W**, so the old 5 W coil was never compliant at that pulse. The committed point takes a shorter pulse instead, which buys back the coil: **3.5 W at 10 ms**, inside the 4.79 W ceiling with 1.37× on the power limit.
+At the placeholder 15 ms the ceiling is **3.10 W**, so the old 5 W coil was never compliant at that pulse. The committed point takes a shorter pulse instead, which buys back the coil: **3.5 W at 10 ms**, inside the 4.65 W ceiling with 1.33× on the power limit.
 
 **The dominant term is the tolerance stack, not the nominal.** Specifying the rail to ±2 % and the winding to ±5 % would drop the corner factor from 1.36× to 1.21×, which buys more headroom than any plausible change to the coil. **That is the cheapest lever and it is a procurement decision, not a circuit one.**
 
 ### What is still open
 
-**The pulse length remains a placeholder and the coil is chosen from it.** WP-04 measures the shortest pulse that reliably releases the latch. If that number comes back above ~10 ms, the table above says what the coil must drop to — and if the mechanism then needs more energy than the budget allows, that is a genuine conflict between a safety limit and a mechanism, and it goes to the PM rather than being absorbed by widening the limit.
+**This is a PROVISIONAL result and the reasons are listed, not buried.**
 
-**The `R_EXT` range and the ±14 % IC figure are second-hand** (see the note above) and must be confirmed against the exact orderable part. **The response to the solenoid finding is not closed, and I do not get to close it.**
+- the ±14 % one-shot timing term is ASSUMED, not guaranteed: it is extrapolated from a 700 µs datasheet test point at VCC = 5 V and applied to a 390 ms interval at 3.3 V with a different R/C. Part still unbound (74HC221 (HC, 2..6 V) -- exact orderable variant NOT yet bound)
+- **The pulse length is a placeholder.** WP-04 measures the shortest pulse that reliably releases the latch. If it comes back above ~10 ms the feasibility table says what the coil must drop to — and if the mechanism then needs more energy than the budget allows, that is a genuine conflict between a safety limit and a mechanism, and it goes to the PM rather than being absorbed by widening the limit.
+- **Vendor egress reaches no datasheet** (H-02), so binding the one-shot's guaranteed timing at this rail is blocked on either the egress gap or a bench measurement of the chosen part. **A measurement is the honest route** and does not wait on anyone: it belongs with WP-04's pulse measurement, on the same bench, on the same day.
+
+**The response to the IR-015 solenoid finding is not closed, and I do not get to close it.** Two reviews have now found real defects in it — one physical, one structural — and the disposition after each was the same.
 <!-- END GENERATED: solenoid_test -->
 
 ### 6.2 The third layer, and what it is not
@@ -537,6 +561,7 @@ result — are the ones that make the audit possible and the ones most likely to
 
 | Rev | Date | Change |
 |---|---|---|
+| 0.5 | 2026-09-06 | **§6 reworked again after IR-018-16…17, and the verdict is now PROVISIONAL rather than pass.** **The topology changed:** B is triggered by the same edge as A and spans the whole cycle, with admission gated on B alone — the previous arrangement triggered B from A's *falling* edge, leaving a propagation window in which a request edge could be admitted and one extra pulse could land inside the lockout, which would have invalidated the minimum period the 0.25 W proof rests on. **The logic rail is now bound at 3.3 V**, which excludes the 74HCT221 (4.5–5.5 V) outright and means any timing figure quoted at 5 V does not apply. **The ±14 % one-shot term is marked ASSUMED, not guaranteed** — it is extrapolated from a 700 µs test point at a different rail and R/C — so the analysis reports it as a qualification gap and refuses to certify. |
 | 0.4a | 2026-09-06 | **Six load rows move by 1 mW.** The generator now quantises to integer microwatts and rounds half-up, because `sum()` over floats changed in Python 3.12 and the playback subtotal sat exactly on 739.5 mW — the committed document was stale on the CI runner and fresh on the author's machine, and the gate was right both times. **No temperature, margin or conclusion changed**; the shifts are ~1 mW on values already marked EST. |
 | 0.4 | 2026-09-06 | **§6 reworked after independent review IR-018-11…15, and T-4 withdrawn.** The previous solenoid working point (5.0 W, 15 ms, 450 ms) **failed** the 0.25 W limit at **0.330 W** once the electrical corners were included; the old model bounded only timing corners on a nominal coil label. Coil power is now bounded by `V²/R` at the rail, winding and cold-copper corners; the fault and usability claims use **opposite** timing corners; the lockout RC is inside the part's specified `R_EXT` range, which the old 1368 kΩ was not; and the criteria are executable and gated in CI. **A new response, not a closure.** |
 | 0.3 | 2026-09-05 | §9: WP-37's results are recorded to `hardware/measurements/TEMPLATE.md`, per PM Decisions 006 §5. No number in this document changed. |

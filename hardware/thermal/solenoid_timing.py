@@ -42,7 +42,19 @@ DESIGN_TARGET_W = 0.20        # design to this, not to the limit
 # +/-14 % around nominal (Nexperia 74HCT221 Rev. 4 gives 602..798 us for the
 # 100 nF / 10 kOhm example). The old stack allocated only 10 % to the IC before
 # adding R and C, so it was tighter than the part it was modelling.
-IC_TOL = 0.14              # guaranteed, over temperature -- NOT a typical
+# IR-018-16: this is an ASSUMPTION, not a guarantee, and the difference is the
+# whole finding. The 602..798 us figure is specified at CX = 0.1 uF, RX = 10 kOhm,
+# VCC = 5 V -- one datasheet test point. It is applied here to a ~390 ms interval
+# with a different R/C, on a 3.3 V rail. Neither the R/C nor the voltage is the
+# condition the guarantee covers.
+#
+# Worse: the Nexperia part cited alongside it is a 74HCT221, a 4.5..5.5 V device.
+# This board's logic rail is 3.3 V (board-rev-a §1), so that part is excluded
+# outright and the HC family's K-factor varies with supply.
+#
+# So the number stays, marked, and the analysis REFUSES TO CERTIFY on it. See
+# TIMING_BOUND_VERIFIED and qualification_gaps().
+IC_TOL = 0.14              # ASSUMED. Not yet bound to a part at this rail
 R_TOL = 0.01               # 1 % metal film
 C_TOL = 0.05               # 5 % film
 TIMING_TOL = IC_TOL + R_TOL + C_TOL          # 0.20, arithmetic sum not RSS
@@ -51,6 +63,24 @@ TIMING_TOL = IC_TOL + R_TOL + C_TOL          # 0.20, arithmetic sum not RSS
 # previous 450 ms lockout needed -- is OUTSIDE this, so that working point was
 # never inside the part's specified envelope. IR-018-13.
 R_EXT_MIN_OHM, R_EXT_MAX_OHM = 2e3, 1e6
+
+# The rail the one-shot actually runs on. Bound from board-rev-a §1, and it is
+# the term IR-018-16 says was missing: a timing guarantee quoted at 5 V is not a
+# guarantee at 3.3 V, and it excludes the HCT variant entirely.
+V_LOGIC = 3.3
+HCT_MIN_V = 4.5            # 74HCT221 is a 4.5..5.5 V part -> excluded here
+
+# Set to True ONLY when the exact orderable part's guaranteed pulse-width limits,
+# at V_LOGIC and over the intended R/C and temperature range, have been read from
+# its datasheet. It is False because vendor egress reaches no datasheet (H-02),
+# and because IC_TOL above is extrapolated from a test point that does not apply.
+TIMING_BOUND_VERIFIED = False
+CANDIDATE_PART = "74HC221 (HC, 2..6 V) -- exact orderable variant NOT yet bound"
+
+# Worst-case propagation from a trigger edge to the one-shot's output actually
+# asserting. IR-018-17: without this term the model assumed the inhibit was
+# continuous across the pulse-to-lockout handoff, and it was not.
+PROP_MAX_S = 100e-9
 
 # ---------------------------------------------------------------------------
 # Coil power, from the electrical corners rather than a label. IR-018-11.
@@ -81,9 +111,34 @@ USABILITY_MARGIN_MS = 25.0
 # coil follows FROM it -- see feasible_coil_w(). The previous point (5.0 W,
 # 15 ms, 450 ms) FAILS once the electrical corners are included: 0.299 W against
 # a 0.25 W limit, where the old model reported 0.220 W and a 1.14x pass.
+# TOPOLOGY CHANGED by IR-018-17, and this is what the numbers now mean.
+#
+# BEFORE: A fired the coil; B was triggered by A's FALLING edge and held the
+# lockout; admission was gated on "neither A nor B active". That has a hole. B's
+# output only asserts after propagation, so between A releasing and B asserting
+# there is a finite window in which a request edge is admitted -- and a firmware
+# fault is not phase-constrained, so it can present an edge exactly there. One
+# extra pulse inside the nominal lockout invalidates the minimum period that the
+# whole 0.25 W proof rests on.
+#
+# AFTER: B is triggered by the SAME edge that triggers A, and its period spans
+# the ENTIRE cycle -- coil pulse plus lockout. Admission is gated on B ALONE.
+#
+#   request edge --+--> A (non-retriggerable, PULSE_NOM_MS)  --> coil driver
+#                  |
+#                  +--> B (non-retriggerable, INHIBIT_NOM_MS) --> admission gate
+#
+#   admit = (not B)      one term, one output, no handoff
+#
+# There is no A->B handoff to race, because B is already asserted before A ends
+# and stays asserted long after. The only remaining window is PROP_MAX_S at the
+# very start, before B asserts -- and A is already triggered and NON-retriggerable
+# through it, so no second coil pulse can occur in that window either. That is
+# the structural argument the finding asks for, and b_covers_a() asserts it.
 COIL_W = 3.5               # NOMINAL, at V_BOOST_NOM. Worst case is ~1.36x this
-PULSE_NOM_MS = 10.0
-LOCKOUT_NOM_MS = 386.0
+PULSE_NOM_MS = 10.0        # A: coil on-time
+INHIBIT_NOM_MS = 390.0     # B: the WHOLE cycle, not the lockout after the pulse
+LOCKOUT_NOM_MS = INHIBIT_NOM_MS   # retained name; B now spans the cycle
 
 ENERGY_BUDGET_J = POWER_LIMIT_W / LEGIT_RATE_HZ
 
@@ -122,19 +177,34 @@ def worst_coil_w(nominal_w: float = None) -> float:
 # ---------------------------------------------------------------------------
 
 def min_inhibit_ms(pulse_nom=None, lockout_nom=None) -> float:
-    """FAST corner: longest pulse, shortest lockout. Bounds FAULT POWER --
-    it is the most often the hardware can possibly fire."""
-    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    """FAST corner of B. Bounds FAULT POWER -- the most often the hardware can
+    possibly fire.
+
+    B spans the whole cycle, so this is B's shortest period and NOT
+    `pulse + lockout`. Summing the two was only correct under the old topology,
+    and only if the handoff between them were instantaneous, which it is not.
+    """
     l = LOCKOUT_NOM_MS if lockout_nom is None else lockout_nom
-    return spread(p)[1] + spread(l)[0]
+    return spread(l)[0]
 
 
 def max_inhibit_ms(pulse_nom=None, lockout_nom=None) -> float:
-    """SLOW corner: longest pulse, longest lockout. Bounds USABILITY --
-    it is the longest a legitimate press can be locked out."""
-    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    """SLOW corner of B. Bounds USABILITY -- the longest a legitimate press can
+    be locked out."""
     l = LOCKOUT_NOM_MS if lockout_nom is None else lockout_nom
-    return spread(p)[1] + spread(l)[1]
+    return spread(l)[1]
+
+
+def b_covers_a(pulse_nom=None, lockout_nom=None) -> tuple[bool, float]:
+    """IR-018-17, as a checkable inequality.
+
+    B must still be asserted when A releases, at the worst corners in opposite
+    directions -- B shortest, A longest -- with propagation on top. If this ever
+    goes false, the handoff gap is back and every power number above is void.
+    """
+    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    a_max = spread(p)[1] + PROP_MAX_S * 1000.0
+    return min_inhibit_ms(pulse_nom, lockout_nom) >= a_max, a_max
 
 
 def fault_avg_w(coil_w=None, pulse_nom=None, lockout_nom=None) -> float:
@@ -213,6 +283,11 @@ def check_criteria(strict: bool = True):
     if spread(PULSE_NOM_MS)[1] > PULSE_CEILING_MS:
         bad.append(f"longest pulse {spread(PULSE_NOM_MS)[1]:.1f} ms exceeds the "
                    f"{PULSE_CEILING_MS:.0f} ms single-pulse ceiling")
+    covers, a_max = b_covers_a()
+    if not covers:
+        bad.append(f"the inhibit ({min_inhibit_ms():.1f} ms at its shortest) does not outlast "
+                   f"the coil pulse ({a_max:.3f} ms incl. propagation) -- there is a handoff "
+                   "gap in which a request edge can be admitted")
     slowest = max_inhibit_ms()
     period = 1000.0 / LEGIT_RATE_HZ
     if slowest > period:
@@ -224,6 +299,8 @@ def check_criteria(strict: bool = True):
         if not (R_EXT_MIN_OHM <= r <= R_EXT_MAX_OHM):
             bad.append(f"{name} timing resistor {r/1000:.0f} kOhm is outside the part's "
                        f"specified {R_EXT_MIN_OHM/1000:.0f}..{R_EXT_MAX_OHM/1000:.0f} kOhm range")
+    if V_LOGIC >= HCT_MIN_V:
+        bad.append(f"logic rail {V_LOGIC} V is in the HCT range; re-check the part family")
     if strict and bad:
         for line in bad:
             print(f"  SOLENOID: {line}", file=sys.stderr)
@@ -242,11 +319,15 @@ def t_solenoid_values() -> str:
     e = pw * t_hi / 1000.0
     period = 1000.0 / LEGIT_RATE_HZ
     return "\n".join([
-        "> **Reworked after independent review IR-018-11…15.** The previous working point "
-        "(5.0 W, 15 ms, 450 ms) **fails** once the electrical corners are included: "
-        "**0.330 W against a 0.25 W limit**, where the old model reported 0.220 W and a "
-        "1.14× pass. It also blocked legitimate use at the slow timing corner. Both are "
-        "corrected below; **the response is not closed and I do not accept it.**",
+        f"> **VERDICT: {verdict()}.** The inequalities below hold at the assumed corners. "
+        "**One corner is not yet bound to a real part** (IR-018-16), so this is not a PASS "
+        "and the document does not claim one. See *What is still open*.",
+        "",
+        "> **Reworked twice after independent review — IR-018-11…15, then IR-018-16…17.** The "
+        "original working point (5.0 W, 15 ms, 450 ms) **fails** once the electrical corners "
+        "are included: **0.330 W against 0.25 W**, where the first model reported 0.220 W and "
+        "a 1.14× pass. The second review then found the pulse-to-lockout handoff could be "
+        "raced. **The response remains open and I do not accept it.**",
         "",
         "### The coil is bounded by its corners, not by its label",
         "",
@@ -278,7 +359,8 @@ def t_solenoid_values() -> str:
         f"**pass**, {PULSE_CEILING_MS/t_hi:.1f}× |",
         f"| Energy per actuation, worst case | **{e*1000:.0f} mJ** | ≤ {ENERGY_BUDGET_J*1000:.0f} mJ | "
         f"**pass**, {ENERGY_BUDGET_J/e:.2f}× |",
-        f"| Lockout | {LOCKOUT_NOM_MS:.0f} ms nominal, {l_lo:.0f}…{l_hi:.0f} ms | | |",
+        f"| **Inhibit (B)** | {LOCKOUT_NOM_MS:.0f} ms nominal, {l_lo:.0f}…{l_hi:.0f} ms | "
+        f"spans the WHOLE cycle, not the tail | see topology |",
         f"| **Fastest** the hardware can fire | one per **{min_inhibit_ms():.0f} ms** | "
         f"bounds fault power | |",
         f"| **Slowest** a press can be locked out | **{max_inhibit_ms():.0f} ms** | "
@@ -295,29 +377,57 @@ def t_solenoid_values() -> str:
         f"capacitor. The previous stack allocated only 10 % to the IC and was therefore "
         "tighter than the part it was modelling.",
         "",
-        "### The part, and why the previous RC was never inside it",
+        "### The topology, and why the handoff cannot be raced",
         "",
-        f"**One `74HC221` dual non-retriggerable monostable.** The A half sets the pulse "
-        f"(R = {r_pulse/1000:.0f} kΩ, C = 100 nF **C0G**); the B half holds the lockout "
-        f"(R = {r_lock/1000:.0f} kΩ, C = 1 µF **film**), **triggered once by A's falling "
-        f"edge** so it sits downstream of the pulse and no gate input can defeat it.",
+        "**This changed after IR-018-17.** The previous arrangement fired the coil from A and "
+        "triggered B from **A's falling edge**, gating admission on *neither A nor B active*. "
+        "B's output only asserts after propagation, so between A releasing and B asserting "
+        "there is a finite window in which a request edge is admitted — and a firmware fault "
+        "is not phase-constrained, so it can present an edge exactly there. **One extra pulse "
+        "inside the lockout invalidates the minimum period the whole 0.25 W proof rests on.**",
         "",
-        f"**Both resistors are inside the family's specified "
-        f"{R_EXT_MIN_OHM/1000:.0f}…{R_EXT_MAX_OHM/1000:.0f} kΩ range, and the previous ones "
-        f"were not:** the old 450 ms lockout on 470 nF needed **1368 kΩ**, above the limit, "
-        "so that working point was never inside the part's envelope. Moving the lockout "
-        "capacitor to 1 µF brings the resistor back to a specified value.",
+        "So B is now triggered by the **same edge that triggers A**, and its period spans the "
+        "**entire cycle** rather than the tail after the pulse. Admission is gated on **B "
+        "alone**:",
         "",
-        "**The wording is also corrected.** A 74HC221 is **non-retriggerable** — the previous "
-        "text said the B half was *\"retriggered by A's falling edge\"*, which describes the "
-        "opposite behaviour. It is triggered once per accepted pulse, and that is the property "
-        "the lockout depends on.",
+        "```",
+        "request edge --+--> A (non-retriggerable, pulse)    --> coil driver",
+        "               |",
+        "               +--> B (non-retriggerable, inhibit)  --> admission gate",
         "",
-        "> **`R_EXT` limits and the ±14 % IC spread are taken from the datasheets the reviewer "
-        "> cited** (Nexperia 74HCT221 Rev. 4; TI CD74HC221 Rev. F). **I cannot fetch them "
-        "> myself** — vendor egress reaches neither, gap H-02 — so these numbers are second-hand "
-        "> and must be confirmed against the exact orderable variant before WP-26. That is a "
-        "> real open item, not a formality: the family's variants differ here.",
+        "admit = NOT B          one term, one output, no handoff",
+        "```",
+        "",
+        f"There is no A→B handoff to race: **B is asserted before A ends** "
+        f"({min_inhibit_ms():.0f} ms at its shortest against a "
+        f"{spread(PULSE_NOM_MS)[1] + PROP_MAX_S*1000:.2f} ms pulse including propagation) and "
+        "stays asserted long after. The only remaining window is the propagation delay at the "
+        "very start, before B asserts — and **A is already triggered and non-retriggerable "
+        "through it**, so no second coil pulse can occur there either.",
+        "",
+        "That is a structural argument, not a statistical one, and it is checked: "
+        "`b_covers_a()` asserts the inequality at opposite corners with propagation included, "
+        "and `test_solenoid.py` has a red case that fails when the inhibit does not outlast "
+        "the pulse — which is exactly the old topology.",
+        "",
+        "### The part, and the rail",
+        "",
+        f"**Candidate: {CANDIDATE_PART}.** A half sets the pulse "
+        f"(R = {timing_resistor_ohm(PULSE_NOM_MS, 100e-9)/1000:.0f} kΩ, C = 100 nF **C0G**); "
+        f"B half sets the inhibit "
+        f"(R = {timing_resistor_ohm(LOCKOUT_NOM_MS, 1e-6)/1000:.0f} kΩ, C = 1 µF **film**). "
+        "Both resistors are inside the family's specified "
+        f"{R_EXT_MIN_OHM/1000:.0f}…{R_EXT_MAX_OHM/1000:.0f} kΩ range; the original 450 ms "
+        "lockout on 470 nF needed **1368 kΩ** and was not.",
+        "",
+        f"**The logic rail is {V_LOGIC} V** (`board-rev-a` §1), and that is a binding "
+        f"constraint IR-018-16 was right to demand. It **excludes the 74HCT221 outright** — "
+        f"that part is {HCT_MIN_V}…5.5 V — and it means the HC family's supply-dependent "
+        "K-factor applies. Any timing figure quoted at 5 V is not a figure for this circuit.",
+        "",
+        "**74HC221 devices are non-retriggerable**, and the design depends on it: it is what "
+        "makes the propagation window at the start harmless.",
+        "",
     ])
 
 
@@ -390,18 +500,51 @@ def t_solenoid_test() -> str:
         "",
         "### What is still open",
         "",
-        "**The pulse length remains a placeholder and the coil is chosen from it.** WP-04 "
-        "measures the shortest pulse that reliably releases the latch. If that number comes "
-        f"back above ~{PULSE_NOM_MS:.0f} ms, the table above says what the coil must drop to — "
-        "and if the mechanism then needs more energy than the budget allows, that is a genuine "
-        "conflict between a safety limit and a mechanism, and it goes to the PM rather than "
-        "being absorbed by widening the limit.",
+        "**This is a PROVISIONAL result and the reasons are listed, not buried.**",
         "",
-        "**The `R_EXT` range and the ±14 % IC figure are second-hand** (see the note above) and "
-        "must be confirmed against the exact orderable part. **The response to the solenoid "
-        "finding is not closed, and I do not get to close it.**",
+    ] + [f"- {g}" for g in qualification_gaps()] + [
+        f"- **The pulse length is a placeholder.** WP-04 measures the shortest pulse that "
+        f"reliably releases the latch. If it comes back above ~{PULSE_NOM_MS:.0f} ms the "
+        "feasibility table says what the coil must drop to — and if the mechanism then needs "
+        "more energy than the budget allows, that is a genuine conflict between a safety limit "
+        "and a mechanism, and it goes to the PM rather than being absorbed by widening the "
+        "limit.",
+        "- **Vendor egress reaches no datasheet** (H-02), so binding the one-shot's guaranteed "
+        "timing at this rail is blocked on either the egress gap or a bench measurement of the "
+        "chosen part. **A measurement is the honest route** and does not wait on anyone: it "
+        "belongs with WP-04's pulse measurement, on the same bench, on the same day.",
+        "",
+        "**The response to the IR-015 solenoid finding is not closed, and I do not get to close "
+        "it.** Two reviews have now found real defects in it — one physical, one structural — "
+        "and the disposition after each was the same.",
     ]
     return "\n".join(rows)
+
+
+def qualification_gaps() -> list[str]:
+    """What is NOT established, kept separate from what is.
+
+    IR-018-16. The inequalities in check_criteria() hold *at the assumed timing
+    corners*. Whether those corners are the real ones is a different question,
+    and answering it needs a datasheet this environment cannot fetch (H-02).
+    Collapsing the two into one PASS is how an assumption becomes a claim, so
+    they are reported separately and the document's verdict is PROVISIONAL.
+    """
+    gaps = []
+    if not TIMING_BOUND_VERIFIED:
+        gaps.append(
+            f"the ±{IC_TOL*100:.0f} % one-shot timing term is ASSUMED, not guaranteed: it is "
+            f"extrapolated from a 700 µs datasheet test point at VCC = 5 V and applied to a "
+            f"{LOCKOUT_NOM_MS:.0f} ms interval at {V_LOGIC} V with a different R/C. "
+            f"Part still unbound ({CANDIDATE_PART})")
+    return gaps
+
+
+def verdict() -> str:
+    """PASS is not available while a corner the proof rests on is unbound."""
+    if check_criteria(strict=False):
+        return "FAIL"
+    return "PROVISIONAL" if qualification_gaps() else "PASS"
 
 
 BLOCKS = {"solenoid_values": t_solenoid_values, "solenoid_test": t_solenoid_test}

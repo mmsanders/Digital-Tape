@@ -4,6 +4,86 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 12 — 6 Sep 2026, solenoid follow-up review (IR-018-16…17)
+
+**Both accepted. Both blockers. The disposition is right and the response stays open.**
+
+Two reviews have now found real defects in this one circuit — the first physical, this one
+structural — and I am not going to characterise that as bad luck.
+
+### IR-018-17 is the one I should have caught myself
+
+**You are right, and the giveaway was in my own text.** I wrote that B was *"triggered by A's
+falling edge so it sits downstream of the pulse and no gate input can defeat it"* — and then
+never drew the gating logic that would make the second half of that sentence true. It was an
+assertion about a circuit I had not specified.
+
+The hole is exactly as described: B's output asserts only after propagation, so between A
+releasing and B asserting there is a window where a request edge is admitted. A firmware fault
+is not phase-constrained, so it can present an edge precisely there, and one extra pulse inside
+the lockout invalidates the minimum period the whole 0.25 W proof rests on.
+
+**Fixed by construction, not by bounding.** B is now triggered by the *same edge* as A, spans
+the whole cycle, and is the sole admission gate:
+
+```
+request edge --+--> A (non-retriggerable, pulse)    --> coil driver
+               |
+               +--> B (non-retriggerable, inhibit)  --> admission gate
+
+admit = NOT B
+```
+
+There is no handoff: B is asserted at 312 ms minimum against a 12.0001 ms pulse including
+propagation. The only remaining window is the propagation delay at the very start — and **A is
+already triggered and non-retriggerable through it**, so no second coil pulse can occur there.
+
+**It also fixed the model, which is the part that would have bitten later.** `min_inhibit_ms`
+was `pulse + lockout`. That sum is only correct if the handoff is instantaneous — so the arithmetic
+was quietly assuming the very thing your finding says is false. It is now B's shortest period.
+
+**And the red case you asked for is the design you rejected.** `test_solenoid.py` fails when the
+inhibit does not outlast the pulse, which is the old topology. ADR-124.
+
+### IR-018-16: accepted, and the rail makes it worse than stated
+
+**The board is 3.3 V** (`board-rev-a` §1). So the Nexperia part cited alongside the figure is a
+**4.5–5.5 V device and is excluded outright**, and the TI 602…798 µs guarantee is at VCC = 5 V.
+My ±14 % was wrong on the test point *and* on the rail — I was extrapolating a 700 µs figure at
+one voltage to a 390 ms interval at another.
+
+**I cannot close this and I am not going to pretend otherwise.** Binding the exact part's
+guaranteed timing at 3.3 V over the intended R/C needs a datasheet, and vendor egress reaches
+none (H-02).
+
+So I took your alternative literally: **treat it as a qualification requirement rather than
+extrapolate.** The analysis now separates *design criteria* — the inequalities, which hold —
+from *qualification gaps* — whether the corners are real, which is open. While any gap is open
+the document's verdict is **`PROVISIONAL`**, printed at the top, and the criteria check reports
+the gap explicitly.
+
+**Collapsing those two into one PASS is how an assumption becomes a claim**, and I had done
+exactly that. ADR-125.
+
+**The honest route out is a measurement, not a wait.** Binding the one-shot's timing at 3.3 V is
+a bench task that belongs with WP-04's pulse measurement — same bench, same day — and it depends
+on nobody. That is now written into §6 as the route rather than left as an egress complaint.
+
+### What I take from two rounds on one circuit
+
+The first review found a missing physical term. This one found an unspecified circuit and an
+assumption wearing a guarantee's clothes. **Neither is a checking error, and both were in the
+part of the work I was most confident about** — I had already reworked this analysis once,
+carefully, in response to findings.
+
+I do not have a process fix for that and I distrust inventing one. The observation I will keep
+is narrower: **both defects were sentences I wrote that asserted a property of something I had
+not drawn.** "No gate input can defeat it" described a schematic that did not exist. "±14 %
+guaranteed" described a part that was not chosen. In both cases the prose ran ahead of the
+artefact, and the model then encoded the prose.
+
+---
+
 ## Round 11a — 6 Sep 2026, a CI failure I caused and then hid from myself
 
 Filed separately from Round 11 because it is not a response to anyone's finding. It is a defect

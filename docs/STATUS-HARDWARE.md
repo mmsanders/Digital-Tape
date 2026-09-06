@@ -1,6 +1,6 @@
 # STATUS — HARDWARE
 
-**Updated:** 2026-09-06 (2nd) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
+**Updated:** 2026-09-06 (3rd) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
 
 The Hardware Lead's window into `hardware/` and `spec/hw/`. Companion to `docs/STATUS.md`,
 which stays the Software Lead's. Argument lives in `docs/REVIEW/hardware-lead.md`; this file is
@@ -17,32 +17,38 @@ state.
 
 ## What changed since last time
 
-**The solenoid circuit was independently reviewed and the response was rejected.** Five findings,
-two blockers, all accepted. **The design did not meet the limit** — 0.330 W against 0.25 W once
-the electrical corners were included, where my model reported 0.220 W and a 1.14× pass.
+**The solenoid response has now been independently reviewed and rejected twice.** Seven findings
+across two rounds, four blockers, all accepted. It is still open.
 
-**The error was physical, not procedural.** I bounded the *timing* corners on a coil labelled
-5.0 W and treated a nominal wattage as a safety maximum. The criterion is average coil *power*
-and `P = V²/R`, so rail and winding tolerance are the quantities — a combined **×1.358**, larger
-than the whole margin I claimed. Reworked to 3.5 W / 10 ms / 386 ms: **0.183 W, 1.37×**. ADR-121.
+**Round one found a missing physical term.** The design did not meet the limit — 0.330 W against
+0.25 W once rail, winding and cold-copper corners were included, where my model said 0.220 W and
+a 1.14× pass. ADR-121.
 
-**Two claims were sharing one timing corner.** The fault bound and the "real use is never
-blocked" proof both used the *fastest* inhibit. At the slow corner the design held the inhibit
-**539 ms against a 500 ms period** — it would have met the safety limit partly by dropping the
-fastest legitimate press.
+**Round two found an unspecified circuit.** I had written that the lockout *"sits downstream of
+the pulse and no gate input can defeat it"* — and never drew the gating logic that would make
+that true. Triggering the second monostable from the first's *falling* edge leaves a propagation
+window in which a request edge is admitted, and one extra pulse inside the lockout invalidates
+the minimum period the whole 0.25 W proof rests on. **Fixed by construction:** both monostables
+now trigger on the same edge, the second spans the entire cycle, and admission is gated on it
+alone — so there is no handoff to race. ADR-124.
 
-**The solenoid gate failed open, and CI never ran it.** `--check` compared the document to the
-generator and never evaluated a single inequality; separately, `hardware.yml` **never invoked
-`thermal-check` at all**, from the day that workflow was written. Both fixed, with a red case
-whose headline is the previous working point. ADR-122.
+**And the timing tolerance was an assumption wearing a guarantee's clothes.** The ±14 % figure
+comes from a 700 µs datasheet test point at VCC = 5 V; it was applied to a 390 ms interval at
+**3.3 V** — which also excludes the 74HCT221 (4.5–5.5 V) outright. The analysis now separates
+*design criteria* from *qualification gaps* and its verdict is **`PROVISIONAL`, not pass**, while
+any gap is open. ADR-125.
 
-**That last one generalises.** CLAUDE.md §1 requires every gate to be proven able to go red. It
-does not require anyone to check the gate is *reachable* — and a red case in a gate nobody runs
-is theatre.
+**Route out: a bench measurement, not a wait.** Binding the one-shot's timing at 3.3 V belongs
+with WP-04's pulse measurement — same bench, same day, depends on nobody.
+
+**A CI failure of my own in between**, worth recording because of how it hid: a Python 3.12
+change to float summation moved a load subtotal across a 0.5 mW rounding boundary, so a
+committed document was stale on the runner and fresh here. **I had filtered the failure out of
+my own verification with a grep.** ADR-123, round 11a.
 
 ---
 
-**The plate is cleared**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
+**The plate is cleared**The plate is cleared**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
 rev-4 STL against the library machine. Rev 5 settles both items they raised, plus one they did
 not have.
 

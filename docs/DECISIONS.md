@@ -1384,3 +1384,77 @@ generator now prints the diff.
 
 **Cost to reverse.** Zero, and it would restore a state where a committed artefact's contents
 depend on the interpreter that happened to render them.
+
+---
+
+## ADR-124 — The solenoid inhibit spans the whole cycle, so there is no handoff to race
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, after independent review IR-018-17
+**Amends:** ADR-121's topology (its power model stands)
+
+**Decision.** The second monostable is triggered by **the same edge that triggers the first**,
+its period spans the **entire cycle** — coil pulse plus lockout — and admission is gated on
+**that output alone**:
+
+```
+request edge --+--> A (non-retriggerable, pulse)    --> coil driver
+               |
+               +--> B (non-retriggerable, inhibit)  --> admission gate
+
+admit = NOT B
+```
+
+**Rationale.** The previous arrangement triggered B from **A's falling edge** and gated
+admission on *neither A nor B active*. B's output asserts only after propagation, so between A
+releasing and B asserting there is a finite window in which a request edge is admitted. **A
+firmware fault is not phase-constrained** — it can present an edge exactly there — and one extra
+pulse inside the nominal lockout invalidates the minimum period that the entire 0.25 W proof
+rests on.
+
+**The fix is structural, which is what the requirement demands.** "Not defeatable by firmware"
+cannot be established statistically. With B starting at the same edge as A and outlasting it by
+two orders of magnitude, there is no handoff: B is asserted long before A ends. The only
+remaining window is the propagation delay at the very start, and **A is already triggered and
+non-retriggerable through it**, so no second coil pulse can occur there either.
+
+`b_covers_a()` asserts the inequality at opposite corners with propagation included, and
+`test_solenoid.py` fails when the inhibit does not outlast the pulse — which is precisely the
+old topology, so the red case is the design this ADR replaces.
+
+**What it also fixed in the model:** `min_inhibit_ms` was `pulse + lockout`. That sum was only
+correct if the handoff were instantaneous. It is now simply B's shortest period.
+
+**Cost to reverse.** Low in parts — same package, same two halves, different trigger edge and
+one gate term. High in argument: reverting reintroduces a race that no amount of testing would
+reliably find, because it needs an adversarial edge in a sub-microsecond window.
+
+---
+
+## ADR-125 — An unbound corner makes the verdict PROVISIONAL, never PASS
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, after independent review IR-018-16
+
+**Decision.** `solenoid_timing.py` separates **design criteria** (inequalities that hold at the
+assumed corners) from **qualification gaps** (whether those corners are the real ones). While
+any gap is open the document's verdict is **`PROVISIONAL`** and it says so at the top. The logic
+rail is bound at **3.3 V** from `board-rev-a` §1, which excludes the 74HCT221 (4.5–5.5 V).
+
+**Rationale.** The ±14 % one-shot timing term was being treated as a guaranteed, transferable
+bound. It is not. The 602…798 µs figure it comes from is specified at **CX = 0.1 µF,
+RX = 10 kΩ, VCC = 5 V** — one datasheet test point — and it was applied unchanged to a 390 ms
+interval with a different R/C on a 3.3 V rail. Neither the components nor the voltage is the
+condition the guarantee covers.
+
+**Collapsing "the inequalities hold" and "the corners are established" into a single PASS is how
+an assumption becomes a claim.** They are different questions with different evidence, and the
+second one is blocked on a datasheet this environment cannot fetch (H-02). So they are reported
+separately, and a document that cannot answer the second does not get to print the first as a
+pass.
+
+**The honest route out is a measurement, not an escalation.** Binding the one-shot's timing at
+3.3 V over its intended R/C is a bench task that belongs with WP-04's pulse measurement — same
+bench, same day — and it waits on nobody.
+
+**Cost to reverse.** Zero mechanically. What it would cost is the distinction: a project where
+every gate reports PASS or FAIL and nothing reports "the arithmetic is right and the inputs are
+unverified" will eventually ship the second as the first.

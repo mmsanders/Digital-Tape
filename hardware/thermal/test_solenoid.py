@@ -95,7 +95,30 @@ def run() -> int:
               for f in at(st.COIL_W, 200.0, st.LOCKOUT_NOM_MS)),
           "RED: a timing resistor outside the datasheet range is caught")
 
-    # --- 8. the feasibility boundary is monotonic -----------------------
+    # --- 8. IR-018-17: the handoff cannot race --------------------------
+    covers, a_max = st.b_covers_a()
+    check(covers, f"the inhibit outlasts the coil pulse ({st.min_inhibit_ms():.0f} ms vs "
+                  f"{a_max:.3f} ms incl. propagation) -- no handoff gap")
+    check(st.PROP_MAX_S > 0, "propagation is in the model at all")
+    # RED: the OLD topology, where B started at A's falling edge, is exactly a
+    # design whose inhibit does not outlast the pulse. Model it by shrinking the
+    # inhibit below the pulse and assert the criteria reject it.
+    gap = at(st.COIL_W, 400.0, 300.0)
+    check(any("handoff gap" in f for f in gap),
+          "RED: an inhibit that does not outlast the pulse is caught")
+    check(any("handoff gap" in f
+              for f in at(st.COIL_W, st.PULSE_NOM_MS, st.PULSE_NOM_MS)),
+          "RED: an inhibit equal to the pulse is caught (propagation makes it short)")
+
+    # --- 9. IR-018-16: unbound corners are reported, not absorbed --------
+    check(st.qualification_gaps() != [],
+          "the unverified timing bound is reported as a qualification gap")
+    check(st.verdict() == "PROVISIONAL",
+          f"the verdict is PROVISIONAL while a corner is unbound (got {st.verdict()})")
+    check(st.V_LOGIC < st.HCT_MIN_V,
+          f"the {st.V_LOGIC} V logic rail excludes the HCT family, as it must")
+
+    # --- 10. the feasibility boundary is monotonic ----------------------
     # A longer pulse must permit a weaker coil, or the boundary is inverted.
     ws = [st.feasible_coil_w(p) for p in (8.0, 10.0, 12.0, 15.0, 20.0)]
     check(all(a > b for a, b in zip(ws, ws[1:])),
@@ -104,7 +127,7 @@ def run() -> int:
           f"the committed coil ({st.COIL_W:.1f} W) is within the boundary "
           f"({st.feasible_coil_w(st.PULSE_NOM_MS):.2f} W) for its pulse")
 
-    n = 17
+    n = 24
     if FAILED:
         print(f"\n{len(FAILED)} of {n} checks FAILED")
         return 1
