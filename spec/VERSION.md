@@ -1,17 +1,16 @@
 # spec/VERSION.md — the spec bundle manifest
 
-**Bundle:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Owner:** Program Manager
-**Publication:** **PROPOSED.** This bundle lives on `surge/draft-8-freeze-candidate`. It is not a PM issue and it is not on `main`. `main` remains DRAFT-7 until the PM lands this text mechanically.
+**Bundle:** DRAFT-7 · **Issued:** 5 Sep 2026 · **Owner:** Program Manager
 
-`Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment, this proposal branch — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
+`Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
 
 ## The bundle
 
 | File | Revision | SHA-256 |
 |---|---|---|
-| `spec/tapefs-v1.md` | DRAFT-8 | `9081a87ab0e37bf5ade916d56d76022eac2a1f7597a4143f25afa8923fd37618` |
-| `spec/engine-api.md` | DRAFT-8 | `28859eff3a716b5ca2f8e2f1ae587c0b6f2e3699870189c6295544fd721c9a8b` |
-| `spec/acceptance.md` | DRAFT-8 | `55d59913c8dc929844839e5369b54bae7b7e8769bde98e85b73e79ec377577b5` |
+| `spec/tapefs-v1.md` | DRAFT-7 | `94f385272641654819c5a2d7dd4dd6217629cab32a019182522ae423c715a95f` |
+| `spec/engine-api.md` | DRAFT-7 | `cbf34cccfc08fa891f9e8be667381d4c4e6d8d7831b5aaf7e988ffe7d02e4724` |
+| `spec/acceptance.md` | DRAFT-7 | `0213726b98875ee6b48bd4d2a50eb67353245f19b07a41fbfe0d0a95995200a8` |
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
@@ -64,5 +63,3 @@ Only the PM issues a new bundle. The Software Lead lands it mechanically:
 2. Replace `spec/VERSION.md` with the PM's copy.
 3. Run the gate locally. If it is red, the bundle was mis-transcribed — do not adjust the hashes to match the files.
 4. If a spec file is *wrong*, that is a `pm-decision` issue, not an edit in this PR.
-
-This DRAFT-8 text was drafted on a surge-support branch for the PM to consider. Landing it is a PM mechanical copy, not an authorisation for anyone else to edit `spec/` on `main`.
