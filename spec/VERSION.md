@@ -1,16 +1,16 @@
 # spec/VERSION.md — the spec bundle manifest
 
-**Bundle:** DRAFT-7 · **Issued:** 5 Sep 2026 · **Owner:** Program Manager
+**Bundle:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Owner:** Program Manager
 
-`Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
+`Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment, a surge branch — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
 
 ## The bundle
 
 | File | Revision | SHA-256 |
 |---|---|---|
-| `spec/tapefs-v1.md` | DRAFT-7 | `94f385272641654819c5a2d7dd4dd6217629cab32a019182522ae423c715a95f` |
-| `spec/engine-api.md` | DRAFT-7 | `cbf34cccfc08fa891f9e8be667381d4c4e6d8d7831b5aaf7e988ffe7d02e4724` |
-| `spec/acceptance.md` | DRAFT-7 | `0213726b98875ee6b48bd4d2a50eb67353245f19b07a41fbfe0d0a95995200a8` |
+| `spec/tapefs-v1.md` | DRAFT-8 | `a769c772ba9efd867badeaa6dbc4dd731913a31b01a5c296336686463093e792` |
+| `spec/engine-api.md` | DRAFT-8 | `d19c8f2453c258c582622c3447a792215debd3ec68df81c306d47ae5b57da836` |
+| `spec/acceptance.md` | DRAFT-8 | `d2cf1f620f582df46bbcd736eed589aefe04512ca7953f15601850210d51ca81` |
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
@@ -63,3 +63,5 @@ Only the PM issues a new bundle. The Software Lead lands it mechanically:
 2. Replace `spec/VERSION.md` with the PM's copy.
 3. Run the gate locally. If it is red, the bundle was mis-transcribed — do not adjust the hashes to match the files.
 4. If a spec file is *wrong*, that is a `pm-decision` issue, not an edit in this PR.
+
+This DRAFT-8 text was drafted by surge support on `surge/draft-8-freeze-candidate` (PR #25) for the PM to issue. The status banner inside the three hashed files remains **NOT FROZEN**. Merging this PR onto `main` is the issue of the bundle; it is not a freeze and it is not authorisation for anyone else to edit `spec/` on `main`.

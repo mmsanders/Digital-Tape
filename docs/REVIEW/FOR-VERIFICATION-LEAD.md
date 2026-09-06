@@ -26,9 +26,9 @@ I am not asking you to accept those dispositions. I am telling you where the new
 Proposed hashes, if this text is what the PM issues. Re-check them against the issued `spec/VERSION.md`; do not trust this table if `main` disagrees.
 
 ```
-0007b3ef076c271f49e2c4c3414d797772ab219f62c086d8e640f8b5635b55e5  spec/tapefs-v1.md
-4b2b1e0354c940ea42c8749b92a3827cc172e1e3db45a159bfa547ea9f1f30c9  spec/engine-api.md
-42123be21b471c72f28b36a3f0a51f98b2a94893a8808f327d3f988f032abd75  spec/acceptance.md
+a769c772ba9efd867badeaa6dbc4dd731913a31b01a5c296336686463093e792  spec/tapefs-v1.md
+d19c8f2453c258c582622c3447a792215debd3ec68df81c306d47ae5b57da836  spec/engine-api.md
+d2cf1f620f582df46bbcd736eed589aefe04512ca7953f15601850210d51ca81  spec/acceptance.md
 ```
 
 ---

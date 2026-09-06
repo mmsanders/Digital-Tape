@@ -29,15 +29,15 @@ Treated as a fresh verifier against the first-cut DRAFT-8 text, not against DRAF
 5. **Phase 1 did not record `needs_repair` for a stale lower-generation partner**, only for an invalid one, while phase 4 now repairs both. **Fix:** both bullets record it; `tape_info.needs_repair` comment matches.
 6. **Newest-text paragraph still said "raw-destination refusals"** after the disposition stopped refusing foreign-major cards. **Fix:** it now says classification.
 
-Proposed hashes after the merge-safe banner trim (dropped "Proposed bundle… Not issued by the PM." from each hashed header so a merge would not publish that sentence on `main`):
+Landed hashes on this branch (banner is **DRAFT-8. NOT FROZEN.** — no "not issued" sentence inside the hash):
 
 ```
-0007b3ef076c271f49e2c4c3414d797772ab219f62c086d8e640f8b5635b55e5  spec/tapefs-v1.md
-4b2b1e0354c940ea42c8749b92a3827cc172e1e3db45a159bfa547ea9f1f30c9  spec/engine-api.md
-42123be21b471c72f28b36a3f0a51f98b2a94893a8808f327d3f988f032abd75  spec/acceptance.md
+a769c772ba9efd867badeaa6dbc4dd731913a31b01a5c296336686463093e792  spec/tapefs-v1.md
+d19c8f2453c258c582622c3447a792215debd3ec68df81c306d47ae5b57da836  spec/engine-api.md
+d2cf1f620f582df46bbcd736eed589aefe04512ca7953f15601850210d51ca81  spec/acceptance.md
 ```
 
-Bundle gate: green, forced red with a one-byte flip on `acceptance.md`, restored green.
+Bundle gate on this tree: green, forced red with a one-byte flip on `acceptance.md`, restored green. The three hashed files and `spec/VERSION.md` landed together so a merge does not go red.
 
 
 ## Simulated verifier pass (third pass, 6 Sep evening)
@@ -73,7 +73,7 @@ Still not a freeze recommendation. This pass is surge pretending to be the lead.
 | Ref | Land on `main`? |
 |---|---|
 | This branch, spec files | Only when the PM issues the bundle |
-| This branch, `CLAUDE.md` header / `FOR-MICHAEL.md` / `WP-05.md` | Yes, separately, if the PM wants process docs current while the bundle is still in review |
+| This branch, `CLAUDE.md` header / `FOR-MICHAEL.md` / `WP-05.md` | Yes, separately, if the PM wants process docs current while the bundle is still in review. They are on this branch now. |
 | PR #18 hardware | PM call. No `engine/` or `tests/`. Independent of freeze. |
 | PR #20 engine | No. Rule 1. |
 
@@ -82,4 +82,4 @@ Still not a freeze recommendation. This pass is surge pretending to be the lead.
 1. `docs/REVIEW/` should become the round brief so Michael stops pasting directions. Leads read `main`.
 2. No 64 GB cards. Smallest current V30 microSDHC. Micro is fine.
 3. Question queue first every round. This file and `docs/FOR-MICHAEL.md` start that way this round.
-4. `CLAUDE.md` header on `main` still cited DRAFT-3 / DRAFT-1. Fixed on this branch.
+4. `CLAUDE.md` header on `main` still cited DRAFT-3 / DRAFT-1. Fixed on this branch to point at `spec/VERSION.md`.
