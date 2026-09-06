@@ -10,7 +10,7 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
@@ -123,6 +123,24 @@ solenoid-test:
 	  && echo "OK  solenoid criteria: 24 checks pass, incl. the old point and the handoff race"
 	@cd $(THERMAL) && $(PY) test_solenoid.py --mutate >/dev/null \
 	  && echo "OK  solenoid criteria: proven able to go red"
+
+## fabrication-gate — may a board be fabricated or a cell charged?
+##
+## Raised by the independent reviewer as an auditability caution: green thermal
+## CI is NOT qualification of the solenoid circuit while IR-018-16 is open, and
+## if that CI status is ever used as a fabrication gate the distinction should be
+## machine-enforced rather than conventional. This project already HAS that gate,
+## and it was a sentence in a document. This is the sentence, executable.
+##
+## NOT part of `check`, and not a CI job: its normal state is CLOSED, and a
+## permanently-red pipeline stops being read. Run it before spending money.
+## Exit 1 means closed, which is the expected answer today.
+fabrication-gate:
+	@$(PY) fabrication_gate.py || true
+	@$(PY) test_fabrication_gate.py >/dev/null \
+	  && echo "OK  fabrication gate: 8 checks pass, and it can OPEN"
+	@$(PY) test_fabrication_gate.py --mutate >/dev/null \
+	  && echo "OK  fabrication gate: proven able to go red"
 
 ## charger / solenoid — print the design analyses without touching the spec
 charger:

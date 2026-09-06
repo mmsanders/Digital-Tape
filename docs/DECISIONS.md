@@ -1458,3 +1458,41 @@ bench, same day — and it waits on nobody.
 **Cost to reverse.** Zero mechanically. What it would cost is the distinction: a project where
 every gate reports PASS or FAIL and nothing reports "the arithmetic is right and the inputs are
 unverified" will eventually ship the second as the first.
+
+---
+
+## ADR-126 — The fabrication gate is executable, and its proof is that it can OPEN
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, from an auditability caution in the
+IR-018-16/17 follow-up review
+
+**Decision.** `hardware/fabrication_gate.py` answers *may a board be fabricated or a cell
+charged?* It enumerates the three IR-015 findings and asks `solenoid_timing.py` directly whether
+its analysis certifies. It is **not** part of `make check` and **not** a CI job: its normal state
+is CLOSED, and a permanently-red pipeline stops being read.
+
+**Rationale.** The reviewer flagged that `--check` prints green while `verdict()` is
+`PROVISIONAL` — internally consistent, but only if a human keeps the distinction in their head.
+They made it conditional: *"if the project later uses that CI status as a fabrication gate, this
+distinction should become machine-enforced rather than conventional."*
+
+**The condition is already met.** This project has had a fabrication gate since the IR-015
+findings landed — *no board is fabricated and no cell is charged until all three close* — and it
+was a sentence in a document banner. **A sentence is exactly what "conventional" means.**
+
+Two properties are deliberate. **It does not decide closure**: an acceptance is a fact with a
+name attached, and the author of a response does not get to mark it accepted (CLAUDE.md §2), so
+an `accepted_by` this file cannot verify is empty and reads as OPEN. And **it does not take the
+analysis on trust**: it calls `qualification_gaps()` rather than reading a status field, so a
+green `thermal-check` cannot be mistaken for qualification of the circuit.
+
+**The proof is inverted, and that is the interesting part.** Every other gate here is normally
+green and is proven able to go **red**. This one is normally CLOSED, so what needs proving is
+that it can ever **open** — `test_fabrication_gate.py` shows it opens when every blocker is
+accepted *and* the analysis certifies, and that neither condition alone suffices. **A gate that
+can only fail is a gate nobody reads**, and it would quietly stop being consulted long before
+anyone ordered a board. Its `--mutate` case is a gate that opens for free.
+
+**Cost to reverse.** Zero mechanically. What it would cost is the only machine-checkable link
+between "the arithmetic is green" and "we may spend money" — which is the link the reviewer
+correctly identified as resting on convention.

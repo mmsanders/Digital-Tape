@@ -607,7 +607,11 @@ def main():
             _show_stale(cur, new_text, 'solenoid_timing.py')
             print("solenoid tables STALE", file=sys.stderr)
             return 1
-        print("solenoid criteria pass, tables up to date")
+        gaps = qualification_gaps()
+        print(f"solenoid: inequalities hold at the assumed corners; "
+              f"VERDICT {verdict()}"
+              + (f" ({len(gaps)} qualification gap(s) open -- this is NOT "
+                 f"qualification of the circuit)" if gaps else ""))
         return 0
     if cur != new_text:
         SPEC.write_text(new_text)

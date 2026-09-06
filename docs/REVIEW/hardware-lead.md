@@ -4,6 +4,56 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 12a — 6 Sep 2026, the auditability caution, acted on
+
+The follow-up review closed IR-018-17, kept IR-018-16 open exactly as I had restated it, and
+found no new circuit defect. It also left a caution it explicitly declined to file as a finding:
+
+> `solenoid_timing.py --check` currently exits green and prints `solenoid criteria pass` while
+> `verdict()` is `PROVISIONAL`. … **green thermal CI is not qualification of the solenoid circuit
+> while IR-018-16 remains open.** If the project later uses that CI status as a fabrication gate,
+> this distinction should become machine-enforced rather than conventional.
+
+**I have acted on it rather than acknowledged it, because the condition they made it conditional
+on is already true.** This project has had a fabrication gate since the IR-015 findings landed —
+*no board is fabricated and no cell is charged until all three close* — and it lived in a
+document banner. A sentence is precisely what "conventional" means.
+
+`hardware/fabrication_gate.py` is that sentence, executable. Today:
+
+```
+FABRICATION GATE — may a board be fabricated or a cell charged?
+  **CLOSED.** 5 blocking item(s):
+    - IR-015-charger …
+    - IR-015-solenoid …
+    - IR-015-transient …
+    - solenoid qualification: the ±14 % one-shot timing term is ASSUMED …
+    - solenoid analysis verdict is PROVISIONAL, not PASS
+```
+
+Two properties are deliberate. **It does not decide closure** — an acceptance is a fact with a
+name attached, and I do not get to write my own, so an unverifiable `accepted_by` reads as OPEN.
+And **it does not trust the analysis's summary**: it calls `qualification_gaps()` directly, so a
+green `thermal-check` cannot be mistaken for qualification.
+
+The `--check` line now says so too: *"inequalities hold at the assumed corners; VERDICT
+PROVISIONAL (1 qualification gap open — this is NOT qualification of the circuit)."*
+
+### The proof is inverted, and that is what makes it worth writing
+
+Every other gate in this repo is normally green and is proven able to go **red**. This one is
+normally CLOSED, so the thing worth proving is that it can ever **open**. `test_fabrication_gate.py`
+shows it opens when every blocker is accepted *and* the analysis certifies, and that neither
+alone is enough.
+
+**A gate that can only fail is a gate nobody reads.** It would stop being consulted long before
+anyone ordered a board, and it would still look correct the whole time. ADR-126.
+
+**It is not in `make check` and not a CI job**, on purpose: its normal state is red, and
+`ci.yml` already makes the argument against permanently-red pipelines about the golden suite.
+
+---
+
 ## Round 12 — 6 Sep 2026, solenoid follow-up review (IR-018-16…17)
 
 **Both accepted. Both blockers. The disposition is right and the response stays open.**

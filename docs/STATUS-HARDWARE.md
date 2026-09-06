@@ -1,6 +1,6 @@
 # STATUS — HARDWARE
 
-**Updated:** 2026-09-06 (3rd) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
+**Updated:** 2026-09-06 (4th) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
 
 The Hardware Lead's window into `hardware/` and `spec/hw/`. Companion to `docs/STATUS.md`,
 which stays the Software Lead's. Argument lives in `docs/REVIEW/hardware-lead.md`; this file is
@@ -37,6 +37,12 @@ comes from a 700 µs datasheet test point at VCC = 5 V; it was applied to a 390 
 **3.3 V** — which also excludes the 74HCT221 (4.5–5.5 V) outright. The analysis now separates
 *design criteria* from *qualification gaps* and its verdict is **`PROVISIONAL`, not pass**, while
 any gap is open. ADR-125.
+
+**The fabrication gate is now executable rather than a sentence** (ADR-126), from an
+auditability caution in the follow-up review: green thermal CI is *not* qualification of the
+solenoid circuit while its timing corner is unbound. `make -C hardware fabrication-gate` reads
+**CLOSED** on five items and names them. Its proof is inverted — a gate whose normal state is red
+is worth nothing unless it can be shown to open.
 
 **Route out: a bench measurement, not a wait.** Binding the one-shot's timing at 3.3 V belongs
 with WP-04's pulse measurement — same bench, same day, depends on nobody.
