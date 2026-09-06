@@ -1230,3 +1230,60 @@ is one variable now, computed once at mount, and phase-4 repair consults it too.
 
 **Cost to reverse.** Low in code, high in meaning — the two rules would refuse to stay separated
 again, and the last time they were merged the result was a blocker.
+
+---
+
+## ADR-036 — Structural validity and §5.2 validity are two functions, not one
+
+**Date:** 2026-09-06 · **Owner:** Software Lead · **Source:** `tapefs` §5.5 (V6-003)
+
+**Decision.** `tape_index_parse` checks §5.5 **structural** validity only — magic, `entry_count ≤
+TAPE_MAX_ENTRIES`, CRC — and fills the index from the bytes, including the raw `side` marker.
+`tape_index_validate` applies §5.2 separately: the side match, the entry bounds, the `total_frames`
+sum, the §5.4 cap, and §5.1's interval disjointness. They had been one function.
+
+**Rationale.** `cartridge_sequence` is the maximum over every **structurally** valid slot, and §5.5
+is explicit that this is not §5.2 validity by accident. §5.2 validity is **not stable across an
+operation**: §9.3.4's "between 2 and 3" row turns on Side A's new index being §5.2-*invalid* until
+step 4 raises the water line. A base computed over §5.2-valid slots could therefore be outranked
+later by a slot that becomes valid — which is the same class of bug as reusing a sequence, arrived
+at from the other direction. Structural validity only ever shrinks the set of numbers this
+cartridge has issued.
+
+The entry-count bound sits in the structural predicate rather than in §5.2 for a concrete reason
+the spec gives: a slot claiming `0xFFFFFFFF` entries would otherwise demand a 51 GB read to decide
+its own validity, on a mount that rejects it in one comparison. `load_slot` checks it **before**
+the entry read, not after.
+
+**Cost to reverse.** Moderate. Merging them back is a small edit and silently reintroduces a base
+that can be outranked; the test that catches it (a Side-B slot carrying a Side-A marker, structurally
+valid and §5.2-invalid, at a higher sequence than either live slot) was verified to go red against
+exactly that merge.
+
+---
+
+## ADR-037 — A Side-B mount request returns that side's own §5.3 error
+
+**Date:** 2026-09-06 · **Owner:** Software Lead · **Source:** `tapefs` §4.2 (V6-001)
+
+**Decision.** `select_indices` propagates Side B's own selection error to a mount that **requested**
+Side B — `TAPE_ERR_INCONSISTENT` when both B slots are valid at equal `sequence`,
+`TAPE_ERR_NO_VALID_INDEX` when neither is. The post-mount `tape_set_side(TAPE_SIDE_B)` refusal stays
+`TAPE_ERR_NO_VALID_INDEX` in **both** causes.
+
+**Rationale.** DRAFT-6 knew one cause of degraded-B and flattened everything to "no valid index".
+DRAFT-7 adds the second — both slots valid at equal `sequence`, which §5.3 refuses — and the two are
+not the same event: one is an absent index, the other is a media fault with two live generations
+that cannot be ordered. Reporting the second as the first tells the caller the opposite of what
+happened.
+
+The asymmetry with `tape_set_side` is deliberate and is the part worth writing down, because it
+looks like an inconsistency: the mount path is *diagnosing* a cartridge and the caller can act on
+which fault it is; the `set_side` path is answering "can I switch to B right now", and the answer is
+no for the same reason either way. So this is a genuine divergence between two paths, not a rename
+that missed a caller.
+
+**Cost to reverse.** Trivial in code. The reason not to is that `tape_reset_side_b` — held by
+structural Rule 1 — recovers *both* causes, and its correctness in the second depends on
+`cartridge_sequence`: the old "highest live sequence + 1" wrote 11 against a surviving B1 at 500, so
+the recovery returned success and changed nothing on the next mount.

@@ -1,7 +1,7 @@
 /*
  * tape_dev.h — the block device interface.
  *
- * Normative: spec/engine-api.md DRAFT-6 §3. This header is that definition in C.
+ * Normative: spec/engine-api.md DRAFT-7 §3. This header is that definition in C.
  *
  * The entire coupling between the engine and the world (guardrail 09,
  * contract 2). Every tape_dev is a block view of TAPEFS partition 2 — LBA 0 is

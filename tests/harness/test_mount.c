@@ -14,6 +14,10 @@
 #include "harness.h"
 #include "media.h"
 #include "tape.h"
+/* White-box: §5.5's cartridge_sequence is derived state with no public
+   accessor, and it is the base every commit will increment from. Reaching it
+   directly is what lets this suite assert it before a commit path exists. */
+#include "tape_internal.h"
 
 /* Sized so the geometry check passes: chunk_base + total_chunks*CHUNK_BLOCKS
    must be <= block_count. Getting this wrong makes every index test fail with
@@ -1060,6 +1064,167 @@ int main(void)
         CHECK_EQ_INT(tape_mount(t, TAPE_SIDE_A, 10u, &w), TAPE_OK);
         CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
         CHECK(!info.warm_start_used);
+    }
+
+    /* ================= reconciled at DRAFT-7 ===================== */
+
+    /* --- tapefs §5.5: cartridge_sequence (V6-003) --------------------------
+     * DRAFT-6 said `sequence` was monotonic per cartridge and then never said
+     * what the current value IS, so every "commit at sequence + 1" had no base.
+     *
+     * The defect is ordinary, not exotic: Side A live at 10 and Side B at 500 is
+     * what a cartridge looks like after a few recordings. A side-local reading
+     * writes 11; B's OLD slot at 500 still wins §5.3; and once promote's phase-1
+     * superblock lands, the stage oracle sees A at the staging generation and B
+     * at the old one and rejects the cartridge. Both numbers were present in the
+     * mounted state and nothing chose between them.
+     */
+    {
+        static const ent a1[1] = { { 0u, 0u, 1000u } };
+        static const ent b1[1] = { { 1u, 0u,  100u } };
+        tape *t = NULL;
+
+        build_valid();
+        wr32(MED.head[0] + 56, 1u);                 /* a_high_water = 1 */
+        med_fix_sb_crc(MED.head[0]);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u,  10u, a1, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 500u, b1, 1u);
+
+        /* The base is global, so it is 500 from EITHER mounted side. */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 500u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 500u);
+    }
+
+    /* A slot that LOST selection still counts — it carries a sequence this
+       cartridge has issued, and reusing it would make §5.3 select the wrong
+       generation. */
+    {
+        static const ent one[1] = { { 0u, 0u, 100u } };
+        static const ent two[1] = { { 0u, 0u, 200u } };
+        tape *t = NULL; tape_info info;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u,  70u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_A1, 0u,  90u, two, 1u);   /* A1 wins */
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u,  20u, one, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 200u);          /* A1 is live */
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 90u);
+    }
+
+    /*
+     * THE ONE THAT MAKES THE SPLIT LOAD-BEARING. A slot that is STRUCTURALLY
+     * valid but fails §5.2 still counts toward the base.
+     *
+     * §5.5 says structural, not §5.2, deliberately: §5.2 validity is not stable
+     * across an operation — §9.3.4's "between 2 and 3" row turns on Side A's new
+     * index being §5.2-INVALID until step 4 raises the water line — so a base
+     * computed over §5.2-valid slots could be outranked later by a slot that
+     * becomes valid. Here B1 carries a Side-A marker, which §5.2 refuses and
+     * structural validity does not care about.
+     */
+    {
+        static const ent one[1] = { { 0u, 0u, 100u } };
+        tape *t = NULL; tape_info info;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u,  10u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u,  20u, one, 1u);
+        /* side marker 0 in a Side-B slot: CRC-correct, §5.2-invalid. */
+        med_index(&MED, TAPE_LBA_INDEX_B1, 0u, 900u, one, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK_EQ_U32((uint32_t)info.total_frames, 100u);          /* B0 is live */
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 900u);
+    }
+
+    /*
+     * And a slot that is NOT structurally valid does not count. entry_count
+     * above the maximum is part of the structural definition rather than an
+     * afterthought: without it, a slot claiming 0xFFFFFFFF entries demands a
+     * 51 GB read to decide its own validity. Assert the sequence is ignored AND
+     * that no chunk-region read was attempted to reach it.
+     */
+    {
+        static const ent one[1] = { { 0u, 0u, 100u } };
+        tape *t = NULL;
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 10u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 20u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B1, 1u, 0xFFFFFF00u, one, 1u);
+        wr32(MED.head[TAPE_LBA_INDEX_B1] + 16, TAPE_MAX_ENTRIES + 1u);
+        MED.chunk_reads = 0u;
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, &t), TAPE_OK);
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 20u);
+        CHECK_EQ_U32(MED.chunk_reads, 0u);
+    }
+
+    /* --- V6-001: degraded-B has TWO causes ---------------------------------
+     * DRAFT-6 knew only "neither B slot valid". The second is "both valid at
+     * equal `sequence`", which §5.3 refuses as TAPE_ERR_INCONSISTENT — and
+     * tape_reset_side_b's old "highest live sequence + 1" wrote 11 against a
+     * surviving B1 at 500, so the recovery RETURNED SUCCESS AND CHANGED NOTHING.
+     *
+     * The mount-side half is what this branch can test. The recovery half needs
+     * tape_reset_side_b, which structural Rule 1 holds.
+     */
+    {
+        static const ent a1[1]  = { { 0u, 0u, 1000u } };
+        static const ent bx[1]  = { { 1u, 0u,  100u } };
+        static const ent by[1]  = { { 2u, 0u,  200u } };   /* different array */
+        tape *t = NULL; tape_info info;
+
+        build_valid();
+        wr32(MED.head[0] + 56, 1u);                 /* a_high_water = 1 */
+        med_fix_sb_crc(MED.head[0]);
+        memcpy(MED.mirror, MED.head[0], TAPE_BLOCK_SIZE);
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 1u, a1, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B0, 1u, 500u, bx, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_B1, 1u, 500u, by, 1u);   /* equal sequence */
+
+        /* A Side-A request mounts DEGRADED-B on cause (b). */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_INT(tape_get_info(t, &info), TAPE_OK);
+        CHECK(!info.side_b_valid);
+        /* degraded-B: free_next = a_high_water = 1, so 3 of 4 chunks are free. */
+        CHECK_EQ_U32(info.free_chunks, 3u);
+
+        /* But tape_set_side(B) is NO_VALID_INDEX in BOTH causes — the two paths
+           genuinely differ, and this is the half that must NOT change. */
+        CHECK_EQ_INT(tape_set_side(t, TAPE_SIDE_B), TAPE_ERR_NO_VALID_INDEX);
+
+        /* A mount REQUESTING Side B gets that side's own §5.3 error, which here
+           is INCONSISTENT and not NO_VALID_INDEX. DRAFT-6 flattened it. */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, NULL), TAPE_ERR_INCONSISTENT);
+
+        /* Both slots are structurally valid, so the base is 500 even though
+           neither is selectable — which is exactly what reset_b will need to
+           beat when it writes B0. */
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, &t), TAPE_OK);
+        CHECK_EQ_U32(((struct tape *)t)->cartridge_sequence, 500u);
+    }
+
+    /* Cause (a) still returns NO_VALID_INDEX to a Side-B request, so the two
+       causes are distinguishable at the mount boundary rather than merged. */
+    {
+        build_valid();
+        med_invalidate(&MED, TAPE_LBA_INDEX_B0);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, NULL), TAPE_ERR_NO_VALID_INDEX);
+    }
+
+    /* Side A at equal sequence is unchanged: the mount fails outright, whichever
+       side was asked for. §5.3 — such a cartridge is unusable, and degraded-A is
+       not a state. */
+    {
+        static const ent one[1] = { { 0u, 0u, 100u } };
+        static const ent two[1] = { { 0u, 0u, 200u } };
+        build_valid();
+        med_index(&MED, TAPE_LBA_INDEX_A0, 0u, 5u, one, 1u);
+        med_index(&MED, TAPE_LBA_INDEX_A1, 0u, 5u, two, 1u);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_A, NULL), TAPE_ERR_INCONSISTENT);
+        CHECK_EQ_INT(mount_side(TAPE_SIDE_B, NULL), TAPE_ERR_INCONSISTENT);
     }
 
     return TAPE_TEST_REPORT("mount read path");

@@ -2,7 +2,7 @@
  * mount.c — instance lifecycle and the mount read path.
  * Normative: spec/engine-api.md §3.1, §4, §5; spec/tapefs-v1.md §4.1–§4.5, §5, §7.
  *
- * DRAFT-6 reconciled. MOUNT IS FOUR PHASES AND ONLY THE LAST ONE WRITES:
+ * DRAFT-7 reconciled. MOUNT IS FOUR PHASES AND ONLY THE LAST ONE WRITES:
  *
  *   1  selection   read both superblock copies, pick a candidate.   No writes.
  *   2  admission   version, minor, defined values, state, geometry.  No writes.
@@ -199,9 +199,16 @@ static void repair_superblock(struct tape *t, uint32_t repair_lba)
     t->needs_repair = false;
 }
 
-/* Load one index slot: header block, then the entry blocks it needs. */
-static tape_result load_slot(struct tape *t, uint32_t lba, uint8_t side,
-                             struct tape_index *out)
+/*
+ * Load one index slot: header block, then the entry blocks it needs, and parse
+ * it for STRUCTURAL validity only (§5.5). §5.2 validity is a separate call.
+ *
+ * The entry_count bound is checked before the entry read and not after, which is
+ * the point §5.5 makes about it being part of the definition: a slot claiming
+ * 0xFFFFFFFF entries would otherwise demand a 51 GB read to decide its own
+ * validity, on a mount that rejects it in one comparison.
+ */
+static tape_result load_slot(struct tape *t, uint32_t lba, struct tape_index *out)
 {
     unsigned char hdr[TAPE_BLOCK_SIZE];
     uint32_t count, blocks;
@@ -220,7 +227,24 @@ static tape_result load_slot(struct tape *t, uint32_t lba, uint8_t side,
             return TAPE_ERR_IO;
         }
     }
-    return tape_index_parse(hdr, t->entry_bytes, side, &t->sb, out);
+    return tape_index_parse(hdr, t->entry_bytes, out);
+}
+
+/*
+ * §5.5: fold one slot's sequence into cartridge_sequence, the base every commit
+ * increments from.
+ *
+ * EVERY structurally valid slot, not only the live ones. A slot that lost
+ * selection still carries a sequence this cartridge has issued, and reusing it
+ * would make §5.3 select the wrong generation.
+ */
+static void note_sequence(struct tape *t, tape_result structural,
+                          const struct tape_index *idx)
+{
+    if (structural != TAPE_OK) { return; }
+    if (idx->sequence > t->cartridge_sequence) {
+        t->cartridge_sequence = idx->sequence;
+    }
 }
 
 /*
@@ -242,8 +266,7 @@ static tape_result select_side(struct tape *t, tape_side side)
     struct tape_index *live = &t->idx[side];
     uint32_t lba0 = (side == TAPE_SIDE_A) ? t->sb.lba_index_a0 : t->sb.lba_index_b0;
     uint32_t lba1 = (side == TAPE_SIDE_A) ? t->sb.lba_index_a1 : t->sb.lba_index_b1;
-    tape_result r0, r1, rc;
-    bool valid0, valid1;
+    tape_result s0, s1, v0, v1;
     uint32_t seq0 = 0u;
 
     /*
@@ -264,44 +287,47 @@ static tape_result select_side(struct tape *t, tape_side side)
      * A third buffer would avoid the reload and cost 49 KiB against a budget
      * already at 76 %. The reload is the cheaper mistake to make.
      */
-    r0 = load_slot(t, lba0, (uint8_t)side, live);
-    valid0 = (r0 == TAPE_OK);
-    if (valid0) { seq0 = live->sequence; }
+    s0 = load_slot(t, lba0, live);
+    note_sequence(t, s0, live);
+    v0 = (s0 == TAPE_OK) ? tape_index_validate(live, (uint8_t)side, &t->sb, t->sort_perm)
+                         : s0;
+    if (v0 == TAPE_OK) { seq0 = live->sequence; }
 
-    r1 = load_slot(t, lba1, (uint8_t)side, live);
-    valid1 = (r1 == TAPE_OK);
+    s1 = load_slot(t, lba1, live);
+    note_sequence(t, s1, live);
+    v1 = (s1 == TAPE_OK) ? tape_index_validate(live, (uint8_t)side, &t->sb, t->sort_perm)
+                         : s1;
 
-    if (!valid0 && !valid1) {
-        return (r0 == TAPE_ERR_IO || r1 == TAPE_ERR_IO) ? TAPE_ERR_IO
+    if (v0 != TAPE_OK && v1 != TAPE_OK) {
+        return (s0 == TAPE_ERR_IO || s1 == TAPE_ERR_IO) ? TAPE_ERR_IO
                                                         : TAPE_ERR_NO_VALID_INDEX;
     }
 
-    if (valid0 && valid1 && live->sequence == seq0) {
+    if (v0 == TAPE_OK && v1 == TAPE_OK && live->sequence == seq0) {
         /* §5.3, regardless of content. My DRAFT-3-era invented rule accepted
            this when the two were byte-identical; equal sequence is unreachable
            through §8, so it means media fault or implementation bug either way,
            and byte-identity would have quietly accepted a card that had somehow
-           produced two live generations. */
+           produced two live generations.
+
+           DRAFT-7 makes this one of the TWO causes of degraded-B on Side B
+           (V6-001), so the caller needs the distinction and gets the error
+           itself rather than a flattened one. */
         return TAPE_ERR_INCONSISTENT;
     }
 
-    if (valid1 && (!valid0 || live->sequence > seq0)) {
+    if (v1 == TAPE_OK && (v0 != TAPE_OK || live->sequence > seq0)) {
         t->live_slot[side] = 1u;
     } else {
         /* Slot 0 wins: it is no longer in the buffer, so read it back. It
            validated a moment ago, so a failure here is genuine I/O or media
            changing underneath us — either way it is not a valid index. */
-        r0 = load_slot(t, lba0, (uint8_t)side, live);
-        if (r0 != TAPE_OK) { return r0; }
+        s0 = load_slot(t, lba0, live);
+        if (s0 != TAPE_OK) { return s0; }
+        v0 = tape_index_validate(live, (uint8_t)side, &t->sb, t->sort_perm);
+        if (v0 != TAPE_OK) { return v0; }
         t->live_slot[side] = 0u;
     }
-
-    /* §5.1's interval-disjointness rule is part of §5.2 validity, so it belongs
-       here and not after selection: an index that overlaps itself is not valid,
-       and "not valid" is what selection is deciding. No chunk is read, which
-       WP-06c asserts by counting chunk-region reads across a whole mount. */
-    rc = tape_index_check_overlap(live, t->sort_perm);
-    if (rc != TAPE_OK) { return rc; }
 
     return TAPE_OK;
 }
@@ -404,7 +430,19 @@ static tape_result select_indices(struct tape *t, tape_side side)
     t->side_b_valid = (rb == TAPE_OK);
     if (!t->side_b_valid) {
         if (rb == TAPE_ERR_IO) { return rb; }
-        if (side == TAPE_SIDE_B) { return TAPE_ERR_NO_VALID_INDEX; }
+        /*
+         * DRAFT-7 (V6-001): a mount REQUESTING Side B returns that side's own
+         * §5.3 error, which is TAPE_ERR_INCONSISTENT when both B slots are valid
+         * at equal `sequence` and TAPE_ERR_NO_VALID_INDEX when neither is.
+         * DRAFT-6 flattened both to the latter.
+         *
+         * The distinction is not cosmetic: equal-sequence-both-valid is a media
+         * fault with two live generations, and reporting it as "no index" tells
+         * the caller the opposite of what happened. The post-mount
+         * tape_set_side(B) refusal stays NO_VALID_INDEX in BOTH causes, so this
+         * is a genuine divergence between the two paths and not a rename.
+         */
+        if (side == TAPE_SIDE_B) { return rb; }
         /*
          * THE STAGE ORACLE IS SKIPPED HERE, and the order is normative.
          *
@@ -491,6 +529,10 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
     /* Phases 1 and 2. No writes anywhere below this line until phase 4. */
     rc = resolve_superblock(t, &repair_lba);
     if (rc != TAPE_OK) { return rc; }
+
+    /* §5.5's base is accumulated across all four slots during phase 3, so it
+       starts from zero on every mount and is never carried across one. */
+    t->cartridge_sequence = 0u;
 
     /* Phase 3 — both sides, degraded-B, then the oracle. Still no writes. */
     rc = select_indices(t, side);

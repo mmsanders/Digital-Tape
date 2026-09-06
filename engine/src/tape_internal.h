@@ -1,6 +1,6 @@
 /*
  * tape_internal.h — the engine's private state and on-media parsers.
- * Normative: spec/tapefs-v1.md DRAFT-6 §4 and §5.
+ * Normative: spec/tapefs-v1.md DRAFT-7 §4, §5 and §5.5.
  */
 
 #ifndef TAPE_INTERNAL_H
@@ -88,6 +88,20 @@ struct tape {
     uint64_t  position_frame;
     int32_t   rate_q16_16;
     uint32_t  free_next;         /* derived at mount, never stored (§7) */
+    /*
+     * §5.5: the base every commit increments from — the maximum `sequence` over
+     * every STRUCTURALLY VALID slot of all four, not only the live ones and not
+     * only the mounted side's. Derived at mount, never stored on media.
+     *
+     * The defect it fixes is ordinary rather than exotic. Side A live at
+     * sequence 10 and Side B at 500 is what a cartridge looks like after a few
+     * recordings; a side-local "live->sequence + 1" writes 11, B's OLD slot at
+     * 500 still wins §5.3, and after promote's phase-1 superblock lands the
+     * stage oracle sees A at the staging generation and B at the old one and
+     * rejects the cartridge. Both numbers were in the mounted state and nothing
+     * chose between them (V6-003).
+     */
+    uint32_t  cartridge_sequence;
     uint32_t  live_slot[2];      /* which of each side's two slots is live */
     bool      mounted;
     bool      needs_repair;
@@ -161,12 +175,24 @@ tape_result tape_geometry_ok(uint32_t nominal_length_s, uint32_t block_count,
    GEOMETRY_OK with stored total_chunks EQUAL to the derived value. */
 tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_count);
 
-/* §5/§5.2: parse and validate one index slot from its header block plus entry
-   bytes. `side` is the slot's assignment; `sb` supplies total_chunks and
-   a_high_water for the run-bound checks. */
+/*
+ * §5.5 STRUCTURAL validity: magic, entry_count <= MAX_ENTRIES, CRC. Nothing
+ * else. Fills `out` from the bytes, including the raw `side` marker.
+ *
+ * Separate from §5.2 because cartridge_sequence (§5.5) is the maximum over every
+ * STRUCTURALLY valid slot -- §5.2 validity is not stable across an operation, so
+ * a base computed over it could be outranked later by a slot that becomes valid.
+ */
 tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entries,
-                             uint8_t side, const struct tape_sb *sb,
                              struct tape_index *out);
+
+/*
+ * §5.2 validity, against the superblock already selected by §4.1: the side
+ * marker, the entry bounds, the total_frames sum, the §5.4 cap, and §5.1's
+ * interval disjointness. `perm` is the sort scratch and is clobbered.
+ */
+tape_result tape_index_validate(struct tape_index *idx, uint8_t side,
+                                const struct tape_sb *sb, uint16_t *perm);
 
 /* §7: free_next = max over live-B entries of (last_chunk_id + 1), floored at
    a_high_water. Derived, never stored. */

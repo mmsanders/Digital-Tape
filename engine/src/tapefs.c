@@ -1,11 +1,15 @@
 /*
  * tapefs.c — on-media parsing and validation.
- * Normative: spec/tapefs-v1.md DRAFT-6 §2, §2.1, §4, §4.1, §5, §5.2, §7.
+ * Normative: spec/tapefs-v1.md DRAFT-7 §2, §2.1, §4, §4.1, §5, §5.2, §5.5, §7.
  *
  * Everything here is pure: it takes bytes and produces structures or refusals.
  * No device access, so it is trivially testable against synthetic media.
  *
- * DRAFT-6 reconciled. Since DRAFT-4: geometry is now ONE predicate (§2.1
+ * DRAFT-7 reconciled. §5.5 splits STRUCTURAL validity (magic, entry_count
+ * bound, CRC) from §5.2 validity, because cartridge_sequence is a maximum over
+ * the former and §5.2 validity is not stable across an operation (ADR-036).
+ *
+ * Since DRAFT-4: geometry is now ONE predicate (§2.1
  * GEOMETRY_OK) used at mount, dup and format, and the superblock's stored
  * total_chunks must EQUAL the value that predicate derives from its own
  * nominal_length_s rather than merely cover it; the superblock carries
@@ -253,19 +257,35 @@ tape_result tape_sb_check_geometry(const struct tape_sb *sb, uint32_t block_coun
     return TAPE_OK;
 }
 
+/*
+ * spec §5.5 — STRUCTURAL validity, which is NOT §5.2 validity.
+ *
+ * A slot is structurally valid iff magic matches, entry_count <= MAX_ENTRIES,
+ * and the CRC verifies over bytes 0..59 concatenated with 12 * entry_count
+ * bytes of entries. That is all. The side marker, the entry bounds, the
+ * total_frames sum and interval disjointness are §5.2 and live in
+ * tape_index_validate below.
+ *
+ * The split is load-bearing, and §5.5 says why: cartridge_sequence is the
+ * maximum over every STRUCTURALLY valid slot, because §5.2 validity is not
+ * stable across an operation -- §9.3.4's "between 2 and 3" row turns on Side A's
+ * new index being §5.2-INVALID until step 4 raises the water line. A base
+ * computed over §5.2-valid slots could therefore be outranked later by a slot
+ * that becomes valid. Structural validity only ever shrinks the set of numbers
+ * this cartridge has issued, which is the property the base needs.
+ *
+ * The entry_count bound is part of the DEFINITION, not an afterthought: a slot
+ * claiming entry_count = 0xFFFFFFFF would otherwise demand a 51 GB read to
+ * decide its own validity, on a mount §5.2 rejects in one comparison.
+ */
 tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entries,
-                             uint8_t side, const struct tape_sb *sb,
                              struct tape_index *out)
 {
     uint32_t i, count;
-    uint64_t sum = 0;
     uint32_t crc;
 
     if (memcmp(hdr, IDX_MAGIC, sizeof IDX_MAGIC) != 0) {
         return TAPE_ERR_BAD_MAGIC;
-    }
-    if (hdr[12] != side) {
-        return TAPE_ERR_NO_VALID_INDEX;
     }
 
     count = tape_rd32(hdr + 16);
@@ -283,23 +303,41 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
     }
 
     out->sequence     = tape_rd32(hdr + 8);
-    out->side         = side;
+    out->side         = hdr[12];
     out->entry_count  = count;
     out->total_frames = tape_rd64(hdr + 20);
 
     for (i = 0; i < count; i++) {
         const unsigned char *e = entries + (size_t)i * TAPE_INDEX_ENTRY_BYTES;
-        uint64_t last;
-
         out->entries[i].first_chunk_id = tape_rd32(e);
         out->entries[i].start_frame    = tape_rd32(e + 4);
         out->entries[i].frame_count    = tape_rd32(e + 8);
+    }
+    return TAPE_OK;
+}
 
-        if (out->entries[i].frame_count < 1u)                  { return TAPE_ERR_NO_VALID_INDEX; }
-        if (out->entries[i].start_frame >= TAPE_CHUNK_FRAMES)  { return TAPE_ERR_NO_VALID_INDEX; }
+/*
+ * spec §5.2 — slot validity, evaluated against the superblock already selected
+ * by §4.1 and depending on nothing derived from either index.
+ *
+ * `perm` is the disjointness sort's scratch (§5.1) and is clobbered.
+ */
+tape_result tape_index_validate(struct tape_index *idx, uint8_t side,
+                                const struct tape_sb *sb, uint16_t *perm)
+{
+    uint32_t i;
+    uint64_t sum = 0;
 
-        /* Compared in 64-bit and never narrowed (§5.1 DRAFT-4). */
-        last = tape_entry_last_chunk(&out->entries[i]);
+    if (idx->side != side) { return TAPE_ERR_NO_VALID_INDEX; }
+
+    for (i = 0; i < idx->entry_count; i++) {
+        uint64_t last;
+
+        if (idx->entries[i].frame_count < 1u)                  { return TAPE_ERR_NO_VALID_INDEX; }
+        if (idx->entries[i].start_frame >= TAPE_CHUNK_FRAMES)  { return TAPE_ERR_NO_VALID_INDEX; }
+
+        /* Compared in 64-bit and never narrowed (§5.1). */
+        last = tape_entry_last_chunk(&idx->entries[i]);
         if (last >= (uint64_t)sb->total_chunks)                { return TAPE_ERR_NO_VALID_INDEX; }
 
         /* spec §5.2: for Side A the bound is the LAST chunk of each run, not the
@@ -311,18 +349,17 @@ tape_result tape_index_parse(const unsigned char *hdr, const unsigned char *entr
             return TAPE_ERR_NO_VALID_INDEX;
         }
 
-        sum += out->entries[i].frame_count;
+        sum += idx->entries[i].frame_count;
     }
 
-    if (sum != out->total_frames) {
-        return TAPE_ERR_NO_VALID_INDEX;
-    }
+    if (sum != idx->total_frames)                              { return TAPE_ERR_NO_VALID_INDEX; }
     /* §5.4: media declaring more than the position representation can address is
        rejected at mount rather than becoming unseekable later (V3-010). */
-    if (out->total_frames > (uint64_t)TAPE_MAX_TOTAL_FRAMES) {
-        return TAPE_ERR_NO_VALID_INDEX;
-    }
-    return TAPE_OK;
+    if (idx->total_frames > (uint64_t)TAPE_MAX_TOTAL_FRAMES)   { return TAPE_ERR_NO_VALID_INDEX; }
+
+    /* §5.1's interval-disjointness rule is part of §5.2 validity. No chunk is
+       read, which acceptance.md WP-06c asserts by counting chunk-region reads. */
+    return tape_index_check_overlap(idx, perm);
 }
 
 uint32_t tape_derive_free_next(const struct tape_index *idx, const struct tape_sb *sb,

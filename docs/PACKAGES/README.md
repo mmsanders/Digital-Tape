@@ -27,7 +27,7 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-6** — 260 checks, sub-criteria 06a–06h exercised. PR #20, parked by the PM. DRAFT-7 adds `cartridge_sequence` (§5.5) and a second degraded-B cause; reconciliation is next. Commit path held by structural Rule 1 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-7** — four-phase mount, `cartridge_sequence`, both degraded-B causes. 286 checks, sub-criteria 06a–06h. PR #20, draft. Commit path held by structural Rule 1 |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done against DRAFT-6** — 46 checks on Rule 3; `tapefs` §7 unchanged through DRAFT-7. Reset-B's commit held by structural Rule 1 |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |

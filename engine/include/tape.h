@@ -1,7 +1,7 @@
 /*
  * tape.h — Digital Tape engine, public API.
  *
- * Normative: spec/engine-api.md DRAFT-6. Where this header and the spec differ,
+ * Normative: spec/engine-api.md DRAFT-7. Where this header and the spec differ,
  * the spec is right and this is a defect.
  *
  * Implementation status. The engine is built against structural Rule 1: engine
@@ -10,9 +10,10 @@
  * implementation, in that order.
  *
  *   Implemented   tape_instance_size, tape_init, tape_mount (all four phases,
- *                 both sides, degraded-B and the stage oracle), tape_unmount,
- *                 tape_get_info, tape_set_side, tape_tell, and the WP-07
- *                 allocator (tape_alloc_run)
+ *                 both sides, both degraded-B causes, the stage oracle and
+ *                 §5.5's cartridge_sequence), tape_unmount, tape_get_info,
+ *                 tape_set_side, tape_tell, and the WP-07 allocator
+ *                 (tape_alloc_run)
  *   Declared,     everything else. Calling one is a link error, which is the
  *   not defined   intended loud failure rather than a silent stub.
  *
@@ -133,7 +134,7 @@ tape_result tape_set_side(tape *t, tape_side side);
 /* --- transport (§6) --------------------------------------------------------- */
 
 tape_result tape_seek(tape *t, uint64_t frame);   /* beyond end clamps; TAPE_OK */
-/* DRAFT-6 (V5-009): this returns tape_result, not a bare uint64_t. §2 says every
+/* V5-009: this returns tape_result, not a bare uint64_t. §2 says every
    call returns tape_result and §10's Not-mounted row requires
    TAPE_ERR_NOT_MOUNTED from every ordinary call — which the old signature had no
    channel for, so an implementation had to invent a sentinel or return a stale
