@@ -1,7 +1,7 @@
-# For the PM — DRAFT-8 candidate, second cut (V8C dispositions)
+# For the PM — DRAFT-8 candidate, third cut (V8R2 dispositions)
 
 From: surge support
-Date: 6 Sep 2026 (evening)
+Date: 6 Sep 2026 (late)
 Branch: `surge/draft-8-freeze-candidate`
 PR: https://github.com/mmsanders/Digital-Tape/pull/25
 Canonical today: `main` is still DRAFT-7. I will not merge.
@@ -12,19 +12,23 @@ This is a handoff, not a freeze request. Spec authorship stays yours.
 
 ## What happened
 
-An independent Verification Lead pass on the first DRAFT-8 candidate bytes
-(`a769c772` / `d19c8f24` / `d2cf1f62`) returned **0 blockers, 3 majors**.
-V7-001 (the cartridge-survival blocker) did not reproduce. Two majors sit
-in the Phase-0 candidate (`V8C-001`, `V8C-002`); one sits in WP-10 scope
-(`V8C-003`). The lead's recommendation: do not sign Phase 0 on those
-bytes; produce another candidate.
+The independent Verification Lead pass on the second-cut bytes
+(`22dca615` / `537eadc4` / `3c764724`) is
+`findings/surge-draft8-second-cut-review.md` on
+`mmsanders/digital-tape-verification/main`
+(`14b386f1424b98237fb32bf7d2221aa130d9543b`).
 
-That pass is also on `mmsanders/digital-tape-verification/main` as
-`findings/surge-draft8-candidate-review.md`
-(`432e4675102244dfb22636e11676dcbd411d9bd4`).
+**0 blockers, 1 major, 1 documentation/coverage question.**
+V8C-001 and V8C-002 stayed fixed. V8C-003's ordinary-headroom path stayed
+fixed. V7-001 did not reopen. The remaining major, **V8R2-001**, is the
+generation-exhausted equal-generation-divergent fallback: §4.6 claimed a
+durable first write is always `INCOMPLETE`, while the required zeroing
+fallback after `sb_generation = 0xFFFFFFFD` leaves the surviving primary's
+own mount result.
 
-I treated the three findings as mine to disposition, same as V7-001/003.
-Partner-first and the two-interruption closure test are unchanged.
+I treated V8R2-001 and V8R2-002 as mine to disposition. Partner-first and
+the two-interruption closure test are unchanged. Engine-api bytes are
+unchanged this cut.
 
 ---
 
@@ -34,15 +38,13 @@ Proven locally with `sha256sum`. Banner inside the hash is still
 **DRAFT-8. NOT FROZEN.**
 
 ```
-22dca61503dbfda40abee53a5ab5eeb968cb887da67b4611ae0adcd67e7835a7  spec/tapefs-v1.md
+3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb  spec/tapefs-v1.md
 537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1  spec/engine-api.md
-3c7647247b6780be6fa68c6f7649d5bedda10219b2231bd470318e11d0890d53  spec/acceptance.md
+7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7  spec/acceptance.md
 ```
 
-Files: `draft-8/` in this project folder. The GitHub branch still carries
-DRAFT-7 spec files plus the review packet so a packet-only merge cannot
-red the gate. Issue by `cmp`-landing these three files plus the DRAFT-8
-`VERSION.md` in one commit.
+Files: `draft-8/` in this project folder. Issue by `cmp`-landing these
+three files plus the DRAFT-8 `VERSION.md` in one commit.
 
 ---
 
@@ -50,24 +52,23 @@ red the gate. Issue by `cmp`-landing these three files plus the DRAFT-8
 
 | ID | Sev. | Where | What I wrote |
 |---|---|---|---|
-| **V8C-001** | major, candidate | `tapefs` §2.1, §4.1 phase 0, §9.5 order; `engine-api` §3 / `tape_mount`; WP-06d | Named `DEVICE_ADDRESSABLE(block_count) := block_count > LBA_CHUNK_BASE`. Mount evaluates it as phase 0, before any callback. Duplicate now refuses geometry and capacity *before* raw classification. `block_count ∈ {0, 1, LBA_CHUNK_BASE}` → `TAPE_ERR_GEOMETRY`, zero writes, zero out-of-range callbacks. Format already had geometry first; the same floor now sits in the named predicate. |
-| **V8C-002** | major, candidate | `tapefs` §4.6 / §5 / identity commits; invariant 7; WP-10 counters | One identity-boundary sentence, copied: `sb_generation` strictly increases on ordinary updates of an *existing* cartridge, including format/dup **step 1**. The identity-assignment commit is a new cartridge and writes `sb_generation = 1`; monotonicity does not span it. Removed "format's and duplicate's commits" from the strict-increase list. |
-| **V8C-003** | major, WP-10 | `tapefs` §9.5/§9.6; WP-10 oracle | Chose the lead's option B, then aligned the oracle. Equal-generation-divergent now takes the v1 WIP template path with the healthy-pair tie-break (mirror = partner, primary = candidate). A durable first write is `INCOMPLETE`, not an arbitrary surviving admission. Zero-both remains only as the generation-exhausted fallback. Crash tables and WP-10 allowed-state sets now name: `INCONSISTENT` if nothing landed; surviving-copy mount result if the first write tore; `INCOMPLETE` once any template write is durable; completed cartridge. |
+| **V8R2-001** | major, candidate | `tapefs` §4.6, §9.5/§9.6 step 1 and crash tables; WP-10 oracle and allowed-state sets | Qualified the equal-generation-divergent template claim with headroom. Ordinary path unchanged (v1 WIP template, durable first write = `INCOMPLETE`). Exhaustion path (`sb_generation ≥ 0xFFFFFFFD`) stays the §4.5 zero-both fallback, mirror first. First durable or torn zero = **mount result of the surviving primary**, not `INCOMPLETE` and not "old cartridge unchanged." Both zeros = `BAD_MAGIC`. New crash-table rows and a mandatory WP-10 shape at `0xFFFFFFFD`. |
+| **V8R2-002** | doc / coverage | WP-06, WP-06d; format/dup allowed-state geometry sentences | Phase-0 refusals at `block_count ∈ {0, 1, LBA_CHUNK_BASE}` now require **zero callbacks of any kind**, not only zero out-of-range callbacks. WP-06 parenthetical is "phase 0 plus phases 1–4." |
 
-V7-001 partner-first and the two-interruption closure test were not
-touched.
+V7-001 partner-first, V8C-001 phase 0, V8C-002 identity boundary, and
+V8C-003's ordinary template path were not touched.
 
 ---
 
 ## What I recommend
 
 **Do not flip the banner.** Hand the new bytes and
-`FOR-VERIFICATION-LEAD.md` to the lead. The lead already said that if the
-two candidate majors land without creating another, the next exact-byte
-pass is a legitimate Phase-0 signature candidate.
+`FOR-VERIFICATION-LEAD.md` to the lead. The lead already said that fixing
+this one edge without introducing a new candidate major would make the
+next exact-byte pass a genuine zero-blocker/zero-major Phase-0 signature
+candidate, still subject to your issuance.
 
-**Do not treat a land as WP-10.** V8C-003 is now in the oracle; WP-10
-still has to run green.
+**Do not treat a land as WP-10.** Paper-clean is not a green WP-10.
 
 **If you reject the text,** leave `main` at DRAFT-7.
 
@@ -80,7 +81,6 @@ files + `VERSION.md` together.
 ## What this does not do
 
 - Does not freeze. Does not flip the banner.
-- Does not touch `engine/` or `tests/`.
-- Does not merge #18 or #20.
-- Does not publish onto `digital-tape-verification` `main`.
-- Does not decide Q-001.
+- Does not touch `engine/` implementation. PR #20 stays parked.
+- Does not merge hardware PR #18.
+- Does not publish findings onto `digital-tape-verification` `main`.
