@@ -4,6 +4,115 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 11 — 6 Sep 2026, independent review of the solenoid circuit (IR-018-11…15)
+
+**All five accepted. None disputed. The disposition — do not accept the solenoid response yet —
+is correct and I am not asking for it to be lifted.** This is a new response, not a closure.
+
+### The headline: the design failed, and my margin was fiction
+
+**IR-018-11 is right, and it is worse than the finding states.** You calculated that a 1.136×
+margin cannot survive a 13.6 % coil-power corner. The actual corner is **×1.358**:
+
+| Corner | | Effect |
+|---|---|---:|
+| Boost rail | 12 V +5 % | ×1.103 |
+| Coil resistance | −10 % as supplied | ×1.111 |
+| Copper at 0 °C | −9.8 % vs 25 °C | ×1.109 |
+| **Combined** | | **×1.358** |
+
+So the old working point is **0.330 W against a 0.25 W limit — a fail**, where my model reported
+0.220 W and a pass. All three terms push the same way, and the temperature one points the
+opposite way to intuition: copper's resistance *falls* as it cools, so the cold end of the range
+is the worst case, not the hot end.
+
+**The root error is the one you named.** I bounded the *timing* corners on a coil I had labelled
+5.0 W, and treated a nominal wattage as a safety maximum. The criterion is average coil *power*
+and `P = V²/R`; the rail and winding tolerances are the quantities, and they were not in the
+model at all.
+
+### IR-018-12: I used one corner for two opposite claims
+
+Accepted without reservation, and this is the one I find most instructive. `min_period_ms` was
+the fastest the hardware could fire — correct for bounding a fault, and exactly backwards for
+proving real use is never blocked. At the slow corner the same design held the inhibit for
+**539 ms against a 500 ms period**.
+
+**So the design would have met the safety bound partly by dropping the fastest legitimate
+press** — the precise failure the PM restated the limit to forbid. There are now two functions
+with two names, `min_inhibit_ms` and `max_inhibit_ms`, and the criteria check asserts the slow
+one clears the period.
+
+### IR-018-13: the RC was never inside the part's envelope
+
+**Confirmed: 1368 kΩ, against a 1000 kΩ specified maximum.** Moving the lockout capacitor from
+470 nF to 1 µF brings it to **551 kΩ**, inside range; the pulse resistor is 143 kΩ.
+
+**And my tolerance stack was tighter than the part it modelled** — 10 % allocated to the IC when
+the datasheet's guaranteed spread over temperature is about ±14 %. The stack is now
+±20 % (14 % IC + 1 % R + 5 % C), which made every other number worse and is the honest figure.
+
+**The wording is corrected too**: 74HC221 devices are non-retriggerable, and I had written that
+the B half was *"retriggered by A's falling edge"* — the opposite of the behaviour the lockout
+depends on.
+
+**One thing I must flag rather than quietly adopt.** `R_EXT` limits and the ±14 % figure are
+**your** datasheet readings. I cannot fetch either datasheet — gap H-02 — so those numbers are
+second-hand in my document and are marked as such. They need confirming against the exact
+orderable variant before WP-26, and the family's variants differ here.
+
+### IR-018-14: the gate failed open, twice
+
+Accepted, and the second half is worse than the first.
+
+**`--check` only tested freshness.** An unsafe edit gave an unsafe table, a fresh file and a
+green result — the ❌ was in the output and nothing read it. The safety verdict now runs first
+and independently.
+
+**And `hardware.yml` never invoked `thermal-check` at all.** The one analysis backing a safety
+limit was the one CI did not run, from the day that workflow was written. Not a regression — it
+was never there.
+
+**That generalises and I have recorded it as ADR-122.** CLAUDE.md §1 requires every gate to be
+proven able to go red. **It does not require anyone to check the gate is reachable.** A red case
+in a gate nobody runs is theatre, and two of your five findings were about exactly that.
+
+### IR-018-15: stale normative text, withdrawn
+
+Confirmed. T-4 proposed *duty ≤ 0.5 % over any 10 s window*, sitting in the section labelled "PM
+to transcribe" — so it could have reintroduced a requirement DRAFT-7 had already replaced. Your
+arithmetic is right: 0.25 W on a 5 W coil is 5 % on-time against a modelled 4.4 % fault, so a
+0.5 % duty criterion would have failed the design it was published beside. Withdrawn with the
+reasoning kept, so nobody re-derives it.
+
+### The rework, and what I am not claiming
+
+New working point: **3.5 W nominal, 10 ms pulse, 386 ms lockout** — 0.183 W over a finite rolling
+10 s window against 0.25 W, **1.37×**, slowest inhibit 475 ms against a 500 ms period.
+
+**§6 now publishes a feasibility boundary rather than a point**, because the pulse is a WP-04
+measurement and the coil follows from it. At the old 15 ms placeholder the ceiling is 3.30 W, so
+the 5 W coil was never compliant at that pulse; a shorter pulse buys the coil back.
+
+**And the cheapest lever turns out not to be the circuit.** Specifying the rail to ±2 % and the
+winding to ±5 % drops the corner factor from 1.36× to 1.21× — more headroom than any plausible
+change to the coil. That is a procurement decision.
+
+**What I am not claiming:** that this closes anything. The pulse is still a placeholder, two of
+the datasheet numbers are yours rather than mine, and the fabrication gate stays shut. **I do
+not accept my own responses** and this one has not been accepted by anyone.
+
+### The pattern, updated
+
+Rounds 5–10 I recorded that every finding was an error in *what a check was asking*, never in
+the engineering. **This round breaks that.** IR-018-11 is an error in the engineering: a missing
+physical term, a factor of 1.36 that decides pass from fail. The check-design errors are still
+here — 12 and 14 are textbook — but I should stop telling myself the maths always holds. It did
+not this time, and the reason is the same as always: I did not ask what the criterion was
+actually about.
+
+---
+
 ## Round 10 — 6 Sep 2026, on PM Decisions 007
 
 ### The two card items are settled. The plate can go.

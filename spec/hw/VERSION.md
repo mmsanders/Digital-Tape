@@ -21,7 +21,7 @@ that changes without its revision moving is the same failure with worse conseque
 | File | Revision | SHA-256 of content |
 |---|---|---|
 | `board-rev-a.md` | 0.5 | `4b0c669a3d8655800ff9e1b6218ff63d571fb20b93082efa0a1f55135a7776ee` |
-| `thermal-budget.md` | 0.3 | `b048a33d9f829b867435ee3f8e1cc181f2253502bef8d671db7423ac08ad1b06` |
+| `thermal-budget.md` | 0.4 | `95ef78839e20b099beb251397307a3b18d00a39ca53820bc05828a953daca738` |
 | `cartridge-shell.md` | 0.2 | `60946373d648d230c2fb6f58cede208b4657eb61c57fa6d257f9acfeef128c51` |
 
 `AUTO` rows are filled by `make -C hardware spec-bless`, which is the deliberate act of

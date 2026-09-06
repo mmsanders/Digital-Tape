@@ -48,6 +48,14 @@ jobs:
         run: make -C hardware atomicity-test
       - name: Clasp tables in spec/hw/cartridge-shell.md are not stale
         run: make -C hardware mech-check
+      # IR-018-14: hardware CI did not run the thermal analyses AT ALL, so the
+      # solenoid safety criteria and the charger/JEITA tables were unguarded on
+      # every push. thermal-check now fails on the criteria first and on
+      # staleness second; solenoid-test proves the criteria can go red.
+      - name: Thermal and solenoid analyses hold and are not stale
+        run: make -C hardware thermal-check
+      - name: Solenoid safety criteria, and proof they can go red
+        run: make -C hardware solenoid-test
       - name: spec/hw content and revision agree
         run: make -C hardware spec-check
 

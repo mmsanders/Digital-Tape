@@ -10,7 +10,7 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
@@ -111,6 +111,19 @@ packet-duplicates:
 	@cd $(CAD) && $(PY) test_packet.py --mutate >/dev/null \
 	  && echo "OK  duplicate gate: proven able to go red"
 
+## solenoid-test — the safety criteria are executable, and proven able to fail
+##
+## IR-018-14: this analysis failed open. `--check` only asked whether the
+## Markdown matched the generator, so an unsafe parameter edit gave an unsafe
+## table, a fresh file and a GREEN gate -- and hardware.yml never ran it at all.
+## The headline red case is the previous working point (5.0 W / 15 ms / 450 ms),
+## which the old model called a 1.14x pass and the corrected model rejects twice.
+solenoid-test:
+	@cd $(THERMAL) && $(PY) test_solenoid.py >/dev/null \
+	  && echo "OK  solenoid criteria: 17 checks pass, incl. the old working point"
+	@cd $(THERMAL) && $(PY) test_solenoid.py --mutate >/dev/null \
+	  && echo "OK  solenoid criteria: proven able to go red"
+
 ## charger / solenoid — print the design analyses without touching the spec
 charger:
 	$(PY) $(THERMAL)/charger_ts.py --report
@@ -183,6 +196,7 @@ check: thermal-check mech-check
 	  && echo "OK  characterisation tool parses"
 	@$(MAKE) --no-print-directory shell-test
 	@$(MAKE) --no-print-directory packet-duplicates
+	@$(MAKE) --no-print-directory solenoid-test
 	@$(MAKE) --no-print-directory atomicity-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc

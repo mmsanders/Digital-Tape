@@ -35,12 +35,55 @@ PULSE_CEILING_MS = 50.0       # single-pulse ceiling, retained from DRAFT-2
 LEGIT_RATE_HZ = 2.0           # the fastest legitimate use the PM names
 DESIGN_TARGET_W = 0.20        # design to this, not to the limit
 
-TIMING_TOL = 0.16             # 1% R + 5% film/C0G C + 10% 74HC221 constant
+# ---------------------------------------------------------------------------
+# Timing tolerance. IR-018-13: this was 16 % and it was too small.
+#
+# The 74HC/HCT221 family's own guaranteed pulse width over -40..85 C spans about
+# +/-14 % around nominal (Nexperia 74HCT221 Rev. 4 gives 602..798 us for the
+# 100 nF / 10 kOhm example). The old stack allocated only 10 % to the IC before
+# adding R and C, so it was tighter than the part it was modelling.
+IC_TOL = 0.14              # guaranteed, over temperature -- NOT a typical
+R_TOL = 0.01               # 1 % metal film
+C_TOL = 0.05               # 5 % film
+TIMING_TOL = IC_TOL + R_TOL + C_TOL          # 0.20, arithmetic sum not RSS
 
-# Working point. PULSE_NOM_MS is a PLACEHOLDER until WP-04 measures it.
-COIL_W = 5.0
-PULSE_NOM_MS = 15.0
-LOCKOUT_NOM_MS = 450.0
+# Datasheet limit on the external timing resistor. 1.368 MOhm -- the value the
+# previous 450 ms lockout needed -- is OUTSIDE this, so that working point was
+# never inside the part's specified envelope. IR-018-13.
+R_EXT_MIN_OHM, R_EXT_MAX_OHM = 2e3, 1e6
+
+# ---------------------------------------------------------------------------
+# Coil power, from the electrical corners rather than a label. IR-018-11.
+#
+# The acceptance criterion is AVERAGE COIL POWER, and coil power is not a
+# constant -- P = V^2 / R, so the boost rail's upper tolerance and the winding's
+# lower resistance are the quantities that decide it. The previous model bounded
+# only the TIMING corners on an exactly-5.0 W coil, which is a nominal label and
+# not a safety maximum.
+#
+# Copper's resistance FALLS as it cools, so the cold end of the operating range
+# is the worst case, not the hot end. That is the counter-intuitive term and it
+# is worth about 10 % on its own.
+V_BOOST_NOM = 12.0
+V_BOOST_TOL = 0.05         # regulated boost output
+R_COIL_TOL = 0.10          # winding, as-supplied
+ALPHA_CU = 0.00393         # /K, copper
+T_COLD_C = 0.0             # cold end of the operating range
+T_REF_C = 25.0
+
+# Usability margin held between the slowest possible inhibit and the fastest
+# legitimate press, so the bound never suppresses the interaction it is
+# specified to sit above. IR-018-12.
+USABILITY_MARGIN_MS = 25.0
+
+# ---------------------------------------------------------------------------
+# Working point. PULSE_NOM_MS is a PLACEHOLDER until WP-04 measures it, and the
+# coil follows FROM it -- see feasible_coil_w(). The previous point (5.0 W,
+# 15 ms, 450 ms) FAILS once the electrical corners are included: 0.299 W against
+# a 0.25 W limit, where the old model reported 0.220 W and a 1.14x pass.
+COIL_W = 3.5               # NOMINAL, at V_BOOST_NOM. Worst case is ~1.36x this
+PULSE_NOM_MS = 10.0
+LOCKOUT_NOM_MS = 386.0
 
 ENERGY_BUDGET_J = POWER_LIMIT_W / LEGIT_RATE_HZ
 
@@ -48,90 +91,315 @@ ENERGY_BUDGET_J = POWER_LIMIT_W / LEGIT_RATE_HZ
 def spread(nom): return nom * (1 - TIMING_TOL), nom * (1 + TIMING_TOL)
 
 
-def fault_avg_w(coil_w, pulse_nom, lockout_nom):
-    """Worst case: longest pulse, shortest lockout, retriggered forever."""
-    t = spread(pulse_nom)[1] / 1000.0
-    l = spread(lockout_nom)[0] / 1000.0
-    return coil_w * t / (t + l)
+# ---------------------------------------------------------------------------
+# Coil power at the electrical corners -- IR-018-11
+# ---------------------------------------------------------------------------
+
+def coil_power_factor(v_tol=V_BOOST_TOL, r_tol=R_COIL_TOL, t_cold=T_COLD_C) -> float:
+    """How much more than nominal the coil can actually dissipate.
+
+    P = V^2 / R, so the worst case is the highest rail into the lowest
+    resistance, and the lowest resistance is at the COLD end of the operating
+    range because copper's resistance falls as it cools. All three terms push
+    the same way, which is why the factor is large.
+    """
+    r_factor = (1.0 - r_tol) * (1.0 + ALPHA_CU * (t_cold - T_REF_C))
+    return (1.0 + v_tol) ** 2 / r_factor
 
 
-def legit_avg_w(coil_w, pulse_nom, rate_hz=LEGIT_RATE_HZ):
-    return coil_w * spread(pulse_nom)[1] / 1000.0 * rate_hz
+def worst_coil_w(nominal_w: float = None) -> float:
+    """The number the acceptance criterion is actually about."""
+    return (COIL_W if nominal_w is None else nominal_w) * coil_power_factor()
 
 
-def min_period_ms(pulse_nom, lockout_nom):
-    return spread(pulse_nom)[1] + spread(lockout_nom)[0]
+# ---------------------------------------------------------------------------
+# Two claims, two opposite corners -- IR-018-12
+#
+# The old model used min_period_ms() for BOTH "the fault is bounded" and "real
+# use is never blocked". Those need opposite corners, and using the fast one for
+# the usability claim is how a design can satisfy the safety bound by
+# suppressing the very interaction the bound is specified to sit above.
+# ---------------------------------------------------------------------------
+
+def min_inhibit_ms(pulse_nom=None, lockout_nom=None) -> float:
+    """FAST corner: longest pulse, shortest lockout. Bounds FAULT POWER --
+    it is the most often the hardware can possibly fire."""
+    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    l = LOCKOUT_NOM_MS if lockout_nom is None else lockout_nom
+    return spread(p)[1] + spread(l)[0]
+
+
+def max_inhibit_ms(pulse_nom=None, lockout_nom=None) -> float:
+    """SLOW corner: longest pulse, longest lockout. Bounds USABILITY --
+    it is the longest a legitimate press can be locked out."""
+    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    l = LOCKOUT_NOM_MS if lockout_nom is None else lockout_nom
+    return spread(p)[1] + spread(l)[1]
+
+
+def fault_avg_w(coil_w=None, pulse_nom=None, lockout_nom=None) -> float:
+    """Worst case in every axis at once: worst-case coil power, longest pulse,
+    shortest lockout, retriggered forever."""
+    p = spread(PULSE_NOM_MS if pulse_nom is None else pulse_nom)[1] / 1000.0
+    inhibit = min_inhibit_ms(pulse_nom, lockout_nom) / 1000.0
+    return worst_coil_w(coil_w) * p / inhibit
+
+
+def legit_avg_w(coil_w=None, pulse_nom=None, rate_hz=LEGIT_RATE_HZ) -> float:
+    p = spread(PULSE_NOM_MS if pulse_nom is None else pulse_nom)[1] / 1000.0
+    return worst_coil_w(coil_w) * p * rate_hz
+
+
+def rolling_window_w(coil_w=None, pulse_nom=None, lockout_nom=None,
+                     window_s=POWER_WINDOW_S) -> float:
+    """The criterion is a FINITE rolling window, not an asymptotic duty ratio.
+
+    Over 10 s the hardware can fit ceil() actuations, not the fractional number
+    the duty ratio implies, so the real bound is very slightly above it. IR-018-11
+    asks for this explicitly, and it is the version the acceptance test measures.
+    """
+    import math
+    inhibit = min_inhibit_ms(pulse_nom, lockout_nom) / 1000.0
+    p = spread(PULSE_NOM_MS if pulse_nom is None else pulse_nom)[1] / 1000.0
+    n = math.floor(window_s / inhibit) + 1        # worst alignment of the window
+    return worst_coil_w(coil_w) * min(n * p, window_s) / window_s
+
+
+def lockout_for_usability_ms(pulse_nom=None) -> float:
+    """Largest NOMINAL lockout whose SLOW corner still clears before the fastest
+    legitimate press, with USABILITY_MARGIN_MS held back."""
+    p = PULSE_NOM_MS if pulse_nom is None else pulse_nom
+    budget = 1000.0 / LEGIT_RATE_HZ - USABILITY_MARGIN_MS - spread(p)[1]
+    return budget / (1.0 + TIMING_TOL)
+
+
+def feasible_coil_w(pulse_nom: float) -> float:
+    """Largest NOMINAL coil power that still meets the limit at every corner,
+    given a pulse length and a lockout sized for usability.
+
+    This is the useful shape of the answer: the pulse is a WP-04 measurement, so
+    the design is a boundary rather than a point, and the coil is chosen once
+    that measurement lands.
+    """
+    lock = lockout_for_usability_ms(pulse_nom)
+    return POWER_LIMIT_W / rolling_window_w(1.0, pulse_nom, lock)
+
+
+def timing_resistor_ohm(ms: float, cap_f: float) -> float:
+    return (ms / 1000.0) / (0.7 * cap_f)
+
+
+# ---------------------------------------------------------------------------
+# The criteria, as executable assertions -- IR-018-14
+# ---------------------------------------------------------------------------
+
+def check_criteria(strict: bool = True):
+    """Every PM-owned inequality, evaluated. Returns a list of failures.
+
+    The previous `--check` only asked whether the Markdown matched the
+    generator, so an unsafe parameter edit produced an unsafe table, a fresh
+    file, and a GREEN gate. That is the same fail-open class this project has
+    removed everywhere else, sitting in the one analysis that backs a safety
+    limit.
+    """
+    bad = []
+    fault = rolling_window_w()
+    legit = legit_avg_w()
+    if fault > POWER_LIMIT_W:
+        bad.append(f"fault-case average coil power {fault:.3f} W exceeds "
+                   f"{POWER_LIMIT_W:.2f} W over a rolling {POWER_WINDOW_S:.0f} s window")
+    if legit > POWER_LIMIT_W:
+        bad.append(f"legitimate-use average {legit:.3f} W exceeds {POWER_LIMIT_W:.2f} W")
+    if spread(PULSE_NOM_MS)[1] > PULSE_CEILING_MS:
+        bad.append(f"longest pulse {spread(PULSE_NOM_MS)[1]:.1f} ms exceeds the "
+                   f"{PULSE_CEILING_MS:.0f} ms single-pulse ceiling")
+    slowest = max_inhibit_ms()
+    period = 1000.0 / LEGIT_RATE_HZ
+    if slowest > period:
+        bad.append(f"slowest inhibit {slowest:.1f} ms exceeds the {period:.0f} ms period of "
+                   f"{LEGIT_RATE_HZ:.0f} Hz use -- the bound would block a legitimate press")
+    for name, ms, cap in (("pulse", PULSE_NOM_MS, 100e-9),
+                          ("lockout", LOCKOUT_NOM_MS, 1e-6)):
+        r = timing_resistor_ohm(ms, cap)
+        if not (R_EXT_MIN_OHM <= r <= R_EXT_MAX_OHM):
+            bad.append(f"{name} timing resistor {r/1000:.0f} kOhm is outside the part's "
+                       f"specified {R_EXT_MIN_OHM/1000:.0f}..{R_EXT_MAX_OHM/1000:.0f} kOhm range")
+    if strict and bad:
+        for line in bad:
+            print(f"  SOLENOID: {line}", file=sys.stderr)
+    return bad
 
 
 def t_solenoid_values() -> str:
     t_lo, t_hi = spread(PULSE_NOM_MS)
     l_lo, l_hi = spread(LOCKOUT_NOM_MS)
-    fault = fault_avg_w(COIL_W, PULSE_NOM_MS, LOCKOUT_NOM_MS)
-    legit = legit_avg_w(COIL_W, PULSE_NOM_MS)
-    per = min_period_ms(PULSE_NOM_MS, LOCKOUT_NOM_MS)
-    e = COIL_W * PULSE_NOM_MS / 1000.0
-    c1, r1 = 100.0, PULSE_NOM_MS / 1000.0 / (0.7 * 100e-9)
-    c2, r2 = 470.0, LOCKOUT_NOM_MS / 1000.0 / (0.7 * 470e-9)  # film: 470 nF C0G is not a real part
+    kf = coil_power_factor()
+    pw = worst_coil_w()
+    fault = rolling_window_w()
+    legit = legit_avg_w()
+    r_pulse = timing_resistor_ohm(PULSE_NOM_MS, 100e-9)
+    r_lock = timing_resistor_ohm(LOCKOUT_NOM_MS, 1e-6)
+    e = pw * t_hi / 1000.0
+    period = 1000.0 / LEGIT_RATE_HZ
     return "\n".join([
+        "> **Reworked after independent review IR-018-11…15.** The previous working point "
+        "(5.0 W, 15 ms, 450 ms) **fails** once the electrical corners are included: "
+        "**0.330 W against a 0.25 W limit**, where the old model reported 0.220 W and a "
+        "1.14× pass. It also blocked legitimate use at the slow timing corner. Both are "
+        "corrected below; **the response is not closed and I do not accept it.**",
+        "",
+        "### The coil is bounded by its corners, not by its label",
+        "",
+        "The criterion is *average coil power*, and coil power is not a constant: "
+        "`P = V²/R`. So the rail's upper tolerance and the winding's lower resistance are the "
+        "quantities that decide it — and the lowest resistance is at the **cold** end of the "
+        "range, because copper's resistance falls as it cools. All three push the same way.",
+        "",
+        "| Corner | Value | Effect on power |",
+        "|---|---:|---:|",
+        f"| Boost rail | {V_BOOST_NOM:.0f} V +{V_BOOST_TOL*100:.0f} % | ×{(1+V_BOOST_TOL)**2:.3f} |",
+        f"| Coil resistance | −{R_COIL_TOL*100:.0f} % as supplied | ×{1/(1-R_COIL_TOL):.3f} |",
+        f"| Copper at {T_COLD_C:.0f} °C | −{ALPHA_CU*(T_REF_C-T_COLD_C)*100:.1f} % vs {T_REF_C:.0f} °C | "
+        f"×{1/(1+ALPHA_CU*(T_COLD_C-T_REF_C)):.3f} |",
+        f"| **Combined** | | **×{kf:.3f}** |",
+        "",
+        f"So a **{COIL_W:.1f} W** nominal coil is a **{pw:.2f} W** coil for the purposes of this "
+        f"limit. **That factor, not the nominal, is what the old margin was missing** — and at "
+        f"{kf:.2f}× it is larger than the 1.14× margin the previous analysis claimed.",
+        "",
+        "### Working point",
+        "",
         "| Quantity | Value | Against | Verdict |",
         "|---|---:|---|---|",
-        f"| Energy budget at {LEGIT_RATE_HZ:.0f} Hz sustained | **{ENERGY_BUDGET_J*1000:.0f} mJ** "
-        f"per actuation | {POWER_LIMIT_W:.2f} W ÷ {LEGIT_RATE_HZ:.0f} Hz | the governing number |",
-        f"| Coil, specified by energy | **{COIL_W:.1f} W** | | selection constraint |",
+        f"| Coil, **nominal** | {COIL_W:.1f} W at {V_BOOST_NOM:.0f} V | | selection |",
+        f"| Coil, **worst case** | **{pw:.2f} W** | the number the limit is about | |",
         f"| Pulse (**placeholder — WP-04 measures this**) | {PULSE_NOM_MS:.0f} ms nominal, "
         f"{t_lo:.1f}…**{t_hi:.1f} ms** | ≤ {PULSE_CEILING_MS:.0f} ms | "
         f"**pass**, {PULSE_CEILING_MS/t_hi:.1f}× |",
-        f"| Energy per actuation | **{e*1000:.0f} mJ** | ≤ {ENERGY_BUDGET_J*1000:.0f} mJ | "
+        f"| Energy per actuation, worst case | **{e*1000:.0f} mJ** | ≤ {ENERGY_BUDGET_J*1000:.0f} mJ | "
         f"**pass**, {ENERGY_BUDGET_J/e:.2f}× |",
-        f"| Lockout | {LOCKOUT_NOM_MS:.0f} ms nominal, **{l_lo:.0f}**…{l_hi:.0f} ms | | |",
-        f"| Fastest the hardware allows | one per **{per:.0f} ms** | must be ≤ "
-        f"{1000/LEGIT_RATE_HZ:.0f} ms so real use is not blocked | "
-        f"**pass** |",
+        f"| Lockout | {LOCKOUT_NOM_MS:.0f} ms nominal, {l_lo:.0f}…{l_hi:.0f} ms | | |",
+        f"| **Fastest** the hardware can fire | one per **{min_inhibit_ms():.0f} ms** | "
+        f"bounds fault power | |",
+        f"| **Slowest** a press can be locked out | **{max_inhibit_ms():.0f} ms** | "
+        f"must be < {period:.0f} ms so real use is never blocked | "
+        f"**pass**, {period-max_inhibit_ms():.0f} ms spare |",
         f"| Average at {LEGIT_RATE_HZ:.0f} Hz legitimate use | **{legit:.3f} W** | "
-        f"≤ {POWER_LIMIT_W:.2f} W | **pass** |",
-        f"| Average in a retrigger fault | **{fault:.3f} W** | ≤ {POWER_LIMIT_W:.2f} W | "
-        f"**pass**, {POWER_LIMIT_W/fault:.2f}× |",
+        f"≤ {POWER_LIMIT_W:.2f} W | **pass**, {POWER_LIMIT_W/legit:.1f}× |",
+        f"| Average in a retrigger fault, rolling {POWER_WINDOW_S:.0f} s | **{fault:.3f} W** | "
+        f"≤ {POWER_LIMIT_W:.2f} W | **pass**, {POWER_LIMIT_W/fault:.2f}× |",
         "",
-        f"Timing tolerance ±{TIMING_TOL*100:.0f} %, arithmetic sum not RSS. One `74HC221`: "
-        f"A half sets the pulse (R = {r1/1000:.0f} kΩ, C = {c1:.0f} nF **C0G**), B half holds "
-        f"the lockout (R = {r2/1000:.0f} kΩ, C = {c2:.0f} nF **film**), retriggered by A's "
-        f"falling edge so it sits downstream of the pulse and no gate input can defeat it.",
+        f"Timing tolerance **±{TIMING_TOL*100:.0f} %**, arithmetic sum not RSS: "
+        f"±{IC_TOL*100:.0f} % for the one-shot itself (its *guaranteed* spread over "
+        f"temperature, not a typical), ±{R_TOL*100:.0f} % resistor, ±{C_TOL*100:.0f} % "
+        f"capacitor. The previous stack allocated only 10 % to the IC and was therefore "
+        "tighter than the part it was modelling.",
+        "",
+        "### The part, and why the previous RC was never inside it",
+        "",
+        f"**One `74HC221` dual non-retriggerable monostable.** The A half sets the pulse "
+        f"(R = {r_pulse/1000:.0f} kΩ, C = 100 nF **C0G**); the B half holds the lockout "
+        f"(R = {r_lock/1000:.0f} kΩ, C = 1 µF **film**), **triggered once by A's falling "
+        f"edge** so it sits downstream of the pulse and no gate input can defeat it.",
+        "",
+        f"**Both resistors are inside the family's specified "
+        f"{R_EXT_MIN_OHM/1000:.0f}…{R_EXT_MAX_OHM/1000:.0f} kΩ range, and the previous ones "
+        f"were not:** the old 450 ms lockout on 470 nF needed **1368 kΩ**, above the limit, "
+        "so that working point was never inside the part's envelope. Moving the lockout "
+        "capacitor to 1 µF brings the resistor back to a specified value.",
+        "",
+        "**The wording is also corrected.** A 74HC221 is **non-retriggerable** — the previous "
+        "text said the B half was *\"retriggered by A's falling edge\"*, which describes the "
+        "opposite behaviour. It is triggered once per accepted pulse, and that is the property "
+        "the lockout depends on.",
+        "",
+        "> **`R_EXT` limits and the ±14 % IC spread are taken from the datasheets the reviewer "
+        "> cited** (Nexperia 74HCT221 Rev. 4; TI CD74HC221 Rev. F). **I cannot fetch them "
+        "> myself** — vendor egress reaches neither, gap H-02 — so these numbers are second-hand "
+        "> and must be confirmed against the exact orderable variant before WP-26. That is a "
+        "> real open item, not a formality: the family's variants differ here.",
     ])
 
 
 def t_solenoid_test() -> str:
+    period = 1000.0 / LEGIT_RATE_HZ
     rows = [
-        "The limit only means something if it clears real use and still bounds a fault. Both, "
-        "at the working point above:",
+        "The limit only means something if it clears real use and still bounds a fault. "
+        "**Those are two different claims and they need opposite timing corners** — using one "
+        "corner for both is how a design satisfies a safety bound by suppressing the exact "
+        "interaction the bound was specified to sit above.",
+        "",
+        "| Claim | Corner used | Value | Against |",
+        "|---|---|---:|---|",
+        f"| A fault is bounded | **fastest**: longest pulse, *shortest* lockout | "
+        f"one per {min_inhibit_ms():.0f} ms | {rolling_window_w():.3f} W ≤ {POWER_LIMIT_W:.2f} W |",
+        f"| Real use is never blocked | **slowest**: longest pulse, *longest* lockout | "
+        f"{max_inhibit_ms():.0f} ms | < {period:.0f} ms |",
+        "",
+        f"**The previous version checked the fast corner for both**, and reported "
+        f"395 ms against the {period:.0f} ms period. At the slow corner the same design held "
+        f"the inhibit for **539 ms** — so a legitimate press arriving {period:.0f} ms after the "
+        "last one would have been silently dropped. IR-018-12.",
         "",
         "| Case | Rate | Average coil power | Against 0.25 W |",
         "|---|---|---:|---|",
     ]
-    per = min_period_ms(PULSE_NOM_MS, LOCKOUT_NOM_MS)
     for label, hz in (("One press", 0.2), ("Brisk use", 1.0),
                       ("**Child mashing stop/play**", LEGIT_RATE_HZ),
-                      ("Firmware retrigger loop, 100 Hz input", 1000.0 / per)):
-        w = legit_avg_w(COIL_W, PULSE_NOM_MS, hz)
+                      ("Firmware retrigger loop, 100 Hz input",
+                       1000.0 / min_inhibit_ms())):
+        w = legit_avg_w(rate_hz=hz)
         rows.append(f"| {label} | {hz:.1f} /s | **{w:.3f} W** | "
-                    f"{'**pass**' if w <= POWER_LIMIT_W else '❌'} |")
+                    f"{'**pass**' if w <= POWER_LIMIT_W else '❌ **FAIL**'} |")
     rows += [
         "",
-        "The last row is the fault case and it is the one the hardware actually bounds: a 100 Hz "
-        f"gate input is throttled by the lockout to one pulse per {per:.0f} ms, whatever firmware "
-        "does. The row above it is a child, and it passes with room — which is the point the "
-        "limit was restated to make.",
+        f"The last row is the fault case: a 100 Hz gate input is throttled by the lockout to "
+        f"one pulse per {min_inhibit_ms():.0f} ms whatever firmware does. It is evaluated over "
+        f"a **finite rolling {POWER_WINDOW_S:.0f} s window** rather than as an asymptotic duty "
+        f"ratio — {rolling_window_w():.3f} W against {fault_avg_w():.3f} W — because the "
+        "criterion is a window and a window can align worse than the ratio implies.",
         "",
-        "**Why the coil dropped from 9 W to 5 W.** At 9 W a 30 ms pulse is 270 mJ, and two of "
-        f"those a second is 0.54 W — more than double the limit. No lockout fixes that without "
-        "also blocking the child, because the energy is spent inside a single legitimate "
-        "actuation. The fix has to be the coil or the pulse, exactly as the PM's note says. "
-        "**The 9 W / 30 ms figure was my assumption, not a measurement**, and it is the third "
-        "number this project has found wrong by costing it.",
+        "### The design is a boundary, not a point",
         "",
-        "**The pulse length is a placeholder and is marked as one.** WP-04 measures the shortest "
-        "pulse that reliably releases the latch; that number, plus margin, replaces the 15 ms "
-        "above and the lockout resistor follows it. Until then the working point demonstrates "
-        "that a compliant design exists — it does not claim to be the final one.",
+        "**The pulse is a WP-04 measurement and the coil follows from it.** So the useful shape "
+        "of the answer is the feasibility curve: for each pulse length, the largest nominal "
+        "coil that still passes every corner with the lockout sized for usability.",
+        "",
+        "| Pulse, nominal | Lockout, nominal | Slowest inhibit | Largest **nominal** coil |",
+        "|---:|---:|---:|---:|",
+    ]
+    for pn in (8.0, 10.0, 12.0, 15.0, 20.0):
+        lock = lockout_for_usability_ms(pn)
+        mark = " ← **committed**" if abs(pn - PULSE_NOM_MS) < 1e-9 else ""
+        rows.append(f"| {pn:.0f} ms | {lock:.0f} ms | {max_inhibit_ms(pn, lock):.0f} ms | "
+                    f"**{feasible_coil_w(pn):.2f} W**{mark} |")
+    rows += [
+        "",
+        f"At the placeholder 15 ms the ceiling is **{feasible_coil_w(15.0):.2f} W**, so the "
+        "old 5 W coil was never compliant at that pulse. The committed point takes a shorter "
+        f"pulse instead, which buys back the coil: **{COIL_W:.1f} W at "
+        f"{PULSE_NOM_MS:.0f} ms**, inside the "
+        f"{feasible_coil_w(PULSE_NOM_MS):.2f} W ceiling with "
+        f"{POWER_LIMIT_W/rolling_window_w():.2f}× on the power limit.",
+        "",
+        "**The dominant term is the tolerance stack, not the nominal.** Specifying the rail to "
+        "±2 % and the winding to ±5 % would drop the corner factor from "
+        f"{coil_power_factor():.2f}× to {coil_power_factor(0.02, 0.05):.2f}×, which buys more "
+        "headroom than any plausible change to the coil. **That is the cheapest lever and it is "
+        "a procurement decision, not a circuit one.**",
+        "",
+        "### What is still open",
+        "",
+        "**The pulse length remains a placeholder and the coil is chosen from it.** WP-04 "
+        "measures the shortest pulse that reliably releases the latch. If that number comes "
+        f"back above ~{PULSE_NOM_MS:.0f} ms, the table above says what the coil must drop to — "
+        "and if the mechanism then needs more energy than the budget allows, that is a genuine "
+        "conflict between a safety limit and a mechanism, and it goes to the PM rather than "
+        "being absorbed by widening the limit.",
+        "",
+        "**The `R_EXT` range and the ±14 % IC figure are second-hand** (see the note above) and "
+        "must be confirmed against the exact orderable part. **The response to the solenoid "
+        "finding is not closed, and I do not get to close it.**",
     ]
     return "\n".join(rows)
 
@@ -153,15 +421,32 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--report", action="store_true")
     a = ap.parse_args()
+
     if a.report:
-        print(t_solenoid_values(), "\n"); print(t_solenoid_test()); return 0
-    cur = SPEC.read_text(); new = render(cur)
+        print(t_solenoid_values(), "\n")
+        print(t_solenoid_test())
+        return 0
+
+    # IR-018-14: the SAFETY verdict comes first and is independent of whether
+    # the document happens to be fresh. The old --check asked only about
+    # freshness, so an unsafe edit produced an unsafe table, a fresh file and a
+    # green gate.
+    bad = check_criteria()
+    if bad:
+        print(f"solenoid criteria FAIL ({len(bad)})", file=sys.stderr)
+        return 1
+
+    cur = SPEC.read_text()
+    new_text = render(cur)
     if a.check:
-        if cur != new:
-            print("solenoid tables STALE", file=sys.stderr); return 1
-        print("solenoid tables up to date"); return 0
-    if cur != new:
-        SPEC.write_text(new); print("regenerated solenoid tables")
+        if cur != new_text:
+            print("solenoid tables STALE", file=sys.stderr)
+            return 1
+        print("solenoid criteria pass, tables up to date")
+        return 0
+    if cur != new_text:
+        SPEC.write_text(new_text)
+        print("regenerated solenoid tables")
     else:
         print("solenoid tables already up to date")
     return 0

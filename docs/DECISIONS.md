@@ -1274,3 +1274,77 @@ installs precisely that naive gate and asserts the suite catches it; it fails th
 
 **Cost to reverse.** Zero. Removing it restores a failure mode that no slicer reports and that
 only a human reading the plate found once.
+
+---
+
+## ADR-121 — The solenoid is bounded by coil power at its electrical corners, not by a nominal label
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, after independent review IR-018-11…15
+**Supersedes:** ADR-116's working point (its principle — specify by energy — stands)
+
+**Decision.** Average coil power is computed from `V²/R` at the worst electrical corner: rail
+at its upper tolerance, winding at its lower resistance, copper at the **cold** end of the
+operating range. The fault case uses the **fast** timing corner and a **finite rolling 10 s
+window**; the usability claim uses the **slow** timing corner. New working point: **3.5 W
+nominal, 10 ms pulse, 386 ms lockout**, giving 0.183 W against the 0.25 W limit — 1.37× — with
+the slowest inhibit at 475 ms against a 500 ms period.
+
+**Rationale.** The previous analysis reported 0.220 W and a 1.14× pass. **It was wrong, and
+the corrected model puts the same point at 0.330 W — a fail.**
+
+**A nominal wattage is a label, not a safety maximum.** The criterion is average coil power and
+`P = V²/R`, so the rail's upper tolerance and the winding's lower resistance are the quantities
+that decide it. The old model bounded only the *timing* corners on an exactly-5.0 W coil. The
+combined electrical corner is **×1.358** — larger than the entire margin the old analysis
+claimed. The counter-intuitive term is temperature: copper's resistance *falls* as it cools, so
+the cold end of the range is the worst case, and it is worth ~10 % on its own.
+
+**Two claims needed opposite corners.** The old model used the fastest inhibit for both "the
+fault is bounded" and "real use is never blocked". At the slow corner the same design held the
+inhibit for **539 ms against a 500 ms period** — so it would have satisfied the safety bound
+partly by silently dropping the fastest legitimate press, which is precisely what the PM's
+"the limit must sit above real use" clause exists to forbid.
+
+**The design is a boundary, not a point.** The pulse is a WP-04 measurement and the coil follows
+from it, so §6 now publishes the feasibility curve. At the old 15 ms placeholder the ceiling is
+3.30 W, so the 5 W coil was never compliant at that pulse; a shorter pulse buys the coil back.
+
+**The cheapest lever is procurement, not circuit design.** Specifying the rail to ±2 % and the
+winding to ±5 % drops the corner factor from 1.36× to 1.21×, which buys more headroom than any
+plausible change to the coil.
+
+**Cost to reverse.** Low — nothing is ordered. What it costs is the *claim*: this is a new
+response to the IR-015 solenoid finding, **not a closure**, and the reviewer's disposition
+stands until they or the PM accept it.
+
+---
+
+## ADR-122 — Every hardware analysis that backs a limit is executable, and runs in CI
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, after IR-018-14
+
+**Decision.** `solenoid_timing.py --check` evaluates each PM-owned inequality and exits
+non-zero on violation **before** it considers whether the document is fresh. `test_solenoid.py`
+proves each criterion can fail, with the previous working point as the headline red case.
+`hardware.yml` now runs `thermal-check` and `solenoid-test`.
+
+**Rationale.** The analysis failed open in two independent ways, and both are the same class
+this project has removed everywhere else.
+
+**The check asked the wrong question.** `--check` compared the Markdown to the generator. An
+unsafe parameter edit produced an unsafe table, a *fresh* file, and a green result — the ❌ was
+right there in the output and nothing read it. Freshness is a document property; safety is a
+design property; only one of them was being tested, and it was the wrong one.
+
+**And the gate was not wired in at all.** `hardware.yml` ran the packet, atomicity, clasp and
+manifest gates and **never invoked `thermal-check`**. The one analysis backing a safety limit
+was the one analysis CI did not run, from the day the workflow was written. Neither the
+`make check` target nor the review packets noticed, because both reported on the targets that
+existed rather than on the ones that should have.
+
+**The generalisation is worth stating.** CLAUDE.md §1 requires every gate to be proven able to
+go red. It did not require anyone to check the gate is *reachable*. Two of the five findings in
+this review were about a gate nobody ran; a red case in an unreachable gate is theatre.
+
+**Cost to reverse.** Zero, and it would restore a state where a safety limit could go red in a
+generated table while every automated job stayed green.

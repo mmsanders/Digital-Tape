@@ -1,6 +1,6 @@
 # STATUS — HARDWARE
 
-**Updated:** 2026-09-06 · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
+**Updated:** 2026-09-06 (2nd) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
 
 The Hardware Lead's window into `hardware/` and `spec/hw/`. Companion to `docs/STATUS.md`,
 which stays the Software Lead's. Argument lives in `docs/REVIEW/hardware-lead.md`; this file is
@@ -17,7 +17,32 @@ state.
 
 ## What changed since last time
 
-**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
+**The solenoid circuit was independently reviewed and the response was rejected.** Five findings,
+two blockers, all accepted. **The design did not meet the limit** — 0.330 W against 0.25 W once
+the electrical corners were included, where my model reported 0.220 W and a 1.14× pass.
+
+**The error was physical, not procedural.** I bounded the *timing* corners on a coil labelled
+5.0 W and treated a nominal wattage as a safety maximum. The criterion is average coil *power*
+and `P = V²/R`, so rail and winding tolerance are the quantities — a combined **×1.358**, larger
+than the whole margin I claimed. Reworked to 3.5 W / 10 ms / 386 ms: **0.183 W, 1.37×**. ADR-121.
+
+**Two claims were sharing one timing corner.** The fault bound and the "real use is never
+blocked" proof both used the *fastest* inhibit. At the slow corner the design held the inhibit
+**539 ms against a 500 ms period** — it would have met the safety limit partly by dropping the
+fastest legitimate press.
+
+**The solenoid gate failed open, and CI never ran it.** `--check` compared the document to the
+generator and never evaluated a single inequality; separately, `hardware.yml` **never invoked
+`thermal-check` at all**, from the day that workflow was written. Both fixed, with a red case
+whose headline is the previous working point. ADR-122.
+
+**That last one generalises.** CLAUDE.md §1 requires every gate to be proven able to go red. It
+does not require anyone to check the gate is *reachable* — and a red case in a gate nobody runs
+is theatre.
+
+---
+
+**The plate is cleared**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
 rev-4 STL against the library machine. Rev 5 settles both items they raised, plus one they did
 not have.
 
@@ -104,22 +129,21 @@ WP-24's S-4 is written to that standard from the start rather than retrofitted.
 
 ## What will hurt in three weeks
 
-- **The plate has been ready and unprinted for four days**, and it is still the critical path —
-  WP-04 blocks WP-20 and WP-22, and WP-22 is the six-to-ten-week long pole. Nothing blocks it
-  that I can act on.
-- **Six plates a month changes the shape of the mechanical schedule and nothing downstream has
-  been replanned for it.** The PM's estimate is 2–4 months for a working latch instead of 5–10.
-  That is a real change to WP-22's position on the critical path and it is not yet reflected in
-  the package index.
-- **Every material number is now an estimate about a material we do not choose.** The sweep is
-  bracketed to measure around that, but if the ranking comes back with everything holding or
-  nothing holding, the next plate needs a datasheet first — which needs egress we do not have.
-- **S-2 is a 90-day clock that has not started** and cannot until a printed pair exists. Longest
-  lead on the hardware stream, and on no schedule.
-- **A cartridge left on a car dashboard may deform**, and this is *worse* in PLA than it would
-  have been in PETG — PLA's glass transition is ~20 K lower. That is the one place where not
-  choosing the spool actually costs something. WP-25.
-- **Nothing in `hardware/` has been independently reviewed since IR-018.** The solenoid circuit
-  is requested this round. Three self-caught defects again this round, all of them stale text or
-  a check asking the wrong question rather than an error in the engineering — a pattern that
-  does not fix itself by being named, and I am not the right party to confirm it has stopped.
+- **The solenoid response is open again and the fabrication gate is unchanged.** No board
+  fabricated, no cell charged. This is now a *second* response to the same IR-015 finding, and
+  I do not accept my own.
+- **Two numbers in the solenoid rework are second-hand.** The `R_EXT` range and the ±14 % IC
+  spread are the reviewer's datasheet readings; I cannot fetch either datasheet (H-02). They
+  need confirming against the exact orderable variant before WP-26, and family variants differ.
+- **The pulse length is still a placeholder and the coil now depends on it.** §6 publishes a
+  feasibility boundary instead of a point. If WP-04 measures a pulse longer than ~10 ms the coil
+  must weaken, and if the mechanism then needs more energy than the budget allows that is a real
+  conflict between a safety limit and a mechanism — a PM escalation, not something to absorb.
+- **The plate has been ready and unprinted for four days** and is still the critical path.
+- **Six plates a month has not been reflected downstream.** The PM's estimate is 2–4 months for
+  a working latch instead of 5–10; that moves WP-22 and the package index does not say so.
+- **S-2 is a 90-day clock that has not started** and cannot until a printed pair exists.
+- **A cartridge left on a car dashboard may deform**, worse in PLA than PETG. WP-25.
+- **The review found an error in the engineering, not only in a check.** Rounds 5–10 I recorded
+  that the maths always held and only the checks were wrong. That is no longer true, and the
+  correction rate on my own numbers is the thing to watch rather than the count of findings.
