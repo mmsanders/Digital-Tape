@@ -12,18 +12,24 @@ Newest first. Proposed DRAFT-8 bundle for PM issue. Not a lead packet.
 
 | ID | Severity in DRAFT-7 | Disposition | Why |
 |---|---|---|---|
-| **V7-001** | blocker, in candidate | `tapefs` §4.6 partner-first write order on every logical superblock update; phase 4 also repairs a *stale* lower-generation partner; WP-10 two-interruption closure | Mirror-first plus "repair only if exactly one valid copy" is how two permitted power losses leave a water line that rejects both live A indices. Partner-first is the rule format/dup step 1 already used. Requiring mutators to wait for two current copies would stall a child on a flaky card. |
+| **V7-001** | blocker, in candidate | `tapefs` §4.6 partner-first write order on every *ordinary* logical superblock update; phase 4 also repairs a *stale* lower-generation partner; WP-10 two-interruption closure | Mirror-first plus "repair only if exactly one valid copy" is how two permitted power losses leave a water line that rejects both live A indices. Partner-first is the rule format/dup step 1 already used. Requiring mutators to wait for two current copies would stall a child on a flaky card. |
 | **V7-002** | major, in candidate | Headroom formula consults a counter only when that counter's `needed != 0` | `FFFFFFFF + 0 <= FFFFFFD` is false and contradicts the zero-write rows. FE/FF stay legal on crafted media; they are never written. |
-| **V7-003** | major, §9 | First cut refused foreign-major cards. Self-review threw that out: it contradicts §4.3 (work slot reclaims any household card). Now: accept; step 1 writes a specified **v1 WIP template** so remount is `INCOMPLETE` not `VERSION`. Equal-generation-divergent copies have no candidate — zero both, continue as blank. | Refuse looked clean and fought a product rule. Canonicalising the barrier fields is the verifier's other fix and keeps the crash tables true. |
+| **V7-003** | major, §9 | Accept foreign-major cards. Step 1 writes a specified **v1 WIP template** so remount is `INCOMPLETE` not `VERSION`. Equal-generation-divergent copies have no candidate — zero both *after* refusal preconditions, continue as blank. | Refuse looked clean and fought §4.3 (work slot reclaims any household card). Classification is a plan, not a write, so a card that is both inconsistent and too small is refused, not erased. |
 | **V7-004** | major, §9 | Destination `label` is a byte copy of the source `label` | Michael: the copy is the same album. |
 | **V7-005** | question, §10 | `tape_service` allowed in every mounted row except Faulted | Table, §7.2 and WP-12a already agreed. The prose sentence did not. |
 
-## Self-review that changed the draft
+## Adversarial self-review that changed this draft (second pass, 6 Sep afternoon)
 
-1. Section order: §4.6 had been inserted above §4.5. Moved.
-2. V7-003 refusal of `version_major ≠ 1` vs §4.3 reclaim. Changed as above.
-3. Invariant 18 / "five preconditions" had to be walked back when classification stopped being a refusal.
-4. Spec-bundle gate run green, forced red with a one-byte flip, restored green.
+Treated as a fresh verifier against the first-cut DRAFT-8 text, not against DRAFT-7. Findings that landed:
+
+1. **§4.6 claimed "the new `sb_generation` is strictly greater than the candidate's" and also claimed to cover "any write that produces a new `sb_generation`."** Format/dup identity-assignment commits write generation 1 after step 1 may have left a higher-generation WIP copy. Applying partner-first there would make the strictly-greater sentence false and would rename crash-table rows that already say "mirror" / "primary". **Fix:** §4.6 covers ordinary logical updates (stage clearing, promote 4 / 5-decline / 9) plus format/dup *step 1*. Identity-assignment commits stay mirror-then-primary and are named as excluded.
+2. **Raw classification wrote during the precondition list.** Equal-generation-divergent zeroing in item 3 would destroy a destination that also failed geometry or capacity. That fights "all before any write" and invariant 18. **Fix:** classification is a plan. Zero-both and the v1 template are step 1, after refusals 1/2/4/5 pass.
+3. **§9.5 step 1 still said "write it"** (field-edit) after item 3 specified a v1 template. Two implementations could still disagree on `version_major` of the barrier. **Fix:** step 1 writes the template, on both dup and format.
+4. **Step 1 tie-break said "§4.1 phase 1 names no candidate" for a healthy identical pair.** That sentence describes the *divergent* equal-generation case. Healthy identical copies *are* a candidate plus a partner under §4.6 (primary / mirror). **Fix:** tie-break cites §4.6.
+5. **Phase 1 did not record `needs_repair` for a stale lower-generation partner**, only for an invalid one, while phase 4 now repairs both. **Fix:** both bullets record it; `tape_info.needs_repair` comment matches.
+6. **Newest-text paragraph still said "raw-destination refusals"** after the disposition stopped refusing foreign-major cards. **Fix:** it now says classification.
+
+Bundle gate: green, forced red with a one-byte flip on `acceptance.md`, restored green.
 
 ## What this branch does not do
 
@@ -44,7 +50,7 @@ Newest first. Proposed DRAFT-8 bundle for PM issue. Not a lead packet.
 
 ## Process notes Michael asked the PM to take
 
-1. `docs/REVIEW/` should become the round brief so Michael stops pasting directions. Leads read `main`. Surge cannot give Claude Cowork a GitHub connection.
+1. `docs/REVIEW/` should become the round brief so Michael stops pasting directions. Leads read `main`.
 2. No 64 GB cards. Smallest current V30 microSDHC. Micro is fine.
 3. Question queue first every round. This file and `docs/FOR-MICHAEL.md` start that way this round.
 4. `CLAUDE.md` header on `main` still cited DRAFT-3 / DRAFT-1. Fixed on this branch.
