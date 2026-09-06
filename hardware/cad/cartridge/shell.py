@@ -43,10 +43,10 @@ L, W = 62.0, 28.0          # coupon footprint
 FLOOR = 1.5
 SPAN = 6.0                 # floor top to the bead: the cantilever length
 WALL_NOM = 2.0
-WALL_RET = 1.2             # thinned local to the engaged run
+WALL_RET = 1.6             # thinned local to the engaged run
 CORNER_RELIEF = 9.0        # engagement stops this far short of each corner
 
-SWEEP_INTERFERENCE = (0.15, 0.25, 0.35, 0.45)
+SWEEP_INTERFERENCE = (0.10, 0.18, 0.26, 0.34)
 
 BEAD_Z = FLOOR + SPAN                  # 7.5 -- bead tip centre, the cantilever's load point
 BEAD_FLAT = 0.20                       # tip land
@@ -146,8 +146,12 @@ def engaged_run() -> float:
     return L - 2 * CORNER_RELIEF
 
 
-def base(v: Shell) -> cq.Workplane:
-    """The half that flexes. Carries the bead, the thinned run and the slot."""
+def base(v: Shell, label: bool = True) -> cq.Workplane:
+    """The half that flexes. Carries the bead, the thinned run and the slot.
+
+    `label=False` returns the mechanism with no letter, so the duplicate check
+    can compare what the hand actually feels rather than what the eye reads.
+    """
     body = (
         cq.Workplane("XY")
         .box(L, W, H_BASE, centered=(True, True, False))
@@ -188,6 +192,8 @@ def base(v: Shell) -> cq.Workplane:
         .translate((SLOT_X, -(W / 2), H_BASE - SLOT_D)))
 
     # Blind label, sunk into the outside of the floor.
+    if not label:
+        return body
     return (
         body.faces("<Z").workplane(centerOption="CenterOfBoundBox")
         .text(v.label, 7.0, -0.6, combine="cut", font="DejaVu Sans"))
@@ -263,23 +269,17 @@ def lid(label: str = "") -> cq.Workplane:
     return body
 
 
-def tpu_lip() -> cq.Workplane:
-    """The TPU lip seal — a bending lip, NOT a compressed gasket.
-
-    The arithmetic is in clasp.py and it is the reason for the shape: this
-    section develops ~22 N over the perimeter, where the same rubber squashed the
-    same distance as a solid gasket develops several hundred and would hold the
-    shell open. The compliance has to come from the shape, not the material.
-
-    It cannot be printed at the library -- PLA only -- so it ships as its own
-    file and waits for a machine that runs TPU.
-    """
-    half_l = (L - 2 * WALL_NOM - 2 * TONGUE_CLEAR) / 2
-    half_w = (W - 2 * WALL_NOM - 2 * TONGUE_CLEAR) / 2
-    outer = cq.Workplane("XY").box(half_l * 2, half_w * 2, TPU_H, centered=(True, True, False))
-    inner = cq.Workplane("XY").box(half_l * 2 - 2 * TPU_T, half_w * 2 - 2 * TPU_T, TPU_H,
-                                   centered=(True, True, False))
-    return outer.cut(inner)
+# The TPU lip is GONE. PM Decisions 007 §2: the library runs a single spool of
+# whatever it has loaded and we do not choose it, so a second-material part cannot
+# be printed at all. It was also carrying 0.086 % of sustained strain, which was
+# defensible in PETG and is a worse idea in PLA -- the material Decisions 007
+# says we should now assume.
+#
+# Its job was anti-rattle preload. That job is DEFERRED rather than redesigned:
+# the coupon ships with no preload feature, so Michael's answer to "does it stay
+# shut when you shake it" tells us whether rattle is real before anything is
+# designed for it. If it is, `clasp.py: leaf()` has the replacement sized in the
+# shell's own material at 0.061 % sustained strain.
 
 
 # --------------------------------------------------------------------------
@@ -289,15 +289,19 @@ def tpu_lip() -> cq.Workplane:
 def packet_variants() -> list[Shell]:
     """Four interferences, bracketed so both ends are expected to be wrong.
 
-    The plate prints in PLA and the design is for PETG. PLA is roughly twice as
-    stiff and half as extensible, so 0.45 mm is over PLA's permissible strain and
-    is EXPECTED to crack -- which is a result, not a wasted part. 0.15 mm should
-    be too loose to hold. If neither endpoint misbehaves, the bracket was too
-    narrow and the trip bought nothing.
+    Swept in PLA because PLA is what the library will load -- we do not choose the
+    spool (PM Decisions 007 §2). 0.34 mm is past PLA's permissible strain and is
+    EXPECTED to crack; 0.10 mm sits at the printer's own repeatability and should
+    barely engage. If neither endpoint misbehaves the bracket was too narrow and
+    the trip bought nothing.
+
+    Each base gets its OWN lid. Rev 0.1 shared two lids across four bases, which
+    would have confounded wear on the shared part with whichever variant was
+    tested last -- on a plate whose entire question is retention.
     """
     return [
-        Shell("N", 0.15, note="expected too loose -- should rattle or fall open"),
-        Shell("G", 0.25),
-        Shell("A", 0.35, note="at PLA's permissible strain"),
-        Shell("Q", 0.45, note="expected to crack in PLA; comfortable in PETG"),
+        Shell("N", 0.10, note="at the printer's own repeatability -- should barely hold"),
+        Shell("G", 0.18, note="the nominal"),
+        Shell("A", 0.26),
+        Shell("Q", 0.34, note="expected to crack in PLA"),
     ]

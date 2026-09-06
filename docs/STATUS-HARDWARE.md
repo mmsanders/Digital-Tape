@@ -1,6 +1,6 @@
 # STATUS — HARDWARE
 
-**Updated:** 2026-09-05 · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
+**Updated:** 2026-09-06 · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
 
 The Hardware Lead's window into `hardware/` and `spec/hw/`. Companion to `docs/STATUS.md`,
 which stays the Software Lead's. Argument lives in `docs/REVIEW/hardware-lead.md`; this file is
@@ -8,45 +8,51 @@ state.
 
 **Scope:** WP-04, WP-05, WP-22–27, WP-29, WP-30, WP-34, WP-37.
 
-> **This file was three rounds stale when I opened it** — dated 2 Sep, still listing the
-> cancelled order 1c as "send with 1a", still carrying a codec suffix superseded on 3 Sep and a
-> spend total that went with it. Rewritten, not patched. Noted because a stale status is worse
-> than no status: the PM has no other window and cannot tell it has stopped moving.
+> Rewritten on 5 Sep after going three rounds stale. PM Decisions 007 §3 flagged that
+> independently — *"I have been reading your work through PRs and the plate itself rather than
+> through your status, which works until it does not."* Correct when written; addressed the day
+> before, and updated again here.
 
 ---
 
 ## What changed since last time
 
-**The cartridge clasp is designed and assessed** — `spec/hw/cartridge-shell.md`, answering
-Decisions 006 §2. Michael can have the no-screw clasp. Retention is a **continuous seam with
-discontinuous engagement**: the tongue-and-groove line runs the whole perimeter, the retaining
-interference only along the long walls, stopping short of the corners, because a rectangle
-cannot open at a corner by bending. **0.75 % peak strain opening, 0.086 % at rest** — creep is
-designed out rather than tolerated, and the closed assembly is checked by boolean.
+**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
+rev-4 STL against the library machine. Rev 5 settles both items they raised, plus one they did
+not have.
 
-**Your cycle target accepted, plus three criteria that can actually fail.** 20 cycles at ≤ 20 %
-loss will pass — the design holds zero strain at rest — so S-2 (90 days closed, 23 °C and
-45 °C), S-3 (1.0 m drop) and S-4 (a 30 N pinch must not open it) are where the risk is.
+**Four lids, one per base.** Rev 4 would have made Michael reuse a mating half across four
+variants, confounding wear with test order on a plate whose whole question is retention.
 
-**WP04-01 is rev 4 and carries both experiments.** The clasp sweep shares the latch plate:
-**1.6 h against a 6 h library limit, 150 × 149 mm against a conservative 180 × 180 bed.** One
-trip, two answers. Sendable today.
+**`D`, `M` and `H` are the same button, deliberately** (ADR-104 bed controls) — and **not
+byte-identical, as the review stated.** Each carries a different letter, so as shipped all nine
+are distinct meshes. That inverts what the requested gate has to do: comparing solids **runs
+green** on the plate that prompted it. The gate now compares the swept parameter and the
+mechanism with the label suppressed, and `--mutate` proves the naive version fails three red
+cases. ADR-120.
 
-**The nylon correction is applied** (Decisions 006 §1). The A1 line runs PLA, PETG and TPU and
-not nylon. The shell is designed for PETG throughout, so it costs this package nothing; it still
-bites WP-22's latch, which is a genuine fatigue part and may need a service bureau.
+**A third card item, and it is the one that can waste the trip: SUPPORTS OFF.** Each button has
+an 8 × 3 mm slot, 14 mm deep, blind at the top and open onto the bed — the thing that makes the
+arm springy. Support material in it is unremovable and welds the flexure solid, so every button
+would read as identically stiff and *"they all felt the same"* is a legitimate answer on the
+card. **The trip would look like it worked and be completely wrong.**
 
-**Two defects in already-shipped documents, found while working.** `CARD.md`'s headline told
-Michael to print `plate.3mf` while its own table said `plate.stl` — the first line he reads was
-the wrong one. `WP-04.md` carried a live paragraph describing a variant deleted two revisions
-earlier. Both fixed.
+**The clasp is respecified for a material we do not choose** (ADR-119). Closed-position strain
+is now **zero, not near-zero**, and proven by a boolean over the closed assembly. The wall went
+1.2 → 1.6 mm and the interference 0.30 → 0.18 mm — **lower strain and higher retention at once**,
+because thickness enters strain linearly and force cubically. The TPU lip is deleted; anti-rattle
+is deferred until the plate says rattle is real.
+
+**The tolerance stopped depending on the filament.** At 0.18 mm nominal a ±0.15 mm band spans
+"no engagement" to "past PLA's limit". Halves printed together shrink together, so the governing
+figure is ±0.05 mm. That is a manufacturing rule, not a tuned fit.
 
 ## In flight
 
 | Work | State | Who |
 |---|---|---|
-| WP-04 packet WP04-01 | **Rev 4 built, nothing blocking.** With Michael to print | Michael |
-| WP-24 cartridge shell | **Assessment delivered** (ADR-117). Variants on the plate | Hardware Lead |
+| WP-04 packet WP04-01 | **Rev 5, cleared by the PM, card settled.** With Michael to print | Michael |
+| WP-24 cartridge shell | **Rev 0.2 — respecified for an unchosen material** (ADR-119) | Hardware Lead |
 | WP-05 parts order | Order 1a checkout-ready. Waiting on Michael | Michael |
 | WP-34 thermal budget | **Rev 0.3.** Estimates; three IR-015 responses filed, none accepted | Hardware Lead |
 | `spec/hw/board-rev-a.md` | Rev 0.5, pin map populated, no pin numbers. Accretes through WP-26 | Hardware Lead |
@@ -98,21 +104,22 @@ WP-24's S-4 is written to that standard from the start rather than retrofitted.
 
 ## What will hurt in three weeks
 
-- **WP04-01 has now been ready and not printed for three days**, and it is the critical path —
-  WP-04 blocks WP-20 and WP-22, and WP-22 is the six-to-ten-week long pole. It is no longer
-  blocked on anything I can act on. Every day it sits is a day off the end of Phase 4.
-- **The 0.2 K JEITA margin still rests on the estimate I trust least** — board-to-air coupling
-  in a sealed box, where ±30 % moves the margin by several kelvin either way. WP-37 measures it
-  and WP-37 is Phase 5, but the mitigation is a *layout* constraint (cell placement) and layout
-  is Phase 5 too. It has to be in `board-rev-a.md` before layout, not after.
-- **S-2 is a 90-day clock that has not started**, and it cannot start until a PETG pair exists,
-  which needs a printer. It is the longest-lead criterion on the hardware stream and it is
-  invisible on every schedule because nobody has drawn it.
-- **Every material number in `cartridge-shell.md` is an estimate**, and the plate is bracketed
-  to measure around that rather than to assume it. If the ranking comes back with everything
-  holding or nothing holding, my stiffness figures are wrong and the next plate needs a
-  datasheet first — which needs egress we do not have.
-- **Nothing in `hardware/` has been independently reviewed since IR-018.** Two rounds of
-  findings there were all in *what a check was asking*, never in the engineering; the three
-  self-caught defects this round were the same pattern. That pattern does not fix itself by
-  being named, and I am not the right party to confirm it has stopped.
+- **The plate has been ready and unprinted for four days**, and it is still the critical path —
+  WP-04 blocks WP-20 and WP-22, and WP-22 is the six-to-ten-week long pole. Nothing blocks it
+  that I can act on.
+- **Six plates a month changes the shape of the mechanical schedule and nothing downstream has
+  been replanned for it.** The PM's estimate is 2–4 months for a working latch instead of 5–10.
+  That is a real change to WP-22's position on the critical path and it is not yet reflected in
+  the package index.
+- **Every material number is now an estimate about a material we do not choose.** The sweep is
+  bracketed to measure around that, but if the ranking comes back with everything holding or
+  nothing holding, the next plate needs a datasheet first — which needs egress we do not have.
+- **S-2 is a 90-day clock that has not started** and cannot until a printed pair exists. Longest
+  lead on the hardware stream, and on no schedule.
+- **A cartridge left on a car dashboard may deform**, and this is *worse* in PLA than it would
+  have been in PETG — PLA's glass transition is ~20 K lower. That is the one place where not
+  choosing the spool actually costs something. WP-25.
+- **Nothing in `hardware/` has been independently reviewed since IR-018.** The solenoid circuit
+  is requested this round. Three self-caught defects again this round, all of them stale text or
+  a check asking the wrong question rather than an error in the engineering — a pattern that
+  does not fix itself by being named, and I am not the right party to confirm it has stopped.

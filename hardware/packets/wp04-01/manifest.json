@@ -4,8 +4,8 @@
     "WP-04",
     "WP-24"
   ],
-  "built": "2026-09-05",
-  "revision": 4,
+  "built": "2026-09-06",
+  "revision": 5,
   "experiments": [
     {
       "work_package": "WP-04",
@@ -21,32 +21,32 @@
       "parts": "shell-base-*, shell-lid-*",
       "swept_parameter": "interference (mm)",
       "bracket_mm": [
-        0.15,
-        0.45
+        0.1,
+        0.34
       ]
     }
   ],
   "seed": 20260902,
   "blind": true,
-  "not_on_plate": {
-    "tpu-lip.stl": "TPU; the library runs PLA only"
-  },
-  "bed_assumed_mm": [
-    180.0,
-    180.0
+  "single_material": true,
+  "bed_mm": [
+    250.0,
+    210.0
   ],
+  "bed_source": "verified against the library machine, PM Decisions 007 \u00a70",
+  "duplicate_check": "parameter + label-suppressed mechanism",
   "plate_extent_mm": [
-    150.0,
-    149.0
+    228.0,
+    119.0
   ],
   "minimum_bed_mm": [
-    162,
-    161
+    240,
+    131
   ],
   "xml_valid": true,
   "stl_validated": true,
   "library_deliverable": "plate.stl",
-  "estimated_print_hours": 1.6,
+  "estimated_print_hours": 2.0,
   "library_job_limit_hours": 6.0,
   "print_settings_assumed": {
     "material": "PLA",
@@ -65,9 +65,9 @@
       "w": 62.0,
       "h": 28.0,
       "label": "G",
-      "interference": 0.25,
+      "interference": 0.18,
       "role": "variant",
-      "note": ""
+      "note": "the nominal"
     },
     {
       "part": "shell-base-Q",
@@ -76,41 +76,55 @@
       "w": 62.0,
       "h": 28.0,
       "label": "Q",
-      "interference": 0.45,
+      "interference": 0.34,
       "role": "variant",
-      "note": "expected to crack in PLA; comfortable in PETG"
+      "note": "expected to crack in PLA"
     },
     {
       "part": "shell-base-A",
+      "x": 144.0,
+      "y": 12.0,
+      "w": 62.0,
+      "h": 28.0,
+      "label": "A",
+      "interference": 0.26,
+      "role": "variant",
+      "note": ""
+    },
+    {
+      "part": "shell-base-N",
       "x": 12.0,
       "y": 44.0,
       "w": 62.0,
       "h": 28.0,
-      "label": "A",
-      "interference": 0.35,
+      "label": "N",
+      "interference": 0.1,
       "role": "variant",
-      "note": "at PLA's permissible strain"
+      "note": "at the printer's own repeatability -- should barely hold"
     },
     {
-      "part": "shell-base-N",
+      "part": "shell-lid-A",
       "x": 78.0,
       "y": 44.0,
       "w": 62.0,
-      "h": 28.0,
-      "label": "N",
-      "interference": 0.15,
-      "role": "variant",
-      "note": "expected too loose -- should rattle or fall open"
+      "h": 28.0
     },
     {
-      "part": "shell-lid-1",
+      "part": "shell-lid-N",
+      "x": 144.0,
+      "y": 44.0,
+      "w": 62.0,
+      "h": 28.0
+    },
+    {
+      "part": "shell-lid-G",
       "x": 12.0,
       "y": 76.0,
       "w": 62.0,
       "h": 28.0
     },
     {
-      "part": "shell-lid-2",
+      "part": "shell-lid-Q",
       "x": 78.0,
       "y": 76.0,
       "w": 62.0,
@@ -118,15 +132,15 @@
     },
     {
       "part": "test-frame",
-      "x": 12.0,
-      "y": 108.0,
+      "x": 144.0,
+      "y": 76.0,
       "w": 30.0,
       "h": 26.0
     },
     {
       "part": "carrier-W",
-      "x": 46.0,
-      "y": 108.0,
+      "x": 178.0,
+      "y": 76.0,
       "w": 14.0,
       "h": 11.6,
       "label": "W",
@@ -140,8 +154,8 @@
     },
     {
       "part": "carrier-B",
-      "x": 64.0,
-      "y": 108.0,
+      "x": 196.0,
+      "y": 76.0,
       "w": 14.0,
       "h": 11.3,
       "label": "B",
@@ -155,8 +169,8 @@
     },
     {
       "part": "carrier-R",
-      "x": 82.0,
-      "y": 108.0,
+      "x": 214.0,
+      "y": 76.0,
       "w": 14.0,
       "h": 11.0,
       "label": "R",
@@ -170,7 +184,7 @@
     },
     {
       "part": "carrier-D",
-      "x": 100.0,
+      "x": 12.0,
       "y": 108.0,
       "w": 14.0,
       "h": 11.0,
@@ -185,7 +199,7 @@
     },
     {
       "part": "carrier-T",
-      "x": 118.0,
+      "x": 30.0,
       "y": 108.0,
       "w": 14.0,
       "h": 11.0,
@@ -200,7 +214,7 @@
     },
     {
       "part": "carrier-K",
-      "x": 136.0,
+      "x": 48.0,
       "y": 108.0,
       "w": 14.0,
       "h": 11.0,
@@ -215,8 +229,8 @@
     },
     {
       "part": "carrier-M",
-      "x": 12.0,
-      "y": 138.0,
+      "x": 66.0,
+      "y": 108.0,
       "w": 14.0,
       "h": 11.0,
       "label": "M",
@@ -230,8 +244,8 @@
     },
     {
       "part": "carrier-H",
-      "x": 30.0,
-      "y": 138.0,
+      "x": 84.0,
+      "y": 108.0,
       "w": 14.0,
       "h": 11.0,
       "label": "H",
@@ -245,8 +259,8 @@
     },
     {
       "part": "carrier-Z",
-      "x": 48.0,
-      "y": 138.0,
+      "x": 102.0,
+      "y": 108.0,
       "w": 14.0,
       "h": 11.0,
       "label": "Z",
@@ -260,8 +274,8 @@
     },
     {
       "part": "hook-bar",
-      "x": 66.0,
-      "y": 138.0,
+      "x": 120.0,
+      "y": 108.0,
       "w": 70.0,
       "h": 5.0
     }

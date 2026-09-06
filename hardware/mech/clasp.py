@@ -44,12 +44,28 @@ SPEC = Path(__file__).resolve().parents[2] / "spec" / "hw" / "cartridge-shell.md
 
 CART_L, CART_W, CART_H = 86.0, 54.0, 12.0   # outer; Michael's call, see module docstring
 WALL_NOM = 2.0             # nominal shell wall
-WALL_RET = 1.2             # thinned local to the retention run -- THE lever on strain
+WALL_RET = 1.6             # thinned local to the retention run
 SPAN = 6.0                 # floor to seam: the cantilever length. Half the shell height
-INTERFERENCE = 0.30        # total, shared between the two halves
-TOL_INTERFERENCE = 0.15    # +/-, FDM on two separately printed parts, plus colour shrink
+INTERFERENCE = 0.18        # total, shared between the two halves
+# Two tolerances, and choosing the right one is the whole reason the 0.18 mm
+# nominal is viable at all.
+#
+#   ACROSS sessions: +/-0.15 mm. Different spool, different colour, different
+#   thermal state. This is the figure Decisions 007 §2 warns about.
+#   WITHIN one plate: +/-0.05 mm. Both halves print in the same machine, same
+#   material, same session -- they shrink TOGETHER, so what survives is the
+#   printer's XY repeatability, not the material's shrinkage.
+#
+# A cartridge's two halves are a matched pair and are always printed together, so
+# the relative figure is the one that governs the fit. That is a manufacturing
+# rule, not a tuned fit, so it does not violate "do not tune to a filament" --
+# it removes the filament from the comparison entirely.
+TOL_PAIRED = 0.05          # +/-, both halves on one plate. THE governing figure
+TOL_MIXED = 0.15           # +/-, halves from different sessions. Forbidden, costed below
+TOL_INTERFERENCE = TOL_PAIRED
 CORNER_RELIEF = 9.0        # engagement stops this far short of each corner
 SPUDGER_SPAN = 14.0        # length of run a levered blade deflects at once
+GROOVE_EXTRA = 0.05        # groove cut deeper than the bead is proud -> zero closed strain
 
 # BOTH ANGLES ARE MEASURED FROM THE PULL AXIS, not from the seam plane, and the
 # distinction is not pedantic: it inverts the formula. Virtual work settles it --
@@ -59,9 +75,11 @@ SPUDGER_SPAN = 14.0        # length of run a levered blade deflects at once
 CHAMFER_LEAD = 25.0        # closing ramp, degrees from the pull axis
 CHAMFER_RETAIN = 40.0      # opening ramp, degrees from the pull axis
 
-# TPU lip seal: compliant in BENDING, which is the only way to get a soft preload
-# out of TPU. The same rubber as a block in compression is stiffer than the PETG.
-TPU_T, TPU_SPAN, TPU_DEFL = 0.8, 2.0, 0.2
+# Anti-rattle leaf, IF the first plate says rattle is real. Same material as the
+# shell -- the TPU lip this replaces cannot be printed on a single library spool.
+# Not on the coupon on purpose: see t_rattle().
+LEAF_T, LEAF_SPAN, LEAF_DEFL, LEAF_W = 0.8, 14.0, 0.10, 20.0
+LEAF_COUNT = 4
 
 # --------------------------------------------------------------------------
 # Material properties. ALL ESTIMATES -- see the module docstring in the spec.
@@ -69,11 +87,18 @@ TPU_T, TPU_SPAN, TPU_DEFL = 0.8, 2.0, 0.2
 # knowledge of the polymers and are marked EST everywhere they surface.
 # --------------------------------------------------------------------------
 
+# PLA leads because PLA is what we will get. PM Decisions 007 §2: the library
+# runs a single spool of whatever it has loaded, we do not choose it, and Michael
+# is not buying a printer. The PETG column is kept only to show the design does
+# not depend on which of them arrives.
+#
+# `creep` is the sustained strain above which the material relaxes measurably at
+# room temperature over months. It is the number Decisions 007 §2 is really about
+# -- a clasp is engaged 99.99 % of its life, so this, not fatigue, is the risk.
 MATERIALS = {
-    #                E MPa   permissible strain, repeated assembly
-    "PETG": (1800.0, 0.020),
-    "PLA":  (3300.0, 0.010),
-    "TPU":  (25.0,   0.300),
+    #        E MPa   permissible (snap)  creep threshold (sustained)
+    "PLA":  (3300.0, 0.010,              0.0025),
+    "PETG": (1800.0, 0.020,              0.0050),
 }
 MU = 0.35                  # print-surface polymer on polymer, EST
 
@@ -125,12 +150,24 @@ def engaged_run(length: float) -> float:
     return length - 2.0 * CORNER_RELIEF
 
 
+def modulus(material: str) -> float:
+    return MATERIALS[material][0]
+
+
+def permissible(material: str) -> float:
+    return MATERIALS[material][1]
+
+
+def creep_threshold(material: str) -> float:
+    return MATERIALS[material][2]
+
+
 def joint(material: str, run: float, interference: float = INTERFERENCE,
           walls: int = 2, thickness: float = WALL_RET, span: float = SPAN):
     """Everything about one clasp, as a dict. Deflection is SHARED: both halves
     bend, so each takes half the interference -- which is also why the strain is
     half what a single-flexing-member design would give."""
-    e, eps_max = MATERIALS[material]
+    e, eps_max = MATERIALS[material][0], MATERIALS[material][1]
     y = interference / 2.0
     p = deflect_force(e, run, thickness, y, span) * walls
     return {
@@ -144,25 +181,17 @@ def joint(material: str, run: float, interference: float = INTERFERENCE,
     }
 
 
-def tpu_preload_n(perimeter: float) -> float:
-    e, _ = MATERIALS["TPU"]
-    return deflect_force(e, perimeter, TPU_T, TPU_DEFL, TPU_SPAN)
+def leaf(material: str) -> tuple[float, float]:
+    """The anti-rattle leaf, if one turns out to be needed: (force N, strain).
 
-
-def resting_strain(perimeter: float, run: float) -> tuple[float, float, float]:
-    """What the TPU preload costs the PETG wall, held for years.
-
-    The preload pushes the lid against the bead's undercut. That normal force has
-    a component trying to cam the wall outward, and THAT is the only sustained
-    bending in the design. Returns (preload N, cam N per wall, resting strain).
+    A short stiff rib cannot do this job -- deflecting a 2.9 mm tall rib by
+    0.10 mm is 1.4 % strain, held forever, which is the exact failure Decisions
+    007 §2 forbids. The compliance has to come from a LONG, THIN leaf, and the
+    strain formula says why: strain goes as 1/span squared while force goes as
+    1/span cubed, so lengthening the leaf buys strain faster than it loses force.
     """
-    pre = tpu_preload_n(perimeter)
-    t = math.tan(math.radians(CHAMFER_RETAIN))
-    cam_total = pre * (t - MU) / (1.0 + MU * t)
-    cam_wall = cam_total / 2.0
-    e, _ = MATERIALS["PETG"]
-    y = 4.0 * cam_wall * SPAN ** 3 / (e * run * WALL_RET ** 3)
-    return pre, cam_wall, strain(y, WALL_RET, SPAN)
+    f = deflect_force(modulus(material), LEAF_W, LEAF_T, LEAF_DEFL, LEAF_SPAN)
+    return f * LEAF_COUNT, strain(LEAF_DEFL, LEAF_T, LEAF_SPAN)
 
 
 # --------------------------------------------------------------------------
@@ -170,7 +199,7 @@ def resting_strain(perimeter: float, run: float) -> tuple[float, float, float]:
 # --------------------------------------------------------------------------
 
 COUPON_L, COUPON_W = 62.0, 28.0
-SWEEP = (0.15, 0.25, 0.35, 0.45)
+SWEEP = (0.10, 0.18, 0.26, 0.34)
 
 
 def sweep_rows(material: str = "PLA"):
@@ -188,173 +217,288 @@ def sweep_rows(material: str = "PLA"):
 
 def t_geometry() -> str:
     run = engaged_run(CART_L)
-    j = joint("PETG", run)
-    worst = joint("PETG", run, interference=INTERFERENCE + TOL_INTERFERENCE)
-    best = joint("PETG", run, interference=max(0.0, INTERFERENCE - TOL_INTERFERENCE))
+    j = joint("PLA", run)
+    worst = joint("PLA", run, interference=INTERFERENCE + TOL_INTERFERENCE)
+    best = joint("PLA", run, interference=max(0.0, INTERFERENCE - TOL_INTERFERENCE))
     rows = [
         "| Parameter | Value | Why this number |",
         "|---|---:|---|",
         f"| Cartridge outer | {CART_L:.0f} × {CART_W:.0f} × {CART_H:.0f} mm | "
-        "**Michael's call, and the analysis does not depend on it** — see the note below |",
+        "**Michael's call, and the analysis does not depend on it** — see below |",
         f"| Nominal wall | {WALL_NOM:.1f} mm | Stiffness and drop survival everywhere except the run |",
-        f"| Retention wall | **{WALL_RET:.1f} mm** | Thinned local to the run. Strain is linear in this |",
-        f"| Cantilever span | {SPAN:.1f} mm | Floor to seam. Half the shell height; strain goes as its square |",
+        f"| Retention wall | **{WALL_RET:.1f} mm** | Thinned local to the run. Was 1.2 mm; see the note below |",
+        f"| Cantilever span | {SPAN:.1f} mm | Floor to bead. Strain goes as its square |",
         f"| Interference | **{INTERFERENCE:.2f} mm** total | Shared: {j['deflection_per_half']:.3f} mm per half |",
-        f"| Tolerance on it | ±{TOL_INTERFERENCE:.2f} mm | Two separate prints, plus colour-to-colour shrink |",
+        f"| Tolerance on it | ±{TOL_INTERFERENCE:.2f} mm | Separately printed parts, and we do not choose the spool |",
         f"| Engaged run | {run:.0f} mm per long wall | {CART_L:.0f} mm less {CORNER_RELIEF:.0f} mm of corner relief each end |",
-        f"| Lead-in chamfer | {CHAMFER_LEAD:.0f}° from the pull axis | Closing ramp; "
-        f"{INTERFERENCE/math.tan(math.radians(CHAMFER_LEAD)):.2f} mm tall for a "
-        f"{INTERFERENCE:.2f} mm bead |",
-        f"| Retention face | **{CHAMFER_RETAIN:.0f}° from the pull axis** | Opening ramp; "
-        f"self-locks past **{self_lock_deg():.1f}°**, so this keeps half the range |",
+        f"| Lead-in chamfer | {CHAMFER_LEAD:.0f}° from the pull axis | Closing ramp |",
+        f"| Retention face | **{CHAMFER_RETAIN:.0f}° from the pull axis** | Self-locks past **{self_lock_deg():.1f}°**, so this keeps half the range |",
+        "",
+        "### The wall got thicker and the interference got smaller, and that improved both numbers",
+        "",
+        "Rev 0.1 was a 1.2 mm wall at 0.30 mm interference: **0.75 % strain and 124 N** of "
+        "retention in PETG. This is a 1.6 mm wall at 0.18 mm: **0.60 % strain and "
+        f"{joint('PETG', run)['separate_n']:.0f} N**. Lower strain *and* higher retention, which "
+        "looks wrong until you write the two out:",
+        "",
+        "```",
+        "strain    ~ i · t / a²        thickness enters LINEARLY",
+        "retention ~ E · w · t³ · i / a³   thickness enters CUBICALLY",
+        "```",
+        "",
+        "So thickening the wall and pulling the interference back down to compensate is a strict "
+        "win: you give up strain linearly and buy retention cubically. **The thicker wall is also "
+        "the better drop part** (S-3), which is the rarest kind of result — the same change "
+        "helping three criteria at once.",
+        "",
+        "### The outer dimensions are free, and this is the one decision Michael can take on taste",
         "",
         "**Strain contains no length term.** `ε = 3yt/2a²` — wall section and deflection only. "
-        f"So {CART_L:.0f} × {CART_W:.0f} can become anything Michael likes: the outer dimensions "
-        "move the *forces*, which are a comfort question, and leave the *strain* untouched, which "
-        "is the materials question. That is the one decision in this document that can be taken "
-        "on taste without reopening anything.",
+        f"So {CART_L:.0f} × {CART_W:.0f} can become anything: the outer dimensions move the "
+        "*forces*, which is a comfort question, and leave the *strain* untouched, which is the "
+        "materials question.",
         "",
-        "| Strain in PETG | Deflection per half | Peak strain | Against 2.0 % permissible |",
-        "|---|---:|---:|---|",
+        "### Snap-through strain, and the material it assumes",
+        "",
+        "The number PM Decisions 007 §2 asks for. **This is the only strain in the design, and it "
+        "exists for about a second, twice in the cartridge's life.**",
+        "",
+        "| | Deflection per half | **Snap-through strain** | vs PLA 1.0 % | vs PETG 2.0 % |",
+        "|---|---:|---:|---|---|",
     ]
     for label, k in (("Interference at minimum", best), ("**Nominal**", j),
                      ("Interference at maximum", worst)):
-        margin = k["strain_permissible"] / k["strain"] if k["strain"] else float("inf")
+        e = k["strain"]
         rows.append(f"| {label} | {k['deflection_per_half']:.3f} mm | "
-                    f"**{k['strain']*100:.2f} %** | {margin:.1f}× |")
+                    f"**{e*100:.2f} %** | {permissible('PLA')/e:.1f}× | {permissible('PETG')/e:.1f}× |")
+    worst_ratio = permissible("PLA") / worst["strain"]
+    verdict = ("Every row above clears PLA's permissible strain"
+               if worst_ratio >= 1.0 else
+               f"**The worst row does NOT clear PLA** ({worst_ratio:.1f}×)")
+    mixed = joint("PLA", run, interference=INTERFERENCE + TOL_MIXED)
+    short_span = 3.2
+    rows += [
+        "",
+        "### Why the wall is thinned only over the run",
+        "",
+        f"The thinning *is* the cantilever: {WALL_RET:.1f} mm over the full {SPAN:.1f} mm from "
+        "floor to bead. Everywhere else the wall stays "
+        f"{WALL_NOM:.1f} mm, for stiffness and for the drop criterion. The tempting "
+        "simplification is to thin the whole rim so the lid's tongue can be a plain rectangle — "
+        f"and that moves the flexing span from {SPAN:.1f} mm to about {short_span:.1f} mm. "
+        "Strain goes as the square of the span, so "
+        f"**{j['strain']*100:.2f} % becomes {strain(j['deflection_per_half'], WALL_RET, short_span)*100:.2f} %** — "
+        f"{strain(j['deflection_per_half'], WALL_RET, short_span)/permissible('PLA'):.1f}× PLA's "
+        "permissible strain. That version prints, assembles and feels correct on the bench. "
+        "`hardware/cad/cartridge/test_shell.py` probes the wall section from the floor to the "
+        "bead for exactly this reason.",
+        "",
+        f"**The assumed material is PLA**, because that is what we will get: a single library "
+        f"spool of whatever is loaded, not chosen by us (Decisions 007 §2). {verdict}, so the "
+        "design does not depend on which of the two arrives — which is the point, since we "
+        "cannot specify it.",
+        "",
+        f"**And this is what the paired-printing rule buys.** Build a cartridge from halves "
+        f"printed in *different* sessions and the tolerance is ±{TOL_MIXED:.2f} mm instead of "
+        f"±{TOL_PAIRED:.2f} mm. The interference then ranges from "
+        f"{max(0.0, INTERFERENCE - TOL_MIXED):.2f} mm — **no engagement at all** — up to "
+        f"{INTERFERENCE + TOL_MIXED:.2f} mm at **{mixed['strain']*100:.2f} % strain**, which is "
+        f"{'past' if mixed['strain'] > permissible('PLA') else 'inside'} PLA's limit. Both ends "
+        "of that range are a failure. **Halves are a matched pair and the card says so.**",
+    ]
     return "\n".join(rows)
 
 
 def t_forces() -> str:
     run = engaged_run(CART_L)
-    j = joint("PETG", run)
-    span_j = joint("PETG", SPUDGER_SPAN, walls=1)
-    ratio = j["separate_n"] / span_j["separate_n"]
     rows = [
-        "| Action | Force | Who does it |",
-        "|---|---:|---|",
-        f"| Pull the halves apart, whole seam at once | **{j['separate_n']:.0f} N** | nobody — see below |",
-        f"| Press closed, whole seam at once | {j['close_n']:.0f} N | nobody — closing rolls too |",
-        f"| Lever one {SPUDGER_SPAN:.0f} mm span open with a blade | **{span_j['separate_n']:.1f} N** | the parent |",
-        f"| Press one {SPUDGER_SPAN:.0f} mm span closed | {span_j['close_n']:.1f} N | the parent, rolling along |",
+        "**All of this comes from geometry, not from stored spring force** — which is the "
+        "distinction PM Decisions 007 §2 turns on. Nothing is held deflected when the cartridge "
+        "is shut. The lip sits behind a shoulder, and separating the halves has to push it back "
+        "out over its ramp against a wall that starts from rest.",
         "",
-        f"**The tool does not beat the latch by force, it beats it by unzipping it.** The ratio "
-        f"is **{ratio:.0f} : 1** — because deflection force is linear in engaged length, and a "
-        f"blade in the slot deflects {SPUDGER_SPAN:.0f} mm of run while a brute pull has to "
-        f"deflect all {run:.0f} mm of both walls at once. Every millimetre of length you add to "
-        "the cartridge makes the brute path harder and leaves the tool path exactly where it is.",
+        "| Action | PLA | PETG | Who does it |",
+        "|---|---:|---:|---|",
+    ]
+    acts = [
+        ("Pull the halves apart, whole seam at once", lambda m: joint(m, run)["separate_n"], "nobody — see below"),
+        ("Press closed, whole seam at once", lambda m: joint(m, run)["close_n"], "nobody — closing rolls too"),
+        (f"Lever one {SPUDGER_SPAN:.0f} mm span open with a blade",
+         lambda m: joint(m, SPUDGER_SPAN, walls=1)["separate_n"], "**the parent**"),
+        (f"Press one {SPUDGER_SPAN:.0f} mm span closed",
+         lambda m: joint(m, SPUDGER_SPAN, walls=1)["close_n"], "the parent, rolling along"),
+    ]
+    for label, fn, who in acts:
+        rows.append(f"| {label} | {fn('PLA'):.0f} N | {fn('PETG'):.0f} N | {who} |")
+
+    j = joint("PLA", run)
+    span_j = joint("PLA", SPUDGER_SPAN, walls=1)
+    ratio = j["separate_n"] / span_j["separate_n"]
+    soft = joint("PETG", run)["separate_n"]
+    rows += [
+        "",
+        f"**The tool does not beat the latch by force, it beats it by unzipping it.** "
+        f"**{ratio:.0f} : 1** — deflection force is linear in engaged length, so a blade in the "
+        f"slot deflects {SPUDGER_SPAN:.0f} mm of run while a brute pull has to deflect all "
+        f"{run:.0f} mm of both walls at once. The ratio is a property of the geometry and is "
+        "**identical in both materials**, which is what makes the opening feature specifiable "
+        "when the spool is not.",
         "",
         "### Why the pull force is not the safety argument",
         "",
-        "| | Force available | vs the {sep:.0f} N pull |".format(sep=j["separate_n"]),
+        f"| | Force available | vs {soft:.0f} N (the softer material) |",
         "|---|---:|---|",
-        f"| Five-year-old, pinch on a flush 12 mm slab | ~{CHILD_PINCH_N:.0f} N | "
-        f"**{j['separate_n']/CHILD_PINCH_N:.1f}× margin** |",
-        f"| Five-year-old, two-handed grip on something to hold | ~{CHILD_GRIP_N:.0f} N | "
-        f"{j['separate_n']/CHILD_GRIP_N:.1f}× margin |",
+        f"| Five-year-old, pinch on a flush {CART_H:.0f} mm slab | ~{CHILD_PINCH_N:.0f} N | "
+        f"**{soft/CHILD_PINCH_N:.1f}× margin** |",
+        f"| Five-year-old, two-handed grip **on something to hold** | ~{CHILD_GRIP_N:.0f} N | "
+        f"{soft/CHILD_GRIP_N:.1f}× margin |",
         f"| Adult, two-handed pull | 200 N+ | none — an adult can force it |",
         "",
         "Read the second row before the first. **Retention force does not separate a child from "
-        "an adult** — a determined seven-year-old with something to grip is inside a factor of "
-        "two of this joint, and I am not going to design a number that pretends otherwise. What "
-        "separates them is that there is *nothing to grip*: the seam is flush, there is no lip, "
-        "no recess and no proud edge anywhere on the shell, so the only force a child can bring "
-        "is a pinch on a smooth 12 mm slab. That is the first row, and it is the one with the "
-        "margin in it.",
+        "an adult.** What separates them is that there is *nothing to grip*: the seam is flush, "
+        "there is no lip, no recess and no proud edge anywhere on the shell, so the only force a "
+        "child can bring is a pinch on a smooth slab. That is the first row, and it is the one "
+        "with the margin in it.",
         "",
-        "**The consequence for the design is a rule, not a number:** any feature that gives a "
-        "fingernail or a fingertip purchase on the parting line converts row 1 into row 2 and "
-        "spends the entire safety margin. That rules out the recessed thumb-notch that every "
-        "battery cover has, and it is why the opening feature is a slot for a blade.",
+        "**The consequence is a rule, not a number:** any feature that gives a fingernail or a "
+        "fingertip purchase on the parting line converts row 1 into row 2 and spends the entire "
+        "margin. That rules out the recessed thumb-notch every battery cover has, and it is why "
+        "the opening feature is a slot for a blade.",
+        "",
+        f"**The margin is quoted against the softer material on purpose.** We do not choose the "
+        f"spool, so every safety number in this document is the worst of the two candidates. In "
+        f"PLA the same joint takes {j['separate_n']:.0f} N.",
     ]
     return "\n".join(rows)
 
 
 def t_creep() -> str:
     run = engaged_run(CART_L)
-    perim = 2.0 * (CART_L + CART_W)
-    pre, cam, eps = resting_strain(perim, run)
-    j = joint("PETG", run)
+    j = joint("PLA", run)
+    lf_pla, lf_eps = leaf("PLA")
+    lf_petg, _ = leaf("PETG")
     rows = [
-        "The question PM Decisions 006 §2 asks — *does PETG creep at the deflection you chose* — "
-        "has a better answer than a margin, which is that **the design does not hold the "
-        "deflection**. The bead seats fully in the groove and the wall returns to undeflected. "
-        "The opening strain exists for about a second, once or twice in the cartridge's life.",
+        "**Closed-position strain: zero. Not near zero — zero, by construction.**",
         "",
-        "What is held for years is only the TPU lip's preload, and this is what it costs:",
+        "The groove is cut deeper than the bead stands proud, so when the cartridge is shut the "
+        "two halves **do not touch at the bead at all**. The lip snaps past its shoulder and the "
+        "wall returns to its undeflected shape. There is no stored spring force holding the "
+        "cartridge together; retention is the lip sitting behind the shoulder, which is exactly "
+        "the arrangement Decisions 007 §2 asks for.",
         "",
-        "| | Value |",
+        "**This is a geometric claim, so it is checked as one.** "
+        "`hardware/cad/cartridge/test_shell.py` intersects the closed assembly as solids and "
+        "asserts the overlap volume is zero, for every variant on the plate. Zero contact means "
+        "zero contact force means zero strain — there is no modelling step between the check and "
+        "the claim. Its `--mutate` run makes the groove too shallow to seat the bead and asserts "
+        "the check goes red; that failure mode prints, assembles, latches and feels correct while "
+        "holding the wall deflected for the life of the cartridge.",
+        "",
+        "| | Strain | Held for | Against PLA's creep threshold (~0.25 %) |",
+        "|---|---:|---|---|",
+        f"| **Closed** | **0.000 %** | years | no sustained load exists |",
+        f"| Snapping open or shut | {j['strain']*100:.2f} % | ~1 s, twice in the cartridge's life | not a creep duty |",
+        "",
+        "**Why this matters more than the cycle count.** A clasp is engaged 99.99 % of its life. "
+        "PLA relaxes at room temperature under sustained strain, and a lip held deflected for a "
+        "year loses its grip silently, on a cartridge in a child's pocket. **Cycling was never "
+        "the risk** — the cartridge is opened once or twice ever. A design whose closed strain is "
+        "zero is indifferent to how creep-prone the spool turns out to be, which is the only kind "
+        "of clasp specifiable when we do not choose the material.",
+        "",
+        "### What the TPU lip was doing, and what replaces it",
+        "",
+        "Rev 0.1 used a TPU lip to preload the joint against rattle. **That is void** — the "
+        "library runs a single spool and a merged STL carries one material for every part in it. "
+        "It also introduced 0.086 % of *sustained* strain, which was defensible in PETG and is a "
+        "worse idea in PLA.",
+        "",
+        "**The replacement is to not solve the problem yet.** The coupon on the plate carries no "
+        "preload feature at all, so Michael's answer to *does it stay shut when you shake it* "
+        "tells us whether rattle is real before anything is designed for it. If it is, the same "
+        "feature in the shell's own material is ready:",
+        "",
+        "| Anti-rattle leaf, if needed | Value |",
         "|---|---:|",
-        f"| TPU lip section | {TPU_T:.1f} mm thick × {TPU_SPAN:.1f} mm tall, deflected {TPU_DEFL:.1f} mm |",
-        f"| Perimeter preload | {pre:.0f} N |",
-        f"| Camming component per long wall | {cam:.1f} N |",
-        f"| **Sustained strain in the PETG wall** | **{eps*100:.3f} %** |",
-        f"| Opening strain, for comparison | {j['strain']*100:.2f} % |",
-        f"| Creep threshold where PETG starts to matter | ~0.5 % (EST) |",
+        f"| Section | {LEAF_COUNT} × {LEAF_W:.0f} mm wide, {LEAF_T:.1f} mm thick, "
+        f"{LEAF_SPAN:.0f} mm long, deflected {LEAF_DEFL:.2f} mm |",
+        f"| Preload | {lf_pla:.1f} N in PLA, {lf_petg:.1f} N in PETG |",
+        f"| **Sustained strain** | **{lf_eps*100:.3f} %** — {creep_threshold('PLA')/lf_eps:.1f}× "
+        f"under PLA's creep threshold |",
         "",
-        f"**{eps*100:.3f} % is {0.5/(eps*100):.0f}× below the threshold**, and it is the only "
-        "sustained figure in the design. The reason the TPU is a bending lip rather than a "
-        "compressed gasket is arithmetic: the same TPU as a 1 mm gasket squashed 0.2 mm over this "
-        "perimeter develops several hundred newtons and would hold the shell open. In bending it "
-        f"develops {pre:.0f} N. **Same material, same displacement, two orders of magnitude apart** "
-        "— the compliance has to come from the shape.",
-        "",
-        "**The TPU is also where the tolerance goes.** The PETG bead gives *retention* — a hard "
-        f"stop at a defined interference. The TPU lip gives *preload* — it takes up the "
-        f"±{TOL_INTERFERENCE:.2f} mm of print variation so the joint does not rattle at the loose "
-        "end of the stack and does not bind at the tight end. Splitting those two jobs across two "
-        "materials is what makes a printed clasp survive a colour change, which is the failure "
-        "PM Decisions 006 §1 warns about.",
+        "**A short stiff rib cannot do this job and the arithmetic says why.** The gap to close "
+        "is 0.10 mm. Deflect a 2.9 mm tall rib by that and it is **1.4 % strain, held forever** — "
+        "the exact failure §2 forbids, arrived at while trying to fix rattle. The compliance has "
+        "to come from a long, thin leaf: strain falls as the square of the span while force falls "
+        "as the cube, so lengthening buys strain faster than it costs force. Same material, same "
+        "displacement, twenty times less strain.",
     ]
     return "\n".join(rows)
 
 
 def t_sweep() -> str:
     run = engaged_run(COUPON_L)
-    _, eps_pla = MATERIALS["PLA"]
-    _, eps_petg = MATERIALS["PETG"]
     rows = [
         f"Coupon: **{COUPON_L:.0f} × {COUPON_W:.0f} × {CART_H:.0f} mm**, a real long-wall run "
-        f"({run:.0f} mm engaged) with both corner relieves, at full section. Not a cartridge — a "
-        "cartridge does not fit on the plate beside WP-04 and the coupon tests the thing being "
-        "swept.",
+        f"({run:.0f} mm engaged) with both corner relieves, at full section. Not a whole "
+        "cartridge — the run is the thing being swept, and a coupon leaves plate room for more "
+        "of them.",
         "",
-        "**The plate prints in PLA, and the design is for PETG.** That is not a flaw in the "
-        "packet, it is the bracket. PLA is roughly twice as stiff and half as extensible, so the "
-        "same geometry that is comfortable in PETG is at PLA's limit — which means **the top of "
-        "this sweep is expected to crack**, and that is a useful result rather than a wasted part.",
+        f"**Swept in PLA, because that is what the library will load.** Bracketed so both ends "
+        "are expected to be wrong: the bottom is at the printer's own repeatability and should "
+        "barely engage, and the top is past PLA's permissible strain and is **expected to "
+        "crack** — a result, not a wasted part.",
         "",
-        "| Interference | Strain | vs PLA {p:.1f} % | vs PETG {q:.1f} % | Brute pull | **Lever** | Expectation |".format(
-            p=eps_pla * 100, q=eps_petg * 100),
-        "|---:|---:|---|---|---:|---:|---|",
+        "| | Interference | Snap strain | vs PLA 1.0 % | Pull-apart | **Lever** | Expectation |",
+        "|---|---:|---:|---|---:|---:|---|",
     ]
     notes = {
-        0.15: "too loose — should rattle or fall open",
-        0.25: "candidate",
-        0.35: "candidate, at PLA's limit",
-        0.45: "**expected to crack in PLA**; comfortable in PETG",
+        0.10: "at the printer's repeatability — should barely hold",
+        0.18: "**the nominal**",
+        0.26: "candidate, and the one to beat",
+        0.34: "**expected to crack in PLA**",
     }
     levers = []
     for j in sweep_rows("PLA"):
         i = j["interference"]
         lev = joint("PLA", SPUDGER_SPAN, interference=i, walls=1)
         levers.append(lev["separate_n"])
-        pla_ok = "ok" if j["strain"] <= eps_pla else "**over**"
-        petg_ok = "ok" if j["strain"] <= eps_petg else "**over**"
-        rows.append(f"| {i:.2f} mm | {j['strain']*100:.2f} % | {pla_ok} | {petg_ok} | "
+        ok = "ok" if j["strain"] <= permissible("PLA") else "**over**"
+        rows.append(f"| | {i:.2f} mm | {j['strain']*100:.2f} % | {ok} | "
                     f"{j['separate_n']:.0f} N | **{lev['separate_n']:.0f} N** | {notes[i]} |")
     rows += [
         "",
         f"**The lever column is the one that matters for the packet**, because it is the force "
-        f"Michael's hand actually applies. It runs {min(levers):.0f}–{max(levers):.0f} N across "
-        "the sweep — a light push to a firm one on a blade — so **every variant is openable by "
-        "hand, including the one expected to crack.** If the brute-pull column were the operating "
-        "force, the top two variants would be untestable and the plate would be worthless.",
+        f"Michael's hand actually applies through a blade. It runs {min(levers):.0f}–"
+        f"{max(levers):.0f} N across the sweep, so **every variant is openable by hand, including "
+        "the one expected to crack.** If the brute-pull column were the operating force the top "
+        "two would be untestable and the plate would be worthless.",
         "",
-        "The brute-pull column is the coupon in PLA, not the cartridge in PETG, and it is here so "
-        "that nobody reads a cartridge number off it later. The coupon's run is shorter and its "
-        "material is stiffer; the two effects push opposite ways and the number means nothing "
-        "except relative to the other rows.",
+        "**Four bases, four lids** (PM Decisions 007 §1). Rev 0.1 shipped two lids for four "
+        "bases, so Michael would have reused a mating half across variants and **wear on the "
+        "shared part would be confounded with whichever variant he tested last** — on a plate "
+        "whose entire question is retention. The print budget now covers a dedicated lid per "
+        "base, so the confound is removed rather than managed with a test order.",
+        "",
+        "**Each pair is printed together and stays together.** Both halves come off one plate in "
+        "one session, which is what holds the interference tolerance at ±"
+        f"{TOL_PAIRED:.2f} mm instead of ±{TOL_MIXED:.2f} mm. Mixing halves between pairs is the "
+        "one thing that invalidates the ranking, and the card says so.",
+        "",
+        "**What each result means, decided in advance** so the next plate goes out without "
+        "another round of thinking:",
+        "",
+        "| If the plate says… | Then… |",
+        "|---|---|",
+        "| A clear winner, and it does not rattle | Print it at cartridge scale and run S-1…S-4 |",
+        "| A clear winner **that rattles** | Add the anti-rattle leaf above. Its numbers are ready |",
+        "| Nothing holds, including 0.34 | My stiffness estimate is too low. Re-bracket upward |",
+        "| Everything holds, including 0.10 | My estimate is too high, and the interference can "
+        "shrink until it is comfortably inside the printer's repeatability |",
+        "| The top one cracks and the next does not | The PLA permissible-strain estimate is about "
+        "right, which also calibrates every other number in this document |",
+        "| They all feel the same | Interference is not what the hand reads. Sweep the retention "
+        "angle instead, at fixed interference |",
     ]
     return "\n".join(rows)
 
@@ -376,6 +520,15 @@ def check_convention() -> None:
         "frictionless 45 deg must be a 1:1 force ratio"
     assert CHAMFER_RETAIN < self_lock_deg(), \
         "the retention face is self-locking: it would break before it opened"
+    # Decisions 007 §2: the closed clasp must not be held deflected, and the snap
+    # must be survivable in the material we do not get to choose. Both are design
+    # commitments, so both are assertions rather than prose.
+    assert GROOVE_EXTRA > 0.0, \
+        "the groove must be deeper than the bead is proud, or the closed strain is not zero"
+    worst = joint("PLA", engaged_run(CART_L),
+                  interference=INTERFERENCE + TOL_PAIRED)["strain"]
+    assert worst <= permissible("PLA"), \
+        f"snap strain {worst*100:.2f}% exceeds PLA's permissible at the tolerance limit"
 
 
 BLOCKS = {

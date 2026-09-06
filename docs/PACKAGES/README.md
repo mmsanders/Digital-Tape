@@ -14,9 +14,9 @@ Charter §04.
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
-| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-6 bundle on `main` 4 Sep, under `verify-spec-bundle.sh` |
-| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-6 bundle on `main` 4 Sep, under `verify-spec-bundle.sh` |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 4 built and sendable** — carries WP-24's sweep too |
+| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-7 bundle on `main` 5 Sep, under `verify-spec-bundle.sh` |
+| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-7 bundle on `main` 5 Sep, under `verify-spec-bundle.sh` |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
 | WP-05 | Parts order #1 | You | hardware | **Carts drafted** — every order goes to Michael (Decisions 002 §4) |
 | WP-34 | Thermal and safety budget | Hardware | hardware | **Rev 0.2** — estimates; three review findings closing |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
@@ -27,14 +27,14 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-4** — 102 checks, PR #20. Reconciliation to DRAFT-6 plus sub-criteria 06a–06h is next. Commit path held by structural Rule 1 |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done** — 46 checks on Rule 3. Reset-B's commit held by structural Rule 1 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-6** — 260 checks, sub-criteria 06a–06h exercised. PR #20, parked by the PM. DRAFT-7 adds `cartridge_sequence` (§5.5) and a second degraded-B cause; reconciliation is next. Commit path held by structural Rule 1 |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done against DRAFT-6** — 46 checks on Rule 3; `tapefs` §7 unchanged through DRAFT-7. Reset-B's commit held by structural Rule 1 |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
-| WP-10 | Crash-injection harness | Verification | 2 | **Infrastructure landed and running in CI**; DRAFT-6 adds both durability modes and the counter boundaries to its scope |
+| WP-10 | Crash-injection harness | Verification | 2 | **Infrastructure landed and running in CI**; DRAFT-7 adds branch-exact headroom, the shared sequence base and promote's four-injection-point superblock writes to its scope |
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **Runner built and proven** (manifest, byte-exact, audible diff). Fixtures + manifest are theirs |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **Gates rebuilt and green** — funnel, 8 KiB stack, two budgets |
+| WP-13 | Embedded-readiness audit | Agent | 1 | **Green, with numbers**: `tape_instance_size()` 156 456 B (76 % of 200 KiB), stack 1 536 / 8 192, `.rodata` 1 040 / 32 768. Funnel and allocator gates green |
 | WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.

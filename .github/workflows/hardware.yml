@@ -76,3 +76,8 @@ jobs:
       # CLAUDE.md section 1: adding a gate means adding its red case.
       - name: Shell geometry realises the analysis, and can go red
         run: make -C hardware shell-test
+      # PM Decisions 007 §1. Compares the swept parameter and the mechanism with
+      # the blind label suppressed -- comparing the solids as shipped runs green
+      # on the very plate that prompted this, and --mutate proves it.
+      - name: No undeclared duplicate parts, and can go red
+        run: make -C hardware packet-duplicates

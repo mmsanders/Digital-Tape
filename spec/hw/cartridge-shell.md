@@ -1,11 +1,30 @@
 # Cartridge shell — the clasp, the seam, and what opens it
 
 **Owner:** Hardware Lead · **Consumed by:** WP-24, WP-23, WP-25 · **Status:** assessment
-**Revision:** 0.1, 5 Sep 2026 · **Answers:** PM Decisions 006 §2 and §3
+**Revision:** 0.2, 6 Sep 2026 · **Answers:** PM Decisions 007 §2 (and 006 §2–§3 before it)
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.2 — 2026-09-06
+**The material assumption is gone, and the design changed to survive not having one.** PM
+Decisions 007 §2: the library runs a **single spool of whatever it has loaded**, Michael is not
+buying a printer, and PETG is no longer a thing we can assume. Rewritten around **creep under
+sustained load** rather than cycle fatigue, per the design rule in §2 of that document.
+
+Four substantive changes, and the first is the one that matters:
+
+- **Closed-position strain is now stated as zero and proven as zero**, not "near zero". §4.
+- **The retention wall went 1.2 → 1.6 mm and the interference 0.30 → 0.18 mm.** Lower snap
+  strain *and* higher retention, because thickness enters strain linearly and force cubically.
+  §2.
+- **The TPU lip is void** — unprintable on a single spool. Its anti-rattle job is *deferred
+  rather than redesigned* until the plate says rattle is real; a same-material replacement is
+  sized and ready. §7.
+- **Two tolerances, not one.** Halves printed together are a matched pair at ±0.05 mm; halves
+  from different sessions are ±0.15 mm, and at this interference that range spans "no
+  engagement" to "past PLA's limit". The paired-printing rule is now normative. §2.
 
 ### 0.1 — 2026-09-05
 First issue. Answers the five asks in PM Decisions 006 §2, gives a week estimate for the
@@ -16,93 +35,92 @@ run nylon**, so the "print the latch in nylon at home" path in Decisions 005 §3
 
 ## 0. What this says, in one page
 
-**Michael can have the clasp.** The PM's reframing is the whole reason, and it is correct: a
-cartridge is opened **one to three times in its life**, because every cartridge after the first
-is loaded by the device's own copy button. A snap that must survive thousands of cycles is a
-fatigue problem no printed material solves. A snap that must survive five is an interference
-fit, and PETG does it with margin to spare.
+**Michael can have the clasp, and it no longer depends on a material we cannot specify.**
 
-Five answers, in the order asked:
+Two reframings carried this design, both the PM's. The first: a cartridge is opened **one to
+three times in its life**, because every cartridge after the first is loaded by the device's own
+copy button — so cycle fatigue was never the risk. The second, from Decisions 007 §2: **a clasp
+is engaged 99.99 % of its life, so the risk is creep under sustained load**, and PLA relaxes at
+room temperature.
 
-| # | Ask | Answer |
+Both point the same way, and the design rule follows from them: **the clasp must not be held
+deflected when closed.**
+
+| The number Decisions 007 §2 asks for | Answer |
+|---|---:|
+| **Closed-position strain** | **0.000 %** — and it is a geometric fact, checked by a boolean, not a model |
+| **Snap-through peak strain** | **0.60 %**, assuming **PLA** — 1.7× under its permissible, 3.3× under PETG's |
+| **Retention force, from geometry alone** | **322 N** in PLA, **176 N** in PETG |
+| **Cycle target** | 20 open-close at ≤ 20 % loss (Decisions 006 §2), accepted — and §1 explains why it is the easy one |
+| **Seam** | Tongue-and-groove on a 1.0 mm 45° chamfer. A 0.15–0.25 mm line, step to ±0.2 mm |
+| **Opening feature** | A 0.9 mm blade slot on the back face — and §3 is honest about what actually keeps a child out |
+
+**Zero is not a rounding of "near zero".** The groove is cut deeper than the bead stands proud,
+so when the cartridge is shut the two halves do not touch at the bead at all. There is no stored
+spring force anywhere in the closed cartridge, so there is nothing for any material to relax.
+That is what makes the design **indifferent to whichever spool the library has loaded**, which
+is the only kind of clasp specifiable when we do not choose the material.
+
+**Everything safety-related in this document is quoted against the softer of the two candidate
+materials**, for the same reason.
+
+> **Every material property here is an estimate.** No vendor egress in this environment reaches
+> a filament datasheet, so modulus, permissible strain, creep threshold and friction are from
+> general knowledge of the polymers and are marked EST. The way that is handled is to make the
+> plate measure what I guessed: the sweep in §8 is bracketed so that if my stiffness numbers are
+> wrong, the ranking says so.
+
+## 1. The cycle target, and the two risks it is not about
+
+**PM Decisions 006 §2 proposed 20 open-close cycles with retention within 20 % of first-cycle.
+Accepted, unchanged.** Ten times the realistic life is right for an object children handle.
+
+**It is also the criterion this design cannot fail, and Decisions 007 §2 says why better than I
+did.** Twenty one-second excursions to 0.60 % strain, spread over years, is not a fatigue duty
+in any thermoplastic. The test takes four minutes and it will pass.
+
+The two things that *can* fail are both about time, not count:
+
+| # | Criterion | The risk it is actually about |
 |---|---|---|
-| 1 | Cycle target | **20 cycles at ≤ 20 % force loss, accepted** — and it is the *easy* criterion. §1 adds the three that can actually fail |
-| 2 | Retention geometry | **Continuous seam, discontinuous engagement.** Perimeter lip is right about load and wrong at the corners. **0.75 % peak strain, 0.086 % at rest** |
-| 3 | The seam | Tongue-and-groove on a 1.0 mm 45° chamfer. Achievable: **a 0.15–0.25 mm line with a step of up to ±0.2 mm**, both hidden by the chamfer. Not invisible — say so to Michael |
-| 4 | Opening feature | **A 0.9 mm blade slot on the back face.** And the honest part: retention force does not separate a child from an adult. *Having nothing to grip* does |
-| 5 | TPU | **Load-bearing, not an experiment.** A bending lip, not a compressed gasket — the shape is the whole difference. It is also where the print tolerance goes |
+| **S-1** | 20 open-close cycles, retention within 20 % of first cycle | PM's. Accepted. Expected to pass easily |
+| **S-2** | **90 days closed at 23 °C, and 90 days closed at 45 °C**, then S-1's force within 20 % | **Creep.** The cartridge is shut 99.99 % of its life |
+| **S-3** | **1.0 m drop, closed, six faces and four corners, card retained every time** | Impact. Not a cycle, and no cycle count sees it |
+| **S-4** | **A 30 N pinch held 10 s does not open it**, no tool | Child access. The only safety-critical one |
 
-**And one correction that changes the plan, not the buy:** the A1 line runs PLA, PETG and TPU
-and **does not run nylon** (§9). Everything above is designed for PETG, which is what the
-printer actually gives us, so nothing here depends on the material we cannot have.
+### S-2 is the one this revision is built around
 
-**On the sealed cartridge (§10): I agree with the PM's recommendation against it**, and the
-trigger they named for reconsidering — *"if a printed clasp cannot hold a card safely"* — is not
-met. My estimate for the USB-MSC package if it is ever wanted is **6 weeks ± 2**.
+Decisions 007 §2 states the risk exactly: *"a lip held deflected for a year loses its grip, and
+it does so silently, on a cartridge in a child's pocket."*
 
-> **Every material property in this document is an estimate.** No vendor egress in this
-> environment has reached a filament datasheet, so modulus, permissible strain and friction are
-> from general knowledge of the polymers and are marked EST. **The PM's note in Decisions 006
-> applies to me too**, and the way I have handled it is to make the plate measure what I have
-> guessed: the interference sweep in §8 is bracketed so that if my stiffness numbers are wrong,
-> the ranking says so.
+**The design's answer is to remove the load rather than to survive it.** §4 shows the closed
+strain is zero — not small, zero — so there is nothing sustained for any material to relax.
+That makes S-2 a test of the *claim* rather than of the material: if the clasp loses grip after
+90 days, the geometry is not doing what §4 says it does, and that is worth knowing regardless of
+what spool it was printed in.
 
----
+**S-2 still runs, and at 45 °C**, because the whole argument rests on a boolean over an ideal
+solid model. A real printed part has elephant's foot, layer bulge and residual stress, and any
+of those can put the two halves into contact where the model says they clear. **The check proves
+the design; only the test proves the part.**
 
-## 1. The cycle target
+### One finding that goes with it
 
-**PM's proposal: 20 open-close cycles with retention force still within 20 % of first-cycle.
-Accepted, unchanged.** Ten times the realistic life is the right margin for an object handled
-by children, and I have no argument for moving it.
-
-**But it is the criterion this design cannot fail, and I would rather say that than bank it.**
-The reason is §4: the clasp holds **zero strain at rest**. The bead seats fully in its groove
-and the wall returns undeflected, so 20 cycles means twenty one-second excursions to 0.75 %
-strain, spread over years. That is not a fatigue duty in any thermoplastic — PETG's fatigue
-knee is orders of magnitude beyond it. The test takes Michael four minutes and it will pass.
-
-A criterion that cannot fail is not a gate, it is a receipt. So three more, and these are the
-ones with teeth:
-
-| # | Criterion | Why it can fail |
-|---|---|---|
-| **S-1** | 20 open-close cycles, retention force within 20 % of first cycle | PM's. Accepted. Expected to pass easily |
-| **S-2** | **90 days closed at 23 °C, and 90 days closed at 45 °C**, then S-1's force within 20 % | The cartridge spends ~100 % of its life closed. This is the one that finds creep, and the 45 °C leg is a cartridge left in a car |
-| **S-3** | **1.0 m drop onto hard floor, closed, six faces and four corners, card retained every time** | A drop is not a cycle and no cycle count catches it. See below |
-| **S-4** | **A 30 N pinch held 10 s does not open it**, applied at the seam with no tool | The child-access criterion, and the only one that is safety-critical |
-
-### Why S-3 is not theatre
-
-A 25 g cartridge dropped 1.0 m arrives with about 0.25 J. Stopping in half a millimetre of
-local deformation puts a peak contact force in the hundreds of newtons — **above the joint's own
-pull-apart force**. The joint does not see all of that (most of it goes into the corner that
-lands, not into separating the halves), but the arithmetic is close enough that the outcome is
-not predictable from the static numbers, and a cartridge that springs open on impact scatters a
-microSD across the floor. That is the choking hazard ADR-105 exists to prevent, arriving by a
-route the cycle test does not look down.
-
-### Why S-2 names a temperature, and one finding that goes with it
-
-PETG's heat-deflection temperature is around **70 °C (EST)**. A closed car in summer reaches
-that. So:
-
-> **Finding for the PM and for Michael:** a PETG cartridge left on a dashboard may deform, and
-> a deformed cartridge is one whose clasp no longer holds. This is not a reason to change
-> material — every printable option except the ones the A1 cannot run has the same problem — but
-> it belongs in whatever the family is told, and it belongs in WP-25's abuse plan.
-
-S-2's 45 °C leg is deliberately *below* that and is a creep test, not a survival test. The
-survival test is WP-25's.
+PLA's glass transition is around **60 °C** and PETG's heat deflection around **70 °C** (EST). A
+closed car in summer reaches both. **A cartridge left on a dashboard may deform**, and a
+deformed cartridge is one whose clasp no longer holds. Not a reason to change material — every
+option we can actually print has this — but it needs a line in whatever the family is told and a
+case in WP-25. **This is worse in PLA than it would have been in PETG**, which is a real cost of
+not choosing the spool and should be recorded as one.
 
 ### The audit standard applies here
 
-Decisions 006 §5 changes what "done" means for the safety measurements: **witnessed by Michael,
-independently audited by the Verification Lead from the method and the raw data.** S-4 is
-safety-critical, so it is written to that standard from the start rather than retrofitted —
-procedure, instrument and revision, raw readings, derivation. A 30 N pinch is measurable with a
-$10 luggage scale and a jig, which is the point of choosing a number a scale can read.
-
----
+`spec/acceptance.md` DRAFT-7 now requires procedure, instrument and calibration, conditions, raw
+readings, derivation and **stated measurement uncertainty** for the safety rows — the gap raised
+as issue #23 and fixed by the PM. S-4 is safety-critical, so it is written to that standard from
+the start rather than retrofitted: record it with `hardware/measurements/TEMPLATE.md`. A 30 N
+pinch was chosen partly because a $10 luggage scale reads it, which is what makes the raw data
+auditable at all.
 
 ## 2. Retention geometry
 
@@ -123,81 +141,112 @@ rigid corners doing the alignment.
 <!-- BEGIN GENERATED: clasp_geometry -->
 | Parameter | Value | Why this number |
 |---|---:|---|
-| Cartridge outer | 86 × 54 × 12 mm | **Michael's call, and the analysis does not depend on it** — see the note below |
+| Cartridge outer | 86 × 54 × 12 mm | **Michael's call, and the analysis does not depend on it** — see below |
 | Nominal wall | 2.0 mm | Stiffness and drop survival everywhere except the run |
-| Retention wall | **1.2 mm** | Thinned local to the run. Strain is linear in this |
-| Cantilever span | 6.0 mm | Floor to seam. Half the shell height; strain goes as its square |
-| Interference | **0.30 mm** total | Shared: 0.150 mm per half |
-| Tolerance on it | ±0.15 mm | Two separate prints, plus colour-to-colour shrink |
+| Retention wall | **1.6 mm** | Thinned local to the run. Was 1.2 mm; see the note below |
+| Cantilever span | 6.0 mm | Floor to bead. Strain goes as its square |
+| Interference | **0.18 mm** total | Shared: 0.090 mm per half |
+| Tolerance on it | ±0.05 mm | Separately printed parts, and we do not choose the spool |
 | Engaged run | 68 mm per long wall | 86 mm less 9 mm of corner relief each end |
-| Lead-in chamfer | 25° from the pull axis | Closing ramp; 0.64 mm tall for a 0.30 mm bead |
-| Retention face | **40° from the pull axis** | Opening ramp; self-locks past **70.7°**, so this keeps half the range |
+| Lead-in chamfer | 25° from the pull axis | Closing ramp |
+| Retention face | **40° from the pull axis** | Self-locks past **70.7°**, so this keeps half the range |
 
-**Strain contains no length term.** `ε = 3yt/2a²` — wall section and deflection only. So 86 × 54 can become anything Michael likes: the outer dimensions move the *forces*, which are a comfort question, and leave the *strain* untouched, which is the materials question. That is the one decision in this document that can be taken on taste without reopening anything.
+### The wall got thicker and the interference got smaller, and that improved both numbers
 
-| Strain in PETG | Deflection per half | Peak strain | Against 2.0 % permissible |
-|---|---:|---:|---|
-| Interference at minimum | 0.075 mm | **0.37 %** | 5.3× |
-| **Nominal** | 0.150 mm | **0.75 %** | 2.7× |
-| Interference at maximum | 0.225 mm | **1.12 %** | 1.8× |
+Rev 0.1 was a 1.2 mm wall at 0.30 mm interference: **0.75 % strain and 124 N** of retention in PETG. This is a 1.6 mm wall at 0.18 mm: **0.60 % strain and 176 N**. Lower strain *and* higher retention, which looks wrong until you write the two out:
+
+```
+strain    ~ i · t / a²        thickness enters LINEARLY
+retention ~ E · w · t³ · i / a³   thickness enters CUBICALLY
+```
+
+So thickening the wall and pulling the interference back down to compensate is a strict win: you give up strain linearly and buy retention cubically. **The thicker wall is also the better drop part** (S-3), which is the rarest kind of result — the same change helping three criteria at once.
+
+### The outer dimensions are free, and this is the one decision Michael can take on taste
+
+**Strain contains no length term.** `ε = 3yt/2a²` — wall section and deflection only. So 86 × 54 can become anything: the outer dimensions move the *forces*, which is a comfort question, and leave the *strain* untouched, which is the materials question.
+
+### Snap-through strain, and the material it assumes
+
+The number PM Decisions 007 §2 asks for. **This is the only strain in the design, and it exists for about a second, twice in the cartridge's life.**
+
+| | Deflection per half | **Snap-through strain** | vs PLA 1.0 % | vs PETG 2.0 % |
+|---|---:|---:|---|---|
+| Interference at minimum | 0.065 mm | **0.43 %** | 2.3× | 4.6× |
+| **Nominal** | 0.090 mm | **0.60 %** | 1.7× | 3.3× |
+| Interference at maximum | 0.115 mm | **0.77 %** | 1.3× | 2.6× |
+
+### Why the wall is thinned only over the run
+
+The thinning *is* the cantilever: 1.6 mm over the full 6.0 mm from floor to bead. Everywhere else the wall stays 2.0 mm, for stiffness and for the drop criterion. The tempting simplification is to thin the whole rim so the lid's tongue can be a plain rectangle — and that moves the flexing span from 6.0 mm to about 3.2 mm. Strain goes as the square of the span, so **0.60 % becomes 2.11 %** — 2.1× PLA's permissible strain. That version prints, assembles and feels correct on the bench. `hardware/cad/cartridge/test_shell.py` probes the wall section from the floor to the bead for exactly this reason.
+
+**The assumed material is PLA**, because that is what we will get: a single library spool of whatever is loaded, not chosen by us (Decisions 007 §2). Every row above clears PLA's permissible strain, so the design does not depend on which of the two arrives — which is the point, since we cannot specify it.
+
+**And this is what the paired-printing rule buys.** Build a cartridge from halves printed in *different* sessions and the tolerance is ±0.15 mm instead of ±0.05 mm. The interference then ranges from 0.03 mm — **no engagement at all** — up to 0.33 mm at **1.10 % strain**, which is past PLA's limit. Both ends of that range are a failure. **Halves are a matched pair and the card says so.**
 <!-- END GENERATED: clasp_geometry -->
-
-**Why the wall is thinned only over the run.** The thinning *is* the cantilever: 1.2 mm over the
-full 6.0 mm from floor to bead. Everywhere else the wall stays 2.0 mm for stiffness and for
-S-3. The tempting simplification is to thin the whole rim so the lid's tongue can be a plain
-rectangle — and it moves the flexing span from 6.0 mm to 3.2 mm. Strain goes as the square of
-the span, so **0.75 % becomes 2.6 %**, past PETG's permissible and far past PLA's. That version
-prints, assembles, and feels correct on the bench. `hardware/cad/cartridge/test_shell.py` checks
-the wall section from the floor to the bead for exactly this reason.
 
 ---
 
-## 3. Forces, and the question the PM did not ask
+## 3. Retention force, from geometry alone
 
 <!-- BEGIN GENERATED: clasp_forces -->
-| Action | Force | Who does it |
-|---|---:|---|
-| Pull the halves apart, whole seam at once | **124 N** | nobody — see below |
-| Press closed, whole seam at once | 72 N | nobody — closing rolls too |
-| Lever one 14 mm span open with a blade | **12.7 N** | the parent |
-| Press one 14 mm span closed | 7.4 N | the parent, rolling along |
+**All of this comes from geometry, not from stored spring force** — which is the distinction PM Decisions 007 §2 turns on. Nothing is held deflected when the cartridge is shut. The lip sits behind a shoulder, and separating the halves has to push it back out over its ramp against a wall that starts from rest.
 
-**The tool does not beat the latch by force, it beats it by unzipping it.** The ratio is **10 : 1** — because deflection force is linear in engaged length, and a blade in the slot deflects 14 mm of run while a brute pull has to deflect all 68 mm of both walls at once. Every millimetre of length you add to the cartridge makes the brute path harder and leaves the tool path exactly where it is.
+| Action | PLA | PETG | Who does it |
+|---|---:|---:|---|
+| Pull the halves apart, whole seam at once | 322 N | 176 N | nobody — see below |
+| Press closed, whole seam at once | 187 N | 102 N | nobody — closing rolls too |
+| Lever one 14 mm span open with a blade | 33 N | 18 N | **the parent** |
+| Press one 14 mm span closed | 19 N | 10 N | the parent, rolling along |
+
+**The tool does not beat the latch by force, it beats it by unzipping it.** **10 : 1** — deflection force is linear in engaged length, so a blade in the slot deflects 14 mm of run while a brute pull has to deflect all 68 mm of both walls at once. The ratio is a property of the geometry and is **identical in both materials**, which is what makes the opening feature specifiable when the spool is not.
 
 ### Why the pull force is not the safety argument
 
-| | Force available | vs the 124 N pull |
+| | Force available | vs 176 N (the softer material) |
 |---|---:|---|
-| Five-year-old, pinch on a flush 12 mm slab | ~20 N | **6.2× margin** |
-| Five-year-old, two-handed grip on something to hold | ~80 N | 1.5× margin |
+| Five-year-old, pinch on a flush 12 mm slab | ~20 N | **8.8× margin** |
+| Five-year-old, two-handed grip **on something to hold** | ~80 N | 2.2× margin |
 | Adult, two-handed pull | 200 N+ | none — an adult can force it |
 
-Read the second row before the first. **Retention force does not separate a child from an adult** — a determined seven-year-old with something to grip is inside a factor of two of this joint, and I am not going to design a number that pretends otherwise. What separates them is that there is *nothing to grip*: the seam is flush, there is no lip, no recess and no proud edge anywhere on the shell, so the only force a child can bring is a pinch on a smooth 12 mm slab. That is the first row, and it is the one with the margin in it.
+Read the second row before the first. **Retention force does not separate a child from an adult.** What separates them is that there is *nothing to grip*: the seam is flush, there is no lip, no recess and no proud edge anywhere on the shell, so the only force a child can bring is a pinch on a smooth slab. That is the first row, and it is the one with the margin in it.
 
-**The consequence for the design is a rule, not a number:** any feature that gives a fingernail or a fingertip purchase on the parting line converts row 1 into row 2 and spends the entire safety margin. That rules out the recessed thumb-notch that every battery cover has, and it is why the opening feature is a slot for a blade.
+**The consequence is a rule, not a number:** any feature that gives a fingernail or a fingertip purchase on the parting line converts row 1 into row 2 and spends the entire margin. That rules out the recessed thumb-notch every battery cover has, and it is why the opening feature is a slot for a blade.
+
+**The margin is quoted against the softer material on purpose.** We do not choose the spool, so every safety number in this document is the worst of the two candidates. In PLA the same joint takes 322 N.
 <!-- END GENERATED: clasp_forces -->
 
 ---
 
-## 4. Does PETG creep? No, and here is the number
+## 4. Closed-position strain — the number Decisions 007 §2 asks for
 
 <!-- BEGIN GENERATED: clasp_creep -->
-The question PM Decisions 006 §2 asks — *does PETG creep at the deflection you chose* — has a better answer than a margin, which is that **the design does not hold the deflection**. The bead seats fully in the groove and the wall returns to undeflected. The opening strain exists for about a second, once or twice in the cartridge's life.
+**Closed-position strain: zero. Not near zero — zero, by construction.**
 
-What is held for years is only the TPU lip's preload, and this is what it costs:
+The groove is cut deeper than the bead stands proud, so when the cartridge is shut the two halves **do not touch at the bead at all**. The lip snaps past its shoulder and the wall returns to its undeflected shape. There is no stored spring force holding the cartridge together; retention is the lip sitting behind the shoulder, which is exactly the arrangement Decisions 007 §2 asks for.
 
-| | Value |
+**This is a geometric claim, so it is checked as one.** `hardware/cad/cartridge/test_shell.py` intersects the closed assembly as solids and asserts the overlap volume is zero, for every variant on the plate. Zero contact means zero contact force means zero strain — there is no modelling step between the check and the claim. Its `--mutate` run makes the groove too shallow to seat the bead and asserts the check goes red; that failure mode prints, assembles, latches and feels correct while holding the wall deflected for the life of the cartridge.
+
+| | Strain | Held for | Against PLA's creep threshold (~0.25 %) |
+|---|---:|---|---|
+| **Closed** | **0.000 %** | years | no sustained load exists |
+| Snapping open or shut | 0.60 % | ~1 s, twice in the cartridge's life | not a creep duty |
+
+**Why this matters more than the cycle count.** A clasp is engaged 99.99 % of its life. PLA relaxes at room temperature under sustained strain, and a lip held deflected for a year loses its grip silently, on a cartridge in a child's pocket. **Cycling was never the risk** — the cartridge is opened once or twice ever. A design whose closed strain is zero is indifferent to how creep-prone the spool turns out to be, which is the only kind of clasp specifiable when we do not choose the material.
+
+### What the TPU lip was doing, and what replaces it
+
+Rev 0.1 used a TPU lip to preload the joint against rattle. **That is void** — the library runs a single spool and a merged STL carries one material for every part in it. It also introduced 0.086 % of *sustained* strain, which was defensible in PETG and is a worse idea in PLA.
+
+**The replacement is to not solve the problem yet.** The coupon on the plate carries no preload feature at all, so Michael's answer to *does it stay shut when you shake it* tells us whether rattle is real before anything is designed for it. If it is, the same feature in the shell's own material is ready:
+
+| Anti-rattle leaf, if needed | Value |
 |---|---:|
-| TPU lip section | 0.8 mm thick × 2.0 mm tall, deflected 0.2 mm |
-| Perimeter preload | 22 N |
-| Camming component per long wall | 4.2 N |
-| **Sustained strain in the PETG wall** | **0.086 %** |
-| Opening strain, for comparison | 0.75 % |
-| Creep threshold where PETG starts to matter | ~0.5 % (EST) |
+| Section | 4 × 20 mm wide, 0.8 mm thick, 14 mm long, deflected 0.10 mm |
+| Preload | 1.2 N in PLA, 0.7 N in PETG |
+| **Sustained strain** | **0.061 %** — 4.1× under PLA's creep threshold |
 
-**0.086 % is 6× below the threshold**, and it is the only sustained figure in the design. The reason the TPU is a bending lip rather than a compressed gasket is arithmetic: the same TPU as a 1 mm gasket squashed 0.2 mm over this perimeter develops several hundred newtons and would hold the shell open. In bending it develops 22 N. **Same material, same displacement, two orders of magnitude apart** — the compliance has to come from the shape.
-
-**The TPU is also where the tolerance goes.** The PETG bead gives *retention* — a hard stop at a defined interference. The TPU lip gives *preload* — it takes up the ±0.15 mm of print variation so the joint does not rattle at the loose end of the stack and does not bind at the tight end. Splitting those two jobs across two materials is what makes a printed clasp survive a colour change, which is the failure PM Decisions 006 §1 warns about.
+**A short stiff rib cannot do this job and the arithmetic says why.** The gap to close is 0.10 mm. Deflect a 2.9 mm tall rib by that and it is **1.4 % strain, held forever** — the exact failure §2 forbids, arrived at while trying to fix rattle. The compliance has to come from a long, thin leaf: strain falls as the square of the span while force falls as the cube, so lengthening buys strain faster than it costs force. Same material, same displacement, twenty times less strain.
 <!-- END GENERATED: clasp_creep -->
 
 ---
@@ -260,34 +309,32 @@ with no tool. If it opens, the geometry is wrong and this section is wrong with 
 
 ---
 
-## 7. The TPU lip
+## 7. What happened to the TPU lip
 
-<!-- see §4 for the arithmetic; this section is what it means -->
+**It is void.** Rev 0.1 used a thin TPU lip to preload the joint against rattle and to absorb
+print tolerance. PM Decisions 007 §2 removes it twice over: the library runs **a single spool**,
+so a second-material part cannot be printed at all, and Michael is not buying a printer, so the
+route by which we would have got one is closed.
 
-The PM offered TPU as "worth one experiment". **It is worth more than that, and it is doing a
-job nothing else in the design can do.**
+**It was also carrying 0.086 % of sustained strain** — defensible in PETG, and a worse idea in
+the PLA we should now assume. Losing it makes the closed-strain number *better*, from 0.086 % to
+zero.
 
-The PETG bead gives **retention**: a hard stop at a defined interference. What it cannot give is
-tolerance absorption — 0.30 mm of interference with ±0.15 mm of print variation is a joint that
-is either loose or tight depending on the day and the colour, which is precisely the failure
-Decisions 006 §1 warns about when a filament changes.
+What it leaves behind is the tolerance problem, and that is answered by §2's paired-printing
+rule rather than by a part: both halves of a cartridge come off one plate in one session, so
+they shrink together and what survives is the printer's repeatability, not the material's
+shrinkage.
 
-The TPU lip gives **preload**: about 22 N spread round the perimeter, taking up the slop so the
-joint does not rattle at the loose end of the stack and does not bind at the tight end. Two
-jobs, two materials, and the tolerance lands on the one that has 400 % elongation to spend.
+**The anti-rattle job is deferred, not redesigned.** The coupon on the plate carries no preload
+feature at all, so Michael's answer to *does it stay shut when you shake it* tells us whether
+rattle is real before anything is built for it. If it is, §4 has the replacement sized in the
+shell's own material — and the arithmetic there is the useful part, because the obvious version
+of that feature is a short stiff rib at **1.4 % sustained strain**, which is the exact failure
+Decisions 007 §2 forbids, arrived at while trying to fix rattle.
 
-**The shape is the entire trick, and it is worth stating because the obvious version fails.** A
-1 mm TPU gasket squashed 0.2 mm over this perimeter develops several hundred newtons — it would
-hold the shell open. The same rubber as a **thin lip in bending** develops 22 N. Same material,
-same displacement, two orders of magnitude apart.
-
-**It cannot be printed at the library.** Shasta runs PLA only, and a merged STL carries one
-material for every part in it. So `tpu-lip.stl` ships beside the plate and waits for a machine
-that runs TPU — which is an argument for the A1 combo that is more concrete than "more
-materials would be nice": **this part is on the critical path for the clasp's tolerance, and
-today we cannot make it.**
-
----
+**Not designing it yet is the point.** A preload feature added now would be a solution to a
+problem nobody has confirmed exists, in a material nobody has confirmed, on a plate that has not
+been printed.
 
 ## 8. The variant plate
 
@@ -297,72 +344,76 @@ mating part as a control, and *"they all felt about the same"* as a first-class 
 experiments, 1.6 h of print against a 6 h limit.
 
 <!-- BEGIN GENERATED: clasp_sweep -->
-Coupon: **62 × 28 × 12 mm**, a real long-wall run (44 mm engaged) with both corner relieves, at full section. Not a cartridge — a cartridge does not fit on the plate beside WP-04 and the coupon tests the thing being swept.
+Coupon: **62 × 28 × 12 mm**, a real long-wall run (44 mm engaged) with both corner relieves, at full section. Not a whole cartridge — the run is the thing being swept, and a coupon leaves plate room for more of them.
 
-**The plate prints in PLA, and the design is for PETG.** That is not a flaw in the packet, it is the bracket. PLA is roughly twice as stiff and half as extensible, so the same geometry that is comfortable in PETG is at PLA's limit — which means **the top of this sweep is expected to crack**, and that is a useful result rather than a wasted part.
+**Swept in PLA, because that is what the library will load.** Bracketed so both ends are expected to be wrong: the bottom is at the printer's own repeatability and should barely engage, and the top is past PLA's permissible strain and is **expected to crack** — a result, not a wasted part.
 
-| Interference | Strain | vs PLA 1.0 % | vs PETG 2.0 % | Brute pull | **Lever** | Expectation |
-|---:|---:|---|---|---:|---:|---|
-| 0.15 mm | 0.37 % | ok | ok | 73 N | **12 N** | too loose — should rattle or fall open |
-| 0.25 mm | 0.62 % | ok | ok | 122 N | **19 N** | candidate |
-| 0.35 mm | 0.87 % | ok | ok | 171 N | **27 N** | candidate, at PLA's limit |
-| 0.45 mm | 1.13 % | **over** | ok | 220 N | **35 N** | **expected to crack in PLA**; comfortable in PETG |
+| | Interference | Snap strain | vs PLA 1.0 % | Pull-apart | **Lever** | Expectation |
+|---|---:|---:|---|---:|---:|---|
+| | 0.10 mm | 0.33 % | ok | 116 N | **18 N** | at the printer's repeatability — should barely hold |
+| | 0.18 mm | 0.60 % | ok | 209 N | **33 N** | **the nominal** |
+| | 0.26 mm | 0.87 % | ok | 301 N | **48 N** | candidate, and the one to beat |
+| | 0.34 mm | 1.13 % | **over** | 394 N | **63 N** | **expected to crack in PLA** |
 
-**The lever column is the one that matters for the packet**, because it is the force Michael's hand actually applies. It runs 12–35 N across the sweep — a light push to a firm one on a blade — so **every variant is openable by hand, including the one expected to crack.** If the brute-pull column were the operating force, the top two variants would be untestable and the plate would be worthless.
+**The lever column is the one that matters for the packet**, because it is the force Michael's hand actually applies through a blade. It runs 18–63 N across the sweep, so **every variant is openable by hand, including the one expected to crack.** If the brute-pull column were the operating force the top two would be untestable and the plate would be worthless.
 
-The brute-pull column is the coupon in PLA, not the cartridge in PETG, and it is here so that nobody reads a cartridge number off it later. The coupon's run is shorter and its material is stiffer; the two effects push opposite ways and the number means nothing except relative to the other rows.
-<!-- END GENERATED: clasp_sweep -->
+**Four bases, four lids** (PM Decisions 007 §1). Rev 0.1 shipped two lids for four bases, so Michael would have reused a mating half across variants and **wear on the shared part would be confounded with whichever variant he tested last** — on a plate whose entire question is retention. The print budget now covers a dedicated lid per base, so the confound is removed rather than managed with a test order.
 
-**Two lids, and they are the control.** One geometry mates every base, so the lid is shared
-across four sequential tests and will wear. If Michael's ranking tracks *which lid he used*
-rather than which base, the sweep is measuring wear on the shared part and not interference —
-the same trick as WP-04's `D`/`H` bed controls, aimed at a different confound.
+**Each pair is printed together and stays together.** Both halves come off one plate in one session, which is what holds the interference tolerance at ±0.05 mm instead of ±0.15 mm. Mixing halves between pairs is the one thing that invalidates the ranking, and the card says so.
 
-**What each result means, decided in advance** so the next plate goes out without another round
-of thinking:
+**What each result means, decided in advance** so the next plate goes out without another round of thinking:
 
 | If the plate says… | Then… |
 |---|---|
-| A clear winner, lids do not matter | Print that interference in PETG and run S-1 to S-4 |
-| The ranking tracks the lid | The shared part is wearing. Print four matched pairs next time and accept the cost |
-| Nothing holds, including Q | My stiffness estimate is too low. Re-bracket upward and get a filament datasheet before the next plate |
-| Everything holds, including N | My stiffness estimate is too high, and the good news is that the interference can shrink until it is inside FDM's comfortable range |
-| Q cracks and A does not | The PLA permissible-strain estimate is about right, which also calibrates the PETG number by the same reasoning |
+| A clear winner, and it does not rattle | Print it at cartridge scale and run S-1…S-4 |
+| A clear winner **that rattles** | Add the anti-rattle leaf above. Its numbers are ready |
+| Nothing holds, including 0.34 | My stiffness estimate is too low. Re-bracket upward |
+| Everything holds, including 0.10 | My estimate is too high, and the interference can shrink until it is comfortably inside the printer's repeatability |
+| The top one cracks and the next does not | The PLA permissible-strain estimate is about right, which also calibrates every other number in this document |
 | They all feel the same | Interference is not what the hand reads. Sweep the retention angle instead, at fixed interference |
+<!-- END GENERATED: clasp_sweep -->
 
 ---
 
-## 9. Materials — the correction, and what it does and does not change
+## 9. Materials — we do not choose the spool, and the design stopped caring
 
-**Decisions 005 §3 told Michael a home printer would give us PETG and nylon. It will not.** The
-A1 line officially runs **PLA, PETG, TPU and their support filaments**, with a 300 °C hotend and
-an 80 °C bed, and explicitly does not recommend ABS, ASA, PC, **PA** or PET. PA is nylon.
+Rev 0.1 corrected one material error (the A1 line does not run nylon). **Decisions 007 §2
+removes the premise underneath it:** Michael is not buying a printer, the library loads a single
+spool of whatever it has, and we do not pick the material or the colour. PETG is no longer an
+assumption available to us.
 
-| Where nylon was assumed | Now |
+| What rev 0.1 assumed | What is actually true |
 |---|---|
-| `docs/PACKAGES/WP-04.md` A-4, "1000 cycles in the final material (MJF nylon or PETG)" | **PETG from the A1**, or MJF nylon **from a service bureau**. Those are different procurement paths and the document now says which |
-| `docs/REVIEW/hardware-lead.md` round 1, "the production latch bar will be PETG, ABS, nylon or an insert" | PETG or an insert. ABS and nylon both need a machine we are not buying. **The review log is append-only and has not been edited** — the correction is here and in round 9 |
+| PETG, from a printer Michael buys | **One library spool, probably PLA, not chosen by us** |
+| A TPU lip for preload and tolerance | **Unprintable.** Single spool, and a merged STL carries one material for every part |
+| Nylon from a service bureau for the latch | Still available and still the right answer for the *latch*, which is a fatigue part. Not for the shell |
 
-**It changes less than it sounds like it should**, for the reason in §0: this shell is designed
-for PETG throughout, and the PM's own reframing is why. Nylon's advantage is fatigue life in a
-small flexure, and a part that flexes twenty times in its life does not need fatigue life. **The
-material we cannot print is the solution to a problem this design does not have.**
+### What that changed, and what it did not
 
-**Where it does still bite: WP-04's latch.** That mechanism actuates on every press for years,
-so it *is* a fatigue part, and WP-04's A-4 criterion (1 000 cycles in the final material) may
-still want MJF nylon from a bureau. Outsourcing one small part while the rest prints at home is
-a normal split and the PM already sketched it. **That decision belongs to WP-22, after WP04-01
-says which geometry won** — printing the wrong shape properly is worse than printing the right
-shape badly.
+**It did not change the geometry's logic.** The design rule Decisions 007 §2 states — the clasp
+must not be held deflected when closed — is the rule rev 0.1 already followed, for the PETG
+creep argument. The new material makes it *more* important, not different.
 
-**One thing to design around regardless** (Decisions 006 §1): a press fit tuned in one filament
-is not guaranteed to fit in another. Two consequences, both already in this design:
+**It did change three numbers**, and §2 has them: a thicker retention wall, a smaller
+interference, and a tolerance figure that now depends on a manufacturing rule rather than on a
+filament.
 
-- **Tune in the production filament**, and re-verify after any colour change. It is on the card.
-- **Retention comes from a feature with tolerance in it** — a lead-in chamfer and a defined
-  interference backed by a TPU preload — not from a knife-edge fit. §7.
+**The honest cost of not choosing the spool** is in §1's dashboard finding: PLA's glass
+transition is ~20 K below PETG's heat-deflection temperature, so a cartridge left in a hot car
+is a real risk in the material we will get and a marginal one in the material we cannot have.
+That is the one place where losing the choice actually costs something, and it belongs in WP-25
+rather than being absorbed here.
 
----
+### The instruction that shaped the fit
+
+Decisions 007 §2: *"Do not tune a fit to a specific filament. Colours and brands differ in
+shrinkage; retention must come from a chamfer and a defined interference with tolerance in it,
+not from a knife-edge fit."*
+
+Followed, and §2 shows how: the retention is a 25° lead-in chamfer onto a defined 0.18 mm
+interference with a ±0.05 mm band around it, and **the paired-printing rule is what makes that
+band achievable without tuning anything.** Halves printed together shrink together — which
+removes the filament from the comparison rather than accommodating it.
 
 ## 10. The sealed cartridge — my estimate, and my agreement
 
@@ -409,8 +460,9 @@ which is itself an argument for the clasp, because the clasp does not close the 
 
 | # | Item | Who | Default if nobody answers |
 |---|---|---|---|
-| SH-1 | **Cartridge outer dimensions.** 86 × 54 × 12 mm is a working number chosen to be child-holdable, not a designed one. This is an aesthetic call and §2 shows the analysis does not depend on it | **Michael** | 86 × 54 × 12 proceeds; changing it later costs a rebuild, not a redesign |
-| SH-2 | **Filament datasheets.** Modulus, permissible strain and friction are all EST. No vendor egress here reaches a filament vendor | Michael or PM | The §8 sweep measures around the uncertainty; a datasheet would narrow the bracket, not unblock it |
-| SH-3 | **S-2's 90 days starts when the first PETG pair exists**, which is after a printer arrives. It is the long-lead criterion in this document | — | Runs in parallel with everything; does not gate WP-24 |
-| SH-4 | **The car-dashboard finding** (§1) needs a line in whatever the family is told, and a case in WP-25 | PM | Recorded here; carried into WP-25 |
-| SH-5 | **The TPU lip cannot be printed today.** The library is PLA-only | Michael's printer decision | The plate ships without it; the clasp works without it but with less tolerance margin |
+| SH-1 | **Cartridge outer dimensions.** 86 × 54 × 12 mm is a working number, not a designed one. §2 shows the analysis does not depend on it — strain has no length term | **Michael** | 86 × 54 × 12 proceeds; changing it later costs a rebuild, not a redesign |
+| SH-2 | **Filament datasheets.** Modulus, permissible strain, creep threshold and friction are all EST, and now for a material we do not choose. No vendor egress here reaches a filament vendor | Michael or PM | The §8 sweep measures around the uncertainty; a datasheet narrows the bracket, it does not unblock it |
+| SH-3 | **Whether the library will let Michael supply his own filament.** He is asking on Monday (Decisions 009 §5). A yes would restore PETG and make the dashboard finding in §1 much less sharp | Michael | Everything here assumes no. If the answer is yes, nothing needs redesigning — the margins just get wider |
+| SH-4 | **S-2's 90-day clock has not started** and cannot until a printed pair exists. It is the longest-lead criterion on the hardware stream and it is on no schedule | — | Runs in parallel; does not gate WP-24 |
+| SH-5 | **Does it rattle?** There is deliberately no preload feature. The first plate answers it; §4 has the replacement sized if the answer is yes | Michael, via the plate | If it rattles, add the leaf. If not, the design is simpler and stays that way |
+| SH-6 | **The car-dashboard finding** (§1) needs a line in whatever the family is told, and a case in WP-25. Sharper in PLA than it would have been in PETG | PM | Recorded here; carried into WP-25 |

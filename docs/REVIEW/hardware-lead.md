@@ -4,6 +4,138 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 10 — 6 Sep 2026, on PM Decisions 007
+
+### The two card items are settled. The plate can go.
+
+**Item 2 first, because it needed no argument: four lids, one per base.** You were right that
+reusing a mating half across four variants confounds wear with whichever went last, on a plate
+whose entire question is retention. The budget covers it, so the confound is removed rather than
+managed with a test order. Each lid carries its base's letter and the card tells Michael to keep
+pairs together.
+
+### Item 1: the repeat is deliberate — and the mechanism you gave for it is wrong, which is the useful part
+
+`D`, `M` and `H` **are** the same button, at 1.2 mm, and it **is** deliberate — ADR-104's blind
+bed controls, ranked alongside the real variants to test whether print position is confounding
+the sweep. So your first branch applies and the card now declares it.
+
+**But they are not byte-identical solids.** Each carrier has its own letter cut into the cap.
+Measured:
+
+| | `M` | `D` | `H` |
+|---|---:|---:|---:|
+| Volume, mm³ | 1739.681 | 1740.288 | 1740.575 |
+| Triangles | 240 | 922 | 236 |
+
+Suppress the label and they collapse to one signature. Ship them and they are three different
+meshes.
+
+**That inverts what the gate you asked for has to do.** "Add a duplicate-geometry check" —
+compare the solids — **runs green on the exact plate that prompted it**, because the blind label
+that makes the experiment work also makes every part unique. It is the allocation gate again:
+a check measuring a real quantity, and not the one anyone cared about.
+
+So the gate does two comparisons: the **swept parameter** (which is what you were actually
+pointing at, and what no mesh comparison can see) and the **mechanism with the label
+suppressed** (which catches the opposite failure — a parameter that differs on paper and never
+reached the geometry). `--mutate` installs the naive version and it fails three red cases.
+ADR-120.
+
+### A third card item you did not have, and it is the one that can waste the trip
+
+**Supports.** Each button has a slot roughly 8 × 3 mm and **14 mm deep, blind at the top, open
+onto the bed**. That slot is what makes the arm springy, and springiness is what the plate
+measures.
+
+A "supports everywhere" setting fills it. Fourteen millimetres down a 3 mm gap it is not
+removable, and while it is in there the arm cannot flex at all — so **every button reads as
+identically stiff.** "They all felt the same" is a first-class answer on this card, so the trip
+would look like it worked and be completely wrong. It is now the first of three lines to the
+staff, in capitals, with the consequence spelled out.
+
+**I did not change the geometry to fix it**, because you verified the current STL and a geometry
+change would void that verification before a trip that is already waiting. The fix for plate 02
+is to open the slot to a side face so a setting cannot ruin it. Logged, not done.
+
+### §2: the clasp, respecified for a material we do not choose
+
+**Your design rule is the one rev 0.1 already followed** — the groove is cut deeper than the bead
+stands proud, so the closed cartridge has no contact at the bead at all. What changed is that it
+is now stated as **zero, not near-zero**, and proven as a boolean over the closed assembly rather
+than argued. Losing the TPU lip actually *improved* that number, from 0.086 % to 0.000 %.
+
+Your six deliverables:
+
+| | |
+|---|---:|
+| Closed-position strain | **0.000 %** |
+| Snap-through peak strain | **0.60 %**, assuming **PLA** — 1.7× under permissible |
+| Retention from geometry alone | **322 N** PLA / **176 N** PETG |
+| Cycle target | 20 at ≤ 20 %, accepted |
+| Seam | 1.0 mm 45° chamfer; a 0.15–0.25 mm line, step to ±0.2 mm |
+| Opening feature | 0.9 mm blade slot, back face |
+
+**Three numbers moved, and the direction is counterintuitive.** The wall went 1.2 → 1.6 mm and
+the interference 0.30 → 0.18 mm: **lower strain and higher retention at the same time**. Strain
+enters linearly in thickness, force cubically, so thickening and pulling the interference back
+down is a strict win — and the thicker wall is the better drop part too. Three criteria improved
+by one change.
+
+### The tolerance number was the real problem, and it is a manufacturing rule not a fit
+
+At 0.18 mm nominal, a ±0.15 mm band spans **0.03 mm — no engagement at all** — to 0.33 mm at
+**1.10 % strain, past PLA's permissible**. Both ends are failures, so at this interference the
+tolerance is the design.
+
+**Halves printed together shrink together.** One plate, one session, one spool: what survives is
+the printer's XY repeatability, ±0.05 mm, not the material's shrinkage. That band is
+comfortable at every point in the sweep. It also satisfies *"do not tune a fit to a specific
+filament"* in the strongest available sense — it removes the filament from the comparison rather
+than accommodating it. The rule is normative in the spec and on the card.
+
+### What I am deliberately not designing yet
+
+The TPU lip's other job was anti-rattle preload. **I have not replaced it**, because nothing has
+confirmed that rattle is real: there is now no preload feature at all, and the card asks Michael
+whether the boxes stay shut when shaken. If they do, the design is simpler and stays that way.
+
+If they do not, the replacement is sized and sitting in `clasp.py`: a long thin leaf in the
+shell's own material at **0.061 % sustained strain**, four times under PLA's creep threshold.
+**The obvious version of that feature is the trap** — the gap to close is 0.10 mm, and deflecting
+a 2.9 mm rib by that is **1.4 % held forever**, which is the exact failure your §2 forbids,
+arrived at while trying to fix rattle. Strain falls as the square of the span and force as the
+cube, so the leaf has to be long and thin.
+
+### Three defects found in my own already-shipped work
+
+- **`spec/hw/cartridge-shell.md` §8 carried a stale duplicate below its generated block** —
+  "two lids, and they are the control" and "print that interference in PETG", directly
+  contradicting the generated text a screen above. I moved that content into the generator last
+  round and left the original behind.
+- **The same section's §2 rationale still quoted a 1.2 mm wall and 0.75 % strain.** Both are now
+  generated from the model rather than typed, so they cannot drift again.
+- **`carrier-X-onside.stl` had been sitting in the packet for two revisions** after the
+  on-its-side variant was dropped — a printable file for a part that no longer exists in the
+  design. The build only ever added files, so nothing could notice. It now wipes the per-part
+  directory first.
+
+### Still open, unchanged
+
+**The three IR-015 findings** and the fabrication gate — no board fabricated, no cell charged.
+**`Request Independent Review` on the solenoid circuit**, per your §4.4: the 74HC221 one-shot
+pair, the RC lockout values and their tolerance stack, and specifically whether the energy
+budget in `thermal-budget.md` §6 bounds a *fault* rather than only normal use.
+
+**Order 1a** still with Michael; 1c stays cancelled. **Issue #23 stays open until the DRAFT-7
+bundle lands**, per your §0.
+
+**`STATUS-HARDWARE.md` was rewritten on 5 September**, before Decisions 007 was written — your
+§3 note about it being three rounds stale was correct when you wrote it and is now addressed. It
+is updated again this round.
+
+---
+
 ## Round 9 — 5 Sep 2026, on PM Decisions 006
 
 ### Michael can have the clasp, and your reframing is the reason

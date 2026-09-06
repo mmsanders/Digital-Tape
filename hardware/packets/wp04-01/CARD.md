@@ -1,7 +1,7 @@
 # Print packet WP04-01 — the latching button, and the cartridge clasp
 
 **One page. Print `plate.stl`. Bring back the parts and this card filled in.**
-Hardware Lead · rev 4, 5 Sep 2026 · WP-04 the transport spike, and WP-24 the cartridge shell
+Hardware Lead · rev 5, 6 Sep 2026 · WP-04 the transport spike, and WP-24 the cartridge shell
 
 ---
 
@@ -16,42 +16,59 @@ is. That hook catches the bar and holds the button down, the way a cassette play
 button stays down until you hit stop. **One of the nine is different in another way**: its hook
 sits on a longer, thinner springy arm. See question 4.
 
-**B. Four little boxes and two lids.** These are a stand-in for the cartridge shell — the
+**B. Four little boxes and four lids.** These are a stand-in for the cartridge shell — the
 clasp that holds the two halves together without a screw. The four bases differ in **one hidden
-dimension**: how much the lip overlaps. Any lid fits any base.
+dimension**: how much the lip overlaps.
+
+**Each box has its own lid, and the letters match.** Box `N` goes with lid `N`. Please keep
+them in their pairs — the two halves of a pair were printed together and are sized to each
+other, and swapping them is the one thing that would make your answers mean nothing.
 
 I have not told you which is which, and the letters are shuffled on purpose. **If you knew
 which one was supposed to win, you would find that it did.**
+
+> **Some parts on this plate are deliberately the same as each other.** I have not said which,
+> and you should not go looking. If two things feel identical to you, **that is a real answer
+> and I want it** — it is how I find out whether the differences I am testing are big enough
+> for a hand to notice at all. It is not a mistake in the file.
 
 ## Printing it
 
 | | |
 |---|---|
 | **File to submit** | **`plate.stl`** — the library only accepts `.stl` |
-| **Plate size** | **150 × 149 mm** (bed needed: 162 × 161 mm) |
-| **Estimated print time** | **about 1 h 40 min** — within the library's 6 h limit |
-| Material | PLA — that is all the library offers, and see the note below |
+| **Plate size** | **228 × 119 mm** (bed needed: 240 × 131 mm) |
+| **Estimated print time** | **about 2 hours** — within the library's 6 h limit |
+| Material | Whatever is loaded. Probably PLA. **One spool, no swaps** |
 | Layer height | Staff decide. 0.2 mm if they ask you |
-| Supports | None needed **as laid out** — see the second line below |
+| **Supports** | **OFF. This is the one setting that can waste the trip — see below** |
 
-> **Two lines for the library staff. The first one is the important one:**
+> ## Three lines for the library staff
 >
-> 1. **"Any orientation is acceptable, provided all parts are printed in the same one."**
-> 2. **"The plate is laid out flat and should print flat. Some parts are open boxes, and if
->    they are turned on their side or upside down they will need supports."**
+> **1. SUPPORTS OFF.** Not "on build plate only" — **off**.
 >
-> The first line is what protects the experiment — the test is a comparison *between* the
-> parts, so it survives them all being rotated together, and it does not survive them being
-> rotated differently from each other. The second line is new this revision because the plate
-> now has box-shaped parts on it, and a box printed upside down prints badly.
+> **2. "Any orientation is acceptable, provided all parts are printed in the same one."**
+>
+> **3. "The plate is laid out flat and should print flat. Some parts are open boxes, and if
+> they are turned on their side or upside down they will need supports."**
 
-**One thing about the boxes and PLA.** The real cartridge will be PETG, which bends further
-before it breaks. PLA is stiffer and more brittle, so **I expect one of the four boxes to
-crack** rather than open. That is deliberate and it is a useful answer, not a wasted part —
-tell me which one and I will know my numbers are about right.
+**Why supports off matters more than everything else on this card.** Each button has a narrow
+slot up the middle of it, about 8 × 3 mm and 14 mm deep, closed at the top and open at the
+bottom onto the bed. That slot is not decoration — **it is what makes the little arm springy,
+and springiness is the thing this whole plate measures.**
 
-There is one more file, `tpu-lip.stl`. **Do not print it** — it needs rubbery TPU filament and
-the library only has PLA. It is there for later.
+A "supports everywhere" setting fills that slot with support material. Fourteen millimetres
+down a 3 mm gap, **you will not get it out**, and while it is in there the arm cannot flex at
+all. Every button would then feel identically stiff — and "they all felt the same" is a real
+answer on this card, so **the trip would look like it worked and would be completely wrong.**
+
+If the staff will not turn supports off, bring the parts back anyway and tell me. That is a
+fact about the machine I need, and it is worth a trip on its own.
+
+**One thing about the boxes.** They are designed to be safe in whatever the library has
+loaded, but **I expect one of the four to crack** rather than open. That is deliberate and it
+is a useful answer, not a wasted part — tell me which one and I will know my numbers are about
+right.
 
 ---
 
@@ -97,14 +114,15 @@ deliberate** — if the extremes were not obviously wrong I picked too narrow a 
 
 ### Putting it together
 
-1. Take **lid 1** and press it onto one of the lettered bases. It should click shut.
+1. Take a lid and press it onto **the base with the same letter**. It should click shut.
 2. To open it: slide a **guitar pick, a spudger, or a butter knife** into the thin slot on the
    long side, and twist. It should pop open along that side and then peel apart.
-3. Do all four bases with lid 1. Then **do them all again with lid 2.**
+3. Do all four pairs.
 
-**Please use both lids and tell me if it made a difference.** The lids are identical. If your
-answers change between lid 1 and lid 2, the lid is wearing out and I am measuring the wrong
-thing — that is worth more to me than the ranking itself.
+**Keep the pairs together.** Last time I was going to send you two lids for four boxes, and the
+PM pointed out that would have meant reusing a lid — so by the fourth box I would be measuring
+how worn the lid was rather than how good the box is. You now have one lid per box and that
+problem is gone. Just do not mix them up.
 
 ### What I need
 

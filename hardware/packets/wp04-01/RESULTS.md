@@ -1,4 +1,4 @@
-# Results — packet WP04-01 (rev 4)
+# Results — packet WP04-01 (rev 5)
 
 **Printed on:** ________________  **Date:** ____________  **Material:** ____________
 
@@ -68,15 +68,19 @@ Which one would you want to be the cartridge?
 
 ## B2. Per-box checks
 
-Do every row twice — **once with lid 1, once with lid 2** — and tick if it was true either
-time. Use the last column if the two lids disagreed.
+Each box with **its own matching lid**. Same letter on both halves.
 
-| Letter | Clicks shut | Stays shut when shaken | Opens easily with the tool | Cracked or broke | **Lid 1 and lid 2 felt different** |
-|---|---|---|---|---|---|
-| **N** | | | | | |
-| **G** | | | | | |
-| **A** | | | | | |
-| **Q** | | | | | |
+| Letter | Clicks shut | **Stays shut when shaken** | Opens easily with the tool | Cracked or broke |
+|---|---|---|---|---|
+| **N** | | | | |
+| **G** | | | | |
+| **A** | | | | |
+| **Q** | | | | |
+
+**The shake column is the one I am least sure about.** There is deliberately nothing springy
+holding these shut — that is what stops the plastic going slack over a year — so it is possible
+they rattle. If they do, say so; there is a fix ready and it costs one more feature. If they
+don't, the design is simpler and I would rather know that than add something nobody needed.
 
 **Did any of them crack instead of opening?** Which: ______________
 
@@ -116,6 +120,13 @@ Look at the seam where the two halves meet, in ordinary room light, at arm's len
 - [ ] The machine or the staff would not take the file
 - [ ] Needed supports after all
 - [ ] They printed it in some orientation other than flat — which? ______________
+- [ ] **They would not turn supports off** *(tell me even if the parts look fine)*
+- [ ] There was support material stuck in the slot up the middle of the buttons
+
+**What was actually loaded in the machine?** Material and colour: ______________________
+
+*(I do not get to choose the spool, so knowing what you got tells me what my numbers were
+really measured against.)*
 
 **Roughly how long from handing it over to having it in your hand?** ______________
 

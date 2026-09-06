@@ -1203,3 +1203,74 @@ left thin, uncertainty and what-would-change-this, are the two the audit actuall
 **Cost to reverse.** Near zero as a format. High as a process: dropping it puts a safety sign-off
 back in the hands of the party with an interest in it passing.
 
+
+---
+
+## ADR-119 — The clasp is specified for a material we do not choose
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, under PM Decisions 007 §2
+**Amends:** ADR-117
+
+**Decision.** The cartridge clasp is designed to **hold zero strain when closed**, and every
+number in `spec/hw/cartridge-shell.md` is quoted against **PLA** with PETG shown only as a
+comparison. Working point: a **1.6 mm** retention wall over a 6.0 mm span at **0.18 mm** total
+interference — **0.60 % snap-through strain, 0.000 % closed**. Two halves of a cartridge are a
+**matched pair printed on one plate in one session**, which is what holds the interference
+tolerance at ±0.05 mm rather than ±0.15 mm. The TPU lip is deleted.
+
+**Rationale.** Michael is not buying a printer. The library loads a single spool of whatever it
+has, probably PLA, and we do not choose the material or the colour. Three consequences, in
+descending order of how much they changed the design.
+
+**Creep replaces fatigue as the risk, and the answer is to remove the load rather than survive
+it.** A clasp is engaged 99.99 % of its life and PLA relaxes at room temperature under sustained
+strain, so a lip held deflected for a year loses its grip silently. Because the groove is cut
+deeper than the bead stands proud, the closed cartridge has **no contact at the bead at all** —
+so there is nothing for any material to relax, and the design is indifferent to which spool
+arrives. That is a geometric claim and it is checked as one: `test_shell.py` intersects the
+closed assembly as solids and asserts zero volume.
+
+**A thicker wall at a smaller interference is better on every axis at once.** Rev 0.1 was 1.2 mm
+at 0.30 mm: 0.75 % strain, 124 N retention in PETG. This is 1.6 mm at 0.18 mm: 0.60 % and 176 N.
+Strain enters linearly in thickness and force cubically, so thickening and pulling the
+interference back down is a strict win — and the thicker wall is also the better drop part.
+**Three criteria improved by one change**, which is rare enough to be worth recording as the
+reason rather than the result.
+
+**The tolerance had to stop depending on the filament.** At 0.18 mm nominal, a ±0.15 mm band
+spans "no engagement at all" to "past PLA's permissible strain" — both failures. Halves printed
+together shrink together, so what survives is the printer's repeatability. That removes the
+filament from the comparison instead of accommodating it, which is what Decisions 007 §2's *"do
+not tune a fit to a specific filament"* actually requires.
+
+**Cost to reverse.** Low and falling. The interference is still a swept parameter on the plate,
+not a commitment. If Michael's Monday question about supplying his own filament comes back yes,
+**nothing here needs redesigning** — the margins simply widen, and the dashboard risk in §1 gets
+much less sharp. The one thing that would be expensive to reverse is the paired-printing rule,
+because it is a manufacturing constraint every later plate inherits.
+
+---
+
+## ADR-120 — Duplicate detection compares the parameter and the unlabelled mechanism
+
+**Date:** 2026-09-06 · **Decided by:** Hardware Lead, under PM Decisions 007 §1
+
+**Decision.** `build_packet.py` refuses to write a packet containing undeclared duplicates,
+checking two things: no two parts share the **swept parameter** unless declared a control, and
+no two parts are the same **solid once the blind label is suppressed**. Declared repeats — the
+`D`/`M`/`H` bed controls, and the four identical lids — are named in the build output.
+`test_packet.py` proves both checks can go red.
+
+**Rationale.** The PM's plate review found that `D`, `M` and `H` are the same button. They are,
+and it is deliberate (ADR-104). The review's stated mechanism was that they are *byte-identical
+solids* — **and they are not.** Each carrier has a different letter cut into its cap, so as
+shipped all nine are distinct meshes with different volumes and triangle counts.
+
+**That is the finding worth building a gate around.** The obvious check — compare the solids —
+runs **green** on the exact plate that prompted the request, because the blind label that makes
+the experiment work also makes every part unique. It is the allocation gate again (CLAUDE.md
+§1): a check that measures a real quantity, and not the one anyone cared about. `--mutate`
+installs precisely that naive gate and asserts the suite catches it; it fails three red cases.
+
+**Cost to reverse.** Zero. Removing it restores a failure mode that no slicer reports and that
+only a human reading the plate found once.

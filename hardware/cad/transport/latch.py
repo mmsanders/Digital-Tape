@@ -65,8 +65,16 @@ class Variant:
         return asdict(self)
 
 
-def carrier(v: Variant) -> cq.Workplane:
-    """Button carrier with a latching barb of depth `v.hook_depth`."""
+def carrier(v: Variant, label: bool = True) -> cq.Workplane:
+    """Button carrier with a latching barb of depth `v.hook_depth`.
+
+    `label=False` returns the MECHANISM ONLY, with no letter cut into the cap.
+    That is not a convenience -- it is what makes the duplicate check possible.
+    Every carrier carries a different letter, so as shipped all nine are distinct
+    solids and a gate comparing meshes runs green while three of them are the
+    same mechanism. The letter has to come off before the comparison means
+    anything. See `check_duplicates()` in build_packet.py.
+    """
     body = (
         cq.Workplane("XY")
         .box(STEM_W, STEM_D, STEM_H, centered=(True, True, False))
@@ -117,10 +125,11 @@ def carrier(v: Variant) -> cq.Workplane:
 
     # Blind label on the cap. Sunk, so it survives handling and does not add a
     # bump under the thumb that could itself bias the ranking.
-    out = (
-        out.faces(">Z").workplane(centerOption="CenterOfBoundBox")
-        .text(v.label, 5.0, -0.6, combine="cut", font="DejaVu Sans")
-    )
+    if label:
+        out = (
+            out.faces(">Z").workplane(centerOption="CenterOfBoundBox")
+            .text(v.label, 5.0, -0.6, combine="cut", font="DejaVu Sans")
+        )
     return out
 
 

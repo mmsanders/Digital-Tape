@@ -29,6 +29,7 @@ tells him which button is supposed to win.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import re
@@ -55,12 +56,13 @@ MAX_JOB_HOURS = 6.0         # library refusal threshold
 
 OUT = Path(__file__).resolve().parents[2] / "packets" / "wp04-01"
 
-# Library-machine assumptions. Q-006 replaces these with facts; until then they
-# are the safe defaults promised to Michael in FOR-MICHAEL.md.
-# A Prusa Mini and a Bambu A1 mini are both 180 x 180 and both common in library
-# makerspaces. Assume the smaller machine until Q-006 says otherwise -- a plate that
-# fits a small bed fits a big one, and the reverse costs a trip.
-BED_X, BED_Y = 180.0, 180.0
+# The bed is now a fact rather than a guess. PM Decisions 007 §0 verified the
+# rev-4 plate against the library's actual machine and states the constraint
+# directly: "the binding limits are now the six-hour cap and the 250 x 210 bed".
+# Rev 4 and earlier laid out for a conservative 180 x 180 because Q-006 came back
+# "not yet checked, proceed on the default"; that caution is spent, and the extra
+# room is what pays for four lids instead of two.
+BED_X, BED_Y = 250.0, 210.0
 MARGIN = 12.0
 GAP = 4.0
 SEED = 20260902          # fixed, so the plate is reproducible from source
@@ -104,6 +106,88 @@ def normalise_3mf(path: Path) -> None:
             fixed.external_attr = info.external_attr
             dst.writestr(fixed, payload[info.filename])
     shutil.move(str(tmp), str(path))
+
+
+# --------------------------------------------------------------------------
+# Duplicate detection -- PM Decisions 007 §1
+# --------------------------------------------------------------------------
+#
+# The PM's plate review found that D, M and H are the same button. They are, and
+# it is deliberate (ADR-104: bed controls, ranked blind to test whether print
+# position is confounding the sweep). But the review's mechanism was that they
+# are "byte-identical solids", and they are not -- each carries a different
+# letter, so as shipped every one of the nine is a distinct mesh.
+#
+# THAT is the part worth building a gate around. The obvious check -- compare the
+# solids -- runs GREEN on this plate while three of nine parts are the same
+# mechanism, because the blind label that makes the experiment work also makes
+# every part unique. It is the allocation gate again (CLAUDE.md §1): a check that
+# measures the wrong quantity reads as passing.
+#
+# So there are two checks, and they catch different failures:
+#
+#   PARAMETER  no two parts share the swept parameter unless declared a control.
+#              Catches the sweep collapsing -- what the PM was actually pointing
+#              at, and what a mesh comparison cannot see.
+#   MECHANISM  no two parts are the same solid once the LABEL IS SUPPRESSED.
+#              Catches a parameter that never reached the geometry: two variants
+#              differing on paper and identical in the file.
+
+def mechanism_signature(shape, tol: float = 0.02) -> str:
+    """Position-independent hash of a solid, for comparing parts across a plate.
+
+    Translated to its own bounding-box origin, so where a part sits on the bed
+    cannot mask that it is a duplicate of one somewhere else.
+    """
+    verts, tris = shape.tessellate(tol)
+    b = shape.BoundingBox()
+    pts = [(round(v.x - b.xmin, 3), round(v.y - b.ymin, 3), round(v.z - b.zmin, 3))
+           for v in verts]
+    h = hashlib.sha256()
+    for tri in sorted(tuple(sorted(t)) for t in tris):
+        for i in tri:
+            h.update(("%.3f,%.3f,%.3f;" % pts[i]).encode())
+    return h.hexdigest()[:16]
+
+
+def check_duplicates(entries) -> None:
+    """`entries` is [(name, swept_value, declared_control, bare_solid), ...].
+
+    Fails the build on any undeclared collision, in either check.
+    """
+    problems = []
+
+    by_param, by_mech = {}, {}
+    for name, param, declared, solid in entries:
+        by_param.setdefault(param, []).append((name, declared))
+        by_mech.setdefault(mechanism_signature(solid), []).append((name, declared))
+
+    for param, group in sorted(by_param.items(), key=lambda kv: str(kv[0])):
+        if len(group) < 2:
+            continue
+        undeclared = [n for n, declared in group if not declared]
+        if len(undeclared) > 1:
+            problems.append(
+                f"parameter {param}: {sorted(undeclared)} share the swept value and none "
+                "is declared a control -- the sweep has collapsed")
+
+    for sig, group in by_mech.items():
+        if len(group) < 2:
+            continue
+        undeclared = [n for n, declared in group if not declared]
+        if len(undeclared) > 1:
+            problems.append(
+                f"mechanism {sig}: {sorted(undeclared)} are the same solid once the label "
+                "is suppressed -- a parameter did not reach the geometry")
+
+    if problems:
+        for line in problems:
+            print(f"  DUPLICATE: {line}")
+        raise SystemExit("undeclared duplicate parts -- refusing to write the packet")
+
+    declared_groups = {p: [n for n, _ in g] for p, g in by_param.items() if len(g) > 1}
+    for param, names in sorted(declared_groups.items(), key=lambda kv: str(kv[0])):
+        print(f"  declared repeat at {param}: {sorted(names)} (blind control, ADR-104)")
 
 
 def _bbox(shape):
@@ -202,13 +286,22 @@ def shell_variants(seed: int = SEED + 1):
 
 def build():
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "stl").mkdir(exist_ok=True)
+    # Wipe the per-part directory rather than writing over it. `carrier-X-onside.stl`
+    # survived in here for two revisions after the on-its-side variant was dropped,
+    # so the packet shipped a printable file for a part that no longer exists in
+    # the design. A build that only ever adds files cannot notice that.
+    stl_dir = OUT / "stl"
+    if stl_dir.exists():
+        shutil.rmtree(stl_dir)
+    stl_dir.mkdir(parents=True)
 
     variants, probe = parts_and_probe()
 
-    items, meta = [], {}
+    items, meta, dup = [], {}, []
     for v in variants:
         part = latch.carrier(v)
+        dup.append((f"carrier-{v.label}", ("hook_depth", v.hook_depth),
+                    v.role == "bed-control", latch.carrier(v, label=False).val()))
         exporters.export(part, str(OUT / "stl" / f"carrier-{v.label}.stl"))
         items.append((f"carrier-{v.label}", part.val()))
         meta[f"carrier-{v.label}"] = v.dict()
@@ -217,6 +310,9 @@ def build():
     # a longer, thinner cantilever -- because print direction is a setting the
     # library controls and we do not.
     pr = latch.carrier(probe)
+    dup.append((f"carrier-{probe.label}",
+                ("beam", probe.beam_length, probe.beam_thickness), False,
+                latch.carrier(probe, label=False).val()))
     exporters.export(pr, str(OUT / "stl" / f"carrier-{probe.label}.stl"))
     items.append((f"carrier-{probe.label}", pr.val()))
     meta[f"carrier-{probe.label}"] = probe.dict()
@@ -224,22 +320,36 @@ def build():
     # --- WP-24: the cartridge clasp sweep, sharing this plate ---------------
     for sv in shell_variants():
         part = shell.base(sv)
+        dup.append((f"shell-base-{sv.label}", ("interference", sv.interference),
+                    False, shell.base(sv, label=False).val()))
         exporters.export(part, str(OUT / "stl" / f"shell-base-{sv.label}.stl"))
         items.append((f"shell-base-{sv.label}", part.val()))
         meta[f"shell-base-{sv.label}"] = sv.dict()
 
-    # Two lids, identical. They are the control: if the ranking tracks the lid
-    # rather than the base, the shared part is wearing and the sweep is
-    # measuring that instead of the interference.
-    for lid_label in ("1", "2"):
-        part = shell.lid(lid_label)
-        exporters.export(part, str(OUT / "stl" / f"shell-lid-{lid_label}.stl"))
-        items.append((f"shell-lid-{lid_label}", part.val()))
+    # FOUR lids, one per base, labelled to match (PM Decisions 007 §1).
+    #
+    # Rev 4 shipped two lids for four bases. Michael would have had to reuse a
+    # mating half across variants, so wear on the shared part would be confounded
+    # with whichever variant he happened to test last -- on a plate whose entire
+    # question is retention. The print budget now covers a lid each, so the
+    # confound is removed rather than managed with a test order on the card.
+    #
+    # They are the same mechanism on purpose, so they are DECLARED to the
+    # duplicate gate. Undeclared, four identical lids are exactly what that gate
+    # exists to catch.
+    for sv in shell_variants():
+        part = shell.lid(sv.label)
+        dup.append((f"shell-lid-{sv.label}", ("lid", "common"), True,
+                    shell.lid().val()))
+        exporters.export(part, str(OUT / "stl" / f"shell-lid-{sv.label}.stl"))
+        items.append((f"shell-lid-{sv.label}", part.val()))
 
-    # The TPU lip cannot go on this plate: the library runs PLA only, and a
-    # merged STL carries one material for every part in it. It ships as its own
-    # file and waits for a machine that runs TPU.
-    exporters.export(shell.tpu_lip(), str(OUT / "tpu-lip.stl"))
+    # No TPU part. PM Decisions 007 §2: the library runs a single spool of
+    # whatever it has loaded, so a second-material part cannot be printed at all.
+    # `tpu-lip.stl` from rev 4 is deleted rather than left lying in the packet.
+    tpu = OUT / "tpu-lip.stl"
+    if tpu.exists():
+        tpu.unlink()
 
     bar = latch.hook_bar()
     exporters.export(bar, str(OUT / "stl" / "hook-bar.stl"))
@@ -248,6 +358,9 @@ def build():
     frame = latch.test_frame()
     exporters.export(frame, str(OUT / "stl" / "test-frame.stl"))
     items.append(("test-frame", frame.val()))
+
+    # PM Decisions 007 §1. Before anything is written: no undeclared duplicates.
+    check_duplicates(dup)
 
     placed = pack(items)
     ok, problems = validate(placed)
@@ -281,7 +394,7 @@ def build():
 
     manifest = {
         "packet": "WP04-01", "work_packages": ["WP-04", "WP-24"],
-        "built": date.today().isoformat(), "revision": 4,
+        "built": date.today().isoformat(), "revision": 5,
         "experiments": [
             {"work_package": "WP-04", "parts": "carrier-*, hook-bar, test-frame",
              "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1]},
@@ -290,8 +403,10 @@ def build():
              "bracket_mm": [min(shell.SWEEP_INTERFERENCE), max(shell.SWEEP_INTERFERENCE)]},
         ],
         "seed": SEED, "blind": True,
-        "not_on_plate": {"tpu-lip.stl": "TPU; the library runs PLA only"},
-        "bed_assumed_mm": [BED_X, BED_Y],
+        "single_material": True,
+        "bed_mm": [BED_X, BED_Y],
+        "bed_source": "verified against the library machine, PM Decisions 007 §0",
+        "duplicate_check": "parameter + label-suppressed mechanism",
         "plate_extent_mm": [round(pbb.xmax, 1), round(pbb.ymax, 1)],
         "minimum_bed_mm": [round(need_x), round(need_y)],
         "xml_valid": True,
@@ -310,7 +425,7 @@ def build():
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
     lines = [
-        "# Plate map — packet WP04-01 (rev 4)", "",
+        "# Plate map — packet WP04-01 (rev 5)", "",
         "**Two experiments, one plate.** `carrier-*`, `hook-bar` and `test-frame` are the",
         "WP-04 latch sweep. `shell-base-*` and `shell-lid-*` are the WP-24 cartridge clasp",
         "sweep. They share a bed and nothing else.", "",
@@ -328,7 +443,7 @@ def build():
               "parts more than the swept parameter is, and the next sweep needs coarser steps."]
     (OUT / "plate-map.md").write_text("\n".join(lines) + "\n")
 
-    print(f"packet WP04-01 rev 4 -> {OUT}")
+    print(f"packet WP04-01 rev 5 -> {OUT}")
     print(f"  {len(placed)} objects, all inside the bed")
     print(f"  extent {pbb.xmax:.1f} x {pbb.ymax:.1f} mm; needs a bed of at least "
           f"{round(need_x)} x {round(need_y)} mm")

@@ -10,7 +10,7 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
@@ -98,6 +98,19 @@ shell-test:
 	@cd $(SHELL_CAD) && $(PY) test_shell.py --mutate >/dev/null \
 	  && echo "OK  shell geometry: proven able to go red"
 
+## packet-duplicates — no two parts are the same, unless declared
+##
+## PM Decisions 007 §1, after the plate review found D, M and H are the same
+## button. The obvious gate -- compare the solids -- runs GREEN on that plate,
+## because every carrier has a different letter cut into its cap. So the gate
+## compares the swept PARAMETER, and the mechanism with the LABEL SUPPRESSED.
+## --mutate installs the naive version and asserts the suite catches it.
+packet-duplicates:
+	@cd $(CAD) && $(PY) test_packet.py >/dev/null \
+	  && echo "OK  duplicate gate: 7 checks pass (parameter + mechanism)"
+	@cd $(CAD) && $(PY) test_packet.py --mutate >/dev/null \
+	  && echo "OK  duplicate gate: proven able to go red"
+
 ## charger / solenoid — print the design analyses without touching the spec
 charger:
 	$(PY) $(THERMAL)/charger_ts.py --report
@@ -169,6 +182,7 @@ check: thermal-check mech-check
 	@$(PY) -c "import ast,sys; ast.parse(open('$(CHAR)/measure_sustained_write.py').read())" \
 	  && echo "OK  characterisation tool parses"
 	@$(MAKE) --no-print-directory shell-test
+	@$(MAKE) --no-print-directory packet-duplicates
 	@$(MAKE) --no-print-directory atomicity-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
