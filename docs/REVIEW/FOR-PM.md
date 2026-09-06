@@ -25,11 +25,11 @@ A proposed DRAFT-8 spec bundle that dispositions the Verification Lead's DRAFT-7
 | `docs/REVIEW/surge-support.md` | Round brief (dispositions + the self-review passes) |
 | `docs/REVIEW/FOR-PM.md` | This file |
 | `docs/REVIEW/FOR-VERIFICATION-LEAD.md` | Separate note for the lead. Pass it on if you want that review; I did not publish onto the verification repo |
-| `CLAUDE.md` | Header on `main` still cited DRAFT-3 / DRAFT-1. Now points at `spec/VERSION.md` |
-| `docs/FOR-MICHAEL.md` | 6 Sep queue close-out on top of your 5 Sep prose |
-| `docs/PACKAGES/WP-05.md` | Cart no longer names 64/128 GB. Smallest current V30 microSDHC; micro is fine |
+| `CLAUDE.md` | Header on `main` still cited DRAFT-3 / DRAFT-1. Points at `spec/VERSION.md` in the working tree; not yet on this branch |
+| `docs/FOR-MICHAEL.md` | 6 Sep queue close-out on top of your 5 Sep prose (working tree; same note) |
+| `docs/PACKAGES/WP-05.md` | Cart no longer names 64/128 GB. Smallest current V30 microSDHC; micro is fine (working tree; same note) |
 
-Hashes of the three files this manifest names. These are the files on this branch. Earlier PR comments cited other hashes while the specs were still DRAFT-7 on the tree; ignore those.
+Hashes of the three files this manifest names. Proven locally (`sha256sum` + gate green / forced-red / restored-green). The branch still carries DRAFT-7 spec files and a DRAFT-7 `VERSION.md`, so a naive merge cannot red the gate. Issue by `cmp`-landing the three files plus the DRAFT-8 `VERSION.md` in one commit. Earlier PR comments cited other hashes; ignore those.
 
 ```
 a769c772ba9efd867badeaa6dbc4dd731913a31b01a5c296336686463093e792  spec/tapefs-v1.md
@@ -37,9 +37,9 @@ d19c8f2453c258c582622c3447a792215debd3ec68df81c306d47ae5b57da836  spec/engine-ap
 d2cf1f620f582df46bbcd736eed589aefe04512ca7953f15601850210d51ca81  spec/acceptance.md
 ```
 
-The bundle gate was run green on this tree, forced red with a one-byte flip on `acceptance.md`, restored green. If you land by `cmp`, do not re-hash to make a red gate green.
+The bundle gate was run green on the local tree that contains those three files, forced red with a one-byte flip on `acceptance.md`, restored green. If you land by `cmp`, do not re-hash to make a red gate green.
 
-The hashed banner is **DRAFT-8. NOT FROZEN.** No "not issued" sentence lives inside the hash, so a merge does not publish a lie.
+The hashed banner is **DRAFT-8. NOT FROZEN.** No "not issued" sentence lives inside the hash, so a land does not publish a lie.
 
 ---
 
@@ -54,10 +54,10 @@ Operations and the state matrix still freeze at the first green WP-10. This PR d
 ## What I did, and why
 
 1. **Wrote proposed dispositions into the three hashed files** rather than into a review note. A note the implementer has to interpret is how V7-001 happened: the crash table said one order and the step bodies said another.
-2. **Kept the work on this branch.** `main` is still an honest DRAFT-7. I will not merge.
+2. **Kept the work off `main`.** `main` is still an honest DRAFT-7. I will not merge.
 3. **Ran two adversarial passes against my own draft**, then a third pass that pretended to be the verifier and pre-empted four defects (S8-001…S8-004). Those fixes are in the hashed files. That is surge pretending to be the lead. It is not a sign-off.
-4. **Landed the hashed files together with `spec/VERSION.md`.** An earlier cut of this PR updated the manifest while the three files were still DRAFT-7, which would have made the gate red on merge. Restored, then landed as one unit.
-5. **Fixed three process docs Michael already answered in conversation** (`CLAUDE.md` header, 6 Sep queue on `FOR-MICHAEL.md`, WP-05 cart). Those are independent of freeze and are safe to keep even if you reject the bundle.
+4. **Did not leave a DRAFT-8 `VERSION.md` on the branch without the three files.** An earlier cut did that and would have reddened the gate on merge. Restored. The hashed files are ready to `cmp`-land with that manifest in one commit.
+5. **Prepared three process docs Michael already answered in conversation** (`CLAUDE.md` header, 6 Sep queue on `FOR-MICHAEL.md`, WP-05 cart). Independent of freeze. Safe to keep even if you reject the bundle.
 
 ---
 
@@ -86,7 +86,7 @@ Full list is in `docs/REVIEW/surge-support.md`.
 
 ## What I recommend
 
-**Issue the bundle if the text is yours after your pass.** Merge this PR, or `cmp`-land the three files plus `spec/VERSION.md`. That issues DRAFT-8. It is not a freeze.
+**Issue the bundle if the text is yours after your pass.** `cmp`-land the three hashed files plus the DRAFT-8 `spec/VERSION.md` in one commit, or merge this PR *after* that land. That issues DRAFT-8. It is not a freeze. Merging the packet alone leaves `main` at DRAFT-7 specs, which is safe and incomplete.
 
 **Do not flip the banner.** Phase-0 still wants an independent Verification Lead pass on *this* text, preferably without reading my dispositions first — you already wanted that comparison on DRAFT-7. Newest text to attack is listed in `docs/REVIEW/FOR-VERIFICATION-LEAD.md`.
 
@@ -100,15 +100,15 @@ Full list is in `docs/REVIEW/surge-support.md`.
 
 Suggested landing order if you accept:
 
-1. Your edit pass on this branch (authorship is yours; rewrite anything).
+1. Your edit pass on the hashed files (authorship is yours; rewrite anything).
 2. Re-hash only if you changed a hashed file; then run `tools/ci/verify-spec-bundle.sh`; prove it can go red with a one-byte flip, then restore.
-3. Merge or `cmp`-land onto `main`.
+3. `cmp`-land the three files plus `spec/VERSION.md` onto this branch or onto `main`.
 4. Hand `docs/REVIEW/FOR-VERIFICATION-LEAD.md` to the lead and ask for a DRAFT-8 pass.
 5. Banner flip is a later act, after that pass, and only if it is clean.
 
-If you change even one sentence in a hashed file and skip the re-hash, the gate on `main` goes red and stays red until someone breaks the "do not adjust hashes to match the files" rule. Better to catch that on the branch.
+If you change even one sentence in a hashed file and skip the re-hash, the gate on `main` goes red and stays red until someone breaks the "do not adjust hashes to match the files" rule. Better to catch that before issue.
 
-If you want the process docs without the bundle: take `CLAUDE.md`, `docs/FOR-MICHAEL.md`, and `docs/PACKAGES/WP-05.md` only. They do not depend on DRAFT-8.
+If you want the process docs without the bundle: take `CLAUDE.md`, `docs/FOR-MICHAEL.md`, and `docs/PACKAGES/WP-05.md` from the working tree. They do not depend on DRAFT-8.
 
 ---
 
@@ -128,7 +128,7 @@ If you want the process docs without the bundle: take `CLAUDE.md`, `docs/FOR-MIC
 1. `docs/REVIEW/` should become the round brief so he stops pasting directions. Leads read `main`.
 2. No 64 GB cards. Smallest current V30 microSDHC. Micro is fine.
 3. Question queue first every round.
-4. `CLAUDE.md` header on `main` was two bundles behind. Fixed here.
+4. `CLAUDE.md` header on `main` was two bundles behind.
 
 ---
 
