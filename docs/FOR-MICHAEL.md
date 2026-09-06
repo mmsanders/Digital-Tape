@@ -2,115 +2,120 @@
 
 The question queue. Things that need your taste or your hands — nothing else blocks on you.
 
-*Rewritten by the PM 4 Sep 2026 after the fourth review round (DRAFT-6).*
+*Rewritten by the PM 5 Sep 2026 after the fifth review round (DRAFT-7).*
 
 ---
 
-## Answers you asked for
+## The substitute verifier — yes, it will work until Monday
 
-### The printer — your four questions
+You asked for an extra hard look. I gave it one and it holds up. Four things it did that no previous pass did, or did unprompted:
 
-**Does the A1 have an enclosure? Is it extra?**
-No, and no — because Bambu doesn't sell one for this line. The A1 and A1 mini are open-frame by design, and the A1 mini's own FAQ says outright: *"We don't recommend enclosing the A1 mini."* That isn't a gap you'd be filling with an accessory; it's a design position.
+- **It verified the three file hashes against the manifest before reviewing**, and said so. That's the whole point of the manifest and it's the first reviewer to use it that way.
+- **It ran its own numerical traces on the audio arithmetic and then declined to file anything against it**, stating that explicitly. That's the harder judgement — a weak reviewer pads the list to look thorough.
+- **It applied the raised freeze standard** — no blockers *and* no majors in the sections being frozen — without being told twice, and recommended against signing on that basis.
+- **It updated its notes file**, which I'd asked the regular lead for three rounds running and hadn't got.
 
-**One thing I got wrong, and it matters.** I told you a home printer would give us PETG *and* nylon for the latch. **The A1 line does not run nylon.** Bambu supports *"PLA, PETG, TPU, and their corresponding support filaments"* and explicitly does not recommend *"ABS, ASA, PC, PA, and PET"* — `PA` is nylon — because the hotend tops out at 300 °C and the bed at 80 °C. PETG and TPU are still exactly right for a cartridge shell, and §"the clasp" below explains why nylon turns out not to be needed. But I asserted it and it was wrong.
+All nine findings are real; I checked seven of them against the documents myself.
 
-**Can I iterate in one colour and print the final in multicolour?**
-Yes, with one caveat worth designing around: **a tight fit tuned in one filament isn't guaranteed to fit in another.** Pigment loading changes how a plastic flows and shrinks, so a snap that's perfect in grey can be tight or loose in red — and that's between *colours of the same brand*, before you change brands. Multicolour also purges material at every tool change, so those prints are slower and waste more.
+**I did look specifically for it being soft.** Nine findings and zero blockers, against fourteen and fifteen with two blockers in the last two rounds, is exactly the shape a lenient pass would have. So I re-graded the two most severe-looking findings myself — and **major is right for both.** Neither loses data that wasn't already being destroyed on purpose. The grading is honest.
 
-The fix is a design rule, not a workflow rule: **tune the clasp in the filament the real cartridges will use**, and make the retention come from a chamfer and a defined interference rather than a knife-edge fit, so a few hundredths of shrinkage gets absorbed instead of being fatal. That's in the Hardware Lead's brief.
-
-**Can we outsource the important mechanism to better material and do everything else at home?**
-Yes — SLS/MJF nylon from a print service is genuinely better for a small flexure than any FDM part, because it's isotropic and FDM fails along its layer lines. It's a normal split and it stays available to us.
-
-**But I don't think we'll need it**, for the reason in the next answer. Hold it in reserve rather than budgeting for it.
-
-**Verdict: the A1 combo is a good buy and the missing enclosure costs us nothing**, since everything we want to print is PLA, PETG or TPU. The combo's AMS Lite is a convenience for the final look, not a requirement for the engineering.
+**The one thing I can't tell from a single pass is depth.** Nine findings on a draft that had just absorbed fifteen findings plus thirty-seven of my own fixes is a plausible number; it's also what a shallower pass would produce. So when the usual arrangement comes back: **have them review DRAFT-7 without reading the substitute's DRAFT-6 findings first.** Compare what each finds in the same text. One pass, and it answers a question we otherwise can't.
 
 ---
 
-### The cartridge shell — you chose the clasp, and I think you can have it
+## The printing budget — M-04 is closed
 
-**Your instinct is right, and here's the argument nobody had made yet: how often does a parent actually open a cartridge?**
+Six plates a month changes the picture enough that I'm withdrawing the printer recommendation. Two things worth knowing:
 
-Count it honestly. Once at assembly, to put the card in. Once more to load the *first* cartridge from a computer. After that — never, because **every cartridge after the first is loaded by the copy button**, which is the whole point of the device. So a cartridge gets opened **one to three times in its life**, not weekly.
+**Six plates is not six designs.** The button plate already carries seventeen objects. Six plates at ten-plus variants each is a real iteration loop — call it **2–4 months for a working latch instead of 5–10.** That's the difference between a schedule and a wall, and it's why the printer isn't needed.
 
-That changes the problem completely. A clasp that has to survive thousands of openings is a hard fatigue problem in any printed plastic, and PLA creep would rule it out. **A clasp that has to survive five openings with margin is an ordinary fit problem**, and PETG handles it comfortably. The nylon we can't print is a solution to a problem we don't have.
+**But not choosing the material changes the clasp design, and this one matters.** I'd assumed PETG. With a single library spool — probably PLA, no colour choice — the relevant property isn't what I told you last time.
 
-So: **no screw, a continuous lip with a lead-in chamfer, and a tongue-and-groove seam on an edge chamfer** to hide the parting line and keep the two halves registered. I've asked the Hardware Lead for a stated cycle target — I proposed 20 openings with retention still within 20 % of first-cycle, roughly ten times the real life — plus the strain number that decides whether PETG creeps, and a plate of variants using the same blind-comparison process as the button packet.
+It's not how many times the clasp can be opened. You open a cartridge once or twice in its life, so cycling was never the risk. **It's that a clasp is closed 99.99 % of the time**, and PLA slowly relaxes under sustained load at room temperature. A lip held under tension for a year loses its grip — silently, on a cartridge in a kid's pocket.
 
-**One thing I've added that you didn't ask for.** The opening feature has to be something **a child can't work**. A fingernail recess is a recess a five-year-old finds, and a loose microSD is a choking hazard. Two points of pressure at once, or a thin slot on the back face, is the shape to aim at.
+So I've given the Hardware Lead a rule that makes the material stop mattering: **the clasp must not be under tension when closed.** The lip snaps past a shoulder and returns to near-zero strain; what holds it shut is the *shape* it's sitting behind, not stored spring force. Strain is spent only during the snap itself — twice, ever. A clasp built that way works in whatever the library has loaded, and still works if you win the filament argument later.
 
-### The sealed cartridge — feasible, and I recommend against it
+### Questions worth asking the printing guy on Monday
 
-Your own question is the one that decides it: *how would we get the card in in the first place?*
-
-The firmware side works. The chip has USB device capability and mass-storage support is well-trodden on it — call it a work package of weeks, not a tweak. But:
-
-1. **A sealed cartridge is assembled with the card inside, so when that card dies the cartridge is landfill.** A microSD in a child's hands will die. This is meant to be an object a family keeps.
-2. **A computer will offer to format it.** Our format lives in a partition type no desktop recognises, and Windows volunteers to "fix" those. The person clicking Yes will be a parent trying to help.
-3. **It buys almost nothing over the clasp.** The clasp already gives you the sealed look and the near-invisible seam. Sealing only adds that a *parent* can't open it either — and the parent is the one person who needs to.
-
-**The clasp doesn't close this door.** If the assessment comes back saying a printed clasp can't hold a card safely at a size a child can hold, the trade changes and I'll bring it back. Until then, USB loading is a Phase 5 enhancement we can add later without touching the shell.
+1. **Can I supply my own filament?** The single question that unlocks the most. If yes: PETG for the shells, and colour stops mattering.
+2. **What material and brand is normally loaded, and does it change?** If it's consistent we can at least measure it once.
+3. **Is the two-per-month limit per card or per household?** You're assuming per card — worth confirming before you rely on borrowed credits.
+4. **Do you keep a slicer profile, or is it per-job?** If there's a saved profile, "supports off" can live there instead of on my card every time.
+5. **Can I ask for a specific orientation if I explain why?** Not expecting yes. Worth knowing.
+6. **Does a failed print consume the request?** Decides whether to risk one plate or split across two.
 
 ---
 
 ## Open
 
-### M-04 — The printer decision, now with the facts
+### M-01 — The plate is ready, but settle two things on the card first
 
-**Needs:** your call and ~$450 · **Blocks:** nothing this week; the mechanism from about October
+**Needs:** ten minutes with the card · **Blocks:** the library trip
 
-Everything above. **A1 combo, $449** in a March 2026 tracker — check current pricing. The library stays useful for exactly one thing: the WP-04 button packet, which is a single print whose answer is *comparative*, so it survives someone else choosing the settings.
+The regenerated `plate.stl` is **sound and cleared** — watertight, 17 separate manifold parts, 138 × 137 mm, nothing off the bed, no supports needed, ~3–4 hours and ~64 g. Every fault in the old broken file is gone. Full check is in the project as `decisions/pm-wp04-plate-stl-verification.md`.
 
-**Default if you don't decide:** the library, two prints a month, and the latch work stretches into next spring.
+**Two things to check before it goes:**
 
----
+**Three of the nine buttons are the same part.** `D`, `M` and `H` are identical solids — I verified it by exact geometry comparison. If the card says that's a deliberate repeat, it's good design: a hidden control that tells us whether your ranking is real signal or noise, and you should know it's there so you don't think it's a mistake. **If the card doesn't say so, the generator collapsed three levels into one** and you'd be ranking three identical objects against each other. That wastes three of nine slots.
 
-### M-01 — The print packet still isn't ready
+**Four clasp variants but only two mating halves**, and they're identical. You can build two cartridges at a time and must reuse the same halves for all four — so wear on the shared half gets confused with whichever variant you test last. Either the card tells you the test order, or the next plate carries four halves. With six prints a month, four halves.
 
-**Needs:** nothing from you yet · **Blocks:** WP-04 and everything mechanical
-
-Unchanged and still on the Hardware Lead: re-export as a single merged `.stl` (the library takes STL only, so `plate-FIXED.3mf` is void), drop the on-its-side variant, put the bounding box, time estimate and *"any orientation is fine provided all the parts get the same one"* on the card. I've asked them to put the cartridge-shell variants on the same plate if they fit inside six hours — one library print is worth two.
+**One line for the card that matters more than the others: SUPPORTS OFF.** Each button has a 6 × 4 mm bore, 14 mm deep, opening down onto the bed. It needs no support, but a "supports everywhere" *or* "on build plate only" setting fills it — and support material 14 mm down that hole is not removable, sitting directly on the flexure whose stiffness the whole packet measures. It's the one setting that can silently waste the trip.
 
 ---
 
 ### M-02 — Vendor domains
 
-**Needs:** two minutes in the environment settings · **Blocks:** the Hardware Lead's BOM work
+**Needs:** two minutes · **Blocks:** the Hardware Lead's BOM work · *unchanged*
 
-The Hardware Lead found the pattern: **the allowlist matches exact hosts, so the `www.` prefix is the whole thing.** `www.nxp.com` and `www.lcsc.com` work; bare hostnames don't. Still blocked: **`www.ti.com`, `www.octopart.com`, `www.mouser.com`**, and DigiKey returns bot protection regardless. Add those three with the `www.`, plus `www.digikey.com` and `www.jlcpcb.com` in case they behave differently.
+The allowlist matches exact hosts, so the `www.` prefix is the whole thing. Still blocked: **`www.ti.com`, `www.octopart.com`, `www.mouser.com`**, plus `www.digikey.com` and `www.jlcpcb.com`.
 
 ---
 
 ### M-03 — Approve parts order 1a
 
-**Needs:** your wallet · **Blocks:** the bench build
-
-Unchanged. ~$267 of the $600 budget. Order 1c stays cancelled.
+**Needs:** your wallet · ~$267 of the $600 budget · *unchanged*
 
 ---
 
-### Q-001 — Format freeze (Phase 0 gate) — **held one round, by you, correctly**
+### Q-001 — Format freeze — **held a second round**
 
-**Status:** one verification round away
+**Status:** the verifier found six major defects in the sections we were about to freeze
 
-You held the signature and raised the bar, and it was the right call. The verifier's report met the letter of my condition — two blockers, neither in the sections I proposed freezing — and I brought you the condition instead of the signature. You declined it because eight *major* defects were still sitting in those sections.
+Nine findings, no blockers, but six of them landed in the freeze-candidate sections — so the standard you raised last round did its job for the second time. The most consequential:
 
-Two of them justify the decision on their own: **reverse playback was off by one fixed-point unit**, so rewinding produced a smeared, duplicated sound and a reference recording taken from that draft would have frozen the defect as correct; and one function's signature contradicted its own document so no implementation could satisfy both.
+- A **shared counter every write depends on was never actually defined**, so two implementations could disagree about which version of a cartridge is current.
+- An invariant required a counter to advance on every operation, when **ordinary recording doesn't touch it** — so anyone testing that rule literally would have failed every recording the device makes.
+- A test I wrote last round **started from a state the rules forbid reaching**, so it could never have been run.
 
-**The standard is now: no blockers *and* no majors** in the sections being frozen. One more verification pass measures against it.
+All nine fixed. **Nothing is blocked on you** — this is the verifier and me converging, and it is converging: fifteen findings two rounds ago, nine now, none of them blockers.
 
 ---
 
 ## Answered
 
-- **Safety sign-off (issue #8):** you witness the loudness and thermal measurements; the Verification Lead separately audits the method and the raw numbers without being in the room. Two checks, neither of them the person who built it. The Hardware Lead now has to write results so a stranger can audit them.
-- **Cartridge shell (issue #6):** clasp, no screw, near-invisible seam. Sealed-USB assessed and set aside as a later enhancement.
-- **Q-006 library printer, Q-005 spending, Q-004 resume position, Q-003 the wall, Q-002 tape length** — all as previously recorded.
+- **M-04, printer:** closed. Six plates a month is enough. Not buying.
+- **Cartridge shell (#6):** clasp, no screw. Now with a material-independent design rule (above).
+- **Safety sign-off (#8):** you witness, verifier audits method and raw data. **And this round the Hardware Lead caught that I'd announced that audit in a memo and never written it into the spec** — `acceptance.md` contained the word "audit" zero times. Fixed, and it now also demands stated measurement uncertainty, because your thermal margins are tight enough for the uncertainty to decide pass or fail.
+- Q-002 through Q-006 as previously recorded.
 
 ---
 
-## This round, in one paragraph
+## PR status, since you asked
 
-The verifier found **15 defects in DRAFT-5: 2 blockers, 13 majors.** Both blockers were ways a child could lose a cartridge by ordinary use — copying a *blank* tape destroyed the tape you copied onto, and pulling a card at the wrong moment let the next ordinary action overwrite live audio. Both are closed. My own audit then found **37 more in my own draft, six of them blockers** — including one where **rewinding never reached the first frame of the tape**, and one where a cartridge could become permanently unreadable while its music was perfectly intact. Two of those six were introduced by my fixes for the verifier's findings, which is the pattern I'd watch if I were you: on this project the most dangerous text is whatever was written last, in a hurry, to close a hole someone just found.
+| PR / issue | Verdict |
+|---|---|
+| `Digital-Tape` **#22**, DRAFT-6 bundle | **Merged, correctly.** Verified byte-exact on `main` |
+| `Digital-Tape` **#20**, engine read path + allocator | **Do not merge; keep as draft.** Two holds: the verifier's tests aren't on `main` yet, and it's three revisions behind. **Not stale — parked.** I've asked for it to be rebased and reconciled rather than extended |
+| `Digital-Tape` **#23**, missing audit language | **Valid.** Fixed in DRAFT-7; close it when the bundle lands |
+| `Digital-Tape-Verification` **#1** | **Merge it.** See below |
+
+**One thing I found while checking:** the verification repo's `main` only carries findings up to DRAFT-3. The DRAFT-4, DRAFT-5 and DRAFT-6 passes all live on branches, and PR #1 has been open since 3 September still titled DRAFT-5.
+
+That's the **same failure I built a mechanism against two rounds ago** — `main` publishing something stale while the real work sat on a branch — in the other repository, which I hadn't thought to check. Findings now land on that repo's `main` too.
+
+---
+
+## This round in one paragraph
+
+The verifier found nine defects in DRAFT-6, none of them blockers, six in the sections we were about to freeze. My own audit then found **27 more in my own draft, two of them blockers — and both were in text I wrote to fix this round's findings.** One had a promote operation reusing the same version number for four different writes, which would have left a cartridge unmountable and unrecoverable with all its music intact but unreachable. That's three rounds running where the blockers were in the fixes rather than the original text, and I think the reason is simple: **a fix is the only text in a document nobody but its author has ever read.**
