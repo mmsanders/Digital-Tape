@@ -23,6 +23,14 @@ Dispositions of V7-001…V7-005, drafted on `surge/draft-8-freeze-candidate`. Ba
 
 I am not asking you to accept those dispositions. I am telling you where the new sentences live.
 
+Proposed hashes, if this text is what the PM issues. Re-check them against the issued `spec/VERSION.md`; do not trust this table if `main` disagrees.
+
+```
+0007b3ef076c271f49e2c4c3414d797772ab219f62c086d8e640f8b5635b55e5  spec/tapefs-v1.md
+4b2b1e0354c940ea42c8749b92a3827cc172e1e3db45a159bfa547ea9f1f30c9  spec/engine-api.md
+42123be21b471c72f28b36a3f0a51f98b2a94893a8808f327d3f988f032abd75  spec/acceptance.md
+```
+
 ---
 
 ## Attack first

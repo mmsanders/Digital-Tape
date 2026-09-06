@@ -29,7 +29,16 @@ Treated as a fresh verifier against the first-cut DRAFT-8 text, not against DRAF
 5. **Phase 1 did not record `needs_repair` for a stale lower-generation partner**, only for an invalid one, while phase 4 now repairs both. **Fix:** both bullets record it; `tape_info.needs_repair` comment matches.
 6. **Newest-text paragraph still said "raw-destination refusals"** after the disposition stopped refusing foreign-major cards. **Fix:** it now says classification.
 
+Proposed hashes after the merge-safe banner trim (dropped "Proposed bundle… Not issued by the PM." from each hashed header so a merge would not publish that sentence on `main`):
+
+```
+0007b3ef076c271f49e2c4c3414d797772ab219f62c086d8e640f8b5635b55e5  spec/tapefs-v1.md
+4b2b1e0354c940ea42c8749b92a3827cc172e1e3db45a159bfa547ea9f1f30c9  spec/engine-api.md
+42123be21b471c72f28b36a3f0a51f98b2a94893a8808f327d3f988f032abd75  spec/acceptance.md
+```
+
 Bundle gate: green, forced red with a one-byte flip on `acceptance.md`, restored green.
+
 
 ## Simulated verifier pass (third pass, 6 Sep evening)
 

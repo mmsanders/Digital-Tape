@@ -8,11 +8,13 @@ Canonical today: `main` is DRAFT-7 until you issue this.
 
 This is a handoff, not a lead packet and not a freeze request. Spec authorship stays yours. I will not merge.
 
+The branch is shaped so that **if you accept the text**, a merge or a `cmp`-land is a clean issue of DRAFT-8. It is still not a freeze.
+
 ---
 
 ## What you are being asked to look at
 
-A proposed DRAFT-8 spec bundle that dispositions the Verification Lead's DRAFT-7 findings (V7-001…V7-005), plus two process docs that were stale on `main`.
+A proposed DRAFT-8 spec bundle that dispositions the Verification Lead's DRAFT-7 findings (V7-001…V7-005), plus the process docs that were stale on `main`.
 
 | File | Role |
 |---|---|
@@ -20,9 +22,9 @@ A proposed DRAFT-8 spec bundle that dispositions the Verification Lead's DRAFT-7
 | `spec/engine-api.md` | `needs_repair` includes stale partners; invariants 32/33; V7-005 service prose; companion line |
 | `spec/acceptance.md` | WP-10 two-interruption closure, zero-needed at FE/FF, foreign-major + equal-gen-divergent, source-label copy |
 | `spec/VERSION.md` | DRAFT-8 manifest. Hashes below. Banner inside the three files is still **NOT FROZEN** |
-| `docs/REVIEW/surge-support.md` | Round brief (dispositions + the two self-review passes) |
+| `docs/REVIEW/surge-support.md` | Round brief (dispositions + the self-review passes) |
 | `docs/REVIEW/FOR-PM.md` | This file |
-| `docs/REVIEW/FOR-VERIFICATION-LEAD.md` | Separate note for the lead. Please pass it on if you want that review; I did not publish onto the verification repo |
+| `docs/REVIEW/FOR-VERIFICATION-LEAD.md` | Separate note for the lead. Pass it on if you want that review; I did not publish onto the verification repo |
 | `CLAUDE.md` | Header on `main` still cited DRAFT-3 / DRAFT-1. Points at `spec/VERSION.md` now |
 | `docs/FOR-MICHAEL.md` | 6 Sep queue close-out on top of your 5 Sep prose |
 | `docs/PACKAGES/WP-05.md` | Cart no longer names 64/128 GB. Smallest current V30 microSDHC; micro is fine |
@@ -30,12 +32,14 @@ A proposed DRAFT-8 spec bundle that dispositions the Verification Lead's DRAFT-7
 Hashes of the three files this manifest names:
 
 ```
-cfb81e27672fea3bc185a48a41c8d44212fe4c0a5b2b5c04d74d4cf2ae5c2c05  spec/tapefs-v1.md
-28e668ed204dd4869e66d51bd319af489e5f3a992c5f6df59cff0460655aa731  spec/engine-api.md
-2e762cf445d7bfd63de4f4a674c72bc00a800969dc592c0e9ea18f3a9a1560db  spec/acceptance.md
+0007b3ef076c271f49e2c4c3414d797772ab219f62c086d8e640f8b5635b55e5  spec/tapefs-v1.md
+4b2b1e0354c940ea42c8749b92a3827cc172e1e3db45a159bfa547ea9f1f30c9  spec/engine-api.md
+42123be21b471c72f28b36a3f0a51f98b2a94893a8808f327d3f988f032abd75  spec/acceptance.md
 ```
 
 The bundle gate was run green, forced red with a one-byte flip on `acceptance.md`, restored green. If you land by `cmp`, do not re-hash to make a red gate green.
+
+The hashed banner no longer says "not issued." That sentence would have been wrong the moment the files hit `main`. **NOT FROZEN** is unchanged.
 
 ---
 
@@ -59,7 +63,7 @@ Michael said V7-001 and V7-003 were my call, and the duplicate label is a copy o
 | **V7-004** | major, §9 | Destination `label` is a byte copy of the source | Michael: the copy is the same album |
 | **V7-005** | question, §10 | `tape_service` allowed in every mounted row except Faulted | Table, §7.2 and WP-12a already agreed. The sentence after the matrix did not |
 
-Two later passes against the draft itself changed it. The important ones:
+Later passes against the draft itself changed it. The ones that would have been findings if they had shipped:
 
 1. §4.6 cannot cover format/dup identity-assignment commits. Those write `sb_generation = 1` after step 1 may have left a higher-generation WIP copy. They keep mirror-then-primary and their existing crash tables.
 2. Promote steps 4 / 5-decline / 9 still said *mirror, flush, primary, flush* after §4.6 required partner-first. An implementer reading the steps ships the old order. Step bodies now cite §4.6.
@@ -72,7 +76,7 @@ Full list is in `docs/REVIEW/surge-support.md`.
 
 ## What I recommend
 
-**Issue the bundle if the text is yours after your pass.** That is a `cmp`-land of the three files plus this `VERSION.md`, or a merge of this PR after you have edited anything you do not want. It is not a freeze.
+**Issue the bundle if the text is yours after your pass.** Merge this PR, or `cmp`-land the three files plus `spec/VERSION.md`. That issues DRAFT-8. It is not a freeze.
 
 **Do not flip the banner.** Phase-0 still wants an independent Verification Lead pass on *this* text, preferably without reading my dispositions first — you already wanted that comparison on DRAFT-7. Newest text to attack is listed in `docs/REVIEW/FOR-VERIFICATION-LEAD.md`.
 
@@ -87,10 +91,12 @@ Full list is in `docs/REVIEW/surge-support.md`.
 Suggested landing order if you accept:
 
 1. Your edit pass on this branch (authorship is yours; rewrite anything).
-2. Re-hash only if you changed a hashed file; then run the gate; prove it can go red.
+2. Re-hash only if you changed a hashed file; then run `tools/ci/verify-spec-bundle.sh`; prove it can go red with a one-byte flip, then restore.
 3. Merge or `cmp`-land onto `main`.
 4. Hand `docs/REVIEW/FOR-VERIFICATION-LEAD.md` to the lead and ask for a DRAFT-8 pass.
 5. Banner flip is a later act, after that pass, and only if it is clean.
+
+If you change even one sentence in a hashed file and skip the re-hash, the gate on `main` goes red and stays red until someone breaks the "do not adjust hashes to match the files" rule. Better to catch that on the branch.
 
 ---
 
@@ -119,3 +125,9 @@ Suggested landing order if you accept:
 - Whether you want the Verification Lead on DRAFT-8 blind to this packet. I think yes.
 - Whether `TAPE_ERR_INCOMPLETE` should distinguish an interrupted duplicate from an interrupted format. Both recover by re-run. I left it open in `tapefs` §14.
 - Whether #18 lands now. Not coupled to this bundle.
+
+---
+
+## Note I would like the Verification Lead to hear
+
+That text is in `docs/REVIEW/FOR-VERIFICATION-LEAD.md`, not here, so you can forward one file. Short version: attack §4.6, the promote step bodies, stale-partner repair, zero-needed, and classification-as-plan first. Do not treat my self-review as a disposition record. WP-10 has not been run.

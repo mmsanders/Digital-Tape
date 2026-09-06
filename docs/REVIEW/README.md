@@ -8,6 +8,9 @@ here so it can process them together rather than in four separate conversations.
 | `software-lead.md` | Software Lead (Claude Code) | Filed |
 | `hardware-lead.md` | Hardware Lead (Claude Code) | Filed as `STATUS-HARDWARE.md`; round 2 filed here |
 | `verification-lead.md` | Verification Lead (ChatGPT) | Not filed — has no repo access, see note |
+| `surge-support.md` | Surge (this round) | DRAFT-8 proposal brief |
+| `FOR-PM.md` | Surge → PM | Handoff for issuing DRAFT-8. Not a freeze request |
+| `FOR-VERIFICATION-LEAD.md` | Surge → Verification Lead | Optional attack list. PM decides whether to forward |
 
 **Note on the Verification Lead's file.** Per the charter it has no repository access, so it
 cannot file here itself. Whoever operates it should paste its packet into
