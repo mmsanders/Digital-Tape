@@ -1,0 +1,126 @@
+name: Agent Bus Task
+about: Staged task envelope for hierarchical agent routing
+title: "[Agent Task] "
+labels: ["agent-task", "state:draft"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Agent Bus is not live until explicitly activated.**
+        Prepare the task completely before changing `state:draft` to `state:queued`.
+
+  - type: input
+    id: round
+    attributes:
+      label: Round
+      description: Round identifier. PM dispatch is legal only after Michael explicitly authorizes this round.
+      placeholder: R1
+    validations:
+      required: true
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent
+      description: Parent issue/PR number, or Michael for a PM round plan.
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: requested_by
+    attributes:
+      label: Requested by
+      options:
+        - Michael
+        - Program Manager
+        - Software Lead
+        - Hardware Lead
+        - Verification Lead
+        - ChatGPT worker
+        - Grok worker
+    validations:
+      required: true
+
+  - type: dropdown
+    id: destination
+    attributes:
+      label: Destination
+      description: Must be exactly one legal adjacent hierarchy level.
+      options:
+        - Program Manager
+        - Software Lead
+        - Hardware Lead
+        - Verification Lead
+        - ChatGPT worker
+        - Grok worker
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: Request
+      description: One bounded objective.
+    validations:
+      required: true
+
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: Deliverable
+      description: What must be returned to the parent.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance
+      description: Observable completion conditions. Do not invent new scope during rework.
+      placeholder: |
+        - Criterion 1
+        - Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: authority
+    attributes:
+      label: Authority / constraints
+      description: Role-specific limits, spec guardrails, repository surfaces, and whether mutation is allowed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Relevant inputs
+      description: Specs, PRs, issues, files, decisions, or evidence needed to work without asking Michael to copy context.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: return_to
+    attributes:
+      label: Return to
+      description: Must be the legal parent role; workers never return directly to PM.
+      options:
+        - Program Manager
+        - Software Lead
+        - Hardware Lead
+        - Verification Lead
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: protocol
+    attributes:
+      label: Protocol checks
+      options:
+        - label: This task moves at most one hierarchy level from its requester.
+          required: true
+        - label: The task is complete before `state:queued` is added.
+          required: true
+        - label: Any rework stays within the parent task's existing acceptance criteria.
+          required: true
