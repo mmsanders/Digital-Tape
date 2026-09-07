@@ -102,7 +102,6 @@ class ProtocolTests(unittest.TestCase):
         )
 
     def test_lead_cannot_send_result_to_michael(self):
-        # michael is not even a valid task destination.
         self.bad(
             "unknown destination",
             actor="software", destination="michael", old_state="working",
@@ -132,7 +131,7 @@ class ProtocolTests(unittest.TestCase):
         self.ok(
             actor="software", destination="verification", old_state="draft",
             new_state="ready", round_authorized=True, independent_review=True,
-            parent_lead="software",
+            parent_lead="software", requested_capability="strong",
         )
 
     def test_untyped_lateral_review_is_red(self):
@@ -171,6 +170,50 @@ class ProtocolTests(unittest.TestCase):
             actor="software", destination="worker_grok", old_state="draft",
             new_state="ready", round_authorized=True,
             is_native_child=False, parent_lead="software",
+        )
+
+    def test_worker_allows_economy(self):
+        self.ok(
+            actor="software", destination="worker_grok", old_state="draft",
+            new_state="ready", round_authorized=True, parent_lead="software",
+            requested_capability="economy",
+        )
+
+    def test_worker_allows_balanced(self):
+        self.ok(
+            actor="software", destination="worker_grok", old_state="draft",
+            new_state="ready", round_authorized=True, parent_lead="software",
+            requested_capability="balanced",
+        )
+
+    def test_worker_cannot_request_frontier(self):
+        self.bad(
+            "not allowed for destination worker_grok",
+            actor="software", destination="worker_grok", old_state="draft",
+            new_state="ready", round_authorized=True, parent_lead="software",
+            requested_capability="frontier",
+        )
+
+    def test_verification_cannot_be_economy(self):
+        self.bad(
+            "not allowed for destination verification",
+            actor="software", destination="verification", old_state="draft",
+            new_state="ready", round_authorized=True, independent_review=True,
+            parent_lead="software", requested_capability="economy",
+        )
+
+    def test_software_root_allows_frontier(self):
+        self.ok(
+            actor="bus", destination="software", old_state="draft",
+            new_state="queued", round_authorized=True, is_root=True,
+            requested_capability="frontier",
+        )
+
+    def test_verification_root_allows_frontier(self):
+        self.ok(
+            actor="bus", destination="verification", old_state="draft",
+            new_state="queued", round_authorized=True, is_root=True,
+            requested_capability="frontier",
         )
 
 
