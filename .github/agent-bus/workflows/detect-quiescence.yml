@@ -1,0 +1,116 @@
+# STAGED / INERT: intentionally outside .github/workflows/.
+# This workflow does not dispatch PM work. It only marks the current round
+# quiescent once all active tasks have returned to PM review or closed.
+
+name: Agent Bus - Detect Quiescence
+
+on:
+  issues:
+    types: [labeled, unlabeled, closed, reopened]
+  pull_request_target:
+    types: [labeled, unlabeled, closed, reopened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: agent-bus-quiescence
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Find active authorized round
+        id: round
+        shell: bash
+        run: |
+          set -euo pipefail
+          rounds="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --label 'agent-round' --label 'round:active' --json number,labels --limit 10)"
+          count="$(jq 'length' <<<"$rounds")"
+          if [[ "$count" -eq 0 ]]; then
+            echo 'No active round; nothing to do.'
+            echo 'number=' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$count" -ne 1 ]]; then
+            echo "Protocol error: expected one active round, found $count" >&2
+            exit 1
+          fi
+          number="$(jq -r '.[0].number' <<<"$rounds")"
+          labels="$(jq -r '.[0].labels[].name' <<<"$rounds")"
+          grep -Fxq 'round:authorized' <<<"$labels" || {
+            echo 'Active round lacks human authorization.' >&2
+            exit 1
+          }
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Verify authorization provenance
+        if: steps.round.outputs.number != ''
+        shell: bash
+        env:
+          ROUND: ${{ steps.round.outputs.number }}
+        run: |
+          set -euo pipefail
+          comments="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${ROUND}/comments?per_page=100")"
+          ok="$(jq '[.[] | select(.user.login == "github-actions[bot]") | select(.body | contains("<!-- AGENT-BUS-AUTH -->"))] | length' <<<"$comments")"
+          [[ "$ok" -ge 1 ]] || {
+            echo 'round:authorized label exists without protected-workflow provenance' >&2
+            exit 1
+          }
+
+      - name: Check active work set
+        id: work
+        if: steps.round.outputs.number != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          tasks="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --label 'agent-task' --label 'round:active' --json number,labels --limit 1000)"
+
+          bad="$(jq '[.[] | {
+              number,
+              labels: [.labels[].name]
+            } | select(
+              ((.labels | index("state:queued")) != null) or
+              ((.labels | index("state:working")) != null) or
+              ((.labels | index("state:blocked")) != null) or
+              ((.labels | index("state:protocol-error")) != null) or
+              (((.labels | index("state:review")) == null) and ((.labels | index("state:draft")) == null)) or
+              (((.labels | index("state:review")) != null) and ((.labels | index("to:pm")) == null))
+            )]' <<<"$tasks")"
+
+          count="$(jq 'length' <<<"$bad")"
+          if [[ "$count" -ne 0 ]]; then
+            echo "Round still active: $count open task(s) have not returned to PM review."
+            jq -r '.[] | "#\(.number): \(.labels | join(", "))"' <<<"$bad"
+            echo 'quiescent=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'All open active tasks are PM-review envelopes; round is quiescent.'
+            echo 'quiescent=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Mark round quiescent exactly once
+        if: steps.round.outputs.number != '' && steps.work.outputs.quiescent == 'true'
+        shell: bash
+        env:
+          ROUND: ${{ steps.round.outputs.number }}
+        run: |
+          set -euo pipefail
+          issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ROUND}")"
+          labels="$(jq -r '.labels[].name' <<<"$issue")"
+          if grep -Fxq 'round:quiescent' <<<"$labels"; then
+            echo 'Already quiescent; no-op.'
+            exit 0
+          fi
+
+          gh issue edit "$ROUND" --repo "$GITHUB_REPOSITORY" --add-label 'round:quiescent'
+          gh issue comment "$ROUND" --repo "$GITHUB_REPOSITORY" --body \
+            "<!-- AGENT-BUS-QUIESCENT -->
+          All active work has returned to PM review or closed. The round is quiescent.
+
+          PM may now perform one executive review/synthesis for Michael. PM must not dispatch new work or start another round without a new protected human authorization."
