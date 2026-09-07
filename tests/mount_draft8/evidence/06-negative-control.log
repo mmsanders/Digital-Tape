@@ -1,0 +1,5 @@
+$ python3 digital-tape-verification/tests/mount_draft8/run.py --adapter digital-tape-verification/tests/mount_draft8/build/rejecting_probe --case M-base-A --log digital-tape-verification/tests/mount_draft8/evidence/negative-control.jsonl
+M-base-A: FAIL: result 19 not in (0,); successful mount not queryable; info.total_frames: 0 != 4
+1 cases; 1 failed; seed=0xd8a607; see digital-tape-verification/tests/mount_draft8/evidence/negative-control.jsonl
+
+exit=1
