@@ -1,0 +1,49 @@
+# STAGED ONLY — this manifest is documentation until activation.
+# Do not apply these labels automatically from this branch.
+
+labels:
+  - name: agent-task
+    description: Managed by the Digital Tape Agent Bus
+
+  # destination — exactly one per active work envelope
+  - name: to:pm
+    description: Return to Program Manager for review; PM never claims queued work
+  - name: to:software
+    description: Software Lead mailbox
+  - name: to:hardware
+    description: Hardware Lead mailbox
+  - name: to:verification
+    description: Verification Lead mailbox
+  - name: to:worker-chatgpt
+    description: ChatGPT chat worker mailbox; requires an available adapter
+  - name: to:worker-grok
+    description: Grok worker mailbox
+
+  # lifecycle — exactly one on an open active envelope
+  - name: state:draft
+    description: Prepared but not dispatchable
+  - name: state:queued
+    description: Dispatch edge; eligible destination may claim
+  - name: state:working
+    description: Claimed by destination
+  - name: state:review
+    description: Returned one hierarchy level upward for review
+  - name: state:blocked
+    description: Cannot proceed within current authority
+  - name: state:protocol-error
+    description: Invalid route/state; do not execute
+
+  # round control
+  - name: round:authorized
+    description: Michael explicitly authorized this specific round
+  - name: round:quiescent
+    description: All root tasks returned; no work below PM remains active
+
+invariants:
+  - exactly_one_destination_on_active_work
+  - exactly_one_lifecycle_state_on_open_active_work
+  - queued_is_added_last
+  - pm_never_claims_queued_inbound_work
+  - only_michael_can_authorize_round
+  - no_automatic_round_restart
+  - no_hierarchy_level_skips
