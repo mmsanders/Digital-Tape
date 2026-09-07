@@ -21,6 +21,21 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: capability
+    attributes:
+      label: Capability class
+      description: Request a capability tier, not an exact model. `auto` chooses the lowest sufficient class under capability-tiers.yml.
+      options:
+        - auto
+        - frontier
+        - strong
+        - balanced
+        - economy
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: objective
     attributes:
@@ -54,7 +69,7 @@ body:
       label: Delegation guidance
       description: What should be pushed to low-cost workers versus retained by the lead.
       value: |
-        Prefer bounded worker delegation for implementation, repetitive debugging, mechanical edits, research, and evidence collection. Retain decomposition, architectural judgment, integration, review, and role-specific sign-off.
+        Prefer bounded worker delegation for implementation, repetitive debugging, mechanical edits, research, and evidence collection. Retain decomposition, architectural judgment, integration, review, and role-specific sign-off. Use the lowest sufficient capability class.
     validations:
       required: true
 
