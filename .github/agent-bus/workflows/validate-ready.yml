@@ -27,7 +27,7 @@ jobs:
       GROK_WORKER_ENABLED: ${{ vars.AGENT_BUS_GROK_WORKER_ENABLED }}
       VERIFICATION_ENABLED: ${{ vars.AGENT_BUS_VERIFICATION_ENABLED }}
     steps:
-      - name: Validate envelope, budgets, parentage, and adapters
+      - name: Validate envelope, capability, budgets, parentage, and adapters
         id: gate
         shell: bash
         run: |
@@ -36,8 +36,6 @@ jobs:
           reject() {
             reason="$1"
             echo "REJECT: $reason" >&2
-            # Converge even a malformed multi-state issue to exactly one durable
-            # non-executing lifecycle state.
             payload="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE}" | jq '{labels: ([.labels[].name | select(startswith("state:") | not)] + ["state:protocol-error"])}')"
             gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${ISSUE}" --input - <<<"$payload" >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
@@ -48,6 +46,17 @@ jobs:
 
           issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE}")"
           labels="$(jq -r '.labels[].name' <<<"$issue")"
+          body="$(jq -r '.body // ""' <<<"$issue")"
+
+          # GitHub Issue Forms render the selected value under this exact heading.
+          capability="$(awk '
+            /^### Capability class[[:space:]]*$/ {
+              while (getline) {
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+                if ($0 != "") { print $0; exit }
+              }
+            }' <<<"$body")"
+          [[ "$capability" =~ ^(auto|economy|balanced|strong|frontier)$ ]] || reject 'missing or invalid Capability class form value'
 
           grep -Fxq 'agent-task' <<<"$labels" || reject 'missing agent-task label'
           grep -Fxq 'state:ready' <<<"$labels" || { echo 'ready already consumed; no-op'; echo 'ok=false' >> "$GITHUB_OUTPUT"; exit 0; }
@@ -95,10 +104,12 @@ jobs:
             [[ "$parent_dest" == 'to:software' || "$parent_dest" == 'to:hardware' ]] || reject 'only Software/Hardware roots may request typed independent review'
             [[ "$destination" == 'to:verification' ]] || reject 'typed independent review must target Verification'
             [[ "$VERIFICATION_ENABLED" == 'true' ]] || reject 'Verification adapter/listener is not enabled'
+            [[ "$capability" =~ ^(auto|strong|frontier)$ ]] || reject 'independent Verification service must use auto/strong/frontier capability'
             review_count="$(jq '[.[] | [.labels[].name] | select(index("kind:independent-review"))] | length' <<<"$siblings")"
             [[ "$review_count" -le 2 ]] || reject 'parent exceeds hard cap of 2 independent-review service calls'
           else
             [[ "$destination" == 'to:worker-chatgpt' || "$destination" == 'to:worker-grok' ]] || reject 'lead child must target a worker unless it is typed independent review'
+            [[ "$capability" =~ ^(auto|economy|balanced)$ ]] || reject 'worker child may not request strong/frontier; parent lead must retain or reclassify the work'
           fi
 
           if [[ "$destination" == 'to:worker-chatgpt' && "$CHATGPT_WORKER_ENABLED" != 'true' ]]; then
@@ -112,15 +123,18 @@ jobs:
           queued_count="$(jq '[.[] | select(.event == "labeled") | select(.label.name == "state:queued")] | length' <<<"$events")"
           [[ "$queued_count" -lt 3 ]] || reject 'child has exhausted the hard cap of 3 dispatch/claim cycles'
 
+          echo "capability=$capability" >> "$GITHUB_OUTPUT"
           echo 'ok=true' >> "$GITHUB_OUTPUT"
 
       - name: Promote ready to queued
         if: steps.gate.outputs.ok == 'true'
         shell: bash
+        env:
+          CAPABILITY: ${{ steps.gate.outputs.capability }}
         run: |
           set -euo pipefail
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label 'state:ready'
           # Dispatch edge is deliberately the final mutation.
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label 'state:queued'
           gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-            "<!-- AGENT-BUS-DISPATCH --> Envelope passed protocol/budget checks and is queued for its destination."
+            "<!-- AGENT-BUS-DISPATCH --> Envelope passed protocol/budget/capability checks and is queued for its destination. Requested capability: \`${CAPABILITY}\`."
