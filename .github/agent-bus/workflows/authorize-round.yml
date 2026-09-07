@@ -1,0 +1,57 @@
+# STAGED / INERT: this file is intentionally outside .github/workflows/.
+# Activation copies it into .github/workflows/ only after the GitHub Environment
+# `michael-round-gate` exists with Michael as required reviewer.
+
+name: Agent Bus - Authorize Round
+
+on:
+  workflow_dispatch:
+    inputs:
+      round_issue:
+        description: "Agent Round issue number"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  authorize:
+    # This environment is the hard human barrier. Even if an agent triggers this
+    # workflow, the job cannot execute until Michael approves the deployment.
+    environment: michael-round-gate
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ROUND_ISSUE: ${{ inputs.round_issue }}
+    steps:
+      - name: Verify round is a draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ROUND_ISSUE}")"
+          labels="$(jq -r '.labels[].name' <<<"$issue")"
+          grep -Fxq 'agent-round' <<<"$labels" || { echo 'not an agent-round issue' >&2; exit 1; }
+          grep -Fxq 'round:draft' <<<"$labels" || { echo 'round is not draft' >&2; exit 1; }
+          if grep -Fxq 'round:authorized' <<<"$labels"; then
+            echo 'round is already authorized' >&2
+            exit 1
+          fi
+
+      - name: Record human-gated authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh issue edit "$ROUND_ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label 'round:draft' \
+            --add-label 'round:authorized'
+
+          gh issue comment "$ROUND_ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "<!-- AGENT-BUS-AUTH -->
+          Round authorization passed the protected \`michael-round-gate\` environment.
+
+          Authorization run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          Initiating actor: ${GITHUB_ACTOR}
+
+          This authorizes only the bounded objectives recorded in this round issue. It does not authorize a subsequent round."
