@@ -1,0 +1,6 @@
+$ python3 digital-tape-verification/tests/mount_draft8/run.py
+usage: run.py [-h] [--adapter ADAPTER] [--log LOG] [--list] [--case CASE]
+              [--timeout TIMEOUT]
+run.py: error: --adapter is required; no engine acceptance can run without it
+
+exit=2

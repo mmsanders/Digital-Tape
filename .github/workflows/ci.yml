@@ -11,6 +11,13 @@ on:
 # permanently-red pipeline stops being read, and then the first real failure
 # arrives against a background of red.
 jobs:
+  verifier-package:
+    name: independent DRAFT-8 mount package self-checks (not engine acceptance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make -C tests/mount_draft8 check
+
   build:
     name: build (-Werror)
     runs-on: ubuntu-latest

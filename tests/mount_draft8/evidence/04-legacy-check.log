@@ -1,0 +1,9 @@
+$ make -C digital-tape-verification/tests check
+make: Entering directory '/workspace/scratch/47722b072299/digital-tape-verification/tests'
+cc -std=c99 -Wall -Wextra -Werror -pedantic audio_oracle.c test_audio_oracle.c -o build/test_audio_oracle
+build/test_fault_block_device
+build/test_crash_harness
+build/test_audio_oracle
+make: Leaving directory '/workspace/scratch/47722b072299/digital-tape-verification/tests'
+
+exit=0
