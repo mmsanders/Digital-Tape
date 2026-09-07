@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Digital Tape Agent Bus routing/state transitions.
+"""Validate Digital Tape Agent Bus routing/state/capability transitions.
 
 Pure-stdlib and side-effect free. This models the protocol rules used by listeners
 and staged GitHub workflows; it never mutates GitHub or dispatches a model.
@@ -18,6 +18,16 @@ LEADS = {"software", "hardware", "verification"}
 WORKERS = {"worker_chatgpt", "worker_grok"}
 MODEL_ROLES = {"pm", *LEADS, *WORKERS}
 ACTORS = {"michael", "bus", *MODEL_ROLES}
+CAPABILITIES = {"auto", "frontier", "strong", "balanced", "economy"}
+
+ALLOWED_CAPABILITIES = {
+    "pm": {"auto", "strong", "frontier"},
+    "software": {"auto", "balanced", "strong", "frontier"},
+    "hardware": {"auto", "balanced", "strong", "frontier"},
+    "verification": {"auto", "strong", "frontier"},
+    "worker_chatgpt": {"auto", "economy", "balanced"},
+    "worker_grok": {"auto", "economy", "balanced"},
+}
 
 DESTINATION_LABELS = {
     "to:pm": "pm",
@@ -81,6 +91,7 @@ class Envelope:
     verification_self_service_allowed: bool = True
     is_native_child: bool = True
     parent_lead: str | None = None
+    requested_capability: str = "auto"
 
 
 def _one(values: Iterable[str], kind: str) -> str:
@@ -125,6 +136,12 @@ def validate(env: Envelope) -> list[str]:
         return [f"unknown actor role: {env.actor}"]
     if env.destination not in MODEL_ROLES:
         return [f"unknown destination role: {env.destination}"]
+    if env.requested_capability not in CAPABILITIES:
+        return [f"unknown capability class: {env.requested_capability}"]
+    if env.requested_capability not in ALLOWED_CAPABILITIES[env.destination]:
+        errors.append(
+            f"capability {env.requested_capability} is not allowed for destination {env.destination}"
+        )
 
     if (env.old_state, env.new_state) not in LEGAL_STATE_EDGES:
         errors.append(f"illegal lifecycle transition: {env.old_state} -> {env.new_state}")
@@ -224,6 +241,7 @@ def main() -> int:
     p.add_argument("--verification-not-self-service", action="store_true")
     p.add_argument("--not-native-child", action="store_true")
     p.add_argument("--parent-lead", choices=sorted(LEADS))
+    p.add_argument("--capability", default="auto", choices=sorted(CAPABILITIES))
     p.add_argument("--json", action="store_true")
     args = p.parse_args()
 
@@ -239,6 +257,7 @@ def main() -> int:
         verification_self_service_allowed=not args.verification_not_self_service,
         is_native_child=not args.not_native_child,
         parent_lead=args.parent_lead,
+        requested_capability=args.capability,
     )
     errors = validate(env)
 
