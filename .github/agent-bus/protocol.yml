@@ -1,0 +1,119 @@
+version: 1
+status: staged
+
+human_gate:
+  principal: michael
+  github_environment: michael-round-gate
+  rule: only_human_gate_may_authorize_round
+
+roles:
+  michael:
+    tier: 0
+    may_send_to: [pm]
+    may_receive_from: [pm]
+    may_claim_queued_tasks: false
+
+  pm:
+    runtime: claude-cowork
+    tier: 1
+    expensive: true
+    may_send_to: [software, hardware, verification]
+    may_receive_from: [michael, software, hardware, verification]
+    may_claim_queued_tasks: false
+    inbound_states: [review, blocked]
+    requires_authorized_round_to_dispatch: true
+
+  software:
+    runtime: claude-code
+    tier: 2
+    expensive: true
+    may_send_to: [pm, worker_chatgpt, worker_grok]
+    may_receive_from: [pm, worker_chatgpt, worker_grok]
+    may_claim_queued_tasks: true
+
+  hardware:
+    runtime: claude-code
+    tier: 2
+    expensive: true
+    may_send_to: [pm, worker_chatgpt, worker_grok]
+    may_receive_from: [pm, worker_chatgpt, worker_grok]
+    may_claim_queued_tasks: true
+
+  verification:
+    runtime: chatgpt-work
+    tier: 2
+    expensive: true
+    may_send_to: [pm, worker_chatgpt, worker_grok]
+    may_receive_from: [pm, worker_chatgpt, worker_grok]
+    may_claim_queued_tasks: true
+    preserve_independence: true
+
+  worker_chatgpt:
+    runtime: chatgpt-chat
+    tier: 3
+    expensive: false
+    adapter_status: unavailable_until_configured
+    may_send_to: [software, hardware, verification]
+    may_receive_from: [software, hardware, verification]
+    may_claim_queued_tasks: true
+    may_send_to_pm: false
+
+  worker_grok:
+    runtime: grok
+    tier: 3
+    expensive: false
+    adapter_status: configure_at_activation
+    may_send_to: [software, hardware, verification]
+    may_receive_from: [software, hardware, verification]
+    may_claim_queued_tasks: true
+    may_send_to_pm: false
+
+states:
+  lifecycle: [draft, queued, working, review, blocked, protocol-error]
+  terminal: github_closed
+
+transitions:
+  dispatch: draft_or_review_to_queued
+  claim: queued_to_working
+  return: working_to_review
+  blocked: working_to_blocked
+  rework: review_to_queued
+
+constraints:
+  - one_destination_per_active_envelope
+  - one_lifecycle_state_per_open_active_envelope
+  - one_parent_per_child
+  - no_worker_to_worker
+  - no_worker_to_pm
+  - no_lead_to_michael
+  - no_pm_accepts_agent_direction
+  - no_new_root_scope_inside_active_round
+  - no_automatic_round_restart
+  - claim_before_expensive_work
+  - comments_are_never_triggers
+
+round:
+  states: [draft, authorized, active, pm-review, closed]
+  authorization:
+    mode: github_environment_manual_approval
+    environment: michael-round-gate
+  quiescence_requires:
+    - all_root_tasks_returned_to_pm_review_or_closed
+    - no_queued_work_below_pm
+    - no_working_work_below_pm
+    - no_blocked_work_below_pm
+    - no_open_children_owned_below_pm
+    - no_protocol_errors
+  after_quiescence:
+    pm_may: [review_repo, synthesize_executive_summary, request_next_round]
+    pm_may_not: [dispatch_new_work, authorize_round, expand_scope]
+
+token_policy:
+  default_delegate_bounded_execution: true
+  protect: [claude-cowork, claude-code, chatgpt-work]
+  prefer_workers: [chatgpt-chat, grok]
+  expensive_roles_focus_on:
+    pm: [planning, architecture, spec, arbitration, executive_synthesis]
+    software: [decomposition, integration, review, merge_decisions]
+    hardware: [decomposition, integration, review, hardware_decisions]
+    verification: [adversarial_reasoning, independent_test_design, acceptance_judgment]
