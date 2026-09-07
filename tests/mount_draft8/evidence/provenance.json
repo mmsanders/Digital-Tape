@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-07",
+  "baseline": "73b91475d50fbefc16df25f07e37b4481a8720be",
+  "cases": 289,
+  "seed": "0xd8a607",
+  "candidate_sha256": {
+    "tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+    "engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7"
+  },
+  "engine_execution": false,
+  "reference_engine_execution": false,
+  "inspected": [
+    "Supplied handoff and DRAFT-8 specifications",
+    "Digital-Tape main CLAUDE.md and spec/VERSION.md",
+    "Verifier repository only"
+  ],
+  "excluded": [
+    "engine implementation",
+    "PR 20 source/diff/discussion",
+    "implementation-derived tests"
+  ],
+  "canonical_product_head": "ed5efd834aa8f7a96bc8ef811569b2687d919526",
+  "canonical_manifest": "DRAFT-7"
+}

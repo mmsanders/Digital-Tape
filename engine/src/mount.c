@@ -2,13 +2,13 @@
  * mount.c — instance lifecycle and the mount read path.
  * Normative: spec/engine-api.md §3.1, §4, §5; spec/tapefs-v1.md §4.1–§4.5, §5, §7.
  *
- * DRAFT-7 reconciled. MOUNT IS FOUR PHASES AND ONLY THE LAST ONE WRITES:
+ * DRAFT-8 reconciled. PHASE 0 PLUS FOUR PHASES; ONLY THE LAST ONE WRITES:
  *
  *   1  selection   read both superblock copies, pick a candidate.   No writes.
  *   2  admission   version, minor, defined values, state, geometry.  No writes.
  *   3  indices     select and validate BOTH sides, then degraded-B,
  *                  then the stage oracle.                            No writes.
- *   4  repair      rewrite the invalid superblock copy.             WRITES.
+ *   4  repair      rewrite an invalid or stale partner.             WRITES.
  *
  * The ordering is the whole point, and it has moved twice for the same reason.
  * DRAFT-3 let repair precede the version check, so a v1 engine could write to v2
@@ -80,11 +80,11 @@ static tape_result read_block(struct tape *t, uint32_t lba, unsigned char *dst)
 
 /*
  * spec §4.1, phases 1 and 2. No writes happen anywhere in this function; repair
- * is phase 3 and is a separate call, so that the "writes nothing" guarantee is
+ * is phase 4 and is a separate call, so that the "writes nothing" guarantee is
  * structural rather than a matter of reading the control flow carefully.
  *
- * On return, *repair_lba is the block to rewrite if phase 3 runs, or UINT32_MAX
- * if both copies were valid.
+ * On return, *repair_lba is the block to rewrite if phase 4 runs, or UINT32_MAX
+ * if both copies are current and identical.
  */
 static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
 {
@@ -95,7 +95,8 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
     bool pri_ok, mir_ok;
 
     *repair_lba = 0xFFFFFFFFu;
-    if (t->dev.block_count == 0u) {
+    /* DEVICE_ADDRESSABLE precedes every callback, including an LBA-0 read. */
+    if (t->dev.block_count <= TAPE_LBA_CHUNK_BASE) {
         return TAPE_ERR_GEOMETRY;
     }
 
@@ -125,14 +126,17 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
             }
             chosen = &sb_pri;
         } else {
-            chosen = (sb_pri.sb_generation > sb_mir.sb_generation) ? &sb_pri : &sb_mir;
+            bool primary_wins = sb_pri.sb_generation > sb_mir.sb_generation;
+            chosen = primary_wins ? &sb_pri : &sb_mir;
+            *repair_lba = primary_wins ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
+            memcpy(t->block, primary_wins ? pri : mir, TAPE_BLOCK_SIZE);
         }
-        t->needs_repair = false;
+        t->needs_repair = (*repair_lba != 0xFFFFFFFFu);
     } else {
         chosen = pri_ok ? &sb_pri : &sb_mir;
         /* Exactly one valid: it is the candidate, and the partner is recorded as
-           needing repair. Whether repair actually happens is phase 3's business
-           and depends on passing phase 2 first. */
+           needing repair. Whether repair happens is phase 4's business and
+           depends on passing admission and both-side validation first. */
         t->needs_repair = true;
         *repair_lba = pri_ok ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
         memcpy(t->block, pri_ok ? pri : mir, TAPE_BLOCK_SIZE);
@@ -178,8 +182,8 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
 /*
  * spec §4.1 phase 4 — the only phase that writes.
  *
- * Runs only if the candidate passed phases 2 AND 3, exactly one superblock copy
- * was structurally valid, and the mount is EFFECTIVELY WRITABLE (§4.3) — not
+ * Runs only if the candidate passed phases 2 AND 3, its partner is invalid or
+ * stale, and the mount is EFFECTIVELY WRITABLE (§4.3) — not
  * merely on a device with a write pointer. sb_generation is NOT incremented:
  * repair restores a copy of an existing logical state, it does not create one.
  *

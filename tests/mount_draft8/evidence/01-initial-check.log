@@ -1,0 +1,24 @@
+make: Entering directory '/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8'
+python3 -m unittest -v test_package.py
+make: Leaving directory '/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8'
+setUpClass (test_package.PackageTests) ... ERROR
+
+======================================================================
+ERROR: setUpClass (test_package.PackageTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8/test_package.py", line 34, in setUpClass
+    def setUpClass(cls):cls.cc=cases();cls.byid={c.id:c for c in cls.cc}
+                               ^^^^^^^
+  File "/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8/cases.py", line 215, in cases
+    assert len({c.id for c in out})==len(out)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.153s
+
+FAILED (errors=1)
+make: *** [Makefile:11: check] Error 5
+
+exit=2
