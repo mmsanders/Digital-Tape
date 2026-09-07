@@ -9,10 +9,18 @@ human_gate:
 
 object_model:
   authoritative_envelope: github_issue
-  pull_requests: artifacts_only
+  pull_requests: artifacts_and_optional_edge_trigger_transport_only
   hierarchy: native_github_sub_issues
   max_task_depth_below_round: 2
   reason: round_to_root_to_child_keeps_barriers_decidable_and_cheap
+
+capability_policy:
+  file: .github/agent-bus/capability-tiers.yml
+  selection: capability_class_not_exact_model
+  classes: [auto, frontier, strong, balanced, economy]
+  principle: lowest_sufficient_capability
+  exact_model_pin_required: false
+  record_resolved_model_when_runtime_exposes_it: true
 
 roles:
   michael:
@@ -22,7 +30,9 @@ roles:
     may_claim_queued_tasks: false
 
   pm:
-    runtime: claude-cowork
+    runtime: chatgpt-work
+    capability: auto
+    preferred_classes: [strong, frontier]
     tier: 1
     expensive: true
     may_prepare_roots_for: [software, hardware, verification]
@@ -32,6 +42,7 @@ roles:
 
   software:
     runtime: claude-code
+    capability: auto
     tier: 2
     expensive: true
     may_request_for: [worker_chatgpt, worker_grok]
@@ -41,6 +52,7 @@ roles:
 
   hardware:
     runtime: claude-code
+    capability: auto
     tier: 2
     expensive: true
     may_request_for: [worker_chatgpt, worker_grok]
@@ -50,6 +62,8 @@ roles:
 
   verification:
     runtime: chatgpt-work
+    capability: auto
+    preferred_classes: [strong, frontier]
     tier: 2
     expensive: true
     may_request_for: [worker_chatgpt, worker_grok]
@@ -59,6 +73,8 @@ roles:
 
   worker_chatgpt:
     runtime: chatgpt-chat
+    capability: auto
+    allowed_classes: [economy, balanced]
     tier: 3
     expensive: false
     adapter_status: unavailable_until_configured
@@ -67,6 +83,8 @@ roles:
 
   worker_grok:
     runtime: grok
+    capability: auto
+    allowed_classes: [economy, balanced]
     tier: 3
     expensive: false
     adapter_status: configure_at_activation
@@ -154,15 +172,24 @@ round:
     next_step: michael_must_authorize_new_round
 
 token_policy:
-  strategy: barriered_batching
-  protect: [claude-cowork, claude-code, chatgpt-work]
+  strategy: barriered_batching_plus_capability_routing
+  protect: [chatgpt-work, claude-code]
   prefer_workers: [chatgpt-chat, grok]
+  estimate_with: capability_weighted_invocations
   pm:
     expected_invocations_per_round: 2
     pattern: [draft_round_and_roots, final_quiescent_summary]
+    default_capability: auto
+    typical_resolution: strong
+    frontier_reserved_for: [freeze, cross_stream_architecture, safety, hard_arbitration]
   leads:
+    default_capability: auto
     pattern: [one_fanout_invocation, one_fanin_invocation_per_bounded_rework_cycle]
     do_not_wake_for_each_worker_return: true
+  workers:
+    default_capability: auto
+    preferred_resolution: economy
+    max_without_parent_reclassification: balanced
   default_budget:
     worker_children_per_root: 6
     worker_rework_cycles_per_child: 2
@@ -180,7 +207,8 @@ token_policy:
     verification: [adversarial_reasoning, independent_test_design, acceptance_judgment]
 
 constraints:
-  - comments_are_never_triggers
+  - persistent_comment_text_is_never_authoritative_queue_state
+  - provider_edge_trigger_comments_may_only_wake_an_adapter_after_bus_authorization
   - agents_never_add_state_queued
   - one_destination_per_active_envelope
   - one_lifecycle_state_per_open_agent_task
