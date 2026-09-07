@@ -9,11 +9,26 @@ body:
         This issue defines a **single bounded autonomous round**.
         Creating or editing it does not authorize work. The staged authorization workflow requires Michael's manual approval through the `michael-round-gate` GitHub Environment.
 
+        Program Manager runtime: **ChatGPT Work**. Capability is class-based rather than pinned to a dated model.
+
   - type: input
     id: round_id
     attributes:
       label: Round ID
       placeholder: R1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pm_capability
+    attributes:
+      label: PM capability policy
+      description: `auto` normally resolves to strong/Sol-class and promotes to frontier/Astra-class only for high-consequence work.
+      options:
+        - auto
+        - strong
+        - frontier
+      default: 0
     validations:
       required: true
 
@@ -74,7 +89,9 @@ body:
     attributes:
       label: Token policy
       options:
-        - label: Root assignments reserve frontier-model work for planning, judgment, integration, or independent verification and delegate bounded execution when practical.
+        - label: Use the lowest sufficient capability class; reserve frontier work for genuinely high-consequence planning, judgment, integration, or verification.
+          required: true
+        - label: Root assignments delegate bounded execution to economy/balanced workers when practical.
           required: true
         - label: This round will stop at PM review and will not automatically start another round.
           required: true
