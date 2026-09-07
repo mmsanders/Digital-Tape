@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   authorize:
-    # Hard human barrier. An agent may start the workflow, but this job cannot
+    # Hard human barrier. An agent may start this workflow, but the job cannot
     # execute until the required reviewer approves the environment deployment.
     environment: michael-round-gate
     runs-on: ubuntu-latest
@@ -40,14 +40,19 @@ jobs:
           labels="$(jq -r '.labels[].name' <<<"$issue")"
           grep -Fxq 'agent-round' <<<"$labels" || { echo 'not an agent-round issue' >&2; exit 1; }
 
-          # No different round may already be active.
-          active="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
-            --label 'agent-round' --label 'round:active' --json number --limit 10)"
-          other_active="$(jq --argjson n "$ROUND_ISSUE" '[.[] | select(.number != $n)] | length' <<<"$active")"
-          [[ "$other_active" -eq 0 ]] || { echo 'another Agent Bus round is already active' >&2; exit 1; }
+          # Exactly one open draft/active round control issue may exist.
+          rounds="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label 'agent-round' --json number,labels --limit 100)"
+          competing="$(jq --argjson current "$ROUND_ISSUE" '[.[] | {
+              number,
+              labels:[.labels[].name]
+            } | select(.number != $current) | select(
+              ((.labels | index("round:draft")) != null) or
+              ((.labels | index("round:active")) != null)
+            )] | length' <<<"$rounds")"
+          [[ "$competing" -eq 0 ]] || { echo 'another draft/active Agent Bus round exists' >&2; exit 1; }
 
-          # A fresh authorization is draft. A rerun may resume the exact same
-          # already-authorized round after a failed root-release step.
+          # Fresh authorization is draft. A rerun may resume the exact same
+          # already-authorized round after a partial root-release failure.
           if grep -Fxq 'round:draft' <<<"$labels"; then
             echo 'resume=false' >> "$GITHUB_OUTPUT"
           elif grep -Fxq 'round:authorized' <<<"$labels" && grep -Fxq 'round:active' <<<"$labels"; then
@@ -67,27 +72,43 @@ jobs:
             exit 1
           }
 
-          # Every direct child of the round is a root and there is at most one
-          # root per lead. Already-released roots are valid on resume.
+          # Every direct child is an agent root and must be either a valid held
+          # root or a valid already-released root on resume.
           bad="$(jq '[.[] | {number, labels:[.labels[].name]} | select(
             ((.labels | index("agent-root")) == null) or
             ((.labels | index("agent-task")) == null) or
             (
-              (((.labels | index("round:pending")) != null) and ((.labels | index("state:draft")) == null)) and
-              (((.labels | index("round:active")) == null) or ((.labels | index("state:queued")) == null))
+              (
+                ((.labels | index("round:pending")) == null) or
+                ((.labels | index("state:draft")) == null) or
+                ((.labels | index("phase:fanout")) == null)
+              ) and
+              (
+                ((.labels | index("round:active")) == null) or
+                ((.labels | index("state:queued")) == null)
+              )
             )
           )]' <<<"$roots")"
           [[ "$(jq 'length' <<<"$bad")" -eq 0 ]] || {
-            echo 'one or more round children are not valid prepared/released roots' >&2
+            echo 'one or more round children are not valid held/released roots' >&2
             jq . <<<"$bad" >&2
             exit 1
           }
 
-          destinations="$(jq -r '.[] | [.labels[].name] | map(select(. == "to:software" or . == "to:hardware" or . == "to:verification")) | .[]' <<<"$roots")"
-          [[ "$(wc -l <<<"$destinations" | tr -d ' ')" -eq "$count" ]] || {
+          # Exactly one destination total per root, and it must be a lead.
+          bad_dest="$(jq '[.[] | {number, labels:[.labels[].name]} | . as $r |
+            ([ $r.labels[] | select(startswith("to:")) ]) as $d |
+            select(
+              ($d | length) != 1 or
+              (($d[0] == "to:software" or $d[0] == "to:hardware" or $d[0] == "to:verification") | not)
+            ) | {number,destinations:$d}]' <<<"$roots")"
+          [[ "$(jq 'length' <<<"$bad_dest")" -eq 0 ]] || {
             echo 'each root must have exactly one lead destination' >&2
+            jq . <<<"$bad_dest" >&2
             exit 1
           }
+
+          destinations="$(jq -r '.[] | [.labels[].name] | map(select(. == "to:software" or . == "to:hardware" or . == "to:verification")) | .[0]' <<<"$roots")"
           [[ "$(sort <<<"$destinations" | uniq | wc -l | tr -d ' ')" -eq "$count" ]] || {
             echo 'round may contain at most one root per lead' >&2
             exit 1
@@ -121,8 +142,7 @@ jobs:
           mapfile -t numbers < <(jq -r '.[].number' <<<"$roots")
 
           for root in "${numbers[@]}"; do
-            issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${root}")"
-            labels="$(jq -r '.labels[].name' <<<"$issue")"
+            labels="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${root}" --jq '.labels[].name')"
 
             if grep -Fxq 'round:active' <<<"$labels" && grep -Fxq 'state:queued' <<<"$labels"; then
               echo "#$root already released; no-op"
@@ -133,7 +153,7 @@ jobs:
             grep -Fxq 'state:draft' <<<"$labels" || { echo "#$root is not draft" >&2; exit 1; }
             grep -Fxq 'phase:fanout' <<<"$labels" || { echo "#$root lacks phase:fanout" >&2; exit 1; }
 
-            # Remove holding state first. Dispatch edge is added LAST.
+            # Remove holding state first. `state:queued` is the final mutation.
             gh issue edit "$root" --repo "$GITHUB_REPOSITORY" \
               --remove-label 'state:draft' \
               --remove-label 'round:pending' \
