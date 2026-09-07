@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Digital Tape · Working State</title>
+  <meta name="theme-color" content="#0c0b0a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0b0a; --surface: #1b1916; --fg: #efe8dc; --muted: #9a9186;
+      --subtle: #6f685f; --border: #2c2924; --accent: #c9b79a;
+      --idle: #7a746b; --working: #d2a35b; --churn: #c16a4d; --held: #b0894a;
+      --blocked: #c45c4a; --draft: #8a9aab; --review: #7ea08c; --unknown: #5c5750;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #0c0b0a; color: var(--fg); font-family: "IBM Plex Sans", system-ui, sans-serif; overflow-x: hidden; }
+    body { min-height: 100dvh; background-image: radial-gradient(1200px 500px at 50% -120px, rgb(201 183 154 / 0.07), transparent 60%); }
+    a { color: inherit; }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    h1 { font-family: Newsreader, Georgia, serif; font-size: clamp(2rem, 6vw, 3.2rem); margin: .2rem 0 0; font-weight: 500; letter-spacing: -0.03em; }
+    .kicker { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--subtle); font-weight: 500; }
+    header { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; }
+    .lead { max-width: 36rem; color: var(--muted); font-size: .9rem; line-height: 1.5; }
+    .pills { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+    .pill { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: .35rem .75rem; font-size: 12px; color: var(--muted); }
+    .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    .tree { margin-top: 1.5rem; display: grid; gap: .75rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.1rem 1.15rem; min-width: 0; }
+    .row { display: flex; justify-content: space-between; gap: .75rem; align-items: flex-start; }
+    h2 { font-family: Newsreader, Georgia, serif; font-size: 1.35rem; margin: .2rem 0 0; font-weight: 500; }
+    .seat { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--subtle); }
+    .chip { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .25rem .65rem; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 500; }
+    .dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; }
+    .bucket { margin-top: 1rem; border: 1px solid var(--border); border-radius: 8px; padding: .7rem .8rem; background: rgb(12 11 10 / .45); }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin: .45rem 0 .6rem; }
+    .bars span { flex: 1; border-radius: 2px; background: var(--border); }
+    .bars span.on { background: color-mix(in oklab, var(--accent) 70%, transparent); }
+    .bars span.hot { background: color-mix(in oklab, var(--churn) 80%, transparent); }
+    .tick { display: flex; justify-content: space-between; gap: .5rem; font-size: 12px; color: var(--fg); min-width: 0; }
+    .tick span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tick time { color: var(--subtle); font-family: "IBM Plex Mono", monospace; font-size: 10px; flex: none; }
+    .leads { display: grid; gap: .75rem; }
+    @media (min-width: 720px) { .leads { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1080px) { .leads { grid-template-columns: repeat(4, 1fr); } }
+    .spine { width: 1px; height: 1.4rem; background: #3d3831; margin: 0 auto; }
+    footer { margin-top: 2.5rem; color: var(--subtle); font-size: 11px; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .warn { margin-top: 1rem; border: 1px solid color-mix(in oklab, var(--held) 35%, transparent); background: color-mix(in oklab, var(--held) 12%, transparent); padding: .7rem 1rem; border-radius: 12px; font-size: 12px; }
+    .muted { color: var(--muted); font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="kicker">Digital Tape</div>
+        <h1>Working state</h1>
+        <p class="lead">Live read of mmsanders/Digital-Tape. PM on top, leads underneath, work buckets at the floor. Bus labels when they exist; otherwise inferred from the repo.</p>
+      </div>
+      <div class="pills" id="meta"></div>
+    </header>
+    <div id="warn"></div>
+    <div class="tree" id="tree">Loading the repo…</div>
+    <footer>
+      <span>Public GitHub API, polled about every 20s.</span>
+      <span id="live">connecting</span>
+    </footer>
+  </div>
+  <script>
+    const OWNER = "mmsanders", REPO = "Digital-Tape";
+    const API = "https://api.github.com";
+    const RAW = "https://raw.githubusercontent.com";
+    const POLL = 20000;
+    const roles = [
+      { id: "pm", label: "Program Manager", seat: "Claude Cowork · spec + rounds", featured: true },
+      { id: "software", label: "Software Lead", seat: "Claude Code · engine + host" },
+      { id: "hardware", label: "Hardware Lead", seat: "Claude Code · boards + BOM" },
+      { id: "verification", label: "Verification Lead", seat: "ChatGPT Work · independent" },
+      { id: "surge", label: "Surge", seat: "Spec freeze candidate" },
+    ];
+    const dest = { "to:pm":"pm","to:software":"software","to:hardware":"hardware","to:verification":"verification","to:worker-chatgpt":"software","to:worker-grok":"software" };
+    const stateMap = { "state:draft":"draft","state:ready":"queued","state:queued":"queued","state:working":"working","state:waiting":"waiting","state:review":"review","state:blocked":"blocked","state:protocol-error":"blocked" };
+    const labels = { idle:"Idle", draft:"Draft", queued:"Queued", working:"Working", waiting:"Waiting", review:"In review", churn:"Churn", held:"Held", blocked:"Blocked", unknown:"No signal" };
+    const tone = { idle:"var(--idle)", draft:"var(--draft)", queued:"var(--draft)", working:"var(--working)", waiting:"var(--muted)", review:"var(--review)", churn:"var(--churn)", held:"var(--held)", blocked:"var(--blocked)", unknown:"var(--unknown)" };
+
+    function ago(iso) {
+      if (!iso) return "—";
+      const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+      if (s < 20) return "just now";
+      if (s < 60) return s + "s ago";
+      if (s < 3600) return Math.floor(s/60) + "m ago";
+      if (s < 86400) return Math.floor(s/3600) + "h ago";
+      return Math.floor(s/86400) + "d ago";
+    }
+    function firstLine(t) { return (t || "").split(/\n/)[0].trim(); }
+    function roleFromText(t) {
+      t = (t || "").toLowerCase();
+      if (/surge|draft-8|freeze-candidate/.test(t)) return "surge";
+      if (/hardware|kicad|bom|wp-04|thermal/.test(t)) return "hardware";
+      if (/verif|golden|acceptance|wp-10|wp-11|crash-injection/.test(t)) return "verification";
+      if (/agent-bus|program manager|\bpm\b|spec bundle|draft-7/.test(t)) return "pm";
+      if (/engine|wp-06|wp-07|software|tapefs/.test(t)) return "software";
+      return null;
+    }
+    function roleFromBranch(name) {
+      if (/^staging\/|agent-bus/i.test(name)) return "pm";
+      if (/hardware/i.test(name)) return "hardware";
+      if (/^surge\//i.test(name)) return "surge";
+      if (/verif|golden/i.test(name)) return "verification";
+      if (/^claude\//i.test(name)) return "software";
+      return roleFromText(name);
+    }
+    function names(list) { return (list || []).map(l => typeof l === "string" ? l : l.name); }
+
+    async function load() {
+      const [repo, branches, tags, pulls, issues, commits, statusMd, hwMd, versionMd] = await Promise.all([
+        fetch(`${API}/repos/${OWNER}/${REPO}`).then(r => r.json()),
+        fetch(`${API}/repos/${OWNER}/${REPO}/branches?per_page=100`).then(r => r.json()),
+        fetch(`${API}/repos/${OWNER}/${REPO}/tags?per_page=50`).then(r => r.json()),
+        fetch(`${API}/repos/${OWNER}/${REPO}/pulls?state=open&per_page=30`).then(r => r.json()),
+        fetch(`${API}/repos/${OWNER}/${REPO}/issues?state=open&per_page=30`).then(r => r.json()),
+        fetch(`${API}/repos/${OWNER}/${REPO}/commits?per_page=20`).then(r => r.json()),
+        fetch(`${RAW}/${OWNER}/${REPO}/main/docs/STATUS.md`).then(r => r.ok ? r.text() : ""),
+        fetch(`${RAW}/${OWNER}/${REPO}/main/docs/STATUS-HARDWARE.md`).then(r => r.ok ? r.text() : ""),
+        fetch(`${RAW}/${OWNER}/${REPO}/main/spec/VERSION.md`).then(r => r.ok ? r.text() : ""),
+      ]);
+      if (!Array.isArray(branches)) throw new Error(repo && repo.message ? repo.message : "GitHub fetch failed");
+      const spec = (versionMd.match(/\*\*Bundle:\*\*\s*([A-Z0-9-]+)/) || statusMd.match(/\bDRAFT-[0-9]+\b/) || [])[1] || null;
+      const board = Object.fromEntries(roles.map(r => [r.id, { ...r, status: "unknown", source: "inferred", headline: "No live signal yet.", detail: "Inferred from the repo — bus labels are not live.", branch: "", ticks: [], churn: 0 }]));
+      for (const issue of issues) {
+        if (issue.pull_request) continue;
+        const ls = names(issue.labels);
+        const role = ls.map(l => dest[l]).find(Boolean) || roleFromText(issue.title);
+        const st = ls.map(l => stateMap[l]).find(Boolean);
+        if (!role) continue;
+        const slot = board[role];
+        slot.ticks.push({ at: issue.updated_at, title: `#${issue.number} ${issue.title}` });
+        if (st) { slot.status = st; slot.source = "bus-label"; slot.headline = issue.title; slot.detail = `Issue #${issue.number}`; }
+      }
+      for (const pr of pulls) {
+        const role = names(pr.labels).map(l => dest[l]).find(Boolean) || roleFromBranch(pr.head.ref) || roleFromText(pr.title);
+        if (!role) continue;
+        const slot = board[role];
+        slot.ticks.push({ at: pr.updated_at, title: `PR #${pr.number} ${pr.title}` });
+        if (slot.source !== "bus-label") {
+          slot.status = pr.draft ? "draft" : "working";
+          slot.headline = pr.title;
+          slot.detail = `${pr.draft ? "Draft" : "Open"} PR #${pr.number} ← ${pr.head.ref}`;
+          slot.branch = pr.head.ref;
+        }
+      }
+      for (const c of commits) {
+        const role = roleFromText(c.commit.message) || "software";
+        const slot = board[role];
+        const date = c.commit.author && c.commit.author.date;
+        slot.ticks.push({ at: date, title: firstLine(c.commit.message) });
+        if (date && Date.now() - new Date(date).getTime() < 6*3600*1000) slot.churn += 1;
+      }
+      for (const b of branches) {
+        const role = roleFromBranch(b.name);
+        if (role && !board[role].branch) board[role].branch = b.name;
+      }
+      if (/parked by the PM/i.test(statusMd) && board.software.status === "unknown") board.software.status = "held";
+      if (/only red gate/i.test(statusMd)) { board.verification.headline = "Golden suite still the red gate; fixtures owed."; board.verification.detail = "From docs/STATUS.md"; if (board.verification.status === "unknown") board.verification.status = "held"; }
+      const firstUseful = (md) => md.split(/\n/).map(s => s.trim()).find(s => s && !s.startsWith("#") && !s.startsWith("**Updated") && s !== "---") || "";
+      if (board.software.headline === "No live signal yet.") { board.software.headline = firstUseful(statusMd).replace(/\*\*/g,""); board.software.detail = "From docs/STATUS.md"; }
+      if (board.hardware.headline === "No live signal yet.") { board.hardware.headline = firstUseful(hwMd).replace(/\*\*/g,""); board.hardware.detail = "From docs/STATUS-HARDWARE.md"; }
+      if (board.pm.headline === "No live signal yet.") { board.pm.headline = spec ? `Canonical spec is ${spec} on main.` : firstUseful(statusMd).replace(/\*\*/g,""); board.pm.detail = "PM owns spec authorship."; }
+      for (const slot of Object.values(board)) {
+        slot.ticks.sort((a,b) => new Date(b.at) - new Date(a.at));
+        slot.ticks = slot.ticks.slice(0, 3);
+        if (slot.status === "unknown") slot.status = slot.ticks.length ? "idle" : "unknown";
+        if (slot.churn >= 2 && slot.source !== "bus-label" && slot.status !== "blocked" && slot.status !== "held") slot.status = "churn";
+      }
+      return { repo, branches, tags, pulls, spec, board, fetchedAt: new Date().toISOString() };
+    }
+
+    function chip(status) {
+      const color = tone[status] || tone.unknown;
+      return `<span class="chip" style="color:${color};background:color-mix(in oklab, ${color} 16%, transparent)"><span class="dot"></span>${labels[status] || status}</span>`;
+    }
+    function card(slot) {
+      const filled = Math.min(10, slot.ticks.length + (slot.churn > 0 ? 1 : 0));
+      const bars = Array.from({length:10}, (_,i) => `<span class="${i<filled ? (slot.churn>=2?'hot':'on') : ''}" style="height:${i<filled? 10+((i*13)%16):4}px"></span>`).join("");
+      const ticks = slot.ticks.length
+        ? slot.ticks.map(t => `<div class="tick"><span>${t.title}</span><time>${ago(t.at)}</time></div>`).join("")
+        : `<div class="tick"><span>No worker-level events visible yet.</span></div>`;
+      return `<article class="card">
+        <div class="row"><div><div class="seat">${slot.seat}</div><h2>${slot.label}</h2></div>${chip(slot.status)}</div>
+        <p style="margin:.7rem 0 .2rem;font-size:.9rem;line-height:1.45">${slot.headline}</p>
+        <p class="muted">${slot.detail}</p>
+        ${slot.branch ? `<p class="mono" style="color:var(--accent);font-size:11px;margin:.4rem 0 0">${slot.branch}</p>` : ""}
+        <div class="bucket"><div class="row"><span class="seat">Work bucket</span><span class="mono" style="color:var(--muted);font-size:11px">${slot.churn>=2?"churn at the floor": filled ? "recent movement":"quiet"}</span></div><div class="bars">${bars}</div>${ticks}</div>
+      </article>`;
+    }
+
+    async function render() {
+      try {
+        const snap = await load();
+        document.getElementById("meta").innerHTML = `
+          <span class="pill">checked ${ago(snap.fetchedAt)}</span>
+          ${snap.spec ? `<span class="pill mono" style="color:var(--accent)">${snap.spec}</span>` : ""}
+          <span class="pill mono">${snap.repo.default_branch}@${(snap.repo.pushed_at||"").slice(0,10)}</span>
+          <span class="pill">${snap.tags.length} tags</span>`;
+        document.getElementById("tree").innerHTML = `
+          ${card(snap.board.pm)}
+          <div class="spine"></div>
+          <div class="leads">${["software","hardware","verification","surge"].map(id => card(snap.board[id])).join("")}</div>`;
+        document.getElementById("live").textContent = "live";
+        document.getElementById("warn").innerHTML = "";
+      } catch (err) {
+        document.getElementById("warn").innerHTML = `<div class="warn">${err.message || err}</div>`;
+        document.getElementById("live").textContent = "retrying";
+      }
+    }
+    render();
+    setInterval(render, POLL);
+  </script>
+</body>
+</html>
