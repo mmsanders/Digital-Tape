@@ -1,0 +1,37 @@
+# STAGED / INERT: intentionally outside .github/workflows/.
+# Safe to move live with the activation PR. It spends no model tokens.
+
+name: Agent Bus - Protocol Tests
+
+on:
+  pull_request:
+    paths:
+      - 'docs/AGENT-BUS.md'
+      - '.github/agent-bus/**'
+      - '.github/ISSUE_TEMPLATE/agent-*.yml'
+      - 'tools/agent-bus/**'
+      - '.github/workflows/agent-bus-*.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/AGENT-BUS.md'
+      - '.github/agent-bus/**'
+      - '.github/ISSUE_TEMPLATE/agent-*.yml'
+      - 'tools/agent-bus/**'
+      - '.github/workflows/agent-bus-*.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Red/green transition tests
+        run: python3 tools/agent-bus/test_validate_transition.py
+      - name: Bootstrap script parses
+        run: bash -n tools/agent-bus/bootstrap-labels.sh
