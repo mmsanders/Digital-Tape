@@ -48,8 +48,39 @@ So I've given the Hardware Lead a rule that makes the material stop mattering: *
 
 ## Open
 
-### M-01 — The plate is ready, but settle two things on the card first
+### Q-008 — How big is a cartridge, and does it have to look like a cassette?
 
+**Needs:** your taste · **Blocks:** nothing — a working number is in use
+**Why you and not us:** this is the one shell decision that is genuinely aesthetic
+
+I have designed the clasp — the thing that holds the two halves of the cartridge together
+without a screw, that you asked for. It works. But I had to pick an outside size to draw it, and
+I picked **86 × 54 × 12 mm** for a reason that is defensible and not yours: 86 × 54 is a credit
+card, so it is a shape a child's hand already knows, and 12 mm is about a cassette's thickness.
+
+**The good news is that this is a free choice.** The maths that decides whether the plastic
+survives has no length term in it — it depends on the wall section and how far the lip bends,
+not on how big the box is. So changing the size moves how *hard* it is to open (bigger is
+harder) and changes nothing about whether it lasts. You can pick this on taste and I will not
+have to redo anything.
+
+Three things worth knowing before you pick:
+
+- **A real cassette is 100 × 64 × 12 mm.** If "it should feel like a cassette" matters more to
+  you than "it should fit a small hand", that is the number, and it costs nothing.
+- **Bigger is harder for a child to pull open**, slightly, because there is more lip to peel at
+  once. Not by enough to change the safety case.
+- **Smaller prints faster.** Less pressing now you have six plates a month rather than two,
+  but it still buys room for more variants on the same plate.
+
+**Default if you don't pick:** 86 × 54 × 12 mm. Nothing waits on this — the clasp is
+designed, the variants are on the plate, and the size can move afterwards.
+
+---
+
+---
+
+### M-01 — The plate is ready, but settle two things on the card first
 **Needs:** ten minutes with the card · **Blocks:** the library trip
 
 The regenerated `plate.stl` is **sound and cleared** — watertight, 17 separate manifold parts, 138 × 137 mm, nothing off the bed, no supports needed, ~3–4 hours and ~64 g. Every fault in the old broken file is gone. Full check is in the project as `decisions/pm-wp04-plate-stl-verification.md`.
@@ -61,7 +92,6 @@ The regenerated `plate.stl` is **sound and cleared** — watertight, 17 separate
 **Four clasp variants but only two mating halves**, and they're identical. You can build two cartridges at a time and must reuse the same halves for all four — so wear on the shared half gets confused with whichever variant you test last. Either the card tells you the test order, or the next plate carries four halves. With six prints a month, four halves.
 
 **One line for the card that matters more than the others: SUPPORTS OFF.** Each button has a 6 × 4 mm bore, 14 mm deep, opening down onto the bed. It needs no support, but a "supports everywhere" *or* "on build plate only" setting fills it — and support material 14 mm down that hole is not removable, sitting directly on the flexure whose stiffness the whole packet measures. It's the one setting that can silently waste the trip.
-
 ---
 
 ### M-02 — Vendor domains

@@ -1,142 +1,161 @@
 # STATUS — HARDWARE
 
-**Updated:** 2026-09-02 · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
+**Updated:** 2026-09-06 (4th) · **Phase:** 0 · **Updated by:** Hardware Lead · **Reports to:** PM
 
 The Hardware Lead's window into `hardware/` and `spec/hw/`. Companion to `docs/STATUS.md`,
-which stays the Software Lead's. Review packets live in `docs/REVIEW/hardware-lead.md`; this
-file is state, not argument.
+which stays the Software Lead's. Argument lives in `docs/REVIEW/hardware-lead.md`; this file is
+state.
 
 **Scope:** WP-04, WP-05, WP-22–27, WP-29, WP-30, WP-34, WP-37.
+
+> Rewritten on 5 Sep after going three rounds stale. PM Decisions 007 §3 flagged that
+> independently — *"I have been reading your work through PRs and the plate itself rather than
+> through your status, which works until it does not."* Correct when written; addressed the day
+> before, and updated again here.
 
 ---
 
 ## What changed since last time
 
-**The solenoid limit was restated as power, and my design failed it.** 0.30 W against a 0.25 W
-bound. The real problem was the coil, not the lockout: because the limit must clear a child
-pressing stop and play twice a second, it reduces to **125 mJ per actuation**, and my assumed
-9 W × 30 ms was **270 mJ, 2.2× over**. No lockout fixes that — the energy is spent inside one
-legitimate press. Corrected to a 5 W coil at 15 ms with a 450 ms lockout: 0.174 W at real use,
-0.220 W in a fault, nothing legitimate blocked. **ADR-116 supersedes ADR-112.** The pulse is now
-an explicit placeholder that WP-04 supplies.
+**The solenoid response has now been independently reviewed and rejected twice.** Seven findings
+across two rounds, four blockers, all accepted. It is still open.
 
-**Order 1c cancelled.** The 39-week / 490-MOQ figure was the tray variant, factory-direct; the
-reel suffix `SGTL5000XNBA3R2` is stocked in thousands. The codec line item changes suffix
-accordingly — `XNBA3` and `XNBA3R2` are the same die and **not interchangeable line items**.
-Spend reconciles to **~$267**.
+**Round one found a missing physical term.** The design did not meet the limit — 0.330 W against
+0.25 W once rail, winding and cold-copper corners were included, where my model said 0.220 W and
+a 1.14× pass. ADR-121.
 
-**Domain access: the `www.` prefix was the whole thing.** `www.nxp.com` and `www.lcsc.com` now
-work; bare hostnames all fail, so the allowlist matches exact hosts. `www.findchips.com` answers
-curl but serves a JavaScript shell. `www.ti.com`, `www.octopart.com` and `www.mouser.com` are
-still blocked, and DigiKey returns 403 bot protection exactly as the PM predicted. Also learned:
-**`WebFetch` and `curl` do not share an allowlist** — the working method is curl plus a parser.
+**Round two found an unspecified circuit.** I had written that the lockout *"sits downstream of
+the pulse and no gate input can defeat it"* — and never drew the gating logic that would make
+that true. Triggering the second monostable from the first's *falling* edge leaves a propagation
+window in which a request edge is admitted, and one extra pulse inside the lockout invalidates
+the minimum period the whole 0.25 W proof rests on. **Fixed by construction:** both monostables
+now trigger on the same edge, the second spans the entire cycle, and admission is gated on it
+alone — so there is no handoff to race. ADR-124.
 
-**The banner and the fabrication gate are in `spec/hw/thermal-budget.md`**, and PR #15 is being
-merged on that basis: three IR-015 findings open, and **no board is fabricated and no cell is
-charged until all three close**.
+**And the timing tolerance was an assumption wearing a guarantee's clothes.** The ±14 % figure
+comes from a 700 µs datasheet test point at VCC = 5 V; it was applied to a 390 ms interval at
+**3.3 V** — which also excludes the 74HCT221 (4.5–5.5 V) outright. The analysis now separates
+*design criteria* from *qualification gaps* and its verdict is **`PROVISIONAL`, not pass**, while
+any gap is open. ADR-125.
 
-## In flight
+**The fabrication gate is now executable rather than a sentence** (ADR-126), from an
+auditability caution in the follow-up review: green thermal CI is *not* qualification of the
+solenoid circuit while its timing corner is unbound. `make -C hardware fabrication-gate` reads
+**CLOSED** on five items and names them. Its proof is inverted — a gate whose normal state is red
+is worth nothing unless it can be shown to open.
 
-| Work | State |
-|---|---|
-| WP-34 thermal budget | **Rev 0.1 issued.** Estimates; WP-37 replaces them |
-| WP-05 parts order | **Drafted.** Waiting on Michael to order |
-| WP-04 packet WP04-01 | **Built.** Waiting on Q-006, sendable today on stated assumptions |
-| `spec/hw/board-rev-a.md` | Skeleton. Accretes through WP-26 |
-| WP-26 schematic | Not started — gated on the codec question below |
+**Route out: a bench measurement, not a wait.** Binding the one-shot's timing at 3.3 V belongs
+with WP-04's pulse measurement — same bench, same day, depends on nobody.
 
-## Blocked
-
-**Codec confirmed `ACTIVE` from NXP's own part page — the first primary-source confirmation of
-any part on this board.** Specify **`SGTL5000XNBA3`**, 12NC 935430641557, **HVQFN32**, 5 × 5 ×
-0.85 mm, 0.5 mm pitch, −40 °C to +85 °C. The `Obsolete` on the aggregator was real but attached
-to `XNAA3`, retired with its punch-QFN line; `XNBA3` is NXP's own migration path. **A BOM written
-from search hits would have said `XNAA3`.** WP-26 is unblocked.
-
-**Two findings larger than the question that produced them.**
-
-**1. The lead time is 39 weeks on a sole-source part.** Nine months, against a Phase 5 that plans
-8–12 weeks and 2–3 spins. If we ever have to *order* this codec rather than pull it from a
-distributor's shelf, the schedule is gone and no amount of good layout recovers it. **Order 1c
-(~$110, twenty pieces) converts that into a box in a drawer** and is the cheapest schedule
-insurance available anywhere on this project. Drafted; it should go with order 1a.
-
-**2. NXP direct is not a channel we can use.** Minimum order 490 (tray) or 5000 (reel) against a
-project needing perhaps twenty. The whole supply route is "a distributor happens to have stock",
-which is true until it isn't — and I cannot check whether it is true now (H-02). If distributors
-hold none, a second-source codec becomes an architectural question and a `pm-decision` issue.
-Not raised yet, because $110 probably retires it.
-
-**The same question is open for the RT1062 and nobody has asked it.** It is the other sole-source
-part and it *is* the board. Lead time and MOQ unknown.
-
-One new item, small: NXP lists a **PCN against `XNBA3` issued 2025-04-16**. A PCN is not a
-discontinuation and the part reads `ACTIVE`, so it is very likely a process or site change — but
-its content is unread, and a package or moisture-sensitivity change would land on the footprint.
-One look before layout, not before schematic capture.
-
-**H-02, vendor egress — confirmed hard, and it is the standing constraint.** Six supplied URLs
-were tried directly (NXP ×3, DigiKey, Mouser, JLCPCB) plus two PCN mirrors: **all blocked at the
-proxy's CONNECT layer**, by WebFetch and by curl. This is the environment's network policy, not a
-link problem. General web *search* works and got the lifecycle question most of the way; **a PDF
-of the part page, saved by a human, finished it and produced both findings above.** That is the
-current working method, and it does not scale to a BOM.
-
-Allowlisting `nxp.com`, `digikey.com`, `mouser.com` and `jlcpcb.com` is the fix. Every remaining
-part number carries `UNVERIFIED`.
-
-**H-03, ERC — unchanged.** Only KiCad 7.0.11 is installable; `kicad-cli sch erc` needs KiCad 8.
-`make -C hardware erc` now **fails loudly** with the reason rather than skipping quietly, so the
-gap is visible the day a board exists instead of passing green. DRC is fine on 7.0.11.
-
-**Q-006, the library printer.** WP04-01 assumes PLA / 0.2 mm / no supports / 220 × 220. All four
-are guesses about a machine nobody here has seen. The packet is sendable with the assumptions
-stated on the card; ten minutes of asking would make it correct instead.
+**A CI failure of my own in between**, worth recording because of how it hid: a Python 3.12
+change to float summation moved a load subtotal across a 0.5 mW rounding boundary, so a
+committed document was stale on the runner and fresh here. **I had filtered the failure out of
+my own verification with a grep.** ADR-123, round 11a.
 
 ---
 
+**The plate is cleared**The plate is cleared**The plate is cleared and the two card items are settled, so it can go.** The PM verified the
+rev-4 STL against the library machine. Rev 5 settles both items they raised, plus one they did
+not have.
+
+**Four lids, one per base.** Rev 4 would have made Michael reuse a mating half across four
+variants, confounding wear with test order on a plate whose whole question is retention.
+
+**`D`, `M` and `H` are the same button, deliberately** (ADR-104 bed controls) — and **not
+byte-identical, as the review stated.** Each carries a different letter, so as shipped all nine
+are distinct meshes. That inverts what the requested gate has to do: comparing solids **runs
+green** on the plate that prompted it. The gate now compares the swept parameter and the
+mechanism with the label suppressed, and `--mutate` proves the naive version fails three red
+cases. ADR-120.
+
+**A third card item, and it is the one that can waste the trip: SUPPORTS OFF.** Each button has
+an 8 × 3 mm slot, 14 mm deep, blind at the top and open onto the bed — the thing that makes the
+arm springy. Support material in it is unremovable and welds the flexure solid, so every button
+would read as identically stiff and *"they all felt the same"* is a legitimate answer on the
+card. **The trip would look like it worked and be completely wrong.**
+
+**The clasp is respecified for a material we do not choose** (ADR-119). Closed-position strain
+is now **zero, not near-zero**, and proven by a boolean over the closed assembly. The wall went
+1.2 → 1.6 mm and the interference 0.30 → 0.18 mm — **lower strain and higher retention at once**,
+because thickness enters strain linearly and force cubically. The TPU lip is deleted; anti-rattle
+is deferred until the plate says rattle is real.
+
+**The tolerance stopped depending on the filament.** At 0.18 mm nominal a ±0.15 mm band spans
+"no engagement" to "past PLA's limit". Halves printed together shrink together, so the governing
+figure is ±0.05 mm. That is a manufacturing rule, not a tuned fit.
+
+## In flight
+
+| Work | State | Who |
+|---|---|---|
+| WP-04 packet WP04-01 | **Rev 5, cleared by the PM, card settled.** With Michael to print | Michael |
+| WP-24 cartridge shell | **Rev 0.2 — respecified for an unchosen material** (ADR-119) | Hardware Lead |
+| WP-05 parts order | Order 1a checkout-ready. Waiting on Michael | Michael |
+| WP-34 thermal budget | **Rev 0.3.** Estimates; three IR-015 responses filed, none accepted | Hardware Lead |
+| `spec/hw/board-rev-a.md` | Rev 0.5, pin map populated, no pin numbers. Accretes through WP-26 | Hardware Lead |
+| WP-26 schematic | Not started. Codec settled, so unblocked | Hardware Lead |
+
+## Blocked, and on what
+
+**The fabrication gate holds.** No board is fabricated and no cell is charged until the three
+IR-015 findings are accepted. A response is filed against each; **I do not get to mark my own
+responses accepted.** This is the only hard gate on the hardware stream and it is waiting on the
+PM or a reviewer, not on work.
+
+**H-02, vendor egress — partially lifted, still binding.** `www.nxp.com`, `www.lcsc.com` and
+`www.jlcpcb.com` now resolve; DigiKey and Mouser serve a JS shell or 403 to any non-browser
+client. The `www.` prefix is required, and **WebFetch and curl do not share an allowlist**. Net
+effect: lifecycle questions are answerable, **stock and price are not**, and no filament
+datasheet is reachable — which is why every material property in `cartridge-shell.md` is marked
+EST.
+
+**H-03, ERC — unchanged.** Only KiCad 7.0.11 is installable; `kicad-cli sch erc` needs KiCad 8.
+`make -C hardware erc` fails loudly rather than skipping, so the gap is visible the day a board
+exists. DRC is fine on 7.0.11.
+
+**Not blocked any more:** Q-006 (answered "proceed on the default"; rev 4 is laid out to it) and
+the codec (`SGTL5000XNBA3R2`, second source `SGTL5000XNLA3R2`, ADR-115).
+
 ## Spending
 
-Running total, per PM Decisions 001 §6 ($150/order, $600 cumulative without asking).
+Per PM Decisions 001 §6 — $150/order, $600 cumulative without asking.
 
 | Order | What | Est. | Status |
 |---|---|---:|---|
-| 1a | Six card SKUs + rated reader | ~$115 | Drafted, under authority. **Send today** |
-| 1b | Bench build | ~$152 | Drafted, **$2 over** the per-order limit |
-| 1c | Codec buy-ahead, 20 × `SGTL5000XNBA3` | ~$110 | Drafted, under authority. **Send with 1a** |
+| 1a | Six card SKUs + rated reader | ~$115 | **Checkout-ready with Michael** |
+| 1b | Bench build | ~$152 | Drafted, **$2 over** the per-order limit — needs a nod |
+| ~~1c~~ | ~~Codec buy-ahead~~ | — | **Cancelled**, Decisions 003 §2 |
 | | **Cumulative committed** | **$0** | Nothing ordered yet |
-| | **Cumulative if all three placed** | **~$377** | of $600 |
-
-Order 1b is $2 over. It is a genuinely separate cart from a different vendor with a different
-urgency, not a split to slide under the limit — but it needs a nod rather than an assumption.
-
-**1a and 1c are the two that should not wait.** 1a answers the tape-length question before the
-format freeze; 1c retires a nine-month lead time on a sole-source part for $110. 1b is useless
-until there are printed carriers to put the switches in, so it can wait on Q-006.
+| | **If 1a and 1b both placed** | **~$267** | of $600 |
 
 ## Acceptance criteria flipped to passing
 
-None. Nothing has been measured. Every criterion written this cycle is marked
-`SELF-REPORTED — no independent confirmation`, which PM Decisions 001 §4 makes standing
+**None, and none can yet.** Nothing has been measured. Every criterion written this cycle is
+marked `SELF-REPORTED — no independent confirmation`, which Decisions 001 §4 makes standing
 convention rather than a placeholder.
 
-Criteria for WP-04 and WP-05 go to the Verification Lead **before** the tests run, per §4 — the
-failure mode with a self-designed test is the criterion, not the measurement.
+**What did change is what "passing" will require.** Decisions 006 §5: the safety measurements
+are witnessed by Michael *and* independently audited by the Verification Lead from method and
+raw data. Recorded as ADR-118, with the record format in `hardware/measurements/TEMPLATE.md`.
+WP-24's S-4 is written to that standard from the start rather than retrofitted.
 
 ## What will hurt in three weeks
 
-- **The codec question is the one to chase.** If the SGTL5000 is genuinely obsolete it is a
-  schematic-level change, and every week it stays unanswered is a week closer to discovering it
-  during WP-26 instead of before it. It is five minutes of someone else's browser.
-- **WP04-01 is built and not moving.** It is the critical path — WP-04 blocks WP-20 and WP-22,
-  and WP-22 is the six-to-ten-week long pole. The packet has been ready since today and is held
-  by a ten-minute question.
-- **The 0.2 K JEITA margin is computed against the estimate I trust least.** The board→air
-  coupling in a sealed box is a guess (±30% would move that margin by several kelvin in either
-  direction). WP-37 measures it, but WP-37 is Phase 5. If it turns out worse than estimated, the
-  fix is a layout constraint — cell placement — and layout happens in Phase 5 too. **The
-  constraint needs to be in `board-rev-a.md` before layout, not after**, which is why §4's
-  mitigation 2 is written as a layout requirement rather than a recommendation.
-- **Nothing has been independently reviewed.** Taking up PM Decisions 001 §8 on the solenoid
-  protection circuit specifically — its whole job is to be correct when firmware is wrong, and
-  that is exactly what a second reader catches and a self-review does not.
+- **The solenoid response is open again and the fabrication gate is unchanged.** No board
+  fabricated, no cell charged. This is now a *second* response to the same IR-015 finding, and
+  I do not accept my own.
+- **Two numbers in the solenoid rework are second-hand.** The `R_EXT` range and the ±14 % IC
+  spread are the reviewer's datasheet readings; I cannot fetch either datasheet (H-02). They
+  need confirming against the exact orderable variant before WP-26, and family variants differ.
+- **The pulse length is still a placeholder and the coil now depends on it.** §6 publishes a
+  feasibility boundary instead of a point. If WP-04 measures a pulse longer than ~10 ms the coil
+  must weaken, and if the mechanism then needs more energy than the budget allows that is a real
+  conflict between a safety limit and a mechanism — a PM escalation, not something to absorb.
+- **The plate has been ready and unprinted for four days** and is still the critical path.
+- **Six plates a month has not been reflected downstream.** The PM's estimate is 2–4 months for
+  a working latch instead of 5–10; that moves WP-22 and the package index does not say so.
+- **S-2 is a 90-day clock that has not started** and cannot until a printed pair exists.
+- **A cartridge left on a car dashboard may deform**, worse in PLA than PETG. WP-25.
+- **The review found an error in the engineering, not only in a check.** Rounds 5–10 I recorded
+  that the maths always held and only the checks were wrong. That is no longer true, and the
+  correction rate on my own numbers is the thing to watch rather than the count of findings.

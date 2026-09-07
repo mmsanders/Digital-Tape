@@ -4,6 +4,874 @@ Newest round at the top. Do not edit a previous round; supersede it.
 
 ---
 
+## Round 12a — 6 Sep 2026, the auditability caution, acted on
+
+The follow-up review closed IR-018-17, kept IR-018-16 open exactly as I had restated it, and
+found no new circuit defect. It also left a caution it explicitly declined to file as a finding:
+
+> `solenoid_timing.py --check` currently exits green and prints `solenoid criteria pass` while
+> `verdict()` is `PROVISIONAL`. … **green thermal CI is not qualification of the solenoid circuit
+> while IR-018-16 remains open.** If the project later uses that CI status as a fabrication gate,
+> this distinction should become machine-enforced rather than conventional.
+
+**I have acted on it rather than acknowledged it, because the condition they made it conditional
+on is already true.** This project has had a fabrication gate since the IR-015 findings landed —
+*no board is fabricated and no cell is charged until all three close* — and it lived in a
+document banner. A sentence is precisely what "conventional" means.
+
+`hardware/fabrication_gate.py` is that sentence, executable. Today:
+
+```
+FABRICATION GATE — may a board be fabricated or a cell charged?
+  **CLOSED.** 5 blocking item(s):
+    - IR-015-charger …
+    - IR-015-solenoid …
+    - IR-015-transient …
+    - solenoid qualification: the ±14 % one-shot timing term is ASSUMED …
+    - solenoid analysis verdict is PROVISIONAL, not PASS
+```
+
+Two properties are deliberate. **It does not decide closure** — an acceptance is a fact with a
+name attached, and I do not get to write my own, so an unverifiable `accepted_by` reads as OPEN.
+And **it does not trust the analysis's summary**: it calls `qualification_gaps()` directly, so a
+green `thermal-check` cannot be mistaken for qualification.
+
+The `--check` line now says so too: *"inequalities hold at the assumed corners; VERDICT
+PROVISIONAL (1 qualification gap open — this is NOT qualification of the circuit)."*
+
+### The proof is inverted, and that is what makes it worth writing
+
+Every other gate in this repo is normally green and is proven able to go **red**. This one is
+normally CLOSED, so the thing worth proving is that it can ever **open**. `test_fabrication_gate.py`
+shows it opens when every blocker is accepted *and* the analysis certifies, and that neither
+alone is enough.
+
+**A gate that can only fail is a gate nobody reads.** It would stop being consulted long before
+anyone ordered a board, and it would still look correct the whole time. ADR-126.
+
+**It is not in `make check` and not a CI job**, on purpose: its normal state is red, and
+`ci.yml` already makes the argument against permanently-red pipelines about the golden suite.
+
+---
+
+## Round 12 — 6 Sep 2026, solenoid follow-up review (IR-018-16…17)
+
+**Both accepted. Both blockers. The disposition is right and the response stays open.**
+
+Two reviews have now found real defects in this one circuit — the first physical, this one
+structural — and I am not going to characterise that as bad luck.
+
+### IR-018-17 is the one I should have caught myself
+
+**You are right, and the giveaway was in my own text.** I wrote that B was *"triggered by A's
+falling edge so it sits downstream of the pulse and no gate input can defeat it"* — and then
+never drew the gating logic that would make the second half of that sentence true. It was an
+assertion about a circuit I had not specified.
+
+The hole is exactly as described: B's output asserts only after propagation, so between A
+releasing and B asserting there is a window where a request edge is admitted. A firmware fault
+is not phase-constrained, so it can present an edge precisely there, and one extra pulse inside
+the lockout invalidates the minimum period the whole 0.25 W proof rests on.
+
+**Fixed by construction, not by bounding.** B is now triggered by the *same edge* as A, spans
+the whole cycle, and is the sole admission gate:
+
+```
+request edge --+--> A (non-retriggerable, pulse)    --> coil driver
+               |
+               +--> B (non-retriggerable, inhibit)  --> admission gate
+
+admit = NOT B
+```
+
+There is no handoff: B is asserted at 312 ms minimum against a 12.0001 ms pulse including
+propagation. The only remaining window is the propagation delay at the very start — and **A is
+already triggered and non-retriggerable through it**, so no second coil pulse can occur there.
+
+**It also fixed the model, which is the part that would have bitten later.** `min_inhibit_ms`
+was `pulse + lockout`. That sum is only correct if the handoff is instantaneous — so the arithmetic
+was quietly assuming the very thing your finding says is false. It is now B's shortest period.
+
+**And the red case you asked for is the design you rejected.** `test_solenoid.py` fails when the
+inhibit does not outlast the pulse, which is the old topology. ADR-124.
+
+### IR-018-16: accepted, and the rail makes it worse than stated
+
+**The board is 3.3 V** (`board-rev-a` §1). So the Nexperia part cited alongside the figure is a
+**4.5–5.5 V device and is excluded outright**, and the TI 602…798 µs guarantee is at VCC = 5 V.
+My ±14 % was wrong on the test point *and* on the rail — I was extrapolating a 700 µs figure at
+one voltage to a 390 ms interval at another.
+
+**I cannot close this and I am not going to pretend otherwise.** Binding the exact part's
+guaranteed timing at 3.3 V over the intended R/C needs a datasheet, and vendor egress reaches
+none (H-02).
+
+So I took your alternative literally: **treat it as a qualification requirement rather than
+extrapolate.** The analysis now separates *design criteria* — the inequalities, which hold —
+from *qualification gaps* — whether the corners are real, which is open. While any gap is open
+the document's verdict is **`PROVISIONAL`**, printed at the top, and the criteria check reports
+the gap explicitly.
+
+**Collapsing those two into one PASS is how an assumption becomes a claim**, and I had done
+exactly that. ADR-125.
+
+**The honest route out is a measurement, not a wait.** Binding the one-shot's timing at 3.3 V is
+a bench task that belongs with WP-04's pulse measurement — same bench, same day — and it depends
+on nobody. That is now written into §6 as the route rather than left as an egress complaint.
+
+### What I take from two rounds on one circuit
+
+The first review found a missing physical term. This one found an unspecified circuit and an
+assumption wearing a guarantee's clothes. **Neither is a checking error, and both were in the
+part of the work I was most confident about** — I had already reworked this analysis once,
+carefully, in response to findings.
+
+I do not have a process fix for that and I distrust inventing one. The observation I will keep
+is narrower: **both defects were sentences I wrote that asserted a property of something I had
+not drawn.** "No gate input can defeat it" described a schematic that did not exist. "±14 %
+guaranteed" described a part that was not chosen. In both cases the prose ran ahead of the
+artefact, and the model then encoded the prose.
+
+---
+
+## Round 11a — 6 Sep 2026, a CI failure I caused and then hid from myself
+
+Filed separately from Round 11 because it is not a response to anyone's finding. It is a defect
+in my own work and in how I verified it.
+
+### The failure
+
+`thermal-check` went **red in CI and green on this machine, on the same commit**.
+
+**Python 3.12 changed `sum()` to compensated summation for floats.** More accurate, and it
+changes the last bit — and the playback load subtotal lands on exactly **739.5 mW**. So 3.11
+rendered `740 mW`, 3.12 rendered `739 mW`, and a committed artefact that CI checks was
+simultaneously fresh and stale depending on where you ran it.
+
+**The gate was right both times.** Nothing was broken except that the number was never a
+function of the inputs alone. Per-load integer microwatts are identical on 3.10 through 3.13, so
+the arithmetic is now integer and the rounding rule explicit. Six rows shift by 1 mW; no
+temperature, margin or conclusion moves. ADR-123.
+
+### The part that is actually about me
+
+**I hid the failure from myself with a grep.** My final verification before pushing was:
+
+```
+make --no-print-directory check 2>&1 | grep -E "^(OK|FAIL)" | tail -6
+```
+
+`thermal budget is STALE` does not start with `OK` or `FAIL`. Neither does most of make's error
+output, and `tail -6` discarded what was left. **I filtered my own gate's failure out of my own
+verification**, in the same session as a review whose central finding was a gate that could not
+report. The gate worked. The pipeline into my eyes did not.
+
+I have no mechanism to propose for this one, and I am suspicious of inventing one. The honest
+statement is narrower: **when the point of a command is to find out whether something failed, do
+not pipe it through anything.** Read it.
+
+### The second-order defect: the gate would not say what was wrong
+
+CI printed `thermal budget is STALE: run make -C hardware thermal` and nothing else. That is the
+half of a gate that tells you to look without telling you where, and diagnosing a one-milliwatt
+difference from it cost a full round-trip.
+
+All four generators now print a unified diff on staleness. The diff would have named the row and
+the value immediately.
+
+### And the environment was never pinned
+
+The hardware CI job used whatever Python the runner image ships. For jobs that *check committed
+artefacts*, that is a dependency nobody declared. Pinned to 3.11 — which does not fix the
+underlying fragility, and is not meant to; the integer quantisation does that. It stops a runner
+image upgrade from being a silent input to a document.
+
+---
+
+## Round 11 — 6 Sep 2026, independent review of the solenoid circuit (IR-018-11…15)
+
+**All five accepted. None disputed. The disposition — do not accept the solenoid response yet —
+is correct and I am not asking for it to be lifted.** This is a new response, not a closure.
+
+### The headline: the design failed, and my margin was fiction
+
+**IR-018-11 is right, and it is worse than the finding states.** You calculated that a 1.136×
+margin cannot survive a 13.6 % coil-power corner. The actual corner is **×1.358**:
+
+| Corner | | Effect |
+|---|---|---:|
+| Boost rail | 12 V +5 % | ×1.103 |
+| Coil resistance | −10 % as supplied | ×1.111 |
+| Copper at 0 °C | −9.8 % vs 25 °C | ×1.109 |
+| **Combined** | | **×1.358** |
+
+So the old working point is **0.330 W against a 0.25 W limit — a fail**, where my model reported
+0.220 W and a pass. All three terms push the same way, and the temperature one points the
+opposite way to intuition: copper's resistance *falls* as it cools, so the cold end of the range
+is the worst case, not the hot end.
+
+**The root error is the one you named.** I bounded the *timing* corners on a coil I had labelled
+5.0 W, and treated a nominal wattage as a safety maximum. The criterion is average coil *power*
+and `P = V²/R`; the rail and winding tolerances are the quantities, and they were not in the
+model at all.
+
+### IR-018-12: I used one corner for two opposite claims
+
+Accepted without reservation, and this is the one I find most instructive. `min_period_ms` was
+the fastest the hardware could fire — correct for bounding a fault, and exactly backwards for
+proving real use is never blocked. At the slow corner the same design held the inhibit for
+**539 ms against a 500 ms period**.
+
+**So the design would have met the safety bound partly by dropping the fastest legitimate
+press** — the precise failure the PM restated the limit to forbid. There are now two functions
+with two names, `min_inhibit_ms` and `max_inhibit_ms`, and the criteria check asserts the slow
+one clears the period.
+
+### IR-018-13: the RC was never inside the part's envelope
+
+**Confirmed: 1368 kΩ, against a 1000 kΩ specified maximum.** Moving the lockout capacitor from
+470 nF to 1 µF brings it to **551 kΩ**, inside range; the pulse resistor is 143 kΩ.
+
+**And my tolerance stack was tighter than the part it modelled** — 10 % allocated to the IC when
+the datasheet's guaranteed spread over temperature is about ±14 %. The stack is now
+±20 % (14 % IC + 1 % R + 5 % C), which made every other number worse and is the honest figure.
+
+**The wording is corrected too**: 74HC221 devices are non-retriggerable, and I had written that
+the B half was *"retriggered by A's falling edge"* — the opposite of the behaviour the lockout
+depends on.
+
+**One thing I must flag rather than quietly adopt.** `R_EXT` limits and the ±14 % figure are
+**your** datasheet readings. I cannot fetch either datasheet — gap H-02 — so those numbers are
+second-hand in my document and are marked as such. They need confirming against the exact
+orderable variant before WP-26, and the family's variants differ here.
+
+### IR-018-14: the gate failed open, twice
+
+Accepted, and the second half is worse than the first.
+
+**`--check` only tested freshness.** An unsafe edit gave an unsafe table, a fresh file and a
+green result — the ❌ was in the output and nothing read it. The safety verdict now runs first
+and independently.
+
+**And `hardware.yml` never invoked `thermal-check` at all.** The one analysis backing a safety
+limit was the one CI did not run, from the day that workflow was written. Not a regression — it
+was never there.
+
+**That generalises and I have recorded it as ADR-122.** CLAUDE.md §1 requires every gate to be
+proven able to go red. **It does not require anyone to check the gate is reachable.** A red case
+in a gate nobody runs is theatre, and two of your five findings were about exactly that.
+
+### IR-018-15: stale normative text, withdrawn
+
+Confirmed. T-4 proposed *duty ≤ 0.5 % over any 10 s window*, sitting in the section labelled "PM
+to transcribe" — so it could have reintroduced a requirement DRAFT-7 had already replaced. Your
+arithmetic is right: 0.25 W on a 5 W coil is 5 % on-time against a modelled 4.4 % fault, so a
+0.5 % duty criterion would have failed the design it was published beside. Withdrawn with the
+reasoning kept, so nobody re-derives it.
+
+### The rework, and what I am not claiming
+
+New working point: **3.5 W nominal, 10 ms pulse, 386 ms lockout** — 0.183 W over a finite rolling
+10 s window against 0.25 W, **1.37×**, slowest inhibit 475 ms against a 500 ms period.
+
+**§6 now publishes a feasibility boundary rather than a point**, because the pulse is a WP-04
+measurement and the coil follows from it. At the old 15 ms placeholder the ceiling is 3.30 W, so
+the 5 W coil was never compliant at that pulse; a shorter pulse buys the coil back.
+
+**And the cheapest lever turns out not to be the circuit.** Specifying the rail to ±2 % and the
+winding to ±5 % drops the corner factor from 1.36× to 1.21× — more headroom than any plausible
+change to the coil. That is a procurement decision.
+
+**What I am not claiming:** that this closes anything. The pulse is still a placeholder, two of
+the datasheet numbers are yours rather than mine, and the fabrication gate stays shut. **I do
+not accept my own responses** and this one has not been accepted by anyone.
+
+### The pattern, updated
+
+Rounds 5–10 I recorded that every finding was an error in *what a check was asking*, never in
+the engineering. **This round breaks that.** IR-018-11 is an error in the engineering: a missing
+physical term, a factor of 1.36 that decides pass from fail. The check-design errors are still
+here — 12 and 14 are textbook — but I should stop telling myself the maths always holds. It did
+not this time, and the reason is the same as always: I did not ask what the criterion was
+actually about.
+
+---
+
+## Round 10 — 6 Sep 2026, on PM Decisions 007
+
+### The two card items are settled. The plate can go.
+
+**Item 2 first, because it needed no argument: four lids, one per base.** You were right that
+reusing a mating half across four variants confounds wear with whichever went last, on a plate
+whose entire question is retention. The budget covers it, so the confound is removed rather than
+managed with a test order. Each lid carries its base's letter and the card tells Michael to keep
+pairs together.
+
+### Item 1: the repeat is deliberate — and the mechanism you gave for it is wrong, which is the useful part
+
+`D`, `M` and `H` **are** the same button, at 1.2 mm, and it **is** deliberate — ADR-104's blind
+bed controls, ranked alongside the real variants to test whether print position is confounding
+the sweep. So your first branch applies and the card now declares it.
+
+**But they are not byte-identical solids.** Each carrier has its own letter cut into the cap.
+Measured:
+
+| | `M` | `D` | `H` |
+|---|---:|---:|---:|
+| Volume, mm³ | 1739.681 | 1740.288 | 1740.575 |
+| Triangles | 240 | 922 | 236 |
+
+Suppress the label and they collapse to one signature. Ship them and they are three different
+meshes.
+
+**That inverts what the gate you asked for has to do.** "Add a duplicate-geometry check" —
+compare the solids — **runs green on the exact plate that prompted it**, because the blind label
+that makes the experiment work also makes every part unique. It is the allocation gate again:
+a check measuring a real quantity, and not the one anyone cared about.
+
+So the gate does two comparisons: the **swept parameter** (which is what you were actually
+pointing at, and what no mesh comparison can see) and the **mechanism with the label
+suppressed** (which catches the opposite failure — a parameter that differs on paper and never
+reached the geometry). `--mutate` installs the naive version and it fails three red cases.
+ADR-120.
+
+### A third card item you did not have, and it is the one that can waste the trip
+
+**Supports.** Each button has a slot roughly 8 × 3 mm and **14 mm deep, blind at the top, open
+onto the bed**. That slot is what makes the arm springy, and springiness is what the plate
+measures.
+
+A "supports everywhere" setting fills it. Fourteen millimetres down a 3 mm gap it is not
+removable, and while it is in there the arm cannot flex at all — so **every button reads as
+identically stiff.** "They all felt the same" is a first-class answer on this card, so the trip
+would look like it worked and be completely wrong. It is now the first of three lines to the
+staff, in capitals, with the consequence spelled out.
+
+**I did not change the geometry to fix it**, because you verified the current STL and a geometry
+change would void that verification before a trip that is already waiting. The fix for plate 02
+is to open the slot to a side face so a setting cannot ruin it. Logged, not done.
+
+### §2: the clasp, respecified for a material we do not choose
+
+**Your design rule is the one rev 0.1 already followed** — the groove is cut deeper than the bead
+stands proud, so the closed cartridge has no contact at the bead at all. What changed is that it
+is now stated as **zero, not near-zero**, and proven as a boolean over the closed assembly rather
+than argued. Losing the TPU lip actually *improved* that number, from 0.086 % to 0.000 %.
+
+Your six deliverables:
+
+| | |
+|---|---:|
+| Closed-position strain | **0.000 %** |
+| Snap-through peak strain | **0.60 %**, assuming **PLA** — 1.7× under permissible |
+| Retention from geometry alone | **322 N** PLA / **176 N** PETG |
+| Cycle target | 20 at ≤ 20 %, accepted |
+| Seam | 1.0 mm 45° chamfer; a 0.15–0.25 mm line, step to ±0.2 mm |
+| Opening feature | 0.9 mm blade slot, back face |
+
+**Three numbers moved, and the direction is counterintuitive.** The wall went 1.2 → 1.6 mm and
+the interference 0.30 → 0.18 mm: **lower strain and higher retention at the same time**. Strain
+enters linearly in thickness, force cubically, so thickening and pulling the interference back
+down is a strict win — and the thicker wall is the better drop part too. Three criteria improved
+by one change.
+
+### The tolerance number was the real problem, and it is a manufacturing rule not a fit
+
+At 0.18 mm nominal, a ±0.15 mm band spans **0.03 mm — no engagement at all** — to 0.33 mm at
+**1.10 % strain, past PLA's permissible**. Both ends are failures, so at this interference the
+tolerance is the design.
+
+**Halves printed together shrink together.** One plate, one session, one spool: what survives is
+the printer's XY repeatability, ±0.05 mm, not the material's shrinkage. That band is
+comfortable at every point in the sweep. It also satisfies *"do not tune a fit to a specific
+filament"* in the strongest available sense — it removes the filament from the comparison rather
+than accommodating it. The rule is normative in the spec and on the card.
+
+### What I am deliberately not designing yet
+
+The TPU lip's other job was anti-rattle preload. **I have not replaced it**, because nothing has
+confirmed that rattle is real: there is now no preload feature at all, and the card asks Michael
+whether the boxes stay shut when shaken. If they do, the design is simpler and stays that way.
+
+If they do not, the replacement is sized and sitting in `clasp.py`: a long thin leaf in the
+shell's own material at **0.061 % sustained strain**, four times under PLA's creep threshold.
+**The obvious version of that feature is the trap** — the gap to close is 0.10 mm, and deflecting
+a 2.9 mm rib by that is **1.4 % held forever**, which is the exact failure your §2 forbids,
+arrived at while trying to fix rattle. Strain falls as the square of the span and force as the
+cube, so the leaf has to be long and thin.
+
+### Three defects found in my own already-shipped work
+
+- **`spec/hw/cartridge-shell.md` §8 carried a stale duplicate below its generated block** —
+  "two lids, and they are the control" and "print that interference in PETG", directly
+  contradicting the generated text a screen above. I moved that content into the generator last
+  round and left the original behind.
+- **The same section's §2 rationale still quoted a 1.2 mm wall and 0.75 % strain.** Both are now
+  generated from the model rather than typed, so they cannot drift again.
+- **`carrier-X-onside.stl` had been sitting in the packet for two revisions** after the
+  on-its-side variant was dropped — a printable file for a part that no longer exists in the
+  design. The build only ever added files, so nothing could notice. It now wipes the per-part
+  directory first.
+
+### Still open, unchanged
+
+**The three IR-015 findings** and the fabrication gate — no board fabricated, no cell charged.
+**`Request Independent Review` on the solenoid circuit**, per your §4.4: the 74HC221 one-shot
+pair, the RC lockout values and their tolerance stack, and specifically whether the energy
+budget in `thermal-budget.md` §6 bounds a *fault* rather than only normal use.
+
+**Order 1a** still with Michael; 1c stays cancelled. **Issue #23 stays open until the DRAFT-7
+bundle lands**, per your §0.
+
+**`STATUS-HARDWARE.md` was rewritten on 5 September**, before Decisions 007 was written — your
+§3 note about it being three rounds stale was correct when you wrote it and is now addressed. It
+is updated again this round.
+
+---
+
+## Round 9 — 5 Sep 2026, on PM Decisions 006
+
+### Michael can have the clasp, and your reframing is the reason
+
+**Accepted, and it is the load-bearing insight of the whole assessment.** A cartridge is opened
+one to three times in its life because every cartridge after the first is copied by the device.
+That converts a fatigue problem no printed material solves into an interference fit PETG does
+comfortably — and it is why the nylon correction in §1 costs this package nothing. **Nylon's
+advantage is fatigue life in a small flexure, and this flexure does not need any.**
+
+Deliverable: `spec/hw/cartridge-shell.md`, generated from `hardware/mech/clasp.py`. Answers to
+your five asks, and the two places I disagreed.
+
+### Where I disagree with you, both times about corners and about force
+
+**1. A continuous perimeter lip does not work on a rectangular box.** You are right about
+spreading the load and right that it gives the seam. It fails at the corners: a rectangle cannot
+open at a corner by bending, only by stretching, and stretching is effectively rigid. A lip
+running through the corners breaks rather than releases.
+
+The fix keeps both halves of what you wanted: **the seam is continuous and the engagement is
+not.** Tongue-and-groove runs the whole perimeter — that hides it and registers the halves —
+while the retaining interference lives only on the two long walls, stopping 9 mm short of each
+corner. Michael sees an unbroken line; the mechanism sees two compliant runs and four rigid
+corners doing alignment.
+
+**2. Retention force cannot separate a child from an adult, and I have not designed a number
+that pretends it can.** The joint takes ~124 N to pull apart. A determined seven-year-old with
+*something to grip* can reach 80 N. That is a factor of 1.5 and I will not present it as a
+safety margin.
+
+What actually separates them is that **there is nothing to grip**. The seam is flush, so the only
+force a child can bring is a pinch on a smooth 12 mm slab — about 20 N, a 6× margin. That turns
+your ask #4 into a rule rather than a number: **any feature giving a fingernail purchase on the
+parting line converts the 20 N case into the 80 N case and spends the entire margin.** It rules
+out the recessed thumb-notch every battery cover uses, and it is why the answer is a 0.9 mm blade
+slot rather than a recess.
+
+Your "two points of pressure at once" is a good instinct that does not survive the dimensions: a
+five-year-old's hand spans about 130 mm and the cartridge is 86 mm, so it is a motion a child
+*can* make. **A tool a child does not have in hand is a better filter than a motion a child
+cannot make.** The parent's low-force path is geometric, not muscular — a blade unzips one 14 mm
+span where a pull must deflect both full runs at once, about 10 : 1.
+
+### The strain number you asked for, and the better answer behind it
+
+**0.75 % peak while opening, 0.086 % at rest.** The second is the one that decides creep, and the
+answer to "does PETG creep at the deflection you chose" is that **the design does not hold the
+deflection**: the groove is deeper than the bead is proud, so the wall returns undeflected. The
+opening strain exists for about a second, once or twice in the cartridge's life.
+
+That is a geometric claim, not a textual one, so it is checked by a boolean rather than a
+paragraph — `test_shell.py` intersects the closed assembly and asserts zero volume, for every
+variant. The mutation run makes the groove too shallow to seat the bead and asserts the checks
+go red. **That failure mode prints, assembles, latches and feels correct while holding the wall
+deflected for years**, and nothing but a boolean catches it.
+
+### Your cycle target: accepted, and it is the criterion that cannot fail
+
+**20 cycles at ≤ 20 % force loss, unchanged.** I have no argument for moving it and ten times the
+realistic life is right for an object children handle.
+
+**But I would rather say plainly that it will pass than bank it as a gate.** Twenty one-second
+excursions to 0.75 % strain, spread over years, is not a fatigue duty in any thermoplastic. It
+costs Michael four minutes. So three more, and these can fail:
+
+- **S-2 — 90 days closed, at 23 °C and at 45 °C.** The cartridge spends ~100 % of its life
+  closed. This is where creep would show, and the 45 °C leg is a cartridge left in a car.
+- **S-3 — 1.0 m drop, six faces and four corners, card retained.** A 25 g cartridge arrives with
+  ~0.25 J; stopping in half a millimetre puts peak contact force in the hundreds of newtons,
+  **above the joint's own pull-apart force**. Not all of that separates the halves, but it is
+  close enough that the outcome is not predictable from the static numbers — and a cartridge
+  that springs open on impact is the choking hazard ADR-105 exists to prevent, arriving by a
+  route no cycle count looks down.
+- **S-4 — a 30 N pinch held 10 s does not open it.** The safety-critical one, and deliberately
+  falsifiable. 30 N was chosen partly because a $10 luggage scale reads it, which is what makes
+  the raw data auditable under §5.
+
+**One finding that goes with S-2 and belongs in whatever the family is told:** PETG's heat
+deflection is around 70 °C and a closed car in summer reaches it. **A cartridge left on a
+dashboard may deform**, and a deformed cartridge is one whose clasp no longer holds. Not a
+reason to change material — every printable option we can run has it — but it needs a line in
+WP-25 and a sentence to Michael.
+
+### TPU is doing a job, not an experiment
+
+You offered it as worth one experiment. It is worth more, and the reason is a split of duties:
+the PETG bead gives **retention**, a hard stop at a defined interference; the TPU lip gives
+**preload**, ~22 N round the perimeter soaking up the ±0.15 mm of print variation. Two jobs, two
+materials, and the tolerance lands on the one with 400 % elongation to spend. **That is what
+makes the clasp survive the colour change §1 warns about.**
+
+The shape is the whole trick and the obvious version fails: a 1 mm TPU gasket squashed 0.2 mm
+over this perimeter develops several hundred newtons and would hold the shell open. The same
+rubber as a **thin lip in bending** develops 22 N. Same material, same displacement, two orders
+of magnitude apart.
+
+**And it cannot be printed at the library** — PLA only, and a merged STL carries one material
+for every part in it. `tpu-lip.stl` ships beside the plate and waits. That is a more concrete
+argument for the A1 combo than "more materials would be nice": **this part is on the critical
+path for the clasp's tolerance and today we cannot make it.**
+
+### One plate, two experiments — and it was nearly free
+
+Per §4. WP04-01 rev 4 carries the latch sweep and the clasp sweep: **1.6 h against the 6 h limit,
+150 × 149 mm against a conservative 180 × 180 bed.** Different letters, different seeds, nothing
+shared but the bed. Two lids act as a control in WP-04's sense — if the ranking tracks the lid
+rather than the base, the shared part is wearing and the sweep is measuring that.
+
+**One line on the card had to change, and I am flagging it rather than doing it quietly.**
+Decisions 005 §2 fixed the staff line as *"any orientation is acceptable, provided all parts are
+printed in the same one."* That is still first and still the one protecting the experiment. But
+the plate now carries open box-shaped parts, and **an inverted tray prints badly**, so a second
+line says the plate is laid out flat and that the boxes need supports if turned. It completes
+your line rather than replacing it — say so if you read it differently.
+
+### The sealed cartridge: agreed against, and my number is 6 weeks ± 2
+
+Your trigger for reconsidering — *"if a printed clasp cannot hold a card safely at a size a child
+can hold"* — is not met.
+
+I would add a fourth reason to your three. **Sealing does not remove the shell problem, it
+relocates it.** A sealed cartridge still needs a seam, a parting line, retention to hold itself
+together during assembly, and a drop case. Everything in §2–§6 is still required. What sealing
+removes is one 0.9 mm slot; what it costs is the ability to replace a dead card. Bad trade.
+
+**6 weeks ± 2**, broken down in `cartridge-shell.md` §10. **The ± 2 is almost entirely the host,
+not the USB stack** — TAPEFS sits in partition 2 with a type byte no desktop recognises, Windows
+volunteers to repair unrecognised volumes, and the person clicking *Yes* is a parent trying to
+help. Enumeration is the easy part.
+
+**Treat that number as an outside estimate and have the Software Lead correct it.** Firmware is
+not my stream and I am sizing someone else's work, which is exactly the kind of number that
+should be checked rather than inherited.
+
+### §5, and what "auditable by someone not in the room" actually costs
+
+Recorded as ADR-118 with a format in `hardware/measurements/TEMPLATE.md`. The part worth naming:
+**it binds before the measurement, not after.** An auditor who was not present cannot tell a
+settled reading from a drifting one — and `thermal-budget.md` §4's worst sustained case lands
+**0.2 K from the JEITA ceiling**, so a result reported without its uncertainty makes that margin
+unauditable. Nobody can tell a 0.2 K margin from a 0.2 K instrument error. The two template
+sections most likely to be left thin, uncertainty and what-would-change-this, are the two the
+audit actually needs.
+
+### Three things I found in my own work this round
+
+**The bases were four different heights.** A deeper bead has a taller lead-in ramp, and the first
+draft let it push the wall up: 8.4, 8.4, 8.6, 8.8 mm. In a **blind** sweep that is not cosmetic —
+the deepest variant was visibly the tallest. Every shared dimension is now derived from the
+worst-case variant and `test_shell.py` asserts the bases are bbox-identical.
+
+**I had the ramp-angle convention backwards in prose.** I wrote "degrees from the seam plane";
+virtual work says the angle in that formula is from the *pull axis*, and the two readings invert
+every force in the file. The numbers were right and the naming was wrong — which is worse than
+it sounds, because the wrong name would have propagated into the CAD. There is now an assertion
+that the factor increases with angle and that a face past `atan(1/µ)` is unopenable. It also gave
+a better fact than the one I had written: **self-locking starts at 70.7°, not 90°.**
+
+**The tempting simplification would have invalidated the analysis silently.** The lid's tongue
+fouls the un-thinned corner walls; the obvious fix is to thin the whole rim. That moves the
+flexing span from 6.0 mm to 3.2 mm, and strain goes as its square — **0.75 % becomes 2.6 %**,
+past PETG's permissible and far past PLA's. It would have printed, assembled and felt right. The
+tongue has ears instead, and `test_shell.py` probes the wall section from the floor to the bead.
+
+**The pattern is the same one as rounds 5–8 and I want it on the record again:** none of these
+was an error in the engineering. All three were errors in what a check or a name was *asking*.
+
+### Two defects in already-shipped documents
+
+Found while working, not by review. **`CARD.md`'s headline still said "Print `plate.3mf`"** while
+its own table said `plate.stl` — the rev-3 change updated the table and missed the first line, so
+the one instruction Michael reads first was the wrong one. **`WP-04.md` had a duplicated heading
+and a live paragraph describing the on-its-side variant** deleted two revisions earlier. Both
+fixed. The second is the argument for `spec/hw/VERSION.md` in miniature: it survived two
+revisions of a document I wrote myself.
+
+### Still open, unchanged
+
+The **three IR-015 findings** and the fabrication gate — no board fabricated, no cell charged,
+until all three are accepted, and **I do not get to mark my own responses accepted**. **Order 1a**
+still with Michael; 1c stays cancelled. Media atomicity is more load-bearing under §8.1's two
+durability modes and the tooling is ready for the cards.
+
+New and small: **`thermal-budget.md` had no revision-history row for 0.2.** Reconstructed at 0.3
+and marked as reconstructed.
+
+---
+
+## Round 8 — 4 Sep 2026, on PM Decisions 005
+
+### The library rules changed WP-04's design, and one change is an improvement
+
+**STL, not 3MF.** The library accepts `.stl` only, so the deliverable is now a single
+merged STL. Your `plate-FIXED.3mf` stopgap is void — Michael should use `plate.stl`.
+
+**Staff choose orientation, which kills the on-its-side variant** — and you are right
+that this is better than a workaround. Print anisotropy is a manufacturing choice we
+control in production, not a design variable Michael should be feeling with his thumb.
+Asking him to compare a part that differs by print direction confounds the question we
+actually want answered.
+
+So compliance moved into geometry, and that exposed something: **the carrier had no
+flexing element at all.** The barb sat on a rigid stem, the bar was rigid, and nothing
+in the model could deflect. `X` was testing anisotropy on a part with no beam in it. The
+carrier now has a real cantilever — `beam_length`, `beam_thickness`, `root_fillet` — and
+`Z` is a longer, thinner tongue at the centre variant's hook depth, asked blind as
+"which feels springier?". Same count, same bracketing, and a better question: if he
+picks it out of nine, the tongue is the dominant lever and packet 02 sweeps beam
+geometry rather than hook depth.
+
+The merged-solid detail is what makes the uniform-orientation argument hold. One solid
+means staff's choice applies to every part together, and a blind comparison survives
+being rotated together — it does not survive parts being rotated differently from each
+other.
+
+**The card carries the three lines**: plate 150 × 53 mm, ~48 minutes estimated against
+the 6 h refusal threshold, and the one sentence for staff. The gate now checks the STL
+as well as the 3MF, because the 3MF is not the file being printed — which was the same
+mistake in miniature as checking bytes rather than validity.
+
+### On M-04 — the two-prints-a-month arithmetic is right, and worse than it looks
+
+Ten to twenty revisions at two requests a month with no guaranteed completion date is
+five to ten months, and I would add one thing to the case you have put to Michael:
+**PLA cannot answer the durability question at all.** The library offers PLA only, a
+latch is a flexure, and PLA creeps under sustained load — so even with unlimited library
+prints, the 1 000-cycle criterion in WP-22 would still need a service bureau or a
+printer that does PETG. The library loop is capped at "does the geometry feel right",
+which is exactly the one-shot comparative job you have scoped it to.
+
+That strengthens rather than changes your recommendation, and it is Michael's call.
+
+### Taking up the version-manifest pattern
+
+§5 offered it and it applies here for a specific reason: `board-rev-a.md` is what
+`firmware/prod` writes against, and its value rests entirely on *the document changes
+first and the notification is explicit*. That was a promise. `spec/hw/VERSION.md` plus
+`make -C hardware spec-check` makes it a gate — **content hash and revision move
+together or the build fails.**
+
+Both red cases are proven: content changed with a static revision, and a revision bumped
+without re-blessing. And while building it I hit the failure it exists to prevent twice
+in ten minutes — an edit that silently matched nothing, and a check that returned OK on
+unblessed rows while verifying nothing. Both are fixed and both are in the red cases.
+
+### Still open
+
+The three IR-015 findings have responses on `main` (ADR-111, ADR-116, per-device
+junction model) and the fabrication gate stands. **I have not marked them closed** — a
+response is not a closure and its author does not accept it.
+
+The **absolute touch-temperature cap** from round 3, unchanged. `ambient + 15 K` permits
+50 °C at the 35 °C ambient this budget designs to, above the ~48 °C class limit for
+plastic a child holds continuously. We pass both today with ~9 K to spare.
+
+---
+
+## Round 7 — 3 Sep 2026, IR-018 round 2
+
+**Five more findings, all correct, all fixed, no disputes.** Two blockers, both the same
+shape as the first round's: a way to reach PASS without doing the experiment.
+
+**IR-018-07 is the one to read, and it invalidated my previous fix.** I closed round 1's blocker
+by qualifying cuts on a DAT0-low sample. But in native 4-bit mode **DAT0 is a data line during
+the payload** and is low whenever the current bit is zero; the protocol's busy indication is a
+*distinct phase* entered only after the data-response token is accepted. So my "proof" of a
+mid-write cut was consistent with a cut landing mid-payload — the exact thing it was supposed to
+rule out. And in SPI mode the indication is on MISO, which I had not considered because I never
+stated the bus mode.
+
+Qualification is now from protocol state: complete payload, accepted response token, observed
+busy entry, indication still asserted at the cut, with the bus mode and sensed line declared and
+checked.
+
+**IR-018-06:** the 1 000 minimum was read from the plan file, so `--cuts 0` passed on an empty
+run. **My own happy-path test demonstrated a PASS with three cuts and I did not notice what that
+implied.** The threshold now lives in code; tests inject a policy rather than lowering the bar
+through the production file format.
+
+**IR-018-09** is the one with the worst incentive: planned attempts and required qualifying were
+the same number, so one honest miss made PASS unreachable — while the cut offsets make misses
+*expected*. The tool was pushing an operator toward editing data. Now separate, with a 1.5×
+surplus and an auditable `--extend`.
+
+**IR-018-10** stings: I wrote that fix last round and **the edit silently failed to apply**, so
+the published procedure still could not run. CI now executes the documented commands end to end.
+
+### What I am taking from three rounds
+
+Round 5 I wrote up a gate that passed on malformed XML. Round 6, a safety tool with no test.
+Round 7, a threshold an operator could set to zero and a "proof" that proved something adjacent
+to what it claimed. **Not one of these was an error in the engineering** — the thermal maths, the
+TS network, the classification logic have all held. Every one was an error in *what the check was
+asking*.
+
+Two habits, adopted rather than intended:
+
+1. **Write the red case first and commit it.** Already done for the atomicity judge.
+2. **When I add a threshold or a proof, ask what the cheapest way to satisfy it without doing the
+   work would be** — and then check whether my own tests do exactly that. Mine did, twice.
+
+I would also rather this be said plainly: the independent review has found five things in two
+rounds that I did not, and the two blockers were both real. That is the arrangement working, and
+it is a good argument for putting the schematic through the same treatment before layout rather
+than after.
+
+---
+
+## Round 6 — 3 Sep 2026, on independent review IR-018
+
+**Five findings, all correct, all fixed. No disputes.** Detail is in the PR #18 thread; the
+part worth carrying up here is what the blocker says about how I build gates.
+
+**IR-018-01 (blocker): the atomicity procedure could return PASS having never cut a card
+mid-write.** Cuts were open-loop delays from one nominal write time, and the judge accepted no
+evidence that any cut intersected a write. A thousand cuts landing after completion all classify
+NEW and the tool was happy — certifying a card while testing nothing, and that PASS is what the
+format's single-block commit assumption would have rested on.
+
+Fixed by making the card's own busy signal the oracle: SD holds `DAT0` low during a write, so
+`DAT0` low at the instant of the cut is the card stating it was mid-commit. Attempted and
+qualifying cuts are now separate numbers and the 1 000 threshold applies to qualifying only.
+
+**IR-018-04 is the one I would not have found.** `OLD = N−1` assumes iteration *N−1* completed —
+precisely what power-cut testing cannot assume. A card still holding *N−2* would have been
+reported CORRUPT, so a perfectly atomic card could fail. Every trial now establishes the old
+image by writing *N−1* cleanly and verifying it, rather than inferring it.
+
+The other three: row count masquerading as cut count, neighbour checking that failed open when
+the field was absent, and no committed test for a tool whose failure mode is a PASS nobody
+earned.
+
+### The pattern across two rounds, which is the actual finding
+
+Round 5 was me writing up how a reproducibility gate passed on malformed XML because it asked
+"are the bytes identical?" and never "is the file valid?". **In the same PR I shipped a safety
+tool with no test at all**, and its default failure was also to pass. Twice now the defect has
+not been in the analysis — the thermal maths, the classification logic — but in **what the check
+was asking**.
+
+So I am adopting a standing rule for anything I build that can say PASS: **write the red case
+first, and commit it.** `make -C hardware atomicity-test` now runs the suite and then runs it
+again with `classify()` mutated to always return `NEW`, asserting it goes red. That is the
+`CLAUDE.md` §1 rule applied to hardware tooling rather than to engine gates, and it is where it
+should have been from the start.
+
+### One thing the review surfaced that changes a deliverable
+
+**No atomicity PASS can support format freeze until the rig firmware is reviewable.** It must
+issue a true single-block raw write rather than a filesystem write that touches metadata,
+capture transaction timing, remove power cleanly rather than brown out, and **bypass caches on
+re-read** — a readback through a stale controller cache returns the new pattern whether or not
+it ever reached the media. That last one produces a confident wrong answer rather than a visible
+failure, and it is now stated in `WP-05.md` rather than left implicit.
+
+---
+
+## Round 5 — 3 Sep 2026, on PM Decisions 004
+
+### The broken plate was mine, and the root cause is worth knowing
+
+`plate.3mf` had malformed XML and no slicer would have opened it. Root cause:
+
+```python
+_CREATION_DATE.sub(rb"\1" + b"2026-09-02T...", data)
+```
+
+The regex replacement **template** parser reads `\1` followed by `2` and `0` as one token:
+`\120` is an **octal escape**, `0o120` = `'P'`. Group 1 — the opening
+`<metadata name="CreationDate">` tag — was replaced by the letter `P`, leaving the orphaned
+closing tag you found. It only appeared because I was making the file byte-reproducible, which
+is the kind of irony worth writing down.
+
+**A second, independent bug:** object 8 at Y = −11 mm. My bounds check tested `xmax`/`ymax`
+only, so anything at negative coordinates passed. Hand-placed pitch coordinates put it there.
+
+Both are now impossible rather than fixed — geometry is shelf-packed from measured bounding
+boxes, `validate()` checks all four edges per object and **refuses to write** a broken packet,
+and `check_3mf()` parses every XML entry after writing. Plus `make -C hardware packet-validate`
+and a CI job, per your §2.4.
+
+**Rev 2 needs a bed of only 162 × 65 mm**, laid out for 180 × 180, and the card carries the
+bed-size line. Thank you for the stopgap — Michael should use rev 2 rather than `plate-FIXED`,
+because rev 2 regenerates from source and the stopgap does not.
+
+**The general lesson, which is why this is in the review packet rather than just the commit.**
+I had a reproducibility gate on that file and it passed happily on malformed XML, because it
+only asked *"are the bytes the same each time?"* — never *"is the file valid?"* That is the same
+failure mode as the allocation gate that ran green over 98 KB of `.bss`: a gate measuring the
+wrong quantity reads as green. `CLAUDE.md` §1 already says every gate must be proven able to go
+red. **My packet gate had never been shown a broken packet.** Now it has.
+
+### The three IR-015 findings — responses are filed and merged
+
+Your §3 lists them as still open, which I think predates the PR #15 merge. All three have
+responses on `main`:
+
+| Finding | Response |
+|---|---|
+| Charger 45 °C | `thermal-budget.md` §5.1–5.3 — route 1, TS divider designed, 32 corners enumerated. **ADR-111** |
+| Solenoid | §6 — restated against your 0.25 W bound; my earlier design **failed it**, corrected. **ADR-116 supersedes ADR-112** |
+| Transient thermal | §3 — per-device junction temps, two-time-constant model |
+
+**They are not closed, and I have not marked them closed** — the author of a response does not
+get to accept it. The banner now says exactly that, and the fabrication gate stands unchanged.
+What I need is a read, not a decision.
+
+The charger one is worth your attention even at a glance: a `BQ25896` holds a 45 °C hot-suspend
+**only with a B = 3950 K thermistor**. The obvious 103AT part spans exactly enough to place both
+thresholds on the limits and nothing more, so asking for any tolerance margin returns a
+*negative resistor*. Margin is not optional because safety is one-sided here.
+
+### Media atomicity — added, plus one thing the criterion misses
+
+Procedure, rig spec and tooling are in `WP-05.md` and
+`hardware/characterisation/media_atomicity.py`. Self-tested against an injected tear.
+
+Two design notes worth your eye:
+
+**The pattern is a repeated counter, not random data.** Iteration *N* fills all 512 bytes with
+the word *N*; old is all *N−1*, new is all *N*. A tear is then visible wherever the boundary
+falls, which random data would not guarantee.
+
+**The neighbouring blocks are checked too, and that is outside your criterion.** An SD card's
+FTL can garbage-collect during a power cut and damage blocks *nobody wrote*. That is equally
+fatal to the format, it is a documented SD failure mode, and the same rig catches it for free in
+the same run. If it fires it is a blocker on the same terms.
+
+**One boundary question.** The rig's Teensy sketch is bench instrumentation, not product
+firmware, so I have treated it as mine and put it under `hardware/`. If you read `firmware/` as
+covering anything running on a microcontroller, say so and it becomes a handover — the analysis
+tool is unaffected either way.
+
+### Still carried forward
+
+The **absolute touch-temperature cap** from round 3, unchanged. `ambient + 15 K` permits 50 °C
+at the 35 °C ambient this budget designs to, above the ~48 °C class limit for plastic a child
+holds continuously. We pass both today with ~9 K to spare, so adding the absolute cap costs
+nothing now and stops a future charge-current increase eroding it silently.
+
+---
+
 ## Round 4 — 2 Sep 2026, on PM Decisions 003
 
 ### The solenoid limit changed and my design failed it — corrected
