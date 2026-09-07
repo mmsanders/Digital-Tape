@@ -2,6 +2,7 @@
 
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 
@@ -11,6 +12,7 @@ SPEC = importlib.util.spec_from_file_location(
 )
 mod = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
+sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 Envelope = mod.Envelope
 validate = mod.validate
@@ -67,23 +69,37 @@ class ProtocolTests(unittest.TestCase):
             new_state="review", round_authorized=True,
         )
 
-    def test_waiting_parent_can_be_released_by_fanin(self):
+    def test_waiting_parent_can_be_released_by_bus_fanin(self):
         self.ok(
-            sender="software", destination="software", old_state="waiting",
+            sender="bus", destination="software", old_state="waiting",
+            new_state="queued", round_authorized=True,
+        )
+
+    def test_bus_cannot_invent_normal_work(self):
+        self.bad(
+            "bus actor may only",
+            sender="bus", destination="software", old_state="draft",
             new_state="queued", round_authorized=True,
         )
 
     def test_untyped_lateral_review_is_red(self):
         self.bad(
-            "kind:independent-review",
+            "lateral Verification routing",
             sender="software", destination="verification", old_state="draft",
             new_state="queued", round_authorized=True,
         )
 
-    def test_typed_independent_review_is_legal(self):
+    def test_typed_independent_review_request_is_legal(self):
         self.ok(
             sender="software", destination="verification", old_state="draft",
             new_state="queued", round_authorized=True,
+            independent_review=True,
+        )
+
+    def test_typed_independent_review_result_returns_to_requester(self):
+        self.ok(
+            sender="verification", destination="software", old_state="working",
+            new_state="review", round_authorized=True,
             independent_review=True,
         )
 
