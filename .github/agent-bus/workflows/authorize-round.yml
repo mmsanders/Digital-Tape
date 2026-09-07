@@ -30,15 +30,33 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       ROUND_ISSUE: ${{ inputs.round_issue }}
     steps:
-      - name: Verify one bounded draft and its prepared roots
+      - name: Verify one bounded draft, capability policy, and prepared roots
         id: verify
         shell: bash
         run: |
           set -euo pipefail
 
+          form_value() {
+            heading="$1"
+            awk -v h="### ${heading}" '
+              $0 == h {
+                while (getline) {
+                  gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+                  if ($0 != "") { print $0; exit }
+                }
+              }'
+          }
+
           issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ROUND_ISSUE}")"
           labels="$(jq -r '.labels[].name' <<<"$issue")"
+          body="$(jq -r '.body // ""' <<<"$issue")"
           grep -Fxq 'agent-round' <<<"$labels" || { echo 'not an agent-round issue' >&2; exit 1; }
+
+          pm_capability="$(form_value 'PM capability policy' <<<"$body")"
+          [[ "$pm_capability" =~ ^(auto|strong|frontier)$ ]] || {
+            echo 'round has missing/invalid PM capability policy; expected auto/strong/frontier' >&2
+            exit 1
+          }
 
           # Exactly one open draft/active round control issue may exist.
           rounds="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label 'agent-round' --json number,labels --limit 100)"
@@ -51,8 +69,6 @@ jobs:
             )] | length' <<<"$rounds")"
           [[ "$competing" -eq 0 ]] || { echo 'another draft/active Agent Bus round exists' >&2; exit 1; }
 
-          # Fresh authorization is draft. A rerun may resume the exact same
-          # already-authorized round after a partial root-release failure.
           if grep -Fxq 'round:draft' <<<"$labels"; then
             echo 'resume=false' >> "$GITHUB_OUTPUT"
           elif grep -Fxq 'round:authorized' <<<"$labels" && grep -Fxq 'round:active' <<<"$labels"; then
@@ -72,8 +88,6 @@ jobs:
             exit 1
           }
 
-          # Every direct child is an agent root and must be either a valid held
-          # root or a valid already-released root on resume.
           bad="$(jq '[.[] | {number, labels:[.labels[].name]} | select(
             ((.labels | index("agent-root")) == null) or
             ((.labels | index("agent-task")) == null) or
@@ -95,7 +109,6 @@ jobs:
             exit 1
           }
 
-          # Exactly one destination total per root, and it must be a lead.
           bad_dest="$(jq '[.[] | {number, labels:[.labels[].name]} | . as $r |
             ([ $r.labels[] | select(startswith("to:")) ]) as $d |
             select(
@@ -114,18 +127,47 @@ jobs:
             exit 1
           }
 
+          # Capability is stored in the Issue Form body to avoid capability-label
+          # clutter. Validate allowed role bands before human authorization can
+          # release any expensive root.
+          mapfile -t root_numbers < <(jq -r '.[].number' <<<"$roots")
+          for root_number in "${root_numbers[@]}"; do
+            root="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${root_number}")"
+            root_body="$(jq -r '.body // ""' <<<"$root")"
+            root_labels="$(jq -r '.labels[].name' <<<"$root")"
+            capability="$(form_value 'Capability class' <<<"$root_body")"
+            destination="$(grep -E '^to:(software|hardware|verification)$' <<<"$root_labels")"
+
+            case "$destination" in
+              to:software|to:hardware)
+                [[ "$capability" =~ ^(auto|balanced|strong|frontier)$ ]] || {
+                  echo "#$root_number invalid lead capability '$capability'" >&2; exit 1;
+                }
+                ;;
+              to:verification)
+                [[ "$capability" =~ ^(auto|strong|frontier)$ ]] || {
+                  echo "#$root_number invalid Verification capability '$capability'" >&2; exit 1;
+                }
+                ;;
+            esac
+          done
+
+          echo "pm_capability=$pm_capability" >> "$GITHUB_OUTPUT"
+
       - name: Record protected authorization
         if: steps.verify.outputs.resume == 'false'
         shell: bash
+        env:
+          PM_CAPABILITY: ${{ steps.verify.outputs.pm_capability }}
         run: |
           set -euo pipefail
-          # Record proof before releasing any model work.
           gh issue comment "$ROUND_ISSUE" --repo "$GITHUB_REPOSITORY" --body \
             "<!-- AGENT-BUS-AUTH -->
           Round authorization passed the protected \`michael-round-gate\` environment.
 
           Authorization run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           Initiating actor: ${GITHUB_ACTOR}
+          PM capability policy: \`${PM_CAPABILITY}\`
 
           This authorizes only the bounded objectives and root tasks already attached to this round issue. It does not authorize a subsequent round."
 
@@ -153,10 +195,10 @@ jobs:
             grep -Fxq 'state:draft' <<<"$labels" || { echo "#$root is not draft" >&2; exit 1; }
             grep -Fxq 'phase:fanout' <<<"$labels" || { echo "#$root lacks phase:fanout" >&2; exit 1; }
 
-            # Remove holding state first. `state:queued` is the final mutation.
             gh issue edit "$root" --repo "$GITHUB_REPOSITORY" \
               --remove-label 'state:draft' \
               --remove-label 'round:pending' \
               --add-label 'round:active'
+            # Dispatch edge is deliberately the final mutation.
             gh issue edit "$root" --repo "$GITHUB_REPOSITORY" --add-label 'state:queued'
           done
