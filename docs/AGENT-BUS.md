@@ -1,67 +1,90 @@
 # Digital Tape Agent Bus — staged design
 
-> **STAGED / NOT LIVE.** This document lives on `staging/agent-bus-v1`. Nothing in this branch authorizes autonomous work. Do not create the bus labels, configure adapters, or move staged workflows into `.github/workflows/` until Michael explicitly approves activation.
+> **STAGED / NOT LIVE.** This file is on `staging/agent-bus-v1`. Nothing here authorizes autonomous work. Do not create bus labels, enable adapters, configure the human gate, or move staged workflows into `.github/workflows/` until Michael explicitly approves activation.
 
-## 1. What this is
+## 1. The architecture
 
-The Agent Bus is a GitHub-native coordination protocol for discrete autonomous work rounds.
+The Agent Bus is a GitHub-native control plane for discrete autonomous work rounds.
 
-- **GitHub Issues are the authoritative work envelopes.**
-- **Native GitHub sub-issues define parent/child work.**
-- PRs are implementation/review artifacts linked from task issues; PR labels may be informative but never control the bus.
-- Labels are machine state.
-- Comments and PR reviews are the audit log, never triggers.
+- **Issues are authoritative work envelopes.**
+- **Native GitHub sub-issues are the hierarchy.**
+- PRs are linked implementation/review artifacts, never queue state.
+- Labels hold machine state.
+- Comments/reviews hold evidence and history; they are never execution triggers.
+- Cheap GitHub workflows operate the gates/barriers between model invocations.
 
-The bus is designed around two scarce resources: Michael's attention and frontier-model tokens. It therefore batches work at expensive-agent boundaries and makes every round stop at PM review until Michael authorizes another one.
-
-## 2. Hierarchy and authority
+The hierarchy is:
 
 ```text
 Michael
   |
   v
-Program Manager — Claude Cowork
+PM — Claude Cowork
   |
   +--> Software Lead — Claude Code
-  |       |
   |       +--> ChatGPT-chat / Grok workers
   |
   +--> Hardware Lead — Claude Code
-  |       |
   |       +--> ChatGPT-chat / Grok workers
   |
   +--> Verification Lead — ChatGPT Work
-          |
-          +--> ChatGPT-chat / Grok workers where independence is preserved
+          +--> ChatGPT-chat / Grok workers where independence permits
 ```
 
-### Hard routing rules
+Hard routing rules:
 
-- PM assigns root work only to leads.
-- Leads may perform high-value work themselves or delegate bounded work to workers.
-- Workers return only to their **parent lead**; never to PM and never to another worker.
-- Leads return root results or blocked escalations only to PM; never to Michael.
+- PM prepares root work only for leads.
+- Leads may work themselves or create bounded worker children.
+- Workers return only to their native parent lead; never PM, never another worker.
+- Leads return root results/blockers only to PM; never Michael.
 - PM does not accept ordinary queued work from agents.
-- PM may act on a `round:quiescent` completion signal only to inspect, synthesize, and report to Michael.
-- Only Michael may release a new round through the protected human gate.
-- No agent may create new root scope during an active round.
+- No agent creates new root scope during an active round.
+- Only Michael can release another round.
 
-### Narrow lateral exception: independent review
+There is one narrow lateral service edge: Software/Hardware may create a `kind:independent-review` child for Verification when existing Digital-Tape governance permits self-service review. It is not an authority transfer and cannot change scope.
 
-Software or Hardware may create a typed `kind:independent-review` child issue addressed to Verification when the existing Digital-Tape governance says that review is self-service. This is a **service edge, not an authority edge**: it cannot change scope, does not make Verification report to the requesting lead, and does not replace PM-owned acceptance sign-off.
+## 2. Why the dispatch bell belongs to GitHub, not agents
 
-If verifier-authored tests have not yet landed for new engine behavior, the Software Lead must not use this exception; its root returns to PM as blocked/finding, consistent with the existing Verification seam.
+Agents **never add `state:queued`**.
+
+A lead creates or revises a child issue, completes its body/destination/parentage, then requests dispatch with:
+
+```text
+state:ready
+```
+
+The cheap `validate-ready` workflow checks:
+
+- exactly one destination and lifecycle state;
+- current protected round authorization;
+- native parent and round ancestry;
+- hierarchy legality;
+- independent-review typing;
+- worker/Verification adapter enabled state;
+- child-count cap;
+- independent-review cap;
+- dispatch/rework cycle cap.
+
+Only after those checks does the bus remove `state:ready` and add:
+
+```text
+state:queued
+```
+
+**`state:queued` is therefore a bus-issued capability to spend model tokens.** Expensive listeners ignore `state:ready` completely.
+
+This is stronger than letting every agent write the execution trigger itself.
 
 ## 3. Round lifecycle
 
 ```text
 PM DRAFTS
    |
-   | Michael approves protected environment
+   | protected Michael approval
    v
-AUTHORIZED / ACTIVE
+AUTHORIZED + ACTIVE
    |
-   | leads fan out -> workers -> fan in
+   | leads/workers execute behind barriers
    v
 QUIESCENT
    |
@@ -72,88 +95,48 @@ CLOSED
    X  no automatic restart
 ```
 
-### 3.1 PM drafts before authorization
+### PM draft pass
 
-To save PM tokens, the PM does its planning **before** the human gate:
+Michael asks the PM to plan a round. PM spends one frontier invocation to inspect state and prepare:
 
-1. create one `agent-round` issue in `round:draft`;
-2. prepare at most one root `agent-task` per participating lead;
-3. attach those roots as native sub-issues of the round issue;
-4. roots remain `state:draft`, `round:pending`, and `phase:fanout`;
-5. PM stops.
+1. one `agent-round` issue in `round:draft`;
+2. zero or one `agent-root` for each participating lead;
+3. each root as a native sub-issue of the round;
+4. each root fully specified and labelled `state:draft + round:pending + phase:fanout + to:<lead>`.
 
-The PM has therefore already issued the directions, but nothing is dispatchable yet.
+The PM then stops. A prepared plan is not authorization.
 
-### 3.2 Michael releases the round
+### Human release
 
-The staged `authorize-round.yml` uses a protected GitHub Environment named `michael-round-gate`. Even if an agent triggers the workflow, the authorization job cannot run until the required human reviewer approves it.
+`authorize-round.yml` is staged to use a protected GitHub Environment named `michael-round-gate`. Even if an agent triggers the workflow, the authorization job cannot execute until the required human reviewer approves it.
 
-The authorization job records bot-authored provenance, marks the round `round:authorized` + `round:active`, and releases the prepared root tasks from draft/pending to active/queued.
+On approval the workflow:
 
-A manually added `round:authorized` label without the protected-workflow provenance is invalid.
+1. records bot-authored authorization provenance;
+2. marks the round authorized/active;
+3. releases the already-prepared roots directly from draft to queued.
 
-### 3.3 Active round
+A manually-added `round:authorized` label without protected-workflow provenance is invalid.
 
-During an active round the PM is idle. Leads and workers may work only inside the already-authorized root scope.
+### Active round
 
-A lead can:
+The PM is idle during the active round. Leads and workers may only satisfy already-authorized root acceptance criteria. Useful new scope is logged for the PM's final summary, not started autonomously.
 
-- do the assignment itself and return the root to PM;
-- create worker sub-issues;
-- create a permitted typed independent-review child;
-- rework a child inside existing acceptance criteria, subject to cycle caps;
-- return the root `to:pm state:blocked` if the lead cannot resolve something within scope.
+If a lead cannot resolve a problem within its authority, it returns the root `to:pm state:blocked` and stops. PM does not wake early to start another downward cycle.
 
-A lead cannot turn a finding into a new root objective. That waits for Michael's next round.
+### Whole-round barrier
 
-### 3.4 Quiescent round
+The round becomes quiescent only when all lead roots have returned `to:pm state:review` or `to:pm state:blocked` and no open child work remains.
 
-The round is quiescent when every root is returned `to:pm state:review` or `to:pm state:blocked`, and nothing below PM remains queued, working, waiting, or in protocol error.
+Then PM wakes exactly once, reviews the repo/evidence, gives Michael an executive summary and recommendation, closes the round, and stops. A new downward wave requires another Michael-approved round.
 
-The PM then gets **one** completion wake-up. It may:
+## 4. Lead fan-out / fan-in
 
-- review the repository and round evidence;
-- synthesize the lead results and blockers;
-- give Michael an executive project-state summary;
-- recommend the next round.
+This is the main frontier-token saver.
 
-It may **not** dispatch more work in that round. The next downward wave requires a new Michael-approved round.
+### Fan-out
 
-## 4. Task lifecycle
-
-Task labels are declared in `.github/agent-bus/labels.yml`.
-
-```text
-DRAFT --dispatch--> QUEUED --claim--> WORKING
-                                 |        |
-                                 |        +--> REVIEW
-                                 |        +--> BLOCKED
-                                 |        +--> WAITING --fan-in barrier--> QUEUED
-                                 |
-                                 +--> PROTOCOL-ERROR (on invalid envelope)
-```
-
-`state:queued` is the dispatch edge. It is always added last, after the body, destination, parent and governance checks are complete.
-
-### Claim before token spend
-
-Every listener must:
-
-1. fetch the issue fresh;
-2. verify destination, state, parent, round authorization and route;
-3. change `state:queued` -> `state:working`;
-4. fetch again and confirm the claim;
-5. **only then** invoke the expensive model or mutate repository state.
-
-A persistent comment never launches work.
-
-## 5. Fan-out / fan-in barriers
-
-This is the main token-saving mechanism.
-
-### Initial lead invocation
-
-A root arrives as:
+A root initially arrives:
 
 ```text
 agent-root
@@ -163,123 +146,162 @@ to:<lead>
 state:queued
 ```
 
-The lead claims it once, decomposes the assignment, and creates all useful child issues in a batch. Each child is a **native GitHub sub-issue** of the root.
+The lead claims it once, does the high-value decomposition/judgment work, then creates all useful child Issues as native sub-issues in one batch.
 
-If children were created, the lead changes the root to `state:waiting` and goes idle.
-
-### Worker execution
-
-Workers independently claim their child issues and return them to their parent lead as `state:review` or `state:blocked`.
-
-**Returning one worker must not wake the lead.**
-
-### Fan-in release
-
-A cheap GitHub workflow watches task-state changes. Only when all open direct children of a waiting root have returned review/blocked and none are queued/working/waiting does it release the root:
+Normal child destination:
 
 ```text
-state:waiting -> state:queued
-phase:fanout  -> phase:fanin
+to:worker-chatgpt
 ```
 
-The lead wakes once and reviews the whole batch.
+or
 
-If bounded rework is needed, it re-queues only the affected child tasks and returns the root to `state:waiting`. If not, it returns the root to PM.
+```text
+to:worker-grok
+```
 
-This turns N worker completions into roughly **one** lead integration invocation rather than N lead invocations.
+Permitted high-value exception:
 
-## 6. Token budgets and loop fuses
+```text
+kind:independent-review
+to:verification
+```
 
-The machine-readable defaults live in `.github/agent-bus/protocol.yml`.
+Each child requests dispatch with `state:ready`. If any children exist, the lead puts its root in `state:waiting` and goes idle.
 
-Current staged defaults:
+### Worker returns do not wake the lead individually
 
-| Resource | Default | Hard cap |
+Workers independently claim queued children and return them `state:review` or `state:blocked` to their native parent lead.
+
+The lead does **not** listen to each return.
+
+### Fan-in
+
+The cheap `release-lead-fanin` workflow watches child states. When every open direct child of a waiting root has returned and none remains ready/queued/working/waiting, the bus re-queues the root and changes it to `phase:fanin`.
+
+The lead wakes once and integrates the batch.
+
+It either:
+
+- accepts/dispositions and closes all child issues, then returns the root to PM;
+- or requests bounded rework on affected children with `state:ready`, puts the root back to waiting, and stops.
+
+Thus N worker results normally cost **one** lead fan-in invocation instead of N.
+
+## 5. Task lifecycle
+
+```text
+DRAFT --lead requests--> READY --bus validates--> QUEUED --destination claims--> WORKING
+                                                                    |
+                                                                    +--> REVIEW
+                                                                    +--> BLOCKED
+                                                                    +--> WAITING --bus fan-in--> QUEUED
+```
+
+`state:protocol-error` is a non-executing sink for invalid envelopes.
+
+### Claim rule
+
+Before any model tokens are spent:
+
+1. fetch queued Issue fresh;
+2. verify destination, state, round and ancestry;
+3. remove `state:queued` and add `state:working`;
+4. fetch again and confirm claim;
+5. only then invoke the substantive model/run.
+
+Duplicate notifications against a non-queued issue are no-ops.
+
+## 6. Loop and spend fuses
+
+Current staged limits:
+
+| Fuse | Default | Hard cap |
 |---|---:|---:|
 | Worker children per lead root | 6 | 12 |
-| Rework cycles per worker child | 2 | 3 queue/claim cycles |
-| Typed independent-review calls per root | 1 | 2 |
+| Rework cycles per child | 2 | 3 total queued cycles |
+| Independent-review service calls per Software/Hardware root | 1 | 2 |
+| Root queue cycles | normally 1–2 | 3 |
 
-The intent is not to force every task to use six workers. The normal case should be fewer. These are fuses against accidental task explosions.
+A hard-cap increase is a protocol change requiring Michael approval, not something an agent may decide mid-round.
 
-### Frontier-token policy
+A stale `state:working` task is never automatically claimed by a second expensive agent.
 
-**Claude Cowork / PM**
-- expected pattern: draft round + roots once; final executive synthesis once;
-- do not use for mechanical repo inspection or implementation.
+## 7. Token allocation policy
 
-**Claude Code / Software and Hardware Leads**
-- use for decomposition, architectural judgment, integration, review and merge decisions;
-- batch worker delegation in fan-out;
-- sleep behind the fan-in barrier instead of waking on every worker return.
+### Claude Cowork / PM
 
-**ChatGPT Work / Verification Lead**
-- reserve for adversarial spec reasoning, independent test design and acceptance judgment;
-- delegate mechanical evidence gathering only when independence is preserved;
-- typed lateral review calls are bounded because they consume this scarce pool.
+Expected expensive pattern: **two invocations per round** — draft/preparation, then final executive synthesis. PM sleeps during the active work wave.
 
-**ChatGPT chat / Grok workers**
-- preferred for bounded implementation, research, debugging, mechanical edits and evidence collection.
+Use PM tokens for roadmap, spec, architecture, arbitration and synthesis, not implementation or repeated repository polling.
 
-### ChatGPT chat caveat
+### Claude Code / Software + Hardware Leads
 
-The protocol reserves `to:worker-chatgpt`, because that is the preferred long-term worker pool. However, an ordinary interactive ChatGPT chat does not currently give this repo a generic GitHub-triggered inbound endpoint merely by existing. The bus must not pretend otherwise.
+Use for decomposition, architecture/interface judgment, integration, review and merge decisions. Batch delegation at fan-out; batch review at fan-in. Do not wake on individual worker returns.
 
-So `to:worker-chatgpt` stays disabled until a supported adapter is configured. Grok or another callable worker can serve as the initial worker adapter if needed.
+### ChatGPT Work / Verification
 
-## 7. Independent Verification
+Reserve for adversarial spec reasoning, independent test design and acceptance judgment. Typed lateral review calls are bounded. Mechanical evidence gathering may be delegated only when independence is preserved.
 
-The bus changes transport, not governance.
+### ChatGPT chat / Grok
 
-- Verification remains independent and reports to PM.
-- Existing test-before-implementation ordering remains intact.
-- A typed independent-review child can point at a PR, but the Issue is the bus envelope and the PR is the artifact being reviewed.
-- The review result is recorded on the PR and summarized on the child issue.
-- A self-service review must be refused/routed back as a finding when the current Digital-Tape rules require PM escalation.
+Preferred execution pool for bounded implementation, investigation, repetitive debugging, mechanical edits and evidence collection.
 
-## 8. Failure containment
+`to:worker-chatgpt` is deliberately defined now, but remains disabled until there is a real supported GitHub-triggered chat adapter. The bus will reject it while disabled rather than pretending the work was dispatched. Grok can be the initial worker adapter if that is the callable pool available at activation.
 
-### Duplicate delivery
+## 8. Verification seam stays intact
 
-The system assumes notifications can be delivered more than once. Execution remains safe because the issue must still be `state:queued` and successfully claimed before any model tokens are spent.
+Transport automation does not weaken the current Digital-Tape rules:
 
-### Stale working task
+- Verification still reports to PM.
+- Test-before-implementation ordering remains intact where required.
+- A typed review child may point to a PR, but the Issue is the bus envelope.
+- A self-service independent review must be refused when verifier-authored tests have not yet landed for the behavior.
+- Verification service children cannot delegate further; Verification root work may delegate only where independence survives.
 
-Do not automatically launch a second expensive agent against a stale `state:working` task. Surface it as blocked for its parent lead.
+## 9. Failure containment
 
-### Illegal route
+- Comments never trigger execution.
+- Agents cannot directly mint `state:queued`.
+- One active round maximum.
+- One root maximum per participating lead.
+- Round -> root -> child is the maximum task depth.
+- Workers cannot create another layer of delegation.
+- Out-of-scope discoveries wait for the next human-approved round.
+- Protocol-invalid ready requests become `state:protocol-error` without waking a model.
+- Round completion never starts another round.
 
-Do not execute. Mark `state:protocol-error` when permitted, explain the violated rule in a comment, and stop.
+If every agent shares the same GitHub account/token, GitHub cannot cryptographically distinguish which model authored a mutation. The hierarchy is still strongly constrained by ancestry, labels, fuses and standing role contracts, but runtime identity separation requires distinct GitHub App/service identities. The human round barrier remains separately protected by the GitHub Environment approval.
 
-### Scope expansion
+## 10. Files staged here
 
-If a worker or lead discovers useful work outside the current root acceptance criteria, record it as a finding/recommendation. Do not create a new autonomous objective. PM includes it in the executive summary; Michael decides whether the next round contains it.
+- `.github/agent-bus/protocol.yml` — machine policy and budgets.
+- `.github/agent-bus/labels.yml` — label manifest, not applied.
+- `.github/agent-bus/ROLE-CONTRACTS.md` — exact PM/lead/worker listener behavior.
+- `.github/ISSUE_TEMPLATE/agent-round.yml` — bounded round draft.
+- `.github/ISSUE_TEMPLATE/agent-root.yml` — PM-prepared lead root.
+- `.github/ISSUE_TEMPLATE/agent-task.yml` — lead child envelope.
+- `.github/agent-bus/workflows/authorize-round.yml` — protected human release, inert here.
+- `.github/agent-bus/workflows/validate-ready.yml` — cheap dispatch gate, inert here.
+- `.github/agent-bus/workflows/release-lead-fanin.yml` — lead barrier, inert here.
+- `.github/agent-bus/workflows/detect-quiescence.yml` — PM barrier, inert here.
+- `tools/agent-bus/validate_transition.py` — side-effect-free protocol validator.
+- `tools/agent-bus/test_validate_transition.py` — red/green protocol tests.
 
-### Runaway cycling
+## 11. Activation boundary
 
-Queue/claim cycles are counted from GitHub issue events. Once a child reaches the configured hard cap, it cannot be automatically re-queued. Its lead must return the root blocked or carry the unresolved item to PM review.
+This branch intentionally does **not** activate the bus.
 
-## 9. Why Issues, not a shared file
+Activation is a separate explicit operation after review:
 
-A shared coordination file would create merge conflicts, noisy commits, stale branch state, and poor representation of parallel work. Issues already provide stable IDs, sub-issues, labels, history and closure semantics without touching product code.
-
-The repository's existing governance already uses Issues for PM escalation. The Agent Bus extends that pattern instead of inventing a competing transport.
-
-## 10. Activation boundary
-
-This branch intentionally does **not** activate anything.
-
-Activation is a separate explicit operation after review. It should:
-
-1. create the declared labels;
-2. create the protected `michael-round-gate` GitHub Environment with Michael as required reviewer;
-3. verify the human gate with a harmless dry run;
-4. configure only worker/runtime adapters that truly exist;
-5. move the approved staged workflows from `.github/agent-bus/workflows/` into `.github/workflows/`;
+1. create the label set;
+2. create/configure `michael-round-gate` with Michael as required reviewer;
+3. configure only runtime adapters that truly exist;
+4. set adapter-enable repository variables;
+5. move approved staged workflows into `.github/workflows/`;
 6. run protocol tests and deliberate red cases;
-7. create one Round 0 draft and root tasks;
-8. prove nothing runs before Michael's approval;
-9. approve Round 0 manually and verify the fan-out/fan-in/PM-stop sequence;
-10. only then treat the bus as live.
+7. prove no agent can execute from `state:ready` or an unapproved round;
+8. dry-run one harmless Round 0 through root fan-out, child fan-in, whole-round quiescence and PM stop;
+9. only then treat the bus as live.
 
-Merging documentation alone must never cause agent execution.
+Merging documentation by itself must never execute an agent.
