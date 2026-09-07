@@ -43,6 +43,21 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: capability
+    attributes:
+      label: Capability class
+      description: `auto` is preferred. Workers normally resolve to economy or balanced; premium tiers require parent-lead reclassification.
+      options:
+        - auto
+        - economy
+        - balanced
+        - strong
+        - frontier
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: request
     attributes:
