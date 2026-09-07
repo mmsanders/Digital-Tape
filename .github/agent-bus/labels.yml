@@ -2,12 +2,19 @@
 # Do not apply these labels automatically from this branch.
 
 labels:
+  # object type
   - name: agent-task
-    description: Managed by the Digital Tape Agent Bus
+    description: Authoritative Agent Bus work envelope; bus work lives on Issues
+  - name: agent-root
+    description: One PM-authored root task for a participating lead in the current round
+  - name: agent-round
+    description: One bounded Michael-authorized autonomous round
+  - name: kind:independent-review
+    description: Sanctioned lateral Verification service request; not an authority transfer
 
   # destination — exactly one per active work envelope
   - name: to:pm
-    description: Return to Program Manager for review; PM never claims queued work
+    description: Returned to Program Manager; PM never claims ordinary queued work
   - name: to:software
     description: Software Lead mailbox
   - name: to:hardware
@@ -19,31 +26,54 @@ labels:
   - name: to:worker-grok
     description: Grok worker mailbox
 
-  # lifecycle — exactly one on an open active envelope
+  # task lifecycle — exactly one on each open agent-task
   - name: state:draft
     description: Prepared but not dispatchable
   - name: state:queued
     description: Dispatch edge; eligible destination may claim
   - name: state:working
     description: Claimed by destination
+  - name: state:waiting
+    description: Expensive parent agent is idle while child work runs
   - name: state:review
     description: Returned one hierarchy level upward for review
   - name: state:blocked
-    description: Cannot proceed within current authority
+    description: Cannot proceed within current authority; waits at parent barrier
   - name: state:protocol-error
     description: Invalid route/state; do not execute
 
-  # round control
+  # root phase — used to batch expensive lead invocations
+  - name: phase:fanout
+    description: Lead should decompose, self-execute high-value work, and dispatch children
+  - name: phase:fanin
+    description: All child work returned; lead should integrate/review once
+
+  # round lifecycle
+  - name: round:draft
+    description: PM has prepared the round; Michael has not authorized it
+  - name: round:pending
+    description: Draft root task held behind Michael's authorization gate
   - name: round:authorized
-    description: Michael explicitly authorized this specific round
+    description: Protected workflow records Michael's approval for this round
+  - name: round:active
+    description: Current round or task belongs to current active round
   - name: round:quiescent
-    description: All root tasks returned; no work below PM remains active
+    description: All roots returned to PM review/blocked; no work below PM is executing
+  - name: round:pm-review
+    description: PM has claimed the one final executive synthesis for this round
+  - name: round:closed
+    description: PM summary delivered; another round requires a new human authorization
 
 invariants:
+  - issues_are_authoritative_bus_envelopes
+  - prs_are_artifacts_not_queue_state
   - exactly_one_destination_on_active_work
-  - exactly_one_lifecycle_state_on_open_active_work
+  - exactly_one_task_state_on_open_agent_task
   - queued_is_added_last
-  - pm_never_claims_queued_inbound_work
-  - only_michael_can_authorize_round
+  - claim_before_token_spend
+  - expensive_parents_wait_for_fanin_barrier
+  - pm_never_claims_ordinary_queued_inbound_work
+  - only_protected_human_gate_authorizes_round
   - no_automatic_round_restart
   - no_hierarchy_level_skips
+  - independent_review_is_typed_and_bounded
