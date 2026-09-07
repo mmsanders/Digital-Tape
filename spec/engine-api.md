@@ -1,13 +1,13 @@
 # spec/engine-api.md — Tape Engine API v1.0
 
-> **STATUS: DRAFT-7. NOT FROZEN.** All nine DRAFT-6 findings dispositioned (PM Decisions 009).
+> **STATUS: DRAFT-8. NOT FROZEN.** V7-001…V7-005 and V8C-001…V8C-003 dispositioned.
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-7 · **Issued:** 5 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
+**Revision:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off.
-**Supersedes:** DRAFT-6 (4 Sep). Incorporates V6-001…V6-009 per PM Decisions 009.
-**Companion:** `spec/tapefs-v1.md` DRAFT-7, normative for everything on media.
+**Supersedes:** DRAFT-7 (5 Sep). Incorporates V7-001…V7-005 and independent-review V8C-001…V8C-003.
+**Companion:** `spec/tapefs-v1.md` DRAFT-8, normative for everything on media.
 
 C99. No operating system. No dynamic allocation, ever. No recursion. No libc file I/O. No floating point in the audio path. No clock. The only coupling to the outside world is the block device in §3.
 
@@ -78,7 +78,7 @@ Callbacks return **0 on success, non-zero on failure** — never engine error co
 
 **`write` is `NULL` for a read-only device.** That is necessary for a mount to be writable. It is not sufficient — see §3.1.
 
-`block_count` is caller-supplied and **untrusted**; `tapefs` §2.1 and §4.1 phase 2 validate geometry against it in 64-bit and refuse on mismatch.
+`block_count` is caller-supplied and **untrusted**. `tapefs` §4.1 phase 0 refuses with `TAPE_ERR_GEOMETRY` and **zero callbacks** unless `DEVICE_ADDRESSABLE(block_count)` (`block_count > LBA_CHUNK_BASE`). That is what stops a `uint32_t` mirror LBA of `block_count − 1` wrapping to `0xFFFFFFFF` when `block_count = 0`. `tapefs` §2.1 and §4.1 phase 2 are the rest of the geometry defence *(V8C-001)*. Raw `tape_format` / `tape_dup` evaluate `GEOMETRY_OK` — which includes that floor — before they read either destination superblock.
 
 `flush` must not return success until data has reached media.
 
@@ -158,7 +158,7 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
 tape_result tape_unmount(tape *t, uint64_t *out_position_frame);
 ```
 
-`tape_mount` runs `tapefs` §4.1's **four phases in order**: (1) superblock selection, (2) admission, (3) index-slot selection and §5.2 validity **for both sides regardless of which was requested**, including interval disjointness, the degraded-B branch and the stage oracle (`tapefs` §4.2), then (4) repair — **the only phase that writes.** It then derives `free_next` and seeks to `resume_frame` clamped to the timeline. `at_end` and `at_start` are cleared.
+`tape_mount` runs `tapefs` §4.1's **phase-0 addressability guard, then four phases in order**: (0) `DEVICE_ADDRESSABLE` — `TAPE_ERR_GEOMETRY` and zero callbacks if `block_count ≤ LBA_CHUNK_BASE` *(V8C-001)*; (1) superblock selection, (2) admission, (3) index-slot selection and §5.2 validity **for both sides regardless of which was requested**, including interval disjointness, the degraded-B branch and the stage oracle (`tapefs` §4.2), then (4) repair — **the only phase that writes.** It then derives `free_next` and seeks to `resume_frame` clamped to the timeline. `at_end` and `at_start` are cleared.
 
 > Repair is **last**, after the indices have been validated (V5-003). DRAFT-5 repaired before looking at any index, so a mount destined to fail on `TAPE_ERR_NO_VALID_INDEX` or the stage oracle had already written the mirror — which is what invariant 26 forbids and could not previously deliver.
 
@@ -205,8 +205,9 @@ typedef struct {
   uint16_t version_minor;       /* NEW: why writable may be false on a writable device */
   bool     writable;            /* effective_writable, §3.1 */
   bool     side_b_valid;        /* false in degraded-B (tapefs §4.4) */
-  bool     needs_repair;        /* one superblock copy invalid, and either the mount is not
-                                   effectively writable or the phase-4 repair write failed */
+  bool     needs_repair;        /* partner invalid or stale (strictly lower sb_generation),
+                                   and either the mount is not effectively writable or the
+                                   phase-4 repair write/flush failed (tapefs §4.1 V7-001) */
   bool     warm_start_used;
 } tape_info;
 
@@ -446,6 +447,8 @@ tape_result tape_format(const tape_dev *dev, const uint8_t uuid[16], uint32_t ep
                         const char *label, uint32_t nominal_length_s);
 ```
 
+`tape_dup` has no destination-label argument. A completed copy's superblock `label` is a byte copy of the source superblock's `label` (`tapefs` §9.5 step 4) *(V7-004)*. `tape_format` still takes a caller-supplied label because it is creating a cartridge, not copying one.
+
 Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, because only the caller knows what a second is. **Do not add `timeout_ms` to any engine call** — it will look like a bug fix during SD bring-up and it is a principle-1 violation.
 
 ### 9.1 The incremental contract — one model, normative
@@ -526,7 +529,7 @@ Progress callbacks carry **counts only**. Rates and ETAs belong to the caller, b
 
 **`tape_seek` and `tape_set_rate` are forbidden while armed.** The recording cursor is fixed at arm time (§7). This resolves the ambiguity by removing it rather than documenting it, and it matches the object: you cannot seek a tape deck while it is recording, because the head is where the head is.
 
-**`tape_render` stays allowed in every mounted row** so firmware can monitor and so audio never stops during a copy, and `tape_service` is always allowed because it is the call that clears owed frames.
+**`tape_render` stays allowed in every mounted row** so firmware can monitor and so audio never stops during a copy. **`tape_service` is allowed in every mounted row except Faulted** — it is the call that clears owed frames, and in Faulted it would touch media whose durability is unknown (§7.2, WP-12a) *(V7-005)*.
 
 **`tape_unmount` while armed or mid-operation is refused.** The caller must commit, abort, or finish first, so a child's recording is never silently dropped by a firmware path that forgot to ask.
 
@@ -564,7 +567,7 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 4. No **Side A** entry's `last` is ≥ `a_high_water`.
 5. **Every chunk Side B *allocates or writes* has id ≥ `a_high_water`.** Side B *referencing* chunks below the mark is correct and expected — it is what reset-B and a completed promote produce. *(DRAFT-3's invariant 4 forbade the reference and was unsatisfiable; V3-009.)*
 6. Every entry has `frame_count ≥ 1` and `start_frame < CHUNK_FRAMES`.
-7. **The two counters have separate domains** (`tapefs` §5). **`sequence` strictly increases on every index commit**, from the `cartridge_sequence` base of `tapefs` §5.5. **`sb_generation` strictly increases on every logical *superblock* update** — setting or clearing `promote_stage`, moving the water line, marking `WRITE_IN_PROGRESS`, and format's and duplicate's commits. **Repair increments neither**, and an ordinary recording, reset-B or re-spool writes no superblock and correctly leaves `sb_generation` unchanged. **`tape_format` and `tape_dup` establish a new cartridge and reset *both* counters — `sb_generation = 1`, `sequence` 1 and 2 — so neither rule spans them.** Format zeroes A1/B1 but leaves whatever the previous cartridge wrote in the slots it does not touch, so a verifier asserting monotonic `sequence` across a format of reusable media would fail every one. *(DRAFT-6 required both counters to advance on every logical update, so a verifier asserting it literally failed every ordinary recording — V6-004.)*
+7. **The two counters have separate domains** (`tapefs` §5). **`sequence` strictly increases on every index commit**, from the `cartridge_sequence` base of `tapefs` §5.5. **`sb_generation` strictly increases on every ordinary logical *superblock* update of an existing cartridge** — setting or clearing `promote_stage`, moving the water line, and the format/duplicate step-1 `WRITE_IN_PROGRESS` barrier. **Repair increments neither**, including phase-4 rewrite of a stale lower-generation partner, and an ordinary recording, reset-B or re-spool writes no superblock and correctly leaves `sb_generation` unchanged. **Identity boundary *(V8C-002)*:** the final format/duplicate identity-assignment commit establishes a new cartridge and writes `sb_generation = 1` with A0/B0 at `sequence` 1 and 2. Neither counter's monotonicity spans that commit. Step 1 of those operations is still an update of the old cartridge and is inside the increase domain. Format zeroes A1/B1 but leaves whatever the previous cartridge wrote in the slots it does not touch, so a verifier asserting monotonic `sequence` across a format of reusable media would fail every one. *(DRAFT-6 required both counters to advance on every logical update, so a verifier asserting it literally failed every ordinary recording — V6-004.)*
 8. Re-spool preserves rendered audio bit-exactly; after a completed pass, the side is exactly one entry — **or zero entries, if the timeline was empty and re-spool was a no-op**.
 9. Any edit sequence followed by re-spool renders identically to the same sequence without it.
 10. **Every re-spool and promote write destination is disjoint from the live set of both sides at the moment of that write.**
@@ -577,8 +580,8 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 14. `tape_render` performs zero block-device calls.
 15. No indirect call exists outside the three `dev_*` wrappers.
 16. Maximum stack depth ≤ 8 KiB.
-17. `tape_dup` writes the destination's `state = VALID`, `cartridge_uuid` and `a_high_water` in the final superblock write, after all chunks and both indices. **The destination's Side A timeline is compacted to `[0, len_A)`, its A0 and B0 slots are written directly with `sequence` 1 and 2, and all four index slots' block 0 are zeroed first** (`tapefs` §9.5) — so no slot surviving from the destination's previous cartridge can outrank the new index.
-18. **`tape_dup` and `tape_format` perform zero writes when any precondition fails** — aliasing, writability, geometry or capacity.
+17. `tape_dup` writes the destination's `state = VALID`, `cartridge_uuid`, `a_high_water` and **source `label`** in the final superblock write, after all chunks and both indices. **The destination's Side A timeline is compacted to `[0, len_A)`, its A0 and B0 slots are written directly with `sequence` 1 and 2, and all four index slots' block 0 are zeroed first** (`tapefs` §9.5) — so no slot surviving from the destination's previous cartridge can outrank the new index.
+18. **`tape_dup` and `tape_format` perform zero writes when any *refusal* precondition fails** — aliasing, writability, geometry or capacity, in the order `tapefs` §9.5 / §9.6 names. Geometry includes `DEVICE_ADDRESSABLE` and is evaluated **before** any destination superblock read *(V8C-001)*. Raw-superblock classification (`tapefs` §9.5 item 5) is a plan, not a refusal; its writes belong to step 1 and run only after every refusal has passed *(V7-003)*.
 19. No engine-owned state lives outside the caller's `mem` block.
 20. **Within one index, every pair of entries has disjoint half-open physical-frame intervals** (`tapefs` §5.1). **Across sides, overlap is permitted and expected — never a violation**, and equally never required: two empty sides, or a fully re-recorded Side B, share nothing. Promote's phase-2 safety check assumes nothing about either; mount rejects media violating the first.
 21. Promote writes below `a_high_water` only in phase 2, only after both live indices reference the staging run, and only after the explicit disjointness check in `tapefs` §9.3 step 5 passes.
@@ -593,6 +596,8 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 29. **Every logical operation preflights the headroom of the *branch it will take*** (`tapefs` §4.5) — decided before the first write — and refuses with `TAPE_ERR_SEQUENCE_EXHAUSTED` and zero writes if it is unavailable. No cartridge is advanced partway into a state whose completion is impossible, **and no branch that will write nothing is refused for counters it will never consume.**
 30. **Every operation defines its empty-input behaviour.** `tape_promote` → `TAPE_ERR_INVALID_ARG`, `tape_respool` → `TAPE_OK`, and `tape_commit` with zero accepted frames → `TAPE_OK`, each **performing zero writes**. `tape_dup` with an empty source **writes**, and must produce a valid, mountable, empty destination (`tapefs` §9.5 step 3) — it is a copy, not a refusal.
 31. **`tape_set_side` leaves position 0, both endpoint flags clear, and the play ring invalidated** (§5). No frame from the previous side is ever rendered after a side switch.
+32. **Every ordinary logical superblock update writes the `tapefs` §4.6 partner first and the selected candidate last.** After any single torn write or power cut in that pair, the only selectable superblock is either the pre-update candidate or the new generation — never a strictly older generation than one this operation already made durable. Phase-4 repair of a stale or invalid partner is not a logical update and does not increment `sb_generation`. Format/dup identity-assignment commits are excluded and keep their mirror-then-primary tables *(V7-001)*.
+33. **A branch whose `sequence_needed` is 0 does not consult `cartridge_sequence`; a branch whose `generation_needed` is 0 does not consult `sb_generation`.** Stored `0xFFFFFFFE` / `0xFFFFFFFF` therefore cannot turn a specified zero-write success into `TAPE_ERR_SEQUENCE_EXHAUSTED` *(V7-002)*.
 
 ---
 
@@ -612,6 +617,7 @@ If the engine appears to need one of these, apply §1 first; if it still does, e
 
 Open:
 
+- Companion `tapefs` §4.6, the §4.1 phase-0 guard, and invariant 7's identity boundary are new in this candidate. They freeze with this list only when the PM issues the bundle.
 - The required `tape_service` cadence, as a number, once the bench build measures it. The failure mode is audible underrun, not corruption.
 - The measured worst-case `tape_commit` latency, which is what makes §7.1's "bounded" a fact. Firmware criterion in `acceptance.md`.
 - The new `tape_instance_size()` after §5.1's disjointness scratch. RAM was at 72 %.
