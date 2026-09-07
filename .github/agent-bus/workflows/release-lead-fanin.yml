@@ -1,0 +1,117 @@
+# STAGED / INERT: intentionally outside .github/workflows/.
+# Releases a waiting lead root only after all direct child issues have returned.
+
+name: Agent Bus - Release Lead Fan-In
+
+on:
+  issues:
+    types: [labeled, unlabeled, closed, reopened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: agent-bus-fanin-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  fanin:
+    if: contains(github.event.issue.labels.*.name, 'agent-task')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CHILD: ${{ github.event.issue.number }}
+    steps:
+      - name: Resolve native parent
+        id: parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          parent="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${CHILD}/parent" 2>/dev/null || true)"
+          if [[ -z "$parent" ]]; then
+            echo 'This task has no parent; fan-in does not apply.'
+            echo 'number=' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          number="$(jq -r '.number' <<<"$parent")"
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - name: Verify parent is a waiting lead root
+        id: eligible
+        if: steps.parent.outputs.number != ''
+        shell: bash
+        env:
+          PARENT: ${{ steps.parent.outputs.number }}
+        run: |
+          set -euo pipefail
+          issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PARENT}")"
+          labels="$(jq -r '.labels[].name' <<<"$issue")"
+          if ! grep -Fxq 'agent-root' <<<"$labels"; then
+            echo 'Parent is not a lead root; no root fan-in release.'
+            echo 'yes=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! grep -Fxq 'state:waiting' <<<"$labels"; then
+            echo 'Parent is not waiting; no-op.'
+            echo 'yes=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          grep -Fxq 'round:active' <<<"$labels" || {
+            echo 'Waiting root is not in active round.' >&2
+            exit 1
+          }
+          echo 'yes=true' >> "$GITHUB_OUTPUT"
+
+      - name: Check all direct children
+        id: children
+        if: steps.eligible.outputs.yes == 'true'
+        shell: bash
+        env:
+          PARENT: ${{ steps.parent.outputs.number }}
+        run: |
+          set -euo pipefail
+          children="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PARENT}/sub_issues?per_page=100")"
+          count="$(jq 'length' <<<"$children")"
+          [[ "$count" -gt 0 ]] || {
+            echo 'Waiting root has no child issues; protocol error.' >&2
+            exit 1
+          }
+
+          not_ready="$(jq '[.[] | select(.state == "open") | {
+            number,
+            labels: [.labels[].name]
+          } | select(
+            ((.labels | index("state:review")) == null) and
+            ((.labels | index("state:blocked")) == null)
+          )]' <<<"$children")"
+
+          n="$(jq 'length' <<<"$not_ready")"
+          if [[ "$n" -gt 0 ]]; then
+            echo "$n child issue(s) have not returned yet:"
+            jq -r '.[] | "#\(.number): \(.labels | join(", "))"' <<<"$not_ready"
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - name: Release lead once
+        if: steps.children.outputs.ready == 'true'
+        shell: bash
+        env:
+          PARENT: ${{ steps.parent.outputs.number }}
+        run: |
+          set -euo pipefail
+          # Remove non-dispatch state first. `state:queued` is deliberately added last.
+          gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" \
+            --remove-label 'state:waiting' \
+            --remove-label 'phase:fanout' \
+            --add-label 'phase:fanin' || {
+              # Rework fan-in may already be in phase:fanin; retry without phase removal.
+              gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" \
+                --remove-label 'state:waiting' \
+                --add-label 'phase:fanin'
+            }
+          gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" --add-label 'state:queued'
+          gh issue comment "$PARENT" --repo "$GITHUB_REPOSITORY" --body \
+            "<!-- AGENT-BUS-FANIN --> All direct child work has returned. Fan-in integration is queued exactly once."
