@@ -136,11 +136,16 @@ solenoid-test:
 ## permanently-red pipeline stops being read. Run it before spending money.
 ## Exit 1 means closed, which is the expected answer today.
 fabrication-gate:
-	@$(PY) fabrication_gate.py || true
+	@$(PY) fabrication_gate.py
+
+## fabrication-gate-test — regression checks, not permission to fabricate
+.PHONY: fabrication-gate-test
+fabrication-gate-test:
 	@$(PY) test_fabrication_gate.py >/dev/null \
 	  && echo "OK  fabrication gate: 8 checks pass, and it can OPEN"
 	@$(PY) test_fabrication_gate.py --mutate >/dev/null \
 	  && echo "OK  fabrication gate: proven able to go red"
+	@$(PY) -m unittest -v test_fabrication_gate_cli.py
 
 ## charger / solenoid — print the design analyses without touching the spec
 charger:
@@ -215,6 +220,7 @@ check: thermal-check mech-check
 	@$(MAKE) --no-print-directory shell-test
 	@$(MAKE) --no-print-directory packet-duplicates
 	@$(MAKE) --no-print-directory solenoid-test
+	@$(MAKE) --no-print-directory fabrication-gate-test
 	@$(MAKE) --no-print-directory atomicity-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc

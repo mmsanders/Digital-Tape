@@ -66,6 +66,8 @@ jobs:
         run: make -C hardware thermal-check
       - name: Solenoid safety criteria, and proof they can go red
         run: make -C hardware solenoid-test
+      - name: Fabrication gate preserves CLOSED at the Make boundary
+        run: make -C hardware fabrication-gate-test
       - name: spec/hw content and revision agree
         run: make -C hardware spec-check
 

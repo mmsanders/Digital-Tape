@@ -1496,3 +1496,27 @@ anyone ordered a board. Its `--mutate` case is a gate that opens for free.
 **Cost to reverse.** Zero mechanically. What it would cost is the only machine-checkable link
 between "the arithmetic is green" and "we may spend money" — which is the link the reviewer
 correctly identified as resting on convention.
+
+---
+
+## ADR-127 — Preserve the fabrication gate's verdict at its Make entry point
+
+**Date:** 2026-09-07 · **Owner:** temporary PM / Software / Hardware Lead
+
+**Decision.** Fix IR-018-18 by removing `|| true` from `fabrication-gate`.
+The target runs the gate unsuppressed. Regression checks live in a separate
+`fabrication-gate-test` target, run by normal hardware CI and `make check`.
+They exercise the actual Make entry point in isolated CLOSED, partially accepted,
+and fully accepted/qualified fixtures, and reproduce the old fail-open mutation.
+
+**Evidence.** Eight existing gate checks and their mutation pass; three new CLI
+tests pass. The real target returns nonzero with five blockers still listed.
+An isolated fully accepted/qualified fixture alone returns zero. Fixture acceptance
+names never modify the production record. These are implementer-owned regression
+results, not independent acceptance or circuit qualification.
+
+**Safety boundary.** No IR-015 acceptance or IR-018-16 qualification is granted.
+No board fabrication or cell charging. IR-018-18 has an implemented, locally tested
+response awaiting independent disposition; it is not marked independently closed.
+
+**Cost to reverse.** Small code change; restores a demonstrated fail-open control.
