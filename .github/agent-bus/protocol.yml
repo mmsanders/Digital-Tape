@@ -11,7 +11,8 @@ object_model:
   authoritative_envelope: github_issue
   pull_requests: artifacts_only
   hierarchy: native_github_sub_issues
-  reason: issue_tree_is_queryable_for_barriers_and_prs_remain_linked_artifacts
+  max_task_depth_below_round: 2
+  reason: round_to_root_to_child_keeps_barriers_decidable_and_cheap
 
 roles:
   michael:
@@ -24,20 +25,17 @@ roles:
     runtime: claude-cowork
     tier: 1
     expensive: true
-    may_send_to: [software, hardware, verification]
-    may_receive_from: [michael, software, hardware, verification]
+    may_prepare_roots_for: [software, hardware, verification]
+    may_receive_from: [software, hardware, verification]
     may_claim_ordinary_queued_tasks: false
-    inbound_states: [review, blocked]
-    root_dispatch_requires_authorized_round: true
     active_round_behavior: idle_until_round_quiescent
 
   software:
     runtime: claude-code
     tier: 2
     expensive: true
-    may_send_to: [pm, worker_chatgpt, worker_grok]
-    may_receive_from: [pm, worker_chatgpt, worker_grok]
-    may_claim_queued_tasks: true
+    may_request_for: [worker_chatgpt, worker_grok]
+    returns_to: pm
     uses_fanin_barrier: true
     may_request_typed_independent_review: true
 
@@ -45,9 +43,8 @@ roles:
     runtime: claude-code
     tier: 2
     expensive: true
-    may_send_to: [pm, worker_chatgpt, worker_grok]
-    may_receive_from: [pm, worker_chatgpt, worker_grok]
-    may_claim_queued_tasks: true
+    may_request_for: [worker_chatgpt, worker_grok]
+    returns_to: pm
     uses_fanin_barrier: true
     may_request_typed_independent_review: true
 
@@ -55,9 +52,8 @@ roles:
     runtime: chatgpt-work
     tier: 2
     expensive: true
-    may_send_to: [pm, worker_chatgpt, worker_grok]
-    may_receive_from: [pm, worker_chatgpt, worker_grok]
-    may_claim_queued_tasks: true
+    may_request_for: [worker_chatgpt, worker_grok]
+    returns_to: pm
     uses_fanin_barrier: true
     preserve_independence: true
 
@@ -66,9 +62,7 @@ roles:
     tier: 3
     expensive: false
     adapter_status: unavailable_until_configured
-    may_send_to: [software, hardware, verification]
-    may_receive_from: [software, hardware, verification]
-    may_claim_queued_tasks: true
+    returns_to: parent_lead
     may_send_to_pm: false
 
   worker_grok:
@@ -76,10 +70,22 @@ roles:
     tier: 3
     expensive: false
     adapter_status: configure_at_activation
-    may_send_to: [software, hardware, verification]
-    may_receive_from: [software, hardware, verification]
-    may_claim_queued_tasks: true
+    returns_to: parent_lead
     may_send_to_pm: false
+
+system_actor:
+  name: bus
+  model_tokens: false
+  may:
+    - release_authorized_roots_draft_to_queued
+    - validate_ready_children_then_ready_to_queued
+    - release_waiting_roots_at_fanin
+    - detect_round_quiescence
+  may_not:
+    - invent_scope
+    - change_task_body
+    - route_to_pm_as_queued
+    - start_new_round
 
 special_service_edges:
   independent_review:
@@ -89,30 +95,36 @@ special_service_edges:
     return_to_requester: true
     transfers_authority: false
     can_change_scope: false
+    can_delegate_further: false
     requires_existing_governance_self_service_permission: true
     otherwise: return_requester_root_to_pm_blocked
 
 states:
-  lifecycle: [draft, queued, working, waiting, review, blocked, protocol-error]
+  lifecycle: [draft, ready, queued, working, waiting, review, blocked, protocol-error]
   terminal: github_closed
 
 transitions:
-  dispatch: [draft, queued]
+  agent_request_initial_dispatch: [draft, ready]
+  agent_request_rework: [review, ready]
+  agent_request_retry_after_resolved_block: [blocked, ready]
+  bus_validated_dispatch: [ready, queued]
+  bus_authorized_root_release: [draft, queued]
   claim: [queued, working]
   wait_for_children: [working, waiting]
-  fanin_release: [waiting, queued]
+  bus_fanin_release: [waiting, queued]
   return: [working, review]
   blocked: [working, blocked]
-  rework: [review, queued]
 
 fanout_fanin:
   root_initial_phase: fanout
   lead_after_dispatching_children: waiting
+  child_dispatch_request_state: ready
   worker_return_states: [review, blocked]
+  child_disposition_before_root_return: close_child_issue
   parent_release_condition:
     - parent_is_waiting
     - every_open_direct_child_is_review_or_blocked
-    - no_direct_child_is_queued_or_working_or_waiting
+    - no_direct_child_is_ready_or_queued_or_working_or_waiting
   parent_release_action:
     - phase_fanin
     - state_queued
@@ -126,10 +138,12 @@ round:
     environment: michael-round-gate
     release_action:
       - mark_round_authorized_and_active
-      - release_all_round_pending_root_tasks_to_queued
+      - release_all_round_pending_root_tasks_directly_to_queued
   pm_during_active_round: idle
   quiescence_requires:
     - every_open_root_is_to_pm_review_or_to_pm_blocked
+    - no_open_non_root_agent_tasks_remain
+    - no_ready_work_below_pm
     - no_queued_work_below_pm
     - no_working_work_below_pm
     - no_waiting_work_below_pm
@@ -156,6 +170,7 @@ token_policy:
   hard_caps:
     worker_children_per_root: 12
     queue_claim_cycles_per_child: 3
+    queue_claim_cycles_per_root: 3
     independent_review_service_calls_per_root: 2
   budget_changes_above_hard_caps_require: protocol_change_and_michael_approval
   expensive_roles_focus_on:
@@ -166,9 +181,11 @@ token_policy:
 
 constraints:
   - comments_are_never_triggers
+  - agents_never_add_state_queued
   - one_destination_per_active_envelope
   - one_lifecycle_state_per_open_agent_task
-  - one_parent_per_non_root_task
+  - one_parent_per_non_round_issue
+  - no_task_nesting_below_child
   - no_worker_to_worker
   - no_worker_to_pm
   - no_lead_to_michael
