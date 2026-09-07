@@ -11,8 +11,10 @@ permissions:
   contents: read
   issues: write
 
+# Global serialization is intentional. Parent issue number is not available in
+# the concurrency expression, and two children can return simultaneously.
 concurrency:
-  group: agent-bus-fanin-${{ github.event.issue.number }}
+  group: agent-bus-fanin
   cancel-in-progress: false
 
 jobs:
@@ -23,21 +25,20 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       CHILD: ${{ github.event.issue.number }}
     steps:
-      - name: Resolve native parent
+      - name: Resolve native parent root
         id: parent
         shell: bash
         run: |
           set -euo pipefail
           parent="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${CHILD}/parent" 2>/dev/null || true)"
           if [[ -z "$parent" ]]; then
-            echo 'This task has no parent; fan-in does not apply.'
+            echo 'No native parent; fan-in does not apply.'
             echo 'number=' >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          number="$(jq -r '.number' <<<"$parent")"
-          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "number=$(jq -r '.number' <<<"$parent")" >> "$GITHUB_OUTPUT"
 
-      - name: Verify parent is a waiting lead root
+      - name: Verify waiting root and protected round ancestry
         id: eligible
         if: steps.parent.outputs.number != ''
         shell: bash
@@ -47,20 +48,29 @@ jobs:
           set -euo pipefail
           issue="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PARENT}")"
           labels="$(jq -r '.labels[].name' <<<"$issue")"
-          if ! grep -Fxq 'agent-root' <<<"$labels"; then
-            echo 'Parent is not a lead root; no root fan-in release.'
+
+          if ! grep -Fxq 'agent-root' <<<"$labels" || ! grep -Fxq 'state:waiting' <<<"$labels"; then
+            echo 'Parent is not a waiting lead root; no-op.'
             echo 'yes=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if ! grep -Fxq 'state:waiting' <<<"$labels"; then
-            echo 'Parent is not waiting; no-op.'
-            echo 'yes=false' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          grep -Fxq 'round:active' <<<"$labels" || {
-            echo 'Waiting root is not in active round.' >&2
-            exit 1
-          }
+          grep -Fxq 'round:active' <<<"$labels" || { echo 'waiting root is not active' >&2; exit 1; }
+
+          lead_dest="$(grep -E '^to:(software|hardware|verification)$' <<<"$labels" || true)"
+          [[ "$(grep -c . <<<"$lead_dest" || true)" -eq 1 ]] || { echo 'waiting root lacks exactly one lead destination' >&2; exit 1; }
+          echo "lead_dest=$lead_dest" >> "$GITHUB_OUTPUT"
+
+          round="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PARENT}/parent" 2>/dev/null || true)"
+          [[ -n "$round" ]] || { echo 'root is not attached to a round issue' >&2; exit 1; }
+          round_number="$(jq -r '.number' <<<"$round")"
+          round_labels="$(jq -r '.labels[].name' <<<"$round")"
+          grep -Fxq 'agent-round' <<<"$round_labels" || { echo 'root parent is not agent-round' >&2; exit 1; }
+          grep -Fxq 'round:authorized' <<<"$round_labels" || { echo 'round lacks authorization' >&2; exit 1; }
+          grep -Fxq 'round:active' <<<"$round_labels" || { echo 'round is not active' >&2; exit 1; }
+          comments="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${round_number}/comments?per_page=100")"
+          proof="$(jq '[.[] | select(.user.login == "github-actions[bot]") | select(.body | contains("<!-- AGENT-BUS-AUTH -->"))] | length' <<<"$comments")"
+          [[ "$proof" -ge 1 ]] || { echo 'round authorization lacks protected-workflow proof' >&2; exit 1; }
+
           echo 'yes=true' >> "$GITHUB_OUTPUT"
 
       - name: Check all direct children
@@ -73,45 +83,59 @@ jobs:
           set -euo pipefail
           children="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PARENT}/sub_issues?per_page=100")"
           count="$(jq 'length' <<<"$children")"
-          [[ "$count" -gt 0 ]] || {
-            echo 'Waiting root has no child issues; protocol error.' >&2
-            exit 1
-          }
+          [[ "$count" -gt 0 && "$count" -le 12 ]] || { echo "invalid child count: $count" >&2; exit 1; }
 
-          not_ready="$(jq '[.[] | select(.state == "open") | {
+          # review/blocked/protocol-error are all returned-to-parent conditions.
+          # The lead is responsible for disposition/closure during fan-in.
+          not_returned="$(jq '[.[] | select(.state == "open") | {
             number,
-            labels: [.labels[].name]
+            labels:[.labels[].name]
           } | select(
             ((.labels | index("state:review")) == null) and
-            ((.labels | index("state:blocked")) == null)
+            ((.labels | index("state:blocked")) == null) and
+            ((.labels | index("state:protocol-error")) == null)
           )]' <<<"$children")"
 
-          n="$(jq 'length' <<<"$not_ready")"
+          n="$(jq 'length' <<<"$not_returned")"
           if [[ "$n" -gt 0 ]]; then
             echo "$n child issue(s) have not returned yet:"
-            jq -r '.[] | "#\(.number): \(.labels | join(", "))"' <<<"$not_ready"
+            jq -r '.[] | "#\(.number): \(.labels | join(", "))"' <<<"$not_returned"
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo 'ready=true' >> "$GITHUB_OUTPUT"
 
-      - name: Release lead once
+      - name: Enforce root invocation fuse or release fan-in
         if: steps.children.outputs.ready == 'true'
         shell: bash
         env:
           PARENT: ${{ steps.parent.outputs.number }}
         run: |
           set -euo pipefail
-          # Remove non-dispatch state first. `state:queued` is deliberately added last.
-          gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" \
-            --remove-label 'state:waiting' \
-            --remove-label 'phase:fanout' \
-            --add-label 'phase:fanin' || {
-              # Rework fan-in may already be in phase:fanin; retry without phase removal.
-              gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" \
-                --remove-label 'state:waiting' \
-                --add-label 'phase:fanin'
-            }
+
+          events="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PARENT}/events?per_page=100")"
+          queued_count="$(jq '[.[] | select(.event == "labeled") | select(.label.name == "state:queued")] | length' <<<"$events")"
+
+          if [[ "$queued_count" -ge 3 ]]; then
+            echo 'Root has exhausted the hard cap of 3 queue/claim cycles; returning mechanical block to PM.'
+            children="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PARENT}/sub_issues?per_page=100")"
+            mapfile -t open_children < <(jq -r '.[] | select(.state == "open") | .number' <<<"$children")
+            for child in "${open_children[@]}"; do
+              gh issue comment "$child" --repo "$GITHUB_REPOSITORY" --body \
+                "<!-- AGENT-BUS-FUSE --> Parent lead invocation fuse exhausted before another integration pass. Result remains in history for PM review."
+              gh issue close "$child" --repo "$GITHUB_REPOSITORY" --reason 'not planned'
+            done
+
+            payload="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PARENT}" | jq '{labels: ([.labels[].name | select(((startswith("state:") or startswith("to:") or startswith("phase:"))) | not)] + ["to:pm","state:blocked"])}')"
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${PARENT}" --input - <<<"$payload" >/dev/null
+            gh issue comment "$PARENT" --repo "$GITHUB_REPOSITORY" --body \
+              "<!-- AGENT-BUS-FUSE --> Lead root hit the hard three-invocation queue fuse. The bus mechanically returned it to PM as blocked rather than spending another frontier-model invocation."
+            exit 0
+          fi
+
+          # Cleanly replace waiting/phase state, then add queued as the final mutation.
+          payload="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PARENT}" | jq '{labels: ([.labels[].name | select(((startswith("state:") or startswith("phase:"))) | not)] + ["phase:fanin"])}')"
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${PARENT}" --input - <<<"$payload" >/dev/null
           gh issue edit "$PARENT" --repo "$GITHUB_REPOSITORY" --add-label 'state:queued'
           gh issue comment "$PARENT" --repo "$GITHUB_REPOSITORY" --body \
-            "<!-- AGENT-BUS-FANIN --> All direct child work has returned. Fan-in integration is queued exactly once."
+            "<!-- AGENT-BUS-FANIN --> All direct child work has returned. One batched fan-in integration pass is queued."
