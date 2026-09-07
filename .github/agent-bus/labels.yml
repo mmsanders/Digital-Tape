@@ -29,8 +29,10 @@ labels:
   # task lifecycle — exactly one on each open agent-task
   - name: state:draft
     description: Prepared but not dispatchable
+  - name: state:ready
+    description: Agent requests dispatch; cheap bus gate must validate before queued
   - name: state:queued
-    description: Dispatch edge; eligible destination may claim
+    description: Bus-issued dispatch edge; eligible destination may claim
   - name: state:working
     description: Claimed by destination
   - name: state:waiting
@@ -69,6 +71,8 @@ invariants:
   - prs_are_artifacts_not_queue_state
   - exactly_one_destination_on_active_work
   - exactly_one_task_state_on_open_agent_task
+  - agents_request_state_ready_but_never_add_state_queued
+  - bus_validates_before_state_queued
   - queued_is_added_last
   - claim_before_token_spend
   - expensive_parents_wait_for_fanin_barrier
