@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Validate Digital Tape Agent Bus routing/state transitions.
 
-Pure-stdlib and intentionally side-effect free. It is suitable for CI or a listener
-preflight. It does not mutate GitHub and it does not dispatch an agent.
+Pure-stdlib and intentionally side-effect free. Suitable for CI/listener preflight.
+It never mutates GitHub and never dispatches an agent.
 """
 
 from __future__ import annotations
@@ -31,11 +31,14 @@ STATE_LABELS = {
     "state:draft": "draft",
     "state:queued": "queued",
     "state:working": "working",
+    "state:waiting": "waiting",
     "state:review": "review",
     "state:blocked": "blocked",
     "state:protocol-error": "protocol-error",
 }
 
+# Normal authority edges. Independent review is handled separately as a typed
+# service edge and therefore does not appear here.
 LEGAL_EDGES = {
     "michael": {"pm"},
     "pm": LEADS,
@@ -46,16 +49,18 @@ LEGAL_EDGES = {
     "worker_grok": LEADS,
 }
 
-# Legal lifecycle edges. Route checks further constrain these.
 LEGAL_STATE_EDGES = {
     ("draft", "queued"),
     ("review", "queued"),
     ("blocked", "queued"),
     ("queued", "working"),
+    ("working", "waiting"),
+    ("waiting", "queued"),
     ("working", "review"),
     ("working", "blocked"),
     ("queued", "protocol-error"),
     ("working", "protocol-error"),
+    ("waiting", "protocol-error"),
     ("review", "protocol-error"),
     ("blocked", "protocol-error"),
 }
@@ -70,7 +75,9 @@ class Envelope:
     round_authorized: bool
     is_root: bool = False
     existing_root_scope: bool = True
+    independent_review: bool = False
     verification_self_service_allowed: bool = True
+    is_native_child: bool = True
 
 
 def _one(values: Iterable[str], kind: str) -> str:
@@ -92,6 +99,14 @@ def parse_labels(labels: Iterable[str]) -> tuple[str, str]:
     return destination, state
 
 
+def _typed_review_edge(env: Envelope) -> bool:
+    return (
+        env.independent_review
+        and env.sender in {"software", "hardware"}
+        and env.destination == "verification"
+    )
+
+
 def validate(env: Envelope) -> list[str]:
     errors: list[str] = []
 
@@ -102,7 +117,9 @@ def validate(env: Envelope) -> list[str]:
     if errors:
         return errors
 
-    if env.destination not in LEGAL_EDGES[env.sender]:
+    normal_edge = env.destination in LEGAL_EDGES[env.sender]
+    review_edge = _typed_review_edge(env)
+    if not normal_edge and not review_edge:
         errors.append(
             f"illegal hierarchy edge: {env.sender} -> {env.destination}; level skipping is forbidden"
         )
@@ -110,31 +127,31 @@ def validate(env: Envelope) -> list[str]:
     if (env.old_state, env.new_state) not in LEGAL_STATE_EDGES:
         errors.append(f"illegal lifecycle transition: {env.old_state} -> {env.new_state}")
 
-    # PM is a review/synthesis sink inside a round, not an inbound task worker.
+    # PM is a review/synthesis sink during an active round, not an inbound worker.
     if env.destination == "pm" and env.new_state == "queued":
         errors.append("PM cannot receive or claim queued agent work; leads return review/blocked only")
 
-    # PM may issue root work only after Michael's explicit authorization.
+    # PM-authored root work is released only after the protected Michael gate.
     if env.sender == "pm" and env.new_state == "queued" and not env.round_authorized:
-        errors.append("PM dispatch requires Michael-authorized active round")
+        errors.append("PM root dispatch requires protected Michael-authorized active round")
 
-    # No one but Michael creates new root objectives.
     if env.is_root and env.sender != "pm":
-        errors.append("only PM may create lead root tasks inside an authorized round")
+        errors.append("only PM may author lead root tasks")
 
-    # Rework is allowed only within scope already authorized for this root.
+    if not env.is_root and not env.is_native_child:
+        errors.append("non-root Agent Bus work must be attached as a native GitHub sub-issue")
+
     if env.new_state == "queued" and not env.existing_root_scope:
         errors.append("dispatch would expand root scope; defer to a future Michael-authorized round")
 
-    # Preserve the existing Digital-Tape Verification seam.
-    if (
-        env.sender == "software"
-        and env.destination == "verification"
-        and not env.verification_self_service_allowed
-    ):
-        errors.append("independent review is not self-service for this behavior; route finding to PM")
+    if env.independent_review:
+        if not review_edge:
+            errors.append("independent-review service edge must be software/hardware -> verification")
+        if not env.verification_self_service_allowed:
+            errors.append("independent review is not self-service for this behavior; return root to PM")
+    elif env.sender in {"software", "hardware"} and env.destination == "verification":
+        errors.append("lead-to-Verification lateral routing requires kind:independent-review")
 
-    # Worker constraints are worth checking explicitly even though LEGAL_EDGES covers them.
     if env.sender in WORKERS and env.destination == "pm":
         errors.append("workers may not route directly to PM")
     if env.sender in WORKERS and env.destination in WORKERS:
@@ -152,7 +169,9 @@ def main() -> int:
     p.add_argument("--round-authorized", action="store_true")
     p.add_argument("--root", action="store_true")
     p.add_argument("--new-scope", action="store_true")
+    p.add_argument("--independent-review", action="store_true")
     p.add_argument("--verification-not-self-service", action="store_true")
+    p.add_argument("--not-native-child", action="store_true")
     p.add_argument("--json", action="store_true")
     args = p.parse_args()
 
@@ -164,7 +183,9 @@ def main() -> int:
         round_authorized=args.round_authorized,
         is_root=args.root,
         existing_root_scope=not args.new_scope,
+        independent_review=args.independent_review,
         verification_self_service_allowed=not args.verification_not_self_service,
+        is_native_child=not args.not_native_child,
     )
     errors = validate(env)
 
