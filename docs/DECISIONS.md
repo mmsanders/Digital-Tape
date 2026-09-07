@@ -1520,3 +1520,20 @@ No board fabrication or cell charging. IR-018-18 has an implemented, locally tes
 response awaiting independent disposition; it is not marked independently closed.
 
 **Cost to reverse.** Small code change; restores a demonstrated fail-open control.
+
+---
+
+## ADR-128 — A reproducible packet records its release date, not today's date
+
+**Date:** 2026-09-07 · **Owner:** temporary Hardware / Software Lead
+
+**Decision.** Pin rev-5 packet provenance to its recorded release date, 2026-09-06.
+The legacy `built` manifest key carries that release date. Do not call `date.today()`
+while rebuilding a committed artifact. Bump release metadata with the next packet.
+
+**Evidence.** Hardware CI run 34158410692 regenerated identical plate geometry but
+failed `packet-check` on one manifest line the day after release. The date was the
+only variable wall-clock input left after zip/XML normalization. The existing
+full artifact comparison remains unchanged and is the regression check.
+
+**Cost to reverse.** One line; deterministic source would again produce daily drift.

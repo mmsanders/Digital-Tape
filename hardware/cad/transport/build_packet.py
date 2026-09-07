@@ -36,7 +36,6 @@ import re
 import shutil
 import sys
 import zipfile
-from datetime import date
 from pathlib import Path
 
 import cadquery as cq
@@ -66,6 +65,7 @@ BED_X, BED_Y = 250.0, 210.0
 MARGIN = 12.0
 GAP = 4.0
 SEED = 20260902          # fixed, so the plate is reproducible from source
+PACKET_RELEASE_DATE = "2026-09-06"  # rev-5 provenance, never the rebuild's wall clock
 
 
 # The plate is a committed artefact -- Michael downloads it, he cannot run `make`.
@@ -394,7 +394,7 @@ def build():
 
     manifest = {
         "packet": "WP04-01", "work_packages": ["WP-04", "WP-24"],
-        "built": date.today().isoformat(), "revision": 5,
+        "built": PACKET_RELEASE_DATE, "revision": 5,
         "experiments": [
             {"work_package": "WP-04", "parts": "carrier-*, hook-bar, test-frame",
              "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1]},
