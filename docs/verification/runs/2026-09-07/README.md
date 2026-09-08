@@ -12,7 +12,7 @@ results/callback events and assertion failures. No assertion or fixture was edit
 | Run | Engine input | Result |
 |---|---|---|
 | `pr20-before.jsonl.gz` | PR #20 at `56c50e226f55b509728811515da7a6d588d15c27` | 289 cases; 15 failures |
-| `pr20-after.jsonl.gz` | Same code plus the mount.c reconciliation in this publication | 289 cases; zero failures |
+| `pr20-after.jsonl.gz` | Published PR #20 commit `740c97e998c7672d9e98916102be84430993521b` | 289 cases; zero failures |
 
 The failures were four pre-read device-size cases and eleven stale-superblock
 selection/repair cases. Fixes implement DRAFT-8's DEVICE_ADDRESSABLE guard before

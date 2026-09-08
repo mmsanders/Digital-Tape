@@ -24,12 +24,12 @@ way a card looks faster than it is:
                                  the dropout. We report the slowest window, because
                                  that is the number the requirement actually needs
 
-Reports PASS when the worst window clears the PM's 35 MB/s bar (10% over the
-31.75 MB/s requirement).
+Reports PASS when the worst window clears the existing 23.3 MB/s C-60
+headroom bar. This media measurement is not end-to-end copy acceptance.
 
 Usage:
     sudo ./measure_sustained_write.py /dev/sdX --fill
-    ./measure_sustained_write.py /mnt/card --json results/samsung-pro-plus-128.json
+    ./measure_sustained_write.py /mnt/card --json results/card-run.json
 
 Writing to a raw device DESTROYS its contents. The script refuses to touch a
 device that is mounted, and requires --i-know for a raw block device.
@@ -176,7 +176,7 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("target", type=Path,
                     help="mountpoint (preferred) or raw block device")
-    ap.add_argument("--sku", default="", help="exact SKU, e.g. MB-MD128SA/AM")
+    ap.add_argument("--sku", default="", help="exact manufacturer SKU for the approved sample")
     ap.add_argument("--revision", default="", help="card revision / CID if known")
     ap.add_argument("--reader", default="", help="reader used, so it can be ruled out")
     ap.add_argument("--transfer-mb", type=int, default=DEFAULT_TRANSFER_MB)
