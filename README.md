@@ -1,39 +1,28 @@
 # Digital Tape
 
-A cassette player with no screen.
+A screenless music player for children. Each cartridge holds one continuous stream
+of 44.1 kHz, 16-bit stereo PCM. Side A is the original; Side B is the editable copy.
+There are no tracks, titles or browsing. Scrub changes playback rate without filtering.
 
-A cartridge is one unbroken stream of raw PCM — no tracks, no titles, no browse. Side A is
-what you were given and cannot be changed. Side B is what you make of it: dub from a phone,
-overdub a voice, splice, copy the whole thing to another cartridge. Fast-forward aliases,
-because the playback rate genuinely increases. The grit is the feature.
+**Phase 0: DRAFT-8 published; paper gate cleared; final freeze sign-off pending.**
+The repo contains provisional engine code, independent tests, and hardware design
+and print packets. It is not a finished player or a safety-qualified hardware design.
 
-The users are children.
+## Start or resume a lead
 
-## Start here
+1. Fetch main; read [Michael’s question queue](docs/FOR-MICHAEL.md) first.
+2. Read [the working agreement](CLAUDE.md) and [current status](docs/STATUS.md).
+3. Follow [the onboarding map](docs/START-HERE.md) and
+   [current round brief](docs/REVIEW/README.md). Historical chat is not required.
 
-| | |
+| Surface | Authority |
 |---|---|
-| [`CLAUDE.md`](CLAUDE.md) | **The working agreement.** Twelve guardrails, who owns what, when to escalate. Read before writing code |
-| [`docs/STATUS.md`](docs/STATUS.md) | Current state of the project. Updated on every merge to main |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only ADRs — choice, date, rationale, cost to reverse |
-| [`docs/FOR-MICHAEL.md`](docs/FOR-MICHAEL.md) | The question queue. Nothing else blocks on him |
-| [`spec/`](spec/) | The source of truth. PM-owned, frozen at the Phase 0 gate |
+| [Freeze record](docs/PHASE0-FREEZE.md) | Scope, signatures and remaining holds |
+| [Product specification](spec/README.md) | PM; revisions/hashes in spec/VERSION.md |
+| [Hardware specification](spec/hw/README.md) | Hardware Lead; separately versioned |
+| [Work packages](docs/PACKAGES/README.md) | Scope and dependencies |
+| [Verification integration](docs/VERIFICATION-INTEGRATION.md) | Provenance, coverage and observed results |
+| [Decision log](docs/DECISIONS.md) | Append-only history; later dispositions supersede earlier ones |
 
-## Layout
-
-```
-spec/            frozen format and API definitions — PM-owned
-engine/          Stream 1 · portable C99, no OS, no allocation
-tests/           Stream 2 · Verification Lead owns this outright
-host/            Stream 3 · tapectl CLI + Tauri GUI over engine FFI
-firmware/bench/  Stream 4 · Teensy 4.1
-firmware/prod/   Stream 5 · i.MX RT1062 custom board
-hardware/        KiCad boards, CadQuery mechanical, BOMs
-docs/            status, decisions, work packages, questions for Michael
-```
-
-One engine, three consumers: the CLI, the GUI and the firmware all link the same C library.
-
-## Status
-
-Phase 0 — format freeze. Nothing is implemented. See [`docs/STATUS.md`](docs/STATUS.md).
+One portable C99 engine serves the CLI, GUI and firmware. Hardware source is in
+hardware/; the independent mount-test package is in tests/mount_draft8/.

@@ -19,11 +19,31 @@ under `docs/verification/` with their original authorship intact.
 
 Structural Rule 1: this test-only change lands before any newly covered engine
 implementation. The main engine still contains the older provisional read path.
-Actual engine linking/execution is the next integration step, not part of this
-test-only delivery. No assertions, expected results, fixture bytes or cases changed.
+Subsequent engine linking/execution is recorded below; the test-only import itself
+made no engine-conformance claim. No assertions, expected results, fixture bytes or cases changed.
 
 VT8-001 remains held: allocation events and running cartridge-sequence consumption
 are not observable through this mount probe. No allocator, commit, operation,
 rendered PCM, complete state-row or full WP-07 acceptance follows from this import.
 PR #20 cannot merge wholesale. Full green WP-10, independent WP-11 goldens, WP-12a
 and hardware acceptance remain separate requirements.
+
+## Software execution — held implementation
+
+The unchanged probe was linked to the real public header and engine archive.
+The original PR #20 head returned 15 failures out of 289; two DRAFT-8 mount
+reconciliations yielded 0/289 failures at published branch commit
+740c97e998c7672d9e98916102be84430993521b. The [raw run packet](verification/runs/2026-09-07/README.md)
+contains both lossless logs, reproduction commands and provenance. Independent
+result disposition is pending; no new engine code has been merged to main.
+
+Safe documentation and raw observations have been extracted from #20. Its remaining
+code/harness boundary includes covered and uncovered behaviour in shared files.
+Do not merge those files wholesale. A further split requires preserving the tested
+behaviour and reviewing dependencies, or additional independently authored coverage.
+Read the [Verification brief](REVIEW/verification-lead.md) for the bounded next return.
+
+Publication order is recorded by the actual merge ancestry: exact spec #25,
+independent tests #27, then software branch reconciliation. Importing hardware #18
+and this documentation does not grant an engine coverage exception. The independent
+test directory and both canonical integrity manifests remain unchanged.
