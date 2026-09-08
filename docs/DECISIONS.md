@@ -1537,3 +1537,219 @@ only variable wall-clock input left after zip/XML normalization. The existing
 full artifact comparison remains unchanged and is the regression check.
 
 **Cost to reverse.** One line; deterministic source would again produce daily drift.
+
+
+---
+
+## Software decision history extracted from held PR #20
+
+**PM provenance, 8 September 2026:** the following six ADRs are preserved verbatim
+from the software branch. They describe branch implementation decisions, not code
+merged to main or independent acceptance. DRAFT-8 and the current working agreement
+supersede historical draft references. This extraction preserves rationale while
+keeping uncovered implementation held.
+
+## ADR-027 — The entry-overlap rule is implemented pairwise, not by the aggregate formula
+
+**Date:** 2026-09-03 · **Decided by:** Software Lead · **Finding filed as issue #19, now closed**
+
+> **Confirmed by DRAFT-5 and unchanged in DRAFT-6.** §5.1's note V4-002 deletes the
+> "Equivalently:" scalar test outright, on both grounds filed — not equivalent, and circular via
+> `free_next`. The interval model is the normative rule and can be evaluated in slot validation
+> with no ordering hazard. No code change follows; this entry stands as written.
+
+**Decision.** `tapefs` §5.1's new overlap requirement is implemented as its precise statement —
+no two entries' frame ranges may intersect — by flattening each entry to an interval in
+chunk-major space (`chunk_id × CHUNK_FRAMES + start_frame`), sorting, and scanning adjacent
+pairs. The section's "Equivalently:" aggregate formula is **not** implemented.
+
+**Rationale.** The two are not equivalent, and the aggregate is strictly weaker. Two entries each
+covering frames 0–1000 of chunk 0 give `total_frames = 2000` against an aggregate bound of
+131 072 — the aggregate passes media the pairwise rule refuses, and that is precisely the
+two-entries-on-one-chunk shape §9.3's phase-2 argument depends on excluding.
+
+It is also circular: the aggregate is phrased in terms of `free_next`, which §7 derives from the
+*live* index — and an index is only live once §5.2 has judged it valid. A validity rule cannot
+depend on a value that only exists after validity is settled.
+
+**Cost to reverse.** Low. If the PM makes the aggregate normative instead, the pairwise check is
+deleted and media that overlaps within a chunk starts mounting — which is why the finding is
+filed rather than silently resolved in the implementer's favour.
+
+Sorting is an iterative heapsort in the caller's scratch index: recursion is forbidden
+(guardrail 08), allocation is forbidden, and mount is on the wake-to-audio path, where an O(n²)
+scan over 4 096 entries would cost real milliseconds.
+
+---
+
+## ADR-033 — Both sides' indices live in the instance; the disjointness sort gets a permutation array
+
+**Date:** 2026-09-05 · **Owner:** Software Lead · **Source:** `tapefs` §4.2, §5.1
+
+**Decision.** `struct tape` holds `idx[2]` — the live index of **both** sides — and §5.1's
+disjointness sort works over a `uint16_t` permutation array rather than a copy of the entry array.
+`tape_instance_size()` is **156 456 bytes, 76 % of the 200 KiB budget.**
+
+**Rationale.** DRAFT-6's phase 3 selects and validates both sides whichever was requested, and it
+must: `free_next` is defined over the live **Side B** index, so a Side-A mount that had not
+selected B could not compute it — while `tape_respool` and `tape_promote` are both permitted from
+a Side-A mount and both allocate from it. Degenerating it to `a_high_water` allocates straight
+over Side B's live chunks (invariant 10). The stage oracle compares both arrays too.
+
+The arithmetic then decides the rest. A `tape_index` is 49 KiB. Keeping the old *live + scratch*
+pair and adding a second side would have been three of them, 147 KiB before the 48 KiB of raw
+entry bytes — over budget on its own. §5.1 names the way out: the sort only needs to order
+`entry_count` **indices**, which is 8 KiB at the maximum. So the third index becomes a
+permutation array and the freed buffer holds the other side.
+
+**Cost to reverse.** Moderate. The permutation sort is a drop-in for the entry-copy sort, but
+`TAPE_LIVE(t)` is now the only name for the mounted side's index and callers reach through it.
+Reversing would mean reintroducing a name that can disagree with `idx[side]`.
+
+---
+
+## ADR-034 — Both index slots are parsed into one buffer, and the winner is re-read
+
+**Date:** 2026-09-05 · **Owner:** Software Lead
+
+**Decision.** `select_side` parses slot 0 and then slot 1 into the *same* buffer, remembering only
+slot 0's `sequence`, and re-reads slot 0 when it wins. That costs one extra slot read — at most 97
+blocks, one or two in practice — in the both-valid, slot-0-wins case.
+
+**Rationale.** The cheaper-looking design is to parse slot 1 into the *other* side's buffer, which
+genuinely is free during Side A's selection. **I wrote it that way first and it is wrong:** phase 3
+selects A and then B, so during Side B's selection that buffer holds Side A's already-selected
+index. A cartridge with two valid Side B slots would have had Side A's index silently overwritten
+by a Side B slot — silently, because the result still parses as a valid index.
+
+Every test passed. §5.3's resting state after every commit is *exactly one valid slot*, so every
+fixture in the suite leaves the partner invalid and the second parse never happened. The condition
+needs a cartridge mid-generation on a side nobody is mounting, which is not a shape a
+refusal-path suite naturally produces. `tests/harness/test_mount.c` now builds it deliberately,
+and the test was verified to go red against the reintroduced bug before being kept.
+
+A third index buffer would remove the reload and cost 49 KiB against a budget already at 76 %.
+**The reload is the cheaper mistake to make**, and the honest one to state.
+
+**Cost to reverse.** Low, and the reason to keep it is written into the function: the comment names
+the wrong design and why it looks right.
+
+---
+
+## ADR-035 — `tape_info.writable` is about the mount, never about the mounted side
+
+**Date:** 2026-09-05 · **Owner:** Software Lead · **Source:** `engine-api` §3.1, §10
+
+**Decision.** `tape_get_info` reports `effective_writable` — `(dev.write != NULL) && (version_minor
+== 0)` — unmodified. It previously reported `writable && side == TAPE_SIDE_B`.
+
+**Rationale.** Two separate rules had been folded into one field. §10 is explicit: `W` is about the
+mount, and the Side-A rule belongs to `tape_arm` and `tape_feed` alone, because those write *the
+mounted side*. `reset_b`, `promote` and `dup` write regions chosen by the operation — and `dup`
+writes the destination's Side A **by definition**, so a side-qualified `writable` reads as if
+duplicating were forbidden outright.
+
+The version term is the other half, and it was V4-001, the round's blocker: `tapefs` §4.1 declared a
+`version_minor > 0` cartridge read-only while every write authorisation in the API was defined
+solely by `dev.write != NULL`. On a writable device a v1 engine was still authorised to commit v1
+structures onto v1.1 media. **The compatibility barrier existed in prose and in no code path.** It
+is one variable now, computed once at mount, and phase-4 repair consults it too.
+
+**Cost to reverse.** Low in code, high in meaning — the two rules would refuse to stay separated
+again, and the last time they were merged the result was a blocker.
+
+---
+
+## ADR-036 — Structural validity and §5.2 validity are two functions, not one
+
+**Date:** 2026-09-06 · **Owner:** Software Lead · **Source:** `tapefs` §5.5 (V6-003)
+
+**Decision.** `tape_index_parse` checks §5.5 **structural** validity only — magic, `entry_count ≤
+TAPE_MAX_ENTRIES`, CRC — and fills the index from the bytes, including the raw `side` marker.
+`tape_index_validate` applies §5.2 separately: the side match, the entry bounds, the `total_frames`
+sum, the §5.4 cap, and §5.1's interval disjointness. They had been one function.
+
+**Rationale.** `cartridge_sequence` is the maximum over every **structurally** valid slot, and §5.5
+is explicit that this is not §5.2 validity by accident. §5.2 validity is **not stable across an
+operation**: §9.3.4's "between 2 and 3" row turns on Side A's new index being §5.2-*invalid* until
+step 4 raises the water line. A base computed over §5.2-valid slots could therefore be outranked
+later by a slot that becomes valid — which is the same class of bug as reusing a sequence, arrived
+at from the other direction. Structural validity only ever shrinks the set of numbers this
+cartridge has issued.
+
+The entry-count bound sits in the structural predicate rather than in §5.2 for a concrete reason
+the spec gives: a slot claiming `0xFFFFFFFF` entries would otherwise demand a 51 GB read to decide
+its own validity, on a mount that rejects it in one comparison. `load_slot` checks it **before**
+the entry read, not after.
+
+**Cost to reverse.** Moderate. Merging them back is a small edit and silently reintroduces a base
+that can be outranked; the test that catches it (a Side-B slot carrying a Side-A marker, structurally
+valid and §5.2-invalid, at a higher sequence than either live slot) was verified to go red against
+exactly that merge.
+
+---
+
+## ADR-037 — A Side-B mount request returns that side's own §5.3 error
+
+**Date:** 2026-09-06 · **Owner:** Software Lead · **Source:** `tapefs` §4.2 (V6-001)
+
+**Decision.** `select_indices` propagates Side B's own selection error to a mount that **requested**
+Side B — `TAPE_ERR_INCONSISTENT` when both B slots are valid at equal `sequence`,
+`TAPE_ERR_NO_VALID_INDEX` when neither is. The post-mount `tape_set_side(TAPE_SIDE_B)` refusal stays
+`TAPE_ERR_NO_VALID_INDEX` in **both** causes.
+
+**Rationale.** DRAFT-6 knew one cause of degraded-B and flattened everything to "no valid index".
+DRAFT-7 adds the second — both slots valid at equal `sequence`, which §5.3 refuses — and the two are
+not the same event: one is an absent index, the other is a media fault with two live generations
+that cannot be ordered. Reporting the second as the first tells the caller the opposite of what
+happened.
+
+The asymmetry with `tape_set_side` is deliberate and is the part worth writing down, because it
+looks like an inconsistency: the mount path is *diagnosing* a cartridge and the caller can act on
+which fault it is; the `set_side` path is answering "can I switch to B right now", and the answer is
+no for the same reason either way. So this is a genuine divergence between two paths, not a rename
+that missed a caller.
+
+**Cost to reverse.** Trivial in code. The reason not to is that `tape_reset_side_b` — held by
+structural Rule 1 — recovers *both* causes, and its correctness in the second depends on
+`cartridge_sequence`: the old "highest live sequence + 1" wrote 11 against a surviving B1 at 500, so
+the recovery returned success and changed nothing on the next mount.
+
+
+---
+
+## ADR-129 — Repo-only Phase 0 handoff and normal authority restoration
+
+**Date:** 2026-09-08 · **Owner:** temporary acting PM
+
+Michael authorized one combined PM/Software/Hardware push, not independent
+Verification. Publish the exact reviewed candidate, safe PR content, raw test runs,
+current role briefs and scoped freeze decision in this repo. Archive superseded
+review instructions; retain the append-only decision history and authenticated
+spec bytes. Fresh leads start at docs/START-HERE.md without chat or external charters.
+
+Normal PM may commit spec/dispositions/briefs directly. Every round refreshes refs
+and surfaces Michael's question queue first. Prefer short bounded rounds and
+appropriate capability; no repeated paste transport or automatic reviewer loop.
+Staged Agent Bus #26 remains unmerged and inactive, outside this freeze push.
+Temporary combined authority expires at recorded freeze; Michael's final format
+sign-off and independent acceptance are not manufactured by this actor.
+
+**Cost to reverse:** documentation changes are reversible; losing the role and
+coverage boundaries would permit self-acceptance or accidental scope expansion.
+
+## ADR-130 — Supersede stale card cart and copy-duration planning text
+
+**Date:** 2026-09-08 · **Owner:** temporary acting PM / Hardware Lead
+
+Michael's latest PM notes explicitly reject 64 GB cards and request cheap 4 GB V30,
+in either physical size. Withdraw the stale cart. Do not silently substitute capacity
+or speed class; return exact alternatives to Michael for purchase approval. A documented
+32 GB V30 alternative is not an approved order or evidence that 4 GB V30 is unavailable.
+
+WP-05 now uses the normative whole-C60 copy requirement rather than the old 90-minute
+planning text. This aligns planning with the existing acceptance contract; it changes
+no hashed criterion and grants no throughput or atomicity acceptance. Preserve exact
+SKU/revision sampling, independently reviewed cut protocol and all raw outcomes.
+
+**Cost to reverse:** re-source the cart and replan samples; no purchase has been made.

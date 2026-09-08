@@ -2,23 +2,26 @@
 
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
-A package file is written when the package is picked up, not before. The index below is the
-authority until then, taken from **Plan Rev B §09** (received 2026-08-31).
+A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
+Current status below is updated 8 September 2026. Historical phase durations are
+planning estimates, not fresh commitments. This repo is the restart authority; no
+external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
+[scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
 
 Owner column is the plan's: **Agent** runs unattended · **You** needs Michael's hands or
-judgement · **Either** has both a DIY and a service-bureau path. Stream column maps to
-Charter §04.
+judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 engine,
+2 independent verification, 3 desktop tooling, 4 prototype firmware, 5 production firmware.
 
 ## Phase 0 — foundations and spikes · 2 weeks, fully parallel
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-01 | Repo, agent docs, decision log | Agent | — | **Done**, unconfirmed |
-| WP-02 | TAPEFS v1 specification | **PM** | spec | **Delivered** — DRAFT-7 bundle on `main` 5 Sep, under `verify-spec-bundle.sh` |
-| WP-03 | Engine API specification | **PM** | spec | **Delivered** — DRAFT-7 bundle on `main` 5 Sep, under `verify-spec-bundle.sh` |
+| WP-01 | Repo, agent docs, decision log | Agent | — | Repo and restart agreement published; no independent package acceptance claimed |
+| WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; final scoped sign-off Q-001 pending |
+| WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; operations/state remain unfrozen |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
-| WP-05 | Parts order #1 | You | hardware | **Carts drafted** — every order goes to Michael (Decisions 002 §4) |
-| WP-34 | Thermal and safety budget | Hardware | hardware | **Rev 0.2** — estimates; three review findings closing |
+| WP-05 | Parts order #1 | You | hardware | 64 GB cart withdrawn; cheap 4 GB V30 sourcing requested; every purchase needs Michael |
+| WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
 **Gate:** Michael signs off the TAPEFS spec. After this, format changes cost real rework.
@@ -27,15 +30,15 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **Read path complete against DRAFT-6** — 260 checks, sub-criteria 06a–06h exercised. PR #20, parked by the PM. DRAFT-7 adds `cartridge_sequence` (§5.5) and a second degraded-B cause; reconciliation is next. Commit path held by structural Rule 1 |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **Allocator done against DRAFT-6** — 46 checks on Rule 3; `tapefs` §7 unchanged through DRAFT-7. Reset-B's commit held by structural Rule 1 |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Blocked on WP-02/03 |
-| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Blocked on WP-02/03 |
-| WP-10 | Crash-injection harness | Verification | 2 | **Infrastructure landed and running in CI**; DRAFT-7 adds branch-exact headroom, the shared sequence base and promote's four-injection-point superblock writes to its scope |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **Runner built and proven** (manifest, byte-exact, audible diff). Fixtures + manifest are theirs |
-| WP-12 | Re-spool / defragment pass | Agent | 1 | Blocked on WP-02/03 |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **Green, with numbers**: `tape_instance_size()` 156 456 B (76 % of 200 KiB), stack 1 536 / 8 192, `.rodata` 1 040 / 32 768. Funnel and allocator gates green |
-| WP-36 | Slot capability model | Agent | 1 | Blocked on WP-02/03 |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | DRAFT-8 reconciliation on held #20: 289 independent mount cases pass in software-run evidence; independent disposition pending; uncovered behaviours remain held |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Allocator implementation retained on #20; VT8-001 observability/coverage hold; own tests are not independent acceptance |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
+| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
+| WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Runner landed; independent fixtures/manifest outstanding, golden CI remains red |
+| WP-12 | Re-spool / defragment pass | Agent | 1 | Contract issued; independent WP-12a coverage and acceptance outstanding |
+| WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
+| WP-36 | Slot capability model | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.
 
@@ -74,7 +77,7 @@ Charter §04.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-26 | Schematic capture and review | Agent | hardware | Not started — codec question first |
+| WP-26 | Schematic capture and review | Agent | hardware | No schematic yet; codec architecture recorded in board-rev-a.md; fabrication/charging safety gate remains CLOSED |
 | WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not started — results format now fixed by ADR-118 |
 | WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked |
 | WP-29 | Bring-up and rev B | Either | 5 | Blocked |
@@ -96,7 +99,9 @@ Charter §04.
 The plan asks Michael for a fine-grained token. The Software Lead already has push access and
 has opened a PR, so the access half is satisfied. **The `main` branch protection half is not
 verified** — the plan's repo decision says "nothing merges to main without your review".
-Flagged in STATUS.md; changing repository settings is not the Software Lead's call.
+Current push used Michael’s explicit temporary merge authority. No repository-protection
+setting was changed or asserted verified. Normal roles resume at freeze; changes to
+repository protection require Michael’s direction.
 
 ## Per-file template
 
@@ -110,7 +115,7 @@ Flagged in STATUS.md; changing repository settings is not the Software Lead's ca
 What this package exposes to other streams. The contract, not the implementation.
 
 ## Acceptance criteria
-From `spec/acceptance.md` and Plan Rev B §09. Measurable and independently checkable.
+From `spec/acceptance.md` and the current package definition; cite exact criteria. Measurable and independently checkable.
 
 ## Independent sign-off
 Verification Lead only. Date and what was run.

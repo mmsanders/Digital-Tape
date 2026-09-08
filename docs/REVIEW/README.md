@@ -1,30 +1,22 @@
-# Lead review packets
+# Current round brief
 
-One file per lead, per review round. The PM asked each lead to record feedback and concerns
-here so it can process them together rather than in four separate conversations.
+**PM-issued: 8 September 2026.** This is the current assignment surface. Read main
+and [Michael’s questions](../FOR-MICHAEL.md) first. Archived reports are not instructions.
 
-| File | Lead | Round 1 (charter rev of 31 Aug) |
+| Role | Next bounded task | Stop/return boundary |
 |---|---|---|
-| `software-lead.md` | Software Lead (Claude Code) | Filed |
-| `hardware-lead.md` | Hardware Lead (Claude Code) | Filed as `STATUS-HARDWARE.md`; round 2 filed here |
-| `verification-lead.md` | Verification Lead (ChatGPT) | Not filed — has no repo access, see note |
-| `surge-support.md` | Surge (this round) | DRAFT-8 proposal brief |
-| `FOR-PM.md` | Surge → PM | Handoff for issuing DRAFT-8. Not a freeze request |
-| `FOR-VERIFICATION-LEAD.md` | Surge → Verification Lead | Optional attack list. PM decides whether to forward |
+| PM | Obtain Q-001 on the exact scoped freeze; disposition verification returns; maintain concise current state | No invented human signature or independent acceptance |
+| Software | Preserve #20; use the independent coverage matrix to plan a safe split or wait for the next tests | 289 mount passes do not license allocator, sequence, warm/state/operation code |
+| Verification | [Read this brief](verification-lead.md); disposition raw mount observations and specify the next test tranche | No untested engine inspection; no package-wide approval from mount-only evidence |
+| Hardware | Complete exact-part timing/safety evidence and small-card sourcing; support WP04 print results | No own-response acceptance, 64 GB order, fabrication or charging |
+| Surge | No active assignment | Do not start autonomous rounds |
 
-**Note on the Verification Lead's file.** Per the charter it has no repository access, so it
-cannot file here itself. Whoever operates it should paste its packet into
-`verification-lead.md`, or the PM should hold its response outside the repo. Flagged as an open
-process question in `software-lead.md` §3.
+## Reporting protocol
 
-## Convention
+Each lead returns: input commit/spec hashes; work/evidence produced; what actually ran;
+remaining holds; next owner. PM commits dispositions and updates this brief directly.
+Use one bounded round and stop on its return condition. No listener, polling loop,
+agent bus activation, or automatic cross-agent dispatch is authorized here.
 
-Newest round at the top of each file, under a dated heading. Do not edit a previous round's
-section — supersede it, the same way `DECISIONS.md` works. Each item gets:
-
-- **What it is** — finding, concern, question, or need
-- **Why it matters** — the consequence if it is not addressed
-- **Recommendation** — a position, not an open question, wherever one is defensible
-
-A packet made only of questions pushes work upward. Every item here should be answerable with
-"yes", "no", or "do it differently", and should say what happens by default if nobody answers.
+Earlier lead/surge packets are in [the historical archive](../archive/pre-phase0/README.md).
+The separate staging/agent-bus-v1 work is outside this freeze push and remains staged.

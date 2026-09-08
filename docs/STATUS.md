@@ -1,63 +1,38 @@
-# STATUS
+# Project status
 
-**Updated:** 2026-09-05 · **Phase:** 1 (engine) · **Updated by:** Software Lead
-**Charter Rev C · spec bundle DRAFT-7 on `main` · CI 8/9 green**
+**Updated: 8 September 2026 · Owner: PM · Phase 0 freeze-ready, sign-off pending.**
 
----
+## Published
 
-## What changed since last time
+- DRAFT-8 issued verbatim through **#25**, main commit 5e92f4085b40d55ea605267b6ce8e0e2c997053c.
+  Independent paper review: zero blockers, zero majors, one non-blocking wording question.
+- Independent mount package landed test-first through **#27**, main commit
+  dd49015d9a6c843489a81217be9f510748099248: 289 cases, ten package self-checks reproduced.
+- Hardware **#18** merged at 3287235d3d9b17373762852ee3d2ad9a9529d98d.
+  Fabrication Make gate now fails closed; packet rebuild no longer drifts with the date.
+  Hardware CI passed all three jobs. This is engineering work, not safety qualification.
+- Current authority, question queue and role briefs replace stale round instructions.
+  [Freeze record](PHASE0-FREEZE.md) defines exactly what is ready for signature.
 
-**DRAFT-7 is on `main`**, plus the PM's rewrite of `docs/FOR-MICHAEL.md`. All five files
-`cmp`-verified; the three hashes checked against the manifest before anything was copied and again
-after. The banner is inside the hashed content, so nothing was added or edited.
+## Held and next owner
 
-**The manifest-driven probe survived its first bundle change** — which is what it was rebuilt for.
-The revision probe named `DRAFT-5` and its hash until ADR-031 made it read `spec/VERSION.md` at run
-time; this is the first bundle to land since, and the meta-gate went 15/15 with **no edit to any
-gate**. A hardcoded probe would have gone quiet today exactly as it did on the DRAFT-6 landing.
-
-**Issue #23 closes with this bundle**, per the PM. `acceptance.md` DRAFT-7 carries the independent
-audit language that Decisions 008 §4 announced and DRAFT-6 did not contain.
-
-## In flight
-
-| Work | Owner | State |
+| Work | State | Next owner |
 |---|---|---|
-| DRAFT-7 bundle | Software Lead | **On `main`**, gate green |
-| WP-06 read path | Software Lead | Done against **DRAFT-6**, 260 checks. PR #20, **parked by the PM** |
-| WP-06/07 reconciliation to DRAFT-7 | Software Lead | **Not started** — three items, below |
-| WP-07 allocator | Software Lead | Done. `tapefs` §7 unchanged through DRAFT-7 |
-| WP-06/07 commit paths | Software Lead | **Held** by structural Rule 1 |
-| WP-10 crash injection | Verification | Infrastructure in CI. DRAFT-7 widens its scope again |
-| WP-11 golden suite | Verification | Runner proven; fixtures owed. **The only red gate** |
+| #20 engine | DRAFT-8 reconciled; 289 mount cases pass on held head 740c97e998c7672d9e98916102be84430993521b. Main still has older provisional engine. | Verification dispositions raw mount observations; Software preserves untested boundary |
+| VT8-001 / WP-07 | Allocation events and running sequence consumption untested independently; warm/state/operation exclusions also remain | Verification authors next tests before implementation merge |
+| WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
+| WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
+| Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
+| #26 Agent Bus | Explicitly staged, unmerged and inactive; outside this freeze push | Michael controls any separate activation |
+| Q-001 | Paper freeze ready for Michael’s reserved sign-off | Michael |
+| WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
 
-## Blocked
+**New independent package acceptances: none.** Mount observations were run by Software,
+not independently dispositioned. CAD checks are not measurements. Do not report all CI
+green: missing WP-11 goldens are an explicit unresolved gate.
 
-Nothing. The commit path is held by instruction, not blocked.
-
-## Acceptance criteria flipped to passing
-
-**None.** 364 self-test checks are the Software Lead's claims about its own code. `acceptance.md`
-requires the Verification Lead's independent confirmation and nothing has had it.
-
-## What will hurt in three weeks
-
-- **`cartridge_sequence` (`tapefs` §5.5) is new and my read path does not compute it.** It is the
-  max over every **structurally valid** slot of all four — a *weaker* predicate than §5.2 validity,
-  deliberately, and my `load_slot` collapses the two. Every commit's base depends on it, and the
-  defect it fixes is ordinary: Side A live at `sequence = 10` and Side B at `500` is what a
-  cartridge looks like after a few recordings, and a side-local reading writes 11, loses selection
-  to B's old slot at 500, and gets the cartridge rejected by the stage oracle.
-- **Degraded-B has a second cause I do not implement** (V6-001). Both B slots valid at *equal*
-  `sequence` is now degraded-B, and a mount **requesting** Side B must return that side's own §5.3
-  error — `TAPE_ERR_INCONSISTENT` in that case, not `TAPE_ERR_NO_VALID_INDEX`. My
-  `select_indices` flattens both causes to `NO_VALID_INDEX`. The `set_side` refusal stays
-  `NO_VALID_INDEX` in both, so the two paths genuinely differ.
-- **`tape_set_side` is now permitted while Playing** (V6-005), and the degraded-B row overrides the
-  Playing row. Neither is reachable in my code yet — there is no render path — but WP-08's
-  `set_side` criterion is written against the Playing case and could not be executed before this
-  change.
-- **The PM's calibration note is now three rounds old and still holds.** Both blockers this round
-  were in text written to fix the previous round's findings. My own `select_side` defect last round
-  was the same shape. *A fix is the only text in a document nobody but its author has ever read* —
-  and the same is true of a patch.
+Risks: unqualified card atomicity, unresolved solenoid timing at the actual rail/parts,
+unprinted mechanism/creep trials, and code still held by coverage. These are visible
+dependencies, not evidence against the exact-byte paper review. See
+[verification integration](VERIFICATION-INTEGRATION.md) and
+[hardware status](STATUS-HARDWARE.md).
