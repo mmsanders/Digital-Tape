@@ -11,14 +11,14 @@
 - Hardware **#18** merged at 3287235d3d9b17373762852ee3d2ad9a9529d98d.
   Fabrication Make gate now fails closed; packet rebuild no longer drifts with the date.
   Hardware CI passed all three jobs. This is engineering work, not safety qualification.
-- Current authority, question queue and role briefs replace stale round instructions.
+- Cleanup **#28** merged: current authority, question queue and role briefs replace stale round instructions.
   [Freeze record](PHASE0-FREEZE.md) defines exactly what is ready for signature.
 
 ## Held and next owner
 
 | Work | State | Next owner |
 |---|---|---|
-| #20 engine | DRAFT-8 reconciled; 289 mount cases pass on held head 740c97e998c7672d9e98916102be84430993521b. Main still has older provisional engine. | Verification dispositions raw mount observations; Software preserves untested boundary |
+| #20 engine | DRAFT-8 reconciled; 289 mount cases pass at tested commit 740c97e998c7672d9e98916102be84430993521b. Only ten engine/harness files remain in the PR; current branch 2e0e8a4b7bff42797ac37901196e5ea348b2e392 carries identical implementation. Main still has older provisional engine. | Verification dispositions raw mount observations; Software preserves untested boundary |
 | VT8-001 / WP-07 | Allocation events and running sequence consumption untested independently; warm/state/operation exclusions also remain | Verification authors next tests before implementation merge |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
@@ -36,3 +36,8 @@ unprinted mechanism/creep trials, and code still held by coverage. These are vis
 dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
+
+Checkpoint validation: cleanup hardware CI [34176318398](https://github.com/mmsanders/Digital-Tape/actions/runs/34176318398)
+passed all three jobs; engine CI [34176318403](https://github.com/mmsanders/Digital-Tape/actions/runs/34176318403)
+passed all jobs except the known missing-goldens gate. Exact spec/test trees and the
+held engine/harness blobs were rechecked after publication. Working checkout is clean.
