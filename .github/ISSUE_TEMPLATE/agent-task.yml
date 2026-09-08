@@ -1,127 +1,86 @@
 name: Agent Bus Child Task
-about: Lead-to-worker or typed independent-review child envelope
-title: "[Agent Task] "
-labels: ["agent-task", "state:draft", "round:active"]
+description: Native child of a working root; use controller ready command with parent claim
+title: '[Agent Task] '
+labels:
+- agent-task
+- state:draft
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **Agent Bus is not live until explicitly activated.**
-        This form is for children of a lead root. Attach the issue as a **native GitHub sub-issue** of exactly one `agent-root` before requesting dispatch.
-
-        Agents never add `state:queued`. When the envelope is complete, remove the old lifecycle label and add `state:ready`; the cheap bus gate validates it and adds `state:queued` only if legal.
-
-  - type: input
-    id: parent
-    attributes:
-      label: Parent root
-      description: Informational copy of the native parent relationship. Native GitHub sub-issue parentage is authoritative.
-      placeholder: "#123"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: requested_by
-    attributes:
-      label: Requested by lead
-      options:
-        - Software Lead
-        - Hardware Lead
-        - Verification Lead
-    validations:
-      required: true
-
-  - type: dropdown
-    id: destination
-    attributes:
-      label: Destination
-      description: Worker by default. Verification is legal only with `kind:independent-review` and only from Software/Hardware.
-      options:
-        - ChatGPT worker
-        - Grok worker
-        - Verification Lead — independent review service
-    validations:
-      required: true
-
-  - type: dropdown
-    id: capability
-    attributes:
-      label: Capability class
-      description: `auto` is preferred. Workers normally resolve to economy or balanced; premium tiers require parent-lead reclassification.
-      options:
-        - auto
-        - economy
-        - balanced
-        - strong
-        - frontier
-      default: 0
-    validations:
-      required: true
-
-  - type: textarea
-    id: request
-    attributes:
-      label: Request
-      description: One bounded objective inside the parent root's existing scope.
-    validations:
-      required: true
-
-  - type: textarea
-    id: deliverable
-    attributes:
-      label: Deliverable
-      description: What must be returned to the parent lead.
-    validations:
-      required: true
-
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance
-      description: Observable completion conditions. Rework may refine execution but not add scope.
-      placeholder: |
-        - Criterion 1
-        - Criterion 2
-    validations:
-      required: true
-
-  - type: textarea
-    id: authority
-    attributes:
-      label: Authority / constraints
-      description: Repository surfaces, mutation permission, guardrails, and explicit prohibitions.
-    validations:
-      required: true
-
-  - type: textarea
-    id: inputs
-    attributes:
-      label: Relevant inputs
-      description: Link the PR/spec/issues/files/evidence needed so the worker does not require context copied through Michael.
-    validations:
-      required: false
-
-  - type: dropdown
-    id: return_to
-    attributes:
-      label: Return to parent lead
-      options:
-        - Software Lead
-        - Hardware Lead
-        - Verification Lead
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: protocol
-    attributes:
-      label: Protocol checks
-      options:
-        - label: This issue is attached as a native sub-issue of the requesting lead's root.
-          required: true
-        - label: This task contains no new root scope.
-          required: true
-        - label: I will request dispatch with `state:ready`; I will not add `state:queued`.
-          required: true
-        - label: Any rework remains within these acceptance criteria and the dispatch-cycle fuse.
-          required: true
+- type: dropdown
+  id: destination
+  attributes:
+    label: Destination
+    options:
+    - worker-chatgpt
+    - worker-claude
+    - worker-grok
+    - verification
+    description: Apply matching to:* label. Verification also needs kind:independent-review and approved
+      root permission.
+  validations:
+    required: true
+- type: dropdown
+  id: capability
+  attributes:
+    label: Capability class
+    options:
+    - auto
+    - economy
+    - balanced
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: request
+  attributes:
+    label: Request
+  validations:
+    required: true
+- type: textarea
+  id: deliverable
+  attributes:
+    label: Deliverable
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance
+  validations:
+    required: true
+- type: textarea
+  id: authority
+  attributes:
+    label: Authority / constraints
+  validations:
+    required: true
+- type: dropdown
+  id: eligibility
+  attributes:
+    label: Review eligibility
+    options:
+    - none
+    - tooling-or-hardware
+    - landed-independent-tests
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: evidence
+  attributes:
+    label: Coverage evidence
+    description: 'Typed review only: exact landed independent test commit/IDs or tooling/hardware scope;
+      never derive tests from uncovered implementation.'
+  validations:
+    required: false

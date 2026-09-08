@@ -1,23 +1,17 @@
-# spec/hw/ — Hardware Lead, versioned not frozen
+# Hardware specification — versioned, not format-frozen
 
-**Owner: Hardware Lead. No PM gate.** Established by PM Decisions 001 §3.
+Owner: Hardware Lead. Revisions/hashes are in [VERSION.md](VERSION.md).
+Generated tables must agree with their source and the hardware manifest.
 
-`spec/` proper is frozen at the Phase 0 gate because three streams implement against it.
-These two documents cannot be, because they describe reality and reality keeps changing —
-estimates become measurements, and a board revision moves a pin. A rule that made every
-thermocouple reading an escalation would be ignored rather than followed, and a spec that
-drifts to describe whatever got built is exactly what the freeze exists to prevent.
+| File | Consumer / obligation |
+|---|---|
+| board-rev-a.md | Firmware; notify Software of pin/rail/timing changes with a concrete change list |
+| thermal-budget.md | Safety design and audit; label estimates, record method/raw data/uncertainty for measurements |
+| cartridge-shell.md | CAD and physical trials; geometry/model checks do not establish measured durability |
 
-So the cut is one level finer: **what needs protecting is not the documents, it is their
-consumers.**
+Routine hardware revisions need notification, not separate PM approval. Changes to
+product limits or guardrails do require PM disposition. Safety limits live upstream
+in spec/acceptance.md; they cannot drift with a model.
 
-| File | Consumer | Obligation |
-|---|---|---|
-| `board-rev-a.md` | `firmware/prod/` | **Notification, not approval.** Any change to a pin, a rail or a timing constraint lands as a PR naming the Software Lead as reviewer, with a `CHANGES` block listing exactly what moved. Firmware acknowledges by merging. The PM does not gate it. |
-| `thermal-budget.md` | nothing in code | None. Update freely as measurements replace estimates. |
-
-**Limits live upstream.** Numbers a unit must not exceed — the JEITA window, the solenoid
-on-time and duty ceilings, the 85 dB cap, touch temperature — belong in `spec/acceptance.md`,
-which is PM-owned and frozen. Measurements live here; the thing they are measured against
-does not, so it cannot drift quietly. `thermal-budget.md` §8 carries the proposed set awaiting
-PM transcription.
+No board fabrication or cell charging while the fabrication gate is CLOSED.
+Independent acceptance is not supplied by a generator, manifest, or the response author.

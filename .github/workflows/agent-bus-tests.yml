@@ -1,0 +1,25 @@
+name: Agent Bus regression tests
+on:
+  push:
+    branches-ignore: [agent-bus-state, gh-pages]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m unittest discover -s tools/agent-bus -p 'test_*.py' -v
+      - run: node --test tools/agent-bus/test_dashboard.cjs
+      - run: python3 tools/agent-bus/browser_smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dashboard-browser-check
+          path: build/agent-bus-browser/
+          if-no-files-found: ignore

@@ -1,112 +1,98 @@
 name: Agent Bus Lead Root
-about: PM-prepared root assignment held behind Michael's round gate
-title: "[Agent Root] "
-labels: ["agent-task", "agent-root", "state:draft", "round:pending", "phase:fanout"]
+description: Attach one root per lead to a draft round; do not queue manually
+title: '[Agent Root] '
+labels:
+- agent-task
+- agent-root
+- state:draft
+- round:pending
+- phase:fanout
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **PM preparation only. Do not queue this issue manually.**
-        Attach it as a native sub-issue of the draft `agent-round`. The protected authorization workflow releases all prepared roots together after Michael approves the round.
-
-  - type: dropdown
-    id: lead
-    attributes:
-      label: Lead
-      description: Apply the matching `to:*` label; exactly one root per participating lead per round.
-      options:
-        - Software Lead
-        - Hardware Lead
-        - Verification Lead
-    validations:
-      required: true
-
-  - type: dropdown
-    id: capability
-    attributes:
-      label: Capability class
-      description: Request a capability tier, not an exact model. `auto` chooses the lowest sufficient class under capability-tiers.yml.
-      options:
-        - auto
-        - frontier
-        - strong
-        - balanced
-        - economy
-      default: 0
-    validations:
-      required: true
-
-  - type: textarea
-    id: objective
-    attributes:
-      label: Root objective
-      description: One bounded objective or coherent batch for this lead.
-    validations:
-      required: true
-
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance / return conditions
-      description: Conditions for returning this root to PM review or blocked.
-      placeholder: |
-        - Criterion 1
-        - Criterion 2
-    validations:
-      required: true
-
-  - type: textarea
-    id: authority
-    attributes:
-      label: Authority and guardrails
-      description: Surfaces this lead may modify, decisions it may make, and escalation boundaries.
-    validations:
-      required: true
-
-  - type: textarea
-    id: delegation
-    attributes:
-      label: Delegation guidance
-      description: What should be pushed to low-cost workers versus retained by the lead.
-      value: |
-        Prefer bounded worker delegation for implementation, repetitive debugging, mechanical edits, research, and evidence collection. Retain decomposition, architectural judgment, integration, review, and role-specific sign-off. Use the lowest sufficient capability class.
-    validations:
-      required: true
-
-  - type: input
-    id: worker_budget
-    attributes:
-      label: Worker child budget
-      description: Default 6; hard cap 12 unless the protocol itself is changed with Michael approval.
-      value: "6"
-    validations:
-      required: true
-
-  - type: input
-    id: review_budget
-    attributes:
-      label: Independent-review service budget
-      description: Default 1; hard cap 2. Relevant to Software/Hardware only.
-      value: "1"
-    validations:
-      required: true
-
-  - type: textarea
-    id: inputs
-    attributes:
-      label: Relevant inputs
-      description: Specs, issues, PRs, decisions and files needed so the lead can work without asking Michael to copy context.
-    validations:
-      required: false
-
-  - type: checkboxes
-    id: barrier
-    attributes:
-      label: Barrier contract
-      options:
-        - label: If I delegate, I will create native sub-issues in one fan-out pass and then enter `state:waiting`.
-          required: true
-        - label: I will not wake on each child return; the fan-in barrier will re-queue me when the batch is ready.
-          required: true
-        - label: I will return new out-of-scope findings to PM rather than starting new root work.
-          required: true
+- type: dropdown
+  id: lead
+  attributes:
+    label: Lead
+    options:
+    - Software Lead
+    - Hardware Lead
+    - Verification Lead
+    - Surge Lead
+    description: Apply matching to:software/hardware/verification/surge label and native round parent.
+  validations:
+    required: true
+- type: dropdown
+  id: capability
+  attributes:
+    label: Capability class
+    options:
+    - auto
+    - economy
+    - balanced
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: objective
+  attributes:
+    label: Root objective
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance / return conditions
+  validations:
+    required: true
+- type: textarea
+  id: authority
+  attributes:
+    label: Authority and guardrails
+  validations:
+    required: true
+- type: textarea
+  id: delegation
+  attributes:
+    label: Delegation guidance
+  validations:
+    required: true
+- type: input
+  id: budget
+  attributes:
+    label: Worker child budget
+    value: '6'
+    description: Total children, including review services and closed tasks. Hard maximum 12.
+  validations:
+    required: true
+- type: input
+  id: review_budget
+  attributes:
+    label: Independent-review service budget
+    value: '1'
+    description: Hard maximum 2; no review authority without permission below.
+  validations:
+    required: true
+- type: dropdown
+  id: review_permission
+  attributes:
+    label: Independent review permission
+    options:
+    - none
+    - tooling-or-hardware
+    - landed-independent-tests
+    default: 0
+    description: Only Software/Hardware. Michael approves this scope before round release; preserve Verification
+      independence.
+  validations:
+    required: true

@@ -1,48 +1,23 @@
-# tests/ — Stream 2
+# Tests — independent acceptance and software scaffolding
 
-**Owned outright by the Verification Lead, who reports to the PM, not to the Software Lead.**
+Verification reports to PM and owns independent tests/oracles. Derive tests from the
+spec before inspecting implementation for the behaviour. Do not relax assertions,
+delete cases or skip failures to fit code; disagreements return to Verification/PM.
 
-Adversarial by design. Read CLAUDE.md §2 for why this reporting line exists before proposing
-to simplify it.
-
-**Packages:** WP-10, WP-11
-**Depends on:** the API spec **only** — write the tests against the spec, before or alongside
-the implementation, never after reading it.
-
-**Done when** one command runs everything, failures produce an audible diff, and crash
-injection is exhaustive over write boundaries rather than sampled.
-
-## Standing instruction
-
-**If a test is hard to pass, that is a finding, not a reason to relax the test.** Report it
-up. Do not negotiate it sideways with Stream 1.
-
-## Layout — and one directory that is not the Verification Lead's
-
-`tests/harness/` is Software Lead scaffolding: the assertion macros, the build, and self-tests
-for the block-device ports and CRC-32. It is the thing tests run *in*, not tests. Nothing in it
-is acceptance, and it must never be cited as sign-off — its only job is that when a Verification
-Lead test fails, it is failing on the engine rather than on the plumbing.
-
-Test source arriving from the Verification Lead should need only `engine/include/` and
-`tests/harness/harness.h` — no framework dependency. If a returned test needs a shape this
-harness cannot express, that is a finding, not a reason to edit the test.
-
-**The golden runner is built and working.** `tests/harness/run-golden.sh` reads
-`tests/golden/MANIFEST`, runs each case, and compares byte-exactly; failures write a difference
-WAV where agreeing passages are silence. The full contract — manifest format, WAV constraints,
-why the comparison has no tolerance — is in **`tests/golden/MANIFEST.md`**. What is missing is
-fixtures and a manifest, and both are the Verification Lead's.
-
-## Layout
-
-| Path | |
+| Path | Provenance / boundary |
 |---|---|
-| `golden/` | Reference WAVs. **The cross-target contract**, not desktop tests firmware also runs. Firmware must be bit-identical at 1.0× playback; a divergence is a release blocker, not a platform difference |
-| `crash/` | Power loss simulated at *every single write boundary* in a full editing session, asserting the cartridge still mounts |
-| `fuzz/` | Transport input sequences, asserting zero write transactions ever reach the source slot |
+| mount_draft8/ | Verbatim independent package from verifier 4ee116fa040bb5ce040325e0076365abf8b0f8f9; 289 mount cases, exact coverage/adapter docs and source evidence |
+| crash/ | Independent fault-device and crash-harness infrastructure; sample self-test is not a full product WP-10 run |
+| golden/ | Independent audio fixture contract; fixtures/manifest still absent, golden CI remains red |
+| harness/ | Software-owned build/assertion scaffolding and implementation self-tests; never independent acceptance |
+| fuzz/ | Reserved for independent input/ownership trials; not a completed fuzz campaign |
 
-The fault-injection capability `crash/` needs already exists: `engine/port/dev_sim.c` wraps any
-device and can cut power after N block-writes, or tear a single write so only part of a block
-lands. The harness that drives it exhaustively over every write boundary — and decides what
-"still mounts" means — is WP-10, and is the Verification Lead's to write.
+Run make -C tests/mount_draft8 check for verifier package self-checks.
+Build the engine then run make -C tests run for existing scaffolding/infrastructure.
+The actual mount probe requires the real public header/archive and a conforming
+implementation; the older main API does not satisfy that integration yet.
+
+See [verification integration](../docs/VERIFICATION-INTEGRATION.md). Product source
+and destination crash outcomes follow the per-operation spec oracles, not a generic
+“always mounts” assertion. Keep torn-write/durability modes and physical card
+qualification distinct. Golden regeneration requires logged PM approval and listening.

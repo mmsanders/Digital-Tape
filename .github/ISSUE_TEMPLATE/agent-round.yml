@@ -1,97 +1,46 @@
 name: Agent Bus Round
-about: Plan one bounded PM round; authorization is a separate Michael-only gate
-title: "[Agent Round] "
-labels: ["agent-round", "round:draft"]
+description: Prepare one bounded round; Michael separately approves its immutable snapshot
+title: '[Agent Round] '
+labels:
+- agent-round
+- round:draft
 body:
-  - type: markdown
-    attributes:
-      value: |
-        This issue defines a **single bounded autonomous round**.
-        Creating or editing it does not authorize work. The staged authorization workflow requires Michael's manual approval through the `michael-round-gate` GitHub Environment.
-
-        Program Manager runtime: **ChatGPT Work**. Capability is class-based rather than pinned to a dated model.
-
-  - type: input
-    id: round_id
-    attributes:
-      label: Round ID
-      placeholder: R1
-    validations:
-      required: true
-
-  - type: dropdown
-    id: pm_capability
-    attributes:
-      label: PM capability policy
-      description: `auto` normally resolves to strong/Sol-class and promotes to frontier/Astra-class only for high-consequence work.
-      options:
-        - auto
-        - strong
-        - frontier
-      default: 0
-    validations:
-      required: true
-
-  - type: textarea
-    id: objective
-    attributes:
-      label: Executive objective
-      description: What should be true when this round returns to PM review?
-    validations:
-      required: true
-
-  - type: textarea
-    id: software
-    attributes:
-      label: Software Lead root assignment
-      description: Leave blank if the Software Lead has no root work this round.
-    validations:
-      required: false
-
-  - type: textarea
-    id: hardware
-    attributes:
-      label: Hardware Lead root assignment
-      description: Leave blank if the Hardware Lead has no root work this round.
-    validations:
-      required: false
-
-  - type: textarea
-    id: verification
-    attributes:
-      label: Verification Lead root assignment
-      description: Leave blank if the Verification Lead has no root work this round.
-    validations:
-      required: false
-
-  - type: textarea
-    id: boundaries
-    attributes:
-      label: Round boundaries / no-new-scope rule
-      description: Explicitly name anything that must be deferred to a later Michael-authorized round.
-    validations:
-      required: true
-
-  - type: textarea
-    id: completion
-    attributes:
-      label: Round completion test
-      description: Observable conditions the PM will use before declaring the bus quiescent.
-      placeholder: |
-        - All root tasks returned to PM review or closed
-        - No queued/working/blocked child work remains
-        - No protocol errors remain
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: token_policy
-    attributes:
-      label: Token policy
-      options:
-        - label: Use the lowest sufficient capability class; reserve frontier work for genuinely high-consequence planning, judgment, integration, or verification.
-          required: true
-        - label: Root assignments delegate bounded execution to economy/balanced workers when practical.
-          required: true
-        - label: This round will stop at PM review and will not automatically start another round.
-          required: true
+- type: dropdown
+  id: pm_capability
+  attributes:
+    label: PM capability policy
+    options:
+    - auto
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: objective
+  attributes:
+    label: Executive objective
+  validations:
+    required: true
+- type: textarea
+  id: boundaries
+  attributes:
+    label: Round boundaries
+  validations:
+    required: true
+- type: textarea
+  id: completion
+  attributes:
+    label: Round completion test
+  validations:
+    required: true

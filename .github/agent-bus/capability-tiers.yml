@@ -1,130 +1,22 @@
-version: 1
-status: staged
-
-# Tasks request a capability class, not an exact model snapshot. Adapters map the
-# class to the best currently available model in that provider family.
-classes:
-  frontier:
-    relative_allowance_weight: 8
-    intent: hardest_cross_stream_architecture_safety_and_freeze_work
-  strong:
-    relative_allowance_weight: 4
-    intent: difficult_role_level_reasoning_and_integration
-  balanced:
-    relative_allowance_weight: 2
-    intent: routine_bounded_engineering_and_analysis
-  economy:
-    relative_allowance_weight: 1
-    intent: mechanical_repetitive_or_well_specified_work
-  auto:
-    relative_allowance_weight: null
-    intent: adapter_selects_lowest_sufficient_class_before_invocation
-
-# These are family/class mappings, not snapshot pins. Updating a provider's
-# current model within the same class is an adapter/configuration change, not a
-# governance change.
-provider_mappings:
-  openai_work:
-    frontier: astra
-    strong: sol
-    balanced: terra
-    economy: luna
-    exact_snapshot_required: false
-
-  anthropic_claude_code:
-    frontier: opus
-    strong: sonnet
-    balanced: sonnet
-    economy: haiku
-    exact_snapshot_required: false
-    note: provider_has_three_primary_capability_families_so_strong_and_balanced_may_share_sonnet
-
-  grok:
-    mapping: adapter_declared_at_activation
-    exact_snapshot_required: false
-    note: use_only_classes_the_runtime_can_actually_select_or_attest
-
-selection_policy:
-  principle: lowest_sufficient_capability
-  no_silent_downgrade_below_requested_class: true
-  unavailable_requested_class: block_or_request_explicit_fallback
-  runtime_attestation_records:
-    - requested_capability
-    - resolved_capability
-    - provider
-    - actual_model_name_when_exposed
-    - adapter_revision
-
-  pm:
-    runtime: chatgpt-work
-    default: auto
-    allowed: [strong, frontier]
-    auto_default: strong
-    auto_frontier_when_any:
-      - phase_or_format_freeze_decision
-      - cross_stream_architecture_or_spec_arbitration
-      - safety_or_child_guardrail_decision
-      - contradictory_evidence_between_leads
-      - high_consequence_scope_change
-      - michael_requests_maximum_capability
-    max_upshifts_per_phase: 1
-    upshift_only: true
-
-  software_lead:
-    runtime: claude-code
-    default: auto
-    allowed: [balanced, strong, frontier]
-    auto_default: strong
-    auto_frontier_when_any:
-      - architecture_or_public_interface_change
-      - frozen_spec_seam_or_guardrail_interpretation
-      - complex_multi_area_integration
-      - high_consequence_merge_decision
-    auto_balanced_when_all:
-      - bounded_and_well_specified
-      - no_architecture_or_guardrail_decision
-      - low_integration_risk
-
-  hardware_lead:
-    runtime: claude-code
-    default: auto
-    allowed: [balanced, strong, frontier]
-    auto_default: strong
-    auto_frontier_when_any:
-      - safety_critical_hardware_decision
-      - architecture_or_cross_stream_interface_change
-      - board_level_high_consequence_trade
-    auto_balanced_when_all:
-      - bounded_and_well_specified
-      - no_safety_or_interface_decision
-      - low_integration_risk
-
-  verification_lead:
-    runtime: chatgpt-work
-    default: auto
-    allowed: [strong, frontier]
-    auto_default: strong
-    auto_frontier_when_any:
-      - freeze_or_release_acceptance
-      - safety_critical_acceptance
-      - cross_cutting_adversarial_spec_review
-      - unresolved_invariant_or_competing_interpretations
-    max_upshifts_per_phase: 1
-    upshift_only: true
-
-  worker:
-    default: auto
-    allowed: [economy, balanced]
-    auto_default: economy
-    auto_balanced_when_any:
-      - nontrivial_bounded_code_change
-      - debugging_requires_local_reasoning
-      - synthesis_across_multiple_inputs
-      - task_failed_once_at_economy_for_quality_not_environment
-    strong_or_frontier_requires: parent_lead_reclassification_before_dispatch
-
-estimation:
-  unit: capability_weighted_invocation
-  purpose: compare_expected_allowance_pressure_across_rounds_not_predict_provider_billing
-  formula: sum(invocations_by_class * relative_allowance_weight)
-  caution: actual_usage_varies_with_context_task_length_reasoning_and_provider_metering
+version: 2
+canonical_mapping: .github/agent-bus/runtimes.json
+implementation: tools/agent-bus/bus.py
+classes: [auto, economy, balanced, strong, frontier]
+strong_examples: [sol, opus]
+balanced_examples: [terra, sonnet]
+economy_examples: [luna, haiku]
+frontier_examples: [astra]
+anthropic_frontier: unmapped_requires_explicit_reassignment
+unavailable: block_never_silently_downgrade
+auto:
+  workers: economy
+  leads_and_pm: strong
+  high_consequence_leads_and_pm: frontier
+exact_model_snapshot_required: false
+attestation: configured_family_or_family_prefix
+relative_planning_weights:
+  economy: 1
+  balanced: 2
+  strong: 4
+  frontier: 8
+weights_are_provider_billing_claims: false

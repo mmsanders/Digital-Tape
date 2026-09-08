@@ -1,11 +1,18 @@
 # Board rev A — the hardware/firmware contract
 
 **Owner:** Hardware Lead · **Consumed by:** `firmware/prod/` · **Status:** skeleton, accreting
-**Revision:** 0.4, 2 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
+**Revision:** 0.5, 3 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
 
 <!-- CHANGES: every revision adds a block here. Firmware reads this first. -->
 
 ## CHANGES
+
+### 0.5 — 2026-09-03
+**Pin map §2 populated with signal names, directions and pulls — no pin numbers yet.** Firmware
+can start against this: the signals, their directions, and which ones it may touch are settled
+even though the assignments are not. Everything is `PROPOSED`; nothing is bindable. Two rows
+firmware should read closely: `SOL_REQ` vs `SOL_GATE` (firmware asks, hardware allows), and
+`CHG_INHIBIT` (must be released on every copy exit path, including errors).
 
 ### 0.4 — 2026-09-02
 **Codec line item changes suffix: `SGTL5000XNBA3` → `SGTL5000XNBA3R2`.** Same die; the reel
@@ -164,13 +171,66 @@ against what this design needs, and that check needs a datasheet — `nxp.com` i
 **Empty by design.** Filled during WP-26 (schematic capture), one `PROPOSED` block at a time,
 promoted to `FROZEN` when the schematic passes PM review.
 
-| Signal | Port / pin | Direction | Pull | Status |
-|---|---|---|---|---|
-| *(none assigned)* | | | | |
+**No pin numbers yet — those come from WP-26 schematic capture.** But firmware does not need
+pin numbers to start; it needs to know which signals exist, which direction they go, and which
+of them it is allowed to touch. That much is settled, so it is written down now.
 
-Sections reserved so firmware can see the shape of what is coming: USDHC1 (source slot),
-USDHC2 (destination slot), I²S to codec, I²C control, button matrix, LED banks, solenoid gate,
-slot detect lines, charger status and NTC, USB-C.
+Every row is `PROPOSED`. **Nothing here is bindable**, and a `CHANGES` entry will announce each
+promotion to `FROZEN`.
+
+### Card slots — USDHC1 (source) and USDHC2 (destination)
+
+| Signal | Dir | Pull | Note |
+|---|---|---|---|
+| `SDx_CLK` | out | — | High-speed 4-bit, 3.3 V (ADR-018/C-60). 1.8 V switching unpopulated |
+| `SDx_CMD` | bidir | 47 k up | |
+| `SDx_DAT[3:0]` | bidir | 47 k up | |
+| `SDx_DET` | in | 47 k up | Card-detect switch, active low. **Debounce in firmware, not hardware** |
+| `SDx_PWR_EN` | out | down | Slot power gate. Off at reset so an insert during boot cannot half-enumerate |
+
+**The source slot is the one guardrail 06 cares about.** It is electrically identical to the
+destination slot — the read-only property is constructed in software with a null write pointer,
+not enforced by a missing trace. Hardware deliberately does **not** try to help here: a slot
+that physically cannot write would make the two slots different parts, and the guardrail is
+about the engine's construction, not the copper.
+
+### Audio
+
+| Signal | Dir | Note |
+|---|---|---|
+| `I2S_MCLK` / `BCLK` / `LRCLK` | out | Codec is I²S slave; RT1062 is master |
+| `I2S_TX` / `I2S_RX` | out / in | |
+| `I2C_SCL` / `I2C_SDA` | bidir | Codec control. **Address is fixed** on the 20-pin second source (§1.1) |
+| `CODEC_RESET_N` | out | Asserted through reset so the codec cannot come up loud |
+
+### Transport
+
+| Signal | Dir | Note |
+|---|---|---|
+| `BTN_ROW[n]` / `BTN_COL[n]` | out / in | Button matrix; geometry follows WP-04 |
+| `SOL_REQ` | out | MCU's *request*. Goes to the one-shot, **not** to the gate |
+| `SOL_GATE` | — | One-shot output to the FET. **Not MCU-reachable.** Test point both sides (§4) |
+| `LED[n]` | out | Copy progress row, record light, charge indicator (§9) |
+
+`SOL_REQ` and `SOL_GATE` being separate is the whole point of ADR-116: firmware can ask, and
+only hardware can allow. Instrumenting both is what makes a solenoid fault a measurement rather
+than an argument.
+
+### Power and USB
+
+| Signal | Dir | Note |
+|---|---|---|
+| `USB_DP` / `USB_DM` | bidir | **Data, not just charge** — WP-38 needs it. ESD at the connector |
+| `CHG_STAT` | in | Charger status |
+| `CHG_TS` | analog | Cell NTC. **B = 3950 K**, network in `thermal-budget.md` §5.1 |
+| `CHG_INHIBIT` | out | Suspends charging during a copy (ADR-102) |
+| `JP_CHG` | link | Defeats the interlock so WP-37 can force charge-during-copy (§10) |
+| `VBAT_SENSE` | analog | Feeds the low-voltage latch-off |
+
+**`CHG_INHIBIT` is the one row on this page firmware must not get wrong.** It is an output
+firmware drives, and ADR-102 depends on it being asserted for the whole duration of a copy —
+including the error paths. A copy that aborts without releasing it leaves the device unable to
+charge, which is indistinguishable to a child from a broken toy.
 
 ## 3. Power-up sequence
 

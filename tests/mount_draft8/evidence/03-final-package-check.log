@@ -1,0 +1,21 @@
+$ make -C tests/mount_draft8 check
+make: Entering directory '/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8'
+python3 -m unittest -v test_package.py
+make: Leaving directory '/workspace/scratch/47722b072299/digital-tape-verification/tests/mount_draft8'
+test_authenticated_inputs (test_package.PackageTests.test_authenticated_inputs) ... ok
+test_checker_rejects_mutations (test_package.PackageTests.test_checker_rejects_mutations) ... ok
+test_checker_synthetic_transcripts (test_package.PackageTests.test_checker_synthetic_transcripts) ... ok
+test_crc_and_literal_byte_layout (test_package.PackageTests.test_crc_and_literal_byte_layout) ... ok
+test_deliberately_wrong_engine_is_red (test_package.PackageTests.test_deliberately_wrong_engine_is_red) ... ok
+test_envelope_and_determinism (test_package.PackageTests.test_envelope_and_determinism) ... ok
+test_fixture_verdicts_independent_decoder (test_package.PackageTests.test_fixture_verdicts_independent_decoder) ... ok
+test_missing_engine_is_error (test_package.PackageTests.test_missing_engine_is_error) ... ok
+test_ownership_boundaries (test_package.PackageTests.test_ownership_boundaries) ... ok
+test_probe_callback_instrumentation (test_package.PackageTests.test_probe_callback_instrumentation) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.323s
+
+OK
+
+exit=0
