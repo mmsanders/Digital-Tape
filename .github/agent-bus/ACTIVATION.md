@@ -11,7 +11,7 @@ agent instances are deliberately unbound. This supersedes the staged activation 
 - Role contracts, immutable approval snapshots, claims, barriers and bounded fuses.
 - Sol/Opus strong mapping; Surge and three worker mailboxes.
 
-Deployment evidence and any repository-admin prerequisite are recorded below after rollout.
+Deployment evidence and the remaining repository-admin prerequisite are recorded below.
 No queued work or active autonomous round is created merely by installing infrastructure.
 
 ## Repository-admin prerequisites before any autonomous round
@@ -51,3 +51,27 @@ historical; dashboard/ on main is the maintained source. Do not edit two indepen
 
 All agent instances and signal PRs are currently unbound. No adapter is certified by this
 infrastructure-only delivery; it creates no independent product acceptance.
+
+
+## Verified rollout — 8 September 2026
+
+- PR #26 merged as e509a6adf0b47141369f0fa55af05a68d8dd7ebd.
+- [Install run 34216859686](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859686)
+  succeeded: labels created and empty ledger initialized at agent-bus-state commit
+  9a659a56075d604b12e10f1da38ebfce224e9991. Fresh ledger read confirms all eight roles
+  disabled, null actor/instance bindings, no current round, no tasks and no receipts.
+- [Pages run 34216859708](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859708)
+  deployed successfully to https://mmsanders.github.io/Digital-Tape/.
+  Authenticated inspection confirmed build_type=workflow, public=true and HTTPS enforced.
+  No Pages settings change is outstanding. Direct HTTP checks returned 200 for the
+  page, app.js and model.js, each byte-identical to dashboard/ on merged main.
+- [Regression run 34216859567](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859567)
+  passed 25 controller cases, 6 dashboard cases and actual Chrome checks at 1280px/390px:
+  eight cards, no horizontal overflow, injected issue title rendered safely as text.
+- Product engine/spec/test checks remain green except the previously missing WP-11 goldens.
+- **Remaining admin prerequisite:** authenticated inspection returned 404 for
+  michael-round-gate. Create that environment with mmsanders as sole required reviewer
+  and administrator bypass disabled. Connected repo tools do not expose environment
+  administration, so this step needs Michael in repository Settings → Environments.
+- **Deliberately deferred:** all particular instance identities, inbound adapters,
+  designated signal PRs and the protected real-adapter Round 0. No autonomous work ran.

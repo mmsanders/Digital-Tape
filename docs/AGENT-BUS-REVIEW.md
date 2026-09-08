@@ -42,3 +42,14 @@ GitHub behavior checked against primary documentation:
 [native sub-issues](https://docs.github.com/en/rest/issues/sub-issues),
 [environment protection](https://docs.github.com/rest/deployments/environments), and
 [Pages publishing](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+
+
+## Rollout evidence
+
+The merged-main [regression run](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859567)
+passed 25 controller tests, 6 dashboard tests and real Chrome desktop/mobile rendering.
+The [bootstrap](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859686) and
+[Pages deployment](https://github.com/mmsanders/Digital-Tape/actions/runs/34216859708) passed.
+Ledger and authenticated settings inspection confirm no bound instances or active round.
+The protected human environment is absent and authorization remains fail-closed; no real
+agent adapter or human-approved Round 0 is claimed tested by these infrastructure checks.
