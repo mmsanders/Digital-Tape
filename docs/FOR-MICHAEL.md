@@ -3,15 +3,12 @@
 **Updated: 8 September 2026.** Every review round starts here after refreshing main.
 PM records your answers directly; leads do not ask again from archived packets.
 
-## Q-001 — Final Phase 0 format sign-off
+## Q-001 — Signed and closed, 8 September 2026
 
-**Decision ready:** approve the exact DRAFT-8 Phase 0 scope in
-[PHASE0-FREEZE.md](PHASE0-FREEZE.md). PM recommends yes. The independent paper review
-has zero blockers and zero majors. Operations/state, implementation acceptance,
-card qualification and hardware safety remain separately held.
-
-This is your reserved sign-off in the working agreement. Until answered, the precise
-status is freeze-ready, not frozen.
+Michael approved the exact scope in [PHASE0-FREEZE.md](PHASE0-FREEZE.md):
+“Consider it signed by me, and do what you need to do to represent that in main.”
+Do not ask again. Operations/state, implementation acceptance, card qualification
+and hardware safety remain separately held.
 
 ## M-01 — Print the current packet
 

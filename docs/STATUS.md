@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 8 September 2026 · Owner: PM · Phase 0 freeze-ready, sign-off pending.**
+**Updated: 8 September 2026 · Owner: PM · Phase 0 scoped format/API freeze signed.**
 
 ## Published
 
@@ -12,7 +12,7 @@
   Fabrication Make gate now fails closed; packet rebuild no longer drifts with the date.
   Hardware CI passed all three jobs. This is engineering work, not safety qualification.
 - Cleanup **#28** merged: current authority, question queue and role briefs replace stale round instructions.
-  [Freeze record](PHASE0-FREEZE.md) defines exactly what is ready for signature.
+  [Freeze record](PHASE0-FREEZE.md) records Michael’s signed scope and remaining holds.
 
 ## Held and next owner
 
@@ -23,8 +23,8 @@
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
 | Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
-| #26 Agent Bus | Explicitly staged, unmerged and inactive; outside this freeze push | Michael controls any separate activation |
-| Q-001 | Paper freeze ready for Michael’s reserved sign-off | Michael |
+| #26 Agent Bus | Michael authorized infrastructure review/integration; particular agent instances remain unbound | Assigned integration actor |
+| Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
 
 **New independent package acceptances: none.** Mount observations were run by Software,

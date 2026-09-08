@@ -49,12 +49,13 @@ Michael assigns the runtime. Prefer short scoped rounds and capability appropria
 task. Michael controls available platforms and spending; do not assume service limits.
 No automatic reviewer/watch loop is enabled by this agreement.
 
-**Temporary exception:** Michael granted one actor PM + Software + Hardware authority
+**Expired freeze exception:** Michael granted one actor PM + Software + Hardware authority
 for this Phase 0 push, including writes and merges. Verification, wallet, physical
-acts and Michael’s reserved sign-off remain separate. The exception ends at the
-recorded freeze milestone or when Michael ends it; a fresh lead does not inherit it.
-The combined actor records which authority it exercised and never calls its own
-regression tests independent acceptance.
+acts and Michael’s reserved sign-off remain separate. The exception ended at Michael’s recorded freeze signature on 8 September 2026;
+a fresh lead does not inherit it.
+The combined actor recorded its exercised authority without claiming independent acceptance.
+Michael separately authorized Agent Bus/signaling and Pages review, fixes and integration,
+excluding binding particular agent instances. Normal product role boundaries remain in force.
 
 ## 3. Spec → independent tests → implementation
 

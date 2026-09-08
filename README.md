@@ -4,7 +4,7 @@ A screenless music player for children. Each cartridge holds one continuous stre
 of 44.1 kHz, 16-bit stereo PCM. Side A is the original; Side B is the editable copy.
 There are no tracks, titles or browsing. Scrub changes playback rate without filtering.
 
-**Phase 0: DRAFT-8 published; paper gate cleared; final freeze sign-off pending.**
+**Phase 0: DRAFT-8 format/API scope frozen by Michael on 8 September 2026.**
 The repo contains provisional engine code, independent tests, and hardware design
 and print packets. It is not a finished player or a safety-qualified hardware design.
 

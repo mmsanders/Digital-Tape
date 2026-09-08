@@ -1753,3 +1753,22 @@ no hashed criterion and grants no throughput or atomicity acceptance. Preserve e
 SKU/revision sampling, independently reviewed cut protocol and all raw outcomes.
 
 **Cost to reverse:** re-source the cart and replan samples; no purchase has been made.
+
+
+## ADR-131 — Michael signs scoped Phase 0; separate infrastructure assignment begins
+
+**Date:** 2026-09-08 · **Owner:** PM recorder, explicit Michael instruction
+
+Michael: “Consider it signed by me, and do what you need to do to represent that in main.”
+Record the exact Phase 0 scope/hashes in PHASE0-FREEZE.md as frozen and close Q-001.
+Keep reviewed spec bytes intact; this signed record resolves historical draft banners.
+Operations/state, implementation acceptance and hardware qualification remain held.
+The combined PM/Software/Hardware freeze mandate ends here.
+
+Michael separately requested review and integration of the staged signaling system and
+Pages dashboard, with particular agent instance hookups deferred. This authorizes the
+infrastructure work and its necessary repository changes, not product self-acceptance.
+He corrected the strong capability examples to Sol/Opus; audit the rest of the design.
+
+**Cost to reverse:** a new explicit scope decision and migration/review process for frozen
+contract changes. Infrastructure can be disabled independently of the product freeze.
