@@ -403,8 +403,15 @@ class Controller:
                 all_closed = all_closed and t['state'] == 'closed'
             if root['state'] == 'waiting' and len(known) == len(children) and children and all(
                     c['state'] in {'review', 'blocked', 'closed'} for c in known):
-                root['phase'] = 'fanin'
-                self.queue(root)
+                if root.get('cycles', 0) >= 3:
+                    # Preserve the last worker's return even when no further lead call
+                    # is allowed. Open child evidence remains; no false quiescence.
+                    root.update(state='blocked', destination='pm',
+                        result='Lead invocation fuse exhausted. Child results retained; Michael must abort/replan.')
+                    r['attention'] = 'Lead invocation fuse exhausted; no new call issued.'
+                else:
+                    root['phase'] = 'fanin'
+                    self.queue(root)
         if all_closed and all(t['state'] in {'review', 'blocked'} and t['destination'] == 'pm' for t in roots):
             r.update(state='quiescent', queue_token=f'{self.run}-{self.request}-pm-final')
 
@@ -425,6 +432,8 @@ class Controller:
         need(r and r['state'] == 'pm-review' and r['claim']['id'] == p['claim'], 'no PM final claim')
         need(p.get('result'), 'executive synthesis link/text required')
         r.update(state='closed', result=p['result'])
+        for root in r['plan']['roots']:
+            self.state['tasks'][str(root['number'])].update(state='closed', disposition='Archived by PM final synthesis; no product acceptance implied.')
         self.state['current'] = None
         return {'closed': r['number']}
 
@@ -469,7 +478,9 @@ def projection(api, state):
     for t in state['tasks'].values():
         i = api.issue(t['number'])
         keep = {v for v in labels(i) if not v.startswith(('state:', 'to:', 'phase:', 'round:'))}
-        extra = {'agent-task', 'to:' + t['destination'], 'round:active'}
+        round_state = state['rounds'][str(t['round'])]['state']
+        membership = round_state if round_state in {'closed', 'aborted'} else 'active'
+        extra = {'agent-task', 'to:' + t['destination'], 'round:' + membership}
         if t['state'] != 'closed': extra.add('state:' + t['state'])
         if t.get('phase'): extra |= {'agent-root', 'phase:' + t['phase']}
         target = sorted(keep | extra)

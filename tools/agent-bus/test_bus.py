@@ -94,6 +94,8 @@ class BusTests(unittest.TestCase):
         self.run_command('reconcile','mmsanders',{})
         self.assertIsNone(self.state['current'])
         self.assertEqual(self.state['rounds']['1']['state'],'closed')
+        self.assertEqual(self.api.data[2]['state'],'closed')
+        self.assertIn('round:closed',self.api.data[2]['labels'])
 
     def test_no_work_with_unbound_instances(self):
         self.config['roles']['software']['enabled']=False
@@ -176,6 +178,18 @@ class BusTests(unittest.TestCase):
         self.run_command('return','worker-chatgpt-bot',dict(issue=3,claim=worker,result='result'))
         self.state['tasks']['3']['cycles']=3
         with self.assertRaisesRegex(Refused,'fuse exhausted'): self.run_command('ready','software-bot',dict(issue=3,parent=2,claim=lead))
+        self.assertEqual(self.api.data[3]['state'],'open')
+
+    def test_root_fuse_preserves_last_child_return_and_cannot_fake_quiescence(self):
+        self.start(); lead=self.claim(2,'software'); self.child()
+        self.run_command('ready','software-bot',dict(issue=3,parent=2,claim=lead))
+        self.run_command('wait','software-bot',dict(issue=2,claim=lead))
+        self.state['tasks']['2']['cycles']=3
+        worker=self.claim(3,'worker-chatgpt')
+        self.run_command('return','worker-chatgpt-bot',dict(issue=3,claim=worker,result='valuable final evidence'))
+        self.assertEqual(self.state['tasks']['3']['result'],'valuable final evidence')
+        self.assertEqual(self.state['tasks']['2']['state'],'blocked')
+        self.assertEqual(self.state['rounds']['1']['state'],'active')
         self.assertEqual(self.api.data[3]['state'],'open')
 
     def test_pm_cannot_claim_ordinary_root_and_early_return_cannot_wake_pm(self):
