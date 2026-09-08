@@ -1,0 +1,83 @@
+{
+  "version": 2,
+  "updated_at": "2026-09-08T10:42:43.275409+00:00",
+  "infrastructure": "installed; instances unbound",
+  "roles": {
+    "pm": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "software": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "hardware": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "verification": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "surge": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-chatgpt": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-claude": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-grok": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "grok",
+      "transport": {
+        "kind": "manual"
+      }
+    }
+  },
+  "current": null,
+  "rounds": {},
+  "tasks": {},
+  "receipts": {}
+}
