@@ -1,0 +1,98 @@
+{
+  "version": 2,
+  "human": "mmsanders",
+  "providers": {
+    "openai": {
+      "frontier": "astra",
+      "strong": "sol",
+      "balanced": "terra",
+      "economy": "luna"
+    },
+    "anthropic": {
+      "frontier": null,
+      "strong": "opus",
+      "balanced": "sonnet",
+      "economy": "haiku"
+    },
+    "grok": {
+      "frontier": null,
+      "strong": null,
+      "balanced": null,
+      "economy": null
+    }
+  },
+  "roles": {
+    "pm": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "software": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "hardware": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "verification": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "surge": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-chatgpt": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-claude": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": {
+        "kind": "manual"
+      }
+    },
+    "worker-grok": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "grok",
+      "transport": {
+        "kind": "manual"
+      }
+    }
+  }
+}

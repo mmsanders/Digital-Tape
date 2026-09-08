@@ -40,3 +40,7 @@ The separate make -C hardware fabrication-gate must currently fail with CLOSED.
 
 Missing WP-11 goldens remain a separate expected CI failure. CAD requires CadQuery;
 hardware CI records the tested environment. A missing dependency is not a passing test.
+
+For signaling infrastructure, read [Agent Bus](AGENT-BUS.md) and the
+[instance hookup checklist](../.github/agent-bus/ACTIVATION.md). No instance is
+connected by this checkpoint; labels and dashboard status do not authorize work.

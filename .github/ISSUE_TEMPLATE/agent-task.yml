@@ -1,0 +1,86 @@
+name: Agent Bus Child Task
+description: Native child of a working root; use controller ready command with parent claim
+title: '[Agent Task] '
+labels:
+- agent-task
+- state:draft
+body:
+- type: dropdown
+  id: destination
+  attributes:
+    label: Destination
+    options:
+    - worker-chatgpt
+    - worker-claude
+    - worker-grok
+    - verification
+    description: Apply matching to:* label. Verification also needs kind:independent-review and approved
+      root permission.
+  validations:
+    required: true
+- type: dropdown
+  id: capability
+  attributes:
+    label: Capability class
+    options:
+    - auto
+    - economy
+    - balanced
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: request
+  attributes:
+    label: Request
+  validations:
+    required: true
+- type: textarea
+  id: deliverable
+  attributes:
+    label: Deliverable
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance
+  validations:
+    required: true
+- type: textarea
+  id: authority
+  attributes:
+    label: Authority / constraints
+  validations:
+    required: true
+- type: dropdown
+  id: eligibility
+  attributes:
+    label: Review eligibility
+    options:
+    - none
+    - tooling-or-hardware
+    - landed-independent-tests
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: evidence
+  attributes:
+    label: Coverage evidence
+    description: 'Typed review only: exact landed independent test commit/IDs or tooling/hardware scope;
+      never derive tests from uncovered implementation.'
+  validations:
+    required: false

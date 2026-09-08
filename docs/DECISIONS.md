@@ -1772,3 +1772,26 @@ He corrected the strong capability examples to Sol/Opus; audit the rest of the d
 
 **Cost to reverse:** a new explicit scope decision and migration/review process for frozen
 contract changes. Infrastructure can be disabled independently of the product freeze.
+
+
+## ADR-132 — Integrate reviewed Agent Bus v2 and main-owned Pages dashboard
+
+**Date:** 2026-09-08 · **Owner:** Michael-authorized infrastructure integrator
+
+Retain bounded Michael → PM → lead → worker rounds, independent Verification and
+batched fan-in. Replace the staged label-chain implementation with one serialized
+workflow controller and GitHub Contents SHA-CAS receipt ledger. Issue scope hashes
+bind protected approval and every claim. Add Surge and Claude worker mailboxes.
+Correct strong capability to Sol/Opus; leave unsupported provider classes unmapped.
+
+The staged claim was not exclusive; bot events could not drive its workflow chain;
+a generic bot comment did not bind authorization to scope; budgets/eligibility and
+some early-return validation paths were incomplete. The Pages dashboard also had
+unescaped HTML, stale role naming and inferred/misrouted activity. Findings and
+regression coverage are in docs/AGENT-BUS-REVIEW.md. Dashboard source now belongs on
+main, reading explicit receipt state. Particular agent instances remain unbound.
+
+**Cost to reverse:** disable the controller and Pages workflows, preserve the ledger
+and issue evidence, and return to manual PM coordination. No product spec hash or
+independent test changes are involved. Actual adapter hookups and protected Round 0
+remain a distinct final integration exercise with Michael.

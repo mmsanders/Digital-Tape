@@ -23,7 +23,7 @@
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
 | Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
-| #26 Agent Bus | Michael authorized infrastructure review/integration; particular agent instances remain unbound | Assigned integration actor |
+| #26 Agent Bus | Reviewed controller and main-owned dashboard integrated; all instances unbound | Michael and adapter owners perform final hookup after admin prerequisites |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
 

@@ -1,0 +1,98 @@
+name: Agent Bus Lead Root
+description: Attach one root per lead to a draft round; do not queue manually
+title: '[Agent Root] '
+labels:
+- agent-task
+- agent-root
+- state:draft
+- round:pending
+- phase:fanout
+body:
+- type: dropdown
+  id: lead
+  attributes:
+    label: Lead
+    options:
+    - Software Lead
+    - Hardware Lead
+    - Verification Lead
+    - Surge Lead
+    description: Apply matching to:software/hardware/verification/surge label and native round parent.
+  validations:
+    required: true
+- type: dropdown
+  id: capability
+  attributes:
+    label: Capability class
+    options:
+    - auto
+    - economy
+    - balanced
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: objective
+  attributes:
+    label: Root objective
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance / return conditions
+  validations:
+    required: true
+- type: textarea
+  id: authority
+  attributes:
+    label: Authority and guardrails
+  validations:
+    required: true
+- type: textarea
+  id: delegation
+  attributes:
+    label: Delegation guidance
+  validations:
+    required: true
+- type: input
+  id: budget
+  attributes:
+    label: Worker child budget
+    value: '6'
+    description: Total children, including review services and closed tasks. Hard maximum 12.
+  validations:
+    required: true
+- type: input
+  id: review_budget
+  attributes:
+    label: Independent-review service budget
+    value: '1'
+    description: Hard maximum 2; no review authority without permission below.
+  validations:
+    required: true
+- type: dropdown
+  id: review_permission
+  attributes:
+    label: Independent review permission
+    options:
+    - none
+    - tooling-or-hardware
+    - landed-independent-tests
+    default: 0
+    description: Only Software/Hardware. Michael approves this scope before round release; preserve Verification
+      independence.
+  validations:
+    required: true

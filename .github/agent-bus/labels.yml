@@ -1,0 +1,6 @@
+version: 2
+purpose: recoverable_projection_of_controller_receipts
+installer: python3 tools/agent-bus/bus.py install
+source_of_label_names: tools/agent-bus/bus.py
+claims_or_authorization_from_labels: false
+manual_lifecycle_edits: never_dispatch_work

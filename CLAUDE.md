@@ -128,3 +128,13 @@ not clocks or timeout policy. Desktop tooling loads cartridges; it is not a musi
 tag editor, library or player. Firmware must not fork seek, mixing or other engine behaviour.
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
 a release blocker. These limits survive the documentation consolidation.
+
+## 7. Agent Bus infrastructure
+
+Michael authorized signaling/Pages integration after the signed Phase 0 milestone.
+Use [Agent Bus](docs/AGENT-BUS.md) and its runtime contracts for bounded rounds.
+Issues hold scope; the controller ledger holds approval/claim receipts; labels and
+PR doorbells are projections. Each new round needs Michael's protected approval.
+Particular instances remain unbound until the agreed hookup step. Installing this
+infrastructure does not delegate product authority, waive Verification independence,
+authorize purchases, open safety gates or start autonomous work.

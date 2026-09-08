@@ -19,5 +19,7 @@ Use one bounded round and stop on its return condition. Michael separately autho
 Particular agent instances must remain unbound until the final hookup step.
 
 Earlier lead/surge packets are in [the historical archive](../archive/pre-phase0/README.md).
-Agent Bus #26 is now under that separate infrastructure assignment; it does not
-change the product test-before-implementation or independent acceptance boundaries.
+Agent Bus #26 is integrated under that separate infrastructure assignment. Read
+[the operating guide](../AGENT-BUS.md) and [hookup checklist](../../.github/agent-bus/ACTIVATION.md).
+No particular agent instances are bound. Product test-before-implementation and
+independent acceptance boundaries remain unchanged.

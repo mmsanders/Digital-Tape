@@ -1,0 +1,22 @@
+version: 2
+canonical_mapping: .github/agent-bus/runtimes.json
+implementation: tools/agent-bus/bus.py
+classes: [auto, economy, balanced, strong, frontier]
+strong_examples: [sol, opus]
+balanced_examples: [terra, sonnet]
+economy_examples: [luna, haiku]
+frontier_examples: [astra]
+anthropic_frontier: unmapped_requires_explicit_reassignment
+unavailable: block_never_silently_downgrade
+auto:
+  workers: economy
+  leads_and_pm: strong
+  high_consequence_leads_and_pm: frontier
+exact_model_snapshot_required: false
+attestation: configured_family_or_family_prefix
+relative_planning_weights:
+  economy: 1
+  balanced: 2
+  strong: 4
+  frontier: 8
+weights_are_provider_billing_claims: false

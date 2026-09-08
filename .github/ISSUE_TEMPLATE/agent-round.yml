@@ -1,0 +1,46 @@
+name: Agent Bus Round
+description: Prepare one bounded round; Michael separately approves its immutable snapshot
+title: '[Agent Round] '
+labels:
+- agent-round
+- round:draft
+body:
+- type: dropdown
+  id: pm_capability
+  attributes:
+    label: PM capability policy
+    options:
+    - auto
+    - strong
+    - frontier
+    default: 0
+  validations:
+    required: true
+- type: dropdown
+  id: risk
+  attributes:
+    label: Decision risk
+    options:
+    - ordinary
+    - high-consequence
+    default: 0
+  validations:
+    required: true
+- type: textarea
+  id: objective
+  attributes:
+    label: Executive objective
+  validations:
+    required: true
+- type: textarea
+  id: boundaries
+  attributes:
+    label: Round boundaries
+  validations:
+    required: true
+- type: textarea
+  id: completion
+  attributes:
+    label: Round completion test
+  validations:
+    required: true
