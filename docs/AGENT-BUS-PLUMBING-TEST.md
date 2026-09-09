@@ -36,3 +36,32 @@ Limits: role identity strings are simulated inside a trusted test job, not eight
 authenticated GitHub actors. Per-agent workflow dispatch, live chat wakeups, model calls and
 optional PR doorbells require the eventual real adapters and remain unverified by this test.
 No product acceptance or independent Verification sign-off is created.
+
+## Verified result — 9 September 2026
+
+**PASS.** Michael approved the protected environment for
+[run 34302460952](https://github.com/mmsanders/Digital-Tape/actions/runs/34302460952),
+executed at commit `f783ac4dbcc7c30eead995e605b359d2f3fbd18b`.
+The exercise ran from 03:58 to 04:08 UTC and all workflow steps succeeded.
+
+- Real environment approval released the previously waiting job.
+- Real issue tree: round #29; Hardware #30, Software #31, Surge #32, Verification #33;
+  workers #34–36. All eight issues closed after the test.
+- Unauthorized and wrong-role claims refused; repeat delivery returned `claimed: false`;
+  a competing claim failed. These identity checks use simulated actor strings.
+- Real GitHub Contents API rejected an outdated ledger SHA with HTTP 409.
+- Software stayed waiting until two worker returns and one blocked result were present,
+  then received exactly its second invocation. All children were dispositioned before return.
+- All roots returned, exactly one PM claim succeeded, duplicate PM claim was refused,
+  and closing/reconciling the round did not restart work.
+- 25 controller regressions, 8 dashboard tests, all 27 live state snapshots through the
+  dashboard model, and actual Chrome checks at 1280px and 390px passed.
+- Cleanup and recovery steps passed: temporary `plumbing-34302460952.json` deleted;
+  production state.json still has no current round, no tasks, and all eight roles disabled.
+  A fresh post-run repository read also confirmed issue closure and production isolation.
+
+Evidence: [workflow artifact plumbing-evidence-34302460952](https://github.com/mmsanders/Digital-Tape/actions/runs/34302460952/artifacts/10087938271)
+contains the trace, snapshots, issue manifest, cleanup report and browser screenshots.
+The old isolated dashboard URL now reports unavailable test data because cleanup removed it;
+use the artifact to inspect the completed test. The ordinary dashboard remains operational.
+The adapter and independent-acceptance limitations above still apply.
