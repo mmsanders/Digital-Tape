@@ -29,6 +29,27 @@
     .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
     .approval-button { display: inline-block; padding: .75rem 1rem; border-radius: 10px; background: var(--accent); color: var(--bg); font-weight: 600; text-decoration: none; margin: .3rem .5rem .3rem 0; }
     .approval-button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .view-nav { margin-top: .8rem; }
+    #flow { scroll-margin-top: 1rem; }
+    #overview { margin-top: .6rem; }
+    .flow-group { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .45rem; }
+    .flow-pm { max-width: 20rem; margin: auto; }
+    .flow-node { display: block; padding: .55rem .65rem; border: 1px solid var(--border); border-left: 4px solid var(--unknown); border-radius: 9px; background: var(--surface); text-decoration: none; min-width: 0; overflow-wrap: anywhere; }
+    .flow-node strong { display: block; font-size: .82rem; }
+    .flow-node span { display: block; font-size: .72rem; color: var(--muted); margin-top: .15rem; }
+    .flow-node[data-state="working"] { border-left-color: var(--working); }
+    .flow-node[data-state="queued"], .flow-node[data-state="waiting"] { border-left-color: var(--held); }
+    .flow-node[data-state="review"] { border-left-color: var(--review); }
+    .flow-node[data-state="blocked"] { border-left-color: var(--blocked); }
+    .flow-connector { height: .65rem; width: 1px; background: var(--muted); margin: auto; }
+    .flow-label { margin: .55rem 0 .3rem; }
+    .details-heading { margin-top: 1.5rem; }
+    summary { cursor: pointer; font-weight: 600; }
+    button { font: inherit; color: var(--bg); background: var(--accent); border: 0; border-radius: 8px; padding: .6rem .8rem; cursor: pointer; }
+    #replay-controls { margin: .6rem 0; }
+    #replay-step { width: 100%; margin-top: .7rem; }
+    #replay-controls label { margin-left: .5rem; font-size: .8rem; }
+    @media(min-width:720px) { .flow-group { grid-template-columns: repeat(4,minmax(0,1fr)); } }
     .tree { margin-top: 1.5rem; display: grid; gap: .75rem; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.1rem 1.15rem; min-width: 0; }
     .row { flex-wrap: wrap; display: flex; justify-content: space-between; gap: .75rem; align-items: flex-start; }
@@ -60,18 +81,35 @@
       <div>
         <div class="kicker">Digital Tape</div>
         <h1>Working state</h1>
-        <p class="lead">Phase 0 format/API scope signed. PM, leads and workers below reflect the Agent Bus receipt ledger. Particular agent instances are not connected yet.</p>
+        <p class="lead">PM, leads and workers · recorded activity</p>
       </div>
       <div class="pills" id="meta"></div>
     </header>
-    <section class="bucket" aria-labelledby="approval-heading">
-      <h2 id="approval-heading">Round approval</h2>
+    <nav class="pills view-nav" aria-label="Dashboard view">
+      <a class="pill" href="./#flow">Live production</a>
+      <a class="pill" href="?replay=34302460952#flow">Replay completed test</a>
+      <span id="active-test"></span>
+    </nav>
+    <p id="view-mode" class="muted" role="status"></p>
+    <div id="replay-controls" hidden>
+      <button id="replay-play" type="button">Play replay</button>
+      <label for="replay-step">Recorded step</label>
+      <input id="replay-step" type="range" min="0" max="0" value="0" />
+      <p id="replay-caption" class="muted" aria-live="polite"></p>
+    </div>
+    <section id="flow" aria-labelledby="flow-heading">
+      <h2 id="flow-heading">Work flow</h2>
+      <div id="overview" aria-busy="true">Loading role states…</div>
+    </section>
+    <details class="bucket" id="approval-panel">
+      <summary id="approval-heading">Round approval</summary>
       <p id="approval-status" class="muted" role="status">Checking for waiting authorization runs…</p>
       <div id="approval-runs"></div>
       <a class="approval-button" href="https://github.com/mmsanders/Digital-Tape/actions/workflows/agent-bus.yml">Open approval workflow</a>
       <p class="muted">Approval happens in GitHub using your signed-in account: Review deployments → michael-round-gate → Approve and deploy. Opening a link does not approve a round.</p>
-    </section>
+    </details>
     <div id="warn" role="status" aria-live="polite"></div>
+    <h2 class="details-heading">Role details</h2>
     <div class="tree" id="tree" aria-busy="true">Loading the repo…</div>
     <footer>
       <span>Read-only ledger view · refreshes every 60 seconds while visible.</span>

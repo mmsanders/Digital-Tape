@@ -1,7 +1,7 @@
 /* Public discovery only. GitHub owns authentication and the approval mutation. */
 'use strict';
 (() => {
-  const endpoint = 'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?status=waiting&branch=main&per_page=100';
+  const endpoint = 'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?branch=main&per_page=100';
   let timer, busy = false;
   async function refreshApprovals() {
     clearTimeout(timer);
@@ -16,6 +16,15 @@
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const data = await response.json();
       const runs = BusDashboard.waitingApprovals(data);
+      const liveTests = data.workflow_runs.filter(r=>r.status==='in_progress' && r.head_branch==='main' && r.path==='.github/workflows/agent-bus-plumbing.yml' && Number.isSafeInteger(r.id) && r.id>0);
+      const activeTest = document.getElementById('active-test');
+      activeTest.replaceChildren();
+      for (const run of liveTests) {
+        const link = document.createElement('a');
+        link.className='pill';link.href='?plumbing='+run.id+'#flow';link.textContent='Watch active test';activeTest.append(link);
+      }
+      document.getElementById('approval-heading').textContent = runs.length ? 'Round approval · '+runs.length+' waiting' : 'Round approval';
+      if (runs.length) document.getElementById('approval-panel').open=true;
       links.replaceChildren();
       for (const run of runs) {
         const link = document.createElement('a');
@@ -33,6 +42,7 @@
         ' Checked ' + new Date().toLocaleTimeString() + '.';
     } catch (error) {
       links.replaceChildren();
+      document.getElementById('active-test').replaceChildren();
       status.textContent = 'Approval status unavailable (' + error.message + '). Open the approval workflow to check directly.';
     } finally {
       clearTimeout(timeout);

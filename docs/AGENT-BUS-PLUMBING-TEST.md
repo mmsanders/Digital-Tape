@@ -62,6 +62,10 @@ The exercise ran from 03:58 to 04:08 UTC and all workflow steps succeeded.
 
 Evidence: [workflow artifact plumbing-evidence-34302460952](https://github.com/mmsanders/Digital-Tape/actions/runs/34302460952/artifacts/10087938271)
 contains the trace, snapshots, issue manifest, cleanup report and browser screenshots.
-The old isolated dashboard URL now reports unavailable test data because cleanup removed it;
-use the artifact to inspect the completed test. The ordinary dashboard remains operational.
+The old isolated dashboard URL reports unavailable test data because cleanup removed it.
+[Replay the completed test](https://mmsanders.github.io/Digital-Tape/?replay=34302460952#flow)
+using Play/Pause or the step slider. Its 26 distinct states were recovered from Git history
+(the 27th transcript snapshot repeats an unchanged state). The replay is explicitly labelled
+as recorded simulated activity. The ordinary dashboard remains operational; it now places a
+compact graph first and provides a Watch active test link while a plumbing workflow runs.
 The adapter and independent-acceptance limitations above still apply.

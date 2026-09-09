@@ -24,7 +24,7 @@ def main():
             "https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/' + (testRun ? 'plumbing-' + testRun + '.json' : 'state.json')", "/state.json'"))
         approvals = site / 'approvals.js'
         approvals.write_text(approvals.read_text().replace(
-            'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?status=waiting&branch=main&per_page=100', '/approvals.json'))
+            'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?branch=main&per_page=100', '/approvals.json'))
         (site / 'approvals.json').write_text(json.dumps({'workflow_runs':[dict(id=123, status='waiting', head_branch='main', event='workflow_dispatch', path='.github/workflows/agent-bus.yml', display_title='Agent Bus · authorize · browser-test')]}))
         config = json.loads(RUNTIME_FILE.read_text())
         state = empty_state(config)
@@ -37,7 +37,15 @@ def main():
         index = site / 'index.html'
         index.write_text(index.read_text().replace('</body>', '''<script>
           setTimeout(() => {
+            if (location.search.includes('replay=')) {
+              const slider = document.getElementById('replay-step');
+              slider.value=8; slider.dispatchEvent(new Event('input'));
+            }
+          }, 1000);
+          setTimeout(() => {
             document.body.dataset.overflow = document.documentElement.scrollWidth > innerWidth;
+            document.body.dataset.flow = document.querySelectorAll('.flow-node').length;
+            document.body.dataset.flowTop = Math.round(document.getElementById('flow').getBoundingClientRect().top);
             document.body.dataset.cards = document.querySelectorAll('article.card').length;
           }, 1500);
         </script></body>'''))
@@ -46,19 +54,26 @@ def main():
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         output = ROOT / 'build/agent-bus-browser'; output.mkdir(parents=True, exist_ok=True)
         try:
-            for width, height in ((1280, 1100), (390, 1600)):
+            for width, height, mode in ((1280,1100,''),(390,1600,''),(1280,1100,'replay'),(390,1600,'replay')):
                 args = [chrome, '--headless', '--no-sandbox', '--disable-gpu', '--hide-scrollbars',
                     '--no-proxy-server', '--virtual-time-budget=2500', f'--window-size={width},{height}',
-                    '--dump-dom', f'--screenshot={output / (str(width)+".png")}',
-                    f'http://127.0.0.1:{server.server_port}/']
+                    '--dump-dom', f'--screenshot={output / (str(width)+mode+".png")}',
+                    f'http://127.0.0.1:{server.server_port}/' + ('?replay=34302460952' if mode else '')]
                 run = subprocess.run(args, capture_output=True, text=True, timeout=30, check=True)
                 dom = run.stdout
                 assert 'https://github.com/mmsanders/Digital-Tape/actions/runs/123' in dom, 'approval link absent'
+                assert 'data-flow="8"' in dom, 'compact graph missing'
+                import re
+                assert int(re.search(r'data-flow-top="(\d+)"',dom)[1]) < 650, 'graph buried on mobile'
                 assert 'data-cards="8"' in dom, 'renderer did not finish'
                 assert 'data-overflow="false"' in dom, 'horizontal overflow'
                 assert 'data-xss=' not in dom.split('<body',1)[1].split('>',1)[0], 'injected markup executed'
-                assert '&lt;img' in dom, 'untrusted issue title not displayed as text'
-                print(f'PASS dashboard {width}px: 8 cards, no horizontal overflow, malicious title rendered safely')
+                if mode:
+                    assert 'Step 9 of 26' in dom, 'replay slider did not change frames'
+                    assert 'RECORDED TEST REPLAY' in dom, 'replay not labelled'
+                else:
+                    assert '&lt;img' in dom, 'untrusted issue title not displayed as text'
+                print(f'PASS dashboard {width}px {mode or "live"}: 8 graph nodes and cards, graph near top, no horizontal overflow, safe rendering')
         finally:
             server.shutdown(); server.server_close()
 

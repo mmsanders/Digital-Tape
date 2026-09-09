@@ -45,3 +45,14 @@ test('protected plumbing test runs appear as review links', () => {
   assert.equal(waitingApprovals({workflow_runs:[r]}).length,1);
   assert.equal(waitingApprovals({workflow_runs:[{...r,event:'pull_request'}]}).length,0);
 });
+
+test('recorded replay preserves actual batch barrier and completed states', () => {
+  const replay=require('../../dashboard/replay-34302460952.json');
+  assert.equal(replay.kind,'recorded-simulation');
+  assert.equal(replay.frames.length,26);
+  const views=replay.frames.map(f=>build(f.state));
+  assert.ok(views.every(v=>v.cards.length===8));
+  assert.ok(views.some(v=>v.cards.find(c=>c.id==='software').state==='waiting'));
+  assert.ok(views.some(v=>v.cards.find(c=>c.id==='worker-claude').state==='blocked'));
+  assert.equal(replay.frames.at(-1).state.current,null);
+});
