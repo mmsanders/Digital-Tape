@@ -18,7 +18,8 @@ No queued work or active autonomous round is created merely by installing infras
 
 The connected repository tools cannot configure protected environments. In Settings →
 Environments create michael-round-gate with **mmsanders as its sole required reviewer**
-and **administrator bypass disabled**. Do not grant runtime credentials approval authority.
+and **administrator bypass disabled**. Leave **Prevent self-review off**, because Michael
+both triggers and approves authorization. Do not grant runtime credentials approval authority.
 The controller checks these exact properties and refuses authorization if absent.
 Michael must trigger the authorize workflow on main and review its preflight snapshot,
 then approve the deployment. Preparing issues is not approval.
@@ -75,3 +76,17 @@ infrastructure-only delivery; it creates no independent product acceptance.
   administration, so this step needs Michael in repository Settings → Environments.
 - **Deliberately deferred:** all particular instance identities, inbound adapters,
   designated signal PRs and the protected real-adapter Round 0. No autonomous work ran.
+
+## Approving from the dashboard
+
+The Round approval panel links directly to waiting authorize runs on main. Select
+**Review approval in GitHub**, inspect the preflight scope, then **Review deployments →
+michael-round-gate → Approve and deploy** while signed in as mmsanders. The fallback
+**Open approval workflow** link works even when public API discovery is rate-limited.
+The panel checks every 60 seconds while visible, independently of the ledger; a pending
+authorization need not yet exist in the ledger. Waiting-run discovery is informational,
+not proof that a particular environment is awaiting review; GitHub is authoritative.
+
+Pages holds no credentials and cannot set an approval flag or approve on your behalf.
+Direct approval within Pages would require a separately authenticated application.
+See [GitHub's approval instructions](https://docs.github.com/en/actions/managing-workflow-runs/reviewing-deployments).

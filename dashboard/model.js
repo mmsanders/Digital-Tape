@@ -30,7 +30,16 @@
     });
     return {cards,round,updatedAt:snapshot.updated_at,infrastructure:snapshot.infrastructure};
   }
-  const exported = {build,roles};
+  function waitingApprovals(response) {
+    if (!response || !Array.isArray(response.workflow_runs)) throw new Error('Invalid workflow response');
+    return response.workflow_runs.filter(run => Number.isSafeInteger(run.id) && run.id > 0 &&
+      run.status === 'waiting' && run.head_branch === 'main' && run.event === 'workflow_dispatch' &&
+      run.path === '.github/workflows/agent-bus.yml' &&
+      typeof run.display_title === 'string' && run.display_title.startsWith('Agent Bus · authorize · '))
+      .map(run => ({id:run.id,title:run.display_title,
+        url:'https://github.com/mmsanders/Digital-Tape/actions/runs/' + run.id}));
+  }
+  const exported = {build,roles,waitingApprovals};
   if (typeof module !== 'undefined' && module.exports) module.exports = exported;
   else root.BusDashboard = exported;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

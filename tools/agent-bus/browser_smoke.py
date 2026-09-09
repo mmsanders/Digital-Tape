@@ -22,6 +22,10 @@ def main():
         app = site / 'app.js'
         app.write_text(app.read_text().replace(
             'https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/state.json', '/state.json'))
+        approvals = site / 'approvals.js'
+        approvals.write_text(approvals.read_text().replace(
+            'https://api.github.com/repos/mmsanders/Digital-Tape/actions/workflows/agent-bus.yml/runs?status=waiting&branch=main&event=workflow_dispatch&per_page=100', '/approvals.json'))
+        (site / 'approvals.json').write_text(json.dumps({'workflow_runs':[dict(id=123, status='waiting', head_branch='main', event='workflow_dispatch', path='.github/workflows/agent-bus.yml', display_title='Agent Bus · authorize · browser-test')]}))
         config = json.loads(RUNTIME_FILE.read_text())
         state = empty_state(config)
         state['current'] = 1
@@ -49,6 +53,7 @@ def main():
                     f'http://127.0.0.1:{server.server_port}/']
                 run = subprocess.run(args, capture_output=True, text=True, timeout=30, check=True)
                 dom = run.stdout
+                assert 'https://github.com/mmsanders/Digital-Tape/actions/runs/123' in dom, 'approval link absent'
                 assert 'data-cards="8"' in dom, 'renderer did not finish'
                 assert 'data-overflow="false"' in dom, 'horizontal overflow'
                 assert 'data-xss=' not in dom.split('<body',1)[1].split('>',1)[0], 'injected markup executed'

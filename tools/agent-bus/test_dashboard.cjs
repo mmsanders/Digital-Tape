@@ -29,3 +29,12 @@ test('renderer uses text nodes rather than injecting issue/error content as mark
   const fs=require('node:fs');const source=fs.readFileSync(require('node:path').join(__dirname,'../../dashboard/app.js'),'utf8');
   assert.doesNotMatch(source,/innerHTML|insertAdjacentHTML|document\.write/);
 });
+
+test('approval links select only waiting main authorization runs and construct trusted URLs', () => {
+  const {waitingApprovals}=require('../../dashboard/model.js');
+  const run={id:123,status:'waiting',head_branch:'main',event:'workflow_dispatch',path:'.github/workflows/agent-bus.yml',display_title:'Agent Bus · authorize · test',html_url:'https://evil.invalid'};
+  assert.deepEqual(waitingApprovals({workflow_runs:[run]}),[{id:123,title:run.display_title,url:'https://github.com/mmsanders/Digital-Tape/actions/runs/123'}]);
+  for (const patch of [{id:-1},{status:'completed'},{head_branch:'other'},{event:'push'},{path:'other.yml'},{display_title:'Agent Bus · claim · test'}])
+    assert.equal(waitingApprovals({workflow_runs:[{...run,...patch}]}).length,0);
+  assert.throws(()=>waitingApprovals({}));
+});

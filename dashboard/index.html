@@ -27,6 +27,8 @@
     .pills { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
     .pill { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: .35rem .75rem; font-size: 12px; color: var(--muted); }
     .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    .approval-button { display: inline-block; padding: .75rem 1rem; border-radius: 10px; background: var(--accent); color: var(--bg); font-weight: 600; text-decoration: none; margin: .3rem .5rem .3rem 0; }
+    .approval-button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
     .tree { margin-top: 1.5rem; display: grid; gap: .75rem; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.1rem 1.15rem; min-width: 0; }
     .row { flex-wrap: wrap; display: flex; justify-content: space-between; gap: .75rem; align-items: flex-start; }
@@ -62,6 +64,13 @@
       </div>
       <div class="pills" id="meta"></div>
     </header>
+    <section class="bucket" aria-labelledby="approval-heading">
+      <h2 id="approval-heading">Round approval</h2>
+      <p id="approval-status" class="muted" role="status">Checking for waiting authorization runs…</p>
+      <div id="approval-runs"></div>
+      <a class="approval-button" href="https://github.com/mmsanders/Digital-Tape/actions/workflows/agent-bus.yml">Open approval workflow</a>
+      <p class="muted">Approval happens in GitHub using your signed-in account: Review deployments → michael-round-gate → Approve and deploy. Opening a link does not approve a round.</p>
+    </section>
     <div id="warn" role="status" aria-live="polite"></div>
     <div class="tree" id="tree" aria-busy="true">Loading the repo…</div>
     <footer>
@@ -71,5 +80,6 @@
   </div>
   <script src="model.js"></script>
   <script src="app.js"></script>
+  <script src="approvals.js"></script>
 </body>
 </html>
