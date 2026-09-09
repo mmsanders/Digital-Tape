@@ -1,5 +1,7 @@
 'use strict';
-const LEDGER = 'https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/state.json';
+const plumbingRun = new URLSearchParams(location.search).get('plumbing');
+const testRun = plumbingRun && /^[1-9][0-9]{0,19}$/.test(plumbingRun) ? plumbingRun : null;
+const LEDGER = 'https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/' + (testRun ? 'plumbing-' + testRun + '.json' : 'state.json');
 const GITHUB = 'https://github.com/mmsanders/Digital-Tape';
 const stateNames = {unbound:'Not connected',ready:'Ready for validation',queued:'Queued',working:'Working',waiting:'Waiting for batch',review:'Returned for review',blocked:'Blocked',idle:'Idle',draft:'Draft',closed:'Closed','protocol-error':'Protocol error'};
 let timer, busy = false, lastSuccess;
@@ -36,6 +38,7 @@ function card(data) {
 }
 function render(snapshot) {
   const data = BusDashboard.build(snapshot);
+  if (testRun) document.querySelector('header .lead').textContent = 'SIMULATED AGENT PLUMBING TEST ' + testRun + '. Role identities and model attestations are simulated. No product work or acceptance.';
   const meta = document.getElementById('meta');
   meta.replaceChildren(el('span','Phase 0 signed','pill'),el('span',data.round ? 'Round #' + data.round.number + ' · ' + data.round.state : 'No active round','pill'));
   const tree = document.getElementById('tree');
@@ -58,7 +61,7 @@ async function refresh() {
     lastSuccess = new Date();
     document.getElementById('live').textContent = 'Fetched ' + lastSuccess.toLocaleTimeString();
   } catch (error) {
-    document.getElementById('warn').replaceChildren(el('div',error.message + '. ' + (lastSuccess ? 'Displayed data is stale; last successful fetch ' + lastSuccess.toLocaleString() + '.' : 'State is unknown; no live activity is inferred.'),'warn'));
+    document.getElementById('warn').replaceChildren(el('div',error.message + '. ' + (testRun ? 'Temporary test data may not exist yet or may have been cleaned up. ' : '') + (lastSuccess ? 'Displayed data is stale; last successful fetch ' + lastSuccess.toLocaleString() + '.' : 'State is unknown; no live activity is inferred.'),'warn'));
     document.getElementById('live').textContent = 'Unavailable';
     document.getElementById('tree').setAttribute('aria-busy','false');
   } finally {

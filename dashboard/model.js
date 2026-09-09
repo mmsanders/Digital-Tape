@@ -33,9 +33,10 @@
   function waitingApprovals(response) {
     if (!response || !Array.isArray(response.workflow_runs)) throw new Error('Invalid workflow response');
     return response.workflow_runs.filter(run => Number.isSafeInteger(run.id) && run.id > 0 &&
-      run.status === 'waiting' && run.head_branch === 'main' && run.event === 'workflow_dispatch' &&
-      run.path === '.github/workflows/agent-bus.yml' &&
-      typeof run.display_title === 'string' && run.display_title.startsWith('Agent Bus · authorize · '))
+      run.status === 'waiting' && run.head_branch === 'main' &&
+      typeof run.display_title === 'string' && (
+        (run.event === 'workflow_dispatch' && run.path === '.github/workflows/agent-bus.yml' && run.display_title.startsWith('Agent Bus · authorize · ')) ||
+        (['push','workflow_dispatch'].includes(run.event) && run.path === '.github/workflows/agent-bus-plumbing.yml' && run.display_title.startsWith('Agent Bus plumbing test · approval required · '))))
       .map(run => ({id:run.id,title:run.display_title,
         url:'https://github.com/mmsanders/Digital-Tape/actions/runs/' + run.id}));
   }

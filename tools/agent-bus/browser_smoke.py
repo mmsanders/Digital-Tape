@@ -21,10 +21,10 @@ def main():
         shutil.copytree(ROOT / 'dashboard', site, dirs_exist_ok=True)
         app = site / 'app.js'
         app.write_text(app.read_text().replace(
-            'https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/state.json', '/state.json'))
+            "https://raw.githubusercontent.com/mmsanders/Digital-Tape/agent-bus-state/' + (testRun ? 'plumbing-' + testRun + '.json' : 'state.json')", "/state.json'"))
         approvals = site / 'approvals.js'
         approvals.write_text(approvals.read_text().replace(
-            'https://api.github.com/repos/mmsanders/Digital-Tape/actions/workflows/agent-bus.yml/runs?status=waiting&branch=main&event=workflow_dispatch&per_page=100', '/approvals.json'))
+            'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?status=waiting&branch=main&per_page=100', '/approvals.json'))
         (site / 'approvals.json').write_text(json.dumps({'workflow_runs':[dict(id=123, status='waiting', head_branch='main', event='workflow_dispatch', path='.github/workflows/agent-bus.yml', display_title='Agent Bus · authorize · browser-test')]}))
         config = json.loads(RUNTIME_FILE.read_text())
         state = empty_state(config)

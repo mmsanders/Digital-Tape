@@ -38,3 +38,10 @@ test('approval links select only waiting main authorization runs and construct t
     assert.equal(waitingApprovals({workflow_runs:[{...run,...patch}]}).length,0);
   assert.throws(()=>waitingApprovals({}));
 });
+
+test('protected plumbing test runs appear as review links', () => {
+  const {waitingApprovals}=require('../../dashboard/model.js');
+  const r={id:77,status:'waiting',head_branch:'main',event:'push',path:'.github/workflows/agent-bus-plumbing.yml',display_title:'Agent Bus plumbing test · approval required · sha'};
+  assert.equal(waitingApprovals({workflow_runs:[r]}).length,1);
+  assert.equal(waitingApprovals({workflow_runs:[{...r,event:'pull_request'}]}).length,0);
+});

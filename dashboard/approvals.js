@@ -1,7 +1,7 @@
 /* Public discovery only. GitHub owns authentication and the approval mutation. */
 'use strict';
 (() => {
-  const endpoint = 'https://api.github.com/repos/mmsanders/Digital-Tape/actions/workflows/agent-bus.yml/runs?status=waiting&branch=main&event=workflow_dispatch&per_page=100';
+  const endpoint = 'https://api.github.com/repos/mmsanders/Digital-Tape/actions/runs?status=waiting&branch=main&per_page=100';
   let timer, busy = false;
   async function refreshApprovals() {
     clearTimeout(timer);
@@ -27,8 +27,8 @@
         description.textContent = run.title;
         links.append(link, description);
       }
-      status.textContent = (runs.length ? runs.length + ' authorization run(s) waiting. Verify the round scope in GitHub before approving.' :
-        'No waiting authorization runs found. This does not confirm that the approval environment is configured.') +
+      status.textContent = (runs.length ? runs.length + ' round/test run(s) waiting. Verify the round scope in GitHub before approving.' :
+        'No waiting round/test runs found. This does not confirm that the approval environment is configured.') +
         (data.total_count > 100 ? ' Results limited to 100 runs; open the workflow for all runs.' : '') +
         ' Checked ' + new Date().toLocaleTimeString() + '.';
     } catch (error) {
