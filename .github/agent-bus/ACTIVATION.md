@@ -33,7 +33,12 @@ An administrator remains a trusted principal; this is not a sandbox against that
 Pages must use GitHub Actions as its publishing source. The existing gh-pages branch is
 historical; dashboard/ on main is the maintained source. Do not edit two independent copies.
 
-## Bind particular instances — explicitly deferred to the next step with Michael
+## Bind particular instances
+
+Michael confirmed `michael-round-gate` setup on 10 September 2026. For Surge + worker
+binding, start with [HOOKUP-SURGE-WORKERS.md](HOOKUP-SURGE-WORKERS.md) (proposed
+runtimes shape, Grok Surge adapter, worker checklist, Round 0). Gate prerequisites
+above still apply before any authorize.
 
 1. Pick actual PM/Software/Hardware/Verification/Surge and worker instances. Keep roles separate.
 2. For each enabled role, set actor (distinct non-human GitHub identity), instance id, provider
@@ -70,12 +75,11 @@ infrastructure-only delivery; it creates no independent product acceptance.
   passed 25 controller cases, 6 dashboard cases and actual Chrome checks at 1280px/390px:
   eight cards, no horizontal overflow, injected issue title rendered safely as text.
 - Product engine/spec/test checks remain green except the previously missing WP-11 goldens.
-- **Remaining admin prerequisite:** authenticated inspection returned 404 for
-  michael-round-gate. Create that environment with mmsanders as sole required reviewer
-  and administrator bypass disabled. Connected repo tools do not expose environment
-  administration, so this step needs Michael in repository Settings → Environments.
-- **Deliberately deferred:** all particular instance identities, inbound adapters,
-  designated signal PRs and the protected real-adapter Round 0. No autonomous work ran.
+- **Gate:** Michael confirmed `michael-round-gate` exists (10 September 2026). Re-verify
+  sole reviewer + admin bypass off before authorize if settings may have drifted.
+- **Still deferred until hookup:** particular instance identities, inbound adapters,
+  designated signal PRs and the protected real-adapter Round 0. See
+  [HOOKUP-SURGE-WORKERS.md](HOOKUP-SURGE-WORKERS.md). No autonomous work ran from this note.
 
 ## Approving from the dashboard
 
