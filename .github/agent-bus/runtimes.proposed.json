@@ -1,0 +1,82 @@
+{
+  "version": 2,
+  "human": "mmsanders",
+  "providers": {
+    "openai": {
+      "frontier": "astra",
+      "strong": "sol",
+      "balanced": "terra",
+      "economy": "luna"
+    },
+    "anthropic": {
+      "frontier": null,
+      "strong": "opus",
+      "balanced": "sonnet",
+      "economy": "haiku"
+    },
+    "grok": {
+      "frontier": null,
+      "strong": null,
+      "balanced": null,
+      "economy": null
+    }
+  },
+  "roles": {
+    "pm": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": { "kind": "manual" }
+    },
+    "software": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": { "kind": "manual" }
+    },
+    "hardware": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "anthropic",
+      "transport": { "kind": "manual" }
+    },
+    "verification": {
+      "enabled": false,
+      "actor": null,
+      "instance": null,
+      "provider": "openai",
+      "transport": { "kind": "manual" }
+    },
+    "surge": {
+      "enabled": false,
+      "actor": "REPLACE_WITH_SURGE_BOT_LOGIN",
+      "instance": "grok-bot-surge-1",
+      "provider": "grok",
+      "transport": { "kind": "manual" }
+    },
+    "worker-chatgpt": {
+      "enabled": false,
+      "actor": "REPLACE_WITH_WORKER_CHATGPT_BOT_LOGIN",
+      "instance": "chatgpt-worker-1",
+      "provider": "openai",
+      "transport": { "kind": "manual" }
+    },
+    "worker-claude": {
+      "enabled": false,
+      "actor": "REPLACE_WITH_WORKER_CLAUDE_BOT_LOGIN",
+      "instance": "claude-worker-1",
+      "provider": "anthropic",
+      "transport": { "kind": "manual" }
+    },
+    "worker-grok": {
+      "enabled": false,
+      "actor": "REPLACE_WITH_WORKER_GROK_BOT_LOGIN",
+      "instance": "grok-worker-1",
+      "provider": "grok",
+      "transport": { "kind": "manual" }
+    }
+  }
+}
