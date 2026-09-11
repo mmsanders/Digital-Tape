@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated_at": "2026-09-09T04:16:39.632987+00:00",
+  "updated_at": "2026-09-11T21:19:30.349095+00:00",
   "infrastructure": "installed; instances unbound",
   "roles": {
     "pm": {
@@ -10,6 +10,13 @@
       "provider": "openai",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "ChatGPT Work cloud",
+        "model_preference": "Astra",
+        "capability": "frontier",
+        "manifest": ".github/agent-bus/roles/pm.md"
       }
     },
     "software": {
@@ -19,6 +26,13 @@
       "provider": "anthropic",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Claude Code cloud routine",
+        "model_preference": "Opus",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/software.md"
       }
     },
     "hardware": {
@@ -28,6 +42,13 @@
       "provider": "anthropic",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Claude Code cloud routine",
+        "model_preference": "Opus",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/hardware.md"
       }
     },
     "verification": {
@@ -37,15 +58,29 @@
       "provider": "openai",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "ChatGPT Work cloud",
+        "model_preference": "Sol",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/verification.md"
       }
     },
     "surge": {
       "enabled": false,
       "actor": null,
       "instance": null,
-      "provider": "openai",
+      "provider": "grok",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Grok Bot cloud",
+        "model_preference": "Grok (actual model to be attested)",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/surge.md"
       }
     },
     "worker-chatgpt": {
@@ -55,6 +90,10 @@
       "provider": "openai",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": false,
+        "reason": "Michael selected Grok/Grok Bot workers; no automatic fallback."
       }
     },
     "worker-claude": {
@@ -64,6 +103,10 @@
       "provider": "anthropic",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": false,
+        "reason": "Michael selected Grok/Grok Bot workers; no automatic fallback."
       }
     },
     "worker-grok": {
@@ -73,6 +116,13 @@
       "provider": "grok",
       "transport": {
         "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Grok Bot cloud (or verified cloud-hosted Grok adapter)",
+        "model_preference": "Grok (actual model to be attested)",
+        "capability": "economy-or-balanced",
+        "manifest": ".github/agent-bus/roles/worker-grok.md"
       }
     }
   },
