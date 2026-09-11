@@ -66,6 +66,10 @@ workflow's github.triggering_actor. Prove the actual actor from a harmless dispa
 Cloud branch-push permissions may also be narrower than normal Software merge authority;
 verify an authorized integration path rather than assuming the clone token can merge.
 
+Hardware's setup-only bootstrap return is recorded in
+[SETUP-REPORT-HARDWARE.md](SETUP-REPORT-HARDWARE.md). It reports capability and gaps only;
+it binds nothing and confirms the identity gap above on a real session.
+
 ## Grok Bot: Surge and workers
 
 Create separate Bots named DT Surge Lead and DT Grok Worker, edit their profiles and
