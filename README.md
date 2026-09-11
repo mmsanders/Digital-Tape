@@ -22,11 +22,10 @@ and print packets. It is not a finished player or a safety-qualified hardware de
 | [Hardware specification](spec/hw/README.md) | Hardware Lead; separately versioned |
 | [Work packages](docs/PACKAGES/README.md) | Scope and dependencies |
 | [Verification integration](docs/VERIFICATION-INTEGRATION.md) | Provenance, coverage and observed results |
-| [Agent dashboard](https://mmsanders.github.io/Digital-Tape/) | Read-only signaling ledger; instances unbound |
-| [Agent Bus](docs/AGENT-BUS.md) | Bounded rounds, protected approvals and claim receipts |
 | [Decision log](docs/DECISIONS.md) | Append-only history; later dispositions supersede earlier ones |
 
 One portable C99 engine serves the CLI, GUI and firmware. Hardware source is in
 hardware/; the independent mount-test package is in tests/mount_draft8/.
 
-Phase 1 lead/worker organization: [trial and roster](docs/PHASE1-AGENT-TRIAL.md) · [cloud instance setup](.github/agent-bus/CLOUD-HOOKUP.md).
+Phase 1 uses individual lead chats with no subworkers. Start with the
+[development plan](docs/PHASE1-DEVELOPMENT.md) and [copyable role bootstraps](docs/ROLES/README.md).

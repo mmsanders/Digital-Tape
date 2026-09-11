@@ -5,5 +5,5 @@ before doing any work, then follow its fresh-context sequence beginning with
 `docs/START-HERE.md`.
 
 The agreement applies to every lead regardless of model or app. Loading this file does
-not assign a product role, bind an agent instance, authorize an Agent Bus round, or
-expand the authority granted by the current brief.
+not assign a product role or expand the authority granted by Michael and the current
+brief. Phase 1 uses individual lead chats; start with docs/ROLES/README.md.

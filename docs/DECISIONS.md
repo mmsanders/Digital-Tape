@@ -1788,10 +1788,40 @@ The staged claim was not exclusive; bot events could not drive its workflow chai
 a generic bot comment did not bind authorization to scope; budgets/eligibility and
 some early-return validation paths were incomplete. The Pages dashboard also had
 unescaped HTML, stale role naming and inferred/misrouted activity. Findings and
-regression coverage are in docs/AGENT-BUS-REVIEW.md. Dashboard source now belongs on
+regression coverage are in [the archived review](https://github.com/mmsanders/Digital-Tape/blob/archive/agent-signaling-and-dashboard/docs/AGENT-BUS-REVIEW.md). Dashboard source now belongs on
 main, reading explicit receipt state. Particular agent instances remain unbound.
 
 **Cost to reverse:** disable the controller and Pages workflows, preserve the ledger
 and issue evidence, and return to manual PM coordination. No product spec hash or
 independent test changes are involved. Actual adapter hookups and protected Round 0
 remain a distinct final integration exercise with Michael.
+
+
+## ADR-133 — Phase 1 returns to individual lead chats
+
+**Date:** 2026-09-11 · **Owner:** Michael; recorded under his explicit repository-transition authority
+
+Michael ended the automated signaling and lead/worker organization trial before product
+activation. This supersedes ADR-132's operating model and the later cloud-hookup plan.
+Astra is PM in a Work chat; Sol is independent Verification in another Work chat;
+Software and Hardware each use an Opus Claude Code chat. Leads perform their own work,
+with no subworkers. Grok handles miscellaneous surge tasks primarily directed by Michael.
+The current agreement, role instructions and bounded briefs govern all new contexts.
+
+The complete prior main tree, including controller, tests, manifests, hookup drafts and
+Pages dashboard/replay, is preserved on
+[archive/agent-signaling-and-dashboard](https://github.com/mmsanders/Digital-Tape/tree/archive/agent-signaling-and-dashboard)
+from feb5fd9c1634d9e3e439165ec1abec2ee9d92b68, with setup reports from PRs #39/#40
+added at archive commit 5a190fe20977f624e8edd9eebbf63740667d9a68. Those reports are
+historical observations, not accepted adapter certification. The separate agent-bus-state branch retains
+historical ledger evidence. These are inactive research archives, not Phase 1 instructions.
+Remove the associated workflows, issue templates and implementation from main, and retire
+the public status display. Older decision entries remain historical, not active assignments.
+
+No product specification, independent test oracle, engine implementation, hardware safety
+gate or signed freeze is changed. Michael's routine accounts are external to this repo;
+he should disable the two setup routines. Resuming this experiment requires a new explicit
+instruction and review of the archived code and real provider integration gaps.
+
+**Cost to reverse:** restore selected archived infrastructure after review and account setup;
+do not restore old status or erase subsequent product changes by resetting main.

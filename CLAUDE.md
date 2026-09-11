@@ -41,7 +41,7 @@ control: a gate that never goes red has not established what it detects.
 | Software Lead | Repo integration, software implementation, CI, reviews/merges; streams 1/3/4/5 | Does not author product spec or accept its own work. Mechanically integrates issued spec and verifier tests. |
 | Hardware Lead | hardware/, spec/hw/, mechanics, sourcing, characterization, thermal design | Does not change engine/ or firmware/; cannot accept its own safety response or spend Michael’s money. |
 | Verification Lead | Stream 2, independent review, tests/oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
-| Surge Lead (Phase 1 trial) | Coordinate bounded PM-assigned packages; plan, delegate to workers and check results | No permanent product lead, normative issuance, acceptance or merge authority. PM dispositions its work. |
+| Surge (Grok) | Bounded miscellaneous tasks primarily assigned directly by Michael | No standing lead, normative issuance, acceptance or merge authority. Return results to Michael; the responsible lead reviews integration. |
 
 Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
@@ -54,9 +54,9 @@ for this Phase 0 push, including writes and merges. Verification, wallet, physic
 acts and Michael’s reserved sign-off remain separate. The exception ended at Michael’s recorded freeze signature on 8 September 2026;
 a fresh lead does not inherit it.
 The combined actor recorded its exercised authority without claiming independent acceptance.
-Michael separately authorized Agent Bus/signaling and Pages review, fixes and integration,
-initially excluding binding particular instances. On 11 September Michael authorized the
-cloud-instance hookup and Phase 1 organization trial; normal product role boundaries remain in force.
+Michael's latest instruction replaces the proposed automated organization with individual
+lead chats for Phase 1. This repository transition is separately authorized; it does
+not restore the expired combined product-lead mandate.
 
 ## 3. Spec → independent tests → implementation
 
@@ -130,28 +130,20 @@ tag editor, library or player. Firmware must not fork seek, mixing or other engi
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
 a release blocker. These limits survive the documentation consolidation.
 
-## 7. Agent Bus infrastructure
+## 7. Phase 1 chat-based development
 
-Michael authorized signaling/Pages integration after the signed Phase 0 milestone.
-Use [Agent Bus](docs/AGENT-BUS.md) and its runtime contracts for bounded rounds.
-Issues hold scope; the controller ledger holds approval/claim receipts; labels and
-PR doorbells are projections. Each new round needs Michael's protected approval.
-Particular instances remain unbound pending the authorized cloud hookup and real-adapter proof. Installing this
-infrastructure does not delegate product authority, waive Verification independence,
-authorize purchases, open safety gates or start autonomous work.
+Use [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) and [role instructions](docs/ROLES/README.md).
+PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;
+Software and Hardware are Opus in separate Claude Code chats. Surge is Grok, primarily
+instructed directly by Michael for miscellaneous scoped tasks.
 
+Leads perform their own work within their normal authorities. Software implements and
+integrates; Hardware designs and characterizes; Verification independently authors and
+runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
+or automatic delegation are part of Phase 1. Do not make routine direct lead work an exception.
 
-## 8. Phase 1 organization trial
-
-Michael assigned Astra/ChatGPT Work to PM, Opus/Claude Code cloud to Software and Hardware,
-Sol/ChatGPT Work to independent Verification, Grok Bot to Surge coordination, and Grok or
-Grok Bot to workers. See [Phase 1 trial](docs/PHASE1-AGENT-TRIAL.md) and the individual
-[role manifests](.github/agent-bus/roles/). Leads primarily plan, delegate small focused
-tasks, and check results. Record necessary direct-work exceptions. Verification blindness
-and independent authorship take precedence over delegation; shared implementation workers
-cannot supply independent test expectations.
-
-Reassess the organization with Michael at Phase 1 exit before Phase 2. Cloud hosting is a
-requirement for the target deployment, not proof that an idle chat is listening. Actual
-binding and wake/claim/return evidence are required; the live roster stays unbound until
-account setup and adapter proof exist. The simulated test does not establish real adapters.
+Michael starts/resumes the chats and carries handoffs when needed. PM maintains bounded
+assignments in docs/REVIEW; each lead fetches main, works its assignment, records durable
+results and stops at the stated boundary. No automated round approval, event listener,
+claim token or continuously running agent is required. Chat instructions do not waive
+independent acceptance, purchase approval, the signed freeze, or physical safety gates.

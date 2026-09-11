@@ -1,4 +1,4 @@
-name: Agent dashboard Pages
+name: Retire project dashboard
 on:
   push:
     branches: [main]

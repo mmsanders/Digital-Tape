@@ -1,6 +1,6 @@
 # For Michael — current question queue
 
-**Updated: 8 September 2026.** Every review round starts here after refreshing main.
+**Updated: 11 September 2026.** Every review round starts here after refreshing main.
 PM records your answers directly; leads do not ask again from archived packets.
 
 ## Q-001 — Signed and closed, 8 September 2026
@@ -50,16 +50,10 @@ The brief is on main; no need to repaste historical instructions.
   asking you to change access. The old blanket “all vendor domains blocked” claim
   is not a current project-wide fact.
 
+## Phase 1 chat setup
 
-## Agent Bus — final setup boundary
-
-Signaling infrastructure and the [Pages dashboard](https://mmsanders.github.io/Digital-Tape/)
-are deployed. Particular instances remain unbound as requested.
-Before authorizing any round, create **michael-round-gate** in repository Settings →
-Environments, require **mmsanders alone** as reviewer, and disable administrator bypass.
-The connected tools cannot change that admin setting; the controller refuses to run a
-round without it. Pages itself is configured and deployed successfully.
-
-Then choose actual instances/adapters with the [hookup checklist](../.github/agent-bus/ACTIVATION.md).
-No API purchase, token-bearing browser UI, automatic model listener or autonomous round
-has been introduced. Strong capability is Sol/Opus; unavailable classes block explicitly.
+Use [the role bootstraps](ROLES/README.md) for new PM, Software, Hardware, Verification
+and Surge contexts. Resume existing chats with the new Phase 1 plan and discard their
+superseded delegation instructions. The two Claude routines created during setup should
+be disabled in your Claude account; use ordinary Claude Code chats instead. No routine
+trigger, special role identity, or new approval environment is needed for this plan.

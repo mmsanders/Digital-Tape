@@ -6,8 +6,8 @@ archived round or the entire decision log.
 1. Fetch main; note its commit. Read [FOR-MICHAEL](FOR-MICHAEL.md) and surface open
    human questions before technical review; do not re-ask answered ones.
 2. Read [CLAUDE](../CLAUDE.md), [STATUS](STATUS.md), and [freeze record](PHASE0-FREEZE.md).
-3. Read [the Phase 1 organization trial](PHASE1-AGENT-TRIAL.md), your manifest under
-   .github/agent-bus/roles/, and [the current brief](REVIEW/README.md), then inputs below.
+3. Read [the Phase 1 development plan](PHASE1-DEVELOPMENT.md), your
+   [role instructions](ROLES/README.md), and [the current brief](REVIEW/README.md), then inputs below.
 
 | Role | Read next | Deliver |
 |---|---|---|
@@ -15,7 +15,7 @@ archived round or the entire decision log.
 | Software | tests/mount_draft8/COVERAGE.md and ADAPTER.md, docs/VERIFICATION-INTEGRATION.md, engine/README.md, tools/README.md | Mechanical integration and covered implementation; keep uncovered code held |
 | Hardware | docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md, WP-04/05/24 | Reproducible designs, sourced parts, auditable measurements |
 | Verification | docs/REVIEW/verification-lead.md, spec/VERSION.md, relevant spec sections and independent tests | Independent tests/result disposition; no premature implementation inspection |
-| Surge | PM’s bounded assignment and referenced spec sections | Proposal with evidence and unknowns returned to PM |
+| Surge | Michael’s bounded assignment and referenced authoritative inputs | Results, evidence and unknowns returned to Michael and the responsible lead |
 
 Product authority is spec/; hardware authority is spec/hw/. Test-package spec copies
 are authenticated historical inputs. Status never overrides the contract.
@@ -41,7 +41,3 @@ The separate make -C hardware fabrication-gate must currently fail with CLOSED.
 
 Missing WP-11 goldens remain a separate expected CI failure. CAD requires CadQuery;
 hardware CI records the tested environment. A missing dependency is not a passing test.
-
-For signaling infrastructure, read [Agent Bus](AGENT-BUS.md) and the
-[instance hookup checklist](../.github/agent-bus/ACTIVATION.md). No instance is
-connected by this checkpoint; labels and dashboard status do not authorize work.

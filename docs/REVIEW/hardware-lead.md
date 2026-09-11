@@ -1,9 +1,7 @@
 # Hardware Lead — current handoff
 
-Phase 1 role: read [the manifest](../../.github/agent-bus/roles/hardware.md).
-Leads primarily plan, delegate small focused work and check results; Verification
-independence and all product holds in this brief remain binding.
-
+Phase 1 role: read [the role instructions](../ROLES/hardware.md).
+Work directly in your lead chat; the current coverage and safety holds remain binding.
 
 **8 September 2026.**
 

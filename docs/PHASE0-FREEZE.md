@@ -71,6 +71,6 @@ new bytes, impact/migration analysis and a new integrity manifest.
 - Operations/state and hardware acceptance: **not granted**.
 
 The temporary combined-lead freeze mandate has ended; normal roles in
-[CLAUDE.md](../CLAUDE.md) resume. Michael separately authorized review/integration
-of Agent Bus and Pages infrastructure, excluding binding particular agent instances.
-That bounded follow-on authorization does not extend product or verification authority.
+[CLAUDE.md](../CLAUDE.md) resume. Later infrastructure experiments do not extend
+product or verification authority. The current operating format is recorded in
+[the Phase 1 plan](PHASE1-DEVELOPMENT.md); the signed scope above is unchanged.
