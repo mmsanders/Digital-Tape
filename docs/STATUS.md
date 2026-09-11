@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 8 September 2026 · Owner: PM · Phase 0 scoped format/API freeze signed.**
+**Updated: 11 September 2026 · Owner: PM · Phase 0 scoped format/API freeze signed.**
 
 ## Published
 
@@ -23,7 +23,7 @@
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
 | Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
-| #26 Agent Bus | Merged at e509a6a; label/empty-ledger installation and Pages deployment passed; all eight roles unbound | Michael creates protected round environment, then instance hookup |
+| #26 Agent Bus | Merged at e509a6a; label/empty-ledger installation and Pages deployment passed; all eight roles unbound | Cloud instance creation, distinct actors and real-adapter proof; human gate already verified |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
 
@@ -48,3 +48,17 @@ Agent Bus rollout: [install](https://github.com/mmsanders/Digital-Tape/actions/r
 passed on merged main. [Dashboard](https://mmsanders.github.io/Digital-Tape/) reads the
 empty receipt ledger. The protected michael-round-gate environment is still absent;
 no autonomous round may start. See [final hookup](../.github/agent-bus/ACTIVATION.md).
+
+
+## Phase 1 organization setup — 11 September
+
+Michael assigned Astra PM, Opus Software/Hardware, Sol independent Verification,
+Grok Bot Surge and Grok/Grok Bot workers for a trial through Phase 1. Leads primarily
+plan, delegate small focused tasks, and check results. See [trial](PHASE1-AGENT-TRIAL.md)
+and [cloud hookup](../.github/agent-bus/CLOUD-HOOKUP.md).
+
+PR #37 supplies the common AGENTS.md entry point. The reviewed PR #38 hookup material
+is reconciled with this full roster. All actual role bindings remain disabled: user
+account setup, model attestation, supported cloud triggers and authenticated return
+adapters are not yet provisioned. September 9's simulated integration test passed;
+real-adapter Round 0 remains required. No new product acceptance or phase gate is claimed.

@@ -1,5 +1,10 @@
 # Software Lead — current handoff
 
+Phase 1 role: read [the manifest](../../.github/agent-bus/roles/software.md).
+Leads primarily plan, delegate small focused work and check results; Verification
+independence and all product holds in this brief remain binding.
+
+
 **8 September 2026.**
 
 Read ../../CLAUDE.md, ../START-HERE.md, ../STATUS.md and ../FOR-MICHAEL.md first.

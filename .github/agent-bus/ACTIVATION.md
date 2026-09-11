@@ -1,7 +1,7 @@
 # Infrastructure installation and final instance hookup
 
-**Michael authorized infrastructure integration on 8 September 2026.** Particular
-agent instances are deliberately unbound. This supersedes the staged activation checklist.
+**Michael authorized infrastructure integration on 8 September and cloud hookup on
+11 September 2026.** Instances remain unbound pending account credentials and adapter proof. This supersedes the staged activation checklist.
 
 ## Installed by the integration
 
@@ -14,10 +14,10 @@ agent instances are deliberately unbound. This supersedes the staged activation 
 Deployment evidence and the remaining repository-admin prerequisite are recorded below.
 No queued work or active autonomous round is created merely by installing infrastructure.
 
-## Repository-admin prerequisites before any autonomous round
+## Repository-admin prerequisite — verified 9 September 2026
 
-The connected repository tools cannot configure protected environments. In Settings →
-Environments create michael-round-gate with **mmsanders as its sole required reviewer**
+Michael configured the protected environment and the install/inspect job verified it.
+Retain michael-round-gate with **mmsanders as its sole required reviewer**
 and **administrator bypass disabled**. Leave **Prevent self-review off**, because Michael
 both triggers and approves authorization. Do not grant runtime credentials approval authority.
 The controller checks these exact properties and refuses authorization if absent.
@@ -33,7 +33,11 @@ An administrator remains a trusted principal; this is not a sandbox against that
 Pages must use GitHub Actions as its publishing source. The existing gh-pages branch is
 historical; dashboard/ on main is the maintained source. Do not edit two independent copies.
 
-## Bind particular instances — explicitly deferred to the next step with Michael
+## Bind particular instances
+
+Start with [CLOUD-HOOKUP.md](CLOUD-HOOKUP.md) for all six Phase 1 instances and
+[phase1-roster.json](phase1-roster.json) for required evidence. The September 9 simulated
+plumbing test passed; it does not certify real provider wakeups or role identities.
 
 1. Pick actual PM/Software/Hardware/Verification/Surge and worker instances. Keep roles separate.
 2. For each enabled role, set actor (distinct non-human GitHub identity), instance id, provider
@@ -70,12 +74,11 @@ infrastructure-only delivery; it creates no independent product acceptance.
   passed 25 controller cases, 6 dashboard cases and actual Chrome checks at 1280px/390px:
   eight cards, no horizontal overflow, injected issue title rendered safely as text.
 - Product engine/spec/test checks remain green except the previously missing WP-11 goldens.
-- **Remaining admin prerequisite:** authenticated inspection returned 404 for
-  michael-round-gate. Create that environment with mmsanders as sole required reviewer
-  and administrator bypass disabled. Connected repo tools do not expose environment
-  administration, so this step needs Michael in repository Settings → Environments.
-- **Deliberately deferred:** all particular instance identities, inbound adapters,
-  designated signal PRs and the protected real-adapter Round 0. No autonomous work ran.
+- **Gate:** Michael confirmed `michael-round-gate` exists (10 September 2026). Re-verify
+  sole reviewer + admin bypass off before authorize if settings may have drifted.
+- **Still deferred until hookup:** particular instance identities, inbound adapters,
+  designated signal PRs and the protected real-adapter Round 0. See
+  [HOOKUP-SURGE-WORKERS.md](HOOKUP-SURGE-WORKERS.md). No autonomous work ran from this note.
 
 ## Approving from the dashboard
 
