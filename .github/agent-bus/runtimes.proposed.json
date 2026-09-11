@@ -27,56 +27,122 @@
       "actor": null,
       "instance": null,
       "provider": "openai",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "ChatGPT Work cloud",
+        "model_preference": "Astra",
+        "capability": "frontier",
+        "manifest": ".github/agent-bus/roles/pm.md"
+      }
     },
     "software": {
       "enabled": false,
       "actor": null,
       "instance": null,
       "provider": "anthropic",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Claude Code cloud routine",
+        "model_preference": "Opus",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/software.md"
+      }
     },
     "hardware": {
       "enabled": false,
       "actor": null,
       "instance": null,
       "provider": "anthropic",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Claude Code cloud routine",
+        "model_preference": "Opus",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/hardware.md"
+      }
     },
     "verification": {
       "enabled": false,
       "actor": null,
       "instance": null,
       "provider": "openai",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "ChatGPT Work cloud",
+        "model_preference": "Sol",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/verification.md"
+      }
     },
     "surge": {
       "enabled": false,
-      "actor": "REPLACE_WITH_SURGE_BOT_LOGIN",
-      "instance": "grok-bot-surge-1",
+      "actor": null,
+      "instance": null,
       "provider": "grok",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Grok Bot cloud",
+        "model_preference": "Grok (actual model to be attested)",
+        "capability": "strong",
+        "manifest": ".github/agent-bus/roles/surge.md"
+      }
     },
     "worker-chatgpt": {
       "enabled": false,
-      "actor": "REPLACE_WITH_WORKER_CHATGPT_BOT_LOGIN",
-      "instance": "chatgpt-worker-1",
+      "actor": null,
+      "instance": null,
       "provider": "openai",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": false,
+        "reason": "Michael selected Grok/Grok Bot workers; no automatic fallback."
+      }
     },
     "worker-claude": {
       "enabled": false,
-      "actor": "REPLACE_WITH_WORKER_CLAUDE_BOT_LOGIN",
-      "instance": "claude-worker-1",
+      "actor": null,
+      "instance": null,
       "provider": "anthropic",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": false,
+        "reason": "Michael selected Grok/Grok Bot workers; no automatic fallback."
+      }
     },
     "worker-grok": {
       "enabled": false,
-      "actor": "REPLACE_WITH_WORKER_GROK_BOT_LOGIN",
-      "instance": "grok-worker-1",
+      "actor": null,
+      "instance": null,
       "provider": "grok",
-      "transport": { "kind": "manual" }
+      "transport": {
+        "kind": "manual"
+      },
+      "phase1": {
+        "selected": true,
+        "surface": "Grok Bot cloud (or verified cloud-hosted Grok adapter)",
+        "model_preference": "Grok (actual model to be attested)",
+        "capability": "economy-or-balanced",
+        "manifest": ".github/agent-bus/roles/worker-grok.md"
+      }
     }
   }
 }

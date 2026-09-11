@@ -28,3 +28,5 @@ and print packets. It is not a finished player or a safety-qualified hardware de
 
 One portable C99 engine serves the CLI, GUI and firmware. Hardware source is in
 hardware/; the independent mount-test package is in tests/mount_draft8/.
+
+Phase 1 lead/worker organization: [trial and roster](docs/PHASE1-AGENT-TRIAL.md) · [cloud instance setup](.github/agent-bus/CLOUD-HOOKUP.md).

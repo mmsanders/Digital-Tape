@@ -6,7 +6,8 @@ archived round or the entire decision log.
 1. Fetch main; note its commit. Read [FOR-MICHAEL](FOR-MICHAEL.md) and surface open
    human questions before technical review; do not re-ask answered ones.
 2. Read [CLAUDE](../CLAUDE.md), [STATUS](STATUS.md), and [freeze record](PHASE0-FREEZE.md).
-3. Read [the current brief](REVIEW/README.md), then your role’s inputs below.
+3. Read [the Phase 1 organization trial](PHASE1-AGENT-TRIAL.md), your manifest under
+   .github/agent-bus/roles/, and [the current brief](REVIEW/README.md), then inputs below.
 
 | Role | Read next | Deliver |
 |---|---|---|

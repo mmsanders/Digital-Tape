@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 8 September 2026.** Applies to every lead, regardless of model
+**Current agreement: 11 September 2026.** Applies to every lead, regardless of model
 or app. Revisions/hashes live in spec/VERSION.md; gate state in docs/PHASE0-FREEZE.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
 charters and Michael’s latest PM instructions; historical rationale remains in
@@ -41,7 +41,7 @@ control: a gate that never goes red has not established what it detects.
 | Software Lead | Repo integration, software implementation, CI, reviews/merges; streams 1/3/4/5 | Does not author product spec or accept its own work. Mechanically integrates issued spec and verifier tests. |
 | Hardware Lead | hardware/, spec/hw/, mechanics, sourcing, characterization, thermal design | Does not change engine/ or firmware/; cannot accept its own safety response or spend Michael’s money. |
 | Verification Lead | Stream 2, independent review, tests/oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
-| Surge support | Bounded proposal or analysis assigned by PM | No standing lead, normative issuance, acceptance or merge authority. PM dispositions its work. |
+| Surge Lead (Phase 1 trial) | Coordinate bounded PM-assigned packages; plan, delegate to workers and check results | No permanent product lead, normative issuance, acceptance or merge authority. PM dispositions its work. |
 
 Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
@@ -55,7 +55,8 @@ acts and Michael’s reserved sign-off remain separate. The exception ended at M
 a fresh lead does not inherit it.
 The combined actor recorded its exercised authority without claiming independent acceptance.
 Michael separately authorized Agent Bus/signaling and Pages review, fixes and integration,
-excluding binding particular agent instances. Normal product role boundaries remain in force.
+initially excluding binding particular instances. On 11 September Michael authorized the
+cloud-instance hookup and Phase 1 organization trial; normal product role boundaries remain in force.
 
 ## 3. Spec → independent tests → implementation
 
@@ -135,6 +136,22 @@ Michael authorized signaling/Pages integration after the signed Phase 0 mileston
 Use [Agent Bus](docs/AGENT-BUS.md) and its runtime contracts for bounded rounds.
 Issues hold scope; the controller ledger holds approval/claim receipts; labels and
 PR doorbells are projections. Each new round needs Michael's protected approval.
-Particular instances remain unbound until the agreed hookup step. Installing this
+Particular instances remain unbound pending the authorized cloud hookup and real-adapter proof. Installing this
 infrastructure does not delegate product authority, waive Verification independence,
 authorize purchases, open safety gates or start autonomous work.
+
+
+## 8. Phase 1 organization trial
+
+Michael assigned Astra/ChatGPT Work to PM, Opus/Claude Code cloud to Software and Hardware,
+Sol/ChatGPT Work to independent Verification, Grok Bot to Surge coordination, and Grok or
+Grok Bot to workers. See [Phase 1 trial](docs/PHASE1-AGENT-TRIAL.md) and the individual
+[role manifests](.github/agent-bus/roles/). Leads primarily plan, delegate small focused
+tasks, and check results. Record necessary direct-work exceptions. Verification blindness
+and independent authorship take precedence over delegation; shared implementation workers
+cannot supply independent test expectations.
+
+Reassess the organization with Michael at Phase 1 exit before Phase 2. Cloud hosting is a
+requirement for the target deployment, not proof that an idle chat is listening. Actual
+binding and wake/claim/return evidence are required; the live roster stays unbound until
+account setup and adapter proof exist. The simulated test does not establish real adapters.

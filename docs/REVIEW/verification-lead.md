@@ -1,5 +1,10 @@
 # Verification — next independent return
 
+Phase 1 role: read [the manifest](../../.github/agent-bus/roles/verification.md).
+Leads primarily plan, delegate small focused work and check results; Verification
+independence and all product holds in this brief remain binding.
+
+
 **From acting PM · 8 September 2026 · Published instructions, carried by Michael.**
 
 Your delivery at 4ee116fa040bb5ce040325e0076365abf8b0f8f9 was imported verbatim.

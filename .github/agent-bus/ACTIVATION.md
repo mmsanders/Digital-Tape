@@ -1,7 +1,7 @@
 # Infrastructure installation and final instance hookup
 
-**Michael authorized infrastructure integration on 8 September 2026.** Particular
-agent instances are deliberately unbound. This supersedes the staged activation checklist.
+**Michael authorized infrastructure integration on 8 September and cloud hookup on
+11 September 2026.** Instances remain unbound pending account credentials and adapter proof. This supersedes the staged activation checklist.
 
 ## Installed by the integration
 
@@ -14,10 +14,10 @@ agent instances are deliberately unbound. This supersedes the staged activation 
 Deployment evidence and the remaining repository-admin prerequisite are recorded below.
 No queued work or active autonomous round is created merely by installing infrastructure.
 
-## Repository-admin prerequisites before any autonomous round
+## Repository-admin prerequisite — verified 9 September 2026
 
-The connected repository tools cannot configure protected environments. In Settings →
-Environments create michael-round-gate with **mmsanders as its sole required reviewer**
+Michael configured the protected environment and the install/inspect job verified it.
+Retain michael-round-gate with **mmsanders as its sole required reviewer**
 and **administrator bypass disabled**. Leave **Prevent self-review off**, because Michael
 both triggers and approves authorization. Do not grant runtime credentials approval authority.
 The controller checks these exact properties and refuses authorization if absent.
@@ -35,10 +35,9 @@ historical; dashboard/ on main is the maintained source. Do not edit two indepen
 
 ## Bind particular instances
 
-Michael confirmed `michael-round-gate` setup on 10 September 2026. For Surge + worker
-binding, start with [HOOKUP-SURGE-WORKERS.md](HOOKUP-SURGE-WORKERS.md) (proposed
-runtimes shape, Grok Surge adapter, worker checklist, Round 0). Gate prerequisites
-above still apply before any authorize.
+Start with [CLOUD-HOOKUP.md](CLOUD-HOOKUP.md) for all six Phase 1 instances and
+[phase1-roster.json](phase1-roster.json) for required evidence. The September 9 simulated
+plumbing test passed; it does not certify real provider wakeups or role identities.
 
 1. Pick actual PM/Software/Hardware/Verification/Surge and worker instances. Keep roles separate.
 2. For each enabled role, set actor (distinct non-human GitHub identity), instance id, provider

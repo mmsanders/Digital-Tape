@@ -1,6 +1,6 @@
 # Adapter — Grok Bot as Surge
 
-Authority: CLAUDE.md Surge support — bounded proposal/analysis assigned by PM; no
+Authority: CLAUDE.md Phase 1 Surge Lead — bounded proposal/analysis assigned by PM; no
 standing lead normative issuance, acceptance, or merge. PM dispositions Surge work.
 Agent Bus treats Surge as a lead root for fan-out to workers, then return to PM.
 
@@ -14,13 +14,16 @@ Agent Bus treats Surge as a lead root for fan-out to workers, then return to PM.
 | Provider | `grok` (classes must be attested before enable) |
 | Transport | `manual` first; `pr-doorbell` optional later |
 
-Grok Bot’s day-to-day GitHub connector may still be Michael’s account for **human
-repo ops**. Bus **claims** must use the Surge bot token/`gh` auth as `BUS_ACTOR`.
+The normal connector may act as Michael, which cannot authenticate a bus role.
+Claims must dispatch using the Surge role credential. The workflow derives its actor
+from github.triggering_actor; setting BUS_ACTOR locally does not change that identity.
+See CLOUD-HOOKUP.md for the shared-computer credential boundary.
 
 ## Wake (manual)
 
-1. Michael (or a standing reminder) tells Surge: “check Agent Bus mailbox.”
-2. Or Surge runs on a schedule: read mailbox only; do nothing if empty.
+1. Use a one-time manual bootstrap to establish the capabilities and role identity.
+2. Production target: a proven cloud event adapter. A routine that launches a model
+   just to check an empty mailbox consumes usage; do not enable an idle polling loop.
 
 ```bash
 python3 tools/agent-bus/client.py mailbox surge

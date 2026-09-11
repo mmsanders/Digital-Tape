@@ -1,8 +1,17 @@
-# Runtime contract — no instances bound yet
+# Runtime contract — Phase 1 trial; instance hookup pending
 
 Normal product authorities remain in CLAUDE.md. Read docs/AGENT-BUS.md for controller
 invariants and runtimes.json for the actual role/capability configuration. Surge is bounded;
 Verification stays independent. No role starts work from a label, PR comment or dashboard.
+
+## Phase 1 lead mandate
+
+Read [the trial](../../docs/PHASE1-AGENT-TRIAL.md), [roster](phase1-roster.json) and your
+[role manifest](roles/). Leads primarily plan, delegate small focused tasks, check and
+disposition results. Grok/Grok Bot is the worker choice; OpenAI/Claude worker slots are
+inactive reserves. Review the organization with Michael after Phase 1. No model polling
+loop is implied by cloud hosting. A native routine waking a model before a claim is not
+proof of a cheap pre-model adapter. See [cloud hookup](CLOUD-HOOKUP.md) for known gaps.
 
 ## Universal adapter boundary
 

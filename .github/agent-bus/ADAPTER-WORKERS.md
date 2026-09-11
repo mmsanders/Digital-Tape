@@ -1,6 +1,8 @@
 # Adapter — workers accepting Surge / lead delegation
 
-Workers: `worker-chatgpt`, `worker-claude`, `worker-grok`.
+Phase 1 worker: `worker-grok` (Grok/Grok Bot). `worker-chatgpt` and `worker-claude`
+remain disabled reserves. Start with one bound worker mailbox; parallel instance pools
+require a separately designed and tested identity/claim boundary.
 
 Capability band: **economy** and **balanced** only (auto → economy).
 
@@ -24,17 +26,18 @@ approved eligibility). Workers do not host independent-review services.
 - [ ] `runtimes.json`: actor, instance, provider, transport filled
 - [ ] Provider capability classes non-null for economy (and balanced if used)
 - [ ] Adapter implements claim/receipt consume-once
-- [ ] `enabled: true` only after a dry claim against a harmless queued task
+- [ ] Ready adapter/bindings first; enable only for gated harmless Round 0, then prove a claim
+- [ ] Product work only after Round 0 evidence has been reviewed
 - [ ] Documented in Round 0 evidence
 
 ## worker-grok specific
 
 `providers.grok` is currently all `null`. Do **not** enable `worker-grok` until the
 adapter can attest real model family strings for at least `economy` (and `balanced`
-if requested). Until then, leave the role disabled and use chatgpt/claude workers
-for Round 0 if needed.
+if requested). Until then, leave the role disabled; do not silently substitute another provider.
 
 ## worker-chatgpt / worker-claude
 
-Use existing OpenAI/Anthropic mappings (luna/haiku economy; terra/sonnet balanced).
-Attest actual runtime model names against those families at claim time.
+Inactive for this trial. Any future reassignment requires Michael and truthful
+provider mappings. Shared Grok implementation workers cannot author blinded independent
+tests; see docs/PHASE1-AGENT-TRIAL.md.
