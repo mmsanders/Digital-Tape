@@ -1825,3 +1825,9 @@ instruction and review of the archived code and real provider integration gaps.
 
 **Cost to reverse:** restore selected archived infrastructure after review and account setup;
 do not restore old status or erase subsequent product changes by resetting main.
+
+Retirement completion: [Pages deployment](https://github.com/mmsanders/Digital-Tape/actions/runs/34654162314)
+succeeded and the public URL was checked for the static retirement notice with no scripts.
+The temporary page source and Pages workflow were then removed from main. GitHub retains
+the deployed notice; it contains no live status or approval controls. No account-side
+Claude routine was disabled by this repository edit.

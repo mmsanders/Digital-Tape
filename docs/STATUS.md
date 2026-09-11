@@ -36,10 +36,10 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-Checkpoint validation: cleanup hardware CI [34176318398](https://github.com/mmsanders/Digital-Tape/actions/runs/34176318398)
-passed all three jobs; engine CI [34176318403](https://github.com/mmsanders/Digital-Tape/actions/runs/34176318403)
-passed all jobs except the known missing-goldens gate. Exact spec/test trees and the
-held engine/harness blobs were rechecked after publication. Working checkout is clean.
+Transition validation: [engine CI](https://github.com/mmsanders/Digital-Tape/actions/runs/34654162368)
+passed the independent package self-checks, build, spec hashes, guardrails, negative
+controls and scaffolding checks. Only the known missing WP-11 goldens failed. No files
+under spec/, engine/, firmware/, tests/ or hardware/ changed in this transition.
 
 ## Phase 1 operating format — 11 September
 
