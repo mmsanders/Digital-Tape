@@ -59,6 +59,10 @@ created wake for our existing doorbell. Prefer a verified API trigger through a 
 adapter once configured; save its secret in a private credential store, never the repo.
 [Official routines setup](https://code.claude.com/docs/en/routines)
 
+One Claude Code cloud instance ran this section's setup-only bootstrap on 11 September;
+its capability evidence and five binding blockers are in
+[the Software setup record](SETUP-SOFTWARE-CLAUDE-CLOUD.md). It bound nothing.
+
 **Identity gap:** Claude's normal connected GitHub actions appear as your account.
 That is not the distinct bus actor. The role's adapter must authenticate command dispatch
 as its own registered bot identity. Merely exporting BUS_ACTOR does not change the
