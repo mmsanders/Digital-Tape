@@ -32,6 +32,24 @@ jobs:
       # engine defines the six missing public operations.
       - run: python3 tests/ops_draft8/selftest.py
 
+  playback-package:
+    name: independent playback/golden package self-checks (synthetic, not engine acceptance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Deterministic fixture/candidate-PCM regeneration plus the verifier's own
+      # three-family oracle, identity, exit, provenance, replay and retention
+      # controls. This runs the package's SYNTHETIC stand-in adapter only: no
+      # engine is built, linked or executed, so a green result is verifier
+      # plumbing and never product evidence or golden acceptance.
+      #
+      # The candidate PCM in tests/playback_draft8/golden/ is verifier-derived
+      # oracle bytes, NOT accepted WP-11 goldens: Michael's human listening is a
+      # separate later step. The PRODUCT adapter lives in tests/playback_adapter
+      # and cannot link yet -- no engine defines tape_seek, tape_set_rate,
+      # tape_render or tape_service -- so no product playback evidence exists.
+      - run: make -C tests/playback_draft8 check
+
   build:
     name: build (-Werror)
     runs-on: ubuntu-latest

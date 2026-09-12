@@ -80,6 +80,45 @@ Diagnostic-only: raw evidence in
 [the P1-R2-SW return](REVIEW/returns/P1-R2-SW.md); the superseded baseline
 diagnostic is in [the P1-R1 packet](verification/runs/2026-09-12/README.md).
 
+## Imported playback/golden tranche — 12 September 2026
+
+Source: `mmsanders/digital-tape-verification` publication
+`7a22cbb4447c40c51b7c8b2282a685ed30a46ba6`, directory `tests/playback_draft8/`.
+All 57 tracked files imported verbatim with modes preserved (six executables); the
+product subtree hash reproduces `ff810814dbc8079c6903e6f85ed7ee312abd3076` exactly.
+
+Imported from the **publication**, not from the corrected source commit
+`d565403907ecea331a5dcf63efbd1c08d8bd732e` (tree
+`aaa6dde86c9a0bdffa2b375361049ac670e26467`): the publication adds the retained
+18-file `evidence/p1-r4-synthetic/` bundle, and importing the source tree alone
+would have omitted it. Both hashes were authenticated before import.
+
+Reproduced locally: deterministic fixture and candidate-PCM regeneration; the
+package self-test — three families plus **18 controls** covering seek/boundary/grid
+mutations, callback I/O during render, altered fixture and PCM bytes, tampered spec,
+manifest-only kind relabel and ID mismatch, missing provenance, missing and tampered
+evidence, tampered verifier identity, missing/nonzero/timed-out adapter exit, and
+nonempty-destination rejection; offline replay of the retained P1-R4 v2 bundle
+(PASS); and confirmation that the historical P1-R2 v1 bundle is refused as the wrong
+schema rather than silently upgraded. **All synthetic — no engine executed.**
+
+The candidate PCM under `tests/playback_draft8/golden/` is verifier-derived oracle
+bytes, **not accepted WP-11 goldens**: Michael's human listening is a separate later
+step, and nothing here is a listening claim.
+
+Structural Rule 1: test-only, landing before any corresponding engine
+implementation. **No playback operation exists in any engine.** The product adapter
+is Software-owned at `tests/playback_adapter/`, outside the verifier subtree, and
+identifies as `product` with a fixed adapter id; it compiles clean against the held
+PR #20 public header and fails to link on four declared-but-undefined symbols —
+`tape_seek`, `tape_set_rate`, `tape_render`, `tape_service` — none of which is
+defined by either the main or the #20 archive. It does not compile against current
+main, whose header predates the frozen DRAFT-8 API. Therefore **no product playback
+evidence exists**, no v2 evidence directory was created, and the adapter's
+observation schema has never been exercised against a real engine. Diagnostic-only:
+raw logs in [the P1-R5 packet](verification/runs/2026-09-12-r5/README.md) and the
+dependency/split map in [the P1-R5-SW return](REVIEW/returns/P1-R5-SW.md).
+
 ## Software execution — held implementation
 
 The unchanged probe was linked to the real public header and engine archive.

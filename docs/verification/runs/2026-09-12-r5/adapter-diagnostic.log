@@ -1,0 +1,73 @@
+# P1-R5-SW playback adapter diagnostic
+adapter source sha256: 4bdcefea3aa2c106701fc1749e323f12acd8248ac38c0fb4e098da87150dff02
+compiler: cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+product main: fd2b73fe50e3e5e8e2d02b8876256a6ed8f4b57b
+held #20 head: 2e0e8a4b7bff42797ac37901196e5ea348b2e392
+
+## TARGET A — current product main
+### compile
+$ make compile ENGINE_INC=../../engine/include
+cc -I../../engine/include -DTAPE_PUBLIC_HEADER='"tape.h"' -std=c99 -Wall -Wextra -Werror -pedantic -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wvla -Wcast-qual -Wpointer-arith -fno-common -g -O1 -c playback_probe.c -o build/mainA.o
+playback_probe.c: In function 'script_forward':
+playback_probe.c:311:9: error: too few arguments to function 'tape_mount'
+  311 |     r = tape_mount(t, TAPE_SIDE_A, 0u, NULL);
+      |         ^~~~~~~~~~
+In file included from playback_probe.c:27:
+../../engine/include/tape.h:74:13: note: declared here
+   74 | tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
+      |             ^~~~~~~~~~
+playback_probe.c: In function 'script_seek':
+playback_probe.c:338:9: error: too few arguments to function 'tape_mount'
+  338 |     r = tape_mount(t, TAPE_SIDE_A, 0u, NULL);
+      |         ^~~~~~~~~~
+../../engine/include/tape.h:74:13: note: declared here
+   74 | tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
+      |             ^~~~~~~~~~
+playback_probe.c: In function 'script_reverse':
+playback_probe.c:372:9: error: too few arguments to function 'tape_mount'
+  372 |     r = tape_mount(t, TAPE_SIDE_A, 0u, NULL);
+      |         ^~~~~~~~~~
+../../engine/include/tape.h:74:13: note: declared here
+   74 | tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
+      |             ^~~~~~~~~~
+make: *** [Makefile:28: build/mainA.o] Error 1
+compile exit: 2
+
+## TARGET B — held PR #20 head 2e0e8a4b
+### compile
+$ make compile ENGINE_INC=<pr20>/engine/include
+make: Nothing to be done for 'compile'.
+compile exit: 0
+### link
+$ cc build/pr20.o <pr20>/build/engine/libtape.a -o build/playback_probe
+/usr/bin/ld: build/pr20.o: in function `service_to_idle':
+/home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:293:(.text+0x2ee): undefined reference to `tape_service'
+/usr/bin/ld: build/pr20.o: in function `script_forward':
+/home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:315:(.text+0xf47): undefined reference to `tape_set_rate'
+/usr/bin/ld: /home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:320:(.text+0xf98): undefined reference to `tape_render'
+/usr/bin/ld: build/pr20.o: in function `script_seek':
+/home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:342:(.text+0x1088): undefined reference to `tape_set_rate'
+/usr/bin/ld: /home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:348:(.text+0x1279): undefined reference to `tape_seek'
+/usr/bin/ld: /home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:353:(.text+0x12b9): undefined reference to `tape_render'
+/usr/bin/ld: build/pr20.o: in function `script_reverse':
+/home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:376:(.text+0x13af): undefined reference to `tape_seek'
+/usr/bin/ld: /home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:380:(.text+0x13e3): undefined reference to `tape_set_rate'
+/usr/bin/ld: /home/user/Digital-Tape/tests/playback_adapter/playback_probe.c:385:(.text+0x1434): undefined reference to `tape_render'
+collect2: error: ld returned 1 exit status
+link exit: 1
+
+### undefined public symbols required by the playback scripts
+U tape_init
+U tape_instance_size
+U tape_mount
+U tape_render
+U tape_seek
+U tape_service
+U tape_set_rate
+U tape_unmount
+
+### playback operations defined by NEITHER archive
+  tape_seek: main=0 pr20=0 (0 = undefined)
+  tape_set_rate: main=0 pr20=0 (0 = undefined)
+  tape_render: main=0 pr20=0 (0 = undefined)
+  tape_service: main=0 pr20=0 (0 = undefined)

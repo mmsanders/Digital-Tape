@@ -1,0 +1,53 @@
+# Reproduction: playback package, SYNTHETIC only (no engine executed)
+verifier publication: 7a22cbb4447c40c51b7c8b2282a685ed30a46ba6
+corrected source:     d565403907ecea331a5dcf63efbd1c08d8bd732e / tree aaa6dde86c9a0bdffa2b375361049ac670e26467
+published subtree:    ff810814dbc8079c6903e6f85ed7ee312abd3076
+python: Python 3.11.15
+
+## generate_fixture.py (deterministic regeneration; rejects checked-in drift)
+PASS checked-in fixture and candidate PCM equal deterministic generator
+raw VO08 3146248 c2ef07b3c35f45a46564c8fc10ed37d31c555ef09b2cb8effab848c76ba9672b
+fixtures/fixture.json 770 7ca4267aff69aef2d4802ac651fee2af59a2f643ce85f667c1ef3f0b91a9dd8c
+fixtures/playback-three-run.vo08.gz 3496 c32431807fe713a3054d15283dc81ec2a0d3d08eabe3fd50e3feeaccc98b7ac4
+golden/forward-1x.pcm 60 750b7dfb75de2d9b75ba337393e3285e2ca02de23d7be609303505b096a424f8
+golden/reverse-neg1x.pcm 60 15e64de5ceb9cf99ad87ea45db0b1ce7ceba65594506d8e2634d9471247049d7
+golden/seek-boundaries.pcm 32 a79ea302572d626d46dbf2662f3fb18666b2ddb03843c2b1ef51042736597cda
+exit: 0
+
+## selftest.py
+PASS deterministic fixture/candidate-PCM regeneration
+PASS authenticated DRAFT-8 package + fixture-derived candidate PCM
+PASS synthetic three-family public-call/callback observation
+CAUGHT wrong first frame after seek
+CAUGHT run-boundary off-by-one
+CAUGHT reverse interpolation/grid drift
+CAUGHT callback I/O during render
+CAUGHT wrong public tape_seek target
+CAUGHT altered fixture bytes
+CAUGHT altered candidate PCM bytes
+CAUGHT tampered authenticated spec bytes
+PASS conforming synthetic offline saved-evidence replay
+CAUGHT manifest-only synthetic/product relabel
+CAUGHT manifest-only adapter ID mismatch
+CAUGHT missing adapter source provenance
+CAUGHT missing adapter build provenance
+CAUGHT missing evidence
+CAUGHT tampered evidence
+CAUGHT tampered verifier identity
+CAUGHT missing recorded adapter exit
+CAUGHT nonzero adapter exit with retained failure record
+CAUGHT bounded adapter timeout with retained failure record
+PASS nonempty evidence destination rejected with existing bytes retained
+SELFTEST PASS: three families + identity/exit/provenance/replay/retention controls
+exit: 0
+
+## replay.py on the retained P1-R4 synthetic bundle (v2)
+REPLAY PASS evidence/p1-r4-synthetic
+  forward_1x: PASS
+  seek_boundaries: PASS
+  reverse_neg1x: PASS
+exit: 0
+
+## replay.py on the historical P1-R2 bundle (v1) — must NOT be silently upgraded
+REPLAY FAIL: wrong evidence schema
+exit: 1
