@@ -1,0 +1,21 @@
+# Reproduction of verifier-owned VT8-001 oracle self-test (SYNTHETIC — not an engine run)
+package source: verifier a91138667673fcf19dc9e83c9034322b982b1771, tests/ops_draft8, tree c8a43df69a6be8e2c34bf79a1d79933abf48286a
+python: Python 3.11.15
+$ python3 selftest.py
+PASS conforming VT8-001-RB-ALLSLOT
+PASS conforming VT8-001-REC-ALLOCSEQ
+CAUGHT reset live-only sequence base => reset_b did not consume all-slot max + 1
+CAUGHT reset chunk write => reset_b moved/wrote chunk data
+CAUGHT record live-only sequence base => record commit did not consume all-slot max + 1
+CAUGHT record allocation below H/free_next => record audio write outside derived allocation chunk
+CAUGHT record sb_generation increment => ordinary recording changed sb_generation/superblock
+CAUGHT record overlapping committed index => record B1 result invalid
+SELFTEST PASS: 2 conforming + 6 required mutations
+exit: 0
+
+$ python3 runner.py --adapter ./_synthetic_adapter.py --log <evidence>/synthetic-runner.jsonl
+2 cases; 0 failed; see /home/user/Digital-Tape/docs/verification/runs/2026-09-12/synthetic-runner.jsonl
+exit: 0
+
+## Byte-comparison against the package's own historical log
+IDENTICAL to tests/ops_draft8/evidence/selftest.log

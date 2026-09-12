@@ -1,0 +1,9 @@
+PASS conforming VT8-001-RB-ALLSLOT
+PASS conforming VT8-001-REC-ALLOCSEQ
+CAUGHT reset live-only sequence base => reset_b did not consume all-slot max + 1
+CAUGHT reset chunk write => reset_b moved/wrote chunk data
+CAUGHT record live-only sequence base => record commit did not consume all-slot max + 1
+CAUGHT record allocation below H/free_next => record audio write outside derived allocation chunk
+CAUGHT record sb_generation increment => ordinary recording changed sb_generation/superblock
+CAUGHT record overlapping committed index => record B1 result invalid
+SELFTEST PASS: 2 conforming + 6 required mutations

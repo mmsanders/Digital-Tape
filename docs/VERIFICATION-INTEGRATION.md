@@ -28,6 +28,38 @@ rendered PCM, complete state-row or full WP-07 acceptance follows from this impo
 PR #20 cannot merge wholesale. Full green WP-10, independent WP-11 goldens, WP-12a
 and hardware acceptance remain separate requirements.
 
+## Imported VT8-001 operation tranche — 12 September 2026
+
+Source: `mmsanders/digital-tape-verification`, immutable commit
+`a91138667673fcf19dc9e83c9034322b982b1771`, directory `tests/ops_draft8/`.
+All 8 tracked files imported verbatim with executable modes preserved; the product
+subtree hash reproduces the expected tree
+`c8a43df69a6be8e2c34bf79a1d79933abf48286a`. Both historical self-test logs under
+`evidence/` are unmodified. No engine code is part of this import.
+
+Reproduced locally: `python3 tests/ops_draft8/selftest.py` passes, accepting two
+conforming synthetic observations and catching all six required mutations, with
+output byte-identical to the package's own `evidence/selftest.log`;
+`runner.py --adapter _synthetic_adapter.py` reports 2/2. **Both are synthetic
+runner/oracle plumbing evidence, not engine runs.**
+
+Structural Rule 1: this test-only import lands before any corresponding engine
+implementation. **`VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` have never
+executed against an engine**, so P1-R1-V01/V02/V03 remain open and allocation
+events and all-slot running-sequence consumption remain unobserved. No assertion,
+fixture, expected sequence, operation argument or exclusion was changed.
+
+The mechanical adapter required by the imported `ADAPTER.md` is Software-owned at
+`tests/ops_adapter/`, deliberately outside the verifier oracle's directory. It
+**compiles clean** against the held PR #20 public header and then fails to link on
+six declared-but-undefined public symbols — `tape_seek`, `tape_arm`, `tape_feed`,
+`tape_service`, `tape_commit`, `tape_reset_side_b` — so no product observation for
+this tranche is obtainable from any engine that exists today. The adapter also does
+not compile against current main, whose public header predates the frozen DRAFT-8
+API. Diagnostic-only: raw evidence and the exact gaps are in
+[the run packet](verification/runs/2026-09-12/README.md) and
+[the P1-R1-SW return](REVIEW/returns/P1-R1-SW.md).
+
 ## Software execution — held implementation
 
 The unchanged probe was linked to the real public header and engine archive.
