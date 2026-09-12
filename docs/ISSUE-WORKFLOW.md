@@ -11,7 +11,7 @@ factual status. Do not keep a second current task list or per-round brief on mai
 |---|---|---|
 | Software Lead | `software-lead` | [Software](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asoftware-lead) |
 | Hardware Lead | `hardware-lead` | [Hardware](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead) |
-| Verification Lead | `verification-lead` | [Verification](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead) |
+| Verification Lead | `verification-lead` | [Verification](https://github.com/mmsanders/digital-tape-verification/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead) |
 | Surge | `surge` | [Surge](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asurge) |
 | Michael | `michael` | [Michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) |
 | PM | `pm` | [PM](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Apm) |
@@ -31,9 +31,10 @@ GitHub author identity do not expand the role's product authority.
    authoritative manifest, scope, dependencies, deliverables, checks/evidence,
    permissions/holds, next owner and stop condition. An immutable review link may
    provide evidence, but it must not substitute for the assignment body.
-4. Do not create another active copy of the same assignment. When superseding work,
-   close the old issue with reason and replacement link; carry forward completed
-   work and evidence. Historical reports are never fresh assignments.
+4. Do not create a no-work issue: an issue is an activation signal, not a round
+   attendance record. Do not create another active copy of the same assignment.
+   When superseding work, link the replacement and carry forward completed work
+   and evidence. Historical reports are never fresh assignments.
 5. PM/Michael scope changes must be explicit in the issue body and documented in a
    comment describing the change. A lead's progress report does not change scope.
    Unresolved conflicting instructions mean report a blocker, not choose a wider task.
@@ -61,10 +62,17 @@ fixtures and substantial reports remain versioned in the appropriate repository;
 link them from the return. Mark the comment Ready for PM review or Blocked and stop.
 Do not mark your own implementation independently accepted.
 
-PM records disposition and closes resolved assignments, or explicitly supersedes
-them. Michael may close his own resolved items. Waiting for review is not permission
-to rerun or start the next round. Issue closure, check success, merge and independent
-acceptance remain separate facts. Verification signs only its documented scope.
+After posting the return, the lead closes its own issue. Closure means only that the
+lead has stopped work on that bounded assignment; it does **not** mean the return is
+correct, merged, accepted or independently verified. A blocked return may also be
+closed once the blocker and next owner are explicit. Waiting for PM review is not
+permission to rerun or start another task.
+
+PM assesses the linked PRs, commits and evidence regardless of issue state. If a
+correction or next tranche is useful, PM opens a new role-labeled issue with fresh
+scope; PM does not use reopening as a substitute for a new assignment. Check success,
+merge, issue closure and independent acceptance remain separate facts. Verification
+signs only its documented scope. Michael closes his own resolved or superseded items.
 
 ## Activation and independence
 
@@ -84,7 +92,8 @@ Michael's purchase/physical/final-signature authority.
 At input main `d9bc6ebd10983711acade6d148895e78fd1a17e3`, P1-R1 work moved to
 [Software #41](https://github.com/mmsanders/Digital-Tape/issues/41),
 [Hardware #42](https://github.com/mmsanders/Digital-Tape/issues/42),
-[Verification #43](https://github.com/mmsanders/Digital-Tape/issues/43),
+[Verification #3](https://github.com/mmsanders/digital-tape-verification/issues/3)
+(which replaced the misrouted, closed Digital-Tape #43),
 [Michael #44](https://github.com/mmsanders/Digital-Tape/issues/44), and
 [PM #45](https://github.com/mmsanders/Digital-Tape/issues/45).
 [Surge #46](https://github.com/mmsanders/Digital-Tape/issues/46) is a closed

@@ -18,6 +18,9 @@ Each lead performs its own work; no subworkers. PM creates a new issue for each
 lead assigned useful work in a round, applying the appropriate role label.
 Not every lead must be assigned. Read open issues and their current scope updates,
 carry forward work already done, return evidence in the issue, and stop at its boundary.
+Do not open an issue for an idle lead. After returning, the lead closes its own issue;
+closure records that work stopped, not that the result is right. PM assesses the linked
+PR or commit and uses a new issue for any correction or next tranche.
 
 Michael configures issue listeners and notifies leads this transition round.
 Activation can also be manual. This plan does not install or verify a listener

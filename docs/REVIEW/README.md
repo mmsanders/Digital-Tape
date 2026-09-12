@@ -8,6 +8,9 @@ their live body/scope updates before acting; do not execute a historical review.
 
 - [P1-R1 PM review](P1-R1-PM-REVIEW.md): exact inputs, reproduced checks and findings
   from the Phase 1 kickoff. Its original work sequence is historical context.
+- [P1-R2 PM disposition](P1-R2-PM-DISPOSITION.md): assessment of verifier
+  `7ca2485`, Software PR #48 and Hardware PR #47, with preserved holds and the
+  exact next-import/card decisions.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

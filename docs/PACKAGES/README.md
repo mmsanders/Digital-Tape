@@ -21,7 +21,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
-| WP-05 | Parts order #1 | You | hardware | 64 GB cart withdrawn; cheap 4 GB V30 sourcing requested; every purchase needs Michael |
+| WP-05 | Parts order #1 | You | hardware | Michael selected a 2 × 64 GB V30 vs 2 × 32 GB U3 evaluation; no purchase or card qualification yet; exact SKU/revision/CID and independent evidence remain required |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
