@@ -100,3 +100,19 @@ this package supports operation acceptance. See [PM review](REVIEW/P1-R1-PM-REVI
 for reproducible gaps, source commitments and remaining coverage exclusions.
 The revised package needs a new immutable source, exact subsequent import and raw
 real-product observations independently dispositioned before expanding acceptance.
+
+## P1-R2 package disposition — 12 September 2026 UTC
+
+Verification resolved P1-R1-V01/V02/V03 and D01 in verifier main
+`7ca24853ed32ddd327461594a31021cba4a408f3`. The hardened source commit is
+`dcc4d7cdb357cf0b082071390c762c25b650f617`; the exact `tests/ops_draft8/` tree is
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`. PM reproduced its self-test and offline
+saved-evidence replay. The old tree `c8a43df...` in draft Software PR #48 remains
+authenticated historical diagnostic input but is superseded for integration.
+
+The hardened package is ready for an exact mechanical product import. That statement
+accepts neither an engine nor a product observation. No current engine links the six
+operations required by both cases, and no raw product VO08 result exists. Do not merge
+a mount split while the §5.5 all-slot running-sequence derivation stays unobservable,
+do not import uncovered allocator behavior to satisfy a link, and do not relax the
+new evidence contract. Active integration work, if any, is in the Software issue.

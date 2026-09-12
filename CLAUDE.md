@@ -105,8 +105,10 @@ default. No default overrides a structural or safety hold.
 
 On relevant merges update concise status: changes, next owner, blockers, independently
 accepted criteria and risks. Append decisions with rationale and reversal cost.
-Keep assignment issues bounded; close superseded ones with their replacement link.
-Record scope changes explicitly. Returning work or closing an issue is not acceptance.
+Keep assignment issues bounded and do not create issues for idle leads. Leads close
+their own issues after returning or blocking; PM assesses the linked PR/commit and
+opens a fresh issue for any correction or next tranche. Record scope changes
+explicitly. Returning work or closing an issue is not acceptance.
 
 ## 5. Hardware boundary
 
@@ -122,9 +124,12 @@ fields with the response author’s own sign-off. Media atomicity must be establ
 per exact card SKU/revision before qualification; paper review qualifies no card.
 A torn block is a blocker, not a firmware workaround.
 
-No 64 GB cards. Seek cheap 4 GB V30 first; micro/full-size are both acceptable.
-If that combination cannot be sourced, return documented alternatives and prices
-to Michael; do not silently substitute capacity or a weaker speed class.
+The original cheap 4 GB V30 search found no purchasable match. Michael has replaced
+the capacity proxy with a two-arm evaluation: two exact 64 GB V30 cards and two exact
+32 GB U3 cards. U3 is an experiment, not a speed-class substitution or qualification.
+Every purchase still needs Michael's approval, and every result remains bound to the
+exact SKU, revision and CID. No media is qualified without the independent sustained-
+write and atomicity evidence required by WP-05.
 
 ## 6. Implementation boundaries retained from the charter
 

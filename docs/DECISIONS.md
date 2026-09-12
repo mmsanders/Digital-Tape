@@ -1895,3 +1895,36 @@ The retired signaling bus, dashboard, controller and worker pool stay retired.
 **Rationale:** one editable assignment record prevents main briefs and issue copies
 from drifting. **Cost to reverse:** explicitly migrate open assignments and update
 charters; preserve linked returns and never reactivate old directions by inference.
+
+## ADR-136 — Disposition P1-R1 returns, narrow the card study, and make lead closure terminal
+
+**Date:** 2026-09-12 UTC · **Owner:** PM recording Michael's workflow/card decisions
+and PM's technical disposition
+
+Review verifier `7ca24853ed32ddd327461594a31021cba4a408f3`, Software PR #48 at
+`c4bd824bdf2bf7ceef9d497ec183ec155a9b45ba`, and Hardware PR #47 at
+`74a9c2bf7a0cff4f449aedb3b63daa5771bb7e2a`. The hardened verifier tree
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263` resolves P1-R1-V01/V02/V03 and
+D01 in independent source and is the only next VT8 import. This is package readiness,
+not a product observation or acceptance. The old Software import must be updated.
+
+Keep all engine code held. In particular, do not merge the proposed mount split while
+§5.5 cartridge-sequence derivation is unobservable, and do not pull uncovered allocator
+functions onto main to satisfy the link. Do not upgrade the public header alone or
+implement six general operations from two narrow cases. Verification's next useful
+dependency is an independent playback/golden tranche.
+
+Michael clarified that the earlier 64 GB exclusion was a cost proxy. Replace the
+six-SKU plan with two exact comparison arms: 2 × `SDHFSBC064G` (64 GB V30) and
+2 × `HTF032G3U3` (32 GB U3). U3 remains an experiment rather than an equivalence;
+two cards are a consistency screen rather than qualification. Michael still approves
+the order and reader. Atomicity and every hardware/safety gate remain unchanged.
+
+Issue closure now belongs to the lead after a returned or explicit blocked result.
+Closure means only that the lead stopped work. PM assesses the linked PR/commit and
+opens a new issue for corrections or the next tranche; no issue is created for an
+idle lead. Verification work is routed to `digital-tape-verification`, not the product
+repository. The retired signaling system remains retired.
+
+**Cost to reverse:** publish a new bounded PM decision and update WP-05/role routing;
+do not reinterpret closed issues, old card quotes or superseded test trees as authority.

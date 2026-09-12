@@ -14,8 +14,8 @@ A role label, a green run or a closed issue grants no broader acceptance.
 
 ## Assignment source and every activation
 
-Current work directions live only in open Digital-Tape issues labeled
-`verification-lead`: [role queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead).
+Current work directions live only in open `digital-tape-verification` issues labeled
+`verification-lead`: [role queue](https://github.com/mmsanders/digital-tape-verification/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead).
 Read [the issue workflow](../ISSUE-WORKFLOW.md). A notification is a wake-up to
 read the current issue, not permission to execute a stale event payload. Closed,
 superseded, completed or blocked work is not a fresh assignment.
@@ -30,6 +30,8 @@ Do only the issue's bounded assignment. Comment when starting, report dependenci
 or access failures, and post an evidence-linked return at the stop condition.
 Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
 completed work on another notification. Issue closure is not package acceptance.
+After returning or explicitly blocking, close your own issue; PM reviews the linked
+commit/evidence and uses a new issue for corrections or the next tranche.
 
 Michael configures listener/activation tools and will notify leads this transition
 round. Manual resumption also works. No listener is implemented or claimed active

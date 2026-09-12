@@ -29,6 +29,9 @@ Do only the issue's bounded assignment. Comment when starting, report dependenci
 or access failures, and post an evidence-linked return at the stop condition.
 Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
 completed work on another notification. Issue closure is not package acceptance.
+Assess lead returns from their linked PRs/commits even though leads close their own
+issues. Open no issue for an idle lead; use a fresh issue for each useful correction
+or next tranche. Close your own PM issue after posting its disposition.
 
 Michael configures listener/activation tools and will notify leads this transition
 round. Manual resumption also works. No listener is implemented or claimed active
