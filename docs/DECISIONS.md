@@ -1958,3 +1958,32 @@ card qualification, purchases, physical evidence and safety holds remain unchang
 **Rationale and evidence:** [P1-R3 PM disposition](REVIEW/P1-R3-PM-DISPOSITION.md).
 **Cost to reverse:** supersede through a fresh bounded PM issue and preserve exact
 source/run provenance; do not relabel synthetic integration as acceptance.
+
+## ADR-138 — Publish a read-only issue queue and hold playback import on evidence identity
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R4 Pages authorization
+
+Replace the old GitHub Pages retirement/agent-dashboard page with a simplified
+read-only lead queue derived from open role-labeled issues. The page displays queue
+state only: it does not observe chat activity, wake leads, assign work, judge returns
+or grant acceptance. Its complete pagination, pull-request exclusion, dual-repository
+routing, escaping and failed-refresh behavior have retained tests. Deploy a single
+HTML artifact through the existing `github-pages` environment from `main`, the only
+branch its protection policy allows. Do not alter or bypass that policy.
+
+Record Hardware PR #54 as integrated at
+`20aa6bbcf886d8f87b4e34c4af4afb0c091703fc`. The targeted supply-envelope control
+is retained and proven able to go red; the real fabrication gate remains CLOSED with
+five blockers and no safety or part acceptance follows.
+
+Hold Verification issue #4's playback package from import. Although deterministic
+fixture generation, self-tests and synthetic replay pass, offline replay accepts a
+manifest-only synthetic-to-product/adapter-ID relabel, does not bind adapter exit,
+and the runner replaces existing evidence destinations. Verification #5 must bind
+identity and exit, preserve prior evidence and retain negative controls without
+changing candidate PCM or consulting implementation.
+
+**Rationale and evidence:** [P1-R4 PM disposition](REVIEW/P1-R4-PM-DISPOSITION.md).
+**Cost to reverse:** remove the dashboard-only source/workflow and redeploy a static
+page through the allowed branch; supersede the playback hold only with corrected,
+immutable verifier evidence and a fresh PM disposition.

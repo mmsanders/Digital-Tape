@@ -82,8 +82,9 @@ signs only its documented scope. Michael closes his own resolved or superseded i
 
 Michael configures external listeners and will notify leads for this migration.
 This repository change does not install listeners, guarantee delivery or claim a
-chat has awakened. No automatic approval, delegation, old signaling bus, dashboard,
-controller or subordinate worker is restored.
+chat has awakened. The read-only Pages lead queue reports open issues only. No
+automatic approval, delegation, old signaling bus, activity dashboard, controller
+or subordinate worker is restored.
 
 Keep Verification issues free of uncovered implementation source/private tests and
 mixed implementation discussion. Link raw observations and verifier-owned sources;

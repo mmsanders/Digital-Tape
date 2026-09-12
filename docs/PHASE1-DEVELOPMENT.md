@@ -24,7 +24,9 @@ PR or commit and uses a new issue for any correction or next tranche.
 
 Michael configures issue listeners and notifies leads this transition round.
 Activation can also be manual. This plan does not install or verify a listener
-and does not restore the archived controller, signaling bus or dashboard.
+and does not restore the archived controller, signaling bus or agent-activity
+dashboard. The separate read-only lead queue displays open role-labeled issues only;
+it cannot wake leads, issue work, monitor chats or grant acceptance.
 Notifications are prompts to inspect live issue state, not new product authority.
 
 Main remains authoritative for product spec, charters, decisions and evidence.

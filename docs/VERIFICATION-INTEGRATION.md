@@ -136,3 +136,20 @@ operations required by both cases, and no raw product VO08 result exists. Do not
 a mount split while the §5.5 all-slot running-sequence derivation stays unobservable,
 do not import uncovered allocator behavior to satisfy a link, and do not relax the
 new evidence contract. Active integration work, if any, is in the Software issue.
+
+## P1-R4 playback-package disposition — 12 September 2026 UTC
+
+Verification issue #4 published the first independently derived three-family
+playback package at verifier main
+`48be424c5b5959c6e87c645a49ecc33a7026a30a`, tree
+`c6c1418a016220cca216eeb42f782a09556d6020`. It covers forward 1.0x, seek boundary
+first-frame behavior and exact -1.0x reverse-from-end candidate PCM. Deterministic
+fixture regeneration, package self-tests and 3/3 saved synthetic replay reproduce.
+
+PM found that changing only the saved manifest's adapter kind from synthetic to
+product and its adapter ID still replays PASS while the observation retains the
+original synthetic identity. Replay also ignores the recorded adapter exit, and the
+runner deletes an existing evidence destination. Verification #5 owns the bounded
+identity, exit, timeout and evidence-retention correction. Do not import this package
+until that corrected exact source is dispositioned. Candidate PCM remains unlistened
+and unaccepted; no product engine has run it and no WP-08/WP-11 acceptance follows.

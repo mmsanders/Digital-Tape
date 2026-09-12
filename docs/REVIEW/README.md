@@ -14,6 +14,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R3 PM disposition](P1-R3-PM-DISPOSITION.md): authentication of the merged
   exact verifier import, explicit real-engine exclusions, and the retained Hardware
   negative-control correction.
+- [P1-R4 PM disposition](P1-R4-PM-DISPOSITION.md): Hardware-control integration,
+  the first playback-package hold/correction, and publication of the read-only Pages
+  lead queue.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
