@@ -118,11 +118,18 @@ packet-duplicates:
 ## table, a fresh file and a GREEN gate -- and hardware.yml never ran it at all.
 ## The headline red case is the previous working point (5.0 W / 15 ms / 450 ms),
 ## which the old model called a 1.14x pass and the corrected model rejects twice.
+## P1-R3-HW: the supply-envelope criterion added by PR #47 now has its OWN
+## retained control and its OWN targeted mutation. The generic --mutate below
+## replaces check_criteria wholesale, so it proves the suite notices a dead
+## gate -- not that one particular inequality is still alive. Deleting those
+## four lines would otherwise have been a silent green regression.
 solenoid-test:
 	@cd $(THERMAL) && $(PY) test_solenoid.py >/dev/null \
-	  && echo "OK  solenoid criteria: 24 checks pass, incl. the old point and the handoff race"
+	  && echo "OK  solenoid criteria: 30 checks pass, incl. the old point and the handoff race"
 	@cd $(THERMAL) && $(PY) test_solenoid.py --mutate >/dev/null \
 	  && echo "OK  solenoid criteria: proven able to go red"
+	@cd $(THERMAL) && $(PY) test_solenoid.py --mutate-supply >/dev/null \
+	  && echo "OK  supply-envelope criterion: deleting it specifically turns the suite red"
 
 ## fabrication-gate — may a board be fabricated or a cell charged?
 ##
