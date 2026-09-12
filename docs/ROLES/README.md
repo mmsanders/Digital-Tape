@@ -9,10 +9,11 @@ Michael assigns roles; opening this index or receiving a label event grants no r
 | PM | ChatGPT Work / Astra | [PM](pm.md) | pm |
 | Software | Claude Code / Opus | [Software](software.md) | software-lead |
 | Hardware | Separate Claude Code / Opus | [Hardware](hardware.md) | hardware-lead |
-| Verification | Separate Work / Sol | [Verification](verification.md) | verification-lead |
+| Verification | Separate Work / Sol | [Verification](verification.md) | verification-lead in `digital-tape-verification` |
 | Surge | Grok | [Surge](surge.md) | surge |
 | Michael | Human reserved decisions | [Queue locator](../FOR-MICHAEL.md) | michael |
 
 [Issue workflow and queue links](../ISSUE-WORKFLOW.md) define assignment, return and
 closure. Michael configures listeners separately and will notify leads during the
 migration. Leads do their own work, no subworkers; unassigned leads need not act.
+Leads close their own returned/blocked issues. Closure is a stop marker, not acceptance.

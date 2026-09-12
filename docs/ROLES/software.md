@@ -27,6 +27,8 @@ Do only the issue's bounded assignment. Comment when starting, report dependenci
 or access failures, and post an evidence-linked return at the stop condition.
 Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
 completed work on another notification. Issue closure is not package acceptance.
+After returning or explicitly blocking, close your own issue; PM reviews the linked
+PR/evidence and uses a new issue for corrections or the next tranche.
 
 Michael configures listener/activation tools and will notify leads this transition
 round. Manual resumption also works. No listener is implemented or claimed active

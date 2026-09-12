@@ -1,15 +1,17 @@
 # Project status
 
-**Updated: 12 September 2026 UTC · Owner: PM · Phase 1 P1-R1 kicked off; scoped Phase 0 freeze unchanged.**
+**Updated: 12 September 2026 UTC · Owner: PM · P1-R1 returns dispositioned; P1-R2 issue round starts; scoped Phase 0 freeze unchanged.**
 
-## Kickoff checkpoint (assignments live in issues)
+## Current checkpoint (assignments live in issues)
 
 [P1-R1 review and disposition](REVIEW/P1-R1-PM-REVIEW.md) records Verification's
 return at `689c41909e6bbec499aeb0243008222d7a1c9f64` and PM reproduction.
 The recorded after-run is independently green for all 289 mount assertions only.
-Two new operation cases are ready for diagnostic import, but review found
-flush-order, illegal-I/O detection and raw-media retention gaps (P1-R1-V01–V03).
-No product operation run or broader package acceptance has occurred.
+Verification resolved the flush-order, whole-trace and raw-media/replay findings in
+verifier main `7ca24853ed32ddd327461594a31021cba4a408f3`; the hardened source tree is
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`. It is ready for exact import, but no
+product operation run or broader package acceptance has occurred. See the
+[P1-R2 disposition](REVIEW/P1-R2-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -32,12 +34,12 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | Work | State | Next owner |
 |---|---|---|
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
-| VT8-001 / WP-07 | Two verifier-authored operation cases at a91138667673fcf19dc9e83c9034322b982b1771; synthetic self-tests only. Baseline has P1-R1-V01–V03 gaps; no product acceptance. | Software / Verification; see current issues |
+| VT8-001 / WP-07 | Hardened verifier tree `4a862fa...` resolves V01–V03 in package source and replay; Software PR #48 still carries the superseded baseline; no real product observation or product acceptance | Software; see current issue |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
-| Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware / independent Verification; see current issues |
+| WP-11 | Runner present; independent playback/golden tranche remains outstanding; golden CI stays red | Verification, then Michael listens |
+| Hardware | PR #47 binds the proposed one-shot part and indexes gaps; timing stays PROVISIONAL and fabrication/charging stay CLOSED | Await exact dependencies; no Hardware issue this round |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael / Hardware; see current issues |
+| WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
 
 **New independent package acceptances: none.** Software's mount observations now
 have Verification's narrow independent disposition, reproduced by PM. That is not
