@@ -1987,3 +1987,32 @@ changing candidate PCM or consulting implementation.
 **Cost to reverse:** remove the dashboard-only source/workflow and redeploy a static
 page through the allowed branch; supersede the playback hold only with corrected,
 immutable verifier evidence and a fresh PM disposition.
+
+## ADR-139 — Authenticate corrected playback evidence and continue laptop work
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R5 activation
+
+Authenticate Verification's corrected playback publication at
+`7a22cbb4447c40c51b7c8b2282a685ed30a46ba6`. The corrected source commit/tree is
+`d565403907ecea331a5dcf63efbd1c08d8bd732e` /
+`aaa6dde86c9a0bdffa2b375361049ac670e26467`; the full subtree with saved evidence is
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`. PM reproduced generation, all verifier
+checks and offline replay, including controls for the prior identity/exit/retention
+findings. The package is ready for exact import, but its run is synthetic and grants
+no PCM, product-engine, WP-08 or WP-11 acceptance.
+
+Michael #49 does not block the next laptop tranche. Issue Software #59 for exact
+import, mechanical product-adapter plumbing and a no-stub diagnostic/split return.
+Issue independent Verification #6 in the verifier repository for zero/one/extreme
+rates, the issued ramp and both side-switch transitions. Hardware and Surge receive
+no issue. Defer Michael listening until product-generated PCM exists; his print/card
+work still gates physical qualification, while protection/cleanup remain process
+risk rather than a technical prerequisite for these two tasks.
+
+PR #20 remains held. No implementation merge, test weakening, synthetic relabel,
+candidate-golden acceptance, purchase, card qualification, fabrication, charging or
+frozen-spec change follows. Closure means the assignee stopped, not acceptance.
+
+**Rationale and evidence:** [P1-R5 PM disposition](REVIEW/P1-R5-PM-DISPOSITION.md).
+**Cost to reverse:** supersede the role issues and preserve the authenticated package
+and evidence history; do not erase controls or reinterpret synthetic output.

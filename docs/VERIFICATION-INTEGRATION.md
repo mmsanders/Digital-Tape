@@ -149,7 +149,33 @@ fixture regeneration, package self-tests and 3/3 saved synthetic replay reproduc
 PM found that changing only the saved manifest's adapter kind from synthetic to
 product and its adapter ID still replays PASS while the observation retains the
 original synthetic identity. Replay also ignores the recorded adapter exit, and the
-runner deletes an existing evidence destination. Verification #5 owns the bounded
-identity, exit, timeout and evidence-retention correction. Do not import this package
-until that corrected exact source is dispositioned. Candidate PCM remains unlistened
-and unaccepted; no product engine has run it and no WP-08/WP-11 acceptance follows.
+runner deletes an existing evidence destination. Verification #5 then owned the
+bounded identity, exit, timeout and evidence-retention correction, so import remained
+held at this P1-R4 checkpoint. The corrected disposition follows. Candidate PCM
+remains unlistened and unaccepted; no product engine has run it and no WP-08/WP-11
+acceptance follows.
+
+## P1-R5 corrected playback-package disposition — 12 September 2026 UTC
+
+Verification #5 published the corrected source at
+`d565403907ecea331a5dcf63efbd1c08d8bd732e`, pre-evidence
+`tests/playback_draft8/` tree `aaa6dde86c9a0bdffa2b375361049ac670e26467`.
+Verifier main `7a22cbb4447c40c51b7c8b2282a685ed30a46ba6` adds the retained P1-R4
+synthetic evidence and return; its complete playback subtree is
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`.
+
+PM reproduced deterministic generation, playback self-tests, the full verifier
+suite and saved 3/3 offline replay. The corrected evidence schema binds manifest and
+observation adapter kind/ID, source/build declarations, a retained zero-exit record,
+complete file hashes and verifier source identity. Negative controls catch the prior
+manifest-only relabel and ID mismatch plus missing provenance/exit/evidence, nonzero
+exit, bounded timeout, tampering and verifier drift. A nonempty evidence destination
+is rejected before writes and its existing sentinel bytes survive.
+
+This package is ready for an exact mechanical import from the complete published
+tree. It is not a product execution or independent acceptance of PCM or engine
+behavior. Software #59 owns the import and no-stub product-adapter diagnostic;
+Verification #6 independently owns the next playback boundary/ramp/side-switch
+tranche. Human listening remains a separate Michael assignment only after product
+PCM evidence exists. PR #20 and every remaining coverage, hardware and safety hold
+stay in force.

@@ -17,6 +17,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R4 PM disposition](P1-R4-PM-DISPOSITION.md): Hardware-control integration,
   the first playback-package hold/correction, and publication of the read-only Pages
   lead queue.
+- [P1-R5 PM disposition](P1-R5-PM-DISPOSITION.md): authentication of the corrected
+  playback evidence, Michael dependency decision, and bounded Software/Verification
+  continuation.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

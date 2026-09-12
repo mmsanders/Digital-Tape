@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 12 September 2026 UTC · Owner: PM · P1-R4 dashboard published; Hardware control integrated; Verification correction active; scoped Phase 0 freeze unchanged.**
+**Updated: 12 September 2026 UTC · Owner: PM · P1-R5 corrected playback package authenticated; laptop integration and next independent tranche active; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -13,12 +13,14 @@ verifier main `7ca24853ed32ddd327461594a31021cba4a408f3`; the hardened source tr
 main through PR #48. Its self-tests pass, but it has not run against the real engine:
 six operations remain undefined, so no product observation or broader package
 acceptance has occurred. See the [P1-R3 disposition](REVIEW/P1-R3-PM-DISPOSITION.md).
-Verification has also published a first three-family playback package at verifier
-`48be424c5b5959c6e87c645a49ecc33a7026a30a`, tree
-`c6c1418a016220cca216eeb42f782a09556d6020`. Its synthetic checks pass, but replay
-does not yet bind the recorded adapter identity/exit and the runner replaces an
-existing evidence directory. Verification #5 owns that correction; no import,
-product run, listening approval or acceptance follows yet.
+Verification corrected the first three-family playback package at verifier
+`7a22cbb4447c40c51b7c8b2282a685ed30a46ba6`. Its source commit/tree is
+`d565403907ecea331a5dcf63efbd1c08d8bd732e` /
+`aaa6dde86c9a0bdffa2b375361049ac670e26467`; the complete published subtree with
+saved synthetic evidence is `ff810814dbc8079c6903e6f85ed7ee312abd3076`.
+PM reproduced its corrected identity, exit, timeout, tamper and retention controls.
+It is ready for exact mechanical import, not a product run, listening approval or
+PCM/WP-08/WP-11 acceptance. See the [P1-R5 disposition](REVIEW/P1-R5-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -56,7 +58,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Verification #4 remains active; no Software issue |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | First three-family playback package is published independently, but its replay identity/evidence-retention correction remains open; candidate PCM is not listened to or accepted and golden CI stays red | Verification #5, then PM; Michael listening only after corrected import/product evidence is separately issued |
+| WP-11 | Corrected first three-family package is authenticated and ready for exact import; candidate PCM is still synthetic-only, unlistened and unaccepted, and golden CI stays red | Software #59 import/product diagnostic; Michael listening only after product PCM evidence is separately issued |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -73,12 +75,13 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R4 validation reproduced the Hardware 30-check suite and its targeted deletion
-control; the real fabrication gate stayed CLOSED at exit 2 with five blockers.
-Verification playback regeneration, self-tests and saved synthetic replay pass, but
-PM's manifest-only relabel reproducer still passes incorrectly and is assigned in
-Verification #5. Dashboard behavior tests cover pagination, PR exclusion, both issue
-repositories, escaping and failed-refresh handling; Pages deployment is green.
+P1-R5 validation reproduced playback regeneration, the full verifier suite and saved
+synthetic replay. The corrected package now rejects manifest-only identity changes,
+missing/nonzero exit, timeout, missing/tampered evidence and verifier-source drift;
+the nonempty-destination control preserves existing bytes. Software #59 owns exact
+import/product diagnosis and Verification #6 owns the next independent playback
+boundary tranche. Michael #49 is not blocking those laptop tasks. Dashboard behavior
+tests and deployment remain unchanged and green.
 
 ## Phase 1 operating format — 11 September
 
