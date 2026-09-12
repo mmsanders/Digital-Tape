@@ -2,7 +2,9 @@
 
 **Updated: 12 September 2026 · Owner: PM disposition of Hardware return.**
 
-PR #18 is merged. Current hardware revisions/hashes are in spec/hw/VERSION.md.
+PR #18 is merged. PR #47 is merged at
+`8d9e8bdffc245d797702a2b3a461348672b0644a`. Current hardware revisions/hashes
+are in spec/hw/VERSION.md.
 WP04-01 rev 5 contains 19 objects, four lids, deliberate blind controls, and an
 explicit SUPPORTS OFF card. CAD rebuild/geometry, printable-packet/thermal/atomicity
 tooling, and KiCad workflow jobs passed at 218b3b123781064c32b234f44dc165ccc5c72fa5.
@@ -11,7 +13,7 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Area | Evidence | Remaining work |
 |---|---|---|
 | Fabrication gate | Regression reproduced; the real gate remains **CLOSED/nonzero with five blockers** | No board fabrication or cell charging |
-| Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL** and rejects an out-of-envelope negative control | IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
+| Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL**. A one-off out-of-envelope mutation is rejected, but no retained targeted automated control pins that criterion | Add the retained negative control; IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | Rev-5 plate reported printing, not yet in hand; results card remains blank | Printed fit, retention, creep/drop and independent measurement audit |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
@@ -19,7 +21,9 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
-claimed as passing there.
+claimed as passing there. The supply-envelope inequality also failed the one-off
+mutation, but the generic fail-open test would not detect deletion of that exact
+criterion; a targeted retained negative control remains required.
 Run make -C hardware fabrication-gate before any fabrication/charging decision.
 Five blockers currently remain. Green regression/thermal checks are not qualification.
 

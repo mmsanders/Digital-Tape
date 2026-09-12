@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 12 September 2026 UTC · Owner: PM · P1-R1 returns dispositioned; P1-R2 issue round starts; scoped Phase 0 freeze unchanged.**
+**Updated: 12 September 2026 UTC · Owner: PM · P1-R2 Software integration dispositioned; Verification and Michael work remain active; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -8,10 +8,11 @@
 return at `689c41909e6bbec499aeb0243008222d7a1c9f64` and PM reproduction.
 The recorded after-run is independently green for all 289 mount assertions only.
 Verification resolved the flush-order, whole-trace and raw-media/replay findings in
-verifier main `7ca24853ed32ddd327461594a31021cba4a408f3`; the hardened source tree is
-`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`. It is ready for exact import, but no
-product operation run or broader package acceptance has occurred. See the
-[P1-R2 disposition](REVIEW/P1-R2-PM-DISPOSITION.md).
+verifier main `7ca24853ed32ddd327461594a31021cba4a408f3`; the hardened source tree
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263` is integrated byte-for-byte on product
+main through PR #48. Its self-tests pass, but it has not run against the real engine:
+six operations remain undefined, so no product observation or broader package
+acceptance has occurred. See the [P1-R3 disposition](REVIEW/P1-R3-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -28,16 +29,22 @@ directions. The kickoff granted no engine merge or broader acceptance.
   Hardware CI passed all three jobs. This is engineering work, not safety qualification.
 - Cleanup **#28** merged: current authority, question queue and role briefs replace stale round instructions.
   [Freeze record](PHASE0-FREEZE.md) records Michael’s signed scope and remaining holds.
+- Hardware **#47** merged at `8d9e8bdffc245d797702a2b3a461348672b0644a`.
+  It binds the proposed one-shot part and indexes remaining qualification gaps;
+  timing remains provisional and all fabrication/charging holds remain.
+- Software **#48** merged at `5b0f891222a68848a7c94282f335368c256f902a`.
+  The exact hardened verifier tree and synthetic self-check CI are integrated;
+  this is integration evidence, not a real-engine run or acceptance.
 
 ## Held and next owner
 
 | Work | State | Next owner |
 |---|---|---|
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
-| VT8-001 / WP-07 | Hardened verifier tree `4a862fa...` resolves V01–V03 in package source and replay; Software PR #48 still carries the superseded baseline; no real product observation or product acceptance | Software; see current issue |
+| VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Verification #4 remains active; no Software issue |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; independent playback/golden tranche remains outstanding; golden CI stays red | Verification, then Michael listens |
-| Hardware | PR #47 binds the proposed one-shot part and indexes gaps; timing stays PROVISIONAL and fabrication/charging stay CLOSED | Await exact dependencies; no Hardware issue this round |
+| Hardware | PR #47 is integrated; timing stays PROVISIONAL and fabrication/charging stay CLOSED. The supply-envelope inequality works, but lacks a retained targeted automated negative control | Hardware correction issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
 

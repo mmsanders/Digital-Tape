@@ -23,19 +23,23 @@ GitHub author identity do not expand the role's product authority.
 
 ## PM issues the round
 
-1. Decide useful bounded work and dependencies. Not every lead needs a task.
-2. Create a new issue per assigned lead for that round, with the complete directions
+1. On Michael's explicit activation of a new PM round, create or refresh one open
+   `pm`-labeled issue before acting. Record exact inputs, authority, bounded task,
+   dependencies, holds and stop condition; post Started and final return comments,
+   then close it at stop. Without that activation or an eligible PM issue, stop.
+2. Decide useful bounded work and dependencies. Not every lead needs a task.
+3. Create a new issue per assigned lead for that round, with the complete directions
    in its body and its role label. Use a title such as
    `[P1-R2-SW] Software Lead — <bounded outcome>`.
-3. Include issuer/role, round and task ID, exact input commits/spec hashes or
+4. Include issuer/role, round and task ID, exact input commits/spec hashes or
    authoritative manifest, scope, dependencies, deliverables, checks/evidence,
    permissions/holds, next owner and stop condition. An immutable review link may
    provide evidence, but it must not substitute for the assignment body.
-4. Do not create a no-work issue: an issue is an activation signal, not a round
+5. Do not create a no-work issue: an issue is an activation signal, not a round
    attendance record. Do not create another active copy of the same assignment.
    When superseding work, link the replacement and carry forward completed work
    and evidence. Historical reports are never fresh assignments.
-5. PM/Michael scope changes must be explicit in the issue body and documented in a
+6. PM/Michael scope changes must be explicit in the issue body and documented in a
    comment describing the change. A lead's progress report does not change scope.
    Unresolved conflicting instructions mean report a blocker, not choose a wider task.
 

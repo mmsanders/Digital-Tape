@@ -1928,3 +1928,33 @@ repository. The retired signaling system remains retired.
 
 **Cost to reverse:** publish a new bounded PM decision and update WP-05/role routing;
 do not reinterpret closed issues, old card quotes or superseded test trees as authority.
+
+## ADR-137 — Authenticate merged VT8 import and retain exact control coverage
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R3 activation
+
+At product main `5b0f891222a68848a7c94282f335368c256f902a`, authenticate that
+Software PR #48 integrated the exact independent `tests/ops_draft8` tree
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`, including file modes. Its synthetic
+self-checks pass, but the adapter has not run against the product engine and six
+operations remain undefined. This is import/integration evidence only: it grants
+no product observation, engine merge, package acceptance or independent sign-off.
+
+Hardware PR #47 is integrated, and the added supply-envelope inequality rejects a
+one-off mutation. Require one retained targeted automated negative control because
+the current generic fail-open mutation would survive deletion of that exact
+criterion. This is a narrow evidence-hardening correction; timing remains
+PROVISIONAL and fabrication/charging stay CLOSED.
+
+Michael also directed PM to update its own issue every round. On an explicit
+Michael activation, PM creates or refreshes one `pm`-labeled issue before acting,
+posts the exact start and return, then closes it at stop. This does not authorize a
+listener, recurring self-assignment or stale-notification replay.
+
+Independent Verification #4 and Michael #49 remain active. Software and Surge are
+idle for this round and receive no issue. Frozen hashes, WP-11 red, draft PR #20,
+card qualification, purchases, physical evidence and safety holds remain unchanged.
+
+**Rationale and evidence:** [P1-R3 PM disposition](REVIEW/P1-R3-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue and preserve exact
+source/run provenance; do not relabel synthetic integration as acceptance.

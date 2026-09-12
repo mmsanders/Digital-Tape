@@ -95,6 +95,10 @@ durable decisions/evidence to main and publishes complete round work directions
 in a new role-labeled issue for each assigned lead. No duplicate current briefs on
 main; Michael need not paste files. Follow [the issue workflow](docs/ISSUE-WORKFLOW.md).
 A stale notification, closed issue or old review does not authorize work.
+When Michael explicitly starts a new PM round, PM first creates or refreshes one
+open `pm`-labeled issue with the exact input, authority, bounded task, dependencies,
+holds and stop condition. PM posts its start and return there and closes the issue
+at stop. This is not recurring self-assignment.
 
 Escalate product-spec changes, engine dependencies, added physical controls,
 acceptance misses >20%, inconvenient guardrails, and a stream held >3 days to PM.

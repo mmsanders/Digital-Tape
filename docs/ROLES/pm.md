@@ -18,6 +18,8 @@ Current work directions live only in open Digital-Tape issues labeled
 Read [the issue workflow](../ISSUE-WORKFLOW.md). A notification is a wake-up to
 read the current issue, not permission to execute a stale event payload. Closed,
 superseded, completed or blocked work is not a fresh assignment.
+Michael's explicit new-round activation authorizes PM to create one fresh
+`pm`-labeled issue before acting; it does not authorize recurring self-assignment.
 
 Fetch main and record its commit. Read AGENTS.md, CLAUDE.md in full,
 docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/STATUS.md,
@@ -47,6 +49,8 @@ and required onboarding documents. Find your current open issue labeled
 `pm`, read its live body and scope updates, and report the input main
 commit, issue number, authority, bounded task, stop condition and missing access.
 Perform only that issue's authorized work directly, with no subworkers. If no
-eligible issue exists, report unassigned and stop. Do not infer new work or
+eligible issue exists and Michael has not explicitly started a new PM round, report
+unassigned and stop. On explicit activation, create or update the PM issue before
+acting. Do not infer new work or
 acceptance from historical instructions. Preserve independent Verification and
 all product holds. Return results in the issue with immutable evidence links.

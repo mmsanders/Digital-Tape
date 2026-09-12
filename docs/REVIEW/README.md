@@ -11,6 +11,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R2 PM disposition](P1-R2-PM-DISPOSITION.md): assessment of verifier
   `7ca2485`, Software PR #48 and Hardware PR #47, with preserved holds and the
   exact next-import/card decisions.
+- [P1-R3 PM disposition](P1-R3-PM-DISPOSITION.md): authentication of the merged
+  exact verifier import, explicit real-engine exclusions, and the retained Hardware
+  negative-control correction.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

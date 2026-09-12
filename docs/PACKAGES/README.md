@@ -32,7 +32,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; full package and uncovered #20 behavior remain held; active work is assigned in issues |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Two VT8 operation cases published, synthetic only; P1-R1-V01–V03 remain open; no full acceptance; see current issues for assignments |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
