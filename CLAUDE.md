@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 11 September 2026.** Applies to every lead, regardless of model
+**Current agreement: 12 September 2026 UTC.** Applies to every lead, regardless of model
 or app. Revisions/hashes live in spec/VERSION.md; gate state in docs/PHASE0-FREEZE.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
 charters and Michael’s latest PM instructions; historical rationale remains in
@@ -37,7 +37,7 @@ control: a gate that never goes red has not established what it detects.
 | Role | Owns | Boundary |
 |---|---|---|
 | Michael | Vision, taste, final format-freeze sign-off, physical work, wallet | No routine code review or engineering-default decisions required. Every purchase needs his approval. |
-| PM | Product spec, roadmap, phase gates, scope, cross-stream decisions, risk, current briefs | May commit PM docs/spec directly. Does not implement/review/merge product code in the normal role or supply independent acceptance. |
+| PM | Product spec, roadmap, phase gates, scope, cross-stream decisions, risk, assignment issues | May commit PM docs/spec directly. Does not implement/review/merge product code in the normal role or supply independent acceptance. |
 | Software Lead | Repo integration, software implementation, CI, reviews/merges; streams 1/3/4/5 | Does not author product spec or accept its own work. Mechanically integrates issued spec and verifier tests. |
 | Hardware Lead | hardware/, spec/hw/, mechanics, sourcing, characterization, thermal design | Does not change engine/ or firmware/; cannot accept its own safety response or spend Michael’s money. |
 | Verification Lead | Stream 2, independent review, tests/oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
@@ -47,7 +47,8 @@ Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Prefer short scoped rounds and capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
-No automatic reviewer/watch loop is enabled by this agreement.
+Michael may configure issue listeners for lead activation. This agreement does not
+install a listener or enable automatic acceptance, review or merge.
 
 **Expired freeze exception:** Michael granted one actor PM + Software + Hardware authority
 for this Phase 0 push, including writes and merges. Verification, wallet, physical
@@ -87,20 +88,25 @@ use it. Untested engine review requires PM escalation and preserves blindness.
 
 ## 4. Rounds, decisions and scope changes
 
-Every round: fetch refs → read and surface Michael’s questions → read STATUS and
-the current REVIEW brief → work the bounded assignment. Answered questions stay
-answered; unrelated safe work need not wait. PM commits dispositions and next-round
-instructions directly. Leads read main; Michael need not paste repeated directions.
+Every activation: fetch refs → read Michael's open issue queue → read STATUS and
+the live assignment issue/body/scope updates → work only that bounded assignment.
+Answered questions stay answered; unrelated safe work need not wait. PM commits
+durable decisions/evidence to main and publishes complete round work directions
+in a new role-labeled issue for each assigned lead. No duplicate current briefs on
+main; Michael need not paste files. Follow [the issue workflow](docs/ISSUE-WORKFLOW.md).
+A stale notification, closed issue or old review does not authorize work.
 
 Escalate product-spec changes, engine dependencies, added physical controls,
 acceptance misses >20%, inconvenient guardrails, and a stream held >3 days to PM.
-Use a pm-decision issue for technical arbitration; FOR-MICHAEL is for taste, hands,
-purchases and his reserved decisions. Include evidence, recommendation and a safe
+Use an issue labeled pm for technical arbitration; issues labeled michael carry
+taste, hands, purchases and reserved decisions. FOR-MICHAEL is only a queue locator
+and settled-decision reference. Include evidence, recommendation and a safe
 default. No default overrides a structural or safety hold.
 
 On relevant merges update concise status: changes, next owner, blockers, independently
 accepted criteria and risks. Append decisions with rationale and reversal cost.
-Keep active briefs short; archive superseded rounds with a historical label.
+Keep assignment issues bounded; close superseded ones with their replacement link.
+Record scope changes explicitly. Returning work or closing an issue is not acceptance.
 
 ## 5. Hardware boundary
 
@@ -130,7 +136,7 @@ tag editor, library or player. Firmware must not fork seek, mixing or other engi
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
 a release blocker. These limits survive the documentation consolidation.
 
-## 7. Phase 1 chat-based development
+## 7. Phase 1 individual leads and issue assignments
 
 Use [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) and [role instructions](docs/ROLES/README.md).
 PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;
@@ -142,8 +148,11 @@ integrates; Hardware designs and characterizes; Verification independently autho
 runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
 or automatic delegation are part of Phase 1. Do not make routine direct lead work an exception.
 
-Michael starts/resumes the chats and carries handoffs when needed. PM maintains bounded
-assignments in docs/REVIEW; each lead fetches main, works its assignment, records durable
-results and stops at the stated boundary. No automated round approval, event listener,
-claim token or continuously running agent is required. Chat instructions do not waive
-independent acceptance, purchase approval, the signed freeze, or physical safety gates.
+Michael configures issue listeners and can also resume chats manually. PM maintains
+work directions solely in role-labeled GitHub issues. Each lead reads the live issue,
+fetches main, performs its own assigned work, returns evidence in the issue and stops.
+Do not repeat completed work on a duplicate event or create tasks for idle leads just
+to fill a round. No subworkers or archived signaling/controller infrastructure is
+restored. The repository does not claim listeners are active. Labels and issue
+closure never waive independent acceptance, purchase approval, the signed freeze,
+or physical safety gates.

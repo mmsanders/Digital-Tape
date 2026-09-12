@@ -6,4 +6,5 @@ before doing any work, then follow its fresh-context sequence beginning with
 
 The agreement applies to every lead regardless of model or app. Loading this file does
 not assign a product role or expand the authority granted by Michael and the current
-brief. Phase 1 uses individual lead chats; start with docs/ROLES/README.md.
+assignment issue. Phase 1 uses individual leads and role-labeled GitHub issues;
+start with docs/ROLES/README.md and docs/ISSUE-WORKFLOW.md.

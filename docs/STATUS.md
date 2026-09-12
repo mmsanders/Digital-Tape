@@ -2,7 +2,7 @@
 
 **Updated: 12 September 2026 UTC · Owner: PM · Phase 1 P1-R1 kicked off; scoped Phase 0 freeze unchanged.**
 
-## Current round
+## Kickoff checkpoint (assignments live in issues)
 
 [P1-R1 review and disposition](REVIEW/P1-R1-PM-REVIEW.md) records Verification's
 return at `689c41909e6bbec499aeb0243008222d7a1c9f64` and PM reproduction.
@@ -11,10 +11,9 @@ Two new operation cases are ready for diagnostic import, but review found
 flush-order, illegal-I/O detection and raw-media retention gaps (P1-R1-V01–V03).
 No product operation run or broader package acceptance has occurred.
 
-Software imports the exact baseline and builds an adapter; Verification independently
-hardens its oracle/evidence. Hardware advances sourcing/qualification evidence;
-Surge is unassigned. Read [bounded briefs](REVIEW/README.md). No engine merge this
-round; not every lead needs an assignment in every round.
+Active assignments and their stop conditions are tracked exclusively in
+[role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
+directions. The kickoff granted no engine merge or broader acceptance.
 
 ## Published
 
@@ -32,13 +31,13 @@ round; not every lead needs an assignment in every round.
 
 | Work | State | Next owner |
 |---|---|---|
-| #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software returns covered-split plan and diagnostic adapter evidence; PM reviews next |
-| VT8-001 / WP-07 | Two verifier-authored operation cases at a91138667673fcf19dc9e83c9034322b982b1771; synthetic self-tests only. Baseline has P1-R1-V01–V03 gaps; no product acceptance. | Software imports exact diagnostic baseline; Verification returns revised oracle/evidence |
+| #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
+| VT8-001 / WP-07 | Two verifier-authored operation cases at a91138667673fcf19dc9e83c9034322b982b1771; synthetic self-tests only. Baseline has P1-R1-V01–V03 gaps; no product acceptance. | Software / Verification; see current issues |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
-| Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
+| Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware / independent Verification; see current issues |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
+| WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael / Hardware; see current issues |
 
 **New independent package acceptances: none.** Software's mount observations now
 have Verification's narrow independent disposition, reproduced by PM. That is not
@@ -62,9 +61,10 @@ under spec/, engine/, firmware/, tests/ or hardware/ changed in this transition.
 Development proceeds through individual lead chats: Astra PM in ChatGPT Work,
 Sol independent Verification in Work, Opus Software and Hardware in separate Claude Code
 chats. Grok provides miscellaneous surge work primarily assigned directly by Michael.
-Leads perform their own scoped work; there are no subworkers or automatic rounds.
+Leads perform their own scoped work without subworkers. Issue activation is
+configured separately by Michael; there is no automatic product approval.
 
-Read the [development plan](PHASE1-DEVELOPMENT.md), [role instructions](ROLES/README.md)
-and [current briefs](REVIEW/README.md). Michael starts/resumes chats; the repo holds
-assignments, decisions and evidence. This operating change grants no new package
-acceptance and changes none of the product holds above.
+Read the [development plan](PHASE1-DEVELOPMENT.md), [role charters](ROLES/README.md)
+and [issue workflow](ISSUE-WORKFLOW.md). Michael configures listeners or resumes
+leads manually. Issues hold active assignments; main holds decisions and evidence.
+Routing changes grant no package acceptance and change none of the product holds.

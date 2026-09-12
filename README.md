@@ -10,10 +10,10 @@ and print packets. It is not a finished player or a safety-qualified hardware de
 
 ## Start or resume a lead
 
-1. Fetch main; read [Michael’s question queue](docs/FOR-MICHAEL.md) first.
+1. Fetch main; read [Michael’s issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) first.
 2. Read [the working agreement](CLAUDE.md) and [current status](docs/STATUS.md).
 3. Follow [the onboarding map](docs/START-HERE.md) and
-   [current round brief](docs/REVIEW/README.md). Historical chat is not required.
+   [issue workflow and role queue](docs/ISSUE-WORKFLOW.md). Historical chat is not required.
 
 | Surface | Authority |
 |---|---|

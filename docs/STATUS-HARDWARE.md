@@ -23,4 +23,5 @@ Run make -C hardware fabrication-gate before any fabrication/charging decision.
 Five blockers currently remain. Green regression/thermal checks are not qualification.
 
 Michael owns purchases and physical trials. Old ~$115/$152 cart estimates are not
-current quotes or approvals. Latest priorities are in [the round brief](REVIEW/README.md).
+current quotes or approvals. Active assignments live only in
+[Hardware's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead).

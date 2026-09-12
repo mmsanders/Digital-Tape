@@ -2,6 +2,10 @@
 
 **Issued 12 September 2026 UTC · PM: Astra / ChatGPT Work.**
 
+**Historical review/evidence, not current work directions.** P1-R1 assignments
+were migrated to role-labeled issues; follow [the issue workflow](../ISSUE-WORKFLOW.md).
+The scope, checks and sequence below record the kickoff decision at its input SHA.
+
 Michael requested this review and direct publication of lead instructions. Normal
 PM authority applies, not the expired combined-lead mandate. No product code is
 reviewed, changed or merged here; independent acceptance remains Verification's.
@@ -84,7 +88,7 @@ Both outputs are `[]` (incorrect traces accepted). These are isolated synthetic
 observations, not product failures. PM has not changed verifier source or supplied
 replacement assertions; Verification independently owns their resolution.
 
-## Work sequence
+## Work sequence recorded at kickoff (historical)
 
 1. Software imports the exact original VT8 directory test-only, labeled a diagnostic
    baseline with V01–V03 open. No assertion edits or engine changes in that import.
@@ -142,6 +146,6 @@ Card atomicity is unqualified per exact SKU/revision. No purchases, 64 GB cards,
 capacity/speed substitutions, physical actions or protection changes are authorized.
 Q-001 is closed; do not request another freeze signature.
 
-PM stops after verified publication of this review, updated status and lead briefs.
-Michael resumes selected lead chats; main publication does not wake them. Next PM
-round begins on his resumption with exact returns, not historical assignments.
+The kickoff PM publication completed at d9bc6ebd10983711acade6d148895e78fd1a17e3.
+Its next-work directions subsequently moved to issues; this record does not assign
+a future round or define listener behavior.

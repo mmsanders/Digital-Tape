@@ -1862,3 +1862,36 @@ All physical safety, card qualification, purchase and coverage holds remain.
 **Cost to reverse:** supersede these brief assignments explicitly while retaining
 source/evidence history. Closing a finding requires evidence, not removal of a hold
 or rewriting a frozen hash. Do not restart archived work or reactivate automation.
+
+## ADR-135 — Role-labeled issues are the sole active assignment surface
+
+**Date:** 2026-09-12 UTC · **Owner:** Michael; recorded by PM
+
+Michael directed PM to move current work directions off main into separate GitHub
+issues with role labels, update lead charters, and use a new issue per assigned
+lead each round. This supersedes ADR-133/134 only for assignment delivery and
+activation. Individual lead work, no subworkers, independent Verification and
+all signed-spec, test-coverage, safety and purchase holds remain unchanged.
+
+Input main: `d9bc6ebd10983711acade6d148895e78fd1a17e3`.
+Migrated Software to #41, Hardware #42, Verification #43, Michael #44 and PM #45.
+Surge #46 is closed as not planned: no work was invented for an unassigned lead.
+Labels: software-lead, hardware-lead, verification-lead, surge, michael and pm.
+The extra PM label routes PM's own existing follow-up without mixing role queues.
+
+Issues contain full scope, exact inputs, dependencies, deliverables, stop conditions
+and holds. Leads return evidence in the issue; main retains specifications,
+charters, factual status, decisions and evidence. Active per-lead brief files were
+removed; prior contents remain in Git history. FOR-MICHAEL and REVIEW/README are
+queue/evidence locators, not duplicate task lists. Historical review records do not
+assign work. The enduring protocol is [ISSUE-WORKFLOW](ISSUE-WORKFLOW.md).
+
+Michael will notify leads this transition round and configure issue listeners
+separately. PM did not create or verify a listener. Notifications require a fresh
+read of live issue state; closed/superseded/already-returned work must not repeat.
+Labels, closing issues and listener delivery grant no new authority or acceptance.
+The retired signaling bus, dashboard, controller and worker pool stay retired.
+
+**Rationale:** one editable assignment record prevents main briefs and issue copies
+from drifting. **Cost to reverse:** explicitly migrate open assignments and update
+charters; preserve linked returns and never reactivate old directions by inference.

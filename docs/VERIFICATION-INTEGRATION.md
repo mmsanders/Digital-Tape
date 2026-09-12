@@ -42,7 +42,7 @@ Safe documentation and raw observations have been extracted from #20. Its remain
 code/harness boundary includes covered and uncovered behaviour in shared files.
 Do not merge those files wholesale. A further split requires preserving the tested
 behaviour and reviewing dependencies, or additional independently authored coverage.
-Read the [current briefs](REVIEW/README.md) for the bounded next returns.
+Read the [current assignment issues](ISSUE-WORKFLOW.md) for the bounded next returns.
 
 Publication order is recorded by the actual merge ancestry: exact spec #25,
 independent tests #27, then software branch reconciliation. Importing hardware #18
@@ -62,8 +62,8 @@ committed run packet supplies engine-SHA association.
 The next baseline is verifier `tests/ops_draft8/` at
 `a91138667673fcf19dc9e83c9034322b982b1771`, tree
 `c8a43df69a6be8e2c34bf79a1d79933abf48286a`, unchanged at the return commit.
-**Not imported by PM.** Software is assigned the exact test-only import, adapter
-and diagnostic attempt. P1-R1-V01/V02/V03 require verifier-owned corrections before
+**Not imported by PM at this checkpoint.** Current import/adapter work directions
+are in role-labeled issues. P1-R1-V01/V02/V03 require verifier-owned corrections before
 this package supports operation acceptance. See [PM review](REVIEW/P1-R1-PM-REVIEW.md)
 for reproducible gaps, source commitments and remaining coverage exclusions.
 The revised package needs a new immutable source, exact subsequent import and raw
