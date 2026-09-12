@@ -1,6 +1,6 @@
 # Hardware status
 
-**Updated: 12 September 2026 · Owner: PM disposition of Hardware return.**
+**Updated: 12 September 2026 · Owner: Hardware Lead (P1-R3-HW retained control).**
 
 PR #18 is merged. PR #47 is merged at
 `8d9e8bdffc245d797702a2b3a461348672b0644a`. Current hardware revisions/hashes
@@ -13,7 +13,7 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Area | Evidence | Remaining work |
 |---|---|---|
 | Fabrication gate | Regression reproduced; the real gate remains **CLOSED/nonzero with five blockers** | No board fabrication or cell charging |
-| Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL**. A one-off out-of-envelope mutation is rejected, but no retained targeted automated control pins that criterion | Add the retained negative control; IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
+| Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL**. The supply-envelope criterion now has a **retained targeted control** in `hardware/thermal/test_solenoid.py` and its own `--mutate-supply` mode, both run by `make -C hardware solenoid-test` | IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | Rev-5 plate reported printing, not yet in hand; results card remains blank | Printed fit, retention, creep/drop and independent measurement audit |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
@@ -21,9 +21,13 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
-claimed as passing there. The supply-envelope inequality also failed the one-off
-mutation, but the generic fail-open test would not detect deletion of that exact
-criterion; a targeted retained negative control remains required.
+claimed as passing there. The supply-envelope inequality's control is now
+**retained rather than one-off** (P1-R3-HW): injecting a 4.5–5.5 V part at the 3.3 V rail must
+add exactly one failure, it must be the supply-envelope one, its message must name both the
+envelope and the rail, and the control must stay specific while an unrelated criterion is also
+failing. `--mutate-supply` deletes only that inequality and requires the suite to go red on
+those checks; a genuine four-line source deletion was also confirmed to produce exit 1.
+This is evidence hardening only — **no acceptance, no measurement, and no gate change.**
 Run make -C hardware fabrication-gate before any fabrication/charging decision.
 Five blockers currently remain. Green regression/thermal checks are not qualification.
 

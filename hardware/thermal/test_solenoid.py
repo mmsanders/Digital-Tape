@@ -12,8 +12,10 @@ headline red case is the strongest one available: **the previous working point**
 (5.0 W, 15 ms, 450 ms), which the old model reported as a 1.14x pass and the
 corrected model rejects on two separate criteria.
 
-    python3 test_solenoid.py            run the checks
-    python3 test_solenoid.py --mutate   prove they can go red
+    python3 test_solenoid.py                  run the checks
+    python3 test_solenoid.py --mutate         prove they can go red
+    python3 test_solenoid.py --mutate-supply  prove the supply-envelope control
+                                              goes red if its own inequality is deleted
 """
 
 from __future__ import annotations
@@ -41,6 +43,91 @@ def at(coil, pulse, lockout):
         return st.check_criteria(strict=False)
     finally:
         st.COIL_W, st.PULSE_NOM_MS, st.LOCKOUT_NOM_MS = saved
+
+
+# ---------------------------------------------------------------------------
+# P1-R3-HW: the supply-envelope criterion gets its own retained control.
+#
+# PR #47 added an inequality to check_criteria(): the BOUND part's supply
+# envelope must contain V_LOGIC. It was prompted by a real catalogue listing of
+# an HC part number (NXP 74HC221DB112) at 4.5..5.5 V -- selecting it would put
+# the one-shot outside its supply range at this rail, and no other check here
+# would have noticed.
+#
+# That criterion was demonstrated once, by hand, and nothing in the repository
+# retained the demonstration. So deleting those four lines would have been a
+# silent, green regression -- the exact fail-open class IR-018-14 removed from
+# this file. The generic --mutate control does NOT cover it: that one replaces
+# check_criteria wholesale, so it proves the suite notices a totally dead gate,
+# not that this particular inequality is alive.
+#
+# Hence a targeted control, and a targeted mutation of it. Nothing here touches
+# a datasheet, a measurement, a part acceptance or a gate: it is evidence
+# hardening on an inequality that already exists.
+SUPPLY_MARK = "outside its supply range"
+HCT_LIKE_RANGE = (4.5, 5.5)      # the anomalous catalogue envelope, at a 3.3 V rail
+
+
+def with_supply_range(rng):
+    """Evaluate the criteria with a different bound-part envelope, then restore."""
+    saved = st.PART_SUPPLY_RANGE_V
+    st.PART_SUPPLY_RANGE_V = rng
+    try:
+        return st.check_criteria(strict=False)
+    finally:
+        st.PART_SUPPLY_RANGE_V = saved
+
+
+def supply_failures_added_by_injection() -> set[str]:
+    """Failures that appear ONLY because an HCT-envelope part was injected.
+
+    Taking the difference against the committed baseline is what makes the
+    control specific: a criterion that was already failing for an unrelated
+    reason cannot masquerade as this one being alive.
+    """
+    base = set(with_supply_range(st.PART_SUPPLY_RANGE_V))
+    return set(with_supply_range(HCT_LIKE_RANGE)) - base
+
+
+def supply_control_survives_unrelated_noise() -> bool:
+    """Is the control still specific when ANOTHER criterion is already failing?
+
+    This is the distinguishability requirement. Differencing against the
+    baseline is what delivers it: an over-powered coil fails the power criterion
+    in both runs, so it cancels, and the injected envelope is still the only
+    thing the control attributes to itself. Without the difference, "some
+    criterion failed" would have been mistaken for "this criterion is alive".
+    """
+    saved = st.COIL_W
+    st.COIL_W = 12.0          # fails the power criterion in BOTH runs
+    try:
+        noisy_base = set(with_supply_range(st.PART_SUPPLY_RANGE_V))
+        added = supply_failures_added_by_injection()
+        return (len(noisy_base) > 0
+                and len(added) == 1
+                and SUPPLY_MARK in next(iter(added)))
+    finally:
+        st.COIL_W = saved
+
+
+def supply_removal_is_caught() -> bool:
+    """Is the control above able to detect its own inequality being deleted?
+
+    A negative control that survives the removal of the thing it controls for is
+    decoration. The deletion is simulated by filtering that one finding out of
+    check_criteria's output while leaving every other criterion intact, which is
+    precisely what striking those lines from the source would do.
+
+    Returns True when the deletion makes the control's central assertion -- one
+    new failure, and it is the supply-envelope one -- stop holding.
+    """
+    real = st.check_criteria
+    st.check_criteria = lambda strict=True: [f for f in real(strict=False)
+                                             if SUPPLY_MARK not in f]
+    try:
+        return len(supply_failures_added_by_injection()) != 1
+    finally:
+        st.check_criteria = real
 
 
 def run() -> int:
@@ -127,7 +214,30 @@ def run() -> int:
           f"the committed coil ({st.COIL_W:.1f} W) is within the boundary "
           f"({st.feasible_coil_w(st.PULSE_NOM_MS):.2f} W) for its pulse")
 
-    n = 24
+    # --- 11. P1-R3-HW: the supply-envelope criterion, retained ----------
+    base = set(with_supply_range(st.PART_SUPPLY_RANGE_V))
+    added = supply_failures_added_by_injection()
+    only = next(iter(added)) if len(added) == 1 else ""
+    lo, hi = HCT_LIKE_RANGE
+
+    check(not any(SUPPLY_MARK in f for f in base),
+          f"the committed envelope ({st.PART_SUPPLY_RANGE_V[0]:.0f}.."
+          f"{st.PART_SUPPLY_RANGE_V[1]:.0f} V) does not itself trip the supply criterion")
+    check(len(added) == 1,
+          f"RED: injecting a {lo}..{hi} V part at the {st.V_LOGIC} V rail adds exactly "
+          f"one failure (got {len(added)}: {sorted(added)})")
+    check(SUPPLY_MARK in only,
+          f"RED: that one added failure is the SUPPLY-ENVELOPE criterion and not a "
+          f"coincidental other one (got {only!r})")
+    check(f"{lo}..{hi} V" in only and f"rail is {st.V_LOGIC} V" in only,
+          f"the supply-envelope failure names both the injected envelope and the rail, "
+          f"so it cannot be mistaken for another criterion (got {only!r})")
+    check(supply_control_survives_unrelated_noise(),
+          "the control stays specific while an unrelated criterion is also failing")
+    check(supply_removal_is_caught(),
+          "the supply-envelope control goes RED if its own inequality is deleted")
+
+    n = 30
     if FAILED:
         print(f"\n{len(FAILED)} of {n} checks FAILED")
         return 1
@@ -147,7 +257,33 @@ def mutate() -> int:
     return 0
 
 
+def mutate_supply() -> int:
+    """P1-R3-HW: delete ONLY the supply-envelope inequality and prove the suite
+    notices -- which the generic wholesale mutation above cannot establish."""
+    real = st.check_criteria
+    st.check_criteria = lambda strict=True: [f for f in real(strict=False)
+                                             if SUPPLY_MARK not in f]
+    try:
+        rc = run()
+    finally:
+        st.check_criteria = real
+    if rc == 0:
+        print("\nMUTATION SURVIVED -- the supply-envelope inequality can be deleted "
+              "without turning this suite red. That is the bug.")
+        return 1
+    failed_on_it = [f for f in FAILED if "supply" in f.lower() or SUPPLY_MARK in f]
+    if not failed_on_it:
+        print("\nMUTATION CAUGHT, BUT NOT BY THE RIGHT CHECK -- the suite went red for "
+              f"another reason: {FAILED}")
+        return 1
+    print("\nOK  targeted mutation caught: deleting the supply-envelope inequality "
+          "turns the retained control red, and it is that control which fails")
+    return 0
+
+
 if __name__ == "__main__":
+    if "--mutate-supply" in sys.argv:
+        raise SystemExit(mutate_supply())
     if "--mutate" in sys.argv:
         raise SystemExit(mutate())
     raise SystemExit(run())
