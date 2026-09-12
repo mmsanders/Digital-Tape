@@ -75,7 +75,27 @@ HCT_MIN_V = 4.5            # 74HCT221 is a 4.5..5.5 V part -> excluded here
 # its datasheet. It is False because vendor egress reaches no datasheet (H-02),
 # and because IC_TOL above is extrapolated from a test point that does not apply.
 TIMING_BOUND_VERIFIED = False
-CANDIDATE_PART = "74HC221 (HC, 2..6 V) -- exact orderable variant NOT yet bound"
+
+# P1-R1-HW: the orderable variant IS now bound, and that is a different fact from
+# the timing guarantee. IR-018-16 asked for both; only one of them is answerable
+# from a distributor catalogue, so they are carried as two constants rather than
+# one, and the gate keeps reading the one that is still open.
+#
+# Bound from DigiKey's catalogue on 12 September 2026 (H-02 partially lifted: the
+# distributor is reachable from this environment, the manufacturers' own sites and
+# the mirrored datasheet PDFs are not -- see hardware/sourcing/2026-09-12-parts.md).
+CANDIDATE_PART = "TI CD74HC221E (16-DIP, bench) / CD74HC221M96 (16-SOIC, board)"
+PART_SUPPLY_RANGE_V = (2.0, 6.0)   # DigiKey parametric, 12 Sep 2026. Covers V_LOGIC
+PART_SOURCE = ("DigiKey catalogue, 12 Sep 2026: CD74HC221E $1.08/1, 1430 in stock; "
+               "CD74HC221M96 $0.87/1, 4828 in stock; both listed 2-6 V")
+
+# What is STILL not bound, and it is the term the proof rests on: the GUARANTEED
+# pulse-width limits at 3.3 V over the intended R/C and temperature. Those live in
+# a pulse-width table in the manufacturer's datasheet, and every host serving that
+# PDF is blocked from this environment (ti.com, mm.digikey.com, rocelec.widen.net
+# all refused). A distributor's supply-range field is not a timing guarantee, and
+# recording it as one would be exactly the substitution IR-018-16 objected to.
+TIMING_TABLE_READ = False
 
 # Worst-case propagation from a trigger edge to the one-shot's output actually
 # asserting. IR-018-17: without this term the model assumed the inhibit was
@@ -301,6 +321,15 @@ def check_criteria(strict: bool = True):
                        f"specified {R_EXT_MIN_OHM/1000:.0f}..{R_EXT_MAX_OHM/1000:.0f} kOhm range")
     if V_LOGIC >= HCT_MIN_V:
         bad.append(f"logic rail {V_LOGIC} V is in the HCT range; re-check the part family")
+    # P1-R1-HW. DigiKey's own catalogue lists at least one part SPELLED 74HC221
+    # (NXP 74HC221DB112) with a 4.5..5.5 V supply field -- an HC part number in an
+    # HCT-like envelope. Whether that is a data error or a real variant, selecting
+    # it would put the one-shot outside its supply range at this rail and no other
+    # check here would notice. So the bound part's envelope is now an inequality.
+    lo, hi = PART_SUPPLY_RANGE_V
+    if not (lo <= V_LOGIC <= hi):
+        bad.append(f"the bound one-shot ({CANDIDATE_PART}) is specified {lo:.1f}..{hi:.1f} V "
+                   f"and the logic rail is {V_LOGIC} V -- the part is outside its supply range")
     if strict and bad:
         for line in bad:
             print(f"  SOLENOID: {line}", file=sys.stderr)
@@ -412,7 +441,12 @@ def t_solenoid_values() -> str:
         "",
         "### The part, and the rail",
         "",
-        f"**Candidate: {CANDIDATE_PART}.** A half sets the pulse "
+        f"**Part bound: {CANDIDATE_PART}** — {PART_SOURCE}. "
+        f"The supply envelope is sourced ({PART_SUPPLY_RANGE_V[0]:.0f}…"
+        f"{PART_SUPPLY_RANGE_V[1]:.0f} V, covering {V_LOGIC} V); "
+        "**its guaranteed pulse-width table at this rail is not** — that host is blocked, "
+        "and a distributor's supply-range field is not a timing guarantee. "
+        "A half sets the pulse "
         f"(R = {timing_resistor_ohm(PULSE_NOM_MS, 100e-9)/1000:.0f} kΩ, C = 100 nF **C0G**); "
         f"B half sets the inhibit "
         f"(R = {timing_resistor_ohm(LOCKOUT_NOM_MS, 1e-6)/1000:.0f} kΩ, C = 1 µF **film**). "
@@ -509,10 +543,15 @@ def t_solenoid_test() -> str:
         "more energy than the budget allows, that is a genuine conflict between a safety limit "
         "and a mechanism, and it goes to the PM rather than being absorbed by widening the "
         "limit.",
-        "- **Vendor egress reaches no datasheet** (H-02), so binding the one-shot's guaranteed "
-        "timing at this rail is blocked on either the egress gap or a bench measurement of the "
-        "chosen part. **A measurement is the honest route** and does not wait on anyone: it "
-        "belongs with WP-04's pulse measurement, on the same bench, on the same day.",
+        "- **Egress reaches the distributor but not the datasheet** (H-02, narrowed 12 Sep "
+        "2026). `www.digikey.com` resolves, which is how the part above got bound, priced and "
+        "stock-checked. Every host that actually serves the pulse-width table refused: "
+        "`ti.com`, `mm.digikey.com`, `rocelec.widen.net`, `nexperia.com`. So the remaining gap "
+        "is narrower and more specific than \"no vendor access\": it is the **guaranteed "
+        "pulse-width limits at 3.3 V over the intended R/C and temperature**, and nothing else. "
+        "**A bench measurement is still the honest route** and does not wait on anyone: it "
+        "belongs with WP-04's pulse measurement, on the same bench, on the same day. The method "
+        "is specified in `hardware/measurements/solenoid-timing-method.md`.",
         "",
         "**The response to the IR-015 solenoid finding is not closed, and I do not get to close "
         "it.** Two reviews have now found real defects in it — one physical, one structural — "
@@ -536,7 +575,10 @@ def qualification_gaps() -> list[str]:
             f"the ±{IC_TOL*100:.0f} % one-shot timing term is ASSUMED, not guaranteed: it is "
             f"extrapolated from a 700 µs datasheet test point at VCC = 5 V and applied to a "
             f"{LOCKOUT_NOM_MS:.0f} ms interval at {V_LOGIC} V with a different R/C. "
-            f"Part still unbound ({CANDIDATE_PART})")
+            f"Part now bound ({CANDIDATE_PART}, {PART_SUPPLY_RANGE_V[0]:.0f}..."
+            f"{PART_SUPPLY_RANGE_V[1]:.0f} V), but its guaranteed pulse-width table at "
+            f"{V_LOGIC} V is still unread"
+            + ("" if TIMING_TABLE_READ else " -- every host serving that datasheet is blocked"))
     return gaps
 
 
