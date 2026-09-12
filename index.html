@@ -131,7 +131,7 @@
     <div class="board" id="board">Loading open issues…</div>
     <footer>
       Reads public GitHub issues from mmsanders/Digital-Tape and
-      mmsanders/digital-tape-verification. Polls about once a minute.
+      mmsanders/digital-tape-verification. Refreshes every five minutes while visible.
       Verification assignments live on the verification repo.
       Issue close is not independent acceptance.
     </footer>
@@ -140,7 +140,7 @@
     const PRODUCT = { owner: "mmsanders", repo: "Digital-Tape" };
     const VERIFY = { owner: "mmsanders", repo: "digital-tape-verification" };
     const API = "https://api.github.com";
-    const POLL_MS = 60000;
+    const POLL_MS = 300000;
 
     const LEADS = [
       {
@@ -189,13 +189,20 @@
     }
 
     async function listOpenIssues(owner, repo) {
-      const url = `${API}/repos/${owner}/${repo}/issues?state=open&per_page=100`;
-      const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+      const items = [];
+      for (let page = 1; ; page += 1) {
+      if (page > 100) throw new Error("Issue pagination limit reached; queue unknown.");
+      const url = `${API}/repos/${owner}/${repo}/issues?state=open&per_page=100&page=${page}`;
+      const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(20000) });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.message || `GitHub ${res.status} for ${owner}/${repo}`);
       }
-      const items = await res.json();
+      const batch = await res.json();
+      if (!Array.isArray(batch)) throw new Error("Invalid GitHub issue response");
+      items.push(...batch);
+      if (batch.length < 100) break;
+      }
       return items.filter((item) => !item.pull_request).map((item) => ({
         number: item.number,
         title: item.title,
@@ -232,6 +239,10 @@
       return Math.floor(s / 86400) + "d ago";
     }
 
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c]));
+    }
+
     function card(lead, issues) {
       const busy = issues.length > 0;
       const tone = busy ? "yellow" : "green";
@@ -242,9 +253,9 @@
       const list = busy
         ? `<ul class="issues">${issues.map((issue) => `
             <li>
-              <a href="${issue.html_url}">
+              <a href="https://github.com/${issue.repo}/issues/${Number(issue.number)}">
                 <span class="num">${issue.repo} #${issue.number}</span>
-                <span class="title">${issue.title.replace(/[<>]/g, "")}</span>
+                <span class="title">${escapeHtml(issue.title)}</span>
               </a>
             </li>`).join("")}</ul>`
         : `<p class="empty">No open ${lead.label.toLowerCase()} assignment.</p>`;
@@ -261,7 +272,10 @@
       </article>`;
     }
 
+    let refreshing = false;
     async function render() {
+      if (refreshing) return;
+      refreshing = true;
       try {
         const [productIssues, verifyIssues] = await Promise.all([
           listOpenIssues(PRODUCT.owner, PRODUCT.repo),
@@ -276,18 +290,22 @@
         }).join("");
         document.getElementById("board").innerHTML = html;
         document.getElementById("meta").innerHTML = `
-          <span class="pill">checked ${ago(fetchedAt)}</span>
-          <span class="pill">${yellow} busy · ${LEADS.length - yellow} clear</span>
+          <span class="pill">checked ${new Date(fetchedAt).toLocaleString()}</span>
+          <span class="pill">${yellow} with open issues · ${LEADS.length - yellow} clear</span>
           <span class="pill">${productIssues.length} open on product</span>
           <span class="pill">${verifyIssues.length} open on verification</span>`;
         document.getElementById("warn").innerHTML = "";
       } catch (err) {
-        document.getElementById("warn").innerHTML = `<div class="warn">${err.message || err}</div>`;
+        document.getElementById("board").textContent = "Queue status unknown — GitHub refresh failed. No clear/busy status is inferred.";
+        document.getElementById("meta").textContent = "Latest refresh failed";
+        document.getElementById("warn").innerHTML = `<div class="warn">${escapeHtml(err.message || err)}</div>`;
+      } finally {
+        refreshing = false;
       }
     }
 
     render();
-    setInterval(render, POLL_MS);
+    setInterval(() => { if (!document.hidden) render(); }, POLL_MS);
   </script>
 </body>
 </html>
