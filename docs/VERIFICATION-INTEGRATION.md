@@ -28,6 +28,58 @@ rendered PCM, complete state-row or full WP-07 acceptance follows from this impo
 PR #20 cannot merge wholesale. Full green WP-10, independent WP-11 goldens, WP-12a
 and hardware acceptance remain separate requirements.
 
+## Imported VT8-001 operation tranche — 12 September 2026
+
+**Active package: hardened verifier tree `4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`**
+from `mmsanders/digital-tape-verification` commit
+`dcc4d7cdb357cf0b082071390c762c25b650f617`, directory `tests/ops_draft8/`.
+All 11 tracked files imported verbatim with modes preserved; the product subtree
+hash reproduces that tree exactly. The earlier baseline tree
+`c8a43df69a6be8e2c34bf79a1d79933abf48286a` (source
+`a91138667673fcf19dc9e83c9034322b982b1771`) is **provenance only** and is no
+longer the active package; PM superseded it for integration.
+
+The hardened package adds `hardened.py` (trace, ordering and public-call-result
+validation layered over the unchanged `oracle.py`), `replay.py` (offline verdict
+recomputation from a hash-bound evidence bundle) and `COVERAGE.md`. `runner.py`
+now retains the input and final VO08 media, stdout, stderr, observation, per-case
+result and a manifest, and requires explicit adapter source/build provenance,
+verifier source identity and a synthetic-versus-product adapter kind.
+
+Reproduced locally: `python3 tests/ops_draft8/selftest.py` passes — two conforming
+observations, **twelve oracle controls**, tampered-spec-bytes detection, and both
+missing-evidence and tampered-evidence replay failures. A synthetic evidence bundle
+was created against the authenticated DRAFT-8 spec bytes and replayed offline;
+both pass. **All of this is synthetic runner/oracle plumbing evidence. No engine
+ran.**
+
+Structural Rule 1: this import remains test-only and lands before any corresponding
+engine implementation. **`VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` have still
+never executed against an engine**, so allocation events and all-slot
+running-sequence consumption remain unobserved. No assertion, fixture, expected
+sequence, operation argument, ordering, range or exclusion was changed.
+
+The mechanical adapter is Software-owned at `tests/ops_adapter/`, outside the
+verifier tree, and was adapted to the revised observation contract: the
+`VT8-OPS-OBSERVATION-1` envelope, ordered public-call results with the fields each
+script depends on, product/synthetic identity, complete callback rc and range
+records including unexpected callbacks, and a finite service guard. Media retention
+and offline replay are now the runner's responsibility, so the older `preserve.sh`
+wrapper was removed as obsolete.
+
+It **compiles clean** against the held PR #20 public header and still fails to link
+on the same six declared-but-undefined public symbols — `tape_seek`, `tape_arm`,
+`tape_feed`, `tape_service`, `tape_commit`, `tape_reset_side_b` — so no product
+observation for this tranche is obtainable from any engine that exists today. It
+also does not compile against current main, whose public header predates the frozen
+DRAFT-8 API. Consequently **the adapter's observation schema has never been
+exercised against a real engine**; it is written against the imported `ADAPTER.md`
+and `hardened.py`, and the first product run is where it is actually tested.
+Diagnostic-only: raw evidence in
+[the P1-R2 packet](verification/runs/2026-09-12-r2/README.md) and
+[the P1-R2-SW return](REVIEW/returns/P1-R2-SW.md); the superseded baseline
+diagnostic is in [the P1-R1 packet](verification/runs/2026-09-12/README.md).
+
 ## Software execution — held implementation
 
 The unchanged probe was linked to the real public header and engine archive.

@@ -1,0 +1,65 @@
+# VT8-001 adapter diagnostic build against held PR #20
+engine input commit: 2e0e8a4b7bff42797ac37901196e5ea348b2e392
+adapter source sha256: 614e76aedab9b67279219c75835d4c02be0ddd10bc275dc78d9be5ef4d0d5b51
+preserve wrapper sha256: aec9ff7a872103d519bf5df9e5a2ed7ea50d920b6fac2284a5a688cb22462e66
+compiler: cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+
+## STAGE 1 — compile only (public header completeness)
+$ make compile ENGINE_INC=<pr20>/engine/include
+cc -I/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/pr20/engine/include -DTAPE_PUBLIC_HEADER='"tape.h"' -std=c99 -Wall -Wextra -Werror -pedantic -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wvla -Wcast-qual -Wpointer-arith -fno-common -g -O1 -c vt8_ops_probe.c -o build/diag.o
+exit: 0
+
+## STAGE 2 — link against pr20 libtape.a
+$ cc build/diag.o <pr20>/build/engine/libtape.a -o build/vt8_ops_probe
+/usr/bin/ld: build/diag.o: in function `case_reset_b':
+/home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:318:(.text+0xb24): undefined reference to `tape_reset_side_b'
+/usr/bin/ld: build/diag.o: in function `case_rec_allocseq':
+/home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:366:(.text+0xcfb): undefined reference to `tape_seek'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:372:(.text+0xd4d): undefined reference to `tape_arm'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:376:(.text+0xd8e): undefined reference to `tape_feed'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:391:(.text+0xe0e): undefined reference to `tape_service'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:399:(.text+0xe56): undefined reference to `tape_commit'
+collect2: error: ld returned 1 exit status
+exit: 1
+
+## STAGE 3 — undefined public symbols, enumerated
+                 U tape_arm
+                 U tape_commit
+                 U tape_feed
+                 U tape_get_info
+                 U tape_init
+                 U tape_instance_size
+                 U tape_mount
+                 U tape_reset_side_b
+                 U tape_seek
+                 U tape_service
+                 U tape_tell
+                 U tape_unmount
+
+## Defined public symbols available in pr20 libtape.a
+tape_alloc_run
+tape_chunks_for_frames
+tape_crc32
+tape_crc32_final
+tape_crc32_init
+tape_crc32_update
+tape_derive_free_next
+tape_entry_last_chunk
+tape_geometry_ok
+tape_get_info
+tape_index_check_overlap
+tape_index_parse
+tape_index_validate
+tape_init
+tape_instance_size
+tape_may_allocate
+tape_may_reference
+tape_mount
+tape_rd16
+tape_rd32
+tape_rd64
+tape_sb_check_geometry
+tape_sb_parse
+tape_set_side
+tape_tell
+tape_unmount
