@@ -1,23 +1,33 @@
-# Current round brief
+# Current round — P1-R1: Phase 1 kickoff
 
-**Product assignments issued 8 September; operating format updated 11 September 2026.** This is the current assignment surface. Read main
-and [Michael’s questions](../FOR-MICHAEL.md) first. Archived reports are not instructions.
+**PM-issued 12 September 2026 UTC.** Read current main, record its SHA, read
+[Michael's queue](../FOR-MICHAEL.md), the working agreement and your role.
+The [PM review](P1-R1-PM-REVIEW.md) records exact inputs, evidence and findings.
+This replaces the 8 September assignments; [previous briefs](../archive/phase1-pre-kickoff/README.md)
+are historical only.
 
-| Role | Next bounded task | Stop/return boundary |
+| Lead | Assignment | Return / stop |
 |---|---|---|
-| PM | Q-001 signed; disposition verification returns and maintain the signed scope | No invented human signature or independent acceptance |
-| Software | Preserve #20; use the independent coverage matrix to plan a safe split or wait for the next tests | 289 mount passes do not license allocator, sequence, warm/state/operation code |
-| Verification | [Read this brief](verification-lead.md); disposition raw mount observations and specify the next test tranche | No untested engine inspection; no package-wide approval from mount-only evidence |
-| Hardware | Complete exact-part timing/safety evidence and small-card sourcing; support WP04 print results | No own-response acceptance, 64 GB order, fabrication or charging |
-| Surge | Michael assigns miscellaneous tasks directly | Return within assigned scope; no standing product authority |
+| [Software](software-lead.md) | Exact VT8 test-only baseline import, public-API adapter, diagnostic held-code run and covered-split plan | Publish raw media/provenance/observations or precise missing-operation blocker; no engine merge |
+| [Verification](verification-lead.md) | Resolve P1-R1-V01/V02/V03; reconcile stale plans | Publish revised immutable package, negative controls, evidence replay and exclusions; no implementation inspection |
+| [Hardware](hardware-lead.md) | Exact-part timing/safety evidence packet and small-card sourcing | One auditable return with gaps; no spending, physical tests, fabrication or charging |
+| [PM](pm.md) | Publish review/briefs; disposition returns on next Michael resumption | No product-code work or self-supplied independent acceptance |
+| [Surge](surge.md) | **Unassigned**, awaiting Michael's bounded task | No speculative work or standing lead authority |
 
-## Reporting protocol
+Assignments are selective, not a requirement to keep every lead active. Michael
+starts/resumes individual chats. No subworkers, listeners or automatic rounds.
+Leads read these files directly; no instruction-file pasting is required.
 
-Each lead returns: input commit/spec hashes; work/evidence produced; what actually ran;
-remaining holds; next owner. PM commits dispositions and updates this brief directly.
-Use one bounded chat round and stop on its return condition. Leads do the assigned work
-directly; PM maintains these briefs, and Michael resumes each chat when needed.
-The [Phase 1 plan](../PHASE1-DEVELOPMENT.md) and [role instructions](../ROLES/README.md)
-replace the earlier automation trial. No subworkers are assigned.
+## Shared return contract
 
-Earlier lead/surge packets are in [the historical archive](../archive/pre-phase0/README.md).
+Return in the repository: assignment ID, exact input/product/spec/source commits
+and hashes, changed files, commands actually run/results, raw evidence, findings,
+exclusions, remaining holds and next owner. Use immutable links. Software/Hardware
+publish readiness notes in their repository work; Verification publishes on verifier
+main. Do not overwrite PM briefs or accept your own work. Stop after one bounded
+return; missing access or a scope-changing dependency is a blocker, not a waiver.
+
+Mount observations are green only within the imported mount matrix. VT8 baseline
+cases remain diagnostic pending oracle/evidence fixes and real runs. No wholesale
+#20 merge, operations freeze, full WP-10/WP-11 acceptance or hardware qualification.
+The real fabrication/charging gate stays CLOSED; every purchase requires Michael.

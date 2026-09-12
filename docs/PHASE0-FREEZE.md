@@ -53,8 +53,10 @@ new bytes, impact/migration analysis and a new integrity manifest.
 ## Evidence and residual holds
 
 - #27 lands verifier tests before implementation. Ten package checks pass; 289 engine
-  observations on the held branch pass after two DRAFT-8 fixes. Independent result
-  disposition is pending. See [integration](VERIFICATION-INTEGRATION.md).
+  observations on the held branch pass after two DRAFT-8 fixes. At signing the
+  independent disposition was pending; the 11 September Verification return now
+  confirms those 289 assertions only. See [integration](VERIFICATION-INTEGRATION.md).
+  This later evidence does not expand the signed scope or accept the full package.
 - Hardware #18 landed after all hardware CI jobs passed. IR-018-18’s Make fix and
   ADR-128’s date-drift fix are implemented. Independent safety acceptances remain open.
 - WP-11 golden CI is still red. No full WP-10, hardware measurement or card-atomicity

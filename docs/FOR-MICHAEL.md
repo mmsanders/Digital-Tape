@@ -1,6 +1,6 @@
 # For Michael — current question queue
 
-**Updated: 11 September 2026.** Every review round starts here after refreshing main.
+**Updated: 12 September 2026 UTC.** Every review round starts here after refreshing main.
 PM records your answers directly; leads do not ask again from archived packets.
 
 ## Q-001 — Signed and closed, 8 September 2026
@@ -33,11 +33,20 @@ for discussion; no purchase or capacity substitution is authorized.
 The bench cart is also an estimate pending exact-part/timing review, not permission
 to charge a cell or fabricate a board. Every purchase still comes to you.
 
-## Verification handoff
+## P1-R1 lead handoff
 
-Please pass [the current verification brief](REVIEW/verification-lead.md) for independent
-disposition of the raw mount observations and planning the still-uncovered tests.
-The brief is on main; no need to repaste historical instructions.
+The [kickoff review and lead assignments](REVIEW/README.md) are on main. Resume
+Software, Verification and Hardware when ready; each reads its own current brief.
+The mount-observation disposition is complete. No instruction files need to be
+pasted. Surge is unassigned; not every lead must work each round.
+
+## M-04 — Main protection policy (proposal pending)
+
+Verification's VR-P1-001 remains open: main is unprotected and its ruleset disabled.
+Software is assigned a concrete proposal for required checks and an approval path
+compatible with normal lead roles and direct PM document publication. No settings
+change is authorized by this kickoff. PM will bring the proposal for your decision;
+safe default is unchanged settings with existing procedural holds, not silent bypass.
 
 ## Already settled
 

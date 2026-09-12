@@ -1831,3 +1831,34 @@ succeeded and the public URL was checked for the static retirement notice with n
 The temporary page source and Pages workflow were then removed from main. GitHub retains
 the deployed notice; it contains no live status or approval controls. No account-side
 Claude routine was disabled by this repository edit.
+
+## ADR-134 — Phase 1 kickoff and narrow verification disposition
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's kickoff/publication request
+
+Reviewed product main `4c273ce57ce6848762b00b8990b0b29a3dc9f74b` and independent
+return `689c41909e6bbec499aeb0243008222d7a1c9f64`. Record Verification's green
+289-case mount observation disposition, not blanket #20 or package acceptance.
+The original gzip-evidence access obstacle is resolved. DRAFT-8 and signed scope
+remain unchanged; the expired combined-lead authority is not revived.
+
+P1-R1 assigns Software an exact diagnostic test import/adapter/run and split plan,
+Verification its oracle/evidence gaps P1-R1-V01/V02/V03 and stale-plan reconciliation,
+and Hardware bounded sourcing/qualification evidence. No product-engine merge this
+round. Surge is unassigned. Michael clarified that all leads need not work every
+round; assignments follow actual dependencies, not a staffing quota.
+
+Rationale and reproducible evidence: [P1-R1 PM review](REVIEW/P1-R1-PM-REVIEW.md).
+The two published VT8 tests are useful but accept bad flush ordering and a forbidden
+feed write; their runner also discards final raw media. Preserve exact baseline
+source for diagnostics, have Verification fix it independently, then review revised
+source and real observations before expanding acceptance. No self-supplied PM
+acceptance, test weakening or speculative engine work is licensed.
+
+VR-P1-001 protection risk is confirmed. Software proposes, Michael decides settings;
+the current direct-publication request does not authorize administrative changes.
+All physical safety, card qualification, purchase and coverage holds remain.
+
+**Cost to reverse:** supersede these brief assignments explicitly while retaining
+source/evidence history. Closing a finding requires evidence, not removal of a hold
+or rewriting a frozen hash. Do not restart archived work or reactivate automation.

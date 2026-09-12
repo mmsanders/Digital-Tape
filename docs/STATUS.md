@@ -1,6 +1,20 @@
 # Project status
 
-**Updated: 11 September 2026 · Owner: PM · Phase 0 scoped format/API freeze signed.**
+**Updated: 12 September 2026 UTC · Owner: PM · Phase 1 P1-R1 kicked off; scoped Phase 0 freeze unchanged.**
+
+## Current round
+
+[P1-R1 review and disposition](REVIEW/P1-R1-PM-REVIEW.md) records Verification's
+return at `689c41909e6bbec499aeb0243008222d7a1c9f64` and PM reproduction.
+The recorded after-run is independently green for all 289 mount assertions only.
+Two new operation cases are ready for diagnostic import, but review found
+flush-order, illegal-I/O detection and raw-media retention gaps (P1-R1-V01–V03).
+No product operation run or broader package acceptance has occurred.
+
+Software imports the exact baseline and builds an adapter; Verification independently
+hardens its oracle/evidence. Hardware advances sourcing/qualification evidence;
+Surge is unassigned. Read [bounded briefs](REVIEW/README.md). No engine merge this
+round; not every lead needs an assignment in every round.
 
 ## Published
 
@@ -18,17 +32,19 @@
 
 | Work | State | Next owner |
 |---|---|---|
-| #20 engine | DRAFT-8 reconciled; 289 mount cases pass at tested commit 740c97e998c7672d9e98916102be84430993521b. Only ten engine/harness files remain in the PR; current branch 2e0e8a4b7bff42797ac37901196e5ea348b2e392 carries identical implementation. Main still has older provisional engine. | Verification dispositions raw mount observations; Software preserves untested boundary |
-| VT8-001 / WP-07 | Allocation events and running sequence consumption untested independently; warm/state/operation exclusions also remain | Verification authors next tests before implementation merge |
+| #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software returns covered-split plan and diagnostic adapter evidence; PM reviews next |
+| VT8-001 / WP-07 | Two verifier-authored operation cases at a91138667673fcf19dc9e83c9034322b982b1771; synthetic self-tests only. Baseline has P1-R1-V01–V03 gaps; no product acceptance. | Software imports exact diagnostic baseline; Verification returns revised oracle/evidence |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Runner present; fixtures absent; golden CI remains red | Verification, then Michael listens |
 | Hardware | No board fabrication or cell charging; IR-015 acceptances and IR-018-16 qualification open | Hardware supplies evidence; Verification independently audits |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Print packet ready; old card cart withdrawn | Michael prints; Hardware re-sources cheap small cards |
 
-**New independent package acceptances: none.** Mount observations were run by Software,
-not independently dispositioned. CAD checks are not measurements. Do not report all CI
-green: missing WP-11 goldens are an explicit unresolved gate.
+**New independent package acceptances: none.** Software's mount observations now
+have Verification's narrow independent disposition, reproduced by PM. That is not
+full WP-06/WP-07 or #20 acceptance. CAD checks are not measurements. Missing WP-11
+goldens remain an explicit red gate. VR-P1-001 main-protection risk remains open;
+Michael must authorize settings changes.
 
 Risks: unqualified card atomicity, unresolved solenoid timing at the actual rail/parts,
 unprinted mechanism/creep trials, and code still held by coverage. These are visible

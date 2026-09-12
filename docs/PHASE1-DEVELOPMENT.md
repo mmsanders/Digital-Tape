@@ -37,6 +37,12 @@ Surge returns results to Michael and identifies the responsible lead for integra
 Michael may explicitly assign repository work, but a surge task alone grants no standing
 merge, normative-spec or independent acceptance authority. Escalate conflicting assignments.
 
+Michael clarified at the P1-R1 kickoff that **not every lead needs work each round**.
+PM assigns only useful bounded work; an unassigned lead waits for an explicit task.
+This is not a staffing quota or a requirement to invent parallel work. Current
+assignments and stop conditions are in docs/REVIEW/README.md, readable directly
+from main without Michael pasting instruction files into chats.
+
 ## Product entry point
 
 Use [STATUS](STATUS.md), [current briefs](REVIEW/README.md), [package scope](PACKAGES/README.md)

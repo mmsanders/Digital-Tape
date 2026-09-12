@@ -35,15 +35,36 @@ The original PR #20 head returned 15 failures out of 289; two DRAFT-8 mount
 reconciliations yielded 0/289 failures at published branch commit
 740c97e998c7672d9e98916102be84430993521b. The [raw run packet](verification/runs/2026-09-07/README.md)
 contains both lossless logs, reproduction commands and provenance. Independent
-result disposition is pending; no new engine code has been merged to main.
+result disposition is now recorded below; no new engine code has been merged by
+the P1-R1 PM publication.
 
 Safe documentation and raw observations have been extracted from #20. Its remaining
 code/harness boundary includes covered and uncovered behaviour in shared files.
 Do not merge those files wholesale. A further split requires preserving the tested
 behaviour and reviewing dependencies, or additional independently authored coverage.
-Read the [Verification brief](REVIEW/verification-lead.md) for the bounded next return.
+Read the [current briefs](REVIEW/README.md) for the bounded next returns.
 
 Publication order is recorded by the actual merge ancestry: exact spec #25,
 independent tests #27, then software branch reconciliation. Importing hardware #18
 and this documentation does not grant an engine coverage exception. The independent
 test directory and both canonical integrity manifests remain unchanged.
+
+## P1-R1 independent return — 12 September 2026 UTC
+
+Source: verifier main `689c41909e6bbec499aeb0243008222d7a1c9f64`.
+`findings/mount-observation-disposition-2026-09-11.md` is copied verbatim to
+[the same report under docs/verification](verification/mount-observation-disposition-2026-09-11.md).
+Verification recomputed 274/289 before and 289/289 after with zero integrity or
+verdict defects. PM reproduced its audit; neither a new engine run nor a new
+independent package acceptance is claimed. JSONL identifies adapter hashes; the
+committed run packet supplies engine-SHA association.
+
+The next baseline is verifier `tests/ops_draft8/` at
+`a91138667673fcf19dc9e83c9034322b982b1771`, tree
+`c8a43df69a6be8e2c34bf79a1d79933abf48286a`, unchanged at the return commit.
+**Not imported by PM.** Software is assigned the exact test-only import, adapter
+and diagnostic attempt. P1-R1-V01/V02/V03 require verifier-owned corrections before
+this package supports operation acceptance. See [PM review](REVIEW/P1-R1-PM-REVIEW.md)
+for reproducible gaps, source commitments and remaining coverage exclusions.
+The revised package needs a new immutable source, exact subsequent import and raw
+real-product observations independently dispositioned before expanding acceptance.

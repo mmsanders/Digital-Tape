@@ -1,46 +1,52 @@
-# Verification — next independent return
+# Verification — P1-R1-V
 
-Phase 1 role: read [the role instructions](../ROLES/verification.md).
-Work directly in your lead chat; the current coverage and safety holds remain binding.
+**PM-issued 12 September 2026 UTC · Sol / separate Work chat · no subworkers.**
+Read [role](../ROLES/verification.md), [round](README.md) and
+[PM review/reproducers](P1-R1-PM-REVIEW.md). Report independently to PM.
+The 289-case raw mount disposition is received and recorded. Do not redo unchanged
+paper review or request the gzip logs again; no broader acceptance follows.
 
-**From acting PM · 8 September 2026 · Published instructions, carried by Michael.**
+## Assignment: make the two-case operation package auditable
 
-Your delivery at 4ee116fa040bb5ce040325e0076365abf8b0f8f9 was imported verbatim.
-DRAFT-8 is canonically issued through #25 and all four files match your authenticated
-test baseline. Tests landed on main through #27 before any corresponding new engine
-implementation merge. Thank you for making the uncovered boundary explicit.
+Start from verifier main `689c41909e6bbec499aeb0243008222d7a1c9f64`; record actual
+input SHA and any subsequent changes. Product DRAFT-8 remains normative.
 
-## Immediate request
+1. Independently reproduce/disposition **P1-R1-V01/V02** against TapeFS §§7–8 and
+   Engine API §§6–7. Add ordered recording durability checks (including the
+   chunk-data barrier before metadata), whole-trace checks for illegal I/O by the
+   scripted calls, callback range/result validation and targeted negative controls.
+   Preserve legitimate reads, public semantics and narrow case scope. PM's synthetic
+   reproducer demonstrates a gap; it is not a replacement oracle or permission to
+   consult implementation.
+2. Resolve **P1-R1-V03**: persist hash-bound raw input/final VO08 media, complete
+   observations and build/source provenance; enable offline verdict recomputation
+   without the engine. Test missing/tampered evidence failure. Authenticate actual
+   fetched spec bytes against DRAFT-8, not just hardcoded provenance labels.
+   Clarify adapter/public-call result evidence and synthetic/product identification.
+3. Reproduce both conforming cases and all original six mutations plus new controls.
+   Run the synthetic adapter and replay saved artifacts. Publish immutable source
+   and an explicit coverage/exclusion matrix tied to assertion IDs/spec sections.
+   Synthetic runs are never product acceptance.
+4. Resolve **P1-R1-D01**: mark DRAFT-6 WP10/WP11/WP12A plans historical or reconcile
+   active claims with DRAFT-8 citations. Supply a short dependency-ordered next-tranche
+   proposal for playback/goldens, recording/random edits, complete crash closure
+   (including V7-001 two-interruption closure), and long-operation/state coverage.
+   Planning only for these additional tranches this round, not all tests at once.
 
-Independently disposition the observations in
-[the run packet](../verification/runs/2026-09-07/README.md).
-Read the existing spec/tests and raw JSONL, not untested implementation, private tests,
-PR #20’s mixed discussion or its diff. The two gzip files are lossless raw logs.
-The after-run engine publication is 740c97e998c7672d9e98916102be84430993521b.
-That SHA identifies the tested branch; it is not an instruction to inspect its code.
+## Boundaries and return
 
-Software observed 15/289 failures before the DRAFT-8 reconciliation and 0/289 after.
-The probe used the real public header/library; no fixture, assertion or accepted
-result changed. Please confirm the covered assertions or return exact findings.
-No need to repeat the full paper review of unchanged bytes.
+Do not inspect engine source, #20 diff/mixed discussion, private implementer tests
+or uncovered implementation to derive expectations. Software is importing the old
+baseline and building an adapter; missing-operation gaps may result. That work does
+not change your oracle or require waiting. No spec edits or relaxed expectations.
 
-## Next coverage needed
+Publish a verifier-main return with immutable commit, changed files, old/new package
+hashes, finding dispositions, actual tests, saved evidence/replay, adapter-contract
+changes and residual exclusions. Identify genuine spec ambiguity for PM; old V6
+labels alone do not reopen frozen bytes.
 
-VT8-001 remains: independently test allocation events and all-slot running-sequence
-consumption through specified public operations/media observations. Also preserve
-the explicit warm-start/state-transition/operation exclusions in COVERAGE.md.
-Return a tractable next tranche and required mechanical adapter contract.
-Do not invent a product API or derive expectations from implementation.
-
-## Return
-
-Publish independent disposition/test source with immutable commit, covered test IDs,
-actual runs, raw evidence and residual exclusions. PM/Software will import it into
-Digital-Tape so new agents do not depend on chat history. If you need to inspect any
-implementation, first identify which behaviour has independently authored landed tests
-and stay within that boundary; a file containing mixed behaviour is not blanket permission.
-
-No request for full WP-07 acceptance, green complete WP-10, operations freeze, WP-11
-goldens or hardware qualification in this immediate return. Those obligations remain.
-IR-018-18 has an implemented gate response; review it separately when assigned, without
-turning software regression results into circuit qualification.
+Stop when the revised package and plan are ready for PM review. Real-product result
+disposition against revised tests is a subsequent bounded return after exact import
+and complete raw evidence. No full WP-07/WP-10 acceptance, operations/state freeze,
+WP-11 completion or hardware qualification. Hardware audit is not assigned to
+Verification this round; PM will schedule it with an exact evidence packet.
