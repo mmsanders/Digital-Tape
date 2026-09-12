@@ -1,0 +1,34 @@
+# Revised VT8-001 adapter — diagnostic build against held PR #20
+adapter source sha256: d48387ba72930381a9d86594c0c1df3f3fe5234667415e1ea99da2983d3cd22e
+engine input: 2e0e8a4b7bff42797ac37901196e5ea348b2e392
+compiler: cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+
+## STAGE 1 — compile only (public header completeness under the revised contract)
+make: Nothing to be done for 'compile'.
+exit: 0
+
+## STAGE 2 — link against pr20 libtape.a
+/usr/bin/ld: build/diag.o: in function `case_rec_allocseq':
+/home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:427:(.text+0x876): undefined reference to `tape_seek'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:433:(.text+0x8b8): undefined reference to `tape_arm'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:438:(.text+0x90f): undefined reference to `tape_feed'
+/usr/bin/ld: build/diag.o: in function `case_reset_b':
+/home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:384:(.text+0xb2f): undefined reference to `tape_reset_side_b'
+/usr/bin/ld: build/diag.o: in function `case_rec_allocseq':
+/home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:454:(.text+0xe4b): undefined reference to `tape_service'
+/usr/bin/ld: /home/user/Digital-Tape/tests/ops_adapter/vt8_ops_probe.c:464:(.text+0xe9e): undefined reference to `tape_commit'
+collect2: error: ld returned 1 exit status
+exit: 1
+
+## STAGE 3 — undefined public symbols, enumerated
+                 U tape_arm
+                 U tape_commit
+                 U tape_feed
+                 U tape_get_info
+                 U tape_init
+                 U tape_instance_size
+                 U tape_mount
+                 U tape_reset_side_b
+                 U tape_seek
+                 U tape_service
+                 U tape_unmount

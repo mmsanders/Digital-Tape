@@ -1,53 +1,84 @@
 # VT8-001 mechanical adapter contract
 
-The adapter exists only to call the frozen **public API** and expose block-device/media observations to verifier code. It is not a product API and may not expose engine internals.
+The adapter calls only the frozen **public API** and exposes public-call plus
+block-device observations to verifier code. It is not a product API and may not expose
+engine internals, private allocator/index state, or implementation-derived claims.
 
-## Invocation
+## Invocation and observation
 
 `vt8_ops_probe CASE_ID INPUT.vo08 OUTPUT.vo08`
 
-It must return 0 only when the scripted public calls completed and it wrote the final compact media envelope. Stdout is one JSON object containing `events`; stderr is diagnostic only.
+Exit 0 only when the scripted calls completed and final VO08 media was written.
+Stdout must be one JSON object:
 
-The `VO08` envelope is defined by `oracle.Media`: `"VO08"`, little-endian `block_count`, primary and mirror 512-byte superblocks, then A0/A1/B0/B1 65,536-byte slots. Unmapped audio reads may return deterministic poison/zero; audio writes must be accepted into a sparse block map and traced. The output envelope contains final metadata. Audio contents themselves are not an oracle in this tranche.
+```json
+{
+  "format": "VT8-OPS-OBSERVATION-1",
+  "adapter_kind": "product",
+  "calls": [],
+  "events": []
+}
+```
 
-## Harness-owned event trace
+`adapter_kind` is exactly `product` for a real adapter or `synthetic` for the verifier
+self-test. The runner supplies the immutable adapter source/build provenance; replay
+checks that the observation identity agrees with the manifest.
 
-Every block callback emits, in call order:
+Every public call appends one ordered `calls` object with `phase`, exact public
+function name, symbolic `result`, and the result fields the script depends on. For
+this tranche those include mounted side, `side_b_valid`, seek frame, record mode,
+feed requested/accepted counts, and each service `block_budget`/`more_work` result.
+
+Every block callback appends, in call order:
 
 `{"phase":"...","op":"read|write|flush","lba":N,"count":N,"rc":0}`
 
-`phase` is set by the wrapper immediately before each **public** call; it is not reported by the engine. At minimum use `mount`, `reset_b`, `seek`, `arm`, `feed`, `service`, `commit`, `unmount`, `remount`. Flush may omit `lba/count`.
+Flush omits `lba/count`. The phase is set by the wrapper immediately before each
+**public** call. The wrapper records every callback, including unexpected callbacks;
+it must never filter observations to make a verdict pass. Callback batches are
+range-checked with widened arithmetic. A nonzero callback return is evidence and
+fails these conforming cases rather than being silently dropped.
 
-The wrapper must reject out-of-range callback batches with widened arithmetic and may record write-byte hashes for diagnosis, but the verifier derives allocation and sequence from callback LBAs plus final raw metadata, not an engine-provided allocation/sequence claim.
+The VO08 envelope is `"VO08"`, little-endian `block_count`, primary and mirror
+512-byte superblocks, then A0/A1/B0/B1 65,536-byte slots. Sparse chunk contents may be
+harness-owned; this tranche does not compare PCM bytes, but all audio writes are
+traced and range checked.
 
-## Case scripts
-
-### `VT8-001-RB-ALLSLOT`
+## Script `VT8-001-RB-ALLSLOT`
 
 1. fresh caller-owned instance/rings;
-2. mount **Side A**, resume 0, `warm == NULL`;
-3. require mount success and degraded-B observable via public info;
-4. call `tape_reset_side_b` once;
-5. unmount;
-6. fresh instance, remount **Side B** from the resulting media to establish recovery is selectable.
+2. mount Side A, resume 0, `warm == NULL`; require `TAPE_OK`;
+3. `tape_get_info`; require `TAPE_OK` and `side_b_valid == false`;
+4. `tape_reset_side_b`; require `TAPE_OK`;
+5. unmount; require `TAPE_OK`;
+6. fresh instance, remount Side B from final media; require `TAPE_OK`.
 
-No additional mutator is permitted.
+No other mutator is permitted. At stage 0 reset moves no audio; its index commit must
+be entries → flush → header → flush.
 
-### `VT8-001-REC-ALLOCSEQ`
+## Script `VT8-001-REC-ALLOCSEQ`
 
-1. fresh instance/rings; mount **Side B**, resume 0, `warm == NULL`;
-2. seek to frame 128 (the end of the one-entry timeline);
-3. arm `TAPE_REC_SPLICE`;
-4. feed exactly 128 deterministic stereo frames and require all 128 accepted;
-5. call `tape_service` with a positive fixed block budget until `more_work == false`; impose a finite harness guard and fail on nontermination;
-6. call `tape_commit` exactly once and require `TAPE_OK`;
-7. unmount;
-8. fresh instance, remount Side B from the final media.
+1. fresh instance/rings; mount Side B, resume 0, `warm == NULL`; require `TAPE_OK`;
+2. seek to frame 128; require `TAPE_OK`;
+3. arm `TAPE_REC_SPLICE`; require `TAPE_OK`;
+4. feed exactly 128 deterministic stereo frames; require `TAPE_OK` and 128 accepted;
+5. call `tape_service` with a positive fixed budget until `more_work == false`, with a
+   finite harness guard; each result is recorded;
+6. call `tape_commit` exactly once; require `TAPE_OK`;
+7. unmount; require `TAPE_OK`;
+8. fresh instance, remount Side B; require `TAPE_OK`.
 
-The adapter may choose the deterministic 128-frame sample values; this tranche does not compare PCM. It may not call private allocator/index helpers to force the result.
+The adapter may choose deterministic samples; no private allocator helper may force an
+allocation. `tape_feed` performs no block I/O. Stage-0 `tape_arm` performs no block
+I/O. Every service write must lie in the newly allocated chunk; a successful service
+flush must follow the final chunk-data write before commit metadata begins. Commit is
+metadata only and exactly entries → flush → header → flush.
 
 ## Permitted integration edits
 
-Only mechanical include/header/library paths, symbol-equivalent build flags, and the sparse `tape_dev` wrapper are permitted. The actual product `tape.h` must be included. Do **not** change a fixture, expected sequence, operation argument, accepted result, callback classification, or oracle rule to make a product build pass.
-
-Do not add an allocate-only or sequence-query API. Do not read internal allocator counters, private index structures, or operation state. If the public operations cannot produce the required observation, return that as an integration finding.
+Only mechanical include/header/library paths, symbol-equivalent build flags, and the
+sparse `tape_dev` wrapper are permitted. Include the actual product public header.
+Do not change fixtures, expected sequences, operation arguments, accepted results,
+callback classification, ordering, ranges or oracle assertions to fit a product
+build. Missing public operations/ABI are findings. Do not add allocate-only or
+sequence-query APIs.

@@ -1,0 +1,10 @@
+{
+  "adapter_kind": "synthetic",
+  "errors": [],
+  "id": "VT8-001-RB-ALLSLOT",
+  "operation": "reset_b",
+  "post_sha256": "14f42962b872b9e06631e2cd7a402866717493f21ca3df01143922803e4687fe",
+  "pre_sha256": "b3fef55d0f9abed54e58318d2f2fa6ae39d309f75c53a3434ede9a43fed7e56d",
+  "returncode": 0,
+  "status": "PASS"
+}

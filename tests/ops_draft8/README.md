@@ -1,51 +1,79 @@
-# VT8-001 — first operation-observation tranche
+# VT8-001 — auditable DRAFT-8 operation tranche
 
-This verifier-owned package closes the smallest useful slice of `VT8-001` left by the DRAFT-8 mount tranche. It is authored from the frozen DRAFT-8 contract and **does not inspect or import product implementation**.
+This verifier-owned package is authored from the frozen DRAFT-8 contract without
+inspection or import of product implementation. It covers two deliberately narrow
+public-operation cases and is **not** full WP-07/WP-10 acceptance.
 
-Frozen hashes:
+Normative DRAFT-8 SHA-256 values:
 
 - TapeFS `3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb`
 - Engine API `537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1`
 - Acceptance `7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7`
 
-## Covered IDs
+`runner.py` hashes the **actual bytes** in `--spec-dir` before a case runs and copies
+those bytes into the evidence bundle. Its default is the independently authenticated
+`tests/mount_draft8/spec/` copy. The repository-root `spec/` is historical and must
+not be used as DRAFT-8 authority.
+
+## Cases
 
 ### `VT8-001-RB-ALLSLOT`
 
-Public operation: mount Side A on a degraded-B cartridge, then `tape_reset_side_b`.
-
-The fixture deliberately combines:
-
-- live A at sequence 10;
-- a structurally valid A-partner header at sequence **900** that is semantically invalid for A;
-- B0/B1 both semantically valid at equal sequence 500, so B is degraded.
-
-Required observation: recovery writes B0 at sequence **901**, copies the live A entries with `side=1`, moves/writes **no chunk data**, leaves the stage-0 superblock byte-identical, and produces a remount-selectable B. This proves that reset uses TapeFS §5.5's maximum over **all structurally valid slots**, not a live-side or semantically-valid maximum.
+Mount Side A on degraded-B media, observe `side_b_valid == false` through the public
+API, call `tape_reset_side_b`, unmount, then remount Side B. The fixture has live A at
+sequence 10, a structurally valid A partner at sequence 900 that is semantically
+invalid for A, and equal-sequence B slots at 500. The result must write B0 at 901,
+copy live-A entries with `side=1`, move no audio, leave the stage-0 superblock
+unchanged, and make B selectable. The B0 index commit must be exactly entry block,
+flush, header block, flush.
 
 ### `VT8-001-REC-ALLOCSEQ`
 
-Public operations: mount Side B, seek to the end, `tape_arm(TAPE_REC_SPLICE)`, feed 128 stereo frames, service until no work remains, `tape_commit`, unmount/remount.
+Mount Side B, seek to frame 128, arm splice, feed exactly 128 accepted frames, service
+to completion, commit, unmount and remount Side B. The fixture has
+`a_high_water == free_next == 3` and a structurally valid high sequence 700 in a slot
+that is semantically invalid for A. The recording must allocate only chunk 3, durably
+flush all service writes before commit metadata begins, commit B1 at sequence 701 as
+`[(0,0,128),(3,0,128)]`, leave the stage-0 superblock unchanged, and derive
+`free_next == 4` after remount. Commit I/O is exactly entries, flush, header, flush.
 
-The fixture has `a_high_water == free_next == 3`, live B sequence 20, and a structurally valid but A-semantically-invalid partner at sequence **700**.
+Whole-trace validation rejects illegal callback I/O from scripted calls, validates
+callback ranges and return codes, and binds the verdict to public-call results such
+as `accepted`, `more_work`, operation results, and the remount side. Legitimate
+metadata reads during mount/remount and service reads remain permitted.
 
-Required observation: service audio writes lie wholly in newly allocated chunk **3** (never below `a_high_water`); the committed B1 index is `[(0,0,128),(3,0,128)]` at sequence **701**; stage-0 ordinary recording leaves the superblock / `sb_generation` unchanged; remount derives `free_next == 4`; all structurally valid slot sequences remain unique.
+## Self-test and evidence replay
 
-## Deliberate exclusions
+Run:
 
-This tranche does **not** claim full WP-07 or WP-10. It does not exercise non-NULL warm start, playback/state transitions, overwrite/overdub, stage clearing, reset timing, 10,000 edit sequences, promote, re-spool, duplicate, format, long-operation continuations, crash injection, FAULTED behavior, or golden PCM. Those exclusions remain exactly the boundary stated by the previous mount tranche.
+```sh
+python3 tests/ops_draft8/selftest.py
+```
 
-The recording case observes allocation from callback LBAs and final committed media; there is no allocate-only API and none is requested.
+It accepts two conforming synthetic observations, rejects the original six mutations,
+and adds controls for P1-R1-V01/V02, the recording chunk-data barrier, callback range
+and return values, and public-call results. It also proves spec-byte authentication
+and that replay fails closed on missing or tampered evidence.
 
-## Local oracle self-test
+A real or synthetic adapter run uses:
 
-`python3 selftest.py`
+```sh
+python3 tests/ops_draft8/runner.py \
+  --adapter /path/to/vt8_ops_probe \
+  --adapter-kind product \
+  --adapter-source <immutable-source-id> \
+  --adapter-build '<compiler/build provenance>' \
+  --verifier-source <verification-commit> \
+  --evidence-dir /path/to/evidence
 
-The self-test is **not an engine run**. It validates that the independent oracle accepts two conforming synthetic observations and rejects six targeted mutations: live-only sequence bases for reset/record, reset chunk movement, an allocation below `H/free_next`, an ordinary-recording `sb_generation` increment, and an overlapping committed index.
+python3 tests/ops_draft8/replay.py /path/to/evidence
+```
 
-## Product run
+The evidence directory persists the exact raw input/final VO08 envelopes as deterministic gzip archives (with both archive and decompressed-raw SHA-256 bindings), adapter stdout
+and stderr, complete callback/public-call observations, per-case verdicts, adapter
+identity/build/source provenance, exact spec bytes and a hash-bound manifest. Replay
+recomputes the verdict without invoking the engine or adapter. Synthetic evidence is
+package evidence only and is never product acceptance.
 
-After PM/Software mechanically supplies the adapter described in `ADAPTER.md`:
-
-`python3 runner.py --adapter /path/to/vt8_ops_probe --log evidence/product.jsonl`
-
-The runner emits provenance, adapter SHA-256, immutable fixture hashes, raw callback observations and PASS/FAIL per case. A missing adapter is an error, never a skip.
+See `COVERAGE.md` for assertion/spec mapping and exclusions, and
+`../NEXT-TRANCHES.md` for the dependency-ordered plan beyond this return.
