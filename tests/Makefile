@@ -9,7 +9,7 @@ BUILD ?= ../build/tests
 ENG   ?= ../build/engine
 
 CFLAGS += -std=c99 -Wall -Wextra -Werror -pedantic -g -O1
-CPPFLAGS += -I../engine/include -I../engine/port -Iharness
+CPPFLAGS += -I../engine/include -I../engine/port -I../engine/src -Iharness
 
 SRC  := $(wildcard harness/test_*.c)
 BINS := $(patsubst harness/test_%.c,$(BUILD)/test_%,$(SRC))
