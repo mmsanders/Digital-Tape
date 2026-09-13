@@ -26,6 +26,12 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R7 PM disposition](P1-R7-PM-DISPOSITION.md): authentication of the complete
   verifier playback sibling, disposition of Software's held product run and its
   provenance correction, and the next test-first import sequence.
+- [P1-R8 PM disposition](P1-R8-PM-DISPOSITION.md): authentication of the exact
+  complete-playback import and held product bundle, plus frozen-contract disposition
+  of three verifier-package conflicts.
+- [P1-R9 PM disposition](P1-R9-PM-DISPOSITION.md): authentication of Verification's
+  corrected complete-playback publication and the ordered exact-import/product-rerun
+  dependency.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

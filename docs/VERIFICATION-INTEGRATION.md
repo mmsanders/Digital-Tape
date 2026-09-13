@@ -276,3 +276,59 @@ cannot yet support independent disposition of PR #64. Preserve it as superseded 
 history; Software must produce a fresh exact-head/build-bound bundle after importing
 the complete sibling. Verification receives no product-observation issue until that
 dependency is ready.
+
+## P1-R8 complete import and contract-conflict disposition — 13 September 2026 UTC
+
+Software #66 merged Phase A through PR #67 at product main
+`14a593120b2400ea5baac79a3b143cd702edcdc0`. The product
+`tests/playback_complete_draft8/` subtree is exactly independent Verification's
+published tree `863b3a49c421bda1bebcf1a9760149bec7051048`, including retained
+synthetic evidence tree `c67ea8fa128e06393839f968ae3cc949d84e5f2a`. The earlier
+playback tree `ff810814dbc8079c6903e6f85ed7ee312abd3076` is unchanged. Clean
+generation, self-test and synthetic replay reproduce; the only full product-gate
+failure is the deliberate missing-WP-11-manifest gate. No engine file landed.
+
+Held PR #64 is `bc53076448112ec3015de40e71c229e17d225c2f`, with tested-code
+ancestor `43d2dbaa6434942df37e165b25edc6d45135fee2`. Its complete product
+bundle is bound to that code and one build identity. Offline replay with the unmodified
+published package reaches the oracle and fails at its first disagreement. PM did not
+inspect implementation or adapter source and does not accept Software's diagnostic
+scratch oracle.
+
+Frozen-contract review identifies exactly three verifier-package defects: the
+`intmin` family drops frame 0 contrary to §§6.2–6.3; the reverse scrub generator uses
+the V5-005-rejected `max_pos - 1` instead of `(total_frames - 1) << 32`; and both
+side families expect integer 6 where the frozen enum makes `TAPE_ERR_UNDERRUN` 18.
+[P1-R8](REVIEW/P1-R8-PM-DISPOSITION.md) logs PM approval to regenerate only the
+affected verifier-owned reverse candidate/evidence from the frozen grid snap. This is
+package correction authority, not PCM/golden/listening acceptance.
+
+Independent Verification owns the correction without consulting product code or
+Software's diagnostic oracle. PR #64 remains draft and held; Software rerun and
+candidate disposition wait for a corrected immutable verifier publication. Every
+other acceptance and safety hold remains.
+
+## P1-R9 corrected complete-playback publication — 13 September 2026 UTC
+
+Verification #8 published its independent correction at verifier main
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. The corrected pre-evidence source
+commit/tree are `1c1489a5b1c10f2baa8425557fd7bdfde3225575` /
+`43ca6f6bbc1990d5ced6de3b2ce0d04f00aa7519`; the final complete package tree is
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, with retained P1-R8 synthetic
+evidence tree `d867fc68c80a2217508868c4b339d160b55ec2cc`.
+
+PM authenticated the changed-path and file-mode boundary and reproduced deterministic
+generation, all ten corrected families, twenty controls including named F-1/F-2/F-3
+negatives, the retained P1-R4 suite and eighteen controls, saved replay and the full
+verifier suite. Only reverse scrub candidate PCM changed among generated inputs, from
+`faae5cf8...` to `5f1794e8...`; fixtures and forward candidate remain byte-identical.
+Frozen hashes, WP-08, the earlier playback tree `ff810814...` and prior complete
+synthetic evidence `c67ea8fa...` are unchanged.
+
+The saved P1-R8 observation is synthetic and binds the corrected source identity; it
+is not a product run, golden, listening or acceptance. The corrected publication is
+ready for exact mechanical product import. Structural Rule 1 requires that replacement
+to land on main without engine/firmware changes before the held candidate reruns. The
+existing failed product bundle remains immutable. PR #64 stays draft and held, and
+Independent Verification receives no product-disposition issue until a fresh bound
+bundle exists.

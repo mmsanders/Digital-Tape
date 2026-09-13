@@ -2093,3 +2093,72 @@ WP-08 only to the test-on-main rung, 13 of 36, with no acceptance implied.
 **Cost to reverse:** supersede the Software correction issue with an exact immutable
 replacement; retain both evidence bundles and their provenance defects rather than
 rewriting history.
+
+## ADR-142 — Keep DRAFT-8 and correct three complete-playback verifier expectations
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R8 activation
+
+Authenticate Software #66 Phase A at product main
+`14a593120b2400ea5baac79a3b143cd702edcdc0`: the exact complete independent
+playback subtree `863b3a49c421bda1bebcf1a9760149bec7051048` is on main test-first,
+including saved synthetic evidence tree `c67ea8fa128e06393839f968ae3cc949d84e5f2a`;
+no engine file landed. Clean regeneration, self-test and replay pass. The known
+missing-WP-11-manifest gate remains the only red full-product gate.
+
+Keep held PR #64 at `bc53076448112ec3015de40e71c229e17d225c2f`. Its complete bundle
+from tested-code commit `43d2dbaa6434942df37e165b25edc6d45135fee2` is exactly bound and
+replays with the unmodified verifier package to `FAIL: tape_render.rendered`. PM did
+not inspect or accept implementation or adapter source.
+
+Frozen DRAFT-8 resolves the three escalations without a spec change. Reverse landing
+must emit frame 0 before setting `at_start`; reverse-from-end must grid-snap to
+`(total_frames - 1) << 32`, not V5-005's rejected `max_pos - 1`; and
+`TAPE_ERR_UNDERRUN` is enum value 18, not 6. The complete verifier package encodes the
+wrong expectation in all three places. Authorize independent Verification to correct
+exactly those expectations and to regenerate the affected reverse candidate/evidence
+from the frozen algorithm while retaining old identities in history. This approval is
+golden-adjacent regeneration authority only, not PCM/golden/listening acceptance.
+
+Software remains idle until the corrected publication exists; Hardware and Surge also
+receive no issue. PR #20 and PR #64 remain draft and held. WP-11 red, independent
+Verification, test-first ordering, frozen hashes, purchase/qualification, fabrication,
+charging, protection and all other current holds remain.
+
+**Rationale and evidence:** [P1-R8 PM disposition](REVIEW/P1-R8-PM-DISPOSITION.md).
+**Cost to reverse:** supersede with a new PM decision and preserve both verifier
+publications and product bundles; do not rewrite a package or frozen contract in place.
+
+## ADR-143 — Authenticate the corrected playback publication and order the product rerun
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R9 activation
+
+Authenticate Verification #8 at verifier main
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. Its corrected source commit/tree are
+`1c1489a5b1c10f2baa8425557fd7bdfde3225575` /
+`43ca6f6bbc1990d5ced6de3b2ce0d04f00aa7519`; complete publication tree is
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, with P1-R8 synthetic evidence tree
+`d867fc68c80a2217508868c4b339d160b55ec2cc`.
+
+The source changes exactly F-1/F-2/F-3 and their package identities/controls. Only
+reverse candidate PCM changes among generated inputs, from `faae5cf8...` to
+`5f1794e8...`; all fixtures, forward candidate, frozen hashes, WP-08, the earlier
+playback tree and prior complete synthetic evidence remain exact. PM reproduced ten
+corrected families, twenty behavioral controls, retained tests, saved replay and the
+full verifier suite. All pass. These are independent package and synthetic-plumbing
+facts, not product, PCM, golden, listening, WP-08 or WP-11 acceptance.
+
+Software is the only next owner. It must import the final corrected publication
+exactly onto main with no engine/firmware delta, then merge that main into held PR #64
+without rewriting history and rerun the unchanged candidate against the unmodified
+corrected package. Retain a new immutable product bundle bound to a prior exact code
+commit and one consistent build identity; preserve the old failed bundle. Stop rather
+than edit tests or make unassigned behavior changes if any genuine mismatch remains.
+
+Verification waits for that product bundle; Hardware and Surge remain idle. PR #20 and
+PR #64 remain draft and held. WP-11 red/listening, independent disposition, frozen
+hashes, purchase/qualification, fabrication, charging, protection and all other holds
+remain.
+
+**Rationale and evidence:** [P1-R9 PM disposition](REVIEW/P1-R9-PM-DISPOSITION.md).
+**Cost to reverse:** supersede the Software issue before execution and retain both
+verifier publications and every product bundle; do not rewrite candidate history.
