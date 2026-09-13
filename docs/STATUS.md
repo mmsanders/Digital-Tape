@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 13 September 2026 UTC · Owner: PM · P1-R6 draft playback import authenticated; missing scrub table issued; scoped Phase 0 freeze unchanged.**
+**Updated: 13 September 2026 UTC · Owner: PM · P1-R7 complete playback verifier tranche authenticated; held product evidence needs exact-head correction; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -19,14 +19,22 @@ Verification corrected the first three-family playback package at verifier
 `aaa6dde86c9a0bdffa2b375361049ac670e26467`; the complete published subtree with
 saved synthetic evidence is `ff810814dbc8079c6903e6f85ed7ee312abd3076`.
 PM reproduced its corrected identity, exit, timeout, tamper and retention controls.
-Software draft PR #60 now imports the complete subtree exactly and adds product-side
-adapter/CI diagnostics without engine changes. PM authenticated the import and
-package checks but did not review adapter code. No product run exists because current
-main has a pre-DRAFT-8 header and held PR #20 lacks all four playback operations.
+Software merged PR #60 at `4517db7efba0d1a0933fc0dda1a607c5441197b7`,
+placing that exact subtree and the product-side adapter/CI diagnostics on main without
+engine changes. PM authenticated the import and package checks but did not review
+adapter code. Software then opened held draft PR #64 at
+`3dc5abb85e5b30200cf1553b9a06a83bc83c6d36`; its three-family product bundle
+replays and PM reproduced the result, but the durable packet misidentifies the
+pre-implementation merge `c108356...` as the candidate and records two different
+engine-archive hashes. The observation is therefore not yet ready for independent
+candidate disposition.
 Verification #6 correctly stopped on the absent “exact” scrub table; PM has now
 issued that deterministic vector in [WP-08](PACKAGES/WP-08.md). No listening,
 PCM/WP-08/WP-11 or engine acceptance follows. See the
-[P1-R6 disposition](REVIEW/P1-R6-PM-DISPOSITION.md).
+[P1-R6 disposition](REVIEW/P1-R6-PM-DISPOSITION.md). Verification #7 subsequently
+published the complete ten-family sibling at verifier `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`;
+PM authenticated its source and saved-evidence trees and reproduced its full suite.
+It awaits exact product import. See the [P1-R7 disposition](REVIEW/P1-R7-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -64,7 +72,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Draft PR #60 contains the exact corrected package and synthetic-only adapter diagnostic; no product PCM exists, candidate PCM is unlistened/unaccepted, and golden CI stays red | Software #63 integration/candidate development, verifier #7 package, then independent product-observation disposition; Michael listening only after product PCM evidence |
+| WP-11 | Exact first playback package is on main; PR #64 retains narrow product PCM, but candidate/build provenance is inconsistent and the complete sibling is not imported. Candidate PCM is unlistened/unaccepted and golden CI stays red | Software correction/import, then independent product-observation disposition; Michael listening only after authenticated product PCM evidence |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -81,16 +89,18 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R6 validation reproduced draft PR #60's exact 57-file verifier subtree, playback
-generation/self-test/replay, frozen-spec gate and product CI. Actions run 34725672675
-has eight green jobs and only the intentionally visible missing-WP-11 golden job red.
-The retained diagnostic has no product run: main fails on the old mount signature and
-held #20 lacks seek, set-rate, render and service definitions. Verification #6's
-schedule blocker is valid and resolved at the product-input layer by the exact WP-08
-table. Software #63 now owns ordered test integration and a held product candidate;
-verifier #7 owns independent boundary/ramp/side-switch authorship. Michael #49
-remains outside the immediate laptop critical path. Dashboard deployment is unchanged
-and green.
+P1-R7 validation confirms the first verifier tree is on main exactly at
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`. The complete verifier source tree is
+`5527547b72b3e5c6d6fb91d41f3aa3bfa86fab7d`, its complete publication subtree is
+`863b3a49c421bda1bebcf1a9760149bec7051048`, and its saved synthetic evidence tree is
+`c67ea8fa128e06393839f968ae3cc949d84e5f2a`; generation, 10 families, 16 new
+behavioral controls, retained P1-R4 controls, offline replay and the full verifier
+suite reproduce green. PR #64's retained three-family bundle also replays and a fresh
+PM run at the actual head produces the same three byte-exact outcomes, but the
+committed candidate/build provenance is internally inconsistent and is held for
+Software correction before Verification spends a disposition round. The hand-maintained
+dashboard now records WP-08 at the test-on-main rung, 13 of 36. Michael #49 remains
+outside the immediate laptop critical path.
 
 ## Phase 1 operating format — 11 September
 

@@ -23,6 +23,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R6 PM disposition](P1-R6-PM-DISPOSITION.md): authentication of Software's
   draft playback import, disposition of Verification's schedule blocker, and the
   issued WP-08 scrub table.
+- [P1-R7 PM disposition](P1-R7-PM-DISPOSITION.md): authentication of the complete
+  verifier playback sibling, disposition of Software's held product run and its
+  provenance correction, and the next test-first import sequence.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

@@ -259,7 +259,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R5 · 12 September 2026 UTC",
+      asOf: "P1-R7 · 13 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -267,8 +267,8 @@
           note: "289/289 independent mount cases landed test-first and were dispositioned. PR #20 stays draft, main still carries the older provisional engine, and the uncovered behaviour is held." },
         { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 2,
           note: "The hardened VT8 tree is imported byte-for-byte and its self-checks pass. Six operations are undefined, so the suite has never met the real engine." },
-        { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 1,
-          note: "The corrected first three-family package is authenticated and ready for exact import (Software #59). The next boundary, ramp and side-switch tranche sits with Verification #6." },
+        { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
+          note: "The exact first three-family package is on main. Verification's complete ten-family boundary, scrub and side-switch sibling is authenticated and awaits import; draft PR #64 and its product evidence remain held." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "Contract frozen in DRAFT-8, nothing else. This is the package the Phase 1 milestone rides on, and its independent tests must land before any implementation." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,

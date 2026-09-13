@@ -33,10 +33,10 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; full package and uncovered #20 behavior remain held; active work is assigned in issues |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Corrected three-family package is exactly imported in draft PR #60; no product run or acceptance. [The missing deterministic scrub table](WP-08.md) is now PM-issued; verifier #7 owns independent boundary/ramp/side-switch coverage before implementation merge |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Exact three-family package is on main. The complete ten-family verifier sibling is authenticated and awaiting exact import. Draft PR #64 and its replaying three-family product bundle remain held on an evidence-provenance correction; no implementation or PCM acceptance |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | First candidate PCM/evidence tranche is corrected and authenticated but remains synthetic-only and unlistened; exact import/product evidence and Michael listening are outstanding, so golden CI remains red |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Candidate PCM remains unlistened and unaccepted. A narrow product bundle exists on held PR #64 but its exact-head/build provenance must be corrected before independent disposition; golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Contract issued; independent WP-12a coverage and acceptance outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
 | WP-36 | Slot capability model | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |

@@ -42,6 +42,10 @@ GitHub author identity do not expand the role's product authority.
 6. PM/Michael scope changes must be explicit in the issue body and documented in a
    comment describing the change. A lead's progress report does not change scope.
    Unresolved conflicting instructions mean report a blocker, not choose a wider task.
+7. Before closing the PM issue, manually refresh the Phase 1 roadmap snapshot in
+   `site/lead-queue/index.html`, including its round/date and factual package notes,
+   and run its dashboard test. Rungs reflect completed gates only; issue closure,
+   implementation evidence and a green run do not imply acceptance.
 
 ## Lead picks up and returns
 

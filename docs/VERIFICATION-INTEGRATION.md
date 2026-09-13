@@ -247,3 +247,32 @@ The DRAFT-8 files and hashes do not change. The new table is an input for indepe
 authorship, not accepted PCM or a product result. Software #63 owns ordered PR #60
 integration and a held implementation/evidence candidate; verifier #7 owns the new
 independent package.
+
+## P1-R7 complete-playback and product-evidence disposition — 13 September 2026 UTC
+
+Software merged PR #60 as `4517db7efba0d1a0933fc0dda1a607c5441197b7`.
+The product `tests/playback_draft8/` tree is exactly
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`; Phase A changed no engine file.
+
+Independent Verification #7 published the complete sibling at verifier main
+`121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`. Its pre-evidence source is
+`54789cc6e6bbfd942857374e2e0b3305d05d2f2c`, source tree
+`5527547b72b3e5c6d6fb91d41f3aa3bfa86fab7d`; the publication subtree with retained
+synthetic evidence is `863b3a49c421bda1bebcf1a9760149bec7051048`, and the saved
+evidence tree is `c67ea8fa128e06393839f968ae3cc949d84e5f2a`. PM reproduced
+deterministic generation, ten families, sixteen new behavioral controls, all retained
+P1-R4 controls, offline replay and the full verifier suite. No product code or adapter
+was inspected. The sibling is ready for exact mechanical import, not acceptance.
+
+Held draft PR #64 is currently `3dc5abb85e5b30200cf1553b9a06a83bc83c6d36`.
+Its retained three-family product evidence tree is
+`c1f173224ef5a312db438bd796e0090c4f329b5c`; offline replay passes, and PM reproduced
+the same three byte-exact outcomes using the existing public adapter at that head.
+That is a diagnostic result only. The committed return and packet incorrectly call
+the pre-implementation merge `c108356c640e971967fb3a00d87e3f6003a129db` the
+candidate head, while the packet and manifest also state different `libtape.a` hashes.
+The manifest does not name the exact implementation commit. The evidence therefore
+cannot yet support independent disposition of PR #64. Preserve it as superseded raw
+history; Software must produce a fresh exact-head/build-bound bundle after importing
+the complete sibling. Verification receives no product-observation issue until that
+dependency is ready.
