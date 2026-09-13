@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 12 September 2026 UTC · Owner: PM · P1-R5 corrected playback package authenticated; laptop integration and next independent tranche active; scoped Phase 0 freeze unchanged.**
+**Updated: 13 September 2026 UTC · Owner: PM · P1-R6 draft playback import authenticated; missing scrub table issued; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -19,8 +19,14 @@ Verification corrected the first three-family playback package at verifier
 `aaa6dde86c9a0bdffa2b375361049ac670e26467`; the complete published subtree with
 saved synthetic evidence is `ff810814dbc8079c6903e6f85ed7ee312abd3076`.
 PM reproduced its corrected identity, exit, timeout, tamper and retention controls.
-It is ready for exact mechanical import, not a product run, listening approval or
-PCM/WP-08/WP-11 acceptance. See the [P1-R5 disposition](REVIEW/P1-R5-PM-DISPOSITION.md).
+Software draft PR #60 now imports the complete subtree exactly and adds product-side
+adapter/CI diagnostics without engine changes. PM authenticated the import and
+package checks but did not review adapter code. No product run exists because current
+main has a pre-DRAFT-8 header and held PR #20 lacks all four playback operations.
+Verification #6 correctly stopped on the absent “exact” scrub table; PM has now
+issued that deterministic vector in [WP-08](PACKAGES/WP-08.md). No listening,
+PCM/WP-08/WP-11 or engine acceptance follows. See the
+[P1-R6 disposition](REVIEW/P1-R6-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -58,7 +64,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Corrected first three-family package is authenticated and ready for exact import; candidate PCM is still synthetic-only, unlistened and unaccepted, and golden CI stays red | Software #59 import/product diagnostic; Michael listening only after product PCM evidence is separately issued |
+| WP-11 | Draft PR #60 contains the exact corrected package and synthetic-only adapter diagnostic; no product PCM exists, candidate PCM is unlistened/unaccepted, and golden CI stays red | Software #63 integration/candidate development, verifier #7 package, then independent product-observation disposition; Michael listening only after product PCM evidence |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -75,13 +81,16 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R5 validation reproduced playback regeneration, the full verifier suite and saved
-synthetic replay. The corrected package now rejects manifest-only identity changes,
-missing/nonzero exit, timeout, missing/tampered evidence and verifier-source drift;
-the nonempty-destination control preserves existing bytes. Software #59 owns exact
-import/product diagnosis and Verification #6 owns the next independent playback
-boundary tranche. Michael #49 is not blocking those laptop tasks. Dashboard behavior
-tests and deployment remain unchanged and green.
+P1-R6 validation reproduced draft PR #60's exact 57-file verifier subtree, playback
+generation/self-test/replay, frozen-spec gate and product CI. Actions run 34725672675
+has eight green jobs and only the intentionally visible missing-WP-11 golden job red.
+The retained diagnostic has no product run: main fails on the old mount signature and
+held #20 lacks seek, set-rate, render and service definitions. Verification #6's
+schedule blocker is valid and resolved at the product-input layer by the exact WP-08
+table. Software #63 now owns ordered test integration and a held product candidate;
+verifier #7 owns independent boundary/ramp/side-switch authorship. Michael #49
+remains outside the immediate laptop critical path. Dashboard deployment is unchanged
+and green.
 
 ## Phase 1 operating format — 11 September
 

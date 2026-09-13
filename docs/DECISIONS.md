@@ -2016,3 +2016,37 @@ frozen-spec change follows. Closure means the assignee stopped, not acceptance.
 **Rationale and evidence:** [P1-R5 PM disposition](REVIEW/P1-R5-PM-DISPOSITION.md).
 **Cost to reverse:** supersede the role issues and preserve the authenticated package
 and evidence history; do not erase controls or reinterpret synthetic output.
+
+## ADR-140 — Issue the missing WP-08 scrub table and sequence playback development
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R6 activation
+
+Accept Verification's blocker P1-R5-V01 at verifier
+`a6b2630a55f7260a74e529d22f84aa94b8d7341f`: frozen acceptance says scrub goldens
+drive an exact table, but only the 4.0× to 12.0× over 1.5 seconds envelope exists.
+Cadence, fixed-point rounding, rendered counts, hold duration and reverse start all
+change byte-exact PCM and cannot be invented by Verification.
+
+Issue [WP-08](PACKAGES/WP-08.md) as the missing package-level deterministic vector:
+100 ms rows over the existing 1.5-second linear envelope, enumerated signed Q16.16
+values, 4,410 output frames per ramp row, a 22,050-frame (500 ms) ±12.0× hold,
+128-frame render requests with service-to-idle before each, forward from frame 0 and
+reverse from `total_frames`. This supplies the external table referenced by the
+acceptance row. It changes no TapeFS/API/acceptance byte, arithmetic or frozen hash;
+candidate fixture/PCM still requires independent authorship and later listening.
+
+Authenticate Software draft PR #60's verifier import at exact tree
+`ff810814dbc8079c6903e6f85ed7ee312abd3076` and record its no-product-run diagnostic.
+PM does not review or merge its adapter. Software may review/merge the test-only
+integration within its authority, then prepare—without merging—a playback candidate
+and raw product evidence. Independent Verification receives a fresh assignment
+against the exact WP-08 input and later dispositions product evidence separately.
+Those assignments are Software #63 and verifier #7; Hardware and Surge remain idle.
+
+PR #20 remains held. No header-only main update, engine merge, test weakening,
+synthetic relabel, golden/listening acceptance, purchase, card qualification,
+fabrication, charging or frozen-spec change follows.
+
+**Rationale and evidence:** [P1-R6 PM disposition](REVIEW/P1-R6-PM-DISPOSITION.md).
+**Cost to reverse:** supersede WP-08 with a new PM-issued vector and preserve both
+tables and their candidate evidence; do not silently regenerate PCM.

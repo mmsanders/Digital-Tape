@@ -20,6 +20,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R5 PM disposition](P1-R5-PM-DISPOSITION.md): authentication of the corrected
   playback evidence, Michael dependency decision, and bounded Software/Verification
   continuation.
+- [P1-R6 PM disposition](P1-R6-PM-DISPOSITION.md): authentication of Software's
+  draft playback import, disposition of Verification's schedule blocker, and the
+  issued WP-08 scrub table.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
