@@ -1,0 +1,25 @@
+{
+  "assignment": "P1-R6-V",
+  "generated_files": {
+    "candidate/scrub-forward.pcm": {"bytes": 352800, "sha256": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b"},
+    "candidate/scrub-reverse.pcm": {"bytes": 352800, "sha256": "faae5cf894f9a7b2d84e9f9c99a36184ddd776e3cdc6de734e935c4f35f4f5d6"},
+    "fixtures/empty.vo08.gz": {"bytes": 7451, "sha256": "95cc2ee3d7c72d42a53ffae9b74c52b21733b492eaa80a4cf06ae0c68655c6af"},
+    "fixtures/fixture.json": {"bytes": 815, "sha256": "625d215b97168c06875c9f263582673bcc44f0463cedec2875cf8e004bbb4859"},
+    "fixtures/long.vo08.gz": {"bytes": 34933, "sha256": "39603c2c6b44a12a82cf8df9dd43cf529cdc3bad8bcebd642b29ba863cb40c2b"},
+    "fixtures/one.vo08.gz": {"bytes": 7469, "sha256": "985dd4e22beb9671be88b1d94695cfb28beae7949245195d0810e392d76bf73f"}
+  },
+  "inherits": {
+    "commit": "7a22cbb4447c40c51b7c8b2282a685ed30a46ba6",
+    "path": "tests/playback_draft8",
+    "tree": "ff810814dbc8079c6903e6f85ed7ee312abd3076"
+  },
+  "product_input_commit": "06f383d3901884a017d5c32316c71b575b6936bf",
+  "schema": "playback-complete-draft8-package-v1",
+  "spec_sha256": {
+    "acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb"
+  },
+  "status": "verifier candidate PCM; synthetic only; not product-run, listened, or accepted",
+  "wp08_sha256": "ff519e960ed3db6e401baebd12f33d5527f83f0e4dfec12484f498470198a96a"
+}

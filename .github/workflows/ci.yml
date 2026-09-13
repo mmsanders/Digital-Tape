@@ -65,6 +65,24 @@ jobs:
       # tape_render or tape_service -- so no product playback evidence exists.
       - run: make -C tests/playback_draft8 check
 
+  playback-complete-package:
+    name: independent complete playback package self-checks (synthetic, not engine acceptance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The P1-R6 tranche: deterministic fixture and scrub-candidate regeneration,
+      # ten families, sixteen new behavioural mutations, the retained P1-R4
+      # eighteen-control package, evidence identity/exit/timeout controls and
+      # offline replay of the saved synthetic bundle.
+      #
+      # SYNTHETIC ONLY: this runs the package's own stand-in adapter. No engine is
+      # built, linked or executed, so a green result is verifier plumbing -- never
+      # product evidence, never listening, never WP-11 golden acceptance. The
+      # candidate scrub PCM under candidate/ is verifier-derived oracle bytes.
+      # The PRODUCT adapter lives in tests/playback_adapter and needs tape_status,
+      # which no engine on main defines.
+      - run: make -C tests/playback_complete_draft8 check
+
   build:
     name: build (-Werror)
     runs-on: ubuntu-latest
