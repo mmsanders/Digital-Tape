@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 13 September 2026 UTC · Owner: PM · P1-R8 complete playback tests are on main; three verifier-package conflicts are routed for correction; scoped Phase 0 freeze unchanged.**
+**Updated: 13 September 2026 UTC · Owner: PM · P1-R9 corrected complete-playback publication authenticated; exact import and held rerun are next; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -43,6 +43,14 @@ package defects: frame 0 is incorrectly dropped in the `intmin` reverse case, re
 scrub uses the explicitly rejected DRAFT-5 off-grid snap, and side-switch underrun is
 numbered 6 rather than 18. Verification owns the independent correction; PR #64 stays
 held. See the [P1-R8 disposition](REVIEW/P1-R8-PM-DISPOSITION.md).
+Verification #8 published the corrected complete package at verifier
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`; its source tree is `43ca6f6b...`,
+complete published tree `6dbb23bb...`, and retained P1-R8 synthetic evidence tree
+`d867fc68...`. PM authenticated the exact three corrections and reproduced all ten
+families, twenty behavioral controls, retained earlier-package tests, saved replay and
+the full verifier suite. The corrected publication is ready for exact import before
+an unchanged held-candidate rerun. See the
+[P1-R9 disposition](REVIEW/P1-R9-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -80,7 +88,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Exact complete playback subtree is on main. Held PR #64 has a build-bound complete product run, but its unmodified replay fails three expectations that conflict with frozen DRAFT-8. Candidate PCM is unlistened/unaccepted and golden CI stays red | Independent Verification package correction, then Software rerun; Michael listening only after a passing authenticated product bundle is separately routed |
+| WP-11 | Corrected complete publication is authenticated but not yet imported. Candidate PCM is synthetic/unlistened/unaccepted and golden CI stays red | Software exact import and held rerun, then independent product-bundle disposition; Michael listening only after PM separately routes a passing authenticated candidate |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -97,16 +105,15 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R8 validation confirms the complete verifier subtree is on main exactly at
-`863b3a49c421bda1bebcf1a9760149bec7051048`, with saved synthetic evidence tree
-`c67ea8fa128e06393839f968ae3cc949d84e5f2a`; generation, self-test and replay
-reproduce green. Held PR #64 at `bc53076448112ec3015de40e71c229e17d225c2f`
-retains a complete product bundle from tested-code commit `43d2dbaa...`; unmodified
-replay fails and remains visible. PM's contract arbitration changes no frozen bytes:
-Verification must correct exactly the frame-0, reverse-grid-snap and underrun-number
-expectations before Software reruns. The hand-maintained dashboard remains at the
-test-on-main rung, 13 of 36. Michael #49 remains outside the immediate laptop critical
-path.
+P1-R9 validation confirms corrected verifier source/publication/evidence trees
+`43ca6f6b...` / `6dbb23bb...` / `d867fc68...`. Only reverse candidate PCM changed,
+to `5f1794e8...`; frozen hashes, WP-08, fixtures, forward candidate, prior P1-R6
+evidence and earlier playback package remain exact. Generation, ten corrected
+families, twenty controls, retained tests, replay and the full verifier suite are
+green. This is package readiness, not product or PCM acceptance. Software must import
+the exact corrected publication before rerunning held PR #64. The hand-maintained
+dashboard remains at the test-on-main rung, 13 of 36. Michael #49 remains outside the
+immediate laptop critical path.
 
 ## Phase 1 operating format — 11 September
 

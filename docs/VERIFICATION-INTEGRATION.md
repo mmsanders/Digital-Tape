@@ -307,3 +307,28 @@ Independent Verification owns the correction without consulting product code or
 Software's diagnostic oracle. PR #64 remains draft and held; Software rerun and
 candidate disposition wait for a corrected immutable verifier publication. Every
 other acceptance and safety hold remains.
+
+## P1-R9 corrected complete-playback publication — 13 September 2026 UTC
+
+Verification #8 published its independent correction at verifier main
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. The corrected pre-evidence source
+commit/tree are `1c1489a5b1c10f2baa8425557fd7bdfde3225575` /
+`43ca6f6bbc1990d5ced6de3b2ce0d04f00aa7519`; the final complete package tree is
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, with retained P1-R8 synthetic
+evidence tree `d867fc68c80a2217508868c4b339d160b55ec2cc`.
+
+PM authenticated the changed-path and file-mode boundary and reproduced deterministic
+generation, all ten corrected families, twenty controls including named F-1/F-2/F-3
+negatives, the retained P1-R4 suite and eighteen controls, saved replay and the full
+verifier suite. Only reverse scrub candidate PCM changed among generated inputs, from
+`faae5cf8...` to `5f1794e8...`; fixtures and forward candidate remain byte-identical.
+Frozen hashes, WP-08, the earlier playback tree `ff810814...` and prior complete
+synthetic evidence `c67ea8fa...` are unchanged.
+
+The saved P1-R8 observation is synthetic and binds the corrected source identity; it
+is not a product run, golden, listening or acceptance. The corrected publication is
+ready for exact mechanical product import. Structural Rule 1 requires that replacement
+to land on main without engine/firmware changes before the held candidate reruns. The
+existing failed product bundle remains immutable. PR #64 stays draft and held, and
+Independent Verification receives no product-disposition issue until a fresh bound
+bundle exists.

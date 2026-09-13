@@ -2127,3 +2127,38 @@ charging, protection and all other current holds remain.
 **Rationale and evidence:** [P1-R8 PM disposition](REVIEW/P1-R8-PM-DISPOSITION.md).
 **Cost to reverse:** supersede with a new PM decision and preserve both verifier
 publications and product bundles; do not rewrite a package or frozen contract in place.
+
+## ADR-143 — Authenticate the corrected playback publication and order the product rerun
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R9 activation
+
+Authenticate Verification #8 at verifier main
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. Its corrected source commit/tree are
+`1c1489a5b1c10f2baa8425557fd7bdfde3225575` /
+`43ca6f6bbc1990d5ced6de3b2ce0d04f00aa7519`; complete publication tree is
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, with P1-R8 synthetic evidence tree
+`d867fc68c80a2217508868c4b339d160b55ec2cc`.
+
+The source changes exactly F-1/F-2/F-3 and their package identities/controls. Only
+reverse candidate PCM changes among generated inputs, from `faae5cf8...` to
+`5f1794e8...`; all fixtures, forward candidate, frozen hashes, WP-08, the earlier
+playback tree and prior complete synthetic evidence remain exact. PM reproduced ten
+corrected families, twenty behavioral controls, retained tests, saved replay and the
+full verifier suite. All pass. These are independent package and synthetic-plumbing
+facts, not product, PCM, golden, listening, WP-08 or WP-11 acceptance.
+
+Software is the only next owner. It must import the final corrected publication
+exactly onto main with no engine/firmware delta, then merge that main into held PR #64
+without rewriting history and rerun the unchanged candidate against the unmodified
+corrected package. Retain a new immutable product bundle bound to a prior exact code
+commit and one consistent build identity; preserve the old failed bundle. Stop rather
+than edit tests or make unassigned behavior changes if any genuine mismatch remains.
+
+Verification waits for that product bundle; Hardware and Surge remain idle. PR #20 and
+PR #64 remain draft and held. WP-11 red/listening, independent disposition, frozen
+hashes, purchase/qualification, fabrication, charging, protection and all other holds
+remain.
+
+**Rationale and evidence:** [P1-R9 PM disposition](REVIEW/P1-R9-PM-DISPOSITION.md).
+**Cost to reverse:** supersede the Software issue before execution and retain both
+verifier publications and every product bundle; do not rewrite candidate history.

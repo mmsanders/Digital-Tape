@@ -33,10 +33,10 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; full package and uncovered #20 behavior remain held; active work is assigned in issues |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Exact complete ten-family verifier subtree is on main test-first. A held complete product run exposes three verifier-package conflicts with frozen DRAFT-8; Verification owns correction before any implementation or PCM disposition |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Verification's corrected complete ten-family publication is authenticated and ready to replace the earlier complete subtree on main. Held PR #64 awaits an exact-import-first rerun; no implementation or PCM acceptance |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Candidate PCM remains unlistened and unaccepted. The held complete product bundle is exactly bound but fails three verifier-package expectations; corrected independent publication and a passing product rerun must precede listening. Golden CI remains red |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Corrected verifier candidate PCM remains synthetic, unlistened and unaccepted. Software must import the corrected package and retain a fresh passing product bundle before independent disposition or listening. Golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Contract issued; independent WP-12a coverage and acceptance outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
 | WP-36 | Slot capability model | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
