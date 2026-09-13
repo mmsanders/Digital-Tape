@@ -46,6 +46,9 @@ GitHub author identity do not expand the role's product authority.
    `site/lead-queue/index.html`, including its round/date and factual package notes,
    and run its dashboard test. Rungs reflect completed gates only; issue closure,
    implementation evidence and a green run do not imply acceptance.
+8. Do not post routine round-refresh comments on Michael's issue. Comment there only
+   when his work changes or becomes blocking. Do not publish or maintain branch KEEP
+   lists; branch cleanup is no longer a PM round deliverable.
 
 ## Lead picks up and returns
 

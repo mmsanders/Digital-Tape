@@ -2162,3 +2162,36 @@ remain.
 **Rationale and evidence:** [P1-R9 PM disposition](REVIEW/P1-R9-PM-DISPOSITION.md).
 **Cost to reverse:** supersede the Software issue before execution and retain both
 verifier publications and every product bundle; do not rewrite candidate history.
+
+## ADR-144 — Route the corrected product bundle and repair one ruleset context
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R10 activation
+
+Authenticate Software #70's exact corrected-package import at product main
+`d52730ffb4c9d8e634eded9caca208dcacb0d046`, tree
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, with no engine/firmware delta.
+Authenticate the fresh held product bundle at PR #64 head
+`c18aa42579ef7c5ea92a4d70972d6a2daa6698bb`, built from prior commit
+`5f44b97fe9fb3342fce3b58236a75ea27b4898a6`. Its unmodified replay passes all
+ten corrected families; the implementation and Software-owned adapter are unchanged
+from the earlier failing candidate. Route only that immutable bundle to independent
+Verification #9. The green result is not acceptance, a golden or listening authority,
+and PR #64 stays held.
+
+Record main ruleset `22084355` active with PR, conversation-resolution, no-deletion,
+no-force-push and eleven required-check rules. The required `print packet is printable`
+context is incompatible with its hardware-path-filtered workflow: ordinary PRs do not
+emit it and therefore cannot merge. Michael must remove that context from the required
+list or make an exact-name check report on every PR; PM recommends removal so hardware
+scope stays isolated. PM changes no repository setting. Requiring branches to be up to
+date is optional hardening and remains Michael's choice.
+
+Routine comments on Michael's issue and branch KEEP-list publication end now. PM adds
+to Michael's issue only when his task changes or becomes blocking; this ruleset defect
+meets that exception. Verification is the only activated lead this round. All frozen,
+independence, implementation, listening, hardware and safety holds remain.
+
+**Rationale and evidence:** [P1-R10 PM disposition](REVIEW/P1-R10-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh PM issue; preserve the evidence bundle
+and ruleset history, and do not weaken hardware CI or reinterpret a product run as
+acceptance.

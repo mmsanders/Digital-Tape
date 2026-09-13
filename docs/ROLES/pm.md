@@ -41,6 +41,8 @@ completed work on another notification. Issue closure is not package acceptance.
 Assess lead returns from their linked PRs/commits even though leads close their own
 issues. Open no issue for an idle lead; use a fresh issue for each useful correction
 or next tranche. Close your own PM issue after posting its disposition.
+Do not post routine round-refresh comments on Michael's issue; add to it only when
+his work changes or becomes blocking. Do not publish or refresh branch KEEP lists.
 
 Michael configures listener/activation tools and will notify leads this transition
 round. Manual resumption also works. No listener is implemented or claimed active
