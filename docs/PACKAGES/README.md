@@ -31,9 +31,9 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; full package and uncovered #20 behavior remain held; active work is assigned in issues |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; clean draft #77 reproduces them with the row-3 helper isolated, but its new exact log awaits Verification #10. Full package remains held |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Ten exact product-observation families are independently accepted at verifier `17d345e...`; broad PR #64 stays held and Software #75 owns a clean implementation split. No package completion or merge yet |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Ten broad-candidate observations are independently accepted. Clean draft #77 has a fresh 10/10 bundle now assigned to Verification #10; no clean-candidate acceptance, package completion or merge yet |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven PCM-bearing product observations are independently byte-exact, but candidate PCM remains verifier-derived, unlistened and unaccepted. Golden CI remains red |

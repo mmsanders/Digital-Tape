@@ -38,6 +38,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R11 PM disposition](P1-R11-PM-DISPOSITION.md): publication of P1-R10 after the
   ruleset repair, acceptance of Verification's exact ten-family product observations,
   and routing of a clean held implementation split.
+- [P1-R12 PM disposition](P1-R12-PM-DISPOSITION.md): authentication of the clean
+  playback/mount split and its exact evidence, plus blind independent disposition
+  routing before any implementation merge.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

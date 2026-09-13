@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 13 September 2026 UTC · Owner: PM · P1-R11 ten corrected playback product observations independently accepted; clean held implementation split is next; scoped Phase 0 freeze unchanged.**
+**Updated: 13 September 2026 UTC · Owner: PM · P1-R12 clean playback/mount candidate authenticated and held; independent disposition is next; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -67,6 +67,15 @@ held implementation, WP-08 completion, PCM/goldens or listening. Ruleset 2208435
 repaired and strict; PM PR #73 merged at `6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96`.
 Software #75 owns a new clean held split from that main. See the
 [P1-R11 disposition](REVIEW/P1-R11-PM-DISPOSITION.md).
+Software #75 returned draft PR #77 at `f100937aed1437401218003db3edbb07d8e4f543`,
+with pre-run code commit `86eb3b77756042c365e2d0353018b981c39c99e8` directly atop
+the assigned base and no held #20/#64 ancestry. Eleven carried files are exact accepted
+blobs; uncovered allocator files are absent, and the one row-3 mount helper is isolated
+in `chunks.c`. PM authenticated all 30 manifest-bound files, replayed the bundle, and
+reproduced the exact playback observation/result plus all 289 mount case records.
+These are PM-authenticated product runs, not acceptance. Verification #10 owns the
+blind exact-evidence disposition. See the
+[P1-R12 disposition](REVIEW/P1-R12-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -104,7 +113,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Exact ten-family raw product observations are independently accepted. Candidate PCM remains verifier-derived, unlistened and unaccepted; golden CI stays red | Software isolates a clean held implementation candidate; PM routes Michael only when an exact listening packet is ready |
+| WP-11 | Exact broad-candidate ten-family observations are independently accepted. Clean candidate #77 is 10/10 but awaits Verification #10. PCM remains verifier-derived, unlistened and unaccepted; golden CI stays red | Verification #10; PM routes Michael only when an exact listening packet is ready |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -124,13 +133,13 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R11 accepts Verification's exact ten-family product-observation disposition. The
-accepted evidence tree is `34bad461...`, bound to code-under-test `5f44b97...`; its
-manifest/observation/result hashes and replay reproduce. PR #64 still contains broad
-held ancestry, so Software #75 must create a clean draft and fresh bundle before any
-implementation merge. The hand-maintained dashboard remains at the test-on-main rung,
-13 of 36. No other lead is activated this round. PM no longer publishes branch KEEP
-lists or routine Michael-issue refreshes.
+P1-R12 authenticates clean draft PR #77 and its fresh exact evidence without reviewing
+or accepting source. The clean bundle tree is `1671bcb3...`, bound to pre-run commit
+`86eb3b7...`; PM reproduced its exact observation/result and all 289 mount case records.
+Independent Verification #10 is the only new lead assignment. The dashboard remains
+at the test-on-main rung, 13 of 36, because the clean implementation is neither merged
+nor independently dispositioned. PM publishes no branch KEEP lists or routine
+Michael-issue refreshes.
 
 ## Phase 1 operating format — 11 September
 
