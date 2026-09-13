@@ -222,6 +222,31 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
 }
 
 /*
+ * §6 status. Permitted in every mounted row of the §10 matrix, INCLUDING Faulted:
+ * it touches neither media nor operation state, and quarantine still has to be
+ * observable. Not-mounted is TAPE_ERR_NOT_MOUNTED like every ordinary call.
+ *
+ * recording_armed and frames_owed are always false here because §7 recording is
+ * not implemented in this candidate. That is the correct answer for every state
+ * this engine can actually reach, not a stub: there is no path that arms.
+ */
+tape_result tape_status(const tape *t, tape_status_t *out)
+{
+    if (t == NULL || out == NULL) { return TAPE_ERR_INVALID_ARG; }
+    if (!t->mounted)              { return TAPE_ERR_NOT_MOUNTED; }
+
+    out->at_end          = t->at_end;
+    out->at_start        = t->at_start;
+    out->recording_armed = false;
+    out->frames_owed     = false;
+    /* Same derivations tape_get_info uses, so the two can never disagree. */
+    out->entries_free    = TAPE_MAX_ENTRIES - TAPE_LIVE(t).entry_count;
+    out->free_chunks     = (t->sb.total_chunks > t->free_next)
+                         ? t->sb.total_chunks - t->free_next : 0u;
+    return TAPE_OK;
+}
+
+/*
  * §6.3: tape_service does ALL card I/O, at most block_budget blocks per call,
  * and sets *more_work while its window is not yet filled.
  *
