@@ -179,3 +179,30 @@ Verification #6 independently owns the next playback boundary/ramp/side-switch
 tranche. Human listening remains a separate Michael assignment only after product
 PCM evidence exists. PR #20 and every remaining coverage, hardware and safety hold
 stay in force.
+
+## P1-R6 draft import and schedule-blocker disposition — 13 September 2026 UTC
+
+Software #59 returned draft PR #60 at
+`b2c16aac98605a94206e4af2fc04d8db1305ddb6`. PM authenticated its complete
+`tests/playback_draft8/` subtree as
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`: all 57 mode/blob/path entries match
+verifier publication `7a22cbb4447c40c51b7c8b2282a685ed30a46ba6` exactly. Generation,
+self-test, saved P1-R4 replay and the frozen-spec gate reproduce. Actions run
+34725672675 has eight green jobs; only the existing missing-WP-11-manifest job is
+red. PM did not inspect or review Software-owned adapter code.
+
+The Software diagnostic retains no product evidence because no engine implements
+`tape_seek`, `tape_set_rate`, `tape_render` or `tape_service`. Current main also has
+the pre-DRAFT-8 mount signature. PR #60 is therefore test/adaptor integration plus
+an honest compile/link result, not product execution or acceptance. Software must
+review/merge within its authority; any later implementation remains unmerged until
+independent Verification dispositions the raw product observation.
+
+Verifier main `a6b2630a55f7260a74e529d22f84aa94b8d7341f` records P1-R5-V01:
+the acceptance criterion refers to an exact scrub table but the authenticated bundle
+contains only its continuous envelope. Verification correctly published no partial
+oracle. PM resolves the missing external input in
+[the WP-08 package](PACKAGES/WP-08.md): exact 100 ms timestamps, signed Q16.16 rows,
+render counts, a 500 ms hold window, direction starts and service/render subdivision.
+The DRAFT-8 files and hashes do not change. The new table is an input for independent
+authorship, not accepted PCM or a product result.
