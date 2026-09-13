@@ -2050,3 +2050,46 @@ fabrication, charging or frozen-spec change follows.
 **Rationale and evidence:** [P1-R6 PM disposition](REVIEW/P1-R6-PM-DISPOSITION.md).
 **Cost to reverse:** supersede WP-08 with a new PM-issued vector and preserve both
 tables and their candidate evidence; do not silently regenerate PCM.
+
+## ADR-141 — Authenticate the complete playback sibling and reject ambiguous candidate provenance
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R7 activation
+
+Record PR #60's test/adaptor-only merge at
+`4517db7efba0d1a0933fc0dda1a607c5441197b7`; its exact first playback tree is
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`, and no engine file changed in that
+integration.
+
+Authenticate independent Verification's complete ten-family playback sibling at
+publication `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`: source commit/tree
+`54789cc6e6bbfd942857374e2e0b3305d05d2f2c` /
+`5527547b72b3e5c6d6fb91d41f3aa3bfa86fab7d`, complete published subtree
+`863b3a49c421bda1bebcf1a9760149bec7051048`, saved evidence tree
+`c67ea8fa128e06393839f968ae3cc949d84e5f2a`. PM reproduced generation, ten
+families, sixteen new mutations, retained P1-R4 controls, replay and the full verifier
+suite. This licenses exact mechanical import only; it accepts no engine or PCM.
+
+Keep draft PR #64 held. Its three-family product bundle replays and a PM reproduction
+at actual head `3dc5abb85e5b30200cf1553b9a06a83bc83c6d36` gives the same byte-exact
+outcomes, but its committed return names pre-implementation merge `c108356...` as
+the candidate and the packet/manifest give different engine-archive hashes. The
+manifest itself does not name the exact implementation commit. Preserve this bundle
+as raw history, but do not spend an independent Verification disposition round on an
+observation that is not unambiguously bound to the candidate.
+
+The next Software tranche is ordered: exact import of the complete verifier sibling
+onto main first, then only independently covered playback/status/side-switch plumbing
+on the held candidate, followed by a fresh evidence run bound to a prior exact code
+commit and one consistent build identity. Verification remains idle until that product
+bundle exists. Hardware and Surge also remain idle; Michael #49 does not block laptop
+work. No implementation merge, acceptance, listening, purchase, qualification,
+fabrication, charging or frozen-spec change follows.
+
+Michael also directs PM to refresh the hand-maintained Phase 1 dashboard every round.
+The procedure now lives in the PM charter and issue workflow; this round advances
+WP-08 only to the test-on-main rung, 13 of 36, with no acceptance implied.
+
+**Rationale and evidence:** [P1-R7 PM disposition](REVIEW/P1-R7-PM-DISPOSITION.md).
+**Cost to reverse:** supersede the Software correction issue with an exact immutable
+replacement; retain both evidence bundles and their provenance defects rather than
+rewriting history.

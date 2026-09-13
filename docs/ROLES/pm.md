@@ -27,6 +27,13 @@ docs/PHASE0-FREEZE.md and docs/PHASE1-DEVELOPMENT.md. Read the issue body and
 relevant PM/Michael scope updates, then spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md and docs/VERIFICATION-INTEGRATION.md.
 Record issue number/update timestamp and exact input/spec commits before acting.
 
+Before closing every activated PM round, refresh the hand-maintained `PHASE1`
+snapshot in `site/lead-queue/index.html` from the newly dispositioned facts. Update
+the `asOf` round/date and any stale package notes even when no rung advances; advance
+a rung only when its stated gate is fully reached, never from issue closure or a
+lead-owned green run. From `site/lead-queue/`, run `node test-dashboard.cjs` and
+record the result in the PM return.
+
 Do only the issue's bounded assignment. Comment when starting, report dependencies
 or access failures, and post an evidence-linked return at the stop condition.
 Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
