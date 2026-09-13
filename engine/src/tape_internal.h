@@ -119,6 +119,18 @@ struct tape {
     bool      faulted;
     bool      at_end, at_start;
     bool      play_ring_valid;   /* §5: invalidated by tape_set_side */
+    /*
+     * §6.3's play ring, as a window over TIMELINE frames: play_ring holds
+     * play_frames consecutive frames starting at timeline frame play_base.
+     * tape_service fills it and is the only thing that touches the device;
+     * tape_render reads nothing else, which is what makes "service to
+     * completion then render" and "interleave them" produce identical bytes.
+     */
+    uint32_t  play_base;
+    uint32_t  play_frames;
+    /* The clamped resume position in WHOLE frames, kept for §5's warm-start
+       comparison, which is specified over frames rather than 32.32 units. */
+    uint64_t  resume_whole_frame;
 };
 
 /* The mounted side's live index. There is no separate `live` member: it would be

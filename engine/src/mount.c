@@ -563,11 +563,17 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
 
     /* Seek to resume_frame, clamped to the timeline (§5, §11). Beyond end is not
        an error — it clamps. */
-    t->position_frame = (resume_frame > TAPE_LIVE(t).total_frames)
-                      ? TAPE_LIVE(t).total_frames : resume_frame;
+    /* §6.1: position is 32.32 fixed point, so the whole part holds the frame and
+       max_pos == total_frames << 32. tapefs §5.4 caps total_frames at 2^32-1
+       (validated above), so the shift cannot overflow. tape_tell and
+       tape_unmount truncate back to whole frames, so what a caller observes is
+       unchanged; only playback needs the fraction. */
+    t->resume_whole_frame = (resume_frame > TAPE_LIVE(t).total_frames)
+                          ? TAPE_LIVE(t).total_frames : resume_frame;
+    t->position_frame = t->resume_whole_frame << 32;
 
     t->mounted = true;
-    t->warm_start_used = warm_start_ok(t, warm, t->position_frame);
+    t->warm_start_used = warm_start_ok(t, warm, t->resume_whole_frame);
     if (t->warm_start_used) { t->play_ring_valid = true; }
     return TAPE_OK;
 }
@@ -581,7 +587,7 @@ tape_result tape_unmount(tape *t, uint64_t *out_position_frame)
        position to media (§5, §11): the source slot is read-only, so position
        lives in the device's flash and the position table is the caller's. */
     if (out_position_frame != NULL) {
-        *out_position_frame = t->position_frame;
+        *out_position_frame = t->position_frame >> 32;   /* whole frames (§6) */
     }
     t->mounted = false;
     t->faulted = false;
@@ -662,6 +668,8 @@ tape_result tape_set_side(tape *t, tape_side side)
     t->at_end          = false;
     t->at_start        = false;
     t->play_ring_valid = false;
+    t->play_frames     = 0u;   /* §5: no frame from the previous side is ever */
+    t->play_base       = 0u;   /* rendered after a side switch (invariant 31) */
     t->warm_start_used = false;
     return TAPE_OK;
 }
@@ -673,6 +681,6 @@ tape_result tape_tell(const tape *t, uint64_t *out_frame)
        signature had no error channel, so an implementation had to invent a
        sentinel or return a stale position (V5-009). */
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
-    *out_frame = t->position_frame;
+    *out_frame = t->position_frame >> 32;   /* whole frames, truncated (§6) */
     return TAPE_OK;
 }
