@@ -2230,3 +2230,35 @@ fabrication and charging holds remain.
 **Cost to reverse:** supersede through a fresh bounded PM issue; retain both wide and
 clean candidate histories and every evidence bundle, without transferring acceptance
 to untested code.
+
+## ADR-146 — Route the clean playback/mount candidate for exact disposition
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R12 activation
+
+Accept Software #75's return as a ready held integration candidate for independent
+evidence review, not as accepted source or merge authority. Draft PR #77 head
+`f100937aed1437401218003db3edbb07d8e4f543` contains one pre-run code commit
+`86eb3b77756042c365e2d0353018b981c39c99e8` directly atop the assigned base and
+does not carry broad #20/#64 ancestry. Eleven carried files are exact accepted blobs;
+the uncovered allocator remains absent. Retain the isolated
+`tape_chunks_for_frames` helper as a held boundary because its only claimed caller is
+the independently covered §9.3.3 row-3 mount path. This is a routing decision, not PM
+source review or acceptance of the helper.
+
+Authenticate the fresh evidence tree `1671bcb37abccb21cb59234792ba35e984a3eb5f`,
+all 30 manifest-bound files, exact package identity, offline replay and PM rerun.
+Playback observation/result bytes reproduce exactly; all 289 mount case records
+reproduce apart from the expected local executable provenance. Route the exact raw
+playback and mount evidence to independent Verification #10, with source, adapter,
+private-test and PR-discussion blindness preserved. No implementation merge is
+authorized before that return is dispositioned.
+
+Do not wake idle Software, Hardware, Surge or Michael. PR #20/#64/#77, frozen hashes,
+WP-11 red/listening, uncovered behavior, purchases, qualification, fabrication,
+charging, safety and Michael-reserved approvals remain held. Publish no routine
+Michael comment or branch KEEP list.
+
+**Rationale and evidence:** [P1-R12 PM disposition](REVIEW/P1-R12-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue; retain PR #77 and its
+immutable evidence, and do not widen the candidate or transfer observation acceptance
+to source.

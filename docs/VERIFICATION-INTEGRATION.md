@@ -382,3 +382,31 @@ main, the narrowest dependency-complete accepted playback slice, and a new exact
 product bundle. That bundle requires its own independent disposition before any
 implementation merge. Candidate PCM remains unlistened and not a WP-11 golden;
 all other holds remain.
+
+## P1-R12 clean split and exact-evidence routing — 13 September 2026 UTC
+
+Software #75 returned held draft PR #77 at
+`f100937aed1437401218003db3edbb07d8e4f543`. Its evidence commit has sole parent
+`86eb3b77756042c365e2d0353018b981c39c99e8`, the pre-run code commit directly
+atop assigned base `6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96`. Neither the broad PR #20/#64
+heads nor the accepted broad code-under-test are ancestors. Eleven carried files
+have exact accepted blobs; `alloc.c` and allocator scaffolding are absent. The one
+required mount dependency, `tape_chunks_for_frames`, is isolated in `chunks.c` and
+is claimed only through the independently covered TapeFS §9.3.3 row-3 mount path.
+This boundary remains held and is not PM source review or acceptance.
+
+The clean run, product-evidence and staged-package trees are respectively
+`a6c1dfeb1e35399301adcabf5adc90ef0e067307`,
+`1671bcb37abccb21cb59234792ba35e984a3eb5f` and
+`b097c2a91fabf55677c9a7f866020d22d83ee90e`. PM authenticated every one of the
+30 manifest-bound files, exact corrected source tree `6dbb23bb...`, product identity,
+zero exit and empty stderr. Offline replay passes. A fresh PM run reproduces exact
+observation/result hashes `24a35a3c...7ce4` / `1fb3437a...f742`; a fresh mount run
+reproduces all 289 case records, differing only in the expected local executable
+path/build-hash provenance line. These are PM observations, not independent acceptance.
+
+Verification issue #10 owns a blind disposition of the exact bundle and mount log,
+including the named §9.3.3 row-3 cases. It may inspect verifier-owned packages, public
+contracts, raw evidence and Git identity metadata only. PR #77, #64 and #20 remain
+draft/held. No source, complete WP-06/WP-08, helper design, PCM/golden/listening or
+merge acceptance follows; all uncovered product and hardware/safety holds remain.
