@@ -1,0 +1,1 @@
+fixture long_side_a_frames=1100000 rows=16 row_frames_total=88200 first_rate=262144 last_rate=786432
