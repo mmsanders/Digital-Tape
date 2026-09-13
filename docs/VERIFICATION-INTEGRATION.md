@@ -357,3 +357,28 @@ narrow disposition using the raw evidence and verifier-owned package while remai
 blind to product/adapter source. PR #64 stays draft and held. Candidate PCM remains
 unlistened and is not a WP-11 golden; all uncovered families and current product,
 hardware and safety holds remain.
+
+## P1-R11 independent product-observation disposition — 13 September 2026 UTC
+
+Verification issue #9 published one findings file at verifier main
+`17d345ef23a9bbdb3e781f3451f4a8797a1a6f1c`, directly atop assigned input
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. It changed no test, oracle,
+fixture, candidate or workflow. Verification remained blind to product/adapter source
+and independently authenticated the complete raw bundle, staged-package identity,
+product adapter agreement, exit, all callback and public-call records, exact scrub
+schedule and saved-result equality.
+
+The narrow disposition accepts the ten recorded product-observation families at
+evidence commit/tree `c18aa42579ef7c5ea92a4d70972d6a2daa6698bb` /
+`34bad4611b6849ed586c7ec701fa7ddafef0cb12`, whose sole parent is pre-run code
+commit `5f44b97fe9fb3342fce3b58236a75ea27b4898a6`. PM recomputed the report's
+manifest, observation and result hashes and reran the unmodified offline replay; all
+match and pass. Seven PCM-bearing families are byte-exact; the three no-PCM families'
+call/state observations pass.
+
+This is independent acceptance of the exact raw observations only. PR #64 contains
+broad held #20 ancestry and cannot merge. Software #75 owns a fresh clean draft from
+main, the narrowest dependency-complete accepted playback slice, and a new exact
+product bundle. That bundle requires its own independent disposition before any
+implementation merge. Candidate PCM remains unlistened and not a WP-11 golden;
+all other holds remain.

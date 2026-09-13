@@ -33,10 +33,10 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | 289/289 recorded mount assertions independently dispositioned; full package and uncovered #20 behavior remain held; active work is assigned in issues |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Corrected ten-family publication is exactly on main; a fresh held product run replays 10/10 and awaits independent Verification #9. No implementation or PCM acceptance |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Ten exact product-observation families are independently accepted at verifier `17d345e...`; broad PR #64 stays held and Software #75 owns a clean implementation split. No package completion or merge yet |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Fresh corrected-package product bundle replays 10/10 but is not independently dispositioned. Candidate PCM remains verifier-derived, unlistened and unaccepted; golden CI remains red |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven PCM-bearing product observations are independently byte-exact, but candidate PCM remains verifier-derived, unlistened and unaccepted. Golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Contract issued; independent WP-12a coverage and acceptance outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
 | WP-36 | Slot capability model | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
@@ -98,14 +98,12 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 ## Note on WP-35
 
 The historic plan requested a fine-grained token; current configured access permits
-repository work, so no new credential request is made. Ruleset 22084355 is now active
-on the default branch: pull request, conversation-resolution, no-deletion,
-no-force-push and eleven required-check rules apply, with no bypass actor. One required
-context is not viable: `print packet is printable` is emitted only by the
-hardware-path-filtered workflow, so ordinary PRs remain pending/blocked. Michael must
-remove that context from the required list or supply an exact-name always-reporting
-check. PM made no setting change or bypass. The expired combined-lead mandate is not
-current authority.
+repository work, so no new credential request is made. Ruleset 22084355 is active on
+the default branch: pull request, conversation-resolution, no-deletion, no-force-push
+and ten all-PR required-check rules apply, with strict latest-main testing and no bypass
+actor. Michael removed the hardware-path-only packet context after it blocked ordinary
+PRs; PM PR #73 then merged normally. PM made no setting change or bypass. The expired
+combined-lead mandate is not current authority.
 
 ## Per-file template
 

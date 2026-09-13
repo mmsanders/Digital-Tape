@@ -35,6 +35,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R10 PM disposition](P1-R10-PM-DISPOSITION.md): authentication of the exact
   corrected-package import and fresh 10/10 product bundle, plus the active-main-ruleset
   check-context assessment and independent disposition route.
+- [P1-R11 PM disposition](P1-R11-PM-DISPOSITION.md): publication of P1-R10 after the
+  ruleset repair, acceptance of Verification's exact ten-family product observations,
+  and routing of a clean held implementation split.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
