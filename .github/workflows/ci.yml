@@ -32,6 +32,21 @@ jobs:
       # engine defines the six missing public operations.
       - run: python3 tests/ops_draft8/selftest.py
 
+  dashboard:
+    name: lead-queue dashboard behaviour
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The same script the Pages job runs before deploying. It ran only there,
+      # which put the first signal after the merge, on the job whose failure also
+      # stops the deploy. It also cross-checks the roadmap's package IDs against
+      # the Phase 1 table in docs/PACKAGES/README.md, so a package added there
+      # needs a matching stage on the dashboard -- a PR-time complaint, not a
+      # surprise on main. No build, no network, no deps.
+      - name: Test queue and roadmap behavior
+        working-directory: site/lead-queue
+        run: node test-dashboard.cjs
+
   build:
     name: build (-Werror)
     runs-on: ubuntu-latest
