@@ -64,7 +64,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Draft PR #60 contains the exact corrected package and synthetic-only adapter diagnostic; no product PCM exists, candidate PCM is unlistened/unaccepted, and golden CI stays red | Software integration/candidate development, then independent product-observation disposition; Michael listening only after product PCM evidence |
+| WP-11 | Draft PR #60 contains the exact corrected package and synthetic-only adapter diagnostic; no product PCM exists, candidate PCM is unlistened/unaccepted, and golden CI stays red | Software #63 integration/candidate development, verifier #7 package, then independent product-observation disposition; Michael listening only after product PCM evidence |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -87,8 +87,10 @@ has eight green jobs and only the intentionally visible missing-WP-11 golden job
 The retained diagnostic has no product run: main fails on the old mount signature and
 held #20 lacks seek, set-rate, render and service definitions. Verification #6's
 schedule blocker is valid and resolved at the product-input layer by the exact WP-08
-table; its test work still requires a fresh issue. Michael #49 remains outside the
-immediate laptop critical path. Dashboard deployment is unchanged and green.
+table. Software #63 now owns ordered test integration and a held product candidate;
+verifier #7 owns independent boundary/ramp/side-switch authorship. Michael #49
+remains outside the immediate laptop critical path. Dashboard deployment is unchanged
+and green.
 
 ## Phase 1 operating format — 11 September
 

@@ -46,11 +46,12 @@ nor does it accept a fixture or PCM.
 
 ## Continuation and holds
 
-Software receives a fresh issue to review and, if sound, merge PR #60 as test/adaptor
-integration; only after that exact tree is on main may it prepare an unmerged
-playback implementation candidate and raw product evidence. Verification receives a
-fresh issue against the exact WP-08 table to author the independent boundary/ramp/
-side-switch package. Hardware and Surge have no useful bounded work this round.
+[Software #63](https://github.com/mmsanders/Digital-Tape/issues/63) owns review and,
+if sound, merge of PR #60 as test/adaptor integration; only after that exact tree is
+on main may it prepare an unmerged playback implementation candidate and raw product
+evidence. [Verifier #7](https://github.com/mmsanders/digital-tape-verification/issues/7)
+owns independent boundary/ramp/side-switch authorship against the exact WP-08 table.
+Hardware and Surge have no useful bounded work this round.
 
 PR #20 remains draft and held. No header-only main update, engine merge, test
 weakening, synthetic relabel, PCM/golden/listening acceptance, card qualification,

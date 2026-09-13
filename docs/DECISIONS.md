@@ -2041,6 +2041,7 @@ PM does not review or merge its adapter. Software may review/merge the test-only
 integration within its authority, then prepare—without merging—a playback candidate
 and raw product evidence. Independent Verification receives a fresh assignment
 against the exact WP-08 input and later dispositions product evidence separately.
+Those assignments are Software #63 and verifier #7; Hardware and Surge remain idle.
 
 PR #20 remains held. No header-only main update, engine merge, test weakening,
 synthetic relabel, golden/listening acceptance, purchase, card qualification,

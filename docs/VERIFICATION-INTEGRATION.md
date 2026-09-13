@@ -205,4 +205,6 @@ oracle. PM resolves the missing external input in
 [the WP-08 package](PACKAGES/WP-08.md): exact 100 ms timestamps, signed Q16.16 rows,
 render counts, a 500 ms hold window, direction starts and service/render subdivision.
 The DRAFT-8 files and hashes do not change. The new table is an input for independent
-authorship, not accepted PCM or a product result.
+authorship, not accepted PCM or a product result. Software #63 owns ordered PR #60
+integration and a held implementation/evidence candidate; verifier #7 owns the new
+independent package.
