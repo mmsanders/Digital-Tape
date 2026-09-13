@@ -2195,3 +2195,38 @@ independence, implementation, listening, hardware and safety holds remain.
 **Cost to reverse:** supersede through a fresh PM issue; preserve the evidence bundle
 and ruleset history, and do not weaken hardware CI or reinterpret a product run as
 acceptance.
+
+## ADR-145 — Accept ten playback observations and require a clean integration split
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R11 activation
+
+Record ruleset `22084355` repaired: remove the required hardware-path-only packet
+context and enable strict latest-main checks while retaining pull requests, resolved
+conversations, no deletion, no force-push, zero approvals and no bypass actors. Merge
+the previously blocked PM-only PR #73 at
+`6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96` after all ten required contexts pass.
+The deliberate missing-WP-11-golden job stays red and unrequired.
+
+Accept Verification #9's exact narrow return at verifier
+`17d345ef23a9bbdb3e781f3451f4a8797a1a6f1c`: product evidence commit/tree
+`c18aa42579ef7c5ea92a4d70972d6a2daa6698bb` /
+`34bad4611b6849ed586c7ec701fa7ddafef0cb12` satisfies the corrected package for
+all ten recorded playback families. This independently accepts those raw observations,
+not source, the implementation generally, WP-08 completion, PCM/goldens/listening or
+a merge.
+
+Do not merge PR #64 or its broad #20 ancestry. Software #75 must construct a new clean
+draft from current main containing only the dependency-complete accepted playback
+slice, retain a fresh exact product bundle and stop before merge. If uncovered code
+cannot be excluded, return the exact dependency blocker. Independent Verification
+must disposition that new split bundle before any implementation merge.
+
+No Michael listening task is issued until an exact ready listening packet exists.
+No routine Michael comment or branch KEEP list is published. PR #20/#64, WP-11 red,
+frozen hashes, independence, test-first, uncovered behavior, purchase/qualification,
+fabrication and charging holds remain.
+
+**Rationale and evidence:** [P1-R11 PM disposition](REVIEW/P1-R11-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue; retain both wide and
+clean candidate histories and every evidence bundle, without transferring acceptance
+to untested code.
