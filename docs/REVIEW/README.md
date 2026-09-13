@@ -32,6 +32,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R9 PM disposition](P1-R9-PM-DISPOSITION.md): authentication of Verification's
   corrected complete-playback publication and the ordered exact-import/product-rerun
   dependency.
+- [P1-R10 PM disposition](P1-R10-PM-DISPOSITION.md): authentication of the exact
+  corrected-package import and fresh 10/10 product bundle, plus the active-main-ruleset
+  check-context assessment and independent disposition route.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

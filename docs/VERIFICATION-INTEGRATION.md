@@ -332,3 +332,28 @@ to land on main without engine/firmware changes before the held candidate reruns
 existing failed product bundle remains immutable. PR #64 stays draft and held, and
 Independent Verification receives no product-disposition issue until a fresh bound
 bundle exists.
+
+## P1-R10 corrected import and product-bundle routing — 13 September 2026 UTC
+
+Software #70 merged the corrected complete publication through PR #71 at product
+main `d52730ffb4c9d8e634eded9caca208dcacb0d046`. The product subtree is exactly
+`6dbb23bb4626238b0f22427031a551d2ece454fd`, retained P1-R8 synthetic evidence
+is `d867fc68c80a2217508868c4b339d160b55ec2cc`, retained P1-R6 synthetic evidence
+is `c67ea8fa128e06393839f968ae3cc949d84e5f2a`, and no engine/firmware file changed.
+PM reproduced generation, self-test and saved replay from clean main.
+
+Held PR #64 head `c18aa42579ef7c5ea92a4d70972d6a2daa6698bb` retains a fresh product
+bundle under `docs/verification/runs/2026-09-13-r9/product-evidence/`, built from
+pre-run code commit `5f44b97fe9fb3342fce3b58236a75ea27b4898a6`. The engine, firmware,
+product adapter and harness are unchanged from the earlier failing candidate. The
+manifest binds the exact corrected verifier source/tree, product adapter identity,
+zero exit, empty stderr and one consistent build identity. PM ran the package's
+unmodified offline replay against the committed bytes; all ten families pass and
+all seven PCM outputs are byte-exact.
+
+This is a ready product observation, not independent acceptance. Verification issue
+[#9](https://github.com/mmsanders/digital-tape-verification/issues/9) owns the
+narrow disposition using the raw evidence and verifier-owned package while remaining
+blind to product/adapter source. PR #64 stays draft and held. Candidate PCM remains
+unlistened and is not a WP-11 golden; all uncovered families and current product,
+hardware and safety holds remain.
