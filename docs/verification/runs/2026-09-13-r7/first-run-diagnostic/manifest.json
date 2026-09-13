@@ -1,0 +1,58 @@
+{
+  "adapter": {
+    "build": "tested-code-commit 32ced9e11f4df5b05fe3f9c5008e3434f56aebd1; cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 -std=c99 -Werror -O1; engine archive libtape.a sha256 debacad3e62e9be4472041f40e7ffc38f09ae0eb249448898ed8def7e44b4dff; probe binary sha256 795ed072c00f0b3b6153f5da401fb6fe0dd449828d3088ebb92aa89ff9f82a25",
+    "command": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r7/tests/playback_adapter/complete_adapter.sh",
+    "id": "software-lead-complete-playback-public-api-probe-v1",
+    "kind": "product",
+    "source": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r7/tests/playback_adapter/complete_probe.c",
+    "source_file": {
+      "path": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r7/tests/playback_adapter/complete_probe.c",
+      "sha256": "85c71e2dc66ba174f32370aee726c4f13b9765f026cab97a0ca88865ad3985f6"
+    }
+  },
+  "assignment": "P1-R6-V",
+  "execution": {
+    "exit_code": 0,
+    "outcome": "exited",
+    "timeout_seconds": 600.0
+  },
+  "files": {
+    "input/package/ADAPTER.md": "52348403d768495ac48ec735191036dc992445ad4bd00b8673bb98fe23b16cb9",
+    "input/package/COVERAGE.md": "fc84e4b814130b8b86826164e6ac77bb168d5e965e6a360f944d89d7a32e4839",
+    "input/package/README.md": "0fd2710bcfb942d683ab52d7f0ca09d42ec35dbd048e35c060c04512f756ace4",
+    "input/package/candidate/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "input/package/candidate/scrub-reverse.pcm": "faae5cf894f9a7b2d84e9f9c99a36184ddd776e3cdc6de734e935c4f35f4f5d6",
+    "input/package/fixtures/empty.vo08.gz": "95cc2ee3d7c72d42a53ffae9b74c52b21733b492eaa80a4cf06ae0c68655c6af",
+    "input/package/fixtures/fixture.json": "625d215b97168c06875c9f263582673bcc44f0463cedec2875cf8e004bbb4859",
+    "input/package/fixtures/long.vo08.gz": "39603c2c6b44a12a82cf8df9dd43cf529cdc3bad8bcebd642b29ba863cb40c2b",
+    "input/package/fixtures/one.vo08.gz": "985dd4e22beb9671be88b1d94695cfb28beae7949245195d0810e392d76bf73f",
+    "input/package/generate_fixture.py": "52bb8904fecc65a95a8a5f9f7372d17768045e6925d00e5d390df897321c224e",
+    "input/package/input/WP-08.md": "ff519e960ed3db6e401baebd12f33d5527f83f0e4dfec12484f498470198a96a",
+    "input/package/oracle.py": "bd04491bb1e8834d8a996bb65135d3d0647c69a982cc3458a9fa4f2def421328",
+    "input/package/package.json": "2756f4527c0eecce08d78659bae982dd66c2265aa5dd343197329bc26dec20d2",
+    "input/package/replay.py": "ae6cf38719ca794ff7d989fd0af7ad970ddff5b912cc2cbe8b080d8c1742f3c9",
+    "input/package/runner.py": "bafe0cb1764221100e27a6078daec52b628195f605824b03c529adc64e617795",
+    "input/package/spec/acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "input/package/spec/engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "input/package/spec/tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+    "output/adapter-exit.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "output/intmin.pcm": "d844e1554b5c802b4cc27c59d7503f3117296f7928d3d24dc87679a3e32a27dd",
+    "output/observation.json": "82468e1e3921dde5a0794acde740a63063d41c3f968541f99e5fd186241e169e",
+    "output/one-intmax.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/reverse-zero.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "output/scrub-reverse.pcm": "9a037d3392142fd11e8e39c4626581e0b16e23959f8861a6793ced801547557b",
+    "output/side-idle.pcm": "3f9f540229960d11ed73b7ff1fae0b6f26f723ea5c80d238976fc4c902cea28b",
+    "output/side-playing.pcm": "55f470d49ef6d2afc08a4dc15bc25a0aac759baa437291b12fc39b957ee132ec",
+    "output/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "result.json": "0f26fedd45b098146a8fa0b7d8ea051127e752fadd954a7971f6de43990df9fe"
+  },
+  "oracle_sha256": "bd04491bb1e8834d8a996bb65135d3d0647c69a982cc3458a9fa4f2def421328",
+  "package_manifest_sha256": "2756f4527c0eecce08d78659bae982dd66c2265aa5dd343197329bc26dec20d2",
+  "replay_sha256": "ae6cf38719ca794ff7d989fd0af7ad970ddff5b912cc2cbe8b080d8c1742f3c9",
+  "runner_sha256": "bafe0cb1764221100e27a6078daec52b628195f605824b03c529adc64e617795",
+  "schema": "playback-complete-draft8-evidence-v1",
+  "source_commit": "121f5f7ab03c9ce08c38329e518c49a1ca9b65a5",
+  "source_tree": "863b3a49c421bda1bebcf1a9760149bec7051048"
+}
