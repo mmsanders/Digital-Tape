@@ -1,9 +1,11 @@
-# Order 1a — withdrawn for re-sourcing
+# Order 1a — superseded historical record
 
-**8 September 2026. No checkout-ready cart and no purchase approval.**
+**Superseded 12 September 2026 by the two-arm evaluation recorded in WP-05 and
+Hardware PR #47. This file is not a shopping list or active direction.**
 
-Michael requires **no 64 GB cards**, prefers **cheap 4 GB V30**, and accepts microSD
-or full-size SD. The earlier six-card ~$115 cart is withdrawn. Historical quotes,
+The text below records the prior 4 GB V30 search. Michael later clarified that
+64 GB had been excluded as a cost proxy, not a capacity requirement, and selected
+two exact V30 cards versus two exact U3 cards for evaluation. Historical quotes,
 stock assertions and “buy any brand” substitutions are not current recommendations.
 
 Hardware recommendation: first obtain a manufacturer-documented 4 GB V30 part and

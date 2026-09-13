@@ -3,18 +3,21 @@
 This repo is sufficient to resume the checkpoint. Do not begin by loading every
 archived round or the entire decision log.
 
-1. Fetch main; note its commit. Read [FOR-MICHAEL](FOR-MICHAEL.md) and surface open
+1. Fetch main; note its commit. Read [Michael's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) and surface open
    human questions before technical review; do not re-ask answered ones.
 2. Read [CLAUDE](../CLAUDE.md), [STATUS](STATUS.md), and [freeze record](PHASE0-FREEZE.md).
-3. Read [the current brief](REVIEW/README.md), then your role’s inputs below.
+3. Read [the Phase 1 development plan](PHASE1-DEVELOPMENT.md), your
+   [role instructions](ROLES/README.md), and [issue workflow](ISSUE-WORKFLOW.md).
+   Read your current open assignment issue and scope updates, then the inputs below.
+   No eligible issue means unassigned; historical documents do not supply a task.
 
 | Role | Read next | Deliver |
 |---|---|---|
-| PM | spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md, docs/VERIFICATION-INTEGRATION.md | Decisions, bounded briefs, gate state and exact spec issuance |
+| PM | spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md, docs/VERIFICATION-INTEGRATION.md | Decisions, labeled assignment issues, gate state and exact spec issuance |
 | Software | tests/mount_draft8/COVERAGE.md and ADAPTER.md, docs/VERIFICATION-INTEGRATION.md, engine/README.md, tools/README.md | Mechanical integration and covered implementation; keep uncovered code held |
 | Hardware | docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md, WP-04/05/24 | Reproducible designs, sourced parts, auditable measurements |
-| Verification | docs/REVIEW/verification-lead.md, spec/VERSION.md, relevant spec sections and independent tests | Independent tests/result disposition; no premature implementation inspection |
-| Surge | PM’s bounded assignment and referenced spec sections | Proposal with evidence and unknowns returned to PM |
+| Verification | Current verification-lead issue, spec/VERSION.md, relevant spec sections and independent tests | Independent tests/result disposition; no premature implementation inspection |
+| Surge | Current authorized surge issue and referenced authoritative inputs | Results, evidence and unknowns returned to Michael and the responsible lead |
 
 Product authority is spec/; hardware authority is spec/hw/. Test-package spec copies
 are authenticated historical inputs. Status never overrides the contract.

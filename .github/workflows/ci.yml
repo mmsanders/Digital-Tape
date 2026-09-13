@@ -18,6 +18,53 @@ jobs:
       - uses: actions/checkout@v4
       - run: make -C tests/mount_draft8 check
 
+  ops-package:
+    name: independent VT8-001 package self-checks (synthetic, not engine acceptance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The verifier's own negative controls over its oracle, evidence capture,
+      # DRAFT-8 spec authentication and offline replay -- including the
+      # missing-evidence and tampered-evidence cases. It runs the package's
+      # SYNTHETIC stand-in adapter: no engine is built, linked or executed here,
+      # so a green result is plumbing evidence and never product acceptance.
+      # The product adapter lives in tests/ops_adapter and cannot link until an
+      # engine defines the six missing public operations.
+      - run: python3 tests/ops_draft8/selftest.py
+
+  dashboard:
+    name: lead-queue dashboard behaviour
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The same script the Pages job runs before deploying. It ran only there,
+      # which put the first signal after the merge, on the job whose failure also
+      # stops the deploy. It also cross-checks the roadmap's package IDs against
+      # the Phase 1 table in docs/PACKAGES/README.md, so a package added there
+      # needs a matching stage on the dashboard -- a PR-time complaint, not a
+      # surprise on main. No build, no network, no deps.
+      - name: Test queue and roadmap behavior
+        working-directory: site/lead-queue
+        run: node test-dashboard.cjs
+
+  playback-package:
+    name: independent playback/golden package self-checks (synthetic, not engine acceptance)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Deterministic fixture/candidate-PCM regeneration plus the verifier's own
+      # three-family oracle, identity, exit, provenance, replay and retention
+      # controls. This runs the package's SYNTHETIC stand-in adapter only: no
+      # engine is built, linked or executed, so a green result is verifier
+      # plumbing and never product evidence or golden acceptance.
+      #
+      # The candidate PCM in tests/playback_draft8/golden/ is verifier-derived
+      # oracle bytes, NOT accepted WP-11 goldens: Michael's human listening is a
+      # separate later step. The PRODUCT adapter lives in tests/playback_adapter
+      # and cannot link yet -- no engine defines tape_seek, tape_set_rate,
+      # tape_render or tape_service -- so no product playback evidence exists.
+      - run: make -C tests/playback_draft8 check
+
   build:
     name: build (-Werror)
     runs-on: ubuntu-latest

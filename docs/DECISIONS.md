@@ -1753,3 +1753,300 @@ no hashed criterion and grants no throughput or atomicity acceptance. Preserve e
 SKU/revision sampling, independently reviewed cut protocol and all raw outcomes.
 
 **Cost to reverse:** re-source the cart and replan samples; no purchase has been made.
+
+
+## ADR-131 — Michael signs scoped Phase 0; separate infrastructure assignment begins
+
+**Date:** 2026-09-08 · **Owner:** PM recorder, explicit Michael instruction
+
+Michael: “Consider it signed by me, and do what you need to do to represent that in main.”
+Record the exact Phase 0 scope/hashes in PHASE0-FREEZE.md as frozen and close Q-001.
+Keep reviewed spec bytes intact; this signed record resolves historical draft banners.
+Operations/state, implementation acceptance and hardware qualification remain held.
+The combined PM/Software/Hardware freeze mandate ends here.
+
+Michael separately requested review and integration of the staged signaling system and
+Pages dashboard, with particular agent instance hookups deferred. This authorizes the
+infrastructure work and its necessary repository changes, not product self-acceptance.
+He corrected the strong capability examples to Sol/Opus; audit the rest of the design.
+
+**Cost to reverse:** a new explicit scope decision and migration/review process for frozen
+contract changes. Infrastructure can be disabled independently of the product freeze.
+
+
+## ADR-132 — Integrate reviewed Agent Bus v2 and main-owned Pages dashboard
+
+**Date:** 2026-09-08 · **Owner:** Michael-authorized infrastructure integrator
+
+Retain bounded Michael → PM → lead → worker rounds, independent Verification and
+batched fan-in. Replace the staged label-chain implementation with one serialized
+workflow controller and GitHub Contents SHA-CAS receipt ledger. Issue scope hashes
+bind protected approval and every claim. Add Surge and Claude worker mailboxes.
+Correct strong capability to Sol/Opus; leave unsupported provider classes unmapped.
+
+The staged claim was not exclusive; bot events could not drive its workflow chain;
+a generic bot comment did not bind authorization to scope; budgets/eligibility and
+some early-return validation paths were incomplete. The Pages dashboard also had
+unescaped HTML, stale role naming and inferred/misrouted activity. Findings and
+regression coverage are in [the archived review](https://github.com/mmsanders/Digital-Tape/blob/archive/agent-signaling-and-dashboard/docs/AGENT-BUS-REVIEW.md). Dashboard source now belongs on
+main, reading explicit receipt state. Particular agent instances remain unbound.
+
+**Cost to reverse:** disable the controller and Pages workflows, preserve the ledger
+and issue evidence, and return to manual PM coordination. No product spec hash or
+independent test changes are involved. Actual adapter hookups and protected Round 0
+remain a distinct final integration exercise with Michael.
+
+
+## ADR-133 — Phase 1 returns to individual lead chats
+
+**Date:** 2026-09-11 · **Owner:** Michael; recorded under his explicit repository-transition authority
+
+Michael ended the automated signaling and lead/worker organization trial before product
+activation. This supersedes ADR-132's operating model and the later cloud-hookup plan.
+Astra is PM in a Work chat; Sol is independent Verification in another Work chat;
+Software and Hardware each use an Opus Claude Code chat. Leads perform their own work,
+with no subworkers. Grok handles miscellaneous surge tasks primarily directed by Michael.
+The current agreement, role instructions and bounded briefs govern all new contexts.
+
+The complete prior main tree, including controller, tests, manifests, hookup drafts and
+Pages dashboard/replay, is preserved on
+[archive/agent-signaling-and-dashboard](https://github.com/mmsanders/Digital-Tape/tree/archive/agent-signaling-and-dashboard)
+from feb5fd9c1634d9e3e439165ec1abec2ee9d92b68, with setup reports from PRs #39/#40
+added at archive commit 5a190fe20977f624e8edd9eebbf63740667d9a68. Those reports are
+historical observations, not accepted adapter certification. The separate agent-bus-state branch retains
+historical ledger evidence. These are inactive research archives, not Phase 1 instructions.
+Remove the associated workflows, issue templates and implementation from main, and retire
+the public status display. Older decision entries remain historical, not active assignments.
+
+No product specification, independent test oracle, engine implementation, hardware safety
+gate or signed freeze is changed. Michael's routine accounts are external to this repo;
+he should disable the two setup routines. Resuming this experiment requires a new explicit
+instruction and review of the archived code and real provider integration gaps.
+
+**Cost to reverse:** restore selected archived infrastructure after review and account setup;
+do not restore old status or erase subsequent product changes by resetting main.
+
+Retirement completion: [Pages deployment](https://github.com/mmsanders/Digital-Tape/actions/runs/34654162314)
+succeeded and the public URL was checked for the static retirement notice with no scripts.
+The temporary page source and Pages workflow were then removed from main. GitHub retains
+the deployed notice; it contains no live status or approval controls. No account-side
+Claude routine was disabled by this repository edit.
+
+## ADR-134 — Phase 1 kickoff and narrow verification disposition
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's kickoff/publication request
+
+Reviewed product main `4c273ce57ce6848762b00b8990b0b29a3dc9f74b` and independent
+return `689c41909e6bbec499aeb0243008222d7a1c9f64`. Record Verification's green
+289-case mount observation disposition, not blanket #20 or package acceptance.
+The original gzip-evidence access obstacle is resolved. DRAFT-8 and signed scope
+remain unchanged; the expired combined-lead authority is not revived.
+
+P1-R1 assigns Software an exact diagnostic test import/adapter/run and split plan,
+Verification its oracle/evidence gaps P1-R1-V01/V02/V03 and stale-plan reconciliation,
+and Hardware bounded sourcing/qualification evidence. No product-engine merge this
+round. Surge is unassigned. Michael clarified that all leads need not work every
+round; assignments follow actual dependencies, not a staffing quota.
+
+Rationale and reproducible evidence: [P1-R1 PM review](REVIEW/P1-R1-PM-REVIEW.md).
+The two published VT8 tests are useful but accept bad flush ordering and a forbidden
+feed write; their runner also discards final raw media. Preserve exact baseline
+source for diagnostics, have Verification fix it independently, then review revised
+source and real observations before expanding acceptance. No self-supplied PM
+acceptance, test weakening or speculative engine work is licensed.
+
+VR-P1-001 protection risk is confirmed. Software proposes, Michael decides settings;
+the current direct-publication request does not authorize administrative changes.
+All physical safety, card qualification, purchase and coverage holds remain.
+
+**Cost to reverse:** supersede these brief assignments explicitly while retaining
+source/evidence history. Closing a finding requires evidence, not removal of a hold
+or rewriting a frozen hash. Do not restart archived work or reactivate automation.
+
+## ADR-135 — Role-labeled issues are the sole active assignment surface
+
+**Date:** 2026-09-12 UTC · **Owner:** Michael; recorded by PM
+
+Michael directed PM to move current work directions off main into separate GitHub
+issues with role labels, update lead charters, and use a new issue per assigned
+lead each round. This supersedes ADR-133/134 only for assignment delivery and
+activation. Individual lead work, no subworkers, independent Verification and
+all signed-spec, test-coverage, safety and purchase holds remain unchanged.
+
+Input main: `d9bc6ebd10983711acade6d148895e78fd1a17e3`.
+Migrated Software to #41, Hardware #42, Verification #43, Michael #44 and PM #45.
+Surge #46 is closed as not planned: no work was invented for an unassigned lead.
+Labels: software-lead, hardware-lead, verification-lead, surge, michael and pm.
+The extra PM label routes PM's own existing follow-up without mixing role queues.
+
+Issues contain full scope, exact inputs, dependencies, deliverables, stop conditions
+and holds. Leads return evidence in the issue; main retains specifications,
+charters, factual status, decisions and evidence. Active per-lead brief files were
+removed; prior contents remain in Git history. FOR-MICHAEL and REVIEW/README are
+queue/evidence locators, not duplicate task lists. Historical review records do not
+assign work. The enduring protocol is [ISSUE-WORKFLOW](ISSUE-WORKFLOW.md).
+
+Michael will notify leads this transition round and configure issue listeners
+separately. PM did not create or verify a listener. Notifications require a fresh
+read of live issue state; closed/superseded/already-returned work must not repeat.
+Labels, closing issues and listener delivery grant no new authority or acceptance.
+The retired signaling bus, dashboard, controller and worker pool stay retired.
+
+**Rationale:** one editable assignment record prevents main briefs and issue copies
+from drifting. **Cost to reverse:** explicitly migrate open assignments and update
+charters; preserve linked returns and never reactivate old directions by inference.
+
+## ADR-136 — Disposition P1-R1 returns, narrow the card study, and make lead closure terminal
+
+**Date:** 2026-09-12 UTC · **Owner:** PM recording Michael's workflow/card decisions
+and PM's technical disposition
+
+Review verifier `7ca24853ed32ddd327461594a31021cba4a408f3`, Software PR #48 at
+`c4bd824bdf2bf7ceef9d497ec183ec155a9b45ba`, and Hardware PR #47 at
+`74a9c2bf7a0cff4f449aedb3b63daa5771bb7e2a`. The hardened verifier tree
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263` resolves P1-R1-V01/V02/V03 and
+D01 in independent source and is the only next VT8 import. This is package readiness,
+not a product observation or acceptance. The old Software import must be updated.
+
+Keep all engine code held. In particular, do not merge the proposed mount split while
+§5.5 cartridge-sequence derivation is unobservable, and do not pull uncovered allocator
+functions onto main to satisfy the link. Do not upgrade the public header alone or
+implement six general operations from two narrow cases. Verification's next useful
+dependency is an independent playback/golden tranche.
+
+Michael clarified that the earlier 64 GB exclusion was a cost proxy. Replace the
+six-SKU plan with two exact comparison arms: 2 × `SDHFSBC064G` (64 GB V30) and
+2 × `HTF032G3U3` (32 GB U3). U3 remains an experiment rather than an equivalence;
+two cards are a consistency screen rather than qualification. Michael still approves
+the order and reader. Atomicity and every hardware/safety gate remain unchanged.
+
+Issue closure now belongs to the lead after a returned or explicit blocked result.
+Closure means only that the lead stopped work. PM assesses the linked PR/commit and
+opens a new issue for corrections or the next tranche; no issue is created for an
+idle lead. Verification work is routed to `digital-tape-verification`, not the product
+repository. The retired signaling system remains retired.
+
+**Cost to reverse:** publish a new bounded PM decision and update WP-05/role routing;
+do not reinterpret closed issues, old card quotes or superseded test trees as authority.
+
+## ADR-137 — Authenticate merged VT8 import and retain exact control coverage
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R3 activation
+
+At product main `5b0f891222a68848a7c94282f335368c256f902a`, authenticate that
+Software PR #48 integrated the exact independent `tests/ops_draft8` tree
+`4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`, including file modes. Its synthetic
+self-checks pass, but the adapter has not run against the product engine and six
+operations remain undefined. This is import/integration evidence only: it grants
+no product observation, engine merge, package acceptance or independent sign-off.
+
+Hardware PR #47 is integrated, and the added supply-envelope inequality rejects a
+one-off mutation. Require one retained targeted automated negative control because
+the current generic fail-open mutation would survive deletion of that exact
+criterion. This is a narrow evidence-hardening correction; timing remains
+PROVISIONAL and fabrication/charging stay CLOSED.
+
+Michael also directed PM to update its own issue every round. On an explicit
+Michael activation, PM creates or refreshes one `pm`-labeled issue before acting,
+posts the exact start and return, then closes it at stop. This does not authorize a
+listener, recurring self-assignment or stale-notification replay.
+
+Independent Verification #4 and Michael #49 remain active. Software and Surge are
+idle for this round and receive no issue. Frozen hashes, WP-11 red, draft PR #20,
+card qualification, purchases, physical evidence and safety holds remain unchanged.
+
+**Rationale and evidence:** [P1-R3 PM disposition](REVIEW/P1-R3-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue and preserve exact
+source/run provenance; do not relabel synthetic integration as acceptance.
+
+## ADR-138 — Publish a read-only issue queue and hold playback import on evidence identity
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R4 Pages authorization
+
+Replace the old GitHub Pages retirement/agent-dashboard page with a simplified
+read-only lead queue derived from open role-labeled issues. The page displays queue
+state only: it does not observe chat activity, wake leads, assign work, judge returns
+or grant acceptance. Its complete pagination, pull-request exclusion, dual-repository
+routing, escaping and failed-refresh behavior have retained tests. Deploy a single
+HTML artifact through the existing `github-pages` environment from `main`, the only
+branch its protection policy allows. Do not alter or bypass that policy.
+
+Record Hardware PR #54 as integrated at
+`20aa6bbcf886d8f87b4e34c4af4afb0c091703fc`. The targeted supply-envelope control
+is retained and proven able to go red; the real fabrication gate remains CLOSED with
+five blockers and no safety or part acceptance follows.
+
+Hold Verification issue #4's playback package from import. Although deterministic
+fixture generation, self-tests and synthetic replay pass, offline replay accepts a
+manifest-only synthetic-to-product/adapter-ID relabel, does not bind adapter exit,
+and the runner replaces existing evidence destinations. Verification #5 must bind
+identity and exit, preserve prior evidence and retain negative controls without
+changing candidate PCM or consulting implementation.
+
+**Rationale and evidence:** [P1-R4 PM disposition](REVIEW/P1-R4-PM-DISPOSITION.md).
+**Cost to reverse:** remove the dashboard-only source/workflow and redeploy a static
+page through the allowed branch; supersede the playback hold only with corrected,
+immutable verifier evidence and a fresh PM disposition.
+
+## ADR-139 — Authenticate corrected playback evidence and continue laptop work
+
+**Date:** 2026-09-12 UTC · **Owner:** PM under Michael's P1-R5 activation
+
+Authenticate Verification's corrected playback publication at
+`7a22cbb4447c40c51b7c8b2282a685ed30a46ba6`. The corrected source commit/tree is
+`d565403907ecea331a5dcf63efbd1c08d8bd732e` /
+`aaa6dde86c9a0bdffa2b375361049ac670e26467`; the full subtree with saved evidence is
+`ff810814dbc8079c6903e6f85ed7ee312abd3076`. PM reproduced generation, all verifier
+checks and offline replay, including controls for the prior identity/exit/retention
+findings. The package is ready for exact import, but its run is synthetic and grants
+no PCM, product-engine, WP-08 or WP-11 acceptance.
+
+Michael #49 does not block the next laptop tranche. Issue Software #59 for exact
+import, mechanical product-adapter plumbing and a no-stub diagnostic/split return.
+Issue independent Verification #6 in the verifier repository for zero/one/extreme
+rates, the issued ramp and both side-switch transitions. Hardware and Surge receive
+no issue. Defer Michael listening until product-generated PCM exists; his print/card
+work still gates physical qualification, while protection/cleanup remain process
+risk rather than a technical prerequisite for these two tasks.
+
+PR #20 remains held. No implementation merge, test weakening, synthetic relabel,
+candidate-golden acceptance, purchase, card qualification, fabrication, charging or
+frozen-spec change follows. Closure means the assignee stopped, not acceptance.
+
+**Rationale and evidence:** [P1-R5 PM disposition](REVIEW/P1-R5-PM-DISPOSITION.md).
+**Cost to reverse:** supersede the role issues and preserve the authenticated package
+and evidence history; do not erase controls or reinterpret synthetic output.
+
+## ADR-140 — Issue the missing WP-08 scrub table and sequence playback development
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R6 activation
+
+Accept Verification's blocker P1-R5-V01 at verifier
+`a6b2630a55f7260a74e529d22f84aa94b8d7341f`: frozen acceptance says scrub goldens
+drive an exact table, but only the 4.0× to 12.0× over 1.5 seconds envelope exists.
+Cadence, fixed-point rounding, rendered counts, hold duration and reverse start all
+change byte-exact PCM and cannot be invented by Verification.
+
+Issue [WP-08](PACKAGES/WP-08.md) as the missing package-level deterministic vector:
+100 ms rows over the existing 1.5-second linear envelope, enumerated signed Q16.16
+values, 4,410 output frames per ramp row, a 22,050-frame (500 ms) ±12.0× hold,
+128-frame render requests with service-to-idle before each, forward from frame 0 and
+reverse from `total_frames`. This supplies the external table referenced by the
+acceptance row. It changes no TapeFS/API/acceptance byte, arithmetic or frozen hash;
+candidate fixture/PCM still requires independent authorship and later listening.
+
+Authenticate Software draft PR #60's verifier import at exact tree
+`ff810814dbc8079c6903e6f85ed7ee312abd3076` and record its no-product-run diagnostic.
+PM does not review or merge its adapter. Software may review/merge the test-only
+integration within its authority, then prepare—without merging—a playback candidate
+and raw product evidence. Independent Verification receives a fresh assignment
+against the exact WP-08 input and later dispositions product evidence separately.
+Those assignments are Software #63 and verifier #7; Hardware and Surge remain idle.
+
+PR #20 remains held. No header-only main update, engine merge, test weakening,
+synthetic relabel, golden/listening acceptance, purchase, card qualification,
+fabrication, charging or frozen-spec change follows.
+
+**Rationale and evidence:** [P1-R6 PM disposition](REVIEW/P1-R6-PM-DISPOSITION.md).
+**Cost to reverse:** supersede WP-08 with a new PM-issued vector and preserve both
+tables and their candidate evidence; do not silently regenerate PCM.

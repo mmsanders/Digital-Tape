@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 8 September 2026.** Applies to every lead, regardless of model
+**Current agreement: 12 September 2026 UTC.** Applies to every lead, regardless of model
 or app. Revisions/hashes live in spec/VERSION.md; gate state in docs/PHASE0-FREEZE.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
 charters and Michael’s latest PM instructions; historical rationale remains in
@@ -37,24 +37,27 @@ control: a gate that never goes red has not established what it detects.
 | Role | Owns | Boundary |
 |---|---|---|
 | Michael | Vision, taste, final format-freeze sign-off, physical work, wallet | No routine code review or engineering-default decisions required. Every purchase needs his approval. |
-| PM | Product spec, roadmap, phase gates, scope, cross-stream decisions, risk, current briefs | May commit PM docs/spec directly. Does not implement/review/merge product code in the normal role or supply independent acceptance. |
+| PM | Product spec, roadmap, phase gates, scope, cross-stream decisions, risk, assignment issues | May commit PM docs/spec directly. Does not implement/review/merge product code in the normal role or supply independent acceptance. |
 | Software Lead | Repo integration, software implementation, CI, reviews/merges; streams 1/3/4/5 | Does not author product spec or accept its own work. Mechanically integrates issued spec and verifier tests. |
 | Hardware Lead | hardware/, spec/hw/, mechanics, sourcing, characterization, thermal design | Does not change engine/ or firmware/; cannot accept its own safety response or spend Michael’s money. |
 | Verification Lead | Stream 2, independent review, tests/oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
-| Surge support | Bounded proposal or analysis assigned by PM | No standing lead, normative issuance, acceptance or merge authority. PM dispositions its work. |
+| Surge (Grok) | Bounded miscellaneous tasks primarily assigned directly by Michael | No standing lead, normative issuance, acceptance or merge authority. Return results to Michael; the responsible lead reviews integration. |
 
 Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Prefer short scoped rounds and capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
-No automatic reviewer/watch loop is enabled by this agreement.
+Michael may configure issue listeners for lead activation. This agreement does not
+install a listener or enable automatic acceptance, review or merge.
 
-**Temporary exception:** Michael granted one actor PM + Software + Hardware authority
+**Expired freeze exception:** Michael granted one actor PM + Software + Hardware authority
 for this Phase 0 push, including writes and merges. Verification, wallet, physical
-acts and Michael’s reserved sign-off remain separate. The exception ends at the
-recorded freeze milestone or when Michael ends it; a fresh lead does not inherit it.
-The combined actor records which authority it exercised and never calls its own
-regression tests independent acceptance.
+acts and Michael’s reserved sign-off remain separate. The exception ended at Michael’s recorded freeze signature on 8 September 2026;
+a fresh lead does not inherit it.
+The combined actor recorded its exercised authority without claiming independent acceptance.
+Michael's latest instruction replaces the proposed automated organization with individual
+lead chats for Phase 1. This repository transition is separately authorized; it does
+not restore the expired combined product-lead mandate.
 
 ## 3. Spec → independent tests → implementation
 
@@ -85,20 +88,31 @@ use it. Untested engine review requires PM escalation and preserves blindness.
 
 ## 4. Rounds, decisions and scope changes
 
-Every round: fetch refs → read and surface Michael’s questions → read STATUS and
-the current REVIEW brief → work the bounded assignment. Answered questions stay
-answered; unrelated safe work need not wait. PM commits dispositions and next-round
-instructions directly. Leads read main; Michael need not paste repeated directions.
+Every activation: fetch refs → read Michael's open issue queue → read STATUS and
+the live assignment issue/body/scope updates → work only that bounded assignment.
+Answered questions stay answered; unrelated safe work need not wait. PM commits
+durable decisions/evidence to main and publishes complete round work directions
+in a new role-labeled issue for each assigned lead. No duplicate current briefs on
+main; Michael need not paste files. Follow [the issue workflow](docs/ISSUE-WORKFLOW.md).
+A stale notification, closed issue or old review does not authorize work.
+When Michael explicitly starts a new PM round, PM first creates or refreshes one
+open `pm`-labeled issue with the exact input, authority, bounded task, dependencies,
+holds and stop condition. PM posts its start and return there and closes the issue
+at stop. This is not recurring self-assignment.
 
 Escalate product-spec changes, engine dependencies, added physical controls,
 acceptance misses >20%, inconvenient guardrails, and a stream held >3 days to PM.
-Use a pm-decision issue for technical arbitration; FOR-MICHAEL is for taste, hands,
-purchases and his reserved decisions. Include evidence, recommendation and a safe
+Use an issue labeled pm for technical arbitration; issues labeled michael carry
+taste, hands, purchases and reserved decisions. FOR-MICHAEL is only a queue locator
+and settled-decision reference. Include evidence, recommendation and a safe
 default. No default overrides a structural or safety hold.
 
 On relevant merges update concise status: changes, next owner, blockers, independently
 accepted criteria and risks. Append decisions with rationale and reversal cost.
-Keep active briefs short; archive superseded rounds with a historical label.
+Keep assignment issues bounded and do not create issues for idle leads. Leads close
+their own issues after returning or blocking; PM assesses the linked PR/commit and
+opens a fresh issue for any correction or next tranche. Record scope changes
+explicitly. Returning work or closing an issue is not acceptance.
 
 ## 5. Hardware boundary
 
@@ -114,9 +128,12 @@ fields with the response author’s own sign-off. Media atomicity must be establ
 per exact card SKU/revision before qualification; paper review qualifies no card.
 A torn block is a blocker, not a firmware workaround.
 
-No 64 GB cards. Seek cheap 4 GB V30 first; micro/full-size are both acceptable.
-If that combination cannot be sourced, return documented alternatives and prices
-to Michael; do not silently substitute capacity or a weaker speed class.
+The original cheap 4 GB V30 search found no purchasable match. Michael has replaced
+the capacity proxy with a two-arm evaluation: two exact 64 GB V30 cards and two exact
+32 GB U3 cards. U3 is an experiment, not a speed-class substitution or qualification.
+Every purchase still needs Michael's approval, and every result remains bound to the
+exact SKU, revision and CID. No media is qualified without the independent sustained-
+write and atomicity evidence required by WP-05.
 
 ## 6. Implementation boundaries retained from the charter
 
@@ -127,3 +144,24 @@ not clocks or timeout policy. Desktop tooling loads cartridges; it is not a musi
 tag editor, library or player. Firmware must not fork seek, mixing or other engine behaviour.
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
 a release blocker. These limits survive the documentation consolidation.
+
+## 7. Phase 1 individual leads and issue assignments
+
+Use [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) and [role instructions](docs/ROLES/README.md).
+PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;
+Software and Hardware are Opus in separate Claude Code chats. Surge is Grok, primarily
+instructed directly by Michael for miscellaneous scoped tasks.
+
+Leads perform their own work within their normal authorities. Software implements and
+integrates; Hardware designs and characterizes; Verification independently authors and
+runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
+or automatic delegation are part of Phase 1. Do not make routine direct lead work an exception.
+
+Michael configures issue listeners and can also resume chats manually. PM maintains
+work directions solely in role-labeled GitHub issues. Each lead reads the live issue,
+fetches main, performs its own assigned work, returns evidence in the issue and stops.
+Do not repeat completed work on a duplicate event or create tasks for idle leads just
+to fill a round. No subworkers or archived signaling/controller infrastructure is
+restored. The repository does not claim listeners are active. Labels and issue
+closure never waive independent acceptance, purchase approval, the signed freeze,
+or physical safety gates.

@@ -1,0 +1,43 @@
+name: Lead queue Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - site/lead-queue/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lead-queue-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test queue behavior
+        working-directory: site/lead-queue
+        run: node test-dashboard.cjs
+      - name: Stage dashboard only
+        run: |
+          mkdir _site
+          cp site/lead-queue/index.html _site/index.html
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

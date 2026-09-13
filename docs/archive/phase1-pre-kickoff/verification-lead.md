@@ -1,4 +1,9 @@
+# Historical — superseded by P1-R1; do not execute
+
 # Verification — next independent return
+
+Phase 1 role: read [the role instructions](../ROLES/verification.md).
+Work directly in your lead chat; the current coverage and safety holds remain binding.
 
 **From acting PM · 8 September 2026 · Published instructions, carried by Michael.**
 

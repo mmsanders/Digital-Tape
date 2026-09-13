@@ -1,0 +1,28 @@
+PASS conforming VT8-001-RB-ALLSLOT
+PASS conforming VT8-001-REC-ALLOCSEQ
+CAUGHT reset live-only sequence base => reset_b did not consume all-slot max + 1
+CAUGHT reset chunk write => reset_b moved/wrote chunk data
+CAUGHT record live-only sequence base => record commit did not consume all-slot max + 1
+CAUGHT record allocation below H/free_next => record audio write outside derived allocation chunk
+CAUGHT record sb_generation increment => ordinary recording changed sb_generation/superblock
+CAUGHT record overlapping committed index => record B1 result invalid
+CAUGHT V01 commit flush ordering => commit missing entry-array durability flush
+CAUGHT record chunk-data durability barrier => record metadata began without chunk-data durability barrier
+CAUGHT V02 feed write below H => feed unexpectedly performed block I/O
+CAUGHT callback out of range => record audio write outside derived allocation chunk
+CAUGHT callback nonzero rc => event 0 callback rc is nonzero
+CAUGHT public tape_feed result mismatch => feed did not prove all 128 frames accepted
+CAUGHT tampered spec bytes
+VT8-001-RB-ALLSLOT: PASS
+VT8-001-REC-ALLOCSEQ: PASS
+2 cases; 0 failed; evidence /tmp/vt8-selftest-jjem_1gn/evidence
+VT8-001-RB-ALLSLOT: REPLAY PASS
+VT8-001-REC-ALLOCSEQ: REPLAY PASS
+REPLAY PASS: evidence complete, hash-bound, DRAFT-8 authenticated, verdicts recomputed offline
+VT8-001-REC-ALLOCSEQ: REPLAY PASS
+REPLAY FAIL: VT8-001-RB-ALLSLOT: VT8-001-RB-ALLSLOT input: missing evidence file cases/VT8-001-RB-ALLSLOT/input.vo08.gz
+CAUGHT missing replay evidence
+VT8-001-RB-ALLSLOT: REPLAY PASS
+REPLAY FAIL: VT8-001-REC-ALLOCSEQ: VT8-001-REC-ALLOCSEQ output: evidence hash mismatch for cases/VT8-001-REC-ALLOCSEQ/output.vo08.gz
+CAUGHT tampered replay evidence
+SELFTEST PASS: 2 conforming + 12 oracle controls + spec/evidence/replay controls

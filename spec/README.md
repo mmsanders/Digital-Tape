@@ -5,8 +5,10 @@ Exact revisions and SHA-256 values are in [VERSION.md](VERSION.md), enforced by
 tools/ci/verify-spec-bundle.sh. Do not duplicate revision labels in onboarding headers.
 
 The exact DRAFT-8 bundle has passed independent paper review and is published.
-**Final Phase 0 sign-off is pending** in [the freeze record](../docs/PHASE0-FREEZE.md).
-The hashed NOT FROZEN banners have deliberately not been edited.
+**Michael signed Phase 0 on 8 September 2026**; see the exact scope in
+[the freeze record](../docs/PHASE0-FREEZE.md).
+The signed record supersedes historical NOT FROZEN banners for that scope only;
+the authenticated spec bytes remain unchanged.
 
 | Surface | Gate |
 |---|---|

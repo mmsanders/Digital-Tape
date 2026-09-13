@@ -1,22 +1,31 @@
-# Current round brief
+# Review evidence — not a work queue
 
-**PM-issued: 8 September 2026.** This is the current assignment surface. Read main
-and [Michael’s questions](../FOR-MICHAEL.md) first. Archived reports are not instructions.
+Current work directions live in [role-labeled GitHub issues](../ISSUE-WORKFLOW.md).
+There are no active per-lead briefs in this directory. Query open issues and read
+their live body/scope updates before acting; do not execute a historical review.
 
-| Role | Next bounded task | Stop/return boundary |
-|---|---|---|
-| PM | Obtain Q-001 on the exact scoped freeze; disposition verification returns; maintain concise current state | No invented human signature or independent acceptance |
-| Software | Preserve #20; use the independent coverage matrix to plan a safe split or wait for the next tests | 289 mount passes do not license allocator, sequence, warm/state/operation code |
-| Verification | [Read this brief](verification-lead.md); disposition raw mount observations and specify the next test tranche | No untested engine inspection; no package-wide approval from mount-only evidence |
-| Hardware | Complete exact-part timing/safety evidence and small-card sourcing; support WP04 print results | No own-response acceptance, 64 GB order, fabrication or charging |
-| Surge | No active assignment | Do not start autonomous rounds |
+## Evidence records
 
-## Reporting protocol
+- [P1-R1 PM review](P1-R1-PM-REVIEW.md): exact inputs, reproduced checks and findings
+  from the Phase 1 kickoff. Its original work sequence is historical context.
+- [P1-R2 PM disposition](P1-R2-PM-DISPOSITION.md): assessment of verifier
+  `7ca2485`, Software PR #48 and Hardware PR #47, with preserved holds and the
+  exact next-import/card decisions.
+- [P1-R3 PM disposition](P1-R3-PM-DISPOSITION.md): authentication of the merged
+  exact verifier import, explicit real-engine exclusions, and the retained Hardware
+  negative-control correction.
+- [P1-R4 PM disposition](P1-R4-PM-DISPOSITION.md): Hardware-control integration,
+  the first playback-package hold/correction, and publication of the read-only Pages
+  lead queue.
+- [P1-R5 PM disposition](P1-R5-PM-DISPOSITION.md): authentication of the corrected
+  playback evidence, Michael dependency decision, and bounded Software/Verification
+  continuation.
+- [P1-R6 PM disposition](P1-R6-PM-DISPOSITION.md): authentication of Software's
+  draft playback import, disposition of Verification's schedule blocker, and the
+  issued WP-08 scrub table.
+- Returns under this directory, when present, are evidence linked from assignment
+  issues; they do not assign the next round.
 
-Each lead returns: input commit/spec hashes; work/evidence produced; what actually ran;
-remaining holds; next owner. PM commits dispositions and updates this brief directly.
-Use one bounded round and stop on its return condition. No listener, polling loop,
-agent bus activation, or automatic cross-agent dispatch is authorized here.
-
-Earlier lead/surge packets are in [the historical archive](../archive/pre-phase0/README.md).
-The separate staging/agent-bus-v1 work is outside this freeze push and remains staged.
+Previous brief contents remain in Git history at
+[d9bc6eb](https://github.com/mmsanders/Digital-Tape/tree/d9bc6ebd10983711acade6d148895e78fd1a17e3/docs/REVIEW).
+Do not recreate or update a parallel current-brief surface here.
