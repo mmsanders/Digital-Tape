@@ -276,3 +276,34 @@ cannot yet support independent disposition of PR #64. Preserve it as superseded 
 history; Software must produce a fresh exact-head/build-bound bundle after importing
 the complete sibling. Verification receives no product-observation issue until that
 dependency is ready.
+
+## P1-R8 complete import and contract-conflict disposition — 13 September 2026 UTC
+
+Software #66 merged Phase A through PR #67 at product main
+`14a593120b2400ea5baac79a3b143cd702edcdc0`. The product
+`tests/playback_complete_draft8/` subtree is exactly independent Verification's
+published tree `863b3a49c421bda1bebcf1a9760149bec7051048`, including retained
+synthetic evidence tree `c67ea8fa128e06393839f968ae3cc949d84e5f2a`. The earlier
+playback tree `ff810814dbc8079c6903e6f85ed7ee312abd3076` is unchanged. Clean
+generation, self-test and synthetic replay reproduce; the only full product-gate
+failure is the deliberate missing-WP-11-manifest gate. No engine file landed.
+
+Held PR #64 is `bc53076448112ec3015de40e71c229e17d225c2f`, with tested-code
+ancestor `43d2dbaa6434942df37e165b25edc6d45135fee2`. Its complete product
+bundle is bound to that code and one build identity. Offline replay with the unmodified
+published package reaches the oracle and fails at its first disagreement. PM did not
+inspect implementation or adapter source and does not accept Software's diagnostic
+scratch oracle.
+
+Frozen-contract review identifies exactly three verifier-package defects: the
+`intmin` family drops frame 0 contrary to §§6.2–6.3; the reverse scrub generator uses
+the V5-005-rejected `max_pos - 1` instead of `(total_frames - 1) << 32`; and both
+side families expect integer 6 where the frozen enum makes `TAPE_ERR_UNDERRUN` 18.
+[P1-R8](REVIEW/P1-R8-PM-DISPOSITION.md) logs PM approval to regenerate only the
+affected verifier-owned reverse candidate/evidence from the frozen grid snap. This is
+package correction authority, not PCM/golden/listening acceptance.
+
+Independent Verification owns the correction without consulting product code or
+Software's diagnostic oracle. PR #64 remains draft and held; Software rerun and
+candidate disposition wait for a corrected immutable verifier publication. Every
+other acceptance and safety hold remains.

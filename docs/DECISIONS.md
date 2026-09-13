@@ -2093,3 +2093,37 @@ WP-08 only to the test-on-main rung, 13 of 36, with no acceptance implied.
 **Cost to reverse:** supersede the Software correction issue with an exact immutable
 replacement; retain both evidence bundles and their provenance defects rather than
 rewriting history.
+
+## ADR-142 — Keep DRAFT-8 and correct three complete-playback verifier expectations
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R8 activation
+
+Authenticate Software #66 Phase A at product main
+`14a593120b2400ea5baac79a3b143cd702edcdc0`: the exact complete independent
+playback subtree `863b3a49c421bda1bebcf1a9760149bec7051048` is on main test-first,
+including saved synthetic evidence tree `c67ea8fa128e06393839f968ae3cc949d84e5f2a`;
+no engine file landed. Clean regeneration, self-test and replay pass. The known
+missing-WP-11-manifest gate remains the only red full-product gate.
+
+Keep held PR #64 at `bc53076448112ec3015de40e71c229e17d225c2f`. Its complete bundle
+from tested-code commit `43d2dbaa6434942df37e165b25edc6d45135fee2` is exactly bound and
+replays with the unmodified verifier package to `FAIL: tape_render.rendered`. PM did
+not inspect or accept implementation or adapter source.
+
+Frozen DRAFT-8 resolves the three escalations without a spec change. Reverse landing
+must emit frame 0 before setting `at_start`; reverse-from-end must grid-snap to
+`(total_frames - 1) << 32`, not V5-005's rejected `max_pos - 1`; and
+`TAPE_ERR_UNDERRUN` is enum value 18, not 6. The complete verifier package encodes the
+wrong expectation in all three places. Authorize independent Verification to correct
+exactly those expectations and to regenerate the affected reverse candidate/evidence
+from the frozen algorithm while retaining old identities in history. This approval is
+golden-adjacent regeneration authority only, not PCM/golden/listening acceptance.
+
+Software remains idle until the corrected publication exists; Hardware and Surge also
+receive no issue. PR #20 and PR #64 remain draft and held. WP-11 red, independent
+Verification, test-first ordering, frozen hashes, purchase/qualification, fabrication,
+charging, protection and all other current holds remain.
+
+**Rationale and evidence:** [P1-R8 PM disposition](REVIEW/P1-R8-PM-DISPOSITION.md).
+**Cost to reverse:** supersede with a new PM decision and preserve both verifier
+publications and product bundles; do not rewrite a package or frozen contract in place.

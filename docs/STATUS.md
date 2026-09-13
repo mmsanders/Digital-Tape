@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 13 September 2026 UTC · Owner: PM · P1-R7 complete playback verifier tranche authenticated; held product evidence needs exact-head correction; scoped Phase 0 freeze unchanged.**
+**Updated: 13 September 2026 UTC · Owner: PM · P1-R8 complete playback tests are on main; three verifier-package conflicts are routed for correction; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -35,6 +35,14 @@ PCM/WP-08/WP-11 or engine acceptance follows. See the
 published the complete ten-family sibling at verifier `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`;
 PM authenticated its source and saved-evidence trees and reproduced its full suite.
 It awaits exact product import. See the [P1-R7 disposition](REVIEW/P1-R7-PM-DISPOSITION.md).
+Software #66 then merged PR #67 at
+`14a593120b2400ea5baac79a3b143cd702edcdc0`, placing that exact complete subtree
+on main before implementation. Its held complete product bundle is exactly bound and
+replays to the unmodified oracle's first failure. Frozen-contract review finds three
+package defects: frame 0 is incorrectly dropped in the `intmin` reverse case, reverse
+scrub uses the explicitly rejected DRAFT-5 off-grid snap, and side-switch underrun is
+numbered 6 rather than 18. Verification owns the independent correction; PR #64 stays
+held. See the [P1-R8 disposition](REVIEW/P1-R8-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -72,7 +80,7 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Exact first playback package is on main; PR #64 retains narrow product PCM, but candidate/build provenance is inconsistent and the complete sibling is not imported. Candidate PCM is unlistened/unaccepted and golden CI stays red | Software correction/import, then independent product-observation disposition; Michael listening only after authenticated product PCM evidence |
+| WP-11 | Exact complete playback subtree is on main. Held PR #64 has a build-bound complete product run, but its unmodified replay fails three expectations that conflict with frozen DRAFT-8. Candidate PCM is unlistened/unaccepted and golden CI stays red | Independent Verification package correction, then Software rerun; Michael listening only after a passing authenticated product bundle is separately routed |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
@@ -89,18 +97,16 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R7 validation confirms the first verifier tree is on main exactly at
-`ff810814dbc8079c6903e6f85ed7ee312abd3076`. The complete verifier source tree is
-`5527547b72b3e5c6d6fb91d41f3aa3bfa86fab7d`, its complete publication subtree is
-`863b3a49c421bda1bebcf1a9760149bec7051048`, and its saved synthetic evidence tree is
-`c67ea8fa128e06393839f968ae3cc949d84e5f2a`; generation, 10 families, 16 new
-behavioral controls, retained P1-R4 controls, offline replay and the full verifier
-suite reproduce green. PR #64's retained three-family bundle also replays and a fresh
-PM run at the actual head produces the same three byte-exact outcomes, but the
-committed candidate/build provenance is internally inconsistent and is held for
-Software correction before Verification spends a disposition round. The hand-maintained
-dashboard now records WP-08 at the test-on-main rung, 13 of 36. Michael #49 remains
-outside the immediate laptop critical path.
+P1-R8 validation confirms the complete verifier subtree is on main exactly at
+`863b3a49c421bda1bebcf1a9760149bec7051048`, with saved synthetic evidence tree
+`c67ea8fa128e06393839f968ae3cc949d84e5f2a`; generation, self-test and replay
+reproduce green. Held PR #64 at `bc53076448112ec3015de40e71c229e17d225c2f`
+retains a complete product bundle from tested-code commit `43d2dbaa...`; unmodified
+replay fails and remains visible. PM's contract arbitration changes no frozen bytes:
+Verification must correct exactly the frame-0, reverse-grid-snap and underrun-number
+expectations before Software reruns. The hand-maintained dashboard remains at the
+test-on-main rung, 13 of 36. Michael #49 remains outside the immediate laptop critical
+path.
 
 ## Phase 1 operating format — 11 September
 
