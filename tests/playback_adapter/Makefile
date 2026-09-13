@@ -15,13 +15,29 @@ ENGINE_INC ?= ../../engine/include
 ENGINE_LIB ?= ../../build/engine/libtape.a
 OUT        ?= build/playback_probe
 OBJ        ?= build/playback_probe.o
+OUT2       ?= build/complete_probe
+OBJ2       ?= build/complete_probe.o
 
 CPPFLAGS := -I$(ENGINE_INC) -DTAPE_PUBLIC_HEADER='"tape.h"'
 
-.PHONY: all compile clean
+.PHONY: all compile complete complete-compile clean
 all: $(OUT)
 
+# The P1-R6 complete tranche's probe. Separate target because it needs
+# tape_status, which the three-family probe does not.
+complete: $(OUT2)
+
 compile: $(OBJ)
+
+complete-compile: $(OBJ2)
+
+$(OBJ2): complete_probe.c
+	@mkdir -p build
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c complete_probe.c -o $(OBJ2)
+
+$(OUT2): $(OBJ2)
+	@mkdir -p build
+	$(CC) $(OBJ2) $(ENGINE_LIB) -o $(OUT2)
 
 $(OBJ): playback_probe.c
 	@mkdir -p build

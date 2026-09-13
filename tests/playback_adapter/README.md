@@ -68,3 +68,35 @@ python3 ../playback_draft8/replay.py <evidence-dir>
 A green run is raw observation for Verification to disposition. It is not
 acceptance, the candidate PCM is not an accepted WP-11 golden, and nothing here
 constitutes human listening.
+
+## Second package: the P1-R6 complete tranche
+
+`complete_probe.c` is the adapter for
+[`tests/playback_complete_draft8`](../playback_complete_draft8/ADAPTER.md) and
+schema `playback-complete-draft8-observation-v1`: ten families, seven PCM
+outputs, invoked as `--fixture-dir DIR --out-dir DIR`.
+
+`complete_adapter.sh` is a decompressing front-end. The package ships its
+fixtures gzipped and the runner passes its own `fixtures/` directory straight
+through, so something must inflate them; the wrapper builds a private temp tree
+shaped like the package and does only that. **It is not trusted:** the probe
+re-hashes every raw image against `fixture.json`'s own `raw_sha256` and refuses
+on mismatch, so the wrapper cannot substitute fixture bytes, and it never touches
+`observation.json` or any PCM. The probe stays the only producer of observations.
+
+The WP-08 identity in the observation is **computed** from the package's own
+`input/WP-08.md`, not hard-coded here, so a changed table is caught by the oracle
+rather than papered over by a constant in my adapter.
+
+**The play ring is deliberately larger than `TAPE_PLAY_RING_MIN`.** That constant
+is a minimum and the caller owns the buffer (§4). A scrub row renders up to 22,050
+frames after a single service sequence, and at 12.0× that spans 264,600 timeline
+frames — far past 372 ms of ring — so this desktop harness supplies 8 MiB.
+Firmware with a smaller ring simply services more often, which is the documented
+interleaving case and yields identical bytes.
+
+Build it separately, because it needs `tape_status`:
+
+```sh
+make complete ENGINE_INC=<engine>/include ENGINE_LIB=<build>/libtape.a
+```

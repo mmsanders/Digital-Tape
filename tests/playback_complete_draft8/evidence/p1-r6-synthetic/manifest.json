@@ -1,0 +1,58 @@
+{
+  "adapter": {
+    "build": "python3 source; no product implementation",
+    "command": "python3 tests/playback_complete_draft8/_synthetic_adapter.py",
+    "id": "verifier-p1-r6-public-contract-model-v1",
+    "kind": "synthetic",
+    "source": "tests/playback_complete_draft8/_synthetic_adapter.py",
+    "source_file": {
+      "path": "tests/playback_complete_draft8/_synthetic_adapter.py",
+      "sha256": "52b69230b8e3cd9982ce1969bf19b445fcaa6e4a2dfe5ba856bc49992641dae1"
+    }
+  },
+  "assignment": "P1-R6-V",
+  "execution": {
+    "exit_code": 0,
+    "outcome": "exited",
+    "timeout_seconds": 90.0
+  },
+  "files": {
+    "input/package/ADAPTER.md": "52348403d768495ac48ec735191036dc992445ad4bd00b8673bb98fe23b16cb9",
+    "input/package/COVERAGE.md": "fc84e4b814130b8b86826164e6ac77bb168d5e965e6a360f944d89d7a32e4839",
+    "input/package/README.md": "0fd2710bcfb942d683ab52d7f0ca09d42ec35dbd048e35c060c04512f756ace4",
+    "input/package/candidate/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "input/package/candidate/scrub-reverse.pcm": "faae5cf894f9a7b2d84e9f9c99a36184ddd776e3cdc6de734e935c4f35f4f5d6",
+    "input/package/fixtures/empty.vo08.gz": "95cc2ee3d7c72d42a53ffae9b74c52b21733b492eaa80a4cf06ae0c68655c6af",
+    "input/package/fixtures/fixture.json": "625d215b97168c06875c9f263582673bcc44f0463cedec2875cf8e004bbb4859",
+    "input/package/fixtures/long.vo08.gz": "39603c2c6b44a12a82cf8df9dd43cf529cdc3bad8bcebd642b29ba863cb40c2b",
+    "input/package/fixtures/one.vo08.gz": "985dd4e22beb9671be88b1d94695cfb28beae7949245195d0810e392d76bf73f",
+    "input/package/generate_fixture.py": "52bb8904fecc65a95a8a5f9f7372d17768045e6925d00e5d390df897321c224e",
+    "input/package/input/WP-08.md": "ff519e960ed3db6e401baebd12f33d5527f83f0e4dfec12484f498470198a96a",
+    "input/package/oracle.py": "bd04491bb1e8834d8a996bb65135d3d0647c69a982cc3458a9fa4f2def421328",
+    "input/package/package.json": "2756f4527c0eecce08d78659bae982dd66c2265aa5dd343197329bc26dec20d2",
+    "input/package/replay.py": "ae6cf38719ca794ff7d989fd0af7ad970ddff5b912cc2cbe8b080d8c1742f3c9",
+    "input/package/runner.py": "bafe0cb1764221100e27a6078daec52b628195f605824b03c529adc64e617795",
+    "input/package/spec/acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "input/package/spec/engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "input/package/spec/tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+    "output/adapter-exit.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "output/intmin.pcm": "7f15ccbb70dca198c355f23c4e1582a9e72c1b76cdbcf7d8b6f511d7401188ad",
+    "output/observation.json": "7432b59cad05f513543cd2e0b6d60663b45c94753ef98448e5dd549056188793",
+    "output/one-intmax.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/reverse-zero.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "output/scrub-reverse.pcm": "faae5cf894f9a7b2d84e9f9c99a36184ddd776e3cdc6de734e935c4f35f4f5d6",
+    "output/side-idle.pcm": "3f9f540229960d11ed73b7ff1fae0b6f26f723ea5c80d238976fc4c902cea28b",
+    "output/side-playing.pcm": "8cde253ff03900ec30ecc695b700913a442ede54fd8b45a1dd06a6fe6e0206e1",
+    "output/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output/stdout.txt": "89ef5ccd5bd61875536eeeafa2b0f2f273e233f65e3806cb4f15e82731e9ce2f",
+    "result.json": "84df717b7ade7b0365428933c0ab4879f9653a967cb6edff8c17b2cc46243c75"
+  },
+  "oracle_sha256": "bd04491bb1e8834d8a996bb65135d3d0647c69a982cc3458a9fa4f2def421328",
+  "package_manifest_sha256": "2756f4527c0eecce08d78659bae982dd66c2265aa5dd343197329bc26dec20d2",
+  "replay_sha256": "ae6cf38719ca794ff7d989fd0af7ad970ddff5b912cc2cbe8b080d8c1742f3c9",
+  "runner_sha256": "bafe0cb1764221100e27a6078daec52b628195f605824b03c529adc64e617795",
+  "schema": "playback-complete-draft8-evidence-v1",
+  "source_commit": "54789cc6e6bbfd942857374e2e0b3305d05d2f2c",
+  "source_tree": "5527547b72b3e5c6d6fb91d41f3aa3bfa86fab7d"
+}
