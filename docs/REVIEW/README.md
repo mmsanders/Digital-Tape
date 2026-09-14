@@ -41,6 +41,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R12 PM disposition](P1-R12-PM-DISPOSITION.md): authentication of the clean
   playback/mount split and its exact evidence, plus blind independent disposition
   routing before any implementation merge.
+- [P1-R13 PM disposition](P1-R13-PM-DISPOSITION.md): authentication of the returned
+  cadence finding, narrow acceptance of the exact mount observations, suspension of
+  playback advancement and verifier-first correction routing.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
