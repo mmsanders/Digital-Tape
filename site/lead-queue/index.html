@@ -259,7 +259,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R13 · 14 September 2026 UTC",
+      asOf: "P1-R14 · 14 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -268,13 +268,13 @@
         { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 2,
           note: "The hardened VT8 tree is imported byte-for-byte and its self-checks pass. Six operations are undefined, so the suite has never met the real engine." },
         { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
-          note: "Playback advancement is suspended: verifier finding P1-R12-V01 proves the shared broad/clean scrub trace omits per-render service. Verification #11 owns the package correction; PR #77 stays held." },
+          note: "Corrected verifier tree 467a34bb enforces service before all 698 renders per direction and rejects the old cadence. Software #83 owns exact test-first import and a fresh held product trace; PR #77 stays unmerged." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "Contract frozen in DRAFT-8, nothing else. This is the package the Phase 1 milestone rides on, and its independent tests must land before any implementation." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
           note: "Crash infrastructure and the narrow mount package are on main. The complete engine crash, operation and state run is not green, which is what keeps the operations matrix unfrozen." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
-          note: "Reported PCM byte equality does not cure the scrub cadence defect. PCM remains verifier-derived, unlistened and unaccepted; the missing-golden CI job stays red." },
+          note: "Corrected verifier candidates remain byte-identical, synthetic, unlistened and unaccepted. Fresh product evidence is pending Software #83; the missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
           note: "Contract issued; independent WP-12a coverage outstanding." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 1,

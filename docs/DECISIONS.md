@@ -2291,3 +2291,31 @@ and all uncovered product and hardware/safety holds remain.
 **Rationale and evidence:** [P1-R13 PM disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
 **Cost to reverse:** supersede through a new independently supported disposition;
 retain both immutable product traces and the defective-package finding.
+
+## ADR-148 — Authenticate the cadence correction and order a test-first product rerun
+
+**Date:** 2026-09-14 UTC · **Owner:** PM under Michael's P1-R14 activation
+
+Authenticate Verification #11's linear source/evidence/return chain at
+`1f7fe3f...` / `05e1932...` / `e3a25bf...`. The source precedes evidence; exact
+changed-path counts are 8, 32 and 1. The corrected package tree is `467a34bb...`,
+all 30 manifest-bound files match, and frozen hashes/candidate PCM remain unchanged.
+PM reproduction confirms 698 renders and 698 immediately preceding completed service
+sequences in each direction, both old-cadence controls going red, ten families, 22
+behavioral controls, retained P1-R4 checks, saved replay and the full suite.
+
+Treat `P1-R12-V01` as cured for verifier-package correctness only. Do not restore
+acceptance of old product observations. Route Software #83 in two ordered phases:
+merge the exact verifier test/evidence subtree first, then minimally correct only the
+Software-owned product probe and generate a fresh held trace on draft PR #77 without
+rewriting history or changing engine/header/harness blobs. Stop before PR #77 merge;
+the new evidence requires fresh independent disposition.
+
+Do not wake Verification, Hardware, Surge or Michael before the product evidence
+exists. Michael #49 remains unchanged/non-blocking. PR #20/#64/#77, playback
+acceptance, narrow mount boundaries, frozen hashes, Structural Rule 1, WP-11
+red/listening and all uncovered product/hardware/safety holds remain.
+
+**Rationale and evidence:** [P1-R14 PM disposition](REVIEW/P1-R14-PM-DISPOSITION.md).
+**Cost to reverse:** stop Software #83 before its next phase, retain the exact imported
+verifier tree and immutable evidence, and issue a new bounded correction.
