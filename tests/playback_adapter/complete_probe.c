@@ -37,14 +37,23 @@
 #define MAX_ROWS 64u
 
 /*
- * The caller owns all storage (§4), and TAPE_PLAY_RING_MIN is a MINIMUM. The
- * scrub rows render up to 22,050 frames after a single service sequence, and at
- * 12.0x that spans 264,600 timeline frames -- far past 372 ms of ring. A desktop
- * harness is free to hand the engine a larger ring, and does: 8 MiB covers the
- * widest row with room to spare. Firmware's smaller ring simply services more
- * often, which is the documented interleaving case and yields identical bytes.
+ * The caller owns all storage (§4), and TAPE_PLAY_RING_MIN is a MINIMUM.
+ *
+ * The 8 MiB ring this used to hand the engine existed only to let a whole scrub
+ * row render after ONE service sequence -- the once-per-row cadence P1-R13-V01
+ * rejects. Under WP-08's specified schedule, servicing before every render, a
+ * ring that large is actively wrong to use here: tape_service restarts its
+ * window whenever the playhead moves, so a forward scrub re-reads the rest of
+ * the timeline on every render. Measured over the 16 rows: 4,516 service calls
+ * and 4,260,912 block reads forward, against 698 and 90,003 at the minimum
+ * ring.
+ *
+ * At TAPE_PLAY_RING_MIN each service sequence completes in a single call, which
+ * is the firmware interleaving case the contract describes and gives exactly one
+ * completed service immediately before each of the 698 renders per direction.
+ * This is caller-owned storage (guardrail 08); no engine byte changes with it.
  */
-#define PLAY_RING_BYTES (8u * 1024u * 1024u)
+#define PLAY_RING_BYTES TAPE_PLAY_RING_MIN
 
 /* --- SHA-256 (harness-local; not engine code) ---------------------------- */
 
