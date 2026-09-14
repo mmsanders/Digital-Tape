@@ -44,6 +44,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R13 PM disposition](P1-R13-PM-DISPOSITION.md): authentication of the returned
   cadence finding, narrow acceptance of the exact mount observations, suspension of
   playback advancement and verifier-first correction routing.
+- [P1-R14 PM disposition](P1-R14-PM-DISPOSITION.md): authentication of the corrected
+  verifier package and ordered test-only import, minimal product-probe correction and
+  fresh held-evidence route.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
