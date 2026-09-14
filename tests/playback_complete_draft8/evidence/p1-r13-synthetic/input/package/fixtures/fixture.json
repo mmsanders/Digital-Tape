@@ -1,0 +1,47 @@
+{
+  "long_side_a_frames": 1100000,
+  "long_side_b_frames": 7,
+  "rates_q16_16": [
+    262144,
+    297097,
+    332049,
+    367002,
+    401954,
+    436907,
+    471859,
+    506812,
+    541764,
+    576717,
+    611669,
+    646622,
+    681574,
+    716527,
+    751479,
+    786432
+  ],
+  "raw_sha256": {
+    "empty": "e91059fe00fafbfc1f8db77a1592c65f91cba38e71be6090ac5338bb4804bef2",
+    "long": "c2547b5d9f36ceb19ad19ca5b45f19cca18f8bed7b7ca60811283befd6957d4c",
+    "one": "116ac0826bb5833b55cce01506690a1a440156cf8c456328841bb5f762bcbba0"
+  },
+  "row_render_frames": [
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    4410,
+    22050
+  ],
+  "schema": "playback-complete-draft8-fixtures-v1",
+  "total_output_frames": 88200
+}

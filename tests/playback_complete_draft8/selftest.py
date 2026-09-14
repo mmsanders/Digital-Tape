@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Corrected P1-R8 package self-test with targeted named controls."""
+"""Corrected P1-R13 package self-test with targeted named controls."""
 from __future__ import annotations
 import copy,json,shutil,subprocess,sys,tempfile
 from pathlib import Path
@@ -14,9 +14,25 @@ def validate(obs,outs):
     if not r["pass"]: raise oracle.VerificationError("PCM mismatch")
 def runner_cmd(ev,cmd=None,source=None,timeout="3"):
     source=source or str(HERE/"_synthetic_adapter.py"); cmd=cmd or f"{sys.executable} {source}"
-    return [sys.executable,str(HERE/"runner.py"),"--adapter-cmd",cmd,"--adapter-kind","synthetic","--adapter-id","verifier-p1-r8-corrected-public-contract-model-v1","--adapter-source",source,"--adapter-build","python3 source; verifier self-test","--adapter-timeout-seconds",timeout,"--source-commit","SELFTEST-DECLARED","--source-tree","SELFTEST-DECLARED","--evidence-dir",str(ev)]
+    return [sys.executable,str(HERE/"runner.py"),"--adapter-cmd",cmd,"--adapter-kind","synthetic","--adapter-id","verifier-p1-r13-per-render-service-model-v1","--adapter-source",source,"--adapter-build","python3 source; verifier self-test","--adapter-timeout-seconds",timeout,"--source-commit","SELFTEST-DECLARED","--source-tree","SELFTEST-DECLARED","--evidence-dir",str(ev)]
+def once_per_row(obs,fam):
+    """Reconstruct the rejected P1-R12 cadence for one scrub direction."""
+    calls=obs["cases"][fam]["calls"]
+    weakened=[]; after_rate=False
+    for x in calls:
+        if x["call"]=="tape_set_rate": after_rate=True; weakened.append(x)
+        elif x["call"]=="tape_service":
+            if after_rate: weakened.append(x); after_rate=False
+        else: weakened.append(x)
+    kept={id(x):i for i,x in enumerate(weakened)}
+    obs["cases"][fam]["calls"]=weakened
+    obs["cases"][fam]["callbacks"]=[
+        {**e,"call_index":kept[id(calls[e["call_index"]])]}
+        for e in obs["cases"][fam]["callbacks"]
+        if id(calls[e["call_index"]]) in kept
+    ]
 def main():
-    oracle.authenticate(); print("PASS authenticated frozen DRAFT-8/WP-08/corrected package and deterministic regeneration")
+    oracle.authenticate(); print("PASS authenticated frozen DRAFT-8/WP-08/P1-R13-corrected package and deterministic regeneration")
     subprocess.run([sys.executable,str(PRIOR/"selftest.py")],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE); print("PASS retained P1-R4 three-family + 18-control self-test")
     with tempfile.TemporaryDirectory(prefix="p1-r8-selftest-") as td_s:
         td=Path(td_s); out=td/"out"; out.mkdir(); subprocess.run([sys.executable,str(HERE/"_synthetic_adapter.py"),"--fixture-dir",str(HERE/"fixtures"),"--out-dir",str(out)],check=True,stdout=subprocess.PIPE)
@@ -34,6 +50,8 @@ def main():
         mut("reverse scrub start",lambda b:b["cases"]["scrub_reverse"]["calls"][1].update(frame=gen.LONG_N-1))
         old=dict(outs); old["scrub_reverse"]=gen.render(gen.LONG_N,tuple(-x for x in gen.RATES),grid_snap=False); fail("F-2 DRAFT-5 off-grid reverse snap candidate",lambda:validate(obs,old))
         mut("service time advancing cadence",lambda b:b["cases"]["scrub_forward"]["calls"][2].update(more_work=True))
+        mut("P1-R13-V01 old once-per-row cadence forward",lambda b:once_per_row(b,"scrub_forward"))
+        mut("P1-R13-V01 old once-per-row cadence reverse",lambda b:once_per_row(b,"scrub_reverse"))
         mut("side switch refused while Playing",lambda b:b["cases"]["side_playing"]["calls"][6].update(result=5))
         mut("side position retained",lambda b:b["cases"]["side_playing"]["calls"][7].update(frame=gen.LONG_N))
         mut("side endpoint flag retained",lambda b:b["cases"]["side_playing"]["calls"][8].update(at_end=True))
@@ -50,8 +68,8 @@ def main():
         nonzero=td/"nonzero.py"; nonzero.write_text("import sys;sys.exit(7)\n"); nev=td/"nonzero-ev"; assert subprocess.run(runner_cmd(nev,f"{sys.executable} {nonzero}",str(nonzero)),stdout=subprocess.PIPE).returncode==1; assert (nev/"output/adapter-exit.txt").read_text()=="7\n"; print("CAUGHT nonzero exit with diagnostics")
         sleeper=td/"sleep.py"; sleeper.write_text("import time;print('start',flush=True);time.sleep(2)\n"); tev=td/"timeout-ev"; assert subprocess.run(runner_cmd(tev,f"{sys.executable} {sleeper}",str(sleeper),"0.05"),stdout=subprocess.PIPE).returncode==1; assert (tev/"output/adapter-exit.txt").read_text()=="TIMEOUT\n"; print("CAUGHT timeout with diagnostics")
         retained=td/"retained"; retained.mkdir(); s=retained/"sentinel"; s.write_bytes(b"KEEP"); assert subprocess.run(runner_cmd(retained),stdout=subprocess.PIPE).returncode==2 and s.read_bytes()==b"KEEP"; print("PASS nonempty destination retained")
-    saved=HERE/"evidence/p1-r8-synthetic"
+    saved=HERE/"evidence/p1-r13-synthetic"
     if saved.exists(): subprocess.run([sys.executable,str(HERE/"replay.py"),str(saved)],check=True); print("PASS checked-in synthetic replay")
-    print("SELFTEST PASS: 10 corrected families; 20 behavioral controls including F-1/F-2/F-3; retained 18-control P1-R4 package; evidence controls")
+    print("SELFTEST PASS: 10 corrected families; 22 behavioral controls including P1-R13-V01 forward/reverse and F-1/F-2/F-3; retained 18-control P1-R4 package; evidence controls")
     return 0
 if __name__=="__main__": raise SystemExit(main())
