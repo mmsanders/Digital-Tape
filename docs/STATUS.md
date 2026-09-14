@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 13 September 2026 UTC · Owner: PM · P1-R10 exact corrected-package import and fresh 10/10 product bundle authenticated; independent disposition is next; scoped Phase 0 freeze unchanged.**
+**Updated: 14 September 2026 UTC · Owner: PM · P1-R13 exact mount observations accepted; playback blocked on verifier cadence correction; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -59,6 +59,32 @@ all ten corrected families byte-exactly. PM authenticated the identity and resul
 but neither PM nor a green run accepts the engine, PCM or package. Independent
 Verification #9 owns the raw-bundle disposition. See the
 [P1-R10 disposition](REVIEW/P1-R10-PM-DISPOSITION.md).
+Verification #9 independently accepted those exact ten raw product-observation
+families at verifier `17d345ef23a9bbdb3e781f3451f4a8797a1a6f1c`, without inspecting
+product or adapter source. PM authenticated its one-file return, evidence identity and
+unmodified replay. The result accepts only the recorded observations—not the broad
+held implementation, WP-08 completion, PCM/goldens or listening. Ruleset 22084355 is
+repaired and strict; PM PR #73 merged at `6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96`.
+Software #75 owns a new clean held split from that main. See the
+[P1-R11 disposition](REVIEW/P1-R11-PM-DISPOSITION.md).
+Software #75 returned draft PR #77 at `f100937aed1437401218003db3edbb07d8e4f543`,
+with pre-run code commit `86eb3b77756042c365e2d0353018b981c39c99e8` directly atop
+the assigned base and no held #20/#64 ancestry. Eleven carried files are exact accepted
+blobs; uncovered allocator files are absent, and the one row-3 mount helper is isolated
+in `chunks.c`. PM authenticated all 30 manifest-bound files, replayed the bundle, and
+reproduced the exact playback observation/result plus all 289 mount case records.
+These are PM-authenticated product runs, not acceptance. Verification #10 owns the
+blind exact-evidence disposition. See the
+[P1-R12 disposition](REVIEW/P1-R12-PM-DISPOSITION.md).
+Verification #10 returned one valid blocker, `P1-R12-V01`: frozen WP-08 requires a
+completed service sequence before every scrub render, while the oracle and exact
+trace use one sequence per rate row. Each direction has 698 renders and 682 omissions.
+Because the broad and clean runs share that observation, playback advancement is
+suspended pending Verification #11's verifier-only correction, fresh product evidence
+and a new independent disposition. Separately, Verification accepts the exact 289/289
+clean mount observations, including row 3, but not source/helper design, complete
+WP-06 or merge status. See the
+[P1-R13 disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -96,18 +122,19 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Corrected publication is exactly imported and the fresh held product bundle replays 10/10. Candidate PCM remains verifier-derived, unlistened and unaccepted; golden CI stays red | Independent Verification #9 dispositions the exact raw bundle; Michael listening only after PM separately routes an accepted candidate |
+| WP-11 | Playback-observation acceptance is suspended by P1-R12-V01. Reported PCM equality does not cure the cadence defect; PCM remains verifier-derived, unlistened and unaccepted; golden CI stays red | Verification #11 corrects the package; PM routes Michael only when an exact listening packet is ready |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
 
-**New independent package acceptances: none.** Software's mount observations now
-have Verification's narrow independent disposition, reproduced by PM. That is not
-full WP-06/WP-07 or #20 acceptance. CAD checks are not measurements. Missing WP-11
-goldens remain an explicit red gate. Main ruleset 22084355 is active, but it
-incorrectly requires the hardware-path-filtered `print packet is printable` context
-on every PR; ordinary PRs cannot emit that context and will be blocked until Michael
-removes it from the required list or supplies an always-reporting equivalent.
+**New independent package acceptances: none.** Verification #10 rejects playback
+acceptance because the shared broad/clean scrub trace violates frozen WP-08 cadence;
+prior observation advancement is suspended pending corrected evidence. The exact clean
+289-case mount log has Verification's narrow independent acceptance. That is not
+source, helper, full WP-06/WP-07 or merge acceptance. CAD checks are not measurements. Missing WP-11
+goldens remain an explicit red gate. Main ruleset 22084355 is active and strict; its
+required list now contains only the ten all-PR engine contexts. The prior
+hardware-path-filtered pending-check blocker is closed.
 
 Risks: unqualified card atomicity, unresolved solenoid timing at the actual rail/parts,
 unprinted mechanism/creep trials, and code still held by coverage. These are visible
@@ -115,14 +142,12 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R10 validation confirms the corrected publication tree `6dbb23bb...` on product
-main with no engine/firmware delta, and a fresh product bundle on held PR #64 bound to
-pre-run code commit `5f44b97...`. The package's unmodified replay reports all ten
-families passing, with seven PCM outputs byte-exact. This is a product-result readiness
-fact, not independent acceptance, an implementation merge, a golden or listening.
-The hand-maintained dashboard remains at the test-on-main rung, 13 of 36. Verification
-#9 is the only new lead assignment. PM no longer publishes branch KEEP lists or posts
-routine Michael-issue refreshes; Michael is contacted only for changed or blocking work.
+P1-R13 authenticates Verification's cadence finding and narrow mount disposition.
+Verification #11 is the only new lead assignment and stops before any product import
+or run. PR #77 remains held; Software will receive a later exact-import/rerun task only
+after the corrected verifier publication is authenticated. The dashboard remains at
+the test-on-main rung, 13 of 36, because no implementation is merged or package
+accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
 
 ## Phase 1 operating format — 11 September
 

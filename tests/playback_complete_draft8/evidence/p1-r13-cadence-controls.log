@@ -1,0 +1,11 @@
+P1-R13-V retained cadence-control result
+Command: python3 tests/playback_complete_draft8/selftest.py
+Source commit: 1f7fe3f79d326c4a6e37f8c301c97c110d481619
+Source tree: fe79113bfe600268585b382fab218e2bbf687a7e
+
+CAUGHT P1-R13-V01 old once-per-row cadence forward
+CAUGHT P1-R13-V01 old once-per-row cadence reverse
+
+SELFTEST PASS: 10 corrected families; 22 behavioral controls including
+P1-R13-V01 forward/reverse and F-1/F-2/F-3; retained 18-control P1-R4
+package; evidence controls

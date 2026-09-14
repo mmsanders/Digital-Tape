@@ -1,0 +1,58 @@
+{
+  "adapter": {
+    "build": "python3 source; verifier P1-R13 synthetic public-contract model",
+    "command": "python3 _synthetic_adapter.py",
+    "id": "verifier-p1-r13-per-render-service-model-v1",
+    "kind": "synthetic",
+    "source": "_synthetic_adapter.py",
+    "source_file": {
+      "path": "_synthetic_adapter.py",
+      "sha256": "75d3ba58550fd2d46114d5dd0048f77cd29ed795668bec5bfad81563fc3f84e3"
+    }
+  },
+  "assignment": "P1-R13-V",
+  "execution": {
+    "exit_code": 0,
+    "outcome": "exited",
+    "timeout_seconds": 90.0
+  },
+  "files": {
+    "input/package/ADAPTER.md": "10e0c1b2bc7376be63662b5fdd33fa75485c7fefdb6883457c3bebda5df2be2a",
+    "input/package/COVERAGE.md": "a496840323a5937b79e9b908c63dba9808c6e01cb1ba844d4239b891988ef564",
+    "input/package/README.md": "d397ab1ef4e206a265cb936c5ecf4cc88c8978b18b04186736d396b69680724b",
+    "input/package/candidate/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "input/package/candidate/scrub-reverse.pcm": "5f1794e8dcd7c1b3e2c390a1aef33039f5b88b20f682c56c4aa6f94051bd8fa1",
+    "input/package/fixtures/empty.vo08.gz": "95cc2ee3d7c72d42a53ffae9b74c52b21733b492eaa80a4cf06ae0c68655c6af",
+    "input/package/fixtures/fixture.json": "625d215b97168c06875c9f263582673bcc44f0463cedec2875cf8e004bbb4859",
+    "input/package/fixtures/long.vo08.gz": "39603c2c6b44a12a82cf8df9dd43cf529cdc3bad8bcebd642b29ba863cb40c2b",
+    "input/package/fixtures/one.vo08.gz": "985dd4e22beb9671be88b1d94695cfb28beae7949245195d0810e392d76bf73f",
+    "input/package/generate_fixture.py": "1a347dacf4684bee53d4f8aa34e63a1494b13d79687bfcda9d1d8a6bc6bbabfb",
+    "input/package/input/WP-08.md": "ff519e960ed3db6e401baebd12f33d5527f83f0e4dfec12484f498470198a96a",
+    "input/package/oracle.py": "0e8161c962c496c0d84c79a71473188a793e09aa08c3eb6630400f76447da7e6",
+    "input/package/package.json": "b9ec085565e8481084dc8c287082cf69cc3419f938a7fe89a08b98ec9904b0c4",
+    "input/package/replay.py": "d5609378a4ed1769287ec727129bc8ec821df27eff19d0fbc72b8fd9cab366f1",
+    "input/package/runner.py": "1b4ca3c2014df70ca1cde6f8d88932aaa7cad42402f57aa50943afba070bf689",
+    "input/package/spec/acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "input/package/spec/engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "input/package/spec/tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+    "output/adapter-exit.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "output/intmin.pcm": "d844e1554b5c802b4cc27c59d7503f3117296f7928d3d24dc87679a3e32a27dd",
+    "output/observation.json": "a7c00a87708103f968c723adc80478934d81374134f682b4fbc5638187d170ec",
+    "output/one-intmax.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/reverse-zero.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "output/scrub-reverse.pcm": "5f1794e8dcd7c1b3e2c390a1aef33039f5b88b20f682c56c4aa6f94051bd8fa1",
+    "output/side-idle.pcm": "3f9f540229960d11ed73b7ff1fae0b6f26f723ea5c80d238976fc4c902cea28b",
+    "output/side-playing.pcm": "8cde253ff03900ec30ecc695b700913a442ede54fd8b45a1dd06a6fe6e0206e1",
+    "output/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output/stdout.txt": "a84ce698b824eb6f9d52b6693d7c9875f9d740dccef3fc91e84dbe080acbb14a",
+    "result.json": "1fb3437a3fffb668ce92e3e6391f4d06d1ead07b8b24889a0264c9fe0d75f742"
+  },
+  "oracle_sha256": "0e8161c962c496c0d84c79a71473188a793e09aa08c3eb6630400f76447da7e6",
+  "package_manifest_sha256": "b9ec085565e8481084dc8c287082cf69cc3419f938a7fe89a08b98ec9904b0c4",
+  "replay_sha256": "d5609378a4ed1769287ec727129bc8ec821df27eff19d0fbc72b8fd9cab366f1",
+  "runner_sha256": "1b4ca3c2014df70ca1cde6f8d88932aaa7cad42402f57aa50943afba070bf689",
+  "schema": "playback-complete-draft8-evidence-v1",
+  "source_commit": "1f7fe3f79d326c4a6e37f8c301c97c110d481619",
+  "source_tree": "fe79113bfe600268585b382fab218e2bbf687a7e"
+}

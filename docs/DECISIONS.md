@@ -2195,3 +2195,99 @@ independence, implementation, listening, hardware and safety holds remain.
 **Cost to reverse:** supersede through a fresh PM issue; preserve the evidence bundle
 and ruleset history, and do not weaken hardware CI or reinterpret a product run as
 acceptance.
+
+## ADR-145 — Accept ten playback observations and require a clean integration split
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R11 activation
+
+Record ruleset `22084355` repaired: remove the required hardware-path-only packet
+context and enable strict latest-main checks while retaining pull requests, resolved
+conversations, no deletion, no force-push, zero approvals and no bypass actors. Merge
+the previously blocked PM-only PR #73 at
+`6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96` after all ten required contexts pass.
+The deliberate missing-WP-11-golden job stays red and unrequired.
+
+Accept Verification #9's exact narrow return at verifier
+`17d345ef23a9bbdb3e781f3451f4a8797a1a6f1c`: product evidence commit/tree
+`c18aa42579ef7c5ea92a4d70972d6a2daa6698bb` /
+`34bad4611b6849ed586c7ec701fa7ddafef0cb12` satisfies the corrected package for
+all ten recorded playback families. This independently accepts those raw observations,
+not source, the implementation generally, WP-08 completion, PCM/goldens/listening or
+a merge.
+
+Do not merge PR #64 or its broad #20 ancestry. Software #75 must construct a new clean
+draft from current main containing only the dependency-complete accepted playback
+slice, retain a fresh exact product bundle and stop before merge. If uncovered code
+cannot be excluded, return the exact dependency blocker. Independent Verification
+must disposition that new split bundle before any implementation merge.
+
+No Michael listening task is issued until an exact ready listening packet exists.
+No routine Michael comment or branch KEEP list is published. PR #20/#64, WP-11 red,
+frozen hashes, independence, test-first, uncovered behavior, purchase/qualification,
+fabrication and charging holds remain.
+
+**Rationale and evidence:** [P1-R11 PM disposition](REVIEW/P1-R11-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue; retain both wide and
+clean candidate histories and every evidence bundle, without transferring acceptance
+to untested code.
+
+## ADR-146 — Route the clean playback/mount candidate for exact disposition
+
+**Date:** 2026-09-13 UTC · **Owner:** PM under Michael's P1-R12 activation
+
+Accept Software #75's return as a ready held integration candidate for independent
+evidence review, not as accepted source or merge authority. Draft PR #77 head
+`f100937aed1437401218003db3edbb07d8e4f543` contains one pre-run code commit
+`86eb3b77756042c365e2d0353018b981c39c99e8` directly atop the assigned base and
+does not carry broad #20/#64 ancestry. Eleven carried files are exact accepted blobs;
+the uncovered allocator remains absent. Retain the isolated
+`tape_chunks_for_frames` helper as a held boundary because its only claimed caller is
+the independently covered §9.3.3 row-3 mount path. This is a routing decision, not PM
+source review or acceptance of the helper.
+
+Authenticate the fresh evidence tree `1671bcb37abccb21cb59234792ba35e984a3eb5f`,
+all 30 manifest-bound files, exact package identity, offline replay and PM rerun.
+Playback observation/result bytes reproduce exactly; all 289 mount case records
+reproduce apart from the expected local executable provenance. Route the exact raw
+playback and mount evidence to independent Verification #10, with source, adapter,
+private-test and PR-discussion blindness preserved. No implementation merge is
+authorized before that return is dispositioned.
+
+Do not wake idle Software, Hardware, Surge or Michael. PR #20/#64/#77, frozen hashes,
+WP-11 red/listening, uncovered behavior, purchases, qualification, fabrication,
+charging, safety and Michael-reserved approvals remain held. Publish no routine
+Michael comment or branch KEEP list.
+
+**Rationale and evidence:** [P1-R12 PM disposition](REVIEW/P1-R12-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a fresh bounded PM issue; retain PR #77 and its
+immutable evidence, and do not widen the candidate or transfer observation acceptance
+to source.
+
+## ADR-147 — Suspend playback advancement and correct the verifier cadence first
+
+**Date:** 2026-09-14 UTC · **Owner:** PM under Michael's P1-R13 activation
+
+Authenticate Verification #10's one-file return at verifier
+`bc0f7ec6ba05a1e7bb7033d99922e7b739abd10d` and accept its disposition at the
+stated boundaries. Finding `P1-R12-V01` shows that frozen WP-08 requires a completed
+service sequence before every scrub render, while both verifier oracle and exact
+product trace permit the weaker once-per-rate-row sequence. PM reproduces the raw
+count: 698 renders and 682 omissions in each direction. Because the broad and clean
+runs share observation hash `24a35a3c...7ce4`, suspend reliance on the earlier
+ten-family playback-observation acceptance until corrected evidence receives a new
+independent disposition. Do not invent partial family acceptance.
+
+Retain Verification's narrow acceptance of the exact 289 mount observations,
+including the row-3 positives and strict `H > len` negative. This does not accept the
+helper, allocator, source, full WP-06/WP-08 or a merge. Keep PR #77 draft/held.
+
+Issue only Verification #11 to repair the verifier-owned cadence and add controls
+that reject once-per-row behavior in both directions. It stops before product import
+or execution. Do not wake Software, Hardware, Surge or Michael until the corrected
+package is authenticated. Michael #49 is unchanged and non-blocking, so publish no
+routine comment. PR #20/#64/#77, frozen hashes, Structural Rule 1, WP-11 red/listening
+and all uncovered product and hardware/safety holds remain.
+
+**Rationale and evidence:** [P1-R13 PM disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a new independently supported disposition;
+retain both immutable product traces and the defective-package finding.

@@ -357,3 +357,82 @@ narrow disposition using the raw evidence and verifier-owned package while remai
 blind to product/adapter source. PR #64 stays draft and held. Candidate PCM remains
 unlistened and is not a WP-11 golden; all uncovered families and current product,
 hardware and safety holds remain.
+
+## P1-R11 independent product-observation disposition — 13 September 2026 UTC
+
+Verification issue #9 published one findings file at verifier main
+`17d345ef23a9bbdb3e781f3451f4a8797a1a6f1c`, directly atop assigned input
+`62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`. It changed no test, oracle,
+fixture, candidate or workflow. Verification remained blind to product/adapter source
+and independently authenticated the complete raw bundle, staged-package identity,
+product adapter agreement, exit, all callback and public-call records, exact scrub
+schedule and saved-result equality.
+
+The narrow disposition accepts the ten recorded product-observation families at
+evidence commit/tree `c18aa42579ef7c5ea92a4d70972d6a2daa6698bb` /
+`34bad4611b6849ed586c7ec701fa7ddafef0cb12`, whose sole parent is pre-run code
+commit `5f44b97fe9fb3342fce3b58236a75ea27b4898a6`. PM recomputed the report's
+manifest, observation and result hashes and reran the unmodified offline replay; all
+match and pass. Seven PCM-bearing families are byte-exact; the three no-PCM families'
+call/state observations pass.
+
+This is independent acceptance of the exact raw observations only. PR #64 contains
+broad held #20 ancestry and cannot merge. Software #75 owns a fresh clean draft from
+main, the narrowest dependency-complete accepted playback slice, and a new exact
+product bundle. That bundle requires its own independent disposition before any
+implementation merge. Candidate PCM remains unlistened and not a WP-11 golden;
+all other holds remain.
+
+## P1-R12 clean split and exact-evidence routing — 13 September 2026 UTC
+
+Software #75 returned held draft PR #77 at
+`f100937aed1437401218003db3edbb07d8e4f543`. Its evidence commit has sole parent
+`86eb3b77756042c365e2d0353018b981c39c99e8`, the pre-run code commit directly
+atop assigned base `6a8b2fb481cf43a8d84aad6c74336fc4a2a50d96`. Neither the broad PR #20/#64
+heads nor the accepted broad code-under-test are ancestors. Eleven carried files
+have exact accepted blobs; `alloc.c` and allocator scaffolding are absent. The one
+required mount dependency, `tape_chunks_for_frames`, is isolated in `chunks.c` and
+is claimed only through the independently covered TapeFS §9.3.3 row-3 mount path.
+This boundary remains held and is not PM source review or acceptance.
+
+The clean run, product-evidence and staged-package trees are respectively
+`a6c1dfeb1e35399301adcabf5adc90ef0e067307`,
+`1671bcb37abccb21cb59234792ba35e984a3eb5f` and
+`b097c2a91fabf55677c9a7f866020d22d83ee90e`. PM authenticated every one of the
+30 manifest-bound files, exact corrected source tree `6dbb23bb...`, product identity,
+zero exit and empty stderr. Offline replay passes. A fresh PM run reproduces exact
+observation/result hashes `24a35a3c...7ce4` / `1fb3437a...f742`; a fresh mount run
+reproduces all 289 case records, differing only in the expected local executable
+path/build-hash provenance line. These are PM observations, not independent acceptance.
+
+Verification issue #10 owns a blind disposition of the exact bundle and mount log,
+including the named §9.3.3 row-3 cases. It may inspect verifier-owned packages, public
+contracts, raw evidence and Git identity metadata only. PR #77, #64 and #20 remain
+draft/held. No source, complete WP-06/WP-08, helper design, PCM/golden/listening or
+merge acceptance follows; all uncovered product and hardware/safety holds remain.
+
+## P1-R13 cadence finding and verifier-first correction — 14 September 2026 UTC
+
+Verification #10 returned at `bc0f7ec6ba05a1e7bb7033d99922e7b739abd10d`
+with one findings blob `11a499b391d38958912394e1cf37ee2b04cbd78d`. PM
+authenticated the one-file parent/tree identity and reran the full verifier suite.
+Finding `P1-R12-V01` correctly identifies that frozen WP-08 requires a completed
+`tape_service(block_budget == 1024)` sequence before every scrub render, while the
+oracle and exact product trace use one sequence per rate row. Each direction records
+698 renders, of which 682 lack an immediately preceding completed service sequence.
+Existing self-tests and replay are green because they encode the same weaker cadence.
+
+The same observation hash `24a35a3c...7ce4` underlies the broad and clean evidence.
+Playback observation acceptance is therefore suspended pending a corrected package,
+fresh product trace and new independent disposition. This does not retract an
+implementation/package acceptance because none existed. Verification's separate
+mount audit accepts exactly 289 recorded observations, including the named row-3
+positive and strict `H > len` negative, but not source, helper design, complete WP-06,
+allocator or merge status.
+
+Verification #11 owns a blind verifier-only correction: enforce the per-render
+service cadence in both scrub directions, add controls that reject the prior
+once-per-row behavior, retain deterministic synthetic evidence and publish source
+before generated evidence. It stops before product import/run. PR #77, #64 and #20
+remain draft/held; candidate PCM remains unlistened and not a WP-11 golden; all other
+product and hardware/safety holds remain.
