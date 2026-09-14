@@ -514,9 +514,16 @@ static int script_scrub(struct family *fam, const char *dir, bool reverse,
         long remaining = counts[k];
         int32_t rate = (int32_t)(reverse ? -rates[k] : rates[k]);
         if (do_rate(t, rate) != TAPE_OK) { return -1; }
-        if (service_to_idle(t) != 0) { return -1; }
         while (remaining > 0) {
             uint32_t n = (remaining > 128) ? 128u : (uint32_t)remaining;
+            /* WP-08: "Before every render request, call tape_service with
+               block_budget == 1024 until more_work == false, under a finite
+               guard." Once per ROW was my defect (P1-R13-V01): it happened to
+               produce the right bytes because the ring is a window over
+               timeline frames, but it is not the schedule the table specifies,
+               and firmware interleaves service with every buffer rather than
+               once per rate change. */
+            if (service_to_idle(t) != 0) { return -1; }
             if (do_render(t, n) != TAPE_OK) { return -1; }
             remaining -= (long)n;
         }
