@@ -1,5 +1,15 @@
 # P1-R11-SW — the clean split candidate, run against the corrected package
 
+> **SUPERSEDED — historical.** This run used the **once-per-row** scrub service
+> cadence. The P1-R13 verifier correction rejects that schedule by name
+> (`P1-R13-V01`): WP-08 requires a completed `tape_service` sequence before
+> **every** render request, not once per rate row. The bytes here are unaffected
+> — both schedules decode identically — but the observation does not exercise the
+> specified cadence and must not be read as current product evidence. The current
+> run is `docs/verification/runs/2026-09-14-r14/`. This packet is preserved
+> unchanged.
+
+
 Product run of the ten-family corrected complete playback package, plus the
 independently landed 289-case mount package, against a **fresh integration slice
 built from published main by file and symbol** — not by merging or cherry-picking
