@@ -124,6 +124,35 @@ static char *slurp(const char *path, size_t *len)
 }
 
 /* Read the integers of the JSON array named `key` into out[]. Returns count. */
+/*
+ * A SCALAR integer value for `key`.
+ *
+ * Deliberately not json_int_array with max == 1. That is how the first P1-R7
+ * product run went wrong: the array parser skips forward to the next '[', so on
+ * a scalar key it silently returned the first element of the NEXT array in the
+ * document -- fixture.json is sorted, so "long_side_a_frames" resolved to
+ * rates_q16_16[0] (262144) instead of 1100000, and the reverse scrub ran off the
+ * start of a tape it believed was a quarter as long. This form refuses anything
+ * that is not a bare integer immediately after the key's colon.
+ */
+static bool json_int(const char *json, const char *key, long *out)
+{
+    const char *p = strstr(json, key);
+    char *end = NULL;
+    long v;
+
+    if (p == NULL) { return false; }
+    p = strchr(p, ':');
+    if (p == NULL) { return false; }
+    p++;
+    while (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t') { p++; }
+    if (*p != '-' && (*p < '0' || *p > '9')) { return false; }   /* not a scalar */
+    v = strtol(p, &end, 10);
+    if (end == NULL || end == p) { return false; }
+    *out = v;
+    return true;
+}
+
 static uint32_t json_int_array(const char *json, const char *key, long *out, uint32_t max)
 {
     const char *p = strstr(json, key);
@@ -654,10 +683,25 @@ int main(int argc, char **argv)
                 (unsigned long)rows, (unsigned long)nrows2);
         return 2;
     }
-    { long v[1];
-      if (json_int_array(g_json, "long_side_a_frames", v, 1u) == 1u) { long_n = (uint64_t)v[0]; } }
+    { long v = 0;
+      if (json_int(g_json, "long_side_a_frames", &v) && v > 0) { long_n = (uint64_t)v; } }
     if (long_n == 0u) { fprintf(stderr, "fixture.json long_side_a_frames missing\n"); return 2; }
     for (k = 0; k < rows; k++) { scrub_total += (size_t)counts[k]; }
+
+    /*
+     * Echo every fixture parameter the scripts derive their positions from. The
+     * oracle pins each family's call list exactly, so the adapter cannot add a
+     * recorded cross-check call without breaking that ordering -- and it must
+     * not make unrecorded engine calls either. Printing the parsed values puts
+     * them in the run's captured stdout instead, where a misparse is visible in
+     * the evidence rather than showing up only as a wrong position deep inside a
+     * scrub row.
+     */
+    printf("fixture long_side_a_frames=%lu rows=%lu row_frames_total=%lu"
+           " first_rate=%ld last_rate=%ld\n",
+           (unsigned long)long_n, (unsigned long)rows, (unsigned long)scrub_total,
+           rates[0], rates[rows - 1u]);
+    fflush(stdout);
 
     /*
      * The observation binds the WP-08 identity. It is COMPUTED from the
