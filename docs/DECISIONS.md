@@ -2262,3 +2262,32 @@ Michael comment or branch KEEP list.
 **Cost to reverse:** supersede through a fresh bounded PM issue; retain PR #77 and its
 immutable evidence, and do not widen the candidate or transfer observation acceptance
 to source.
+
+## ADR-147 — Suspend playback advancement and correct the verifier cadence first
+
+**Date:** 2026-09-14 UTC · **Owner:** PM under Michael's P1-R13 activation
+
+Authenticate Verification #10's one-file return at verifier
+`bc0f7ec6ba05a1e7bb7033d99922e7b739abd10d` and accept its disposition at the
+stated boundaries. Finding `P1-R12-V01` shows that frozen WP-08 requires a completed
+service sequence before every scrub render, while both verifier oracle and exact
+product trace permit the weaker once-per-rate-row sequence. PM reproduces the raw
+count: 698 renders and 682 omissions in each direction. Because the broad and clean
+runs share observation hash `24a35a3c...7ce4`, suspend reliance on the earlier
+ten-family playback-observation acceptance until corrected evidence receives a new
+independent disposition. Do not invent partial family acceptance.
+
+Retain Verification's narrow acceptance of the exact 289 mount observations,
+including the row-3 positives and strict `H > len` negative. This does not accept the
+helper, allocator, source, full WP-06/WP-08 or a merge. Keep PR #77 draft/held.
+
+Issue only Verification #11 to repair the verifier-owned cadence and add controls
+that reject once-per-row behavior in both directions. It stops before product import
+or execution. Do not wake Software, Hardware, Surge or Michael until the corrected
+package is authenticated. Michael #49 is unchanged and non-blocking, so publish no
+routine comment. PR #20/#64/#77, frozen hashes, Structural Rule 1, WP-11 red/listening
+and all uncovered product and hardware/safety holds remain.
+
+**Rationale and evidence:** [P1-R13 PM disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
+**Cost to reverse:** supersede through a new independently supported disposition;
+retain both immutable product traces and the defective-package finding.

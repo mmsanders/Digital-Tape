@@ -410,3 +410,29 @@ including the named §9.3.3 row-3 cases. It may inspect verifier-owned packages,
 contracts, raw evidence and Git identity metadata only. PR #77, #64 and #20 remain
 draft/held. No source, complete WP-06/WP-08, helper design, PCM/golden/listening or
 merge acceptance follows; all uncovered product and hardware/safety holds remain.
+
+## P1-R13 cadence finding and verifier-first correction — 14 September 2026 UTC
+
+Verification #10 returned at `bc0f7ec6ba05a1e7bb7033d99922e7b739abd10d`
+with one findings blob `11a499b391d38958912394e1cf37ee2b04cbd78d`. PM
+authenticated the one-file parent/tree identity and reran the full verifier suite.
+Finding `P1-R12-V01` correctly identifies that frozen WP-08 requires a completed
+`tape_service(block_budget == 1024)` sequence before every scrub render, while the
+oracle and exact product trace use one sequence per rate row. Each direction records
+698 renders, of which 682 lack an immediately preceding completed service sequence.
+Existing self-tests and replay are green because they encode the same weaker cadence.
+
+The same observation hash `24a35a3c...7ce4` underlies the broad and clean evidence.
+Playback observation acceptance is therefore suspended pending a corrected package,
+fresh product trace and new independent disposition. This does not retract an
+implementation/package acceptance because none existed. Verification's separate
+mount audit accepts exactly 289 recorded observations, including the named row-3
+positive and strict `H > len` negative, but not source, helper design, complete WP-06,
+allocator or merge status.
+
+Verification #11 owns a blind verifier-only correction: enforce the per-render
+service cadence in both scrub directions, add controls that reject the prior
+once-per-row behavior, retain deterministic synthetic evidence and publish source
+before generated evidence. It stops before product import/run. PR #77, #64 and #20
+remain draft/held; candidate PCM remains unlistened and not a WP-11 golden; all other
+product and hardware/safety holds remain.
