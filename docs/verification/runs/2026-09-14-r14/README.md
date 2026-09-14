@@ -24,6 +24,8 @@ the once-per-row scrub service schedule the corrected package now rejects by nam
 | Imported package tree | `467a34bb0a84672c5bdef9059f2dd326d6435eb6` |
 | Ancestry-sync commit | `5b8d62938a0ed5010fac658235de110ffadfbd0c` |
 | **Pre-run code commit (built and run)** | **`b94ee2e33fd7fb8f6691e76a83d2392b6717e8a7`** |
+| Pre-run tree | `9a801f8b7e61f498e4a0459a640bc1aacf706c66` |
+| Evidence commit / tree | `9204512b7f3f06ce6ce202db9f1e2a92e56e8d0b` / `78ecbe71ec38d854f77989408bd3f0b8a15fe623` |
 | PR #77 head before this round | `f100937aed1437401218003db3edbb07d8e4f543` |
 | Existing clean code commit | `86eb3b77756042c365e2d0353018b981c39c99e8` |
 | Verifier publication / evidence commit | `e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da` / `05e193209542d204669b32f485dad21007a084ee` |

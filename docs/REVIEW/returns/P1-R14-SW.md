@@ -31,6 +31,8 @@ changed in this round.
 | Verifier source commit / tree | `1f7fe3f79d326c4a6e37f8c301c97c110d481619` / `fe79113bfe600268585b382fab218e2bbf687a7e` |
 | Ancestry-sync commit (merge) | `5b8d62938a0ed5010fac658235de110ffadfbd0c` |
 | **Phase-B pre-run code commit** | **`b94ee2e33fd7fb8f6691e76a83d2392b6717e8a7`** |
+| Phase-B pre-run tree | `9a801f8b7e61f498e4a0459a640bc1aacf706c66` |
+| Phase-B evidence commit / tree | `9204512b7f3f06ce6ce202db9f1e2a92e56e8d0b` / `78ecbe71ec38d854f77989408bd3f0b8a15fe623` |
 | PR #77 head before this round | `f100937aed1437401218003db3edbb07d8e4f543` |
 | Existing clean code commit | `86eb3b77756042c365e2d0353018b981c39c99e8` |
 | Evidence path | `docs/verification/runs/2026-09-14-r14/` |
