@@ -37,14 +37,23 @@
 #define MAX_ROWS 64u
 
 /*
- * The caller owns all storage (§4), and TAPE_PLAY_RING_MIN is a MINIMUM. The
- * scrub rows render up to 22,050 frames after a single service sequence, and at
- * 12.0x that spans 264,600 timeline frames -- far past 372 ms of ring. A desktop
- * harness is free to hand the engine a larger ring, and does: 8 MiB covers the
- * widest row with room to spare. Firmware's smaller ring simply services more
- * often, which is the documented interleaving case and yields identical bytes.
+ * The caller owns all storage (§4), and TAPE_PLAY_RING_MIN is a MINIMUM.
+ *
+ * The 8 MiB ring this used to hand the engine existed only to let a whole scrub
+ * row render after ONE service sequence -- the once-per-row cadence P1-R13-V01
+ * rejects. Under WP-08's specified schedule, servicing before every render, a
+ * ring that large is actively wrong to use here: tape_service restarts its
+ * window whenever the playhead moves, so a forward scrub re-reads the rest of
+ * the timeline on every render. Measured over the 16 rows: 4,516 service calls
+ * and 4,260,912 block reads forward, against 698 and 90,003 at the minimum
+ * ring.
+ *
+ * At TAPE_PLAY_RING_MIN each service sequence completes in a single call, which
+ * is the firmware interleaving case the contract describes and gives exactly one
+ * completed service immediately before each of the 698 renders per direction.
+ * This is caller-owned storage (guardrail 08); no engine byte changes with it.
  */
-#define PLAY_RING_BYTES (8u * 1024u * 1024u)
+#define PLAY_RING_BYTES TAPE_PLAY_RING_MIN
 
 /* --- SHA-256 (harness-local; not engine code) ---------------------------- */
 
@@ -124,6 +133,35 @@ static char *slurp(const char *path, size_t *len)
 }
 
 /* Read the integers of the JSON array named `key` into out[]. Returns count. */
+/*
+ * A SCALAR integer value for `key`.
+ *
+ * Deliberately not json_int_array with max == 1. That is how the first P1-R7
+ * product run went wrong: the array parser skips forward to the next '[', so on
+ * a scalar key it silently returned the first element of the NEXT array in the
+ * document -- fixture.json is sorted, so "long_side_a_frames" resolved to
+ * rates_q16_16[0] (262144) instead of 1100000, and the reverse scrub ran off the
+ * start of a tape it believed was a quarter as long. This form refuses anything
+ * that is not a bare integer immediately after the key's colon.
+ */
+static bool json_int(const char *json, const char *key, long *out)
+{
+    const char *p = strstr(json, key);
+    char *end = NULL;
+    long v;
+
+    if (p == NULL) { return false; }
+    p = strchr(p, ':');
+    if (p == NULL) { return false; }
+    p++;
+    while (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t') { p++; }
+    if (*p != '-' && (*p < '0' || *p > '9')) { return false; }   /* not a scalar */
+    v = strtol(p, &end, 10);
+    if (end == NULL || end == p) { return false; }
+    *out = v;
+    return true;
+}
+
 static uint32_t json_int_array(const char *json, const char *key, long *out, uint32_t max)
 {
     const char *p = strstr(json, key);
@@ -485,9 +523,16 @@ static int script_scrub(struct family *fam, const char *dir, bool reverse,
         long remaining = counts[k];
         int32_t rate = (int32_t)(reverse ? -rates[k] : rates[k]);
         if (do_rate(t, rate) != TAPE_OK) { return -1; }
-        if (service_to_idle(t) != 0) { return -1; }
         while (remaining > 0) {
             uint32_t n = (remaining > 128) ? 128u : (uint32_t)remaining;
+            /* WP-08: "Before every render request, call tape_service with
+               block_budget == 1024 until more_work == false, under a finite
+               guard." Once per ROW was my defect (P1-R13-V01): it happened to
+               produce the right bytes because the ring is a window over
+               timeline frames, but it is not the schedule the table specifies,
+               and firmware interleaves service with every buffer rather than
+               once per rate change. */
+            if (service_to_idle(t) != 0) { return -1; }
             if (do_render(t, n) != TAPE_OK) { return -1; }
             remaining -= (long)n;
         }
@@ -654,10 +699,25 @@ int main(int argc, char **argv)
                 (unsigned long)rows, (unsigned long)nrows2);
         return 2;
     }
-    { long v[1];
-      if (json_int_array(g_json, "long_side_a_frames", v, 1u) == 1u) { long_n = (uint64_t)v[0]; } }
+    { long v = 0;
+      if (json_int(g_json, "long_side_a_frames", &v) && v > 0) { long_n = (uint64_t)v; } }
     if (long_n == 0u) { fprintf(stderr, "fixture.json long_side_a_frames missing\n"); return 2; }
     for (k = 0; k < rows; k++) { scrub_total += (size_t)counts[k]; }
+
+    /*
+     * Echo every fixture parameter the scripts derive their positions from. The
+     * oracle pins each family's call list exactly, so the adapter cannot add a
+     * recorded cross-check call without breaking that ordering -- and it must
+     * not make unrecorded engine calls either. Printing the parsed values puts
+     * them in the run's captured stdout instead, where a misparse is visible in
+     * the evidence rather than showing up only as a wrong position deep inside a
+     * scrub row.
+     */
+    printf("fixture long_side_a_frames=%lu rows=%lu row_frames_total=%lu"
+           " first_rate=%ld last_rate=%ld\n",
+           (unsigned long)long_n, (unsigned long)rows, (unsigned long)scrub_total,
+           rates[0], rates[rows - 1u]);
+    fflush(stdout);
 
     /*
      * The observation binds the WP-08 identity. It is COMPUTED from the
