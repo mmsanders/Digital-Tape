@@ -1,5 +1,22 @@
 # Independent verification integration
 
+## Current clean integration boundary — 18 September 2026
+
+PR #77 is merged at product main
+`4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
+ten corrected-cadence playback observations and exact 289 mount records are
+independently accepted. That disposition does not accept source/helper design,
+complete WP-06/WP-08, listening, WP-11 goldens or a package. Held PR #20/#64 are
+not ancestors, and uncovered allocator/recording/crash/warm/state/operation and
+performance behaviour was not imported.
+
+The hardened VT8-001 verifier tree remains test-first and unchanged. Its public
+header and adapter now compile against main because `tape_seek` and playback
+`tape_service` exist, but `tape_arm`, `tape_feed`, `tape_commit` and
+`tape_reset_side_b` remain undefined. Therefore neither VT8-001 case has executed
+against the real engine and no allocator/all-slot sequence observation is accepted.
+Current work directions live only in role-labeled issues.
+
 ## Imported mount tranche — 7 September 2026
 
 Source: `mmsanders/digital-tape-verification`, immutable commit
