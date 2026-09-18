@@ -33,11 +33,12 @@ ADR109_C90_BAR = 35.0   # ADR-109's superseded "worst-case >= 35 -> C-90" rule
 def pairwise(windows: list[float], window_mb: int) -> list[float]:
     """Effective rate over each ADJACENT PAIR of windows.
 
-    The runs alternate fast/slow with near-perfect regularity. Whatever causes
-    that -- fsync landing on the card's fold boundary is the leading candidate
-    -- a pair spans one full cycle, so the pair rate is insensitive to where
-    the window boundary happens to fall. Harmonic mean by construction: total
-    bytes over total time, not the average of two rates.
+    The runs alternate fast/slow with period 2; no cause for that is
+    established (README.md section 8a). A pair spans one full cycle, so the
+    pair rate is insensitive to where the window boundary happens to fall.
+    Harmonic mean by construction: total bytes over total time, not the
+    average of two rates. This is a derived convenience figure, not an A-2
+    criterion -- A-2 is judged on the worst 64 MB window.
     """
     out = []
     for i in range(0, len(windows) - 1, 2):
@@ -103,7 +104,7 @@ def main() -> int:
               f"bar {r['worst']/BAR:5.2f}x   C-90 req {r['worst']/REQUIRED_C90:5.2f}x   "
               f"ADR-109 C-90 bar {r['worst']/ADR109_C90_BAR:5.2f}x")
 
-    print("\nThe alternation, and what survives it:")
+    print("\nPeriod-2 window alternation (descriptive; no cause established):")
     for r in runs:
         print(f"  {r['name']:13} fast {r['fast_mean']:6.2f}  slow {r['slow_mean']:6.2f}  "
               f"ratio {r['fast_mean']/r['slow_mean']:4.2f}   "
@@ -116,7 +117,7 @@ def main() -> int:
     print(f"  values {[round(m, 2) for m in means]}  "
           f"spread {max(means)-min(means):.2f} = {100*(max(means)-min(means))/statistics.mean(means):.1f}% of mean")
 
-    print("\nA-4 reader-ceiling check -- best window per run:")
+    print("\nA-4 ceiling check -- best window per run (path, not card):")
     for r in runs:
         print(f"  {r['name']:13} {r['best']:6.2f}")
     tops = [r["best"] for r in pny]

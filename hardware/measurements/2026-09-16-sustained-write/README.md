@@ -1,86 +1,111 @@
-# Measurement record — sustained write, three PNY 64 GB V30 + one onn V10
+# Measurement record — sustained write, three PNY 64 GB V30 samples + one onn V10 control
 
 **Work package:** WP-05 · **Criterion:** A-2 (sustained-write characterization)
 **Date measured:** 16 September 2026 · **Measured by:** Michael
 **Witnessed by:** n/a — Michael ran these himself; see §2
-**Status:** `SUBMITTED FOR AUDIT` — acceptance fields below are deliberately unsigned
+**Status:** `SUBMITTED FOR AUDIT` — acceptance fields in §11 are deliberately unsigned
 
-> **This record establishes headroom, not a qualified card.** The tool's own header says so:
-> *"this is no longer a gate. It is a headroom measurement… This media measurement is not
-> end-to-end copy acceptance."* WP-05 A-6 (≥ 1,000 qualifying power cuts per exact SKU and
-> revision) has **not** been run, and no rig exists to run it. See §10.
+> **Scope of this record.** It contains five raw sustained-write runs and a reproducible
+> derivation of every number quoted from them. It is not card qualification, not a card-speed
+> measurement, and not end-to-end copy acceptance. Card identity (A-1), card-versus-path
+> attribution (A-4), atomicity (A-6) and production end-to-end copy time all remain open, and
+> **C-90 is not reopened.** §10 states each exclusion explicitly.
 
 ## 1. What this is evidence for
 
-WP-05 A-2, quoted verbatim:
+WP-05 A-2, quoted verbatim from `docs/PACKAGES/WP-05.md` at main `faeaf26`:
 
-> Sustained-write tool: 80% filled media, ≥1200 MB transfer, worst 64 MB window and raw
-> per-window data
+> Per candidate SKU/revision, at least one sustained-write run on 80%-filled media: ≥1200 MB
+> transfer, worst 64 MB window and raw per-window data. Unfilled repeat/unit/control runs are
+> useful screening evidence but do not replace the filled run
 
-and the requirement it serves, from `characterisation/measure_sustained_write.py`:
+and the requirement it serves, from `hardware/characterisation/measure_sustained_write.py`:
 
 > At 635 MB the copy needs **21.2 MB/s** sustained write
 
-with a reporting bar of **23.3 MB/s** (10% over the C-60 requirement) and **31.75 MB/s** quoted
-as what a C-90 would need.
+with a screening bar of **23.3 MB/s** (10% over the C-60 requirement). The tool also prints a
+**31.75 MB/s** C-90 figure; that figure is reported by the tool and is **not** a live requirement
+— ADR-018 set the product at C-60 and the P1-R16 disposition does not reopen it.
+
+**How the five runs map onto A-2** (PM disposition, 18 September 2026):
+
+| Role under A-2 | Runs |
+|---|---|
+| **The conforming filled observation** — one per candidate SKU/revision | `raw/pny3-filled.json` (80% fill) |
+| Screening / unit-to-unit evidence | `raw/pny1.json`, `raw/pny2.json`, `raw/pny3.json` |
+| Retained negative control | `raw/onn-v10.json` |
+
+The four unfilled runs are **not** A-2 deviations and are not substitutes for a filled run. A-2's
+80%-fill condition stands: low logical occupancy in the product does not establish what the flash
+translation layer will do after prior writes and garbage collection over the card's service life.
 
 ## 2. Provenance, and the limit on what this record can claim
 
 **Michael ran these measurements on his own hardware and supplied the five JSON files
 unmodified.** The Hardware Lead did not witness the session and has no independent view of the
-bench. Everything in §4 and §5 is what the tool recorded or what Michael reported; nothing here
-is a Hardware Lead observation of physical apparatus.
+bench. Everything in §5 onward is what the tool recorded or what Michael reported; nothing here is
+a Hardware Lead observation of physical apparatus, and nothing here has been independently
+audited.
 
-PM Decisions 006 §5 reserves witnessing to Michael and auditing to the Verification Lead. For a
-headroom measurement that is a lighter bar than for a safety limit — but it is why this record
-is marked `SUBMITTED FOR AUDIT` rather than complete, and why §10 signs nothing.
+PM Decisions 006 §5 reserves witnessing to Michael and auditing to the Verification Lead. That is
+why this record is marked `SUBMITTED FOR AUDIT` and why §11 signs nothing.
 
-## 3. Procedure
+## 3. Identity and provenance of the samples
 
-`hardware/characterisation/measure_sustained_write.py` against a mounted filesystem (`E:\`),
-1200 MB transfer, 64 MB windows, `os.fsync()` after every window. Five runs:
+Filled as far as the physical record permits. **Nothing in this table is inferred**; a field that
+was not recorded says so, and §12 names the smallest exact request that would close it.
 
-| Run | Card | Fill | File |
-|---|---|---|---|
-| 1 | onn, V10, capacity unrecorded — a card Michael already had | none | `raw/onn-v10.json` |
-| 2 | PNY 64 GB V30, sample 1 | none | `raw/pny1.json` |
-| 3 | PNY 64 GB V30, sample 2 | none | `raw/pny2.json` |
-| 4 | PNY 64 GB V30, sample 3 | none | `raw/pny3.json` |
-| 5 | PNY 64 GB V30, **sample 3 again** | **80%** | `raw/pny3-filled.json` |
+| Field | Value | Source |
+|---|---|---|
+| Retail identity | PNY, microSD, 64 GB, V30 mark, three samples, ~$13 each, bought on Amazon (`https://a.co/d/0cYsozv6`), free shipping | Michael, reported in chat |
+| Manufacturer part number | **not recorded** | — |
+| Revision | **not recorded** — the `revision` field is empty in all five files | `raw/*.json` |
+| CID | **not recorded** | — |
+| Order/invoice identity | **not recorded** (order number, order date, seller of record) | — |
+| Sample labels | `pny1`, `pny2`, `pny3` — **operator labels, not part numbers** | `raw/*.json` `sku` field |
+| Sample mapping | `pny3` and `pny3-filled` are the **same physical card**; `pny1` and `pny2` are the other two | Michael |
+| Control card | onn, V10 mark, capacity **not recorded**, already owned | Michael; `raw/onn-v10.json` |
+| Card reader | TRANSCEND TS-RDF5R; firmware **not recorded** | `raw/*.json` `reader` field |
+| Host | Windows 11, build 10.0.26200 | `raw/*.json` |
+| Target | `E:\`, `filesystem_mode: mounted-filesystem` | `raw/*.json` |
+| Host write caching | **not recorded** | — |
+| Ambient temperature / humidity | **not recorded** | — |
+| Reader temperature | **not instrumented.** Michael reports by hand that it "was getting really hot" | Michael |
 
-**Deviation from A-2 as written:** four of the five runs were **not** filled to 80%. Michael ran
-the fill once, on sample 3, and reports it took about 20 minutes. §8 argues this deviation is
-defensible for this product and §11 puts the disposition where it belongs.
+WP-05 is explicit that *"Exact SKU, capacity, revision and CID matter; a family name is
+insufficient."* On the record as it stands, these results are bound to three physical cards in
+Michael's possession — not to a part number anyone could re-order, and not to a revision that
+atomicity evidence could later be bound to.
 
-## 4. Instruments
+## 4. Procedure
 
-| Instrument | Identification | Calibration | Notes |
-|---|---|---|---|
-| Card reader | TRANSCEND TS-RDF5R (from the tool's `reader` field) | n/a | **Michael reports it ran hot.** See §9 |
-| Host | Windows 11, build 10.0.26200 | n/a | `filesystem_mode: mounted-filesystem`, target `E:\` |
-| Timing | `time.monotonic()` in the tool | host clock | Per-window, write + `fsync` inside the timed region |
+`hardware/characterisation/measure_sustained_write.py` against the mounted filesystem at `E:\`,
+1200 MB transfer, 64 MB windows, `os.write()` followed by `os.fsync()` inside each timed window.
+Five runs in this order:
 
-**Not recorded, and needed before any atomicity work:** manufacturer part number, revision and
-CID for each card; reader firmware; whether host write caching was enabled. WP-05 is explicit —
-*"Exact SKU, capacity, revision and CID matter; a family name is insufficient."* The `sku` fields
-in the raw files (`pny1`, `pny2`, `pny3`, `onn`) are **operator labels, not part numbers.**
+| # | File | Card | Fill | `measured_at` (UTC) |
+|---|---|---|---|---|
+| 1 | `raw/onn-v10.json` | onn V10 control | none | 22:28:32 |
+| 2 | `raw/pny1.json` | PNY sample 1 | none | 22:33:50 |
+| 3 | `raw/pny2.json` | PNY sample 2 | none | 22:35:26 |
+| 4 | `raw/pny3.json` | PNY sample 3 | none | 22:38:41 |
+| 5 | `raw/pny3-filled.json` | PNY sample 3, refilled | **80%** | 22:59:03 |
 
-## 5. Conditions
+Michael reports the 80% fill took about 20 minutes, which is consistent with the 20-minute gap
+between runs 4 and 5. He ran it once rather than three times.
 
-Ambient temperature and humidity were not recorded. Reader temperature was not instrumented;
-"ran hot" is a hand observation, not a reading. Each run's UTC timestamp is in its JSON file;
-the four PNY runs span 22:33–22:59, so they were taken back to back with a warm reader.
+## 5. Raw readings
 
-## 6. Raw readings
+`raw/*.json`, exactly as the tool emitted them — 19 windows per run, unedited, byte-for-byte as
+supplied. No outliers were removed; there are none to remove, and §6's derivation consumes every
+window of every run.
 
-`raw/*.json`, exactly as the tool emitted them — 19 windows per run, unedited. No outliers were
-removed; there are none to remove, and §7's derivation consumes every window.
+## 6. Derivation
 
-## 7. Derivation
-
-`analyse.py` in this directory recomputes every figure below from `raw/*.json`. It deliberately
+`analyse.py` in this directory recomputes every figure in §7 from `raw/*.json`. It deliberately
 **recomputes each verdict from the per-window data instead of trusting the file's own `verdict`
-field**, so an edited or corrupted summary line cannot pass unnoticed. All five agree.
+field**, so an edited or corrupted summary line cannot pass unnoticed. All five recomputed
+verdicts agree with the stored ones; the script exits 0.
 
 ```
 run           fill   worst   best   mean  pairmin  verdict
@@ -91,116 +116,115 @@ pny3          -      25.88  67.11  38.38    37.35     PASS
 pny3-filled   0.8    27.36  74.07  40.59    38.52     PASS
 ```
 
-## 8. Results
+`pairmin` is the lowest rate over any adjacent pair of windows (128 MB); it is a derived
+convenience figure defined in `analyse.py`, not an A-2 criterion.
 
-**Against the C-60 requirement the three PNY samples clear the bar on every run**, on the
-conservative worst-64 MB-window criterion the tool applies:
+## 7. Results — measured facts only
 
-| Run | Worst window | × C-60 requirement (21.2) | × reporting bar (23.3) |
-|---|---:|---:|---:|
-| pny1 | 26.18 | 1.23 | 1.12 |
-| pny2 | 25.41 | 1.20 | 1.09 |
-| pny3 | 25.88 | 1.22 | 1.11 |
-| pny3, 80% filled | 27.36 | 1.29 | 1.17 |
-| onn V10 | 15.34 | **0.72** | **0.66** |
+Against the 23.3 MB/s screening bar, on the worst-64 MB-window criterion the tool applies:
 
-**The onn V10 is a genuine negative control and it earned its place.** It fails the requirement
-outright at 0.72×, which demonstrates the measurement discriminates adequate media from
-inadequate rather than passing whatever is put in front of it. A test that cannot fail has not
-established anything; this one can, and did.
+| Run | Role | Worst window | × C-60 requirement (21.2) | × screening bar (23.3) |
+|---|---|---:|---:|---:|
+| pny3, 80% filled | **conforming filled run** | 27.36 | 1.29 | 1.17 |
+| pny1 | screening | 26.18 | 1.23 | 1.12 |
+| pny2 | screening | 25.41 | 1.20 | 1.09 |
+| pny3 | screening | 25.88 | 1.22 | 1.11 |
+| onn V10 | negative control | 15.34 | **0.72** | **0.66** |
 
-**Unit-to-unit consistency is excellent.** The three PNY samples agree to **1.0%** on the 128 MB
-pair rate (38.12 / 37.88 / 37.73 MB/s). That is the n≥2 quality check Michael asked for, and it
-passes convincingly.
+Three statements this record does support, each a fact about **this measurement path on this
+evening**, not about the cards in isolation:
 
-**The 80% fill did not degrade this card — it helped.** Same physical sample, worst window
-25.88 → 27.36 (+1.48), pair rate 37.73 → 39.86 (+2.13). The fill condition exists to provoke
-garbage-collection stalls; on this SKU it did not provoke one. One SKU, one trial.
+1. **The conforming filled run cleared the screening bar** at 27.36 MB/s worst window.
+2. **The negative control failed**, at 0.72× the C-60 requirement. The measurement therefore
+   discriminates adequate from inadequate media rather than passing whatever is put in front of
+   it. A check that cannot go red has not established what it detects.
+3. **The three PNY samples agree to 1.0%** on the derived 128 MB pair rate (38.12 / 37.88 /
+   37.73 MB/s) — a unit-to-unit consistency screen across three samples of one retail family,
+   which is not statistical qualification of a SKU.
 
-## 9. Uncertainty — three things that limit what these numbers mean
+On the one sample tested both ways, the 80% fill did **not** degrade the result: worst window
+25.88 → 27.36, pair rate 37.73 → 39.86. That is a single observation on a single physical card
+and it does not generalize to the SKU, to other samples, or to the card's later life.
 
-**(a) The windows alternate fast/slow with a regularity that is almost certainly an artefact of
-the window size.** Every PNY run alternates ~67 / ~26 MB/s with period 2, and the *pair* rate —
-each adjacent fast+slow pair, spanning one full cycle — is extraordinarily steady: pny1 ranges
-37.84–38.34 across the whole run. A card stalling on garbage collection does not stall on exactly
-every second window for nineteen windows. The leading explanation is that the per-window `fsync`
-lands on the card's internal fold boundary, so one window is absorbed and the next pays for it.
+## 8. Hypotheses — explicitly not established
 
-**This matters because it means the reported worst window may understate the card.** If the
-alternation is aliasing, the honest sustained figure is the ~38 MB/s pair rate, not 26 MB/s.
-**It does not threaten the C-60 conclusion** — that conclusion uses the pessimistic number and
-still passes — but it is load-bearing for C-90 (§11).
+These are candidate explanations for features of the data. None is tested, none is load-bearing
+for anything in §7, and none should be cited as a finding.
 
-**(b) The reader is very likely the ceiling, which is exactly the condition WP-05 A-4 names.**
-A-4: *"Establish the reader is not the bottleneck; similar top results at its ceiling invalidate
-a card-speed conclusion."* The PNY best windows cluster within 9.8% (67.11–74.07), and **two
-different runs sit on the identical maximum, 74.07 MB/s to the last digit.** Different cards
-reaching the same number to four significant figures is a shared-path limit, not card behaviour.
-Michael's independent observation that the reader ran hot corroborates it.
+**(a) The period-2 alternation may be an artefact of the 64 MB window size.** Every PNY run
+alternates roughly 67 / 26 MB/s with period 2, while the derived adjacent-pair rate is steady
+(pny1 spans 37.84–38.34 across the whole run). One candidate explanation is the per-window
+`fsync` landing on an internal fold boundary, so one window is absorbed and the next pays for it.
+**This is untested.** No experiment distinguishing it from ordinary card behaviour has been run,
+and no conclusion here depends on it. Testing it would mean re-running at 128 MB and 256 MB
+windows on the same cards.
 
-So **no conclusion about how fast these cards are is available from this data.** What survives is
-narrower and still sufficient: a bottleneck upstream of the card cannot make a card look *faster*
-than it is, so the measured floor is a floor for the whole path — reader included — and that
-floor clears the C-60 requirement. We have measured the path, and the path is good enough.
+**(b) The measurement path may be limited upstream of the card.** The PNY best windows cluster
+within 9.8% (67.11–74.07 MB/s) and two different runs report an identical 74.07 MB/s maximum.
+WP-05 A-4 states that *"similar top results at its ceiling invalidate a card-speed conclusion"*;
+that condition is met on the face of the data, so **no card-speed conclusion is drawn** (§10).
+Whether the limit is the reader, the host, the bus or the driver is **not established** —
+identifying it would require measuring the same cards through a different path.
 
-**(c) Thermal drift is visible in the run that was probably hottest.** pny2's fast windows decay
-72.79 → 74.07 → … → 53.69 across the run while its slow windows hold near 26; its pair minimum
-(36.09) is the lowest of the three samples. Consistent with a warming reader, not established as
-such — nothing was instrumented.
+**(c) Thermal drift may be present.** pny2's fast windows decay from 74.07 to 53.69 across the
+run while its slow windows hold near 26, and Michael reports the reader was hot to the touch.
+No temperature was instrumented, so this is an observation about the numbers and a hand report,
+not a measurement, and no cause is established.
 
-Also minor: `p05_mb_s` is `null` in all five files because the tool needs ≥20 windows and 1200 MB
-at 64 MB gives 19. A 1280 MB transfer would populate it.
+Minor and certain: `p05_mb_s` is `null` in all five files because the tool requires ≥20 windows
+and 1200 MB at 64 MB gives 19. A 1280 MB transfer would populate it.
 
-## 10. What is established, and what is not
+## 9. Uncertainty
 
-**Established (pending independent audit):** three PNY samples and the measurement path together
-sustain comfortably more than a C-60 copy needs, with ~20% margin on the most pessimistic
-reading and ~80% on the pair-rate reading; the three samples are consistent to 1%; an 80% fill
-did not degrade the one sample tested that way; and a V10 card fails the same test.
+Instrument accuracy is not characterizable from this record: the timing source is
+`time.monotonic()` on a Windows host, the transfer path includes an uncharacterized reader, and
+neither host caching state nor ambient conditions were recorded. The spread that *is* visible —
+three samples within 1.0% on the pair rate, and a 74.07 MB/s figure repeating exactly across two
+runs — is reported in §7 and §8 rather than converted into an error bar, because the dominant
+term is a systematic unknown (§8b), not scatter.
 
-**Not established, and not claimable from this record:**
+What a hostile reader should attack first, and would be right to: every number here is measured
+through one reader, on one host, on one evening, by one person, with no independent witness and
+no recorded part number.
 
-- **Card atomicity (A-6).** Zero of the required ≥1,000 qualifying power cuts have been run, per
-  exact SKU and revision. No rig, firmware or rail traces exist. `CLAUDE.md` §5: *"Media
-  atomicity must be established per exact card SKU/revision before qualification."*
-- **Card identity (A-1).** No manufacturer part number, revision or CID is recorded, so these
-  results are not yet bound to a part anyone could re-order or re-test.
-- **How fast these cards are (A-4).** Invalidated by the ceiling clustering in §9(b).
-- **End-to-end copy time (A-3).** This is a PC-side media measurement. Guardrail 10 is explicit
-  that PC card throughput is not proof of production end-to-end time.
-- **Anything about C-90.** See §11.
+## 10. Exclusions — open, and not claimable from this record
 
-**Acceptance:** ☐ *unsigned — Verification Lead* · ☐ *unsigned — PM*
+- **Card qualification.** No card is qualified. Nothing here authorizes an order, a design
+  dependency on a specific part, or a claim that this SKU is suitable for the product.
+- **Card identity (A-1).** Manufacturer part number, revision and CID are absent (§3). Atomicity
+  evidence cannot be bound to a revision that was never recorded.
+- **Card speed (A-4).** Not established: the A-4 ceiling condition is met on the face of the data
+  (§8b), so this record attributes no speed to the cards themselves.
+- **Atomicity (A-6).** Zero of the required ≥1,000 qualifying power cuts have been run, per exact
+  SKU and revision. No rig, firmware or rail traces exist.
+- **End-to-end copy time (A-3).** This is a PC-side media measurement. Guardrail 10: PC card
+  throughput is not proof of production end-to-end time.
+- **Independent audit.** Not performed. Method, instruments, conditions, raw data, derivation and
+  uncertainty all remain for Verification.
+- **C-90.** Not reopened, and this record proposes no change to tape duration. The product is
+  C-60 by ADR-018.
+
+## 11. Acceptance
+
+☐ *unsigned — Verification Lead* · ☐ *unsigned — PM*
 
 The Hardware Lead compiled this record and cannot accept it. Michael ran the measurements and
 cannot audit them. Both of those are the rule working, not an obstruction.
 
-## 11. Two questions this record puts to PM
+## 12. Smallest exact request that would close the identity gap
 
-**(a) Does the A-2 80% fill condition still apply to this product?** ADR-109 set it because *"an
-empty card writes to clean blocks; a full one must garbage-collect first, which is when it
-stalls."* Michael's argument is that the condition models a state this product never reaches: a
-cartridge holds one ~635 MB tape on a 64 GB card, so occupancy stays near 1%. The single filled
-trial supports him — it was *faster*, not slower. **Hardware's view: the argument is sound and
-the evidence points the same way, but A-2 is a written criterion and relaxing it is PM's call,
-not Michael's unilaterally and not mine.** Recommend PM either amend A-2 for low-occupancy media
-or record a standing exception. Until then this record stands as a documented deviation.
+For each of the three PNY cards, and before any atomicity work begins:
 
-**(b) C-90 is not supported by this data, and the project already has a bar for it.** ADR-109 set
-**≥ 2 SKUs sustaining ≥ 35 MB/s worst-case**; ADR-018 superseded that rule when Michael chose
-C-60 directly, so it never fired. Measured against it:
+1. The **manufacturer part number** printed on the card body or its retail packaging, transcribed
+   exactly, including any suffix.
+2. The **CID register** read from each card, with the sample label (`pny1` / `pny2` / `pny3`) it
+   belongs to. On Linux: `cat /sys/block/mmcblk0/device/cid`.
+3. The **Amazon order number and order date**, which fixes seller of record and ship date.
 
-| | worst window | × C-90 requirement (31.75) | × ADR-109 C-90 bar (35.0) |
-|---|---:|---:|---:|
-| best PNY run | 27.36 | **0.86** | **0.78** |
+Items 1 and 3 are transcription; item 2 needs a host that exposes the CID, which a USB reader
+generally does not. If no such host is available, that is worth recording as a blocker rather
+than leaving the field blank — it would mean the revision binding A-6 requires cannot be
+established with the equipment currently in hand.
 
-The worst-window figures do not reach the C-90 *requirement*, let alone its bar. The pair rates
-(37.7–39.9) would clear both — but that reading depends on §9(a) being right, and it is measured
-through a path that §9(b) shows is itself the limiter. **Reopening C-90 on this evidence would
-rest on two unresolved confounds at once.** It is also a product-scope decision reserved to PM
-and Michael, not a hardware finding.
-
-**What would settle it,** if PM wants C-90 reconsidered: re-run with 128 MB and 256 MB windows on
-the same cards to test the aliasing hypothesis directly, on a reader established not to be the
-ceiling — and note that C-90 pulls the bus requirement back up toward SDR104, which ADR-109
-records C-60 as having retired. That is a real cost, not just a number.
+Also useful, and cheap, when the reader question is next touched: the make and model of any
+second card reader available, so the same cards can be measured through a different path.
