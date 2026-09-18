@@ -1,0 +1,22 @@
+scrub_forward:
+  tape_render calls .................. 698
+  tape_service calls ................. 698
+  renders immediately preceded by a
+  completed tape_service(1024, more_work=False, result=0) ... 698
+  exceptions ......................... []
+  tape_set_rate calls ................ 16
+  frames rendered .................... 88200
+  short renders ...................... 0
+  total recorded calls ............... 1414
+  device callbacks (all read, rc=0) .. 90003  non-read/failed: 0
+scrub_reverse:
+  tape_render calls .................. 698
+  tape_service calls ................. 698
+  renders immediately preceded by a
+  completed tape_service(1024, more_work=False, result=0) ... 698
+  exceptions ......................... []
+  tape_set_rate calls ................ 16
+  frames rendered .................... 88200
+  short renders ...................... 0
+  total recorded calls ............... 1415
+  device callbacks (all read, rc=0) .. 90056  non-read/failed: 0
