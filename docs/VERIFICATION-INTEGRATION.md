@@ -489,3 +489,30 @@ mount provenance. It may use verifier-owned source, frozen public contracts, raw
 evidence and Git identity metadata only—not product/adapter source, Software returns,
 private tests or held-PR diffs/discussions. PR #77/#64/#20 remain draft/held;
 candidate PCM is unlistened and not a WP-11 golden; no wider acceptance follows.
+
+## P1-R16 corrected-cadence disposition — 18 September 2026 UTC
+
+Verification #12 published one findings file at verifier main
+`392d6bb9c948a5924fe18728fab04202bc8e337e`, tree
+`53d4ad25023ccd788017518b01da661c30541ba0`, blob
+`bd1166e7831bb28a95a2d12f5078596388bdf375`, SHA-256
+`ded9a314fb636a8d6fceca9593054849f28b4bc49f8a6ec5cac7e22c0330c532`.
+PM authenticated those identities and reran the full verifier suite.
+
+Accept the report narrowly: the exact ten corrected-cadence product observations and
+the exact 289 mount records are independently accepted. Each scrub direction has 698
+renders, 698 immediately preceding completed service sequences and 88,200 frames;
+all seven output files match verifier candidates byte-for-byte. `P1-R12-V01` is cured
+for this exact evidence. The 289 post-header records match the earlier accepted run;
+the bound current executable provenance is sufficient for these observations only.
+
+Finding `P1-R15-V01` corrects the actual committed outer run tree to
+`ea34ba25cd5b67e739038b59f14dbecf69747d0f`; the stale `db88b71a...` value differed
+only in two self-referential README rows. The product-evidence tree, package tree and
+raw hashes were not affected.
+
+This is not source or helper review, complete WP-06/WP-08 acceptance, reproducible-
+binary acceptance, a WP-11 golden or listening. PR #20/#64 and uncovered allocator,
+recording, crash/recovery, warm-start, state/operations, performance and all hardware
+holds remain. A bounded Software integration may use only the clean independently
+observed PR #77 slice and must preserve Structural Rule 1 and exact accepted blobs.
