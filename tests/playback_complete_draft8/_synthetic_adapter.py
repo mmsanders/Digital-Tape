@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Corrected synthetic public-contract model; never product evidence."""
+"""P1-R13 corrected synthetic public-contract model; never product evidence."""
 from __future__ import annotations
 import argparse,json
 from pathlib import Path
@@ -17,8 +17,11 @@ def scrub(reverse=False):
     c=[call("tape_mount",side="A",resume_frame=0,warm=None)]
     if reverse:c.append(call("tape_seek",frame=gen.LONG_N))
     for rate,count in zip(gen.RATES,gen.COUNTS):
-        c += [call("tape_set_rate",rate_q16_16=-rate if reverse else rate),call("tape_service",block_budget=1024,more_work=False)]
-        while count: n=min(128,count); c.append(call("tape_render",requested=n,rendered=n)); count-=n
+        c.append(call("tape_set_rate",rate_q16_16=-rate if reverse else rate))
+        while count:
+            n=min(128,count)
+            c += [call("tape_service",block_budget=1024,more_work=False),call("tape_render",requested=n,rendered=n)]
+            count-=n
     c.append(call("tape_unmount")); return {"fixture":"long","calls":c,"callbacks":finish(c)}
 def side(playing):
     c=[call("tape_mount",side="A",resume_frame=0,warm=None)]
@@ -35,8 +38,8 @@ def main():
     for fam,fixture,rate,st in (("empty_zero","empty",0,(True,False,0)),("empty_nonzero","empty",65536,(True,False,0))): c=basic(fixture,rate,st); cases[fam]={"fixture":fixture,"calls":c,"callbacks":finish(c)}
     c=[call("tape_mount",side="A",resume_frame=0,warm=None),call("tape_seek",frame=1234),call("tape_set_rate",rate_q16_16=0),call("tape_render",requested=4,rendered=0),call("tape_tell",frame=1234),call("tape_status",at_end=False,at_start=False),call("tape_unmount")]; cases["nonempty_zero"]={"fixture":"long","calls":c,"callbacks":finish(c)}
     cases.update(one_intmax=boundary("one",2147483647),reverse_zero=boundary("long",-65536),intmin=boundary("long",-2147483648,1),scrub_forward=scrub(),scrub_reverse=scrub(True),side_playing=side(True),side_idle=side(False))
-    obs={"schema":"playback-complete-draft8-observation-v1","wp08_sha256":oracle.WP08,"adapter":{"kind":"synthetic","id":"verifier-p1-r8-corrected-public-contract-model-v1"},"cases":cases}
+    obs={"schema":"playback-complete-draft8-observation-v1","wp08_sha256":oracle.WP08,"adapter":{"kind":"synthetic","id":"verifier-p1-r13-per-render-service-model-v1"},"cases":cases}
     (out/"observation.json").write_text(json.dumps(obs,indent=2,sort_keys=True)+"\n")
     for fam,name in oracle.OUTPUTS.items():(out/name).write_bytes(oracle.expected_outputs()[fam])
-    print("synthetic corrected P1-R8 observation written"); return 0
+    print("synthetic corrected P1-R13 observation written"); return 0
 if __name__=="__main__": raise SystemExit(main())
