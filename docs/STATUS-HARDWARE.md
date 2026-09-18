@@ -1,6 +1,6 @@
 # Hardware status
 
-**Updated: 12 September 2026 · Owner: Hardware Lead (P1-R3-HW retained control).**
+**Updated: 18 September 2026 · Owner: Hardware Lead (sustained-write session recorded).**
 
 PR #18 is merged. PR #47 is merged at
 `8d9e8bdffc245d797702a2b3a461348672b0644a`. Current hardware revisions/hashes
@@ -16,8 +16,8 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL**. The supply-envelope criterion now has a **retained targeted control** in `hardware/thermal/test_solenoid.py` and its own `--mutate-supply` mode, both run by `make -C hardware solenoid-test` | IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | Rev-5 plate reported printing, not yet in hand; results card remains blank | Printed fit, retention, creep/drop and independent measurement audit |
-| Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
-| WP-05 | Michael selected 2 × `SDHFSBC064G` (64 GB V30) versus 2 × `HTF032G3U3` (32 GB U3) for evaluation; six-SKU plan withdrawn | Michael confirms reader adequacy, shipping and purchase; evaluation grants no speed-class equivalence or atomicity qualification |
+| Media | Atomicity judge has 43 checks and negative controls. **Sustained-write (A-2) now has real data**, independently recomputed from raw per-window output by `2026-09-16-sustained-write/analyse.py` | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; **no atomicity PASS yet and no rig exists**. Sustained-write headroom is not card qualification |
+| WP-05 | **Superseded by Michael's purchase:** three PNY 64 GB V30 cards (~$13 each, Amazon), not the HTsemi V30/U3 split. **Sustained-write measured 16 Sep** — all three clear the C-60 bar (worst window 25.4–27.4 MB/s, 1.20–1.29× the 21.2 MB/s requirement), consistent to 1% unit-to-unit; an onn V10 control **fails** at 0.72×. Record: `hardware/measurements/2026-09-16-sustained-write/` | **Headroom only, not a qualified card.** A-4 reader-ceiling condition is met (two runs on an identical 74.07 MB/s maximum), so no card-speed conclusion is available; exact MPN/revision/CID unrecorded; A-6 atomicity untouched. PM to disposition the 80%-fill deviation and the C-90 question |
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
@@ -30,6 +30,8 @@ those checks; a genuine four-line source deletion was also confirmed to produce 
 This is evidence hardening only — **no acceptance, no measurement, and no gate change.**
 Run make -C hardware fabrication-gate before any fabrication/charging decision.
 Five blockers currently remain. Green regression/thermal checks are not qualification.
+
+**C-90 is not reopened by the 16 September data.** ADR-109's bar was ≥ 2 SKUs at ≥ 35 MB/s worst-case; the best PNY run reaches 27.36 (0.78× that bar, 0.86× the bare C-90 requirement). The higher pair-rate reading would clear it but depends on two unresolved confounds at once — see the record's §9 and §11. Tape length is a PM/Michael scope decision regardless.
 
 Michael owns purchases and physical trials. Old ~$115/$152 cart estimates are not
 current quotes or approvals. Active assignments live only in
