@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 14 September 2026 UTC. Historical phase durations are
+Current status below is updated 18 September 2026 UTC. Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -21,7 +21,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
-| WP-05 | Parts order #1 | You | hardware | Michael selected a 2 × 64 GB V30 vs 2 × 32 GB U3 evaluation; no purchase or card qualification yet; exact SKU/revision/CID and independent evidence remain required |
+| WP-05 | Parts order #1 | You | hardware | Three PNY 64 GB V30 samples purchased and characterized; PR #87 is submitted, not independently audited. Exact part/revision/CID, atomicity and end-to-end acceptance remain open |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
@@ -31,12 +31,12 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean draft #77's exact 289/289 mount observations, including the row-3 boundary, are independently accepted. Source/helper design, full package and merge remain held |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean draft #77's exact 289/289 mount observations, including the row-3 boundary, are independently accepted. A bounded current-main integration is routed; source/helper design and full package remain held |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated; synthetic self-tests only. Six operations remain undefined, no product run exists and full acceptance remains held; see current issues for assignments |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Playback observation acceptance is suspended: verifier finding P1-R12-V01 proves the shared broad/clean trace omits per-render scrub service. Verification #11 owns the package correction; product and merge remain held |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Exact ten corrected-cadence product observations are independently accepted, including 698/698 per-render service in each scrub direction. Source, complete package, listening/goldens and merge remain separate |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Reported PCM byte equality does not cure P1-R12-V01. Candidate PCM remains verifier-derived, unlistened and unaccepted; golden CI remains red |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but remain unlistened and are not accepted goldens; golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Contract issued; independent WP-12a coverage and acceptance outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
 | WP-36 | Slot capability model | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
@@ -70,7 +70,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-22 | Transport mechanism, production design | You | hardware | Blocked on WP-04 |
 | WP-23 | Enclosure CAD | Either | hardware | Not started |
 | WP-24 | Cartridge shell and carrier PCB | Either | hardware | **In flight** — clasp assessment delivered (ADR-117); variants share the WP04-01 plate |
-| WP-25 | Abuse testing | You | hardware | Blocked |
+| WP-25 | Abuse testing | You | hardware | **In flight as a design input** — player-wide architecture and pre-test plan now precede final enclosure CAD; no physical acceptance yet |
 
 **Milestone:** a Teensy-based unit in a finished printed case. A reasonable place to stop.
 

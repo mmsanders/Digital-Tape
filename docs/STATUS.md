@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 14 September 2026 UTC · Owner: PM · P1-R13 exact mount observations accepted; playback blocked on verifier cadence correction; scoped Phase 0 freeze unchanged.**
+**Updated: 18 September 2026 UTC · Owner: PM · P1-R16 exact corrected-cadence observations independently accepted; ruggedization issued as a design input; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -85,6 +85,43 @@ and a new independent disposition. Separately, Verification accepts the exact 28
 clean mount observations, including row 3, but not source/helper design, complete
 WP-06 or merge status. See the
 [P1-R13 disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
+Verification #11 then published a source-before-evidence correction at verifier main
+`e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da`. PM authenticated its eight source
+changes, 32 retained-evidence additions, one-file return, package tree `467a34bb...`
+and 30/30 manifest inventory. Both directions now require 698 completed per-render
+service sequences for 698 renders, and separate old-cadence controls go red. This
+cures P1-R12-V01 for verifier-package correctness only. Software #83 owns an exact
+test-only import before the minimal product-probe correction and fresh held trace.
+See the [P1-R14 disposition](REVIEW/P1-R14-PM-DISPOSITION.md).
+Software #83 then merged that exact test/evidence-only import through PR #85 at
+product main `888f4dafcddcc4d7b96e8ec8e250dd5bb4062b63` and returned held draft
+PR #77 at `b252b536574c777d2998e5a79aac66c6a73fe21b`. Its fresh evidence commit
+`9204512b...` is directly atop recorded pre-run code `b94ee2e...`; PM authenticated
+all 30 manifest-bound files, unmodified replay, 698/698 immediate completed-service
+cadence in both directions, seven candidate PCM hashes, and 289 mount records.
+These are PM-authenticated observations, not acceptance. Verification #12 owns the
+blind exact-evidence and mount-provenance disposition. See the
+[P1-R15 disposition](REVIEW/P1-R15-PM-DISPOSITION.md).
+
+Verification #12 returned verifier main `392d6bb9c948a5924fe18728fab04202bc8e337e`.
+PM authenticated its one-file return, tree/blob/digest and reran the full verifier
+suite. Accept its narrow disposition: the exact ten corrected-cadence playback
+observations and exact 289 mount records are independently accepted, and
+`P1-R12-V01` is cured for that evidence. The actual outer run tree is
+`ea34ba25cd5b67e739038b59f14dbecf69747d0f`, correcting the stale value in the
+P1-R15 route. Source/helper design, complete WP-06/WP-08, PCM listening/WP-11 and
+package acceptance remain held. Software receives a bounded clean-integration task
+for PR #77; no broad #20/#64 code is licensed.
+
+Hardware PR #87 submits five raw sustained-write runs. All three PNY samples clear
+the C-60 23.3 MB/s screening bar on their recorded path; the onn V10 negative control
+fails. The one 80%-filled PNY run also passes. PM keeps WP-05 A-2's filled condition:
+unfilled repeats remain useful screening evidence, not a substitute or four failures.
+Exact part/revision/CID, independent audit, reader/card attribution, atomicity and
+production end-to-end copy remain open. Michael has also bought an A1 Mini, replacing
+the library-only printing assumption. Guardrail 13 and WP-25 now require loaded-player
+drop, shake and rough-play resilience before final enclosure CAD. See the
+[P1-R16 disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -122,16 +159,14 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Playback-observation acceptance is suspended by P1-R12-V01. Reported PCM equality does not cure the cadence defect; PCM remains verifier-derived, unlistened and unaccepted; golden CI stays red | Verification #11 corrects the package; PM routes Michael only when an exact listening packet is ready |
-| Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
+| WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
+| Hardware | PR #87 card data is submitted, not audited; A1 Mini setup replaces the library-only assumption; ruggedization is now a pre-CAD requirement. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware issue queue; later independent evidence audit |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
+| WP-04 / WP-05 | Library print path retired without a result; A1 Mini setup in progress. Three PNY samples measured, but identity/audit/atomicity/qualification remain open | Hardware; Michael only for hands/wallet facts when requested |
 
-**New independent package acceptances: none.** Verification #10 rejects playback
-acceptance because the shared broad/clean scrub trace violates frozen WP-08 cadence;
-prior observation advancement is suspended pending corrected evidence. The exact clean
-289-case mount log has Verification's narrow independent acceptance. That is not
-source, helper, full WP-06/WP-07 or merge acceptance. CAD checks are not measurements. Missing WP-11
+**New independent package acceptances: none.** Verification independently accepts the
+exact ten corrected-cadence observations and exact clean 289-case mount log. That is
+not source, helper, full WP-06/WP-08 or merge acceptance. CAD checks are not measurements. Missing WP-11
 goldens remain an explicit red gate. Main ruleset 22084355 is active and strict; its
 required list now contains only the ten all-PR engine contexts. The prior
 hardware-path-filtered pending-check blocker is closed.
@@ -142,11 +177,12 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R13 authenticates Verification's cadence finding and narrow mount disposition.
-Verification #11 is the only new lead assignment and stops before any product import
-or run. PR #77 remains held; Software will receive a later exact-import/rerun task only
-after the corrected verifier publication is authenticated. The dashboard remains at
-the test-on-main rung, 13 of 36, because no implementation is merged or package
+P1-R16 accepts Verification #12 only at its exact evidence boundary and corrects the
+outer run-tree identity. Software may integrate only the clean independently observed
+PR #77 slice after current-main synchronization and exact blob/scope checks. Hardware
+must correct and finish the PR #87 evidence packet and produce the pre-CAD ruggedization
+architecture/test plan. PR #20/#64 remain held. The dashboard remains at the
+test-on-main rung, 13 of 36, because no complete implementation rung or package is
 accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
 
 ## Phase 1 operating format — 11 September

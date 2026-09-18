@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 12 September 2026 UTC.** Applies to every lead, regardless of model
+**Current agreement: 18 September 2026 UTC.** Applies to every lead, regardless of model
 or app. Revisions/hashes live in spec/VERSION.md; gate state in docs/PHASE0-FREEZE.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
 charters and Michael’s latest PM instructions; historical rationale remains in
@@ -25,6 +25,7 @@ seven-year-old can understand without instruction, not maximum capability.
 | 10 | Whole C-60 copy <30 s on the target system. Bench function and PC card throughput are not proof of production end-to-end time. |
 | 11 | 85 dB output cap against specified reference headphones, enforced in the codec and reasserted at boot, unreachable from user controls. |
 | 12 | One engine shared by CLI, GUI and firmware; do not reimplement engine behaviour in a consumer. |
+| 13 | Kid-resistant mechanical design is a first-order requirement. The assembled player and cartridge must tolerate foreseeable drops, shaking and rough handling without exposing or loosening the battery, creating sharp or hazardous detached parts, ejecting the cartridge, exposing live conductors, or silently losing the basic playback controls. Ruggedization is designed and tested before final enclosure CAD, not added afterward. |
 
 The engine computes; the caller owns entropy, hardware knowledge and storage beyond
 the engine budget. Identity and validity are written last. Ownership is not reference.
@@ -128,12 +129,12 @@ fields with the response author’s own sign-off. Media atomicity must be establ
 per exact card SKU/revision before qualification; paper review qualifies no card.
 A torn block is a blocker, not a firmware workaround.
 
-The original cheap 4 GB V30 search found no purchasable match. Michael has replaced
-the capacity proxy with a two-arm evaluation: two exact 64 GB V30 cards and two exact
-32 GB U3 cards. U3 is an experiment, not a speed-class substitution or qualification.
-Every purchase still needs Michael's approval, and every result remains bound to the
-exact SKU, revision and CID. No media is qualified without the independent sustained-
-write and atomicity evidence required by WP-05.
+The original cheap 4 GB V30 search and later two-arm HTsemi plan are superseded.
+Michael bought three PNY 64 GB V30 cards and characterized those samples alongside
+an existing onn V10 control. The retail family and speed marks are not exact card
+identity: every result and any later qualification must still bind manufacturer part
+number, capacity, revision and CID. No media is qualified without the independent
+sustained-write and atomicity evidence required by WP-05.
 
 ## 6. Implementation boundaries retained from the charter
 

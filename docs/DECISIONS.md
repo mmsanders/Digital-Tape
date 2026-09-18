@@ -2291,3 +2291,100 @@ and all uncovered product and hardware/safety holds remain.
 **Rationale and evidence:** [P1-R13 PM disposition](REVIEW/P1-R13-PM-DISPOSITION.md).
 **Cost to reverse:** supersede through a new independently supported disposition;
 retain both immutable product traces and the defective-package finding.
+
+## ADR-148 — Authenticate the cadence correction and order a test-first product rerun
+
+**Date:** 2026-09-14 UTC · **Owner:** PM under Michael's P1-R14 activation
+
+Authenticate Verification #11's linear source/evidence/return chain at
+`1f7fe3f...` / `05e1932...` / `e3a25bf...`. The source precedes evidence; exact
+changed-path counts are 8, 32 and 1. The corrected package tree is `467a34bb...`,
+all 30 manifest-bound files match, and frozen hashes/candidate PCM remain unchanged.
+PM reproduction confirms 698 renders and 698 immediately preceding completed service
+sequences in each direction, both old-cadence controls going red, ten families, 22
+behavioral controls, retained P1-R4 checks, saved replay and the full suite.
+
+Treat `P1-R12-V01` as cured for verifier-package correctness only. Do not restore
+acceptance of old product observations. Route Software #83 in two ordered phases:
+merge the exact verifier test/evidence subtree first, then minimally correct only the
+Software-owned product probe and generate a fresh held trace on draft PR #77 without
+rewriting history or changing engine/header/harness blobs. Stop before PR #77 merge;
+the new evidence requires fresh independent disposition.
+
+Do not wake Verification, Hardware, Surge or Michael before the product evidence
+exists. Michael #49 remains unchanged/non-blocking. PR #20/#64/#77, playback
+acceptance, narrow mount boundaries, frozen hashes, Structural Rule 1, WP-11
+red/listening and all uncovered product/hardware/safety holds remain.
+
+**Rationale and evidence:** [P1-R14 PM disposition](REVIEW/P1-R14-PM-DISPOSITION.md).
+**Cost to reverse:** stop Software #83 before its next phase, retain the exact imported
+verifier tree and immutable evidence, and issue a new bounded correction.
+
+## ADR-149 — Route the corrected-cadence product trace to independent Verification
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R15 activation
+
+Authenticate Software #83's ordered return for routing. PR #85 placed exact corrected
+verifier tree `467a34bb...` on main at `888f4daf...` before the new product run.
+Held PR #77 preserves its clean ancestry and has evidence commit `9204512b...`
+directly atop pre-run commit `b94ee2e...`; held #20/#64 heads are not ancestors and
+allocator paths remain absent. PM path/blob authentication is not source review.
+
+Authenticate all 30 manifest-bound evidence files, unmodified replay, the ten family
+results, seven candidate PCM hashes, 698/698 immediate completed-service cadence in
+both scrub directions, and 289 mount records matching the earlier run after provenance.
+Do not accept those observations. Route the exact bundle to independent Verification
+#12 under implementation blindness, including an explicit decision on the changed
+mount-probe executable hash and whether its exact source/current-build provenance is
+sufficient for narrow disposition.
+
+Do not wake Software for a reproducible-build improvement unless Verification finds
+the existing provenance materially insufficient. Do not wake Hardware, Surge or
+Michael. Keep PR #77/#64/#20, playback advancement, WP-11 red/listening, frozen hashes,
+Structural Rule 1 and every uncovered product/hardware/safety hold in force.
+
+**Rationale and evidence:** [P1-R15 PM disposition](REVIEW/P1-R15-PM-DISPOSITION.md).
+**Cost to reverse:** close or supersede Verification #12 before disposition, retain
+the immutable trace, and issue a fresh bounded Software provenance correction only if
+the independent finding requires it.
+
+## ADR-150 — Accept the exact corrected-cadence observations and license only the clean integration
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R16 activation
+
+Authenticate Verification #12 at verifier main `392d6bb9...`, accept the exact ten
+corrected-cadence playback observations and exact 289 mount records, and treat
+`P1-R12-V01` as cured for those records. Correct the durable outer run-tree identity
+to `ea34ba25...`; the stale `db88b71a...` value differed only in self-referential
+README rows and did not affect inner evidence.
+
+This licenses Software to integrate only PR #77's clean independently observed slice
+after current-main synchronization and exact scope/blob checks. It does not accept
+source/helper design, the implementation generally, complete WP-06/WP-08, PCM as a
+golden, listening or uncovered behavior. PR #20/#64 and every broader hold remain.
+
+**Rationale and evidence:** [P1-R16 PM disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
+**Cost to reverse:** stop the Software integration before merge, retain all immutable
+product/verifier evidence and issue a new independently supported correction.
+
+## ADR-151 — Keep the filled-media stress and make ruggedization pre-CAD
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R16 activation
+
+Retain WP-05 A-2's 80%-filled-media condition, clarified as at least one conforming
+filled run per exact candidate SKU/revision. Unfilled repeats and controls remain
+useful screening evidence but do not replace that run. Accept PR #87 only as a
+submitted record ready for Hardware correction: all three recorded PNY samples clear
+the C-60 screening bar on their path and the onn V10 control fails, but exact identity,
+independent audit, card-speed attribution, atomicity, end-to-end copy and qualification
+remain open. C-90 is not reopened.
+
+Add product guardrail 13 and issue WP-25: loaded-player drop, shake and rough-play
+resilience is a system input before final enclosure CAD. Require a Hardware failure
+matrix and Verification-reviewable staged protocol before physical acceptance. Record
+Michael's A1 Mini purchase as superseding library-only printing assumptions, without
+qualifying the machine, process, material or part.
+
+**Rationale and evidence:** [P1-R16 PM disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
+**Cost to reverse:** a fresh PM decision must replace the stress condition or abuse
+boundary before Hardware locks CAD; preserve the submitted raw runs and all failures.
