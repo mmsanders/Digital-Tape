@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 18 September 2026 UTC · Owner: PM · P1-R16 exact corrected-cadence observations independently accepted; ruggedization issued as a design input; scoped Phase 0 freeze unchanged.**
+**Updated: 18 September 2026 UTC · Owner: PM · P1-R17 clean observed slice integrated; card evidence and ruggedization proposal routed for independent review; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -123,6 +123,18 @@ the library-only printing assumption. Guardrail 13 and WP-25 now require loaded-
 drop, shake and rough-play resilience before final enclosure CAD. See the
 [P1-R16 disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
 
+Software #90 then synchronized and merged the clean PR #77 slice at product main
+`4e1d248b62866871613775a50ab931f4a4597a52` with its accepted evidence history
+intact and held PR #20/#64 outside ancestry. Exact independently dispositioned
+observations are now integrated, but source/helper design and complete WP-06/WP-08
+remain held. Hardware #91 corrected the exact PR #87 packet to audit-ready head
+`c0e6a83...` and returned the proposed ruggedization/owned-printer work at draft PR
+#92 head `7b80631...`. PM reproduced the card derivation, hardware regression suite
+and the still-closed five-blocker fabrication gate. Verification now owns the exact
+card audit and ruggedization criteria review. Software may build a held candidate
+only for the two already-covered VT8-001 cases. See the
+[P1-R17 disposition](REVIEW/P1-R17-PM-DISPOSITION.md).
+
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
 directions. The kickoff granted no engine merge or broader acceptance.
@@ -147,6 +159,10 @@ directions. The kickoff granted no engine merge or broader acceptance.
 - Hardware **#54** merged after Software review at
   `20aa6bbcf886d8f87b4e34c4af4afb0c091703fc`. The supply-envelope criterion now
   has a retained targeted negative control; timing and safety status are unchanged.
+- Software **#77** merged with history preserved at
+  `4e1d248b62866871613775a50ab931f4a4597a52`. It integrates only the clean
+  independently observed mount/playback slice; no source, complete-package, golden
+  or listening acceptance follows.
 - The simplified read-only [lead queue](https://mmsanders.github.io/Digital-Tape/)
   is deployed from main through Pages run
   [34720715628](https://github.com/mmsanders/Digital-Tape/actions/runs/34720715628).
@@ -156,11 +172,11 @@ directions. The kickoff granted no engine merge or broader acceptance.
 
 | Work | State | Next owner |
 |---|---|---|
-| #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
-| VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
+| #20 engine | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
+| VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass. Seek and playback service now exist, but arm, feed, commit and reset_side_b remain undefined and neither real-product case has run | Software held implementation/evidence task, then independent Verification |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
-| Hardware | PR #87 card data is submitted, not audited; A1 Mini setup replaces the library-only assumption; ruggedization is now a pre-CAD requirement. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware issue queue; later independent evidence audit |
+| Hardware | PR #87 is audit-ready but not audited. PR #92 proposes the owned-printer/ruggedization method but is not accepted. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Independent Verification; Hardware awaits the return |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Library print path retired without a result; A1 Mini setup in progress. Three PNY samples measured, but identity/audit/atomicity/qualification remain open | Hardware; Michael only for hands/wallet facts when requested |
 
@@ -177,13 +193,14 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R16 accepts Verification #12 only at its exact evidence boundary and corrects the
-outer run-tree identity. Software may integrate only the clean independently observed
-PR #77 slice after current-main synchronization and exact blob/scope checks. Hardware
-must correct and finish the PR #87 evidence packet and produce the pre-CAD ruggedization
-architecture/test plan. PR #20/#64 remain held. The dashboard remains at the
-test-on-main rung, 13 of 36, because no complete implementation rung or package is
-accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
+P1-R17 accepts PR #77's integration identity and scope without widening the exact
+independent observation boundary. PR #87 is routed for exact independent audit and
+PR #92 for independent criteria review. The A1 Mini packet may eventually split into
+one WP-24 matched-pair plate and one WP-04 button plate, contingent on the recorded
+usable bed and a new reproducible packet revision. PR #20/#64 remain held. The
+dashboard remains at the test-on-main rung, 13 of 36, because no complete
+implementation rung or package is accepted. PM publishes no branch KEEP lists or
+routine Michael-issue refreshes.
 
 ## Phase 1 operating format — 11 September
 
