@@ -436,3 +436,56 @@ once-per-row behavior, retain deterministic synthetic evidence and publish sourc
 before generated evidence. It stops before product import/run. PR #77, #64 and #20
 remain draft/held; candidate PCM remains unlistened and not a WP-11 golden; all other
 product and hardware/safety holds remain.
+
+## P1-R14 corrected package and product-rerun ordering — 14 September 2026 UTC
+
+Verification #11 published source `1f7fe3f79d326c4a6e37f8c301c97c110d481619`
+before evidence `05e193209542d204669b32f485dad21007a084ee`, then returned at
+`e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da`. The commits respectively change
+eight verifier source paths, add 32 retained-evidence paths and add one findings file.
+PM matched the reported parents, trees, modes, blobs and SHA-256 inventory; all 30
+manifest-bound evidence files match with no missing or unbound paths.
+
+The corrected complete-package tree is `467a34bb0a84672c5bdef9059f2dd326d6435eb6`.
+PM reproduced deterministic generation, saved replay, ten families, 22 controls,
+retained P1-R4 controls and the full suite. Each scrub direction has 698 renders and
+698 immediately preceding completed service sequences; named forward and reverse
+controls reject the prior once-per-row schedule. Frozen hashes and candidate PCM bytes
+are unchanged. This resolves `P1-R12-V01` only for verifier-package correctness.
+
+Software #83 must land that exact test/evidence subtree on main before changing the
+Software-owned product probe. Only then may it update draft PR #77 non-destructively,
+isolate the per-render probe cadence change, and retain a fresh product trace. It must
+not change held engine/header/harness blobs or merge PR #77. The new trace requires
+PM authentication and a fresh blind Verification disposition. Old product playback
+observations remain suspended; the exact 289-case mount disposition remains narrow;
+PCM/listening/golden and all other product/hardware holds remain.
+
+## P1-R15 corrected-cadence product-evidence routing — 18 September 2026 UTC
+
+Software #83 completed the ordered import before rerun. PR #85 merged at product main
+`888f4dafcddcc4d7b96e8ec8e250dd5bb4062b63`, where the complete-playback subtree
+is exactly corrected verifier tree `467a34bb0a84672c5bdef9059f2dd326d6435eb6`.
+No engine or firmware file landed in that import.
+
+Held draft PR #77 is `b252b536574c777d2998e5a79aac66c6a73fe21b`.
+Evidence commit/tree `9204512b7f3f06ce6ce202db9f1e2a92e56e8d0b` /
+`78ecbe71ec38d854f77989408bd3f0b8a15fe623` has sole parent pre-run commit/tree
+`b94ee2e33fd7fb8f6691e76a83d2392b6717e8a7` /
+`9a801f8b7e61f498e4a0459a640bc1aacf706c66`. The product-evidence tree is
+`365dc5e83263e9c3a16d224c986e64c7895ab5cb`; its 30 manifest-bound files have no
+missing or extra paths. PM replay and package self-test pass.
+
+Direct raw-record recomputation finds 698 renders and 698 immediately preceding
+completed `tape_service(1024)` calls in each scrub direction, 16 rate calls and
+88,200 rendered frames with no short render. All 90,003 forward and 90,056 reverse
+callbacks are successful reads; all seven PCM files match verifier candidates. The
+289 mount records match the earlier clean run after the provenance header, but the
+current probe executable hash differs. PM authenticates the exact source/current-build
+packet and does not transfer the earlier independent mount disposition.
+
+Verification issue #12 owns blind disposition of these exact observations and the
+mount provenance. It may use verifier-owned source, frozen public contracts, raw
+evidence and Git identity metadata only—not product/adapter source, Software returns,
+private tests or held-PR diffs/discussions. PR #77/#64/#20 remain draft/held;
+candidate PCM is unlistened and not a WP-11 golden; no wider acceptance follows.
