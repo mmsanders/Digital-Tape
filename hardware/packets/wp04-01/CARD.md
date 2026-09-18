@@ -1,14 +1,36 @@
 # Print packet WP04-01 — the latching button, and the cartridge clasp
 
-**One page. Print `plate.stl`. Bring back the parts and this card filled in.**
+**One page. Print the plate. Bring back the parts and this card filled in.**
 Hardware Lead · rev 5, 6 Sep 2026 · WP-04 the transport spike, and WP-24 the cartridge shell
+
+> ## ⚠ Do not print this plate yet — read this first (18 Sep 2026)
+>
+> **The library print did not come back.** No parts, no results. That attempt is recorded as
+> inconclusive: it tells us nothing about any part on this plate, and every question below is
+> still open.
+>
+> **You now own an A1 Mini, and this plate was laid out for the library's machine.** The plate
+> is **228 mm** long. If the A1 Mini's bed is 180 × 180 mm, **it does not fit**, and no
+> orientation fixes it — it is one merged solid by design.
+>
+> So this card is **on hold pending a rebuild**, and the rebuild needs two things from you
+> first: the machine's **actual build volume**, and PM's approval of how the plate is split
+> (splitting it reshuffles the blind letters, which is a change to the experiment, not a
+> formatting fix). The options are laid out in
+> `hardware/printing/owned-printer-baseline.md` §3.
+>
+> **Everything below this line still describes what the experiment is for and what to look at.**
+> The parts of it about the library — one file format, staff choosing orientation, two prints a
+> month, whatever spool is loaded — are now void. You choose the material, the orientation and
+> the settings, and you record them on `RESULTS.md`.
 
 ---
 
 ## What this is
 
-**Two experiments on one plate**, because you get two library prints a month and one trip is
-worth two. They have nothing to do with each other except the bed they share.
+**Two experiments on one plate.** They have nothing to do with each other except the bed they
+share — which, now that prints are not rationed by trips to the library, is the one reason they
+may not stay on one plate.
 
 **A. Nine little buttons, one long bar, and a frame to hold them.** They are nearly all the
 same except for **one hidden dimension** — how deep the little hook on the side of each button
@@ -36,21 +58,24 @@ which one was supposed to win, you would find that it did.**
 
 | | |
 |---|---|
-| **File to submit** | **`plate.stl`** — the library only accepts `.stl` |
-| **Plate size** | **228 × 119 mm** (bed needed: 240 × 131 mm) |
-| **Estimated print time** | **about 2 hours** — within the library's 6 h limit |
-| Material | Whatever is loaded. Probably PLA. **One spool, no swaps** |
-| Layer height | Staff decide. 0.2 mm if they ask you |
-| **Supports** | **OFF. This is the one setting that can waste the trip — see below** |
+| **File** | `plate.stl` (`plate.3mf` is also in the packet and your slicer can open it) |
+| **Plate size** | **228 × 119 mm** — ⚠ **larger than a 180 mm bed. See the hold above** |
+| **Estimated print time** | about 2 hours |
+| Material | **Your choice now, and write it down.** PLA is the conservative case the analysis assumes; PETG is fine and gives more margin |
+| Layer height | 0.2 mm unless you have a reason |
+| **Supports** | **OFF. This is the one setting that can waste the print — see below** |
+| **Orientation** | Flat, as laid out — and **all parts in the same orientation**, which is now yours to guarantee rather than a request to staff |
 
-> ## Three lines for the library staff
+> ## The settings that matter, in order
 >
 > **1. SUPPORTS OFF.** Not "on build plate only" — **off**.
 >
-> **2. "Any orientation is acceptable, provided all parts are printed in the same one."**
+> **2. All parts in one orientation.** The plate is laid out flat and should print flat. Some
+> parts are open boxes; turned on their side or upside down they will need supports.
 >
-> **3. "The plate is laid out flat and should print flat. Some parts are open boxes, and if
-> they are turned on their side or upside down they will need supports."**
+> **3. Record what you actually used** on `RESULTS.md` — material, spool, nozzle, plate, layer
+> height, orientation, slicer version. A printed part with no process record is not evidence,
+> and that is the whole point of owning the machine instead of borrowing one.
 
 **Why supports off matters more than everything else on this card.** Each button has a narrow
 slot up the middle of it, about 8 × 3 mm and 14 mm deep, closed at the top and open at the
@@ -60,13 +85,13 @@ and springiness is the thing this whole plate measures.**
 A "supports everywhere" setting fills that slot with support material. Fourteen millimetres
 down a 3 mm gap, **you will not get it out**, and while it is in there the arm cannot flex at
 all. Every button would then feel identically stiff — and "they all felt the same" is a real
-answer on this card, so **the trip would look like it worked and would be completely wrong.**
+answer on this card, so **the print would look like it worked and would be completely wrong.**
 
-If the staff will not turn supports off, bring the parts back anyway and tell me. That is a
-fact about the machine I need, and it is worth a trip on its own.
+If supports cannot be turned off for some reason, print it anyway and tell me. That is a fact
+about the machine I need.
 
-**One thing about the boxes.** They are designed to be safe in whatever the library has
-loaded, but **I expect one of the four to crack** rather than open. That is deliberate and it
+**One thing about the boxes.** They are designed to be safe in either candidate material, but
+**I expect one of the four to crack** rather than open. That is deliberate and it
 is a useful answer, not a wasted part — tell me which one and I will know my numbers are about
 right.
 
@@ -150,10 +175,11 @@ it, that is my mistake and I want to hear about it.
 
 ## About how it feels versus how long it lasts
 
-You are answering **how does it feel** only. PLA is a prototyping plastic — it will not feel
-quite like the finished part, and it will wear out much sooner. Once you have picked winners I
-will get those shapes printed properly in the real material and you can confirm they still win.
-So do not worry about whether these will last. They will not. That is a different trip.
+You are answering **how does it feel** only. If you print these in PLA it is a prototyping
+plastic — it will not feel quite like the finished part, and it will wear out much sooner. Once
+you have picked winners, those shapes get printed in the material that ships and you confirm
+they still win. So do not worry about whether these will last. They will not. That is a
+different print — and now it is a different afternoon rather than a different month.
 
 ---
 

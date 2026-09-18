@@ -1,11 +1,43 @@
 # Cartridge shell — the clasp, the seam, and what opens it
 
 **Owner:** Hardware Lead · **Consumed by:** WP-24, WP-23, WP-25 · **Status:** assessment
-**Revision:** 0.2, 6 Sep 2026 · **Answers:** PM Decisions 007 §2 (and 006 §2–§3 before it)
+**Revision:** 0.3, 18 Sep 2026 · **Answers:** PM Decisions 007 §2 (and 006 §2–§3 before it), corrected for the owned printer
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.3 — 2026-09-18
+**The printer premise is void. The design conclusions are not.** Michael has bought a Bambu Lab
+A1 Mini, so the two facts rev 0.2 was written around — *"Michael is not buying a printer"* and
+*"the library runs a single spool of whatever it has loaded"* (PM Decisions 007 §2) — are both
+superseded. The process record is `hardware/printing/owned-printer-baseline.md`.
+
+What this revision changes:
+
+- **Material is now a choice we make and record, not a spool we are handed.** PETG is
+  selectable again. It is **not** thereby chosen, and nothing here is printed in it yet.
+- **The PLA assumption is retained as the conservative case, not as a constraint.** Every
+  strain and retention number in §2 to §4 clears PLA's permissible strain, and PLA is the
+  weaker of the two candidates on the criteria that bind here — so the analysis stands
+  unchanged and gets wider margin if PETG is chosen. No number moved.
+- **The TPU lip stays void, for one of its two reasons instead of both.** "A single spool" no
+  longer applies; a multi-material print may become possible if an AMS lite is attached. The
+  reason that survives is the one that was always the stronger: it carried 0.086 % of
+  *sustained* strain, and §7's replacement is sized and waiting on evidence of rattle.
+- **The paired-printing rule stands, and its numbers are now testable.** ±0.05 mm within a job
+  and ±0.15 mm between jobs were estimates for a machine we did not own. Coupon **K-2** in the
+  printing baseline measures them. **If the real between-job spread is wider, the interference
+  sweep may sit inside the process noise** — which would be a finding about the sweep, not
+  about the design.
+- **SH-3 is closed as moot**: whether the library would accept Michael's own filament no longer
+  matters. **SH-2 is narrowed but not closed**: we now choose the material, and still have no
+  vendor egress to a filament datasheet.
+- **§1's car-dashboard finding is unchanged and still belongs in WP-25**, and is now also
+  carried by `spec/hw/ruggedization.md` F-18 as an explicitly separate thermal case.
+
+**Nothing is qualified by this revision.** The printer, the material, the settings and every
+printed part remain uncharacterized, and the library rev-5 plate returned no result at all.
 
 ### 0.2 — 2026-09-06
 **The material assumption is gone, and the design changed to survive not having one.** PM
@@ -180,7 +212,7 @@ The number PM Decisions 007 §2 asks for. **This is the only strain in the desig
 
 The thinning *is* the cantilever: 1.6 mm over the full 6.0 mm from floor to bead. Everywhere else the wall stays 2.0 mm, for stiffness and for the drop criterion. The tempting simplification is to thin the whole rim so the lid's tongue can be a plain rectangle — and that moves the flexing span from 6.0 mm to about 3.2 mm. Strain goes as the square of the span, so **0.60 % becomes 2.11 %** — 2.1× PLA's permissible strain. That version prints, assembles and feels correct on the bench. `hardware/cad/cartridge/test_shell.py` probes the wall section from the floor to the bead for exactly this reason.
 
-**The assumed material is PLA**, because that is what we will get: a single library spool of whatever is loaded, not chosen by us (Decisions 007 §2). Every row above clears PLA's permissible strain, so the design does not depend on which of the two arrives — which is the point, since we cannot specify it.
+**PLA is carried as the conservative case, not as a constraint** (rev 0.3). Material is ours to choose again on the owned A1 Mini and PETG is selectable, but PLA is the weaker candidate on the criteria that bind here. Every row above clears PLA's permissible strain, so the design does not depend on which is chosen — which was the point when we could not specify it, and is now free margin if PETG is.
 
 **And this is what the paired-printing rule buys.** Build a cartridge from halves printed in *different* sessions and the tolerance is ±0.15 mm instead of ±0.05 mm. The interference then ranges from 0.03 mm — **no engagement at all** — up to 0.33 mm at **1.10 % strain**, which is past PLA's limit. Both ends of that range are a failure. **Halves are a matched pair and the card says so.**
 <!-- END GENERATED: clasp_geometry -->
@@ -311,10 +343,10 @@ with no tool. If it opens, the geometry is wrong and this section is wrong with 
 
 ## 7. What happened to the TPU lip
 
-**It is void.** Rev 0.1 used a thin TPU lip to preload the joint against rattle and to absorb
-print tolerance. PM Decisions 007 §2 removes it twice over: the library runs **a single spool**,
-so a second-material part cannot be printed at all, and Michael is not buying a printer, so the
-route by which we would have got one is closed.
+**It is void**, and as of rev 0.3 for one reason rather than two. Rev 0.1 used a thin TPU lip
+to preload the joint against rattle and to absorb print tolerance. Decisions 007 §2 removed it
+twice over — a single library spool, and no printer. **The printer objection is gone**: Michael
+owns an A1 Mini, and a second material becomes printable if an AMS lite is attached.
 
 **It was also carrying 0.086 % of sustained strain** — defensible in PETG, and a worse idea in
 the PLA we should now assume. Losing it makes the closed-strain number *better*, from 0.086 % to
@@ -375,17 +407,21 @@ Coupon: **62 × 28 × 12 mm**, a real long-wall run (44 mm engaged) with both co
 
 ---
 
-## 9. Materials — we do not choose the spool, and the design stopped caring
+## 9. Materials — we choose the spool again, and the design still does not care
 
-Rev 0.1 corrected one material error (the A1 line does not run nylon). **Decisions 007 §2
-removes the premise underneath it:** Michael is not buying a printer, the library loads a single
-spool of whatever it has, and we do not pick the material or the colour. PETG is no longer an
-assumption available to us.
+Rev 0.1 corrected one material error (the A1 line does not run nylon). Decisions 007 §2 then
+removed the premise underneath it — no printer, one library spool, no choice of material or
+colour. **Rev 0.3 removes that premise in turn:** Michael owns an A1 Mini, so material is a
+recorded choice and PETG is available again.
+
+**The design's indifference is the point and it survives both reversals.** It was built to be
+correct in whatever arrived; it is now correct in whatever we pick. PLA remains the conservative
+case in the numbers above.
 
 | What rev 0.1 assumed | What is actually true |
 |---|---|
-| PETG, from a printer Michael buys | **One library spool, probably PLA, not chosen by us** |
-| A TPU lip for preload and tolerance | **Unprintable.** Single spool, and a merged STL carries one material for every part |
+| PETG, from a printer Michael buys | **True again as of rev 0.3** — Michael owns an A1 Mini. PETG is selectable, not chosen, and nothing is printed in it yet |
+| A TPU lip for preload and tolerance | **Printable again if an AMS lite is attached.** Still void — on the sustained-strain argument in §7, which does not depend on the printer |
 | Nylon from a service bureau for the latch | Still available and still the right answer for the *latch*, which is a fatigue part. Not for the shell |
 
 ### What that changed, and what it did not
@@ -461,8 +497,8 @@ which is itself an argument for the clasp, because the clasp does not close the 
 | # | Item | Who | Default if nobody answers |
 |---|---|---|---|
 | SH-1 | **Cartridge outer dimensions.** 86 × 54 × 12 mm is a working number, not a designed one. §2 shows the analysis does not depend on it — strain has no length term | **Michael** | 86 × 54 × 12 proceeds; changing it later costs a rebuild, not a redesign |
-| SH-2 | **Filament datasheets.** Modulus, permissible strain, creep threshold and friction are all EST, and now for a material we do not choose. No vendor egress here reaches a filament vendor | Michael or PM | The §8 sweep measures around the uncertainty; a datasheet narrows the bracket, it does not unblock it |
-| SH-3 | **Whether the library will let Michael supply his own filament.** He is asking on Monday (Decisions 009 §5). A yes would restore PETG and make the dashboard finding in §1 much less sharp | Michael | Everything here assumes no. If the answer is yes, nothing needs redesigning — the margins just get wider |
+| SH-2 | **Filament datasheets.** Modulus, permissible strain, creep threshold and friction are all EST. **Narrowed by rev 0.3** — the material is now ours to choose — but not closed: no vendor egress here reaches a filament datasheet | Michael or PM | The §8 sweep measures around the uncertainty; a datasheet narrows the bracket, it does not unblock it |
+| SH-3 | ~~Whether the library will let Michael supply his own filament~~ — **closed as moot at rev 0.3.** He owns the printer; the question no longer has a consequence | — | Closed. PETG is available; the margins widen if it is chosen, and nothing needs redesigning |
 | SH-4 | **S-2's 90-day clock has not started** and cannot until a printed pair exists. It is the longest-lead criterion on the hardware stream and it is on no schedule | — | Runs in parallel; does not gate WP-24 |
 | SH-5 | **Does it rattle?** There is deliberately no preload feature. The first plate answers it; §4 has the replacement sized if the answer is yes | Michael, via the plate | If it rattles, add the leaf. If not, the design is simpler and stays that way |
 | SH-6 | **The car-dashboard finding** (§1) needs a line in whatever the family is told, and a case in WP-25. Sharper in PLA than it would have been in PETG | PM | Recorded here; carried into WP-25 |

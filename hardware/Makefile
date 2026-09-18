@@ -10,7 +10,7 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-test spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
@@ -208,8 +208,15 @@ atomicity-test:
 ## document changing first with an explicit notification. A silent pin swap between
 ## revisions is how a week of bring-up goes to a problem that is not in the code.
 ## This turns that promise into a gate. PM Decisions 005 section 5.
-spec-check:
+## The manifest gate now has retained controls of its own (spec-test). They run
+## first, because the failure they catch -- a file quietly dropped from TRACKED --
+## makes spec_manifest.py print OK while watching nothing.
+spec-check: spec-test
 	@$(PY) spec_manifest.py
+
+## spec-test — the manifest gate must be able to go red, and must watch every spec
+spec-test:
+	@$(PY) test_spec_manifest.py
 
 ## spec-bless — record an intended revision bump
 spec-bless:

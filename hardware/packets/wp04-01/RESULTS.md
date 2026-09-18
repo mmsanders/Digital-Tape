@@ -1,6 +1,24 @@
 # Results — packet WP04-01 (rev 5)
 
-**Printed on:** ________________  **Date:** ____________  **Material:** ____________
+> **Hold, 18 Sep 2026.** The library attempt returned no parts and no result. This plate is
+> not to be printed on the A1 Mini until it has been rebuilt to fit the bed — see `CARD.md`.
+> The process block below is the new requirement: **a printed part with no process record is
+> not evidence.**
+
+## Process record — fill this in before the ranking
+
+| | |
+|---|---|
+| **Printer** | ____________________  Serial ____________ |
+| **Firmware / slicer + version** | ____________________ |
+| **Material** | ____________ **Vendor** ____________ **Spool/lot** ____________ |
+| **Nozzle** | ____ mm  **Plate** ____________  **Layer height** ____ mm |
+| **Nozzle / plate temp** | ____ °C / ____ °C  **Ambient** ____ °C |
+| **Orientation** | ____________________  **Supports** OFF / ____________ |
+| **Print date / time taken** | ____________ / ____ h ____ min |
+| **Anything unusual** | ____________________________________________ |
+
+**Date ranked:** ____________
 
 *Two experiments. Part A is the buttons, Part B is the boxes. Do them in any order.*
 
