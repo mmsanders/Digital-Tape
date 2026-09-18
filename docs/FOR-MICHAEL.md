@@ -10,9 +10,10 @@ The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digita
 Q-001 is signed and closed: Michael signed the exact Phase 0 scope on
 8 September 2026 in [the freeze record](PHASE0-FREEZE.md). Do not ask again.
 Operations/state, implementation acceptance, card qualification and hardware safety
-remain separate. Every purchase remains Michael's decision. The current card plan
-is a V30/U3 evaluation at exact SKUs, not a speed-class equivalence or card
-qualification. No printer purchase is approved.
+remain separate. Every purchase remains Michael's decision. Michael has bought three
+PNY 64 GB V30 samples and a Bambu A1 Mini; these facts supersede the unpurchased
+HTsemi comparison and library-only printing assumptions. Neither purchase is card,
+print-process or product qualification.
 
 Michael witnesses physical measurements; Verification independently audits method,
 raw data and uncertainty. Estimates and green regression checks are not measurements.

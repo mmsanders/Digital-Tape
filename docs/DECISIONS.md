@@ -2347,3 +2347,44 @@ Structural Rule 1 and every uncovered product/hardware/safety hold in force.
 **Cost to reverse:** close or supersede Verification #12 before disposition, retain
 the immutable trace, and issue a fresh bounded Software provenance correction only if
 the independent finding requires it.
+
+## ADR-150 — Accept the exact corrected-cadence observations and license only the clean integration
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R16 activation
+
+Authenticate Verification #12 at verifier main `392d6bb9...`, accept the exact ten
+corrected-cadence playback observations and exact 289 mount records, and treat
+`P1-R12-V01` as cured for those records. Correct the durable outer run-tree identity
+to `ea34ba25...`; the stale `db88b71a...` value differed only in self-referential
+README rows and did not affect inner evidence.
+
+This licenses Software to integrate only PR #77's clean independently observed slice
+after current-main synchronization and exact scope/blob checks. It does not accept
+source/helper design, the implementation generally, complete WP-06/WP-08, PCM as a
+golden, listening or uncovered behavior. PR #20/#64 and every broader hold remain.
+
+**Rationale and evidence:** [P1-R16 PM disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
+**Cost to reverse:** stop the Software integration before merge, retain all immutable
+product/verifier evidence and issue a new independently supported correction.
+
+## ADR-151 — Keep the filled-media stress and make ruggedization pre-CAD
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R16 activation
+
+Retain WP-05 A-2's 80%-filled-media condition, clarified as at least one conforming
+filled run per exact candidate SKU/revision. Unfilled repeats and controls remain
+useful screening evidence but do not replace that run. Accept PR #87 only as a
+submitted record ready for Hardware correction: all three recorded PNY samples clear
+the C-60 screening bar on their path and the onn V10 control fails, but exact identity,
+independent audit, card-speed attribution, atomicity, end-to-end copy and qualification
+remain open. C-90 is not reopened.
+
+Add product guardrail 13 and issue WP-25: loaded-player drop, shake and rough-play
+resilience is a system input before final enclosure CAD. Require a Hardware failure
+matrix and Verification-reviewable staged protocol before physical acceptance. Record
+Michael's A1 Mini purchase as superseding library-only printing assumptions, without
+qualifying the machine, process, material or part.
+
+**Rationale and evidence:** [P1-R16 PM disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
+**Cost to reverse:** a fresh PM decision must replace the stress condition or abuse
+boundary before Hardware locks CAD; preserve the submitted raw runs and all failures.
