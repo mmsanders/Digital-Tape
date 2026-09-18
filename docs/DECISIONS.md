@@ -2319,3 +2319,31 @@ red/listening and all uncovered product/hardware/safety holds remain.
 **Rationale and evidence:** [P1-R14 PM disposition](REVIEW/P1-R14-PM-DISPOSITION.md).
 **Cost to reverse:** stop Software #83 before its next phase, retain the exact imported
 verifier tree and immutable evidence, and issue a new bounded correction.
+
+## ADR-149 — Route the corrected-cadence product trace to independent Verification
+
+**Date:** 2026-09-18 UTC · **Owner:** PM under Michael's P1-R15 activation
+
+Authenticate Software #83's ordered return for routing. PR #85 placed exact corrected
+verifier tree `467a34bb...` on main at `888f4daf...` before the new product run.
+Held PR #77 preserves its clean ancestry and has evidence commit `9204512b...`
+directly atop pre-run commit `b94ee2e...`; held #20/#64 heads are not ancestors and
+allocator paths remain absent. PM path/blob authentication is not source review.
+
+Authenticate all 30 manifest-bound evidence files, unmodified replay, the ten family
+results, seven candidate PCM hashes, 698/698 immediate completed-service cadence in
+both scrub directions, and 289 mount records matching the earlier run after provenance.
+Do not accept those observations. Route the exact bundle to independent Verification
+#12 under implementation blindness, including an explicit decision on the changed
+mount-probe executable hash and whether its exact source/current-build provenance is
+sufficient for narrow disposition.
+
+Do not wake Software for a reproducible-build improvement unless Verification finds
+the existing provenance materially insufficient. Do not wake Hardware, Surge or
+Michael. Keep PR #77/#64/#20, playback advancement, WP-11 red/listening, frozen hashes,
+Structural Rule 1 and every uncovered product/hardware/safety hold in force.
+
+**Rationale and evidence:** [P1-R15 PM disposition](REVIEW/P1-R15-PM-DISPOSITION.md).
+**Cost to reverse:** close or supersede Verification #12 before disposition, retain
+the immutable trace, and issue a fresh bounded Software provenance correction only if
+the independent finding requires it.

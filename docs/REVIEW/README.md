@@ -47,6 +47,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R14 PM disposition](P1-R14-PM-DISPOSITION.md): authentication of the corrected
   verifier package and ordered test-only import, minimal product-probe correction and
   fresh held-evidence route.
+- [P1-R15 PM disposition](P1-R15-PM-DISPOSITION.md): authentication of the exact
+  corrected-package import and fresh cadence-corrected product evidence, plus blind
+  Verification routing before any implementation merge.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

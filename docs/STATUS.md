@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 14 September 2026 UTC · Owner: PM · P1-R14 corrected cadence verifier authenticated; exact test-first product import/rerun is next; scoped Phase 0 freeze unchanged.**
+**Updated: 18 September 2026 UTC · Owner: PM · P1-R15 corrected-cadence product evidence authenticated for independent disposition; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -93,6 +93,15 @@ service sequences for 698 renders, and separate old-cadence controls go red. Thi
 cures P1-R12-V01 for verifier-package correctness only. Software #83 owns an exact
 test-only import before the minimal product-probe correction and fresh held trace.
 See the [P1-R14 disposition](REVIEW/P1-R14-PM-DISPOSITION.md).
+Software #83 then merged that exact test/evidence-only import through PR #85 at
+product main `888f4dafcddcc4d7b96e8ec8e250dd5bb4062b63` and returned held draft
+PR #77 at `b252b536574c777d2998e5a79aac66c6a73fe21b`. Its fresh evidence commit
+`9204512b...` is directly atop recorded pre-run code `b94ee2e...`; PM authenticated
+all 30 manifest-bound files, unmodified replay, 698/698 immediate completed-service
+cadence in both directions, seven candidate PCM hashes, and 289 mount records.
+These are PM-authenticated observations, not acceptance. Verification #12 owns the
+blind exact-evidence and mount-provenance disposition. See the
+[P1-R15 disposition](REVIEW/P1-R15-PM-DISPOSITION.md).
 
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
@@ -130,15 +139,14 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | #20 engine | Recorded 289/289 mount observations independently dispositioned at tested commit 740c97e998c7672d9e98916102be84430993521b. PR remains draft at 2e0e8a4b7bff42797ac37901196e5ea348b2e392; main has older provisional engine. No wholesale merge. | Software / PM; see current issues |
 | VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass, but seek, arm, feed, service, commit and reset_side_b remain undefined and no real product run or acceptance exists | Held pending covered implementation sequencing; no current Verification correction |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Corrected verifier candidates remain byte-identical, synthetic, unlistened and unaccepted. Product playback acceptance remains suspended; golden CI stays red | Software #83 imports the exact package and produces fresh evidence; PM routes independent Verification afterward |
+| WP-11 | Fresh corrected-cadence product evidence is PM-authenticated but not independently dispositioned. Candidate PCM remains unlistened and unaccepted; golden CI stays red | Verification #12; no listening route yet |
 | Hardware | PR #54 retains the targeted supply-envelope negative control; timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Await exact physical/independent dependencies; no Hardware issue |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Rev-5 plate printing, no results card yet; two-arm V30/U3 evaluation selected, no purchase/qualification | Michael; see current issue |
 
-**New independent package acceptances: none.** Verification #11 corrects the verifier
-package and its negative controls, not product evidence. Prior playback observation
-advancement remains suspended pending exact import, fresh trace and new independent
-disposition. The exact clean
+**New independent package acceptances: none.** The corrected package is now exactly
+on main and fresh product evidence exists, but prior playback observation advancement
+remains suspended pending Verification #12's independent disposition. The exact clean
 289-case mount log has Verification's narrow independent acceptance. That is not
 source, helper, full WP-06/WP-07 or merge acceptance. CAD checks are not measurements. Missing WP-11
 goldens remain an explicit red gate. Main ruleset 22084355 is active and strict; its
@@ -151,9 +159,10 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R14 authenticates Verification's corrected package and assigns only Software #83.
-Its test/evidence-only Phase A must merge before the Software-owned probe correction
-and fresh Phase B product trace. PR #77 remains held and must not merge. The dashboard
+P1-R15 authenticates Software #83's ordered import and raw return and assigns only
+Verification #12. No Software reproducible-build task is opened unless independent
+review finds the changed executable identity materially blocks disposition. PR #77
+remains held and must not merge. The dashboard
 remains at the test-on-main rung, 13 of 36, because no implementation is merged or
 package accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
 
