@@ -10,9 +10,9 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test rugged rugged-test spec-check spec-test spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
-all: packet-wp04 thermal mech
+all: packet-wp04 thermal mech rugged
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
@@ -27,24 +27,18 @@ packet-wp04:
 packet-validate:
 	@$(PY) -c "import sys, json, zipfile, struct, os, xml.etree.ElementTree as ET; \
 	d='packets/wp04-01'; \
-	z=zipfile.ZipFile(d+'/plate.3mf'); \
-	[ET.fromstring(z.read(e)) for e in ('[Content_Types].xml','_rels/.rels','3D/3dmodel.model')]; \
-	ns={'m':'http://schemas.microsoft.com/3dmanufacturing/core/2015/02'}; \
-	r=ET.fromstring(z.read('3D/3dmodel.model')); \
-	vs=[(float(v.get('x')),float(v.get('y'))) for v in r.findall('.//m:vertex',ns)]; \
-	bad=[c for c in vs if c[0]<-0.001 or c[1]<-0.001]; \
-	sys.exit('FAIL %d vertices at negative X/Y' % len(bad)) if bad else None; \
-	p=d+'/plate.stl'; n=os.path.getsize(p); \
-	h=open(p,'rb').read(84); \
-	t=struct.unpack('<I', h[80:84])[0]; \
-	sys.exit('FAIL STL declares zero triangles') if t==0 else None; \
-	sys.exit('FAIL STL length %d != %d triangles' % (n,t)) if n != 84+t*50 else None; \
 	m=json.load(open(d+'/manifest.json')); \
-	sys.exit('FAIL library deliverable is not plate.stl') if m.get('library_deliverable')!='plate.stl' else None; \
-	sys.exit('FAIL estimated print time %.1f h exceeds the library limit' % m['estimated_print_hours']) \
-	  if m['estimated_print_hours'] >= m['library_job_limit_hours'] else None; \
-	print('OK  plate.stl %d triangles, plate.3mf well-formed, all geometry on the bed' % t); \
-	print('OK  needs %dx%d mm, ~%.1f h print, within the library 6 h limit' % (m['minimum_bed_mm'][0], m['minimum_bed_mm'][1], m['estimated_print_hours']))"
+	plates=m['plates']; \
+	sys.exit('FAIL expected two plates, got %d' % len(plates)) if len(plates)!=2 else None; \
+	[ (lambda z: [ET.fromstring(z.read(e)) for e in ('[Content_Types].xml','_rels/.rels','3D/3dmodel.model')])(zipfile.ZipFile(d+'/'+pl['preview'])) for pl in plates.values() ]; \
+	ns={'m':'http://schemas.microsoft.com/3dmanufacturing/core/2015/02'}; \
+	bed=m['bed_mm']; clr=m['edge_clearance_mm']; maxz=m['max_object_height_mm']; \
+	[ (lambda r: [ sys.exit('FAIL %s: vertex outside the usable area' % pl['file']) for v in r.findall('.//m:vertex',ns) if float(v.get('x'))<clr-0.05 or float(v.get('y'))<clr-0.05 or float(v.get('x'))>bed[0]-clr+0.05 or float(v.get('y'))>bed[1]-clr+0.05 or float(v.get('z'))>maxz+0.05 ])(ET.fromstring(zipfile.ZipFile(d+'/'+pl['preview']).read('3D/3dmodel.model'))) for pl in plates.values() ]; \
+	[ (lambda p_, n_, h_: [ sys.exit('FAIL %s declares zero triangles' % p_) if struct.unpack('<I', h_[80:84])[0]==0 else None, sys.exit('FAIL %s length %d != %d triangles' % (p_, n_, struct.unpack('<I', h_[80:84])[0])) if n_ != 84+struct.unpack('<I', h_[80:84])[0]*50 else None ])(d+'/'+pl['file'], os.path.getsize(d+'/'+pl['file']), open(d+'/'+pl['file'],'rb').read(84)) for pl in plates.values() ]; \
+	sys.exit('FAIL the packet claims a usable area it has not proven') if m.get('usable_area_proven') or m.get('printed') else None; \
+	sys.exit('FAIL matched pairs are not declared on one plate') if not m.get('matched_pairs_on_one_plate') else None; \
+	print('OK  two plates, every vertex inside %gx%g mm with %g mm clearance and z <= %g' % (bed[0], bed[1], clr, maxz)); \
+	[ print('OK  %s: %d objects, ~%.1f h, clearance %.1f mm' % (k, v['objects'], v['estimated_print_hours'], min(v['clearance_mm'].values()))) for k,v in plates.items() ]"
 
 ## packet-check — fail if the committed plate is not what the source produces
 ##
@@ -202,14 +196,33 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
 
+## rugged — regenerate the generated tables in spec/hw/ruggedization.md
+rugged:
+	$(PY) rugged/protocol.py
+
+## rugged-check — the protocol tables must not be stale, and the method must
+## remain executable: every check with an instrument and a numeric threshold,
+## every control's injected defect clearing that threshold by 2x or more.
+## P1-R17-V-B02/B03: a protocol that cannot be held to those is a description.
+rugged-test:
+	@cd rugged && $(PY) test_protocol.py
+	@cd rugged && $(PY) test_sharp.py
+
 ## spec-check — spec/hw content and revision must move together
 ##
 ## board-rev-a.md is what firmware/prod writes against, and its value rests on the
 ## document changing first with an explicit notification. A silent pin swap between
 ## revisions is how a week of bring-up goes to a problem that is not in the code.
 ## This turns that promise into a gate. PM Decisions 005 section 5.
-spec-check:
+## The manifest gate now has retained controls of its own (spec-test). They run
+## first, because the failure they catch -- a file quietly dropped from TRACKED --
+## makes spec_manifest.py print OK while watching nothing.
+spec-check: spec-test
 	@$(PY) spec_manifest.py
+
+## spec-test — the manifest gate must be able to go red, and must watch every spec
+spec-test:
+	@$(PY) test_spec_manifest.py
 
 ## spec-bless — record an intended revision bump
 spec-bless:
@@ -229,6 +242,7 @@ check: thermal-check mech-check
 	@$(MAKE) --no-print-directory solenoid-test
 	@$(MAKE) --no-print-directory fabrication-gate-test
 	@$(MAKE) --no-print-directory atomicity-test
+	@$(MAKE) --no-print-directory rugged-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
 	@$(MAKE) --no-print-directory erc

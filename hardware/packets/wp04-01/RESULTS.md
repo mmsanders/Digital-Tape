@@ -1,6 +1,26 @@
 # Results — packet WP04-01 (rev 5)
 
-**Printed on:** ________________  **Date:** ____________  **Material:** ____________
+> **Rev 6, 19 Sep 2026.** The library attempt returned no parts and no result. The packet is
+> now **two plates** laid out for the A1 Mini's confirmed nominal envelope — see `CARD.md`.
+> Nothing has been printed. The process block below is the requirement whenever something is:
+> **a printed part with no process record is not evidence.**
+>
+> **Fill one block per plate**, and say which plate the parts in each section came from.
+
+## Process record — fill this in before the ranking
+
+| | |
+|---|---|
+| **Printer** | ____________________  Serial ____________ |
+| **Firmware / slicer + version** | ____________________ |
+| **Material** | ____________ **Vendor** ____________ **Spool/lot** ____________ |
+| **Nozzle** | ____ mm  **Plate** ____________  **Layer height** ____ mm |
+| **Nozzle / plate temp** | ____ °C / ____ °C  **Ambient** ____ °C |
+| **Orientation** | ____________________  **Supports** OFF / ____________ |
+| **Print date / time taken** | ____________ / ____ h ____ min |
+| **Anything unusual** | ____________________________________________ |
+
+**Date ranked:** ____________
 
 *Two experiments. Part A is the buttons, Part B is the boxes. Do them in any order.*
 

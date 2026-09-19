@@ -76,7 +76,8 @@ CHAMFER_LEAD = 25.0        # closing ramp, degrees from the pull axis
 CHAMFER_RETAIN = 40.0      # opening ramp, degrees from the pull axis
 
 # Anti-rattle leaf, IF the first plate says rattle is real. Same material as the
-# shell -- the TPU lip this replaces cannot be printed on a single library spool.
+# shell -- the TPU lip it replaces stays void on the sustained-strain argument,
+# not on printability, now that Michael owns the printer (spec rev 0.3).
 # Not on the coupon on purpose: see t_rattle().
 LEAF_T, LEAF_SPAN, LEAF_DEFL, LEAF_W = 0.8, 14.0, 0.10, 20.0
 LEAF_COUNT = 4
@@ -87,10 +88,11 @@ LEAF_COUNT = 4
 # knowledge of the polymers and are marked EST everywhere they surface.
 # --------------------------------------------------------------------------
 
-# PLA leads because PLA is what we will get. PM Decisions 007 §2: the library
-# runs a single spool of whatever it has loaded, we do not choose it, and Michael
-# is not buying a printer. The PETG column is kept only to show the design does
-# not depend on which of them arrives.
+# PLA leads because it is the conservative case, not because it is imposed. That
+# was the reason at rev 0.2 -- Decisions 007 §2, one library spool, no printer --
+# and rev 0.3 removed it: Michael owns an A1 Mini and the material is a recorded
+# choice. PLA stays in front because it is the weaker candidate on permissible
+# strain and creep, so clearing it clears both.
 #
 # `creep` is the sustained strain above which the material relaxes measurably at
 # room temperature over months. It is the number Decisions 007 §2 is really about
@@ -293,10 +295,11 @@ def t_geometry() -> str:
         "`hardware/cad/cartridge/test_shell.py` probes the wall section from the floor to the "
         "bead for exactly this reason.",
         "",
-        f"**The assumed material is PLA**, because that is what we will get: a single library "
-        f"spool of whatever is loaded, not chosen by us (Decisions 007 §2). {verdict}, so the "
-        "design does not depend on which of the two arrives — which is the point, since we "
-        "cannot specify it.",
+        f"**PLA is carried as the conservative case, not as a constraint** (rev 0.3). Material "
+        f"is ours to choose again on the owned A1 Mini and PETG is selectable, but PLA is the "
+        f"weaker candidate on the criteria that bind here. {verdict}, so the design does not "
+        "depend on which is chosen — which was the point when we could not specify it, and is "
+        "now free margin if PETG is.",
         "",
         f"**And this is what the paired-printing rule buys.** Build a cartridge from halves "
         f"printed in *different* sessions and the tolerance is ±{TOL_MIXED:.2f} mm instead of "

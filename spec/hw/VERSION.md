@@ -22,7 +22,8 @@ that changes without its revision moving is the same failure with worse conseque
 |---|---|---|
 | `board-rev-a.md` | 0.5 | `4b0c669a3d8655800ff9e1b6218ff63d571fb20b93082efa0a1f55135a7776ee` |
 | `thermal-budget.md` | 0.6 | `e30982ec982b96dbf34062990d011b454a6c0f7d13b228c527a9323751d78542` |
-| `cartridge-shell.md` | 0.2 | `60946373d648d230c2fb6f58cede208b4657eb61c57fa6d257f9acfeef128c51` |
+| `cartridge-shell.md` | 0.3 | `4a6ec3d07bd8b90a4f499fc90498bd863ef8bf497ed313ddba2c407382dd9113` |
+| `ruggedization.md` | 0.5 | `a040e1013f574752acef6060e2a1338a63228a382db67972ec82dcd1fcc708a0` |
 
 `AUTO` rows are filled by `make -C hardware spec-bless`, which is the deliberate act of
 recording that a revision bump is intended. The gate fails if a file's content hash

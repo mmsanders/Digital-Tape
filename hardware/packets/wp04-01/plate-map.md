@@ -1,35 +1,40 @@
-# Plate map — packet WP04-01 (rev 5)
+# Plate map — packet WP04-01 (rev 6)
 
-**Two experiments, one plate.** `carrier-*`, `hook-bar` and `test-frame` are the
-WP-04 latch sweep. `shell-base-*` and `shell-lid-*` are the WP-24 cartridge clasp
-sweep. They share a bed and nothing else.
+**Two plates, two experiments.** `plate-wp04` is the latch sweep:
+`carrier-*`, `hook-bar`, `test-frame`. `plate-wp24` is the cartridge clasp
+sweep: every `shell-base-*` **with its matching `shell-lid-*` in the same
+job**, because a base and its lid are a matched pair and printing them
+apart re-introduces the confound the per-base lids removed.
 
-Fits a **240 × 131 mm** bed. Laid out for 250 × 210 mm — a Prusa Mini or Bambu A1 mini.
+Laid out for a **180 × 180 × 180 mm** nominal
+envelope with **5 mm clearance** from every edge and a
+**175 mm** height cap. The envelope is the machine's advertised
+figure, not a measured usable area — nothing here has been printed.
 
-The letter is **not** related to hook depth; the mapping is in `manifest.json` and
-deliberately not on the card.
+The letter is **not** related to hook depth; the mapping is in
+`manifest.json` and deliberately not on the card.
 
-| Part | X | Y | W | H |
-|---|---:|---:|---:|---:|
-| shell-base-G | 12 | 12 | 62 | 28 |
-| shell-base-Q | 78 | 12 | 62 | 28 |
-| shell-base-A | 144 | 12 | 62 | 28 |
-| shell-base-N | 12 | 44 | 62 | 28 |
-| shell-lid-A | 78 | 44 | 62 | 28 |
-| shell-lid-N | 144 | 44 | 62 | 28 |
-| shell-lid-G | 12 | 76 | 62 | 28 |
-| shell-lid-Q | 78 | 76 | 62 | 28 |
-| test-frame | 144 | 76 | 30 | 26 |
-| carrier-W | 178 | 76 | 14 | 12 |
-| carrier-B | 196 | 76 | 14 | 11 |
-| carrier-R | 214 | 76 | 14 | 11 |
-| carrier-D | 12 | 108 | 14 | 11 |
-| carrier-T | 30 | 108 | 14 | 11 |
-| carrier-K | 48 | 108 | 14 | 11 |
-| carrier-M | 66 | 108 | 14 | 11 |
-| carrier-H | 84 | 108 | 14 | 11 |
-| carrier-Z | 102 | 108 | 14 | 11 |
-| hook-bar | 120 | 108 | 70 | 5 |
+| Plate | Part | X | Y | W | H |
+|---|---|---:|---:|---:|---:|
+| plate-wp24 | shell-base-G | 5 | 5 | 62 | 28 |
+| plate-wp24 | shell-base-Q | 71 | 5 | 62 | 28 |
+| plate-wp24 | shell-base-A | 5 | 37 | 62 | 28 |
+| plate-wp24 | shell-base-N | 71 | 37 | 62 | 28 |
+| plate-wp24 | shell-lid-A | 5 | 69 | 62 | 28 |
+| plate-wp24 | shell-lid-N | 71 | 69 | 62 | 28 |
+| plate-wp24 | shell-lid-G | 5 | 101 | 62 | 28 |
+| plate-wp24 | shell-lid-Q | 71 | 101 | 62 | 28 |
+| plate-wp04 | test-frame | 5 | 5 | 30 | 26 |
+| plate-wp04 | carrier-W | 39 | 5 | 14 | 12 |
+| plate-wp04 | carrier-B | 57 | 5 | 14 | 11 |
+| plate-wp04 | carrier-R | 75 | 5 | 14 | 11 |
+| plate-wp04 | carrier-D | 93 | 5 | 14 | 11 |
+| plate-wp04 | carrier-T | 111 | 5 | 14 | 11 |
+| plate-wp04 | carrier-K | 129 | 5 | 14 | 11 |
+| plate-wp04 | carrier-M | 147 | 5 | 14 | 11 |
+| plate-wp04 | carrier-H | 5 | 35 | 14 | 11 |
+| plate-wp04 | carrier-Z | 23 | 35 | 14 | 11 |
+| plate-wp04 | hook-bar | 41 | 35 | 70 | 5 |
 
 `D` and `H` are the same geometry as one of the lettered variants, placed
 apart on the bed. If they do not rank together, bed position is affecting the

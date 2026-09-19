@@ -61,11 +61,33 @@ OUT = Path(__file__).resolve().parents[2] / "packets" / "wp04-01"
 # Rev 4 and earlier laid out for a conservative 180 x 180 because Q-006 came back
 # "not yet checked, proceed on the default"; that caution is spent, and the extra
 # room is what pays for four lids instead of two.
-BED_X, BED_Y = 250.0, 210.0
-MARGIN = 12.0
+# Rev 6. Michael confirms the A1 Mini's ADVERTISED NOMINAL envelope, 180 x 180 x
+# 180 mm. That is a nominal figure from the machine's specification, not a
+# measured usable area, and the difference is the whole reason for the clearance
+# below: a nominal envelope is not proof that every edge of it is printable.
+BED_X, BED_Y, BED_Z = 180.0, 180.0, 180.0
+BED_SOURCE = ("Michael-confirmed ADVERTISED NOMINAL envelope of the Bambu Lab "
+              "A1 Mini, 180 x 180 x 180 mm. Not a measured usable area: no "
+              "print has been made and no edge has been proven usable.")
+
+# Every object stays at least this far from every nominal bed edge, and no
+# taller than MAX_Z. Both are deliberate deratings of a number we do not trust
+# to its last millimetre.
+EDGE_CLEARANCE = 5.0     # mm, XY, from each of the four nominal edges
+MAX_Z = 175.0            # mm, 5 mm under the nominal height
+
+# A filleted solid's tessellated bounding box dips a few microns below the
+# plane it was built on -- the measured worst here is 9 um. That is a quarter
+# of a percent of a 0.2 mm layer and the first layer absorbs it. The tolerance
+# is set at a quarter of a layer so it stays far below anything a slicer would
+# act on, while a part genuinely modelled INTO the bed still fails.
+Z_SINK_TOLERANCE = 0.05  # mm
+
+MARGIN = EDGE_CLEARANCE
 GAP = 4.0
 SEED = 20260902          # fixed, so the plate is reproducible from source
-PACKET_RELEASE_DATE = "2026-09-06"  # rev-5 provenance, never the rebuild's wall clock
+PACKET_RELEASE_DATE = "2026-09-19"  # rev-6 provenance, never the rebuild's wall clock
+PACKET_REVISION = 6
 
 
 # The plate is a committed artefact -- Michael downloads it, he cannot run `make`.
@@ -216,14 +238,36 @@ def pack(items, bed_x=BED_X, bed_y=BED_Y, margin=MARGIN, gap=GAP):
     return placed
 
 
-def validate(placed, bed_x=BED_X, bed_y=BED_Y):
-    """Every object fully inside the bed, on all four sides. Returns (ok, problems)."""
+def validate(placed, bed_x=BED_X, bed_y=BED_Y, bed_z=BED_Z,
+             clearance=EDGE_CLEARANCE, max_z=MAX_Z):
+    """Every object inside the bed with clearance, and under the height cap.
+
+    Fail-closed, and checked per object on BOTH edges of BOTH axes plus Z. Hand
+    placement is how object 8 once ended up at Y = -11 mm off the front of the
+    bed, with a check that only looked at xmax/ymax.
+
+    The clearance is not decoration. The envelope is a nominal advertised
+    figure; the outer few millimetres of a bed are where adhesion and levelling
+    fail first, and nothing here has ever printed. Returns (ok, problems).
+    """
+    lo, hi_x, hi_y = clearance, bed_x - clearance, bed_y - clearance
     bad = []
+    if max_z > bed_z:
+        bad.append(f"the height cap {max_z} mm exceeds the bed's {bed_z} mm")
     for name, shape, x, y, w, h in placed:
         b = shape.BoundingBox()
-        if b.xmin < -1e-6 or b.ymin < -1e-6 or b.xmax > bed_x + 1e-6 or b.ymax > bed_y + 1e-6:
-            bad.append(f"{name}: x {b.xmin:.1f}..{b.xmax:.1f}, y {b.ymin:.1f}..{b.ymax:.1f} "
-                       f"outside 0..{bed_x:.0f} x 0..{bed_y:.0f}")
+        if b.xmin < lo - 1e-6 or b.ymin < lo - 1e-6 or \
+                b.xmax > hi_x + 1e-6 or b.ymax > hi_y + 1e-6:
+            bad.append(
+                f"{name}: x {b.xmin:.1f}..{b.xmax:.1f}, y {b.ymin:.1f}..{b.ymax:.1f} "
+                f"is outside the usable area {lo:.1f}..{hi_x:.1f} x "
+                f"{lo:.1f}..{hi_y:.1f} mm ({clearance:.1f} mm clearance from a "
+                f"{bed_x:.0f} x {bed_y:.0f} mm nominal bed)")
+        if b.zmax > max_z + 1e-6:
+            bad.append(f"{name}: {b.zmax:.1f} mm tall, over the {max_z:.0f} mm cap")
+        if b.zmin < -Z_SINK_TOLERANCE:
+            bad.append(f"{name}: sits {b.zmin:.3f} mm below the plate, more "
+                       f"than the {Z_SINK_TOLERANCE} mm tessellation allowance")
     return (not bad), bad
 
 
@@ -362,96 +406,157 @@ def build():
     # PM Decisions 007 §1. Before anything is written: no undeclared duplicates.
     check_duplicates(dup)
 
-    placed = pack(items)
-    ok, problems = validate(placed)
-    if not ok:
-        for line in problems:
-            print(f"  OFF-BED: {line}")
-        raise SystemExit("plate does not fit the bed -- refusing to write a broken packet")
+    # --- two plates, because one no longer fits ------------------------------
+    #
+    # The rev-5 plate was 228 mm long, laid out for the library's 250 x 210 bed.
+    # That machine is gone; the A1 Mini's nominal envelope is 180 x 180. So the
+    # packet splits, and the split is not arbitrary:
+    #
+    #   plate-wp24  all four shell bases AND their four matching lids, together
+    #               in ONE job. A base and its lid are a matched pair -- printed
+    #               in the same session they shrink together and what survives
+    #               is the printer's repeatability, not the material's. Splitting
+    #               a pair across jobs re-introduces exactly the confound rev 5
+    #               removed by giving every base its own lid.
+    #
+    #   plate-wp04  the latch sweep: every carrier including the beam probe, the
+    #               hook bar and the test frame. It has no pairing constraint,
+    #               and it keeps the spread M/D/H bed-position controls.
+    #
+    # Both keep the full sweeps, the blind lettering and the labels.
+    groups = {
+        "wp24": [it for it in items
+                 if it[0].startswith(("shell-base-", "shell-lid-"))],
+        "wp04": [it for it in items
+                 if not it[0].startswith(("shell-base-", "shell-lid-"))],
+    }
+    for gname, gitems in groups.items():
+        if not gitems:
+            raise SystemExit(f"plate {gname} would be empty -- refusing")
 
-    plate = cq.Compound.makeCompound([shape for _, shape, *_ in placed])
+    plates, rows, all_placed = {}, [], []
+    for gname, gitems in groups.items():
+        placed = pack(gitems)
+        ok, problems = validate(placed)
+        if not ok:
+            for line in problems:
+                print(f"  OFF-BED [{gname}]: {line}")
+            raise SystemExit(
+                f"plate {gname} does not fit the usable area -- refusing to "
+                f"write a broken packet")
+        plate = cq.Compound.makeCompound([shape for _, shape, *_ in placed])
+        bb = plate.BoundingBox()
 
-    # THE library deliverable is the merged STL. One file containing every part in
-    # its intended relative position, because the library chooses orientation and a
-    # single merged solid forces that choice to apply to all parts uniformly -- a
-    # blind comparison survives being rotated together, not part by part.
-    exporters.export(plate, str(OUT / "plate.stl"))
-    check_stl(OUT / "plate.stl", plate)
+        stem = f"plate-{gname}"
+        exporters.export(plate, str(OUT / f"{stem}.stl"))
+        check_stl(OUT / f"{stem}.stl", plate)
+        exporters.export(plate, str(OUT / f"{stem}.3mf"))
+        normalise_3mf(OUT / f"{stem}.3mf")
+        check_3mf(OUT / f"{stem}.3mf")
 
-    # The 3MF is ours, not the library's: it cannot open one. Kept because it is
-    # the format our own slicer previews use, and gated because it shipped broken.
-    exporters.export(plate, str(OUT / "plate.3mf"))
-    normalise_3mf(OUT / "plate.3mf")
-    check_3mf(OUT / "plate.3mf")
+        for name, shape, x, y, w, h in placed:
+            b = shape.BoundingBox()
+            rows.append({"plate": stem, "part": name, "x": round(b.xmin, 1),
+                         "y": round(b.ymin, 1), "w": round(w, 1),
+                         "h": round(h, 1), **meta.get(name, {})})
+        all_placed += placed
+        plates[stem] = {
+            "file": f"{stem}.stl",
+            "preview": f"{stem}.3mf",
+            "objects": len(placed),
+            "extent_mm": [round(bb.xlen, 1), round(bb.ylen, 1), round(bb.zmax, 1)],
+            "occupies_mm": [round(bb.xmin, 1), round(bb.ymin, 1),
+                            round(bb.xmax, 1), round(bb.ymax, 1)],
+            "clearance_mm": {
+                "min_x": round(bb.xmin, 1),
+                "min_y": round(bb.ymin, 1),
+                "max_x": round(BED_X - bb.xmax, 1),
+                "max_y": round(BED_Y - bb.ymax, 1),
+            },
+            "estimated_print_hours": round(print_time_hours(plate), 1),
+        }
 
-    pbb = plate.BoundingBox()
-    need_x, need_y = pbb.xmax + MARGIN, pbb.ymax + MARGIN
-    rows = []
-    for name, shape, x, y, w, h in placed:
-        b = shape.BoundingBox()
-        rows.append({"part": name, "x": round(b.xmin, 1), "y": round(b.ymin, 1),
-                     "w": round(w, 1), "h": round(h, 1), **meta.get(name, {})})
+    # The old single merged deliverable is gone with the machine that needed it.
+    for stale in ("plate.stl", "plate.3mf", "tpu-lip.stl"):
+        q = OUT / stale
+        if q.exists():
+            q.unlink()
 
     manifest = {
         "packet": "WP04-01", "work_packages": ["WP-04", "WP-24"],
-        "built": PACKET_RELEASE_DATE, "revision": 5,
+        "built": PACKET_RELEASE_DATE, "revision": PACKET_REVISION,
         "experiments": [
-            {"work_package": "WP-04", "parts": "carrier-*, hook-bar, test-frame",
+            {"work_package": "WP-04", "plate": "plate-wp04",
+             "parts": "carrier-*, hook-bar, test-frame",
              "swept_parameter": "hook_depth (mm)", "bracket_mm": [0.6, 2.1]},
-            {"work_package": "WP-24", "parts": "shell-base-*, shell-lid-*",
+            {"work_package": "WP-24", "plate": "plate-wp24",
+             "parts": "shell-base-*, shell-lid-*",
              "swept_parameter": "interference (mm)",
-             "bracket_mm": [min(shell.SWEEP_INTERFERENCE), max(shell.SWEEP_INTERFERENCE)]},
+             "bracket_mm": [min(shell.SWEEP_INTERFERENCE),
+                            max(shell.SWEEP_INTERFERENCE)]},
         ],
         "seed": SEED, "blind": True,
         "single_material": True,
-        "bed_mm": [BED_X, BED_Y],
-        "bed_source": "verified against the library machine, PM Decisions 007 §0",
+        "bed_mm": [BED_X, BED_Y, BED_Z],
+        "bed_source": BED_SOURCE,
+        "edge_clearance_mm": EDGE_CLEARANCE,
+        "max_object_height_mm": MAX_Z,
+        "printed": False,
+        "usable_area_proven": False,
         "duplicate_check": "parameter + label-suppressed mechanism",
-        "plate_extent_mm": [round(pbb.xmax, 1), round(pbb.ymax, 1)],
-        "minimum_bed_mm": [round(need_x), round(need_y)],
+        "plates": plates,
+        "matched_pairs_on_one_plate": True,
         "xml_valid": True,
         "stl_validated": True,
-        "library_deliverable": "plate.stl",
-        "estimated_print_hours": round(print_time_hours(plate), 1),
-        "library_job_limit_hours": MAX_JOB_HOURS,
         "print_settings_assumed": {
-            "material": "PLA", "layer_mm": 0.2, "nozzle_mm": 0.4,
+            "material": "PLA or PETG, recorded per job; PLA is the conservative "
+                        "case the analysis assumes",
+            "layer_mm": 0.2, "nozzle_mm": 0.4,
             "perimeters": 3, "infill_pct": 40,
-            "supports": "none required -- every overhang is <= 45 degrees by design",
-            "note": "Michael's answer to Q-006 (Decisions 002 §2).",
+            "supports": "OFF -- every overhang is <= 45 degrees by design, and "
+                        "support material in a carrier's relief slot destroys "
+                        "the property the sweep measures",
+            "orientation": "flat as laid out; all parts in one orientation",
         },
         "parts": rows,
     }
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
     lines = [
-        "# Plate map — packet WP04-01 (rev 5)", "",
-        "**Two experiments, one plate.** `carrier-*`, `hook-bar` and `test-frame` are the",
-        "WP-04 latch sweep. `shell-base-*` and `shell-lid-*` are the WP-24 cartridge clasp",
-        "sweep. They share a bed and nothing else.", "",
-        f"Fits a **{round(need_x)} × {round(need_y)} mm** bed. Laid out for "
-        f"{BED_X:.0f} × {BED_Y:.0f} mm — a Prusa Mini or Bambu A1 mini.", "",
-        "The letter is **not** related to hook depth; the mapping is in `manifest.json` and",
-        "deliberately not on the card.", "",
-        "| Part | X | Y | W | H |", "|---|---:|---:|---:|---:|",
+        f"# Plate map — packet WP04-01 (rev {PACKET_REVISION})", "",
+        "**Two plates, two experiments.** `plate-wp04` is the latch sweep:",
+        "`carrier-*`, `hook-bar`, `test-frame`. `plate-wp24` is the cartridge clasp",
+        "sweep: every `shell-base-*` **with its matching `shell-lid-*` in the same",
+        "job**, because a base and its lid are a matched pair and printing them",
+        "apart re-introduces the confound the per-base lids removed.", "",
+        f"Laid out for a **{BED_X:.0f} × {BED_Y:.0f} × {BED_Z:.0f} mm** nominal",
+        f"envelope with **{EDGE_CLEARANCE:.0f} mm clearance** from every edge and a",
+        f"**{MAX_Z:.0f} mm** height cap. The envelope is the machine's advertised",
+        "figure, not a measured usable area — nothing here has been printed.", "",
+        "The letter is **not** related to hook depth; the mapping is in",
+        "`manifest.json` and deliberately not on the card.", "",
+        "| Plate | Part | X | Y | W | H |", "|---|---|---:|---:|---:|---:|",
     ]
     for r in rows:
-        lines.append(f"| {r['part']} | {r['x']:.0f} | {r['y']:.0f} | "
+        lines.append(f"| {r['plate']} | {r['part']} | {r['x']:.0f} | {r['y']:.0f} | "
                      f"{r['w']:.0f} | {r['h']:.0f} |")
     lines += ["", "`D` and `H` are the same geometry as one of the lettered variants, placed",
               "apart on the bed. If they do not rank together, bed position is affecting the",
               "parts more than the swept parameter is, and the next sweep needs coarser steps."]
     (OUT / "plate-map.md").write_text("\n".join(lines) + "\n")
 
-    print(f"packet WP04-01 rev 5 -> {OUT}")
-    print(f"  {len(placed)} objects, all inside the bed")
-    print(f"  extent {pbb.xmax:.1f} x {pbb.ymax:.1f} mm; needs a bed of at least "
-          f"{round(need_x)} x {round(need_y)} mm")
-    hrs = print_time_hours(plate)
-    print(f"  estimated print time {hrs:.1f} h "
-          f"({'within' if hrs < MAX_JOB_HOURS else 'OVER'} the library's "
-          f"{MAX_JOB_HOURS:.0f} h limit)")
-    print(f"  library deliverable: plate.stl")
+    print(f"packet WP04-01 rev {PACKET_REVISION} -> {OUT}")
+    print(f"  {len(all_placed)} objects on {len(plates)} plates, all inside the "
+          f"usable area")
+    for stem, pl in plates.items():
+        c = pl["clearance_mm"]
+        print(f"  {stem}: {pl['objects']} objects, extent "
+              f"{pl['extent_mm'][0]:.1f} x {pl['extent_mm'][1]:.1f} x "
+              f"{pl['extent_mm'][2]:.1f} mm, clearance "
+              f"{min(c.values()):.1f} mm minimum, ~{pl['estimated_print_hours']:.1f} h")
+    print(f"  nominal bed {BED_X:.0f} x {BED_Y:.0f} x {BED_Z:.0f} mm, "
+          f"{EDGE_CLEARANCE:.0f} mm edge clearance, {MAX_Z:.0f} mm height cap")
+    print("  NOT printed, and the nominal envelope is not proof every edge is usable")
     return 0
 
 

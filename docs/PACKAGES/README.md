@@ -20,8 +20,12 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-01 | Repo, agent docs, decision log | Agent | — | Repo and restart agreement published; no independent package acceptance claimed |
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
+| WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. Independent method audit blocks a new run: schema 2 lacks ordered per-write primitives and strict validation. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
+=======
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | Rev-6 source packet reproducibly splits WP-24 and WP-04 onto two nominal-A1 plates with 5 mm XY margins; usable area/process and every physical result remain unproved, so printing is held |
 | WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. PR #87's repaired ordered schema-2 method awaits independent re-audit before acquisition. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
+>>>>>>> origin/main
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
@@ -67,10 +71,10 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-22 | Transport mechanism, production design | You | hardware | Blocked on WP-04 |
-| WP-23 | Enclosure CAD | Either | hardware | Not started |
-| WP-24 | Cartridge shell and carrier PCB | Either | hardware | **In flight** — clasp assessment delivered (ADR-117); variants share the WP04-01 plate |
-| WP-25 | Abuse testing | You | hardware | **In flight as a design input** — player-wide architecture and pre-test plan now precede final enclosure CAD; no physical acceptance yet |
+| WP-22 | Transport mechanism, production design | You | hardware | Blocked on WP-04. Ruggedization now constrains it: the transport wants rigid location, so drop energy must be absorbed before it reaches the latch (`spec/hw/ruggedization.md` §1) |
+| WP-23 | Enclosure CAD | Either | hardware | Not started — and now **gated behind the ruggedization architecture** by Guardrail 13: the load path and failure matrix come first (`spec/hw/ruggedization.md`) |
+| WP-24 | Cartridge shell and carrier PCB | Either | hardware | **In flight** — clasp assessment at `cartridge-shell.md` rev 0.3 (material premise corrected for the owned printer); variants share the held WP04-01 plate. S-3 stays a separate minimum |
+| WP-25 | Abuse testing | You | hardware | **In flight as a design input** — Hardware's architecture, 18-mode failure matrix and staged numeric protocol are proposed at `spec/hw/ruggedization.md` rev 0.1, awaiting PM approval and Verification review. No trial authorized, no physical acceptance |
 
 **Milestone:** a Teensy-based unit in a finished printed case. A reasonable place to stop.
 

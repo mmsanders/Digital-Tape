@@ -33,6 +33,12 @@ This is evidence hardening only — **no acceptance, no measurement, and no gate
 Run make -C hardware fabrication-gate before any fabrication/charging decision.
 Five blockers currently remain. Green regression/thermal checks are not qualification.
 
+**The spec/hw manifest gate now has retained controls of its own**
+(`hardware/test_spec_manifest.py`, run by `make -C hardware spec-check`). Adding
+`ruggedization.md` to the manifest was a hand edit to a tuple, and one deleted line would have
+put it back outside the gate while the gate still printed OK — demonstrated, then closed. Six
+controls, including the file-list check that catches exactly that deletion.
+
 Michael owns purchases and physical trials. The PNY cards and A1 Mini are purchased
 facts, not qualification or permission for another purchase. Old ~$115/$152 cart
 estimates are not current quotes or approvals. Active assignments live only in
