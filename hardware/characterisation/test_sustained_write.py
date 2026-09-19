@@ -21,6 +21,14 @@ No card, device or physical run is involved. The fixture is synthetic and the
 five submitted schema-1 files are never written to.
 
     python3 test_sustained_write.py
+
+P1-R21-V01 added a second requirement: a malformed record must be rejected BY
+REPORT, never by traceback. Each of the fifteen malformed forms the independent
+audit found accepted or crashing is reproduced here as its own control,
+asserting the message names the field it is about -- so none of them can pass
+because an unrelated check happened to fail on the same record. Each was
+confirmed red against the rejected head before being recorded green here.
+
 """
 
 from __future__ import annotations
@@ -610,6 +618,332 @@ def an_unreadable_record_fails() -> list[str]:
     return []
 
 
+# --- P1-R21-V01: the malformed forms the independent audit found open -------
+#
+# Verification generated a schema-2 fixture and mutated it one property at a
+# time. Thirteen malformed forms were ACCEPTED and one crashed the auditor with
+# an uncaught TypeError. Each of those forms is reproduced below as its own
+# retained control, and each asserts the message names the field it is about --
+# so a control cannot pass because some unrelated check happened to fail on the
+# same record.
+#
+# The crash matters separately from the acceptances: an audit that dies by
+# traceback has not reported anything, and a verifier cannot tell a crash from
+# a tool it invoked wrongly. Every form here must leave a problem report the
+# auditor owns.
+
+def _deep() -> dict:
+    """A fresh, clean fixture for each mutation; nothing leaks between them."""
+    return copy.deepcopy(good_record())
+
+
+def expect_controlled_red(name: str, rec: dict, marker: str) -> list[str]:
+    """Rejected by report, never by traceback, and the report must be specific."""
+    try:
+        a = audit_dict(rec)
+    except Exception as exc:                       # noqa: BLE001 -- that is the point
+        return [f"{name}: the audit raised {type(exc).__name__}: {exc} -- a "
+                f"malformed record must produce a problem report the auditor "
+                f"owns, not a traceback"]
+    if a.ok:
+        return [f"{name}: audit passed a record with the defect injected"]
+    if not any(marker in p for p in a.problems):
+        return [f"{name}: failed, but no problem mentions {marker!r}: "
+                f"{a.problems}"]
+    return []
+
+
+def the_closing_flush_interval_must_run_forwards() -> list[str]:
+    """A flush whose end precedes its start proves no ordered durability event."""
+    rec = _deep()
+    fs = rec["final_fsync"]
+    fs["t_start_monotonic_s"], fs["t_end_monotonic_s"] = \
+        fs["t_end_monotonic_s"], fs["t_start_monotonic_s"]
+    bad = expect_controlled_red("reversed closing fsync", rec,
+                                "before it starts")
+    # ... and the honest interval must still pass, or the check is just noise.
+    if not audit_dict(_deep()).ok:
+        bad.append("the unmutated fixture stopped passing")
+    return bad
+
+
+def the_closing_flush_object_is_closed() -> list[str]:
+    bad = []
+    rec = _deep()
+    del rec["final_fsync"]["error"]
+    bad += expect_controlled_red("final_fsync.error removed", rec,
+                                 "missing required field 'error'")
+    rec = _deep()
+    rec["final_fsync"]["duration_s"] = 0.01
+    bad += expect_controlled_red("unknown final_fsync member", rec,
+                                 "unknown field 'duration_s'")
+    rec = _deep()
+    rec["final_fsync"]["ok"] = True
+    rec["final_fsync"]["error"] = "ENOSPC"
+    bad += expect_controlled_red("fsync both ok and errored", rec,
+                                 "one of the two is untrue")
+    return bad
+
+
+def a_malformed_timestamp_is_reported_not_raised() -> list[str]:
+    """The exact crash in P1-R21-V01, plus the other timestamps it reaches."""
+    bad = []
+    rec = _deep()
+    rec["final_fsync"]["t_start_monotonic_s"] = "1000.0"
+    bad += expect_controlled_red("string final_fsync.t_start_monotonic_s", rec,
+                                 "final_fsync: t_start_monotonic_s")
+    rec = _deep()
+    rec["final_fsync"]["t_end_monotonic_s"] = None
+    bad += expect_controlled_red("null final_fsync.t_end_monotonic_s", rec,
+                                 "final_fsync: t_end_monotonic_s")
+    rec = _deep()
+    rec["t_last_monotonic_s"] = "later"
+    bad += expect_controlled_red("string top-level timestamp", rec,
+                                 "t_last_monotonic_s")
+    rec = _deep()
+    rec["windows"][2]["t_end_monotonic_s"] = "soon"
+    bad += expect_controlled_red("string window timestamp", rec,
+                                 "window 2: t_end_monotonic_s")
+    rec = _deep()
+    rec["windows"][2]["duration_s"] = float("nan")
+    bad += expect_controlled_red("NaN window duration", rec, "not finite")
+    rec = _deep()
+    rec["t_last_monotonic_s"] = float("inf")
+    bad += expect_controlled_red("infinite top-level timestamp", rec,
+                                 "not finite")
+    return bad
+
+
+def a_boolean_is_not_an_integer_identity() -> list[str]:
+    """`True == 1` in Python; it must not be 1 in a record that proves order.
+
+    The digest is rebound in each case, so nothing but the type check can be
+    what catches these.
+    """
+    bad = []
+    rec = _deep()
+    rec["write_trace"][0]["seq"] = False           # was 0
+    bad += expect_controlled_red("boolean write_trace.seq", rebind(rec),
+                                 "write call 0: seq")
+    rec = _deep()
+    rec["write_trace"][1]["window"] = True         # was 1
+    bad += expect_controlled_red("boolean write_trace.window", rebind(rec),
+                                 "write call 1: window")
+    rec = _deep()
+    rec["windows"][1]["index"] = True              # was 1
+    bad += expect_controlled_red("boolean window index", rec, "window 1: index")
+    rec = _deep()
+    rec["windows"][0]["short_writes"] = False      # was 0
+    bad += expect_controlled_red("boolean short_writes", rec,
+                                 "window 0: short_writes")
+    return bad
+
+
+def an_integral_float_is_not_an_integer_byte_count() -> list[str]:
+    """1.0 is not 1 for a byte count: it has been through a lossy path."""
+    bad = []
+    rec = _deep()
+    rec["windows"][1]["offset_start_bytes"] = float(
+        rec["windows"][1]["offset_start_bytes"])
+    bad += expect_controlled_red("float byte offset", rec,
+                                 "window 1: offset_start_bytes")
+    rec = _deep()
+    rec["returned_bytes_total"] = float(rec["returned_bytes_total"])
+    bad += expect_controlled_red("float byte total", rec,
+                                 "returned_bytes_total")
+    rec = _deep()
+    rec["windows"][0]["write_calls"] = 1.0
+    bad += expect_controlled_red("float call count", rec,
+                                 "window 0: write_calls")
+    rec = _deep()
+    rec["space_after_measurement"]["total_bytes"] = float(
+        rec["space_after_measurement"]["total_bytes"])
+    bad += expect_controlled_red("float capacity", rec,
+                                 "space_after_measurement: total_bytes")
+    rec = _deep()
+    rec["fill"]["before"]["used_bytes"] = 0.0
+    bad += expect_controlled_red("float capacity in fill.before", rec,
+                                 "fill.before: used_bytes")
+    rec = _deep()
+    rec["write_trace"][0]["returned_bytes"] = float(
+        rec["write_trace"][0]["returned_bytes"])
+    bad += expect_controlled_red("float in a write call", rebind(rec),
+                                 "write call 0: returned_bytes")
+    rec = _deep()
+    rec["final_size_bytes"] = -1
+    bad += expect_controlled_red("negative final size", rec,
+                                 "final_size_bytes is negative")
+    return bad
+
+
+def the_declared_window_size_must_match_the_windows() -> list[str]:
+    """`window_mb` was accepted while the retained windows contradicted it."""
+    bad = []
+    rec = _deep()
+    rec["window_mb"] = 32                          # the windows are 64 MB
+    bad += expect_controlled_red("false window_mb", rec, "window_mb")
+    rec = _deep()
+    rec["window_mb"] = 0
+    bad += expect_controlled_red("zero window_mb", rec, "not a positive size")
+    rec = _deep()
+    rec["windows"][2]["requested_bytes"] -= MB     # a SHORT window mid-run
+    rec["windows"][2]["returned_bytes"] -= MB
+    bad += expect_controlled_red("short window mid-run", rec,
+                                 "only the final window may be short")
+
+    # A genuinely short FINAL window is how every real run ends when the
+    # transfer is not a whole number of windows. The rule must not reject it,
+    # or it is stricter than the method and would fail an honest record.
+    rec = _deep()
+    trim = MB                                      # one whole MB, so transfer_mb stays exact
+    last, call = rec["windows"][-1], rec["write_trace"][-1]
+    last["requested_bytes"] -= trim
+    last["returned_bytes"] -= trim
+    last["offset_end_bytes"] -= trim
+    call["requested_bytes"] -= trim
+    call["returned_bytes"] -= trim
+    for key in ("requested_bytes_total", "returned_bytes_total",
+                "expected_final_size_bytes", "final_size_bytes"):
+        rec[key] -= trim
+    rec["transfer_mb"] -= 1
+    a = audit_dict(rebind(rec))
+    if not a.ok:
+        bad.append(f"a legitimately short FINAL window was rejected: "
+                   f"{a.problems}")
+    return bad
+
+
+def the_declared_criteria_must_be_the_methods() -> list[str]:
+    """A record that carries its own bar can otherwise move the bar."""
+    bad = []
+    for name, wrong in (("required_mb_s", 1.0),
+                        ("required_c90_mb_s", 1.0),
+                        ("bar_mb_s", 1.0)):
+        rec = _deep()
+        rec[name] = wrong
+        bad += expect_controlled_red(f"false {name}", rec, name)
+    # And the auditor's own constants must be the method's, restated here a
+    # third time rather than read back out of either module.
+    for name, want in (("REQUIRED_MB_S", 21.2), ("REQUIRED_C90_MB_S", 31.75),
+                       ("BAR_MB_S", 23.3)):
+        got = getattr(aud, name)
+        if got != want:
+            bad.append(f"the auditor's {name} is {got}, not the method's {want}")
+        if getattr(msw, name) != want:
+            bad.append(f"the tool's {name} is {getattr(msw, name)}, not {want}")
+    return bad
+
+
+def the_nested_capacity_objects_are_closed() -> list[str]:
+    bad = []
+    rec = _deep()
+    rec["fill"]["hurried"] = True
+    bad += expect_controlled_red("unknown fill member", rec,
+                                 "fill: unknown field 'hurried'")
+    rec = _deep()
+    rec["space_after_measurement"]["trimmed"] = False
+    bad += expect_controlled_red("unknown space member", rec,
+                                 "space_after_measurement: unknown field "
+                                 "'trimmed'")
+    rec = _deep()
+    rec["fill"]["after"]["headroom_bytes"] = 1
+    bad += expect_controlled_red("unknown fill.after member", rec,
+                                 "fill.after: unknown field 'headroom_bytes'")
+    rec = _deep()
+    del rec["fill"]["ballast_path"]
+    bad += expect_controlled_red("missing fill member", rec,
+                                 "fill: missing required field 'ballast_path'")
+    rec = _deep()
+    del rec["space_after_measurement"]["occupancy"]
+    bad += expect_controlled_red("missing capacity member", rec,
+                                 "space_after_measurement: missing required "
+                                 "field 'occupancy'")
+    rec = _deep()
+    rec["fill"]["performed"] = "yes"
+    bad += expect_controlled_red("non-boolean fill.performed", rec,
+                                 "fill: performed must be a boolean")
+    rec = _deep()
+    rec["fill"]["requested_fraction"] = 1.5
+    bad += expect_controlled_red("out-of-range fill fraction", rec,
+                                 "not a fraction in (0, 1]")
+    return bad
+
+
+def a_figure_that_cannot_be_measured_must_be_null() -> list[str]:
+    """A raw device has no filesystem accounting; inventing one is fabrication."""
+    rec = _deep()
+    rec["space_after_measurement"] = {
+        "applies": False, "reason": "raw block device: no filesystem accounting",
+        "total_bytes": 64 * 1000 * MB,
+        # fabricated: these cannot be measured on a block device
+        "free_bytes": 1, "used_bytes": 2, "occupancy": 0.5,
+    }
+    return expect_controlled_red("fabricated raw-device accounting", rec,
+                                 "must be null, not fabricated")
+
+
+def an_honest_raw_device_record_still_passes() -> list[str]:
+    """Closing a schema must not reject the records it exists to accept.
+
+    The raw-device branch is where the new null-rather-than-fabricated rule
+    bites, and it has no fixture of its own elsewhere in this suite. A check
+    that fails closed on legitimate input is as much a defect as one that
+    fails open on malformed input -- it just fails later, on a real card.
+    """
+    cap = 64 * 1000 * MB
+    raw_space = {"applies": False,
+                 "reason": "raw block device: no filesystem free/used accounting",
+                 "total_bytes": cap, "free_bytes": None, "used_bytes": None,
+                 "occupancy": None}
+    rec = _deep()
+    rec["target_kind"] = "raw-device"
+    rec["measurement_file_retained"] = False
+    rec["measurement_path"] = "/dev/sdb"
+    rec["final_size_bytes"] = cap
+    rec["space_after_measurement"] = copy.deepcopy(raw_space)
+    rec["fill"] = {"requested_fraction": 0.8, "performed": False,
+                   "reason": "raw block device: the whole device is written anyway",
+                   "before": copy.deepcopy(raw_space),
+                   "after": copy.deepcopy(raw_space),
+                   "ballast_bytes": 0, "ballast_path": None}
+    a = audit_dict(rec)
+    if not a.ok:
+        return [f"a legitimate raw-device record was rejected: {a.problems}"]
+    return []
+
+
+def every_p1_r21_form_is_covered_and_none_of_them_crash() -> list[str]:
+    """The finding's own list, checked as a list rather than as prose.
+
+    If a later round deletes one of the controls above, this goes red naming
+    the form that stopped being covered.
+    """
+    required = {
+        "reversed closing fsync": the_closing_flush_interval_must_run_forwards,
+        "final_fsync.error removed": the_closing_flush_object_is_closed,
+        "unknown final_fsync member": the_closing_flush_object_is_closed,
+        "string final_fsync.t_start_monotonic_s":
+            a_malformed_timestamp_is_reported_not_raised,
+        "boolean write_trace.seq": a_boolean_is_not_an_integer_identity,
+        "boolean window index": a_boolean_is_not_an_integer_identity,
+        "float byte offset": an_integral_float_is_not_an_integer_byte_count,
+        "float byte total": an_integral_float_is_not_an_integer_byte_count,
+        "float capacity": an_integral_float_is_not_an_integer_byte_count,
+        "false window_mb": the_declared_window_size_must_match_the_windows,
+        "false required_mb_s": the_declared_criteria_must_be_the_methods,
+        "false required_c90_mb_s": the_declared_criteria_must_be_the_methods,
+        "false bar_mb_s": the_declared_criteria_must_be_the_methods,
+        "unknown fill member": the_nested_capacity_objects_are_closed,
+        "unknown space member": the_nested_capacity_objects_are_closed,
+    }
+    bad = []
+    for form, control in sorted(required.items()):
+        if control not in CONTROLS:
+            bad.append(f"{form!r} is covered by {control.__name__}, which is "
+                       f"no longer in the retained suite")
+    return bad
+
+
 CONTROLS = (
     the_good_fixture_passes,
     short_writes_are_looped_not_assumed,
@@ -626,6 +960,17 @@ CONTROLS = (
     summary_tampering_is_caught_in_legacy_records,
     every_adjacent_pair_is_what_is_computed,
     an_unreadable_record_fails,
+    the_closing_flush_interval_must_run_forwards,
+    the_closing_flush_object_is_closed,
+    a_malformed_timestamp_is_reported_not_raised,
+    a_boolean_is_not_an_integer_identity,
+    an_integral_float_is_not_an_integer_byte_count,
+    the_declared_window_size_must_match_the_windows,
+    the_declared_criteria_must_be_the_methods,
+    the_nested_capacity_objects_are_closed,
+    a_figure_that_cannot_be_measured_must_be_null,
+    an_honest_raw_device_record_still_passes,
+    every_p1_r21_form_is_covered_and_none_of_them_crash,
 )
 
 
@@ -638,11 +983,16 @@ def main() -> int:
         for f in failures:
             print(f"FAIL sustained-write control: {f}", file=sys.stderr)
         return 1
+    nested = (len(aud.S2_FSYNC_REQUIRED) + len(aud.S2_FILL_REQUIRED)
+              + len(aud.S2_SPACE_REQUIRED) + len(aud.S2_WINDOW_REQUIRED)
+              + len(aud.S2_CALL_REQUIRED))
     print(f"OK  sustained-write: {len(CONTROLS)} retained controls pass over "
-          f"{len(aud.S2_REQUIRED)} required schema-2 fields; the write-call "
-          f"trace, window order and offsets, timing and the closing flush, "
-          f"totals and final size, capacity accounting, target branch, schema "
-          f"closure, false summaries and legacy tampering all go red")
+          f"{len(aud.S2_REQUIRED)} required schema-2 fields and {nested} "
+          f"nested ones; the write-call trace, window order and offsets, "
+          f"timing and the closing flush, totals and final size, capacity "
+          f"accounting, target branch, schema closure, false summaries and "
+          f"legacy tampering all go red, and every P1-R21-V01 malformed form "
+          f"is rejected by report rather than by traceback")
     return 0
 
 

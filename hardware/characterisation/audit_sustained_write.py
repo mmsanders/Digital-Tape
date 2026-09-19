@@ -27,6 +27,21 @@ Two schemas exist and the difference is stated, never blurred:
             So a schema-1 record audits as LEGACY and is reported as incomplete
             WP-05 A-2 evidence however clean its arithmetic is.
 
+P1-R21-V01 rejected the previous head for the other half of that distrust: the
+top level was closed but the nested objects were not, and the primitive types
+were not enforced. Thirteen malformed records were accepted -- a closing flush
+running backwards, a removed `final_fsync.error`, unknown members inside
+`final_fsync`, `fill` and `space_after_measurement`, Boolean sequence and window
+identities passing as their integer equivalents, integral floats passing for
+byte and capacity counts, and declared `window_mb`/criterion metadata nobody
+checked -- and a string timestamp ended the audit in a traceback rather than a
+report. So: every nested object is closed, every byte, count and identity field
+must be an exact integer, every timestamp must be finite, the closing flush must
+run forwards inside the measured span, and the declared metadata is checked
+against the retained primitives and against this module's own restated
+criterion. Types are settled before the first comparison, because a malformed
+record must leave with a problem report the auditor owns.
+
     python3 audit_sustained_write.py FILE [FILE...]      exit 1 on any problem
 """
 
@@ -42,8 +57,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 BYTES_PER_MB = 1_000_000
+# Restated here, not imported from the tool: an auditor that reads its
+# criterion out of the thing it audits checks nothing. A C-60 is
+# 60 x 60 x 44100 x 4 = 635,040,000 B, which over 30 s is 21.168 MB/s, declared
+# 21.2. A C-90 is 952,560,000 B, 31.752 MB/s, declared 31.75 and reported only
+# -- C-90 is not open (ADR-018). The bar is 10% over the C-60 requirement.
 REQUIRED_MB_S = 21.2
+REQUIRED_C90_MB_S = 31.75
 BAR_MB_S = 23.3
+CRITERION_EPS = 1e-9     # a declared criterion must BE the method's, not near it
 
 # Tolerances. Each is a rounding or timer-resolution allowance, not a fudge.
 TIME_EPS_S = 1e-6        # duration vs (t_end - t_start): float representation
@@ -142,6 +164,38 @@ S2_WINDOW_REQUIRED = {
 }
 S2_CALL_REQUIRED = {"seq", "window", "offset_bytes", "requested_bytes",
                     "returned_bytes"}
+# The nested objects are closed too. P1-R21-V01 found every one of these open:
+# removing `final_fsync.error`, adding an unknown member to `final_fsync`, `fill`
+# or `space_after_measurement`, all passed. A schema that is closed at the top
+# and open one level down is not a closed schema.
+S2_FSYNC_REQUIRED = {"attempted", "ok", "error", "t_start_monotonic_s",
+                     "t_end_monotonic_s"}
+S2_SPACE_REQUIRED = {"applies", "reason", "total_bytes", "free_bytes",
+                     "used_bytes", "occupancy"}
+S2_FILL_REQUIRED = {"requested_fraction", "performed", "reason", "before",
+                    "after", "ballast_bytes", "ballast_path"}
+
+# Fields that must be EXACT integers. An integral-valued float is not one: a
+# byte count that arrives as 1.0 has been through an arithmetic path that does
+# not preserve byte identity, and the record exists to prove byte identity.
+S2_INT_FIELDS = ("transfer_mb", "window_mb", "bytes_per_mb",
+                 "requested_bytes_total", "returned_bytes_total",
+                 "expected_final_size_bytes", "final_size_bytes")
+S2_WINDOW_INT_FIELDS = ("index", "offset_start_bytes", "offset_end_bytes",
+                        "requested_bytes", "returned_bytes", "write_calls",
+                        "short_writes")
+S2_CALL_INT_FIELDS = ("seq", "window", "offset_bytes", "requested_bytes",
+                      "returned_bytes")
+S2_SPACE_INT_FIELDS = ("total_bytes", "free_bytes", "used_bytes")
+
+# Fields that must be finite real numbers. Monotonic clocks and derived
+# durations; NaN and infinity compare in ways that silently satisfy bounds.
+S2_FLOAT_FIELDS = ("t_first_monotonic_s", "t_last_monotonic_s", "elapsed_s",
+                   "required_mb_s", "required_c90_mb_s", "bar_mb_s")
+S2_WINDOW_FLOAT_FIELDS = ("t_start_monotonic_s", "t_end_monotonic_s",
+                          "duration_s")
+S2_FSYNC_FLOAT_FIELDS = ("t_start_monotonic_s", "t_end_monotonic_s")
+
 S2_TARGET_KINDS = {"mounted-filesystem", "raw-device"}
 # Schema 2 stores primitives. A summary in the file is not authoritative and is
 # not quietly ignored: it is a contradiction and the record is rejected.
@@ -151,6 +205,250 @@ S2_FORBIDDEN = {"worst_window_mb_s", "mean_mb_s", "median_mb_s", "p05_mb_s",
 
 def _num(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _int(v) -> bool:
+    """An exact integer. `True` is not 1 and `1.0` is not 1."""
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _want_int(a: "Audit", where: str, name: str, v, *, nonneg: bool = True) -> int:
+    """Report and count, rather than raise, on anything that is not an integer."""
+    if isinstance(v, bool):
+        a.problems.append(
+            f"{where}{name} is the boolean {v!r}; a byte, count or identity "
+            f"field must be an exact integer, and True is not 1 here")
+    elif not isinstance(v, int):
+        a.problems.append(
+            f"{where}{name} is {type(v).__name__} {v!r}; an exact integer is "
+            f"required -- an integral-valued float is not an integer byte, "
+            f"count or capacity value")
+    elif nonneg and v < 0:
+        a.problems.append(f"{where}{name} is negative ({v})")
+    else:
+        return 0
+    return 1
+
+
+def _want_finite(a: "Audit", where: str, name: str, v) -> int:
+    """A finite real number. NaN and infinity satisfy bounds they should not."""
+    if not _num(v):
+        a.problems.append(
+            f"{where}{name} is {type(v).__name__} {v!r}; a finite number is "
+            f"required, and a malformed value must be rejected here rather "
+            f"than raise when it is first compared")
+    elif not math.isfinite(v):
+        a.problems.append(f"{where}{name} is {v!r}, which is not finite")
+    else:
+        return 0
+    return 1
+
+
+def _want_bool(a: "Audit", where: str, name: str, v) -> int:
+    if not isinstance(v, bool):
+        a.problems.append(f"{where}{name} must be a boolean, not "
+                          f"{type(v).__name__} {v!r}")
+        return 1
+    return 0
+
+
+def _want_str_or_none(a: "Audit", where: str, name: str, v) -> int:
+    if v is not None and not isinstance(v, str):
+        a.problems.append(f"{where}{name} must be a string or null, not "
+                          f"{type(v).__name__} {v!r}")
+        return 1
+    return 0
+
+
+def _closed(a: "Audit", where: str, obj, required: set) -> int:
+    """Present, a mapping, and neither missing nor carrying unknown members."""
+    if not isinstance(obj, dict):
+        a.problems.append(f"{where.rstrip(': ')} is {type(obj).__name__}, not "
+                          f"an object")
+        return 1
+    bad = 0
+    for missing in sorted(required - set(obj)):
+        a.problems.append(f"{where}missing required field {missing!r}")
+        bad += 1
+    for unknown in sorted(set(obj) - required):
+        a.problems.append(f"{where}unknown field {unknown!r} in a closed schema")
+        bad += 1
+    return bad
+
+
+def _audit_space_shape(a: "Audit", where: str, sp) -> int:
+    """One capacity object: closed, and typed by its own `applies` branch."""
+    bad = _closed(a, where, sp, S2_SPACE_REQUIRED)
+    if bad:
+        return bad
+    if _want_bool(a, where, "applies", sp["applies"]):
+        return 1
+    bad += _want_int(a, where, "total_bytes", sp["total_bytes"])
+    if sp["applies"]:
+        # A filesystem: every figure is measured, and `reason` is not needed.
+        for name in ("free_bytes", "used_bytes"):
+            bad += _want_int(a, where, name, sp[name])
+        bad += _want_finite(a, where, "occupancy", sp["occupancy"])
+        if sp["reason"] is not None:
+            a.problems.append(
+                f"{where}applies is true but a reason is given ({sp['reason']!r}); "
+                f"a reason explains why accounting does NOT apply")
+            bad += 1
+    else:
+        # A raw device: the rest must be absent, not invented (P1-R18 A item 4).
+        for name in ("free_bytes", "used_bytes", "occupancy"):
+            if sp[name] is not None:
+                a.problems.append(
+                    f"{where}{name} is {sp[name]!r}, but filesystem accounting "
+                    f"does not apply here -- a figure that cannot be measured "
+                    f"must be null, not fabricated")
+                bad += 1
+        if not (isinstance(sp["reason"], str) and sp["reason"].strip()):
+            a.problems.append(f"{where}accounting is inapplicable with no "
+                              f"reason given")
+            bad += 1
+    return bad
+
+
+def _audit_shapes(rec: dict, a: "Audit") -> int:
+    """Nested closure and primitive types, before any value is compared.
+
+    P1-R21-V01 found a malformed `final_fsync.t_start_monotonic_s` terminating
+    the audit by traceback. A malformed record must leave with a problem report
+    the verifier owns, so every type is settled here -- before the first
+    comparison that could raise on it.
+
+    Returns the number of findings, so an unrelated failure elsewhere can never
+    suppress or be mistaken for one of these.
+    """
+    bad = 0
+    for name in S2_INT_FIELDS:
+        bad += _want_int(a, "", name, rec[name])
+    for name in S2_FLOAT_FIELDS:
+        bad += _want_finite(a, "", name, rec[name])
+    bad += _want_bool(a, "", "measurement_file_retained",
+                      rec["measurement_file_retained"])
+    if not _int(rec["schema_version"]):
+        a.problems.append(f"schema_version is not an integer: "
+                          f"{rec['schema_version']!r}")
+        bad += 1
+    for name in ("target_kind", "measurement_path", "write_trace_sha256"):
+        if not isinstance(rec[name], str):
+            a.problems.append(f"{name} must be a string, not "
+                              f"{type(rec[name]).__name__} {rec[name]!r}")
+            bad += 1
+
+    # --- the closing flush ---------------------------------------------------
+    fs_bad = _closed(a, "final_fsync: ", rec["final_fsync"], S2_FSYNC_REQUIRED)
+    bad += fs_bad
+    if not fs_bad:
+        fs = rec["final_fsync"]
+        for name in ("attempted", "ok"):
+            bad += _want_bool(a, "final_fsync: ", name, fs[name])
+        bad += _want_str_or_none(a, "final_fsync: ", "error", fs["error"])
+        t_bad = sum(_want_finite(a, "final_fsync: ", name, fs[name])
+                    for name in S2_FSYNC_FLOAT_FIELDS)
+        bad += t_bad
+        if not t_bad and fs["t_end_monotonic_s"] < fs["t_start_monotonic_s"]:
+            a.problems.append(
+                f"final_fsync ends at {fs['t_end_monotonic_s']}, before it "
+                f"starts at {fs['t_start_monotonic_s']} -- a flush interval "
+                f"that runs backwards does not establish that the last "
+                f"durability event was observed in order")
+            bad += 1
+
+    # --- windows and the call trace -----------------------------------------
+    if not isinstance(rec["windows"], list):
+        a.problems.append("windows is not a list")
+        bad += 1
+    else:
+        for i, w in enumerate(rec["windows"]):
+            where = f"window {i}: "
+            w_bad = _closed(a, where, w, S2_WINDOW_REQUIRED)
+            bad += w_bad
+            if w_bad:
+                continue
+            for name in S2_WINDOW_INT_FIELDS:
+                bad += _want_int(a, where, name, w[name])
+            for name in S2_WINDOW_FLOAT_FIELDS:
+                bad += _want_finite(a, where, name, w[name])
+            bad += _want_bool(a, where, "fsync_ok", w["fsync_ok"])
+            bad += _want_str_or_none(a, where, "sync_error", w["sync_error"])
+
+    if not isinstance(rec["write_trace"], list):
+        a.problems.append("write_trace is not a list")
+        bad += 1
+    else:
+        for i, c in enumerate(rec["write_trace"]):
+            where = f"write call {i}: "
+            c_bad = _closed(a, where, c, S2_CALL_REQUIRED)
+            bad += c_bad
+            if c_bad:
+                continue
+            for name in S2_CALL_INT_FIELDS:
+                bad += _want_int(a, where, name, c[name])
+
+    # --- fill and the capacity objects --------------------------------------
+    fill_bad = _closed(a, "fill: ", rec["fill"], S2_FILL_REQUIRED)
+    bad += fill_bad
+    if not fill_bad:
+        fill = rec["fill"]
+        bad += _want_bool(a, "fill: ", "performed", fill["performed"])
+        bad += _want_str_or_none(a, "fill: ", "reason", fill["reason"])
+        bad += _want_str_or_none(a, "fill: ", "ballast_path", fill["ballast_path"])
+        bad += _want_int(a, "fill: ", "ballast_bytes", fill["ballast_bytes"])
+        if fill["requested_fraction"] is not None:
+            if _want_finite(a, "fill: ", "requested_fraction",
+                            fill["requested_fraction"]):
+                bad += 1
+            elif not 0.0 < fill["requested_fraction"] <= 1.0:
+                a.problems.append(
+                    f"fill: requested_fraction {fill['requested_fraction']} is "
+                    f"not a fraction in (0, 1]")
+                bad += 1
+        bad += _audit_space_shape(a, "fill.before: ", fill["before"])
+        bad += _audit_space_shape(a, "fill.after: ", fill["after"])
+    bad += _audit_space_shape(a, "space_after_measurement: ",
+                              rec["space_after_measurement"])
+    return bad
+
+
+def _audit_declared(rec: dict, windows: list, a: "Audit") -> None:
+    """The declared metadata, against the retained primitives and the method.
+
+    P1-R21-V01: `window_mb` was accepted while the retained windows contradicted
+    it, and the three criterion figures were accepted at any value at all. A
+    declared number nobody checks is decoration on a safety record.
+    """
+    mb_unit = rec["bytes_per_mb"]
+    win_mb = rec["window_mb"]
+    if win_mb <= 0:
+        a.problems.append(f"window_mb {win_mb} is not a positive size")
+    else:
+        want = win_mb * mb_unit
+        for i, w in enumerate(windows):
+            req = w["requested_bytes"]
+            last = i == len(windows) - 1
+            if req > want:
+                a.problems.append(
+                    f"window {i} requested {req} bytes, more than the declared "
+                    f"window_mb ({win_mb} x {mb_unit} = {want})")
+            elif not last and req != want:
+                a.problems.append(
+                    f"window {i} requested {req} bytes, not the declared "
+                    f"window_mb ({win_mb} x {mb_unit} = {want}); only the final "
+                    f"window may be short")
+            elif last and req <= 0:
+                a.problems.append(f"window {i} requested {req} bytes")
+
+    for name, want_v in (("required_mb_s", REQUIRED_MB_S),
+                         ("required_c90_mb_s", REQUIRED_C90_MB_S),
+                         ("bar_mb_s", BAR_MB_S)):
+        if not _close(rec[name], want_v, CRITERION_EPS):
+            a.problems.append(
+                f"declared {name} {rec[name]} is not the method's {want_v}; a "
+                f"record that carries its own criterion can otherwise move the "
+                f"bar it is judged against")
 
 
 def audit_schema2(rec: dict, a: Audit) -> None:
@@ -166,6 +464,14 @@ def audit_schema2(rec: dict, a: Audit) -> None:
         a.problems.append(f"unknown field {unknown!r} in a closed schema")
     if a.problems:
         return            # nothing below can be trusted on an unsound record
+
+    # --- shapes and primitive types, before any value is compared -----------
+    # Everything after this line compares, sums and divides. A malformed type
+    # reaching those comparisons is how P1-R21-V01 terminated the audit by
+    # traceback instead of by a problem report, so types are settled first and
+    # a typed record is the only kind that gets further.
+    if _audit_shapes(rec, a):
+        return
 
     kind = rec["target_kind"]
     if kind not in S2_TARGET_KINDS:
@@ -188,28 +494,11 @@ def audit_schema2(rec: dict, a: Audit) -> None:
     prev_end_t = None
     for i, w in enumerate(windows):
         where = f"window {i}"
-        for missing in sorted(S2_WINDOW_REQUIRED - set(w)):
-            a.problems.append(f"{where}: missing required field {missing!r}")
-        for unknown in sorted(set(w) - S2_WINDOW_REQUIRED):
-            a.problems.append(f"{where}: unknown field {unknown!r}")
-        if not S2_WINDOW_REQUIRED <= set(w):
-            continue
+        # Closure and types are already settled by _audit_shapes; what is left
+        # here is what the numbers say.
         if w["index"] != i:
             a.problems.append(
                 f"{where}: index {w['index']} is out of order or duplicated")
-        for f in ("offset_start_bytes", "offset_end_bytes", "requested_bytes",
-                  "returned_bytes", "write_calls", "short_writes",
-                  "t_start_monotonic_s", "t_end_monotonic_s", "duration_s"):
-            if not _num(w[f]):
-                a.problems.append(f"{where}: {f} is not a number: {w[f]!r}")
-        if not isinstance(w["fsync_ok"], bool):
-            a.problems.append(f"{where}: fsync_ok must be a boolean, not "
-                              f"{w['fsync_ok']!r} -- a missing flush result "
-                              f"must not read as success")
-        if not S2_WINDOW_REQUIRED <= set(w) or any(
-                not _num(w[f]) for f in ("offset_start_bytes", "returned_bytes",
-                                         "duration_s")):
-            continue
 
         want_start = 0 if i == 0 else windows[i - 1].get("offset_end_bytes")
         if w["offset_start_bytes"] != want_start:
@@ -251,6 +540,9 @@ def audit_schema2(rec: dict, a: Audit) -> None:
         rates.append((w["returned_bytes"] / mb_unit) / span)
         byts.append(w["returned_bytes"])
         durs.append(span)
+
+    # --- the declared metadata, against those same primitives ---------------
+    _audit_declared(rec, windows, a)
 
     # --- the write-call trace: prove it, do not believe it -------------------
     _audit_trace(rec, windows, a)
@@ -320,14 +612,15 @@ def audit_schema2(rec: dict, a: Audit) -> None:
                 f"window durations sum to {sum(durs):.3f} s, more than the "
                 f"{span:.3f} s the run took")
         fs = rec["final_fsync"]
-        if not isinstance(fs, dict) or not {"attempted", "ok", "t_start_monotonic_s",
-                                            "t_end_monotonic_s"} <= set(fs):
-            a.problems.append("final_fsync is missing its required fields")
-        elif fs.get("attempted") is not True:
+        if fs["attempted"] is not True:
             a.problems.append("no closing fsync was attempted, so the run does "
                               "not establish the data reached the device")
-        elif fs.get("ok") is not True:
-            a.problems.append(f"the closing fsync failed: {fs.get('error')}")
+        elif fs["ok"] is not True:
+            a.problems.append(f"the closing fsync failed: {fs['error']}")
+        elif fs["ok"] and fs["error"] is not None:
+            a.problems.append(
+                f"the closing fsync reports success and an error "
+                f"({fs['error']!r}); one of the two is untrue")
         elif not (t_first <= fs["t_start_monotonic_s"]
                   and fs["t_end_monotonic_s"] <= t_last + TIME_EPS_S):
             a.problems.append(

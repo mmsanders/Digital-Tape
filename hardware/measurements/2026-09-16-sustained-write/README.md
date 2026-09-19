@@ -331,7 +331,7 @@ does not exist as a Git object. The authenticated ancestor is
 **`c0e6a83ae44c2370288594b75915a214ba25deb7`**, tree `4421e11258690936f02734c176589ff0c3dad826`,
 and the five legacy files are byte-identical from it through every head since.
 
-**Retained controls:** `characterisation/test_sustained_write.py`, run by
+**Retained controls at that round:** `characterisation/test_sustained_write.py`, run by
 `make -C hardware card-test`. Eleven controls, each injecting the defect it claims to catch:
 short writes (in the tool, against an injected partial writer, and in the record), a stalled
 writer, duration and timestamp corruption, window ordering, byte-count and final-size mismatch,
@@ -340,6 +340,54 @@ a deleted measurement file, a false occupancy, an unmeasured occupancy, legacy s
 distinction. Each targeted failure is also required to survive an unrelated failure being
 present, so a control cannot pass by firing on everything.
 
+### The second repair after independent audit (P1-R21-V01)
+
+Verification re-audited the method at head `10471f37f432c44d6f5beac59d25b3771e057c38` and
+**rejected it again**. The earlier ordered-trace defects were confirmed repaired and all
+thirteen prior mutations confirmed rejected — but a new adversarial corpus found the schema
+closed only at the top level, and the primitive types not enforced at all. **Thirteen malformed
+records were accepted and one crashed the auditor.**
+
+- **The nested objects were open.** Removing `final_fsync.error`, or adding an unknown member
+  to `final_fsync`, `fill` or `space_after_measurement`, all passed. A schema closed at the top
+  and open one level down is not a closed schema.
+- **The types were not enforced.** In Python `True == 1`, so a Boolean `write_trace.seq` or
+  window `index` passed as its integer equivalent — defeating the identity typing the trace
+  exists to provide. Integral-valued floats passed for byte offsets, byte counts and capacity
+  counts; a byte count that arrives as `1.0` has been through a path that does not preserve
+  byte identity, which is the one thing the record is for.
+- **The closing flush could run backwards.** A `final_fsync` whose end timestamp preceded its
+  start was accepted. Containment inside the measured span was checked; ordering was not. A
+  reversed interval does not establish that the last durability event was observed in order.
+- **A malformed timestamp ended the audit in a traceback.** A string
+  `final_fsync.t_start_monotonic_s` raised an uncaught `TypeError`. An audit that dies by
+  traceback has reported nothing, and a verifier cannot distinguish that from a tool invoked
+  wrongly.
+- **The declared metadata was decoration.** A false `window_mb` was accepted while the retained
+  windows contradicted it, and `required_mb_s`, `required_c90_mb_s` and `bar_mb_s` were accepted
+  at any value — so a record could carry, and move, the bar it is judged against.
+
+**What the auditor now does.** Every nested object is closed with its own required-field set.
+Every byte, count, capacity and identity field must be an **exact integer** — not a Boolean,
+not an integral float — and must be non-negative. Every timestamp and duration must be a
+**finite** number. The closing flush must run forwards and lie inside the measured span, and it
+may not report success and an error at once. Types are settled in a single pass **before the
+first comparison**, so a malformed record leaves with a problem report the auditor owns rather
+than a traceback. `window_mb` is checked against the retained windows — every window but the
+last must be exactly that size, and the last may only be shorter — and the three criterion
+figures are checked against this module's **own restated** constants, derived from the tape
+rather than read back out of the tool. A figure that cannot be measured, such as filesystem
+accounting on a raw block device, must be null rather than fabricated.
+
+**All fifteen malformed forms now go red**, each naming the field it is about, and each was
+confirmed accepted-or-crashing against the rejected head before being recorded green here. The
+retained suite is now **25 controls** over 30 top-level and 35 nested schema-2 fields, and a
+coverage registry goes red if any of the fifteen forms loses its control.
+
+**Still not evidence.** No schema-2 record exists, no physical run has occurred, and this repair
+promotes no stored result. Closing a method is not qualifying a card.
+
 **No rerun is requested.** The tool is ready and the audit path is exercised against synthetic
 fixtures; whether and when to ask Michael for another session is PM's call, and the identity
-items in §12 should be collected first since they cost nothing and gate A-6.
+items in §12 should be collected first since they cost nothing and gate A-6. Independent
+Verification owns a fresh method audit of the repaired head before any acquisition.
