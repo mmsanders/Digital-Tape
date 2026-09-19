@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current clean integration boundary — 18 September 2026
+## Current clean integration boundary — 19 September 2026
 
 PR #77 is merged at product main
 `4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
@@ -10,11 +10,13 @@ complete WP-06/WP-08, listening, WP-11 goldens or a package. Held PR #20/#64 are
 not ancestors, and uncovered allocator/recording/crash/warm/state/operation and
 performance behaviour was not imported.
 
-The hardened VT8-001 verifier tree remains test-first and unchanged. Its public
-header and adapter now compile against main because `tape_seek` and playback
-`tape_service` exist, but `tape_arm`, `tape_feed`, `tape_commit` and
-`tape_reset_side_b` remain undefined. Therefore neither VT8-001 case has executed
-against the real engine and no allocator/all-slot sequence observation is accepted.
+The product's imported VT8-001 verifier tree is now superseded by corrected complete
+verifier tree `3667a2830ba80dbcedad03b97870d1127001ab59` at verifier main
+`15dd16eb499f5c148bff7c5b4b67ff75ae7a0f32`. It corrects frozen 60-second geometry
+and binds adapter exit state into retained evidence and replay. Software must import
+that exact tree test-first before rerunning the unchanged held PR #96 product adapter.
+Neither the corrected package nor a future green run accepts allocator/all-slot
+behavior or the package.
 Current work directions live only in role-labeled issues.
 
 ## Imported mount tranche — 7 September 2026
@@ -559,3 +561,26 @@ rejection before any write. The runner also records nonzero adapter failure outs
 the result that offline replay recomputes, so the retained failing bundle cannot close
 under replay. Verification owns a blind, source-before-evidence correction of both
 defects and stops before product import/run. PR #96 and all existing holds remain.
+
+## P1-R19 corrected VT8 publication — 19 September 2026 UTC
+
+Verification #14 published corrected source first at
+`eb5d7867c604b2c8a07e05597b8b9f07071b539e`, then retained evidence and findings at
+verifier main `15dd16eb499f5c148bff7c5b4b67ff75ae7a0f32`. The corrected source
+operations tree is `12d2a95e879dd0b7b891387ebdc166f0be0c854e`; the complete published
+subtree is `3667a2830ba80dbcedad03b97870d1127001ab59`.
+
+PM reproduced self-test, exact replay of both saved P1-R18 synthetic cases and the
+full verifier suite. Geometry now derives 21 chunks for 60 seconds at 44,100 Hz and a
+23,553-block device, reserving chunk blocks `[2048, 23552)` and final block 23,552.
+Generator-side mismatch and undersized-media controls go red. `VT8-EVIDENCE-2` and
+manifest-bound `VT8-ADAPTER-STATUS-1` make nonzero adapter exit a retained per-case
+failure that replay reproduces exactly; missing, tampered and relabeled status controls
+also go red.
+
+This closes the verifier-package defects only. Software must import the entire complete
+tree, including retained earlier and current synthetic evidence, with exact modes and
+tree identity before changing or running the held product branch. The subsequent run
+must use the unchanged product adapter and held engine/header blobs, retain fresh
+manifest-bound evidence and stop for PM authentication plus a new blind Verification
+disposition. Structural Rule 1 and every existing product hold remain.

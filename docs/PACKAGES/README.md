@@ -32,7 +32,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean PR #77 slice merged with evidence history intact. Exact 289/289 mount observations, including row 3, are independently accepted; source/helper design and the incomplete package remain held |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact hardened VT8 tree integrated, but both fixtures are frozen-geometry-invalid and replay omits runner-level failure state. Verification correction precedes any held PR #96 rerun; complete product and acceptance remain held |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Corrected complete verifier tree `3667a28...` is authenticated but awaits exact product import before an unchanged held PR #96 rerun; complete product and acceptance remain held |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Clean observed slice merged. Exact ten corrected-cadence product observations are independently accepted, including 698/698 per-render service in each direction. Source, complete package and listening/goldens remain separate |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
