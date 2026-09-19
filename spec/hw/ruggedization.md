@@ -1,12 +1,36 @@
 # Ruggedization — shock and load path, failure modes, and the staged abuse protocol
 
 **Owner:** Hardware Lead · **Consumed by:** WP-25, WP-23, WP-22, WP-24 · **Status:** proposal
-**Revision:** 0.3, 19 September 2026 · **Answers:** Guardrail 13, `docs/PACKAGES/WP-25.md`,
-and Verification findings P1-R17-V-B01..B05, B04 closed as far as the sources are reachable
+**Revision:** 0.4, 19 September 2026 · **Answers:** Guardrail 13, `docs/PACKAGES/WP-25.md`,
+Verification P1-R17-V-B01..B05, and the P1-R20 assignment
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.4 — 2026-09-19
+**What P1-R20 asked for, and what this environment allowed.** The round asked for direct
+primary-source transcription to replace the secondary rendering. **Every named source was
+retried and every one is still refused** — `ecfr.gov` and all three `img.federalregister.gov`
+figures answer 403 at the egress gateway, by direct fetch and by the harness fetch tool. So
+**primary-source transcription is not achieved**, the record says so in the generated block,
+and a retained control fails if that statement is ever removed.
+
+What did change:
+
+- **Probe B is dimensioned** (a..g) from the assignment, which cites the figure. The provenance
+  says "via the assignment" on every one of the seven, and CS-1 stays open: a probe built to
+  these numbers is dimensioned, not verified, and should be checked against the drawing by
+  someone who can open it.
+- **The use-and-abuse conditions for the seven-year band are recorded** — 1500.50's impact
+  medium and 1500.53's drop, torque, tension and compression tests.
+- **A crosswalk states every difference as a gap.** Our drop is higher onto a harder surface
+  and in declared rather than random orientations; **torque, tension and compression are not
+  covered at all**. Being harsher in places is not equivalence, and the crosswalk says so per
+  row. A control fails if an uncovered test quietly stops being marked uncovered.
+- **Tool facts** (§12a): the available scale could serve D-14 **only** if its model's published
+  specification meets the existing 0.01 g / ±0.03 g requirement; screwdrivers are not a torque
+  instrument; nothing else is owned and no purchase is requested.
 
 ### 0.3 — 2026-09-19
 **B04: R-3 is no longer a judgement call.** The sharp-point and sharp-edge screens are
@@ -341,6 +365,8 @@ nothing about whether the product would pass a competent laboratory's version.
 
 > Internal engineering screen only. Adopted from the cited sections for our own design use. NOT CPSC approval, certification, regulatory compliance, third-party testing or safety acceptance. Hardware cannot accept its own screen, and a pass here is not a ruggedization result.
 
+**P1-R20 named the two sections and three official figure URLs directly and asked for direct primary-source transcription. Every one was retried on 19 September 2026 and every one is still refused by this environment's egress proxy: ecfr.gov and img.federalregister.gov both answer 403 at the gateway, by direct fetch and by the harness fetch tool. PRIMARY-SOURCE TRANSCRIPTION IS THEREFORE NOT ACHIEVED, and this file does not pretend otherwise.**
+
 **Provenance of every value below:** web search restricted to ecfr.gov, law.cornell.edu, govinfo.gov and cpsc.gov; the documents themselves are unreachable from this environment (gateway 403 on CONNECT). No field is marked verified against the primary document, and the edition banner ("current through") could not be read. See CS-1..CS-5.
 
 ### Accessibility basis
@@ -378,11 +404,49 @@ nothing about whether the product would pass a competent laboratory's version.
 
 | # | Missing | Consequence |
 |---|---|---|
-| **CS-1** | **Probe B's own geometry** — collar diameter, tip diameter and extension length from the section's figures. The selection rule and the depth rule are recovered; the probe's dimensions are not, because they live in a drawing rather than in text. | blocks building or buying a conforming probe |
+| **CS-1** | **Probe B's figure.** Seven dimensions are now recorded (a..g) from the P1-R20 assignment, which cites the figure -- but the figure itself is still unreachable, so nothing here is checked against the drawing. Tolerances, surface finish and how the extension attaches are not recovered at all. | a probe can be dimensioned but not verified; check it against the figure before it is used on anything |
 | **CS-2** | **Tape width** for the edge tester. The contact point is specified relative to the width; the width itself was not recovered. | blocks specifying the consumable |
 | **CS-3** | **The eCFR edition banner** — the 'current through' date. Nothing here can claim to be the current text. | blocks any currency claim |
 | **CS-4** | **The complete exclusion clauses** of both sections — which points and edges are exempt (functional features and similar). | a screen that does not know its exclusions can only over-report, which is the safe direction, but it is not the method |
 | **CS-5** | **The conditioning and use tests** referenced by the accessibility rule (1500.51/.52/.53, excluding the bite test), which determine whether a point is accessible before or after use and abuse. | our sequence applies the screen after the abuse family, which is at least as severe; matching the referenced procedure exactly is not established |
+
+### Probe B geometry (CS-1 — dimensioned, not verified)
+
+| Dim | Value | Cited as |
+|---|---|---|
+| a | **0.170 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| b | **0.340 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| c | **1.510 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| d | **0.760 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| e | **2.280 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| f | **1 1/2 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+| g | **27 25/32 in** | 16 CFR 1500.48 figure, via the P1-R20 assignment |
+
+### Use-and-abuse conditioning for the seven-year band
+
+| Condition | Value | Cited as |
+|---|---|---|
+| impact medium | 1/8 in nominal type IV vinyl-composition tile, composition 1 (asbestos free), over at least 2.5 in of concrete, impact area at least 3 sq ft | 16 CFR 1500.50 — impact medium |
+| drop test | 4 drops from 3 ft +/- 0.5 in, random orientation | 16 CFR 1500.53 — impact, over 36 through 96 months |
+| torque test | 4 in-lb +/- 0.2 applied evenly over 5 s clockwise to 180 degrees or until exceeded, held 10 s | 16 CFR 1500.53 — torque |
+| tension test | 15 lb +/- 0.5 applied evenly over 5 s, parallel then perpendicular to the major axis, each held 10 s | 16 CFR 1500.53 — tension |
+| compression test | 30 lb +/- 0.5 applied evenly within 5 s through the disc, held 10 s | 16 CFR 1500.53 — compression |
+
+### Crosswalk — our method against those conditions
+
+Every difference is a gap, stated as one. Being harsher in places is not equivalence.
+
+| Item | Our internal method | The referenced condition | Gap |
+|---|---|---|---|
+| drop height | 1.00 m (+0/-10 mm) | 0.92 m (3 ft +/- 0.5 in) | ours is ~9% higher, which is more severe -- severity is not equivalence |
+| drop count and orientation | 12 per article, declared, cumulative | 4, random orientation | neither contains the other: a random sequence can land where our twelve never do |
+| impact surface | bare concrete slab >= 50 mm | 1/8 in vinyl-composition tile over >= 2.5 in concrete | **a real gap.** Bare concrete is harder, so ours is more severe and NOT comparable; a result on one surface does not transfer to the other |
+| articles | 2, explicitly a screen | as the method specifies | ours makes no statistical claim |
+| torque | not performed | 4 in-lb | **not covered** -- a part that only fails under torque passes our screen |
+| tension | not performed | 15 lb | **not covered**, same consequence |
+| compression | not performed | 30 lb | **not covered**, same consequence |
+| shake and tumble | 3 Hz shake, 25 tumbles | no direct equivalent | ours goes beyond these conditions; that is extra evidence, not compliance |
+| when the screen runs | R-3/R-4 after the abuse families | accessibility assessed before and after 1500.51/.52/.53 (excluding the bite test) | ours screens after a harsher sequence, but the before side and the exact referenced sequence are not reproduced |
 
 **Evaluation is deterministic**, in `hardware/rugged/sharp.py`: `point_run_conforms` and `edge_run_conforms` reject a run whose tester is out of specification — a non-conforming run yields no verdict rather than a pass — and `point_is_sharp` / `edge_is_sharp` then apply the criterion above. R-3 is no longer a judgement call.
 
@@ -439,6 +503,24 @@ WP-25's interface is mechanism-neutral and this document keeps it that way.
 - **No acceptance.** Hardware cannot accept its own design. There is no signed acceptance field
   in this document because there is nothing yet to sign.
 
+## 12a. What the available tools can and cannot do
+
+Recorded as facts, not as substitutions. **An ordinary tool is not a substitute for an
+instrument with a stated resolution, accuracy and calibration** — that is the whole content of
+B02, and it does not stop applying because a drawer is closer than a supplier.
+
+| Tool available | Could serve | Only if | Cannot serve |
+|---|---|---|---|
+| **Sensitive food-preparation scale** | **D-14**, the loose-part mass check | its **exact model's published specification** proves **≥ 0.01 g resolution, ±0.03 g accuracy** and enough capacity for the article, and it can be checked against a reference mass. A kitchen scale reading to 1 g is 100× too coarse and would pass a detached 2 g part as noise | any force, torque or displacement check |
+| **Screwdrivers and sockets** | assembly and disassembly | — | **D-17.** Driving a fastener is not measuring its breakaway torque, and a hand-tight guess is not 0.25 N·m |
+| **Soldering iron (likely)** | building a harness or a fixture | — | nothing in §5 or §9 |
+
+**Still unowned and unapproved:** torque screwdriver, dial indicator, push-pull force gauge,
+gauge blocks, reference masses, audio interface, sharp-point tester, sharp-edge tester, TFE tape.
+**D-14 is the only check that a currently-available tool could plausibly serve**, and only
+conditionally — the requirement in §5 is unchanged and the scale does not meet it until its own
+specification says so.
+
 ## 13. Open items
 
 | # | Item | Owner | Effect if it resolves the other way |
@@ -449,4 +531,4 @@ WP-25's interface is mechanism-neutral and this document keeps it that way.
 | RG-4 | Whether a live-cell trial is ever required | **PM and Michael** | Would need a separate safety review, not an extension of this protocol |
 | RG-5 | Drop surface assumes a domestic concrete slab is available | Michael | A different declared surface changes severity and must be re-approved |
 | RG-6 | **CS-1..CS-5** (§9): the probe figure geometry, tape width, edition banner, exclusion clauses and referenced conditioning tests are **not recovered** — every official host is blocked from the Hardware environment. The operative criteria themselves are sourced and R-3 is deterministic | Michael or PM, from a reachable copy | A conforming probe and consumable cannot be specified, and no currency claim can be made, until CS-1..CS-3 close |
-| RG-7 | The instruments in §5 — force gauge, torque screwdriver, dial indicator, balance, audio interface — are **not owned**, and none is approved for purchase | **Michael** | No check in §5 can run without them; this is the largest physical dependency after the articles themselves |
+| RG-7 | **Tools actually available** (Michael, 19 Sep): a sensitive food-preparation scale, ordinary screwdrivers and sockets, and likely access to a soldering iron. **Nothing else in §5 or §9 is owned**, and no purchase is requested this round. See the table below | **Michael** | Most checks in §5 still cannot run; this is the largest physical dependency after the articles themselves |

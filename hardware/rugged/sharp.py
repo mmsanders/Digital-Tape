@@ -40,6 +40,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 RETRIEVED = "2026-09-19"
+RETRY_RECORD = (
+    "P1-R20 named the two sections and three official figure URLs directly and "
+    "asked for direct primary-source transcription. Every one was retried on "
+    "19 September 2026 and every one is still refused by this environment's "
+    "egress proxy: ecfr.gov and img.federalregister.gov both answer 403 at the "
+    "gateway, by direct fetch and by the harness fetch tool. PRIMARY-SOURCE "
+    "TRANSCRIPTION IS THEREFORE NOT ACHIEVED, and this file does not pretend "
+    "otherwise."
+)
 RETRIEVAL = ("web search restricted to ecfr.gov, law.cornell.edu, govinfo.gov "
              "and cpsc.gov; the documents themselves are unreachable from this "
              "environment (gateway 403 on CONNECT)")
@@ -88,6 +97,72 @@ class Field:
             return " to ".join(f"{v}" for v in self.value) + f" {self.unit}"
         return f"{self.value} {self.unit}" if self.unit else str(self.value)
 
+
+# --- Probe B's own geometry (CS-1) ------------------------------------------
+#
+# These seven dimensions come from the P1-R20 assignment, which cites the
+# official figure. They are NOT transcribed from the figure: it is unreachable
+# from here. Their provenance is "the assignment" -- an authoritative internal
+# instruction, and still not the primary document. CS-1 stays open for exactly
+# that reason, and a probe built to these numbers should be checked against the
+# drawing by someone who can open it.
+
+PROBE_B = (
+    Field("a", "0.170", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("b", "0.340", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("c", "1.510", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("d", "0.760", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("e", "2.280", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("f", "1 1/2", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+    Field("g", "27 25/32", "in",
+          "16 CFR 1500.48 figure, via the P1-R20 assignment"),
+)
+
+# --- use-and-abuse conditioning for the seven-year age band ------------------
+
+USE_AND_ABUSE = (
+    Field("impact medium", "1/8 in nominal type IV vinyl-composition tile, "
+          "composition 1 (asbestos free), over at least 2.5 in of concrete, "
+          "impact area at least 3 sq ft", "", "16 CFR 1500.50 — impact medium"),
+    Field("drop test", "4 drops from 3 ft +/- 0.5 in, random orientation", "",
+          "16 CFR 1500.53 — impact, over 36 through 96 months"),
+    Field("torque test", "4 in-lb +/- 0.2 applied evenly over 5 s clockwise to "
+          "180 degrees or until exceeded, held 10 s", "",
+          "16 CFR 1500.53 — torque"),
+    Field("tension test", "15 lb +/- 0.5 applied evenly over 5 s, parallel then "
+          "perpendicular to the major axis, each held 10 s", "",
+          "16 CFR 1500.53 — tension"),
+    Field("compression test", "30 lb +/- 0.5 applied evenly within 5 s through "
+          "the disc, held 10 s", "", "16 CFR 1500.53 — compression"),
+)
+
+# --- crosswalk: the internal method against those conditions -----------------
+
+CROSSWALK = (
+    ("drop height", "1.00 m (+0/-10 mm)", "0.92 m (3 ft +/- 0.5 in)",
+     "ours is ~9% higher, which is more severe -- severity is not equivalence"),
+    ("drop count and orientation", "12 per article, declared, cumulative",
+     "4, random orientation",
+     "neither contains the other: a random sequence can land where our twelve "
+     "never do"),
+    ("impact surface", "bare concrete slab >= 50 mm",
+     "1/8 in vinyl-composition tile over >= 2.5 in concrete",
+     "**a real gap.** Bare concrete is harder, so ours is more severe and NOT "
+     "comparable; a result on one surface does not transfer to the other"),
+    ("articles", "2, explicitly a screen", "as the method specifies",
+     "ours makes no statistical claim"),
+    ("torque", "not performed", "4 in-lb",
+     "**not covered** -- a part that only fails under torque passes our screen"),
+    ("tension", "not performed", "15 lb", "**not covered**, same consequence"),
+    ("compression", "not performed", "30 lb", "**not covered**, same consequence"),
+    ("shake and tumble", "3 Hz shake, 25 tumbles", "no direct equivalent",
+     "ours goes beyond these conditions; that is extra evidence, not compliance"),
+    ("when the screen runs", "R-3/R-4 after the abuse families",
+     "accessibility assessed before and after 1500.51/.52/.53 (excluding the "
+     "bite test)",
+     "ours screens after a harsher sequence, but the before side and the exact "
+     "referenced sequence are not reproduced"),
+)
 
 # --- accessibility (which features get tested at all) ------------------------
 
@@ -161,11 +236,13 @@ EDGE = (
 # --- what could not be recovered, and is therefore not stated ---------------
 
 OPEN = (
-    ("CS-1", "**Probe B's own geometry** — collar diameter, tip diameter and "
-             "extension length from the section's figures. The selection rule "
-             "and the depth rule are recovered; the probe's dimensions are not, "
-             "because they live in a drawing rather than in text.",
-     "blocks building or buying a conforming probe"),
+    ("CS-1", "**Probe B's figure.** Seven dimensions are now recorded (a..g) "
+             "from the P1-R20 assignment, which cites the figure -- but the "
+             "figure itself is still unreachable, so nothing here is checked "
+             "against the drawing. Tolerances, surface finish and how the "
+             "extension attaches are not recovered at all.",
+     "a probe can be dimensioned but not verified; check it against the figure "
+     "before it is used on anything"),
     ("CS-2", "**Tape width** for the edge tester. The contact point is "
              "specified relative to the width; the width itself was not "
              "recovered.",

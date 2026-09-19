@@ -123,7 +123,55 @@ def run() -> int:
     check(bp.mechanism_signature(a) == bp.mechanism_signature(b),
           "the same part at two bed positions hashes the same")
 
-    n = 7
+    # --- 7. the bed-bounds gate is fail-closed ---------------------------
+    #
+    # Rev 6 lays out against a NOMINAL envelope Michael read off the machine's
+    # specification, with 5 mm of edge clearance and a height cap, because a
+    # nominal figure is not proof that every edge prints. The gate that enforces
+    # that has to be shown to fail, or the clearance is decoration.
+    import cadquery as cq
+
+    def placed(shape):
+        b = shape.BoundingBox()
+        return [("probe", shape, b.xmin, b.ymin, b.xlen, b.ylen)]
+
+    inside = cq.Workplane("XY").box(20, 20, 10).translate(
+        (bp.EDGE_CLEARANCE + 10, bp.EDGE_CLEARANCE + 10, 5)).val()
+    ok, problems = bp.validate(placed(inside))
+    check(ok, f"a part inside the usable area passes ({problems})")
+
+    for label, shape, marker in (
+        ("past the far X edge",
+         cq.Workplane("XY").box(20, 20, 10).translate(
+             (bp.BED_X - bp.EDGE_CLEARANCE, 50, 5)).val(), "outside the usable area"),
+        ("past the far Y edge",
+         cq.Workplane("XY").box(20, 20, 10).translate(
+             (50, bp.BED_Y - bp.EDGE_CLEARANCE, 5)).val(), "outside the usable area"),
+        ("into the near X margin",
+         cq.Workplane("XY").box(20, 20, 10).translate((2, 50, 5)).val(),
+         "outside the usable area"),
+        ("into the near Y margin",
+         cq.Workplane("XY").box(20, 20, 10).translate((50, 2, 5)).val(),
+         "outside the usable area"),
+        ("over the height cap",
+         cq.Workplane("XY").box(20, 20, bp.MAX_Z + 20).translate(
+             (50, 50, (bp.MAX_Z + 20) / 2)).val(), "over the"),
+        ("modelled into the bed",
+         cq.Workplane("XY").box(20, 20, 10).translate((50, 50, 3)).val(),
+         "below the plate"),
+    ):
+        ok, problems = bp.validate(placed(shape))
+        check(not ok and any(marker in p_ for p_ in problems),
+              f"RED: a part {label} is refused ({problems[:1]})")
+
+    # A part that merely fits the nominal bed but eats the clearance must fail:
+    # that is the difference between "fits 180 mm" and "fits what we trust".
+    edge = cq.Workplane("XY").box(bp.BED_X - 1, 20, 10).translate(
+        ((bp.BED_X - 1) / 2 + 0.5, 50, 5)).val()
+    ok, problems = bp.validate(placed(edge))
+    check(not ok, "RED: a part filling the nominal bed but not the clearance is refused")
+
+    n = 15
     if FAILED:
         print(f"\n{len(FAILED)} of {n} checks FAILED")
         return 1

@@ -532,6 +532,8 @@ def gen_sharp() -> str:
         "",
         f"> {sharp.DISCLAIMER}",
         "",
+        f"**{sharp.RETRY_RECORD}**",
+        "",
         f"**Provenance of every value below:** {sharp.RETRIEVAL}. No field is "
         f"marked verified against the primary document, and the edition banner "
         f"(\"current through\") could not be read. See CS-1..CS-5.",
@@ -553,6 +555,22 @@ def gen_sharp() -> str:
               "| # | Missing | Consequence |", "|---|---|---|"]
     for cid, what, why in sharp.OPEN:
         lines.append(f"| **{cid}** | {what} | {why} |")
+    lines += ["", "### Probe B geometry (CS-1 — dimensioned, not verified)", "",
+              "| Dim | Value | Cited as |", "|---|---|---|"]
+    for f in sharp.PROBE_B:
+        lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
+    lines += ["",
+              "### Use-and-abuse conditioning for the seven-year band", "",
+              "| Condition | Value | Cited as |", "|---|---|---|"]
+    for f in sharp.USE_AND_ABUSE:
+        lines.append(f"| {f.name} | {f.rendered()} | {f.cite} |")
+    lines += ["", "### Crosswalk — our method against those conditions", "",
+              "Every difference is a gap, stated as one. Being harsher in places "
+              "is not equivalence.", "",
+              "| Item | Our internal method | The referenced condition | Gap |",
+              "|---|---|---|---|"]
+    for item, ours, theirs, gap in sharp.CROSSWALK:
+        lines.append(f"| {item} | {ours} | {theirs} | {gap} |")
     lines += ["",
               "**Evaluation is deterministic**, in `hardware/rugged/sharp.py`: "
               "`point_run_conforms` and `edge_run_conforms` reject a run whose "

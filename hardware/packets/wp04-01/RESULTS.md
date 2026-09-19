@@ -1,9 +1,11 @@
 # Results — packet WP04-01 (rev 5)
 
-> **Hold, 18 Sep 2026.** The library attempt returned no parts and no result. This plate is
-> not to be printed on the A1 Mini until it has been rebuilt to fit the bed — see `CARD.md`.
-> The process block below is the new requirement: **a printed part with no process record is
-> not evidence.**
+> **Rev 6, 19 Sep 2026.** The library attempt returned no parts and no result. The packet is
+> now **two plates** laid out for the A1 Mini's confirmed nominal envelope — see `CARD.md`.
+> Nothing has been printed. The process block below is the requirement whenever something is:
+> **a printed part with no process record is not evidence.**
+>
+> **Fill one block per plate**, and say which plate the parts in each section came from.
 
 ## Process record — fill this in before the ranking
 

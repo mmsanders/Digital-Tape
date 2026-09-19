@@ -77,6 +77,26 @@ EDGE_VELOCITY_IN_S = (0.92, 1.08)
 EDGE_CUT_IN = 0.5
 
 
+EXPECTED_PROBE_B = {
+    "a": "0.170 in", "b": "0.340 in", "c": "1.510 in", "d": "0.760 in",
+    "e": "2.280 in", "f": "1 1/2 in", "g": "27 25/32 in",
+}
+
+# Restated independently from 16 CFR 1500.53, the over-36-through-96-month band.
+EXPECTED_ABUSE = {
+    "drop test": "4 drops from 3 ft +/- 0.5 in, random orientation",
+    "torque test": "4 in-lb +/- 0.2 applied evenly over 5 s clockwise to 180 "
+                   "degrees or until exceeded, held 10 s",
+    "tension test": "15 lb +/- 0.5 applied evenly over 5 s, parallel then "
+                    "perpendicular to the major axis, each held 10 s",
+    "compression test": "30 lb +/- 0.5 applied evenly within 5 s through the "
+                        "disc, held 10 s",
+}
+
+CROSSWALK_MUST_COVER = {"drop height", "impact surface", "torque", "tension",
+                        "compression"}
+
+
 def _by_name(fields) -> dict:
     return {f.name: f.rendered() for f in fields}
 
@@ -266,7 +286,76 @@ def what_is_missing_is_still_declared_missing() -> list[str]:
     return bad
 
 
+def the_probe_dimensions_are_what_the_assignment_gave() -> list[str]:
+    """Altering a probe dimension must fail against an independent restatement."""
+    got = _by_name(S.PROBE_B)
+    bad = []
+    for name, want in EXPECTED_PROBE_B.items():
+        if name not in got:
+            bad.append(f"probe dimension {name!r} is missing")
+        elif got[name] != want:
+            bad.append(f"probe {name}: {got[name]!r}, the figure gives {want!r}")
+    for f in S.PROBE_B:
+        if "assignment" not in f.cite:
+            bad.append(f"probe {f.name}: the citation no longer records that "
+                       f"this came via the assignment rather than the figure")
+    return bad
+
+
+def the_use_and_abuse_conditions_are_the_seven_year_band() -> list[str]:
+    got = _by_name(S.USE_AND_ABUSE)
+    bad = []
+    for name, want in EXPECTED_ABUSE.items():
+        if name not in got:
+            bad.append(f"{name!r} is missing from the recorded conditions")
+        elif got[name] != want:
+            bad.append(f"{name}: reads {got[name]!r}, 1500.53 gives {want!r}")
+    for f in S.USE_AND_ABUSE:
+        if "1500.5" not in f.cite:
+            bad.append(f"{f.name!r} is not cited to 1500.50 or 1500.53")
+        if "18 months" in f.cite or "36 months" in f.cite.replace(
+                "over 36 through 96 months", ""):
+            bad.append(f"{f.name!r} cites a different age band than the "
+                       f"seven-year-old this product is for")
+    return bad
+
+
+def the_crosswalk_states_every_gap() -> list[str]:
+    """A crosswalk that quietly drops an uncovered test is worse than none."""
+    items = {c[0] for c in S.CROSSWALK}
+    bad = [f"the crosswalk no longer covers {m!r}"
+           for m in sorted(CROSSWALK_MUST_COVER - {i.split(" and ")[0] for i in items}
+                           - items)]
+    for item, ours, theirs, gap in S.CROSSWALK:
+        if not gap.strip():
+            bad.append(f"crosswalk row {item!r} states no gap")
+        if ours.strip() == theirs.strip():
+            bad.append(f"crosswalk row {item!r} claims our method and the "
+                       f"referenced condition are identical")
+    for name in ("torque", "tension", "compression"):
+        row = next((c for c in S.CROSSWALK if c[0] == name), None)
+        if row and "not covered" not in row[3].lower():
+            bad.append(f"the {name} row no longer says it is not covered, but "
+                       f"the method still does not perform it")
+    return bad
+
+
+def the_blocked_retrieval_is_still_declared() -> list[str]:
+    bad = []
+    if "NOT ACHIEVED" not in S.RETRY_RECORD:
+        bad.append("the record no longer states that primary-source "
+                   "transcription was not achieved")
+    for host in ("ecfr.gov", "img.federalregister.gov"):
+        if host not in S.RETRY_RECORD:
+            bad.append(f"the retry record no longer names {host} as blocked")
+    return bad
+
+
 CONTROLS_SUITE = (
+    the_probe_dimensions_are_what_the_assignment_gave,
+    the_use_and_abuse_conditions_are_the_seven_year_band,
+    the_crosswalk_states_every_gap,
+    the_blocked_retrieval_is_still_declared,
     transcribed_values_match_the_independent_restatement,
     the_age_basis_is_probe_b_and_says_why,
     every_field_declares_unverified_provenance,

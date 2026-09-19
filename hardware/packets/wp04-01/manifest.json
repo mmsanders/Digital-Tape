@@ -4,11 +4,12 @@
     "WP-04",
     "WP-24"
   ],
-  "built": "2026-09-06",
-  "revision": 5,
+  "built": "2026-09-19",
+  "revision": 6,
   "experiments": [
     {
       "work_package": "WP-04",
+      "plate": "plate-wp04",
       "parts": "carrier-*, hook-bar, test-frame",
       "swept_parameter": "hook_depth (mm)",
       "bracket_mm": [
@@ -18,6 +19,7 @@
     },
     {
       "work_package": "WP-24",
+      "plate": "plate-wp24",
       "parts": "shell-base-*, shell-lid-*",
       "swept_parameter": "interference (mm)",
       "bracket_mm": [
@@ -30,38 +32,82 @@
   "blind": true,
   "single_material": true,
   "bed_mm": [
-    250.0,
-    210.0
+    180.0,
+    180.0,
+    180.0
   ],
-  "bed_source": "verified against the library machine, PM Decisions 007 \u00a70",
+  "bed_source": "Michael-confirmed ADVERTISED NOMINAL envelope of the Bambu Lab A1 Mini, 180 x 180 x 180 mm. Not a measured usable area: no print has been made and no edge has been proven usable.",
+  "edge_clearance_mm": 5.0,
+  "max_object_height_mm": 175.0,
+  "printed": false,
+  "usable_area_proven": false,
   "duplicate_check": "parameter + label-suppressed mechanism",
-  "plate_extent_mm": [
-    228.0,
-    119.0
-  ],
-  "minimum_bed_mm": [
-    240,
-    131
-  ],
+  "plates": {
+    "plate-wp24": {
+      "file": "plate-wp24.stl",
+      "preview": "plate-wp24.3mf",
+      "objects": 8,
+      "extent_mm": [
+        128.0,
+        124.0,
+        8.6
+      ],
+      "occupies_mm": [
+        5.0,
+        5.0,
+        133.0,
+        129.0
+      ],
+      "clearance_mm": {
+        "min_x": 5.0,
+        "min_y": 5.0,
+        "max_x": 47.0,
+        "max_y": 51.0
+      },
+      "estimated_print_hours": 1.2
+    },
+    "plate-wp04": {
+      "file": "plate-wp04.stl",
+      "preview": "plate-wp04.3mf",
+      "objects": 11,
+      "extent_mm": [
+        156.0,
+        41.0,
+        26.0
+      ],
+      "occupies_mm": [
+        5.0,
+        5.0,
+        161.0,
+        46.0
+      ],
+      "clearance_mm": {
+        "min_x": 5.0,
+        "min_y": 5.0,
+        "max_x": 19.0,
+        "max_y": 134.0
+      },
+      "estimated_print_hours": 0.8
+    }
+  },
+  "matched_pairs_on_one_plate": true,
   "xml_valid": true,
   "stl_validated": true,
-  "library_deliverable": "plate.stl",
-  "estimated_print_hours": 2.0,
-  "library_job_limit_hours": 6.0,
   "print_settings_assumed": {
-    "material": "PLA",
+    "material": "PLA or PETG, recorded per job; PLA is the conservative case the analysis assumes",
     "layer_mm": 0.2,
     "nozzle_mm": 0.4,
     "perimeters": 3,
     "infill_pct": 40,
-    "supports": "none required -- every overhang is <= 45 degrees by design",
-    "note": "Michael's answer to Q-006 (Decisions 002 \u00a72)."
+    "supports": "OFF -- every overhang is <= 45 degrees by design, and support material in a carrier's relief slot destroys the property the sweep measures",
+    "orientation": "flat as laid out; all parts in one orientation"
   },
   "parts": [
     {
+      "plate": "plate-wp24",
       "part": "shell-base-G",
-      "x": 12.0,
-      "y": 12.0,
+      "x": 5.0,
+      "y": 5.0,
       "w": 62.0,
       "h": 28.0,
       "label": "G",
@@ -70,9 +116,10 @@
       "note": "the nominal"
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-base-Q",
-      "x": 78.0,
-      "y": 12.0,
+      "x": 71.0,
+      "y": 5.0,
       "w": 62.0,
       "h": 28.0,
       "label": "Q",
@@ -81,9 +128,10 @@
       "note": "expected to crack in PLA"
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-base-A",
-      "x": 144.0,
-      "y": 12.0,
+      "x": 5.0,
+      "y": 37.0,
       "w": 62.0,
       "h": 28.0,
       "label": "A",
@@ -92,9 +140,10 @@
       "note": ""
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-base-N",
-      "x": 12.0,
-      "y": 44.0,
+      "x": 71.0,
+      "y": 37.0,
       "w": 62.0,
       "h": 28.0,
       "label": "N",
@@ -103,44 +152,50 @@
       "note": "at the printer's own repeatability -- should barely hold"
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-lid-A",
-      "x": 78.0,
-      "y": 44.0,
+      "x": 5.0,
+      "y": 69.0,
       "w": 62.0,
       "h": 28.0
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-lid-N",
-      "x": 144.0,
-      "y": 44.0,
+      "x": 71.0,
+      "y": 69.0,
       "w": 62.0,
       "h": 28.0
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-lid-G",
-      "x": 12.0,
-      "y": 76.0,
+      "x": 5.0,
+      "y": 101.0,
       "w": 62.0,
       "h": 28.0
     },
     {
+      "plate": "plate-wp24",
       "part": "shell-lid-Q",
-      "x": 78.0,
-      "y": 76.0,
+      "x": 71.0,
+      "y": 101.0,
       "w": 62.0,
       "h": 28.0
     },
     {
+      "plate": "plate-wp04",
       "part": "test-frame",
-      "x": 144.0,
-      "y": 76.0,
+      "x": 5.0,
+      "y": 5.0,
       "w": 30.0,
       "h": 26.0
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-W",
-      "x": 178.0,
-      "y": 76.0,
+      "x": 39.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.6,
       "label": "W",
@@ -153,9 +208,10 @@
       "note": "expected too deep -- stiff, reluctant to release"
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-B",
-      "x": 196.0,
-      "y": 76.0,
+      "x": 57.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.3,
       "label": "B",
@@ -168,9 +224,10 @@
       "note": ""
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-R",
-      "x": 214.0,
-      "y": 76.0,
+      "x": 75.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.0,
       "label": "R",
@@ -183,9 +240,10 @@
       "note": ""
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-D",
-      "x": 12.0,
-      "y": 108.0,
+      "x": 93.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.0,
       "label": "D",
@@ -198,9 +256,10 @@
       "note": "duplicate of M, far bed corner"
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-T",
-      "x": 30.0,
-      "y": 108.0,
+      "x": 111.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.0,
       "label": "T",
@@ -213,9 +272,10 @@
       "note": ""
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-K",
-      "x": 48.0,
-      "y": 108.0,
+      "x": 129.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.0,
       "label": "K",
@@ -228,9 +288,10 @@
       "note": "expected too shallow -- should not hold"
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-M",
-      "x": 66.0,
-      "y": 108.0,
+      "x": 147.0,
+      "y": 5.0,
       "w": 14.0,
       "h": 11.0,
       "label": "M",
@@ -243,9 +304,10 @@
       "note": "centre of the bracket"
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-H",
-      "x": 84.0,
-      "y": 108.0,
+      "x": 5.0,
+      "y": 35.0,
       "w": 14.0,
       "h": 11.0,
       "label": "H",
@@ -258,9 +320,10 @@
       "note": "duplicate of M, near bed corner"
     },
     {
+      "plate": "plate-wp04",
       "part": "carrier-Z",
-      "x": 102.0,
-      "y": 108.0,
+      "x": 23.0,
+      "y": 35.0,
       "w": 14.0,
       "h": 11.0,
       "label": "Z",
@@ -273,9 +336,10 @@
       "note": "same hook depth as the centre variant, much springier tongue"
     },
     {
+      "plate": "plate-wp04",
       "part": "hook-bar",
-      "x": 120.0,
-      "y": 108.0,
+      "x": 41.0,
+      "y": 35.0,
       "w": 70.0,
       "h": 5.0
     }

@@ -3,34 +3,36 @@
 **One page. Print the plate. Bring back the parts and this card filled in.**
 Hardware Lead · rev 5, 6 Sep 2026 · WP-04 the transport spike, and WP-24 the cartridge shell
 
-> ## ⚠ Do not print this plate yet — read this first (18 Sep 2026)
+> ## Two plates now, and still not a print instruction (19 Sep 2026)
 >
-> **The library print did not come back.** No parts, no results. That attempt is recorded as
-> inconclusive: it tells us nothing about any part on this plate, and every question below is
-> still open.
+> **The library print never came back.** That attempt is recorded as inconclusive: no parts,
+> no results, nothing established about anything on the plate.
 >
-> **You now own an A1 Mini, and this plate was laid out for the library's machine.** The plate
-> is **228 mm** long. If the A1 Mini's bed is 180 × 180 mm, **it does not fit**, and no
-> orientation fixes it — it is one merged solid by design.
+> **The packet is rebuilt as rev 6 for your A1 Mini.** The old plate was 228 mm long, laid
+> out for the library machine. There are now **two plates**, each laid out against the
+> **180 × 180 × 180 mm nominal envelope you confirmed**, with **5 mm of clearance from every
+> edge** and nothing taller than 175 mm:
 >
-> So this card is **on hold pending a rebuild**, and the rebuild needs two things from you
-> first: the machine's **actual build volume**, and PM's approval of how the plate is split
-> (splitting it reshuffles the blind letters, which is a change to the experiment, not a
-> formatting fix). The options are laid out in
-> `hardware/printing/owned-printer-baseline.md` §3.
+> | File | What is on it | Rough time |
+> |---|---|---|
+> | `plate-wp24.stl` | the four boxes **and their four matching lids** | ~1.2 h |
+> | `plate-wp04.stl` | the nine buttons, the bar and the frame | ~0.8 h |
 >
-> **Everything below this line still describes what the experiment is for and what to look at.**
-> The parts of it about the library — one file format, staff choosing orientation, two prints a
-> month, whatever spool is loaded — are now void. You choose the material, the orientation and
-> the settings, and you record them on `RESULTS.md`.
+> **The boxes and lids stay on one plate together on purpose.** A box and its lid are a
+> matched pair: printed in the same job they shrink together, and what is left is the
+> printer's repeatability rather than the material's. Split across two jobs, that comparison
+> stops meaning anything.
+>
+> **Still not a print instruction.** 180 mm is the figure from the machine's specification,
+> not a measured usable area, and nothing here has been printed. Which plate to run, when,
+> and in what material is PM's call and yours.
 
 ---
 
 ## What this is
 
-**Two experiments on one plate.** They have nothing to do with each other except the bed they
-share — which, now that prints are not rationed by trips to the library, is the one reason they
-may not stay on one plate.
+**Two experiments, now on two plates** — one each, which is what the smaller bed allows and
+what the matched-pair rule wants anyway.
 
 **A. Nine little buttons, one long bar, and a frame to hold them.** They are nearly all the
 same except for **one hidden dimension** — how deep the little hook on the side of each button
@@ -58,9 +60,9 @@ which one was supposed to win, you would find that it did.**
 
 | | |
 |---|---|
-| **File** | `plate.stl` (`plate.3mf` is also in the packet and your slicer can open it) |
-| **Plate size** | **228 × 119 mm** — ⚠ **larger than a 180 mm bed. See the hold above** |
-| **Estimated print time** | about 2 hours |
+| **Files** | `plate-wp24.stl` and `plate-wp04.stl` (`.3mf` previews are in the packet too) |
+| **Plate sizes** | **128 × 124 mm** and **156 × 41 mm** — both inside 180 × 180 with 5 mm to spare on every edge |
+| **Estimated print time** | about 1.2 h and 0.8 h |
 | Material | **Your choice now, and write it down.** PLA is the conservative case the analysis assumes; PETG is fine and gives more margin |
 | Layer height | 0.2 mm unless you have a reason |
 | **Supports** | **OFF. This is the one setting that can waste the print — see below** |
