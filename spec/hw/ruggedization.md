@@ -1,11 +1,49 @@
 # Ruggedization — shock and load path, failure modes, and the staged abuse protocol
 
 **Owner:** Hardware Lead · **Consumed by:** WP-25, WP-23, WP-22, WP-24 · **Status:** proposal
-**Revision:** 0.1, 18 September 2026 · **Answers:** Guardrail 13 and `docs/PACKAGES/WP-25.md`
+**Revision:** 0.2, 19 September 2026 · **Answers:** Guardrail 13, `docs/PACKAGES/WP-25.md`,
+and Verification findings P1-R17-V-B01..B05
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.2 — 2026-09-19
+**Rev 0.1 was rejected as a test method, and it deserved to be.** Verification's
+P1-R17-V-B01..B05 said, correctly, that a protocol whose checks have no instrument and no
+threshold cannot be executed by anyone but its author, and that a control described in a
+sentence has not been shown to fire. Every finding is answered:
+
+- **B01 — the mechanics are now repeatable.** A datum convention names every face, edge and
+  corner; the drop sequence is ordered and complete on that convention; release fixture,
+  height datum and tolerance, attitude tolerance and settle time are declared. The shake's
+  150 mm is defined as peak-to-peak of the centre of mass, with how it is measured and how
+  the frequency is verified — and the 120 s per axis is split into four 30 s bouts, because
+  continuous 3 Hz hand motion for two minutes is not reliably repeatable and saying so is
+  better than pretending. The tumble box, what counts as one tumble, and the completion rule
+  are specified.
+- **B02 — every check carries its instrument.** Range, resolution, accuracy, calibration
+  action, baseline and a numeric threshold, and a flag saying whether performing the check
+  disturbs the article. Disturbing checks are scheduled where they cannot corrupt a
+  cumulative sequence.
+- **B03 — the controls are measured, not described.** Each injects a defect in the target
+  check's own unit, sized to clear that threshold by at least 2×, and each says what it means
+  if the check fails to go red.
+- **B04 — the child-safety screens name their source.** Exact CFR sections, the operative
+  method as far as it can be stated without the document in hand, and an explicit list of the
+  numeric details that must be transcribed from the source before the screen runs. No source
+  host is reachable from this environment and nothing is invented to fill the gap.
+- **B05 — staging is a gate, not a list.** Entry and exit conditions per stage, dummy
+  equivalence on five properties rather than mass alone, a restart rule that says exactly what
+  a repair restarts, and a quarantine rule for failed articles.
+
+**The protocol is now data.** `hardware/rugged/protocol.py` holds it and generates the tables
+below, so the document cannot drift from the numbers; `hardware/rugged/test_protocol.py` holds
+eleven retained controls that enforce the properties above and prove they go red. That is the
+difference between a method and a description of one.
+
+Still true, and unchanged: **nothing here has been tested.** No enclosure exists, no mass has
+been weighed, no trial is authorized, and no live cell appears in any stage.
 
 ### 0.1 — 2026-09-18
 First issue. Publishes the load-path architecture and failure-mode matrix that WP-25 A-1
@@ -94,147 +132,254 @@ an assertion, not a mitigation. Check IDs are used by the result cards in §5.
 **F-08 and F-18 are deliberately not absorbed into this protocol.** F-08 is WP-24's S-3 and
 runs separately; F-18 is a thermal case and a drop protocol would not find it.
 
-## 3. The proposed test protocol (WP-25 A-3, A-4, A-5 — for PM approval)
+## 3. The drop family (B01)
 
 **Nothing in this section may be executed before PM approves it and Verification reviews the
-criteria.** Every parameter is declared here so that it is approved as a number, not as an
-intention.
+criteria.** Every parameter is declared so that it is approved as a number.
 
-### 3.1 Staging — inert before representative (WP-25 A-5)
+<!-- BEGIN GENERATED: rugged_drops -->
+**Datum:** right-handed, article-fixed: +Z up through the control face, +Y the cartridge insertion direction, +X = Y x Z.
 
-| Stage | Unit under test | Cell | Purpose |
-|---|---|---|---|
-| **0** | bench only, no abuse | n/a | Record as-built state and functional baseline |
-| **1** | enclosure with **dummy mass**, inert or non-functional internals | **inert dummy of matched mass and outline** | Find gross shell and retention failures cheaply |
-| **2** | representative assembled unit in the intended material and process | **inert dummy of matched mass and outline** | The qualifying run |
-| **3** | live-cell trial | **live cell** | **Not proposed. Not scheduled.** See §7 |
-
-**No live lithium cell is used in any exploratory or destructive trial.** Stage 2 is the
-qualifying stage and it runs on an inert cell dummy. Whether a live-cell trial is ever needed,
-and under what separate safety review, is a PM and Michael decision that this document does not
-make and does not pre-authorize.
-
-### 3.2 Declared parameters
-
-| Parameter | Declared value | Why this value |
+| # | Orientation | What lands |
 |---|---|---|
-| **Drop height** | **1.0 m**, measured from the lowest point of the unit to the surface | WP-25 A-3's floor. A child holds the player at chest height; 1.0 m is that, not a lab margin |
-| **Surface** | Bare concrete slab ≥50 mm thick, flat, level, no covering; slab temperature recorded | Reproducible, and the realistic worst case in a kitchen or garage. Declared rather than "a hard floor" |
-| **Loaded mass** | **measured before the run and recorded**; planning estimate ~150 g `EST`, carried from `thermal-budget.md` §3 | The protocol is keyed to the real mass. **If measured mass differs from the planning estimate by more than 20%, the height and surface go back to PM before the run** |
-| **Impact energy at 1.0 m** | **1.47 J** at the 150 g `EST` — recompute from measured mass as `m·g·h` | Stated so an auditor can check the arithmetic rather than the adjective |
-| **Orientations** | 12 per unit: **6 faces, 4 corners, 2 edges** | The four corners are the two nearest the cell compartment and the two nearest the cartridge slot — F-01 and F-07. The two edges are the shell seam and the control face — F-04 and F-13 |
-| **Order** | Faces (least severe) → edges → corners, **cumulative on one unit** | Cumulative is the honest version: a child does not get a fresh player after each drop. A fresh unit per orientation would hide progressive damage |
-| **Units** | **2 per stage**, both taking the full sequence | n=1 cannot distinguish a unit defect from a design failure. n=2 is a consistency screen, not a statistical claim |
-| **Functional check** | after **every** drop, §5.2 card | A fault that appears at drop 4 and is only found at drop 12 has lost its cause |
-| **Full inspection** | after every **third** drop and at the end | Opening the unit after every drop would itself disturb the retention being tested |
+| 1 | `F+Z` | flat on the control face (buttons up) |
+| 2 | `F-Z` | flat on the base |
+| 3 | `F+Y` | flat on the cartridge-slot face |
+| 4 | `F-Y` | flat on the rear face |
+| 5 | `F+X` | flat on the right side |
+| 6 | `F-X` | flat on the left side |
+| 7 | `E(+Y+Z)` | shell seam along the control face |
+| 8 | `E(-Y-Z)` | shell seam over the cell compartment |
+| 9 | `C(+X+Y+Z)` | nearest the cartridge latch and the control face |
+| 10 | `C(-X+Y+Z)` | cartridge slot, opposite side |
+| 11 | `C(+X-Y-Z)` | over the cell compartment |
+| 12 | `C(-X-Y-Z)` | over the cell compartment, opposite side |
 
-### 3.3 Rough-play family (WP-25 A-4)
+**12 drops per article, cumulative, in this order.** n=2 is a SCREEN, not a statistical claim. One failure on either article fails the stage.
 
-*"Shook it and it seemed fine" is not evidence.* Both elements below are paced and counted so
-a second person can repeat them.
+- height **1.00 m** (+0 / -10 mm), datum: lowest point of the article to the impact surface, measured with a steel rule against a plumbed mark
+- surface: bare concrete slab, >= 50 mm thick, flat within 1 mm over 300 mm, no covering
+- release: hinged trapdoor release fixture: the article rests on two half-flaps held by a single latch, so both flaps fall away together and the article is not pushed, tipped or spun
+- attitude within **±5°** of the nominal orientation at release
+- the article is left untouched for 10 s after impact, then checked
+<!-- END GENERATED: rugged_drops -->
 
-| Element | Declared protocol |
-|---|---|
-| **Shake** | Metronome at **180 bpm (3 Hz)**, hand travel **150 mm ± 25 mm**, **120 s per axis**, three orthogonal axes, unit held as a child would hold it. Recorded to video with the metronome audible, which is what makes the cadence auditable |
-| **Tumble** | **25 tumbles** in a 400 mm cube box, end over end, one tumble per 2 s. A repeated random-orientation impact at roughly 0.4 m — the rough-handling case the drop family's fixed orientations cannot reach |
-| **After each element** | **D-14** shake-and-listen, **D-10** connector unmate force against baseline, **D-17** fastener torque against the as-built record, and the §5.2 functional card |
+**On the 1.0 m height.** This is an *internal screen* at the height a child holds a player at
+chest level. It is not an external qualification height and this document does not claim it as
+one. WP-25 A-3 sets 1.0 m as a floor; if PM wants a higher declared height the number changes
+here and the sequence does not.
 
-### 3.4 Negative control (WP-25 A-7) — the part that makes the rest mean something
+**Why cumulative, and why that makes order part of the method.** A child does not get a fresh
+player after each drop. Severity accumulates, so the sequence runs least-severe first: a corner
+landing on an already-cracked rib is a different test from one landing on a sound rib, and
+running faces first means a failure is attributable to the step that caused it.
 
-Before the final qualifying run, on a **separate control unit that is never used for a
-qualifying result**:
+## 4. The rough-play family (B01)
 
-| Control | Deliberate defect | The check that must catch it | If it does not |
-|---|---|---|---|
-| **C-1** | Cell retainer fitted but **its fastener omitted** | **D-14** shake-and-listen must report cell motion within the first 120 s axis, and **D-01** must find it | The rough-play family is not sensitive enough to detect a loose cell, and **the whole shake protocol is invalid** — not the unit |
-| **C-2** | One shell fastener **backed out two full turns** from the as-built torque | **D-17** must flag the torque, and **D-04** must find the seam gap after the drop family | The fastener and seam checks are decorative and must be redesigned before the qualifying run |
+<!-- BEGIN GENERATED: rugged_roughplay -->
+**Shake.** PEAK-TO-PEAK travel of the article's centre of mass along the axis under test, **150 ± 25 mm**, at **3.0 ± 0.2 Hz**.
 
-Neither control involves a live cell, a charged cell or a powered board beyond the functional
-card. This is the direct application of the standing rule: a check that never goes red has not
-established what it detects.
+- displacement measured against a 10 mm-graduated scale fixed in the camera frame, in the plane of motion, counted from video
+- frequency verified by cycle count from the same video divided by its duration -- an audible metronome proves cadence was available, not that it was followed
+- grip: held in one hand across the F+X/F-X faces, controls unobstructed, wrist neutral
+- **4 bouts of 30 s** with 30 s rest, per axis, three axes (X, Y, Z) — 120 s per axis in total
+- 120 s of continuous 3 Hz hand motion is not reliably repeatable, so each axis is four 30 s bouts with 30 s rest. If any bout falls outside the displacement or frequency tolerance on review, that bout is repeated.
 
-## 4. Pass and fail rules (WP-25 A-2)
+**Tumble.** 25 tumbles in a 400×400×400 mm internal box, 9 mm plywood, internal faces bare (no lining, no padding).
 
-A trial **fails** if any of these is true. They are absolute — no cosmetic allowance applies to
-them, and a repaired design **restarts the affected sequence** rather than erasing the failure.
+- one tumble = one 90 degree rotation of the box about a horizontal edge, so the article falls from the upper face to the new floor
+- fall height **0.40 m**, internal box height; the article starts on the face that becomes the ceiling
+- 2 s per tumble; one article, unrestrained, box otherwise empty
+- completion: 25 tumbles counted aloud on video, box opened, article photographed in the position it came to rest
+<!-- END GENERATED: rugged_roughplay -->
+
+Connectors fail by walkout rather than by fracture, which is why this family exists and is not
+redundant with the drop family. A single impact rarely backs a connector out; a few hundred
+small accelerations do.
+
+## 5. Checks: instrument, baseline, threshold (B02)
+
+Every check below names what measures it, to what resolution, against what baseline, and the
+number it must beat. A check without those is an opinion, and P1-R17-V-B02 was right that rev
+0.1 was full of them.
+
+<!-- BEGIN GENERATED: rugged_checks -->
+| ID | Measures | Instrument | Range · resolution · accuracy | Calibration | Baseline | Threshold | Disturbs? |
+|---|---|---|---|---|---|---|---|
+| **D-01** | cell retention: free travel of the cell dummy in its pocket | dial indicator on a magnetic stand, article opened and fixtured | 0-10 mm · 0.01 mm · +/-0.02 mm | zeroed against a 1.000 mm gauge block before each session | travel under a 5.0 N applied load, recorded per article at stage 0 | **increase over baseline <= 0.20 mm** | **yes** |
+| **D-04** | shell seam gap | feeler gauge set | 0.05-1.00 mm · 0.05 mm · +/-0.005 mm (set spec) | blades checked against a micrometer annually; visually before use | largest blade entering the seam at stage 0, per edge, recorded | **no blade 0.20 mm or larger enters where the baseline blade was smaller** | no |
+| **D-07** | cartridge retention against withdrawal | push-pull force gauge, hook adapter on the cartridge grip feature | 0-50 N · 0.05 N · +/-0.5% of reading | checked against a 2.00 kg reference mass before each session | withdrawal force at stage 0, mean of three, per article | **within 30% of baseline, and never below 8.0 N** | **yes** |
+| **D-10** | connector retention | push-pull force gauge in line with the connector axis | 0-50 N · 0.05 N · +/-0.5% of reading | checked against a 2.00 kg reference mass before each session | unmate force at stage 0 on the DESIGNATED DISTURB ARTICLE only | **unmate force >= 0.50 x baseline; in-sequence articles use continuity and seating instead** | **yes** |
+| **D-12** | transport alignment | dial indicator against the latch-bar datum face | 0-10 mm · 0.01 mm · +/-0.02 mm | zeroed against a 1.000 mm gauge block before each session | datum reading at stage 0 with the bar at rest, per article | **shift from baseline <= 0.15 mm** | **yes** |
+| **D-14** | loose part inside: mass and audible impact | balance for mass; quiet room (<= 35 dBA) and a 0.3 m listen for impacts, article rotated through all three axes twice | 0-500 g · 0.01 g · +/-0.03 g | checked against a 100.00 g class-M2 mass before each session | assembled mass at stage 0, per article | **mass change <= 0.10 g AND no audible internal impact** | no |
+| **D-17** | fastener retention | torque screwdriver, breakaway direction | 0.10-1.00 N.m · 0.01 N.m · +/-6% of reading | verified against a torque tester at the start of each session | install torque 0.35 N.m, recorded per fastener at stage 0 | **residual breakaway torque >= 0.25 N.m (70% of install). Measuring it releases the fastener, so it is re-torqued and recorded** | **yes** |
+| **FC-02** | audio output, both channels | USB audio interface, line input, 1 kHz reference tone from the article's test track, RMS over 5 s | -60 to +6 dBu · 0.1 dB · +/-0.2 dB | interface input calibrated against a 1.000 Vrms source | per-channel RMS at stage 0, article at its fixed volume setting | **within 1.0 dB of baseline on both channels, no dropout** | no |
+| **FC-03** | controls | 10 actuations per control, logged by the article's own firmware counter | n/a · 1 actuation · exact count | counter zeroed before each check | 10 of 10 registered per control at stage 0 | **10 of 10 registered, no double-fire, no dead press** | no |
+
+A check marked DISTURBS changes the article -- opening it, releasing a fastener or unmating a connector. Those run at stage 0, at every third drop, and at the end of a family, never in the middle of a cumulative sequence. Non-disturbing checks run after every event. An article that has been opened is reassembled to the recorded install torque before the sequence continues, and the reassembly is recorded as an event.
+<!-- END GENERATED: rugged_checks -->
+
+**A measurement can be the thing that breaks the article.** Measuring breakaway torque releases
+the fastener. Measuring unmate force disconnects the connector. Opening the shell disturbs
+everything inside it. That is why `D-10` is measured on a designated disturb article rather than
+on the articles carrying the sequence, and why the in-sequence proxy for connector retention is
+continuity plus visual seating, which changes nothing.
+
+## 6. Controls: defects large enough that the check cannot miss them (B03)
+
+A control is not a plan to break something. It is a *measured* defect, in the same unit as the
+threshold it must trip, large enough that a check which fails to notice is proven inadequate
+rather than merely unlucky.
+
+<!-- BEGIN GENERATED: rugged_controls -->
+| Control | Targets | Injected defect | Margin | Must read | If it does not go red |
+|---|---|---|---|---|---|
+| **C-1** | D-01 | the cell-dummy retainer is fitted with its 0.60 mm shim removed and its fastener omitted, giving a measured free travel of 0.60 mm +/- 0.05 against a 0.20 mm limit | **3.0×** past the 0.2 mm limit | D-01 must read >= 0.55 mm of travel before any abuse | D-01 cannot detect a loose cell, so the cell-retention check is invalid and no article may be exposed until it is redesigned |
+| **C-2** | D-04 | one shell fastener is backed out until a 0.45 mm feeler blade enters the seam, against a 0.20 mm limit | **2.2×** past the 0.2 mm limit | D-04 must admit a 0.40 mm blade where the baseline admitted none | the seam check is decorative and must be redefined before it is relied on |
+| **C-3** | D-14 | a 2.00 g captive mass is released inside the closed article, against a 0.10 g mass limit | **20.0×** past the 0.1 g limit | D-14 must show a mass change >= 1.9 g on the article-plus-parts weighing, and an audible impact on rotation | the loose-part check cannot find a detached part, which is the one failure a functional check alone never sees |
+| **C-4** | D-17 | one fastener is set to 0.10 N.m install torque instead of 0.35, giving a residual breakaway below the 0.25 N.m floor | **2.5×** past the 0.25 N.m limit | D-17 must read a breakaway torque <= 0.15 N.m | fastener retention is not being measured and the torque check must be replaced |
+
+Each control runs **before** the articles it protects are exposed, on a control article that never produces a qualifying result. Safety: C-1 — inert dummy only; no cell, charged or otherwise; C-2 — no energy stored; the article is not dropped in this state; C-3 — inert mass, no sharp edges, article closed; C-4 — no live cell; the article is not dropped in this state.
+<!-- END GENERATED: rugged_controls -->
+
+`hardware/rugged/test_protocol.py` enforces the margin: a control whose defect is less than 2×
+its target threshold fails the suite, and so does one measured in a different unit from the
+check it claims to exercise. Both failure modes are demonstrated in that file rather than
+asserted here.
+
+## 7. Pass and fail rules
+
+A trial **fails** if any of these is true. They are absolute — no cosmetic allowance applies —
+and a repaired design restarts per the rule in §8.
 
 | Rule | Failure |
 |---|---|
-| **R-1** | The cell is exposed, loose, dented, punctured, or has moved in its pocket |
+| **R-1** | The cell dummy is exposed, loose beyond D-01's threshold, dented, punctured, or has moved in its pocket |
 | **R-2** | Any live conductor is exposed, or any insulation is breached |
-| **R-3** | Any accessible edge or point created by the trial is sharp. Assessed against the sharp-edge and sharp-point criteria used for children's products; **this is a design criterion adopted for our own use, not a claim of regulatory testing or compliance** |
-| **R-4** | Any part detaches that fits entirely within a **31.7 mm diameter × 57.1 mm deep** cylinder — the small-parts dimensions used for children's products, adopted here for the same reason and with the same caveat as R-3 |
+| **R-3** | Any accessible edge or point created by the trial is sharp by the §9 screen |
+| **R-4** | Any part detaches that is a small part by the §9 screen |
 | **R-5** | The enclosure opens unintentionally, or the cartridge ejects |
-| **R-6** | Any functional check on the §5.2 card fails, including intermittently |
-| **R-7** | A loose part is audible or visible inside, even with every functional check passing |
-| **R-8** | Transport alignment has changed against its datum |
+| **R-6** | Any check in §5 falls outside its threshold, including intermittently |
+| **R-7** | D-14 shows a mass change or an audible internal impact |
+| **R-8** | D-12 shows transport alignment outside its threshold |
 
-**A cosmetic blemish passes.** Scuffs, witness marks on an outer face, and colour transfer from
-the surface are recorded and do not fail a trial. The line is drawn at anything that changes
-function, containment or safety.
+**A cosmetic blemish passes.** Scuffs, witness marks and colour transfer from the surface are
+recorded and do not fail a trial. The line is function, containment and safety.
 
-## 5. Evidence (WP-25 A-6)
+## 8. Staging, restart and quarantine (B05)
 
-### 5.1 Recorded before the first drop, per unit
+<!-- BEGIN GENERATED: rugged_stages -->
+| Stage | Article | Cell | What runs | Exit gate | On failure |
+|---|---|---|---|---|---|
+| 0 | bench | inert | record as-built state, every baseline in CHECKS, and photographs | all baselines recorded and within their build spec | n/a |
+| 1 | enclosure with dummy mass, inert or non-functional internals | inert dummy of matched mass, centre of mass, envelope, mounting interface and mount stiffness | full drop family, then the rough-play family | BOTH articles complete the full sequence with every check inside its threshold, AND every control in CONTROLS has been shown to go red on the control article | any failure fails the stage; see the restart rule |
+| 2 | representative assembled unit in the intended material and process | inert dummy, same equivalence as stage 1 | the same sequence, on articles built to a recorded process | as stage 1; this is the qualifying stage | any failure fails the stage; see the restart rule |
+| 3 | live-cell trial | NOT PROPOSED | NOT PROPOSED | not scheduled and not implied by this document | would require a separate safety review by PM and Michael |
+
+**Dummy equivalence** — an inert dummy matched on mass alone is not equivalent:
+
+| Property | Tolerance |
+|---|---|
+| mass | +/- 2 g of the cell it replaces |
+| centre of mass | +/- 2 mm in each axis |
+| envelope | +/- 0.5 mm on each dimension |
+| mounting interface | identical features, same fasteners, same torque |
+| mount stiffness | within 20% of the cell's, measured as deflection under a 5.0 N transverse load |
+
+**Restart.** A repair, a redesign or any change to the article, the material or the process restarts the ENTIRE affected cumulative family, on FRESH articles, for BOTH articles -- not the failed orientation alone. The drop family and the rough-play family are separate families for this purpose; a change that can only affect one restarts only that one, and the reason is recorded. Every control that covers a check in the restarted family is rerun before the articles are exposed.
+
+**Quarantine.** A failed article is photographed as found, bagged, labelled with its article id, the step it failed and the date, and retained until the package is accepted. It is never returned to a sequence, never used for a later stage, and never repaired for reuse as a test article. Its data stays in the record: a failure is not deleted by a later pass.
+<!-- END GENERATED: rugged_stages -->
+
+**No live lithium cell is used in any exploratory or destructive trial**, including the
+qualifying stage, which runs on an inert dummy. Whether a live-cell trial is ever needed, and
+under what separate safety review, is a PM and Michael decision this document does not make and
+does not pre-authorize.
+
+## 9. Child-safety screens: source, method, and what is missing (B04)
+
+**These are internal engineering screens adopted for our own use. They are not regulatory
+testing, not certification, and not a compliance claim**, and a pass here says nothing about
+whether the product would pass a competent laboratory's version.
+
+| Screen | Adopted source | What the method requires |
+|---|---|---|
+| **Small parts (R-4)** | 16 CFR Part 1501 — the small-parts cylinder used for articles intended for children under three | A test cylinder of **31.7 mm inside diameter** with a **slanted base**, giving a depth of **25.4 mm at the shallow side and 57.1 mm at the deep side**. A detached part is placed into the cylinder **without compressing it**, in **any orientation**; if it fits **entirely within**, it is a small part and R-4 fails. Fragments are tested individually, as found. |
+| **Sharp points (R-3)** | 16 CFR §1500.48 — technical requirements for determining a sharp point | A sharp-point tester with a gauge slot and an indicating circuit: the point is inserted into the slot under a defined load and the circuit indicates if it is sharp. Applies to accessible points on the article as presented after the trial. |
+| **Sharp edges (R-3)** | 16 CFR §1500.49 — technical requirements for determining a sharp metal or glass edge | A mandrel wrapped with a defined tape is rotated against the edge under a defined force for a defined arc; the edge is sharp if the tape is cut over more than a defined fraction of the contact length. |
+
+### What must be transcribed before either sharp screen runs
+
+**No host serving the CFR is reachable from the Hardware Lead's environment** (`ecfr.gov` and
+its API both fail to connect), and inventing a number to fill a gap in a safety method is
+exactly the failure this project has rules against. The following are therefore **named, not
+guessed**, and each must be transcribed from the cited section before the screen is run:
+
+| # | Missing detail | Section |
+|---|---|---|
+| CS-1 | Sharp-point tester slot width, insertion depth and applied load | §1500.48 |
+| CS-2 | The accessibility rule — which points and edges count as accessible, and the probe that decides it | §1500.48 / §1500.49 |
+| CS-3 | Sharp-edge mandrel diameter, rotation speed, applied force and arc | §1500.49 |
+| CS-4 | The tape specification and the cut fraction that defines "sharp" | §1500.49 |
+| CS-5 | Whether the adopted edition matches the current one, and its date | all three |
+
+**Michael, the smallest useful reply:** the three sections above, from any library or online
+copy, or the corresponding ASTM F963 clauses if that is easier to reach. Until then R-3 runs as
+a **documented judgement call** and is recorded as such — which is weaker than a screen and must
+not be written up as if it were one. R-4's cylinder is fully specified above and can run today.
+
+## 10. Evidence (WP-25 A-6)
+
+### 10.1 Recorded before the first drop, per article
 
 Mass (g, measured); outline dimensions; **material and vendor, with the exact filament spool**;
-printer, nozzle, plate, orientation, slicer and version, and the full settings profile — by
-reference to the process record in `hardware/printing/owned-printer-baseline.md`; fastener
-type, count and **as-built torque**; photographs of every face and of the open interior;
-functional baseline per §5.2; ambient temperature and slab temperature.
+printer, nozzle, plate, orientation, slicer and version and the full settings profile — by
+reference to `hardware/printing/owned-printer-baseline.md`; fastener type, count and as-built
+install torque; photographs of every face and of the open interior; **every baseline named in
+§5**; ambient temperature and slab temperature.
 
-### 5.2 Functional card, run at every checkpoint
+### 10.2 Recorded after every event
 
-| ID | Check | Pass condition |
-|---|---|---|
-| FC-1 | Power on | Comes up, no reset loop |
-| FC-2 | Audio, left and right | Both channels present at the same reference level as baseline |
-| FC-3 | All five transport controls, 10 actuations each | Every actuation registers; no double-fire, no dead press |
-| FC-4 | Latch and pop | Latches and releases as before the trial (**D-12**) |
-| FC-5 | Cartridge seated and read | Reads, and the card is retained (**D-07**) |
-| FC-6 | Cartridge insert/remove | Normal force, no new resistance or looseness |
-| FC-7 | Shake and listen (**D-14**) | Nothing audible inside |
-| FC-8 | Charge inhibit intact | The NTC path still reads; **no charging is performed** (`thermal-budget.md` T-1) |
+Every observation in the order taken; the step number and orientation it belongs to;
+photographs; **every failure and every repair, kept in the record**; the raw video of the shake
+and tumble elements. Nothing is summarized away, and a failure is never edited out of a
+sequence.
 
-### 5.3 Recorded after every trial
+## 11. Material and process — candidates, explicitly not mandated
 
-Every observation in the order taken; the drop number and orientation each observation belongs
-to; photographs; **every failure and every repair, kept in the record**; the raw video of the
-shake element. Nothing is summarized away, and a failure is never edited out of the sequence.
-
-## 6. Material and process — candidates, explicitly not mandated
-
-WP-25's interface is mechanism-neutral and this document keeps it that way. Recorded so the
-eventual choice is visible as a choice:
+WP-25's interface is mechanism-neutral and this document keeps it that way.
 
 | Candidate | Argument for | Argument against | Status |
 |---|---|---|---|
-| **PETG shell** | Tougher and less brittle than PLA at the same wall; now printable on the owned machine | Heat-deflection still modest; SH-4's dashboard case survives | **Candidate.** Now selectable where it previously was not — but not chosen and not tested |
-| **PLA shell** | What the existing analysis assumes; cheap; dimensionally stable | Brittle at the corner radii that matter for F-05 | **Candidate**, and the conservative case the current numbers already clear |
+| **PETG shell** | Tougher and less brittle than PLA at the same wall; printable on the owned machine | Heat-deflection still modest; SH-4's dashboard case survives | **Candidate**, not chosen, not tested |
+| **PLA shell** | What the existing analysis assumes; cheap; dimensionally stable | Brittle at the corner radii that matter for F-05 | **Candidate**, and the conservative case the numbers already clear |
 | **TPU bumper or corner** | Absorbs at the shell, which is where §1 wants absorption | Second material; adds a process step and a joint | **Candidate**, unprioritized |
 | **Foam or compliant liner in the cell pocket** | Directly addresses F-01 to F-03 | Compression set over time; thickness eats volume | **Candidate**, likely the cheapest win |
-| **Ribs and radii** | Free in a printed part | Can move a crack rather than prevent it | **Expected**, but sized only against a tested failure |
+| **Ribs and radii** | Free in a printed part | Can move a crack rather than prevent it | **Expected**, sized only against a tested failure |
 | **Locking connectors, strain relief, service loops** | Directly address F-10 and F-11 | Cost and board area | **Expected** |
 
 **None of these is a product decision.** The protocol above is how one becomes one.
 
-## 7. What this document does not authorize
+## 12. What this document does not authorize
 
 - **No fabrication and no cell charging.** `make -C hardware fabrication-gate` reads CLOSED
-  with five blockers and this document does not touch any of them.
-- **No purchase.** Filament, fasteners, foam, a metronome or anything else needs Michael.
+  with five blockers and nothing here touches any of them.
+- **No purchase.** Filament, fasteners, foam, a force gauge, a torque screwdriver, a dial
+  indicator, a balance or a tumble box all need Michael.
 - **No physical trial.** Every parameter here is a proposal pending PM approval and
   Verification's review of the criteria.
 - **No live-cell abuse trial**, now or implicitly later.
 - **No acceptance.** Hardware cannot accept its own design. There is no signed acceptance field
   in this document because there is nothing yet to sign.
 
-## 8. Open items
+## 13. Open items
 
 | # | Item | Owner | Effect if it resolves the other way |
 |---|---|---|---|
-| RG-1 | **Loaded mass is an estimate, not a measurement.** ~150 g `EST` | Hardware, then Michael's scale | Height and surface go back to PM if the real mass is >20% off |
-| RG-2 | No enclosure design exists, so §2's mitigations are named against a load path rather than against geometry | Hardware (WP-23) | The matrix gains rows as the CAD acquires features; it is not expected to shrink |
-| RG-3 | The printer, material and process are uncharacterized (`printing/owned-printer-baseline.md`) | Michael's setup, then Hardware | A representative unit cannot be built until the process is repeatable; Stage 2 is gated on it |
+| RG-1 | **Loaded mass is an estimate, not a measurement.** ~150 g `EST` | Hardware, then Michael's balance | Height and surface go back to PM if the real mass is >20% off |
+| RG-2 | No enclosure design exists, so §2's mitigations are named against a load path rather than geometry | Hardware (WP-23) | The matrix gains rows as the CAD acquires features |
+| RG-3 | The printer, material and process are uncharacterized | Michael's setup, then Hardware | Stage 2 is gated on it; a representative article cannot be built without it |
 | RG-4 | Whether a live-cell trial is ever required | **PM and Michael** | Would need a separate safety review, not an extension of this protocol |
-| RG-5 | Drop surface assumes a domestic concrete slab is available and usable | Michael | A different declared surface changes severity and must be re-approved, not substituted |
+| RG-5 | Drop surface assumes a domestic concrete slab is available | Michael | A different declared surface changes severity and must be re-approved |
+| RG-6 | **CS-1..CS-5: the sharp-point and sharp-edge methods are not fully transcribed** (§9) | Michael or PM, from the cited sections | R-3 stays a documented judgement call until they are |
+| RG-7 | The instruments in §5 — force gauge, torque screwdriver, dial indicator, balance, audio interface — are **not owned**, and none is approved for purchase | **Michael** | No check in §5 can run without them; this is the largest physical dependency after the articles themselves |

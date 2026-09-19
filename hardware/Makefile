@@ -10,9 +10,9 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-test spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test rugged rugged-test spec-check spec-test spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
-all: packet-wp04 thermal mech
+all: packet-wp04 thermal mech rugged
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
@@ -202,6 +202,17 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
 
+## rugged — regenerate the generated tables in spec/hw/ruggedization.md
+rugged:
+	$(PY) rugged/protocol.py
+
+## rugged-check — the protocol tables must not be stale, and the method must
+## remain executable: every check with an instrument and a numeric threshold,
+## every control's injected defect clearing that threshold by 2x or more.
+## P1-R17-V-B02/B03: a protocol that cannot be held to those is a description.
+rugged-test:
+	@cd rugged && $(PY) test_protocol.py
+
 ## spec-check — spec/hw content and revision must move together
 ##
 ## board-rev-a.md is what firmware/prod writes against, and its value rests on the
@@ -236,6 +247,7 @@ check: thermal-check mech-check
 	@$(MAKE) --no-print-directory solenoid-test
 	@$(MAKE) --no-print-directory fabrication-gate-test
 	@$(MAKE) --no-print-directory atomicity-test
+	@$(MAKE) --no-print-directory rugged-test
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
 	@$(MAKE) --no-print-directory erc
