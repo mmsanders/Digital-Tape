@@ -131,6 +131,32 @@ struct tape {
     /* The clamped resume position in WHOLE frames, kept for §5's warm-start
        comparison, which is specified over frames rather than 32.32 units. */
     uint64_t  resume_whole_frame;
+
+    /*
+     * §7 recording. Scalars only: every recorded frame lives in the CALLER's
+     * rec_ring (§4), and the chunks it will occupy are a bump-allocated run,
+     * so the engine needs no buffer of its own to describe either.
+     *
+     * rec_ring holds run-relative frames [rec_base, rec_base + rec_buf_frames).
+     * rec_base is always a multiple of the frames-per-block, because a partial
+     * final block has to stay in the buffer: the next tape_feed extends it and
+     * tape_service rewrites that same block. Frames whose block is complete are
+     * dropped from the front and are never written twice.
+     *
+     * rec_written counts frames already handed to dev_write; rec_frames counts
+     * frames tape_feed accepted. Their difference is what §7 calls OWED, and
+     * §7.1's tape_commit refusal is that difference plus rec_unflushed --
+     * accepted frames are not durable until §8 step 2's flush has returned.
+     */
+    bool      rec_armed;
+    uint64_t  rec_cursor;        /* the edit point, fixed at arm (§7) */
+    uint32_t  rec_first_chunk;   /* first chunk of the contiguous allocated run */
+    uint32_t  rec_chunks;        /* chunks allocated to that run so far */
+    uint64_t  rec_frames;        /* frames tape_feed has accepted */
+    uint64_t  rec_written;       /* frames already written to media */
+    uint64_t  rec_base;          /* run-relative index of rec_ring[0]; block aligned */
+    uint32_t  rec_buf_frames;    /* frames currently held in rec_ring */
+    bool      rec_unflushed;     /* a chunk write is not yet behind a flush */
 };
 
 /* The mounted side's live index. There is no separate `live` member: it would be
@@ -251,5 +277,59 @@ tape_result tape_alloc_run(const struct tape_sb *sb, tape_side side,
 
 /* Chunks needed for `frames`, ceiling. 64-bit; frames may be up to 2^32-1. */
 uint32_t tape_chunks_for_frames(uint64_t frames);
+
+/* --- §8 commit protocol: byte production and the two writes ---------------- */
+
+/* §8 step 3's block count: ceil(entry_count * 12 / 512), zero for zero entries. */
+uint32_t tape_index_entry_blocks(uint32_t entry_count);
+
+/*
+ * Serialise `idx`'s entries into `out` and return the block count above.
+ * `out` must be tape_index_entry_blocks(count) * 512 bytes; the instance's
+ * entry_bytes is exactly 96 blocks, which is the TAPE_MAX_ENTRIES worst case.
+ *
+ * Bytes past the live entries are not CRC-covered and are undefined ON MEDIA
+ * (§5) — they are zeroed here anyway, so the block a commit writes is a
+ * function of the index alone. An output that depends on stale buffer contents
+ * is not byte-reproducible, and WP-11 compares bytes.
+ */
+uint32_t tape_index_serialize_entries(const struct tape_index *idx, unsigned char *out);
+
+/* §5's 64-byte header zero-padded to a block, with §8 step 5's CRC over bytes
+   0…59 concatenated with the entry array just serialised. */
+void tape_index_header_block(const struct tape_index *idx, const unsigned char *entries,
+                             unsigned char *blk);
+
+/*
+ * §4.5's headroom test for ONE counter. `need == 0` is not consulted at all:
+ * a zero-consumption branch must not be refused because a stored counter
+ * already sits at 0xFFFFFFFE on crafted media (V7-002). 64-bit, because
+ * 0xFFFFFFFC + 4 wraps to 0 in u32 and the check would pass.
+ */
+bool tape_headroom_ok(uint32_t current, uint32_t need);
+
+/*
+ * §8 steps 3–6 against one index slot: entry array, flush, header, flush.
+ * At most 97 blocks and exactly two flushes (§8, engine-api §7.1).
+ *
+ * `idx` supplies the sequence, side, entry array and total_frames, and its
+ * bytes are what lands. Any dev_write or dev_flush failure quarantines the
+ * instance per §7.2 before returning TAPE_ERR_IO.
+ */
+tape_result tape_commit_index(struct tape *t, uint32_t slot_lba, const struct tape_index *idx);
+
+/* §8 steps 1–2 for recording: drain owed frames into the allocated run, at most
+   `budget - *used` blocks, then flush once every accepted frame is on media.
+   Called only by tape_service, which owns the budget. */
+tape_result tape_record_service(struct tape *t, uint32_t budget, uint32_t *used, bool *more);
+
+/* §7's OWED predicate: frames tape_feed accepted that are not yet durable.
+   §8.1 is why the pending flush counts — a write is not durable until a flush
+   has returned, so tape_commit may not assume the barrier already happened. */
+bool tape_frames_owed(const struct tape *t);
+
+/* Return the instance to the disarmed state. tape_mount calls it so a remount
+   on a reused instance cannot inherit a previous mount's armed bookkeeping. */
+void tape_record_reset(struct tape *t);
 
 #endif /* TAPE_INTERNAL_H */

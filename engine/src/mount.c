@@ -560,6 +560,10 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
     t->at_end         = false;
     t->at_start       = false;
     t->play_ring_valid = false;
+    /* §7 bookkeeping belongs to the mount that armed it. A remount on a reused
+       instance starts disarmed and owes nothing, whatever the previous mount
+       was doing when it ended. */
+    tape_record_reset(t);
 
     /* Seek to resume_frame, clamped to the timeline (§5, §11). Beyond end is not
        an error — it clamps. */
@@ -582,6 +586,13 @@ tape_result tape_unmount(tape *t, uint64_t *out_position_frame)
 {
     if (t == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
+    /*
+     * §10: unmount while armed is refused — the caller must commit or abort
+     * first, so a child's recording is never silently dropped by a firmware
+     * path that forgot to ask. The Faulted row overrides it: there, unmount is
+     * the only exit and refusing it would strand the instance (§7.2).
+     */
+    if (t->rec_armed && !t->faulted) { return TAPE_ERR_BUSY; }
 
     /* Permitted in FAULTED — it is the only exit (§7.2). The engine never writes
        position to media (§5, §11): the source slot is read-only, so position
@@ -650,6 +661,9 @@ tape_result tape_set_side(tape *t, tape_side side)
     if (t == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    /* §10: B in both armed rows. The recording cursor is a position on THIS
+       side's timeline; switching out from under it has no defined meaning. */
+    if (t->rec_armed) { return TAPE_ERR_BUSY; }
     if (side != TAPE_SIDE_A && side != TAPE_SIDE_B) { return TAPE_ERR_INVALID_ARG; }
 
     /*

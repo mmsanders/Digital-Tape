@@ -38,6 +38,23 @@ uint64_t tape_rd64(const unsigned char *p)
     return (uint64_t)tape_rd32(p) | ((uint64_t)tape_rd32(p + 4) << 32);
 }
 
+/* The writers, byte for byte the readers' inverse. Same reason for the explicit
+   assembly: what a commit puts on media must not depend on the host, and a
+   struct overlay would make it depend on padding and endianness both. */
+static void tape_wr32(unsigned char *p, uint32_t v)
+{
+    p[0] = (unsigned char)(v & 0xFFu);
+    p[1] = (unsigned char)((v >> 8) & 0xFFu);
+    p[2] = (unsigned char)((v >> 16) & 0xFFu);
+    p[3] = (unsigned char)((v >> 24) & 0xFFu);
+}
+
+static void tape_wr64(unsigned char *p, uint64_t v)
+{
+    tape_wr32(p,      (uint32_t)(v & 0xFFFFFFFFu));
+    tape_wr32(p + 4u, (uint32_t)(v >> 32));
+}
+
 uint64_t tape_entry_last_chunk(const struct tape_entry *e)
 {
     /* spec §5.1, checked 64-bit. Every operand is widened BEFORE any
@@ -383,4 +400,65 @@ uint32_t tape_derive_free_next(const struct tape_index *idx, const struct tape_s
         }
     }
     return next;
+}
+
+/* --- §8 byte production: what a commit actually writes --------------------- */
+
+/*
+ * §8 step 3 writes "blocks 1 … ceil(entry_count * 12 / 512)". Zero entries is
+ * zero blocks, not one: a side with an empty timeline commits a header and
+ * nothing else, and the CRC covers no entry bytes.
+ */
+uint32_t tape_index_entry_blocks(uint32_t entry_count)
+{
+    return (entry_count * TAPE_INDEX_ENTRY_BYTES + TAPE_BLOCK_SIZE - 1u) / TAPE_BLOCK_SIZE;
+}
+
+uint32_t tape_index_serialize_entries(const struct tape_index *idx, unsigned char *out)
+{
+    uint32_t blocks = tape_index_entry_blocks(idx->entry_count);
+    size_t   live   = (size_t)idx->entry_count * TAPE_INDEX_ENTRY_BYTES;
+    uint32_t i;
+
+    for (i = 0; i < idx->entry_count; i++) {
+        unsigned char *e = out + (size_t)i * TAPE_INDEX_ENTRY_BYTES;
+        tape_wr32(e,      idx->entries[i].first_chunk_id);
+        tape_wr32(e + 4u, idx->entries[i].start_frame);
+        tape_wr32(e + 8u, idx->entries[i].frame_count);
+    }
+
+    /* §5: bytes past the live entries are undefined on media and are NOT
+       CRC-covered. They are zeroed anyway, so the blocks a commit writes are a
+       function of the index alone. An implementation whose output depends on
+       whatever the staging buffer last held is not byte-reproducible, and WP-11
+       compares bytes across desktop and firmware. */
+    memset(out + live, 0, (size_t)blocks * TAPE_BLOCK_SIZE - live);
+    return blocks;
+}
+
+/*
+ * §5's header, and §8 step 5's CRC over bytes 0…59 concatenated with the entry
+ * array. Bytes 64…511 are reserved and zero; so are 13…15 and 28…59.
+ *
+ * `entries` must be the buffer tape_index_serialize_entries just filled from
+ * this same index — the CRC binds the header to those exact bytes, which is
+ * what makes a torn commit fail its own CRC and fall back to the other slot.
+ */
+void tape_index_header_block(const struct tape_index *idx, const unsigned char *entries,
+                             unsigned char *blk)
+{
+    uint32_t crc;
+
+    memset(blk, 0, TAPE_BLOCK_SIZE);
+    memcpy(blk, IDX_MAGIC, sizeof IDX_MAGIC);
+    tape_wr32(blk + 8,  idx->sequence);
+    blk[12] = idx->side;
+    tape_wr32(blk + 16, idx->entry_count);
+    tape_wr64(blk + 20, idx->total_frames);
+
+    crc = tape_crc32_init();
+    crc = tape_crc32_update(crc, blk, 60u);
+    crc = tape_crc32_update(crc, entries,
+                            (size_t)idx->entry_count * TAPE_INDEX_ENTRY_BYTES);
+    tape_wr32(blk + 60, tape_crc32_final(crc));
 }
