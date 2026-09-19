@@ -1,6 +1,6 @@
 # Hardware status
 
-**Updated: 18 September 2026 · Owner: PM disposition of submitted Hardware evidence;
+**Updated: 19 September 2026 · Owner: PM disposition of submitted Hardware evidence;
 Hardware retains engineering control.**
 
 PR #18 is merged. PR #47 is merged at
@@ -18,8 +18,8 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | Rev-5 library plate did not produce a returned result. Michael has bought an A1 Mini and is setting it up; the printer/process is not yet characterized | Rebase the packet on the owned-printer process, then record printed fit, retention, creep/drop and independent measurement audit |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
-| WP-05 | PR #87 submits five raw sustained-write runs: three PNY 64 GB V30 samples clear the 23.3 MB/s screening bar at 25.41–27.36 MB/s worst-window; the onn V10 negative control fails at 15.34 MB/s. One PNY run is at 80% fill. Record and raw data: `hardware/measurements/2026-09-16-sustained-write/` | Keep A-2's filled condition. Exact PNY part/revision/CID, independent audit, reader/card attribution, atomicity and production end-to-end copy remain open; no card is qualified |
-| Ruggedization | Guardrail 13 and WP-25 now make loaded-player drop, shake and rough-play resilience a pre-CAD system requirement | Hardware architecture/failure matrix and auditable staged test plan; dummy-mass trials before representative assembled-unit trials |
+| WP-05 | Verification independently reproduced all 95 stored rate values and the exact 15.34 MB/s onn failure plus 25.41–27.36 MB/s PNY passes | Correct the tool to retain primitive returned-byte/time/final-size and before/after capacity/free/occupancy evidence; derive summaries without trusting stored means; then seek a new physical rerun. Identity, attribution, atomicity and end-to-end copy remain open; no card is qualified |
+| Ruggedization | Draft PR #92 head `7b80631...` is directionally useful, but Verification rejected it as an executable/auditable method | Resolve findings B01–B06: exact drop/shake/tumble mechanics, calibrated measurements and thresholds, measured red controls, sourced internal safety procedures, stage/restart/quarantine rules and quantitative printer-process controls. No physical or live-cell destructive test |
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
@@ -37,3 +37,10 @@ Michael owns purchases and physical trials. The PNY cards and A1 Mini are purcha
 facts, not qualification or permission for another purchase. Old ~$115/$152 cart
 estimates are not current quotes or approvals. Active assignments live only in
 [Hardware's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead).
+
+PM approves a split-plate direction for the A1 Mini, contingent on recording its
+actual usable build volume: keep every WP-24 base with its matching lid on one plate
+and move the WP-04 button experiment to a second plate. Preserve blindness, the full
+sweeps and controls, regenerate from source and issue a new packet revision. This is
+not permission to print. Hardware now owns method corrections only; it must stop
+before machine-bound rebuild or physical execution if usable volume is unavailable.
