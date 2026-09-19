@@ -320,8 +320,16 @@ static void emit_json(void)
 
 /* --- caller-owned storage (guardrail 08: the caller owns every buffer) ------ */
 
-static unsigned char g_inst_a[65536];
-static unsigned char g_inst_b[65536];
+/* Guardrail 08 caps the engine's WHOLE RAM budget -- .data + .bss + the
+   instance -- at 200 KiB, so a 256 KiB reservation is sufficient for any
+   conforming engine by construction and cannot go stale the way a number
+   copied from one candidate's tape_instance_size() would. open_instance()
+   still checks the real size at run time and fails loudly if that ever stops
+   being true. */
+#define INSTANCE_BYTES 262144u
+
+static unsigned char g_inst_a[INSTANCE_BYTES];
+static unsigned char g_inst_b[INSTANCE_BYTES];
 static unsigned char g_play_a[TAPE_PLAY_RING_MIN];
 static unsigned char g_rec_a[TAPE_REC_RING_MIN];
 static unsigned char g_play_b[TAPE_PLAY_RING_MIN];

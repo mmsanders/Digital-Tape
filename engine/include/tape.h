@@ -12,10 +12,20 @@
  *   Implemented   tape_instance_size, tape_init, tape_mount (all four phases,
  *                 both sides, both degraded-B causes, the stage oracle and
  *                 §5.5's cartridge_sequence), tape_unmount, tape_get_info,
- *                 tape_set_side, tape_tell, and the WP-07 allocator
- *                 (tape_alloc_run)
- *   Declared,     everything else. Calling one is a link error, which is the
- *   not defined   intended loud failure rather than a silent stub.
+ *                 tape_set_side, tape_tell, tape_seek, tape_set_rate,
+ *                 tape_status, tape_service, tape_render, the WP-07 allocator,
+ *                 §8's index commit, §7's tape_arm / tape_feed / tape_commit
+ *                 and §9.2's tape_reset_side_b
+ *   Partial       tape_arm accepts TAPE_REC_SPLICE only. TAPE_REC_OVERWRITE
+ *                 and TAPE_REC_OVERDUB have no independently landed tests and
+ *                 are NOT IMPLEMENTED: arm refuses them with
+ *                 TAPE_ERR_INVALID_ARG and writes nothing. That is a statement
+ *                 about this engine, not about the format — §7 defines all
+ *                 three modes. See engine/src/record.c and treat it as a
+ *                 coverage boundary awaiting PM disposition, not as spec.
+ *   Declared,     everything else — tape_abort, tape_promote, tape_respool,
+ *   not defined   tape_dup, tape_format. Calling one is a link error, which is
+ *                 the intended loud failure rather than a silent stub.
  *
  * Guardrails this header exists to keep: no allocation ever (the caller owns all
  * storage, §4); no clock and no timeout anywhere (§9); nothing returns a pointer
