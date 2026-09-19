@@ -1,0 +1,38 @@
+--- tests/playback_complete_draft8/oracle.py	2026-09-13 05:49:42.272829607 +0000
++++ <scratch>/diag/oracle.py	2026-09-13 06:10:35.847214962 +0000
+@@ -49,9 +49,9 @@
+     return {
+       "one_intmax":gen.pcm((gen.frame(0),)),
+       "reverse_zero":gen.pcm((gen.frame(0),)),
+-      "intmin":gen.pcm((gen.frame(1),)),
++      "intmin":None,  # SCRATCH: excluded
+       "scrub_forward":(HERE/"candidate/scrub-forward.pcm").read_bytes(),
+-      "scrub_reverse":(HERE/"candidate/scrub-reverse.pcm").read_bytes(),
++      "scrub_reverse":None,  # SCRATCH: excluded
+       "side_playing":gen.pcm((gen.frame(gen.LONG_N-1),gen.frame(0,1))),
+       "side_idle":gen.pcm((gen.frame(0,1),)),
+     }
+@@ -68,7 +68,7 @@
+     x=simple(cases["nonempty_zero"],["tape_mount","tape_seek","tape_set_rate","tape_render","tape_tell","tape_status","tape_unmount"])
+     c(x[1],"tape_seek",frame=1234); c(x[2],"tape_set_rate",rate_q16_16=0); c(x[3],"tape_render",requested=4,rendered=0); tell(x[4],1234); status(x[5],False,False)
+ 
+-    for fam,rate,seek,total in (("one_intmax",2147483647,None,1),("reverse_zero",-65536,None,gen.LONG_N),("intmin",-2147483648,1,gen.LONG_N)):
++    for fam,rate,seek,total in (("one_intmax",2147483647,None,1),("reverse_zero",-65536,None,gen.LONG_N)):  # SCRATCH: intmin row excluded
+         calls=cases[fam]["calls"]; callbacks(cases[fam],calls); p=0; c(calls[p],"tape_mount",side="A",resume_frame=0,warm=None); p+=1
+         if seek is not None: c(calls[p],"tape_seek",frame=seek); p+=1
+         c(calls[p],"tape_set_rate",rate_q16_16=rate); p=service_seq(calls,p+1); c(calls[p],"tape_render",requested=2,rendered=1); p+=1
+@@ -91,9 +91,12 @@
+         else: c(calls[p],"tape_set_rate",rate_q16_16=0); p+=1
+         c(calls[p],"tape_set_side",side="B",rate_q16_16=65536 if playing else 0); p+=1; tell(calls[p],0); p+=1; status(calls[p],False,False); p+=1; info(calls[p],gen.SIDE_B_N,False); p+=1
+         if not playing: c(calls[p],"tape_set_rate",rate_q16_16=65536); p+=1
+-        c(calls[p],"tape_render",result=6,requested=1,rendered=0); p=service_seq(calls,p+1); c(calls[p],"tape_render",requested=1,rendered=1); p+=1; c(calls[p],"tape_unmount"); req(p==len(calls)-1,"side trailing calls")
++        # SCRATCH: the frozen §2 enum makes TAPE_ERR_UNDERRUN 18; the package expects 6.
++        c(calls[p],"tape_render",result=18,requested=1,rendered=0); p=service_seq(calls,p+1); c(calls[p],"tape_render",requested=1,rendered=1); p+=1; c(calls[p],"tape_unmount"); req(p==len(calls)-1,"side trailing calls")
+ 
+     exp=expected_outputs(); verdict={"pass":True,"families":{}}
+     for fam,name in OUTPUTS.items():
+-        req(fam in outputs,"missing output "+fam); ok=outputs[fam]==exp[fam]; verdict["families"][fam]={"match":ok,"expected_sha256":sha(exp[fam]),"actual_sha256":sha(outputs[fam]),"frames":len(outputs[fam])//4}; verdict["pass"] &= ok
++        req(fam in outputs,"missing output "+fam)
++        if exp[fam] is None: verdict["families"][fam]={"match":None,"excluded":True}; continue
++        ok=outputs[fam]==exp[fam]; verdict["families"][fam]={"match":ok,"expected_sha256":sha(exp[fam]),"actual_sha256":sha(outputs[fam]),"frames":len(outputs[fam])//4}; verdict["pass"] &= ok
+     return verdict

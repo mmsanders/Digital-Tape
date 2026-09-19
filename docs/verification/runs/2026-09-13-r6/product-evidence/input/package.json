@@ -1,0 +1,60 @@
+{
+  "assignment": "P1-R2-V",
+  "audio": {
+    "channels": 2,
+    "frame_bytes": 4,
+    "sample_format": "s16le",
+    "sample_rate_hz": 44100
+  },
+  "coverage": [
+    "forward_1x",
+    "seek_run_boundaries_pm1",
+    "reverse_from_end_neg1x"
+  ],
+  "fixture": {
+    "archive": "fixtures/playback-three-run.vo08.gz",
+    "archive_sha256": "c32431807fe713a3054d15283dc81ec2a0d3d08eabe3fd50e3feeaccc98b7ac4",
+    "block_count": 6145,
+    "metadata": "fixtures/fixture.json",
+    "metadata_sha256": "7ca4267aff69aef2d4802ac651fee2af59a2f643ce85f667c1ef3f0b91a9dd8c",
+    "raw_bytes": 3146248,
+    "raw_sha256": "c2ef07b3c35f45a46564c8fc10ed37d31c555ef09b2cb8effab848c76ba9672b"
+  },
+  "goldens": {
+    "forward_1x": {
+      "frames": 15,
+      "path": "golden/forward-1x.pcm",
+      "sha256": "750b7dfb75de2d9b75ba337393e3285e2ca02de23d7be609303505b096a424f8"
+    },
+    "reverse_neg1x": {
+      "frames": 15,
+      "path": "golden/reverse-neg1x.pcm",
+      "sha256": "15e64de5ceb9cf99ad87ea45db0b1ce7ceba65594506d8e2634d9471247049d7"
+    },
+    "seek_boundaries": {
+      "frames": 8,
+      "path": "golden/seek-boundaries.pcm",
+      "sha256": "a79ea302572d626d46dbf2662f3fb18666b2ddb03843c2b1ef51042736597cda",
+      "targets": [
+        0,
+        1,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10
+      ]
+    }
+  },
+  "product_input_commit": "7fe9942a847c6decfa40ea75aa08d16ea730bb39",
+  "schema": "playback-draft8-package-v1",
+  "spec_bundle": "DRAFT-8",
+  "spec_sha256": {
+    "acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb"
+  },
+  "status": "candidate verifier oracle bytes; not human-listened or product-accepted",
+  "verifier_input_commit": "7ca24853ed32ddd327461594a31021cba4a408f3"
+}

@@ -1,0 +1,122 @@
+{
+  "schema": "playback-draft8-observation-v1",
+  "fixture_sha256": "c2ef07b3c35f45a46564c8fc10ed37d31c555ef09b2cb8effab848c76ba9672b",
+  "adapter": {"kind": "product", "id": "software-lead-playback-public-api-probe-v1"},
+  "cases": {
+    "forward_1x": {
+      "output": "forward-1x.pcm",
+      "calls": [
+        {"call": "tape_mount", "side": "A", "resume_frame": 0, "warm": null, "result": 0},
+        {"call": "tape_set_rate", "rate_q16_16": 65536, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 15, "rendered": 15, "result": 0},
+        {"call": "tape_unmount", "result": 0}
+      ],
+      "callbacks": [
+        {"call_index": 0, "op": "read", "lba": 0, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 6144, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 136, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 137, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 392, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 2, "op": "read", "lba": 2048, "count": 1, "rc": 0},
+        {"call_index": 2, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 2, "op": "read", "lba": 3072, "count": 1, "rc": 0}
+      ]
+    },
+    "seek_boundaries": {
+      "output": "seek-boundaries.pcm",
+      "calls": [
+        {"call": "tape_mount", "side": "A", "resume_frame": 0, "warm": null, "result": 0},
+        {"call": "tape_set_rate", "rate_q16_16": 65536, "result": 0},
+        {"call": "tape_seek", "frame": 0, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 1, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 4, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 5, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 6, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 8, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 9, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_seek", "frame": 10, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 1, "rendered": 1, "result": 0},
+        {"call": "tape_unmount", "result": 0}
+      ],
+      "callbacks": [
+        {"call_index": 0, "op": "read", "lba": 0, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 6144, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 136, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 137, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 392, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 2048, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 6, "op": "read", "lba": 2048, "count": 1, "rc": 0},
+        {"call_index": 6, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 6, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 9, "op": "read", "lba": 2048, "count": 1, "rc": 0},
+        {"call_index": 9, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 9, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 12, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 12, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 15, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 15, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 18, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 18, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 21, "op": "read", "lba": 3072, "count": 1, "rc": 0},
+        {"call_index": 24, "op": "read", "lba": 3072, "count": 1, "rc": 0}
+      ]
+    },
+    "reverse_neg1x": {
+      "output": "reverse-neg1x.pcm",
+      "calls": [
+        {"call": "tape_mount", "side": "A", "resume_frame": 0, "warm": null, "result": 0},
+        {"call": "tape_seek", "frame": 15, "result": 0},
+        {"call": "tape_set_rate", "rate_q16_16": -65536, "result": 0},
+        {"call": "tape_service", "block_budget": 1024, "more_work": false, "result": 0},
+        {"call": "tape_render", "requested": 15, "rendered": 15, "result": 0},
+        {"call": "tape_unmount", "result": 0}
+      ],
+      "callbacks": [
+        {"call_index": 0, "op": "read", "lba": 0, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 6144, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 136, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 137, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 8, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 9, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 392, "count": 1, "rc": 0},
+        {"call_index": 0, "op": "read", "lba": 264, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 2048, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 4096, "count": 1, "rc": 0},
+        {"call_index": 3, "op": "read", "lba": 3072, "count": 1, "rc": 0}
+      ]
+    }
+  }
+}

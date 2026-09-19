@@ -1,0 +1,30 @@
+{
+  "error": null,
+  "families": {
+    "forward_1x": {
+      "actual_bytes": 60,
+      "differing_samples": 0,
+      "expected_bytes": 60,
+      "first_difference": null,
+      "match": true,
+      "peak_abs_delta": 0
+    },
+    "reverse_neg1x": {
+      "actual_bytes": 60,
+      "differing_samples": 0,
+      "expected_bytes": 60,
+      "first_difference": null,
+      "match": true,
+      "peak_abs_delta": 0
+    },
+    "seek_boundaries": {
+      "actual_bytes": 32,
+      "differing_samples": 0,
+      "expected_bytes": 32,
+      "first_difference": null,
+      "match": true,
+      "peak_abs_delta": 0
+    }
+  },
+  "pass": true
+}
