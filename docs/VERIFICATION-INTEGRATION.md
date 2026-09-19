@@ -647,3 +647,36 @@ offset, flush, arithmetic, target and false-summary controls. The five legacy re
 remain unchanged and no schema-2 physical record exists. Verification owns a fresh
 method-only audit of that exact head before any new acquisition; no stored card result
 is promoted by the method repair.
+
+## P1-R22 clean-candidate route and sustained-write rejection — 19 September 2026 UTC
+
+Software #110 returned held PR #112 at evidence head
+`15fbcfae0085d5e2f2cb983959fe063c2233fa40`, tree
+`8f048f0296b7ffdcec216d26236d8d59ad392aa4`. Its sole parent is pre-run code
+`20505f4254b36c2100b9b1ec8f78aff8e95e252c`, directly atop assigned main
+`86a1ba0874812ef4ca052a4dbc6baad2b16addb6`. PM reproduced clean held-PR
+ancestry, unchanged verifier tree `3667a2830ba80dbcedad03b97870d1127001ab59`,
+hash-bound evidence and two passing offline replays. This authenticates an exact
+candidate/packet for blind disposition, not source or package acceptance. Verification
+owns only the two observed cases and must keep the reported invented refusals and all
+unexercised behavior outside any acceptance.
+
+Verification #17 published one findings file at verifier main
+`f00da3ffbaab62833cce52b29c4999934a37a9d2`, tree
+`dd2031338601186690474567544a4eaa154a75ec`, blob
+`659837ffd5ed5e8c59ba07f48863238f873b6404`, SHA-256
+`cc48b96b85b2981de063b8d522808e6764259652e6aefba54994d21bf449d1da`.
+PM authenticated the one-file return and reproduced the full suite.
+
+Accept the rejection exactly. PR #87 closes the earlier ordered-trace defect and all
+thirteen prior mutations, but `P1-R21-V01` finds thirteen newly malformed records
+accepted and one malformed timestamp type crashing the auditor. Nested fsync/fill/
+capacity schemas, strict primitive types, final-flush timestamp order, and declared
+window/criterion metadata remain fail-open. No new sustained-write acquisition may
+occur until Hardware repairs the exact finding and Verification accepts a later head.
+
+Hardware #111 returned held PR #92 at `0943571e83126795797c33a0aa92706247dbaa65`.
+Its bounded method commit transcribes CS-1–CS-5 and retains field-specific red
+controls; PM reproduced those controls, unchanged packet bytes and the still-CLOSED
+five-blocker fabrication gate. The exact head awaits independent audit. No apparatus,
+print, physical run, qualification, safety/compliance conclusion or purchase follows.

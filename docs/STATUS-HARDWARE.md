@@ -18,8 +18,8 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | PR #92 head `2b004b5...` generates rev-6 WP-24 and WP-04 plates inside the nominal `180 x 180 x 180 mm` envelope with 5 mm XY margins, Z ≤175 mm and fail-closed vertex checks. PM reproduced packet identity/validation | Keep printing held: usable edges and process remain uncharacterized. After a separately issued physical route, record print settings, fit, retention, creep/drop and independent measurement audit |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
-| WP-05 | PR #87 head `10471f3...` retains a digest-bound ordered write-call trace, reconstructs windows and summaries, closes schema/type/arithmetic/target validation and passes 15 retained control families. Five legacy records remain byte-identical | Independent Verification re-audits the exact method before any acquisition. No schema-2 physical record exists; identity, attribution, atomicity, filled-condition qualification and end-to-end copy remain open; no card is qualified |
-| Ruggedization | PR #92 head `2b004b5...` passes 25 internal protocol/sharp controls and the two-plate packet checks. Hardware correctly left CS-1–CS-5 open after official-source access failed. PM recovered the current official text/drawings in the P1-R21 source note | Hardware performs a source-only correction against the PM-authenticated primary-source note; later independent Verification audits the exact head. Tool and regulatory-method gaps remain. No print, physical or live-cell destructive test |
+| WP-05 | PR #87 head `10471f3...` repairs the earlier ordered-trace defects, and five legacy records remain byte-identical. Independent Verification nevertheless rejects the method under `P1-R21-V01`: thirteen malformed schema-2 forms pass and one crashes the auditor | Hardware closes exact nested schemas, primitive types, final-fsync ordering and declared metadata with targeted red controls; another independent audit is required before any acquisition. No schema-2 physical record exists; identity, attribution, atomicity, filled-condition qualification and end-to-end copy remain open |
+| Ruggedization | PR #92 head `0943571...` transcribes CS-1–CS-5 for the method and passes 23 retained sharp controls, 51 independently restated values and 42 field-specific red mutations. The two-plate packet bytes are unchanged | Wait held for independent audit of the exact head. RG-8–RG-10, apparatus, tool and regulatory-method gaps remain. No print, physical or live-cell destructive test and no compliance claim |
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
@@ -54,5 +54,6 @@ current source/tool/packet work.
 PM's [P1-R21 primary-source note](REVIEW/P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md)
 authenticates the current eCFR banner, official Probe B drawings, edge-test tape and
 apparatus, exemptions and applicable over-36-through-96-month use/abuse inputs.
-Hardware must bind and control those exact inputs; PM's retrieval is not independent
-method acceptance or a regulatory-compliance claim.
+Hardware bound and controlled those inputs at held PR #92 head `0943571...`; PM's
+retrieval and Hardware's transcription are not independent method acceptance or a
+regulatory-compliance claim.
