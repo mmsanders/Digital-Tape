@@ -21,6 +21,8 @@ it does not imply whole-work-package acceptance.
 | VT8-A13 | evidence | actual spec bytes authenticate to issued DRAFT-8 hashes | `spec/VERSION.md`; Phase-0 freeze | spec-byte tamper control |
 | VT8-A14 | evidence | raw input/final VO08, observations and verdict are hash-bound and replayable without engine | P1-R1-V03 evidence requirement | missing/tampered evidence controls |
 | VT8-A15 | evidence | adapter is explicitly synthetic/product with immutable source/build provenance | P1-R1-V03 | manifest/observation identity checks |
+| VT8-A16 | both | generated input stores the frozen derived 21 chunks, fits the complete chunk region before the reserved last block, and preserves every case premise | TapeFS §§4.1–4.2, §5.1–5.5, §7, §9.1–9.2 | mismatched stored/derived and too-small-media controls |
+| VT8-A17 | evidence | adapter exit/outcome is separately retained, hash-bound and included in exact offline verdict recomputation | runner/replay closure requirement | nonzero-exit exact replay; missing/tampered/relabel controls; zero-exit replay |
 
 ## Deliberate exclusions
 

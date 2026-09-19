@@ -8,6 +8,7 @@ import oracle as base
 from oracle import *  # re-export fixture/media helpers for package tools
 
 OBS_FORMAT = 'VT8-OPS-OBSERVATION-1'
+ADAPTER_STATUS_FORMAT = 'VT8-ADAPTER-STATUS-1'
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -26,6 +27,26 @@ def verify_spec_dir(spec_dir: Path, expected: dict[str, str] | None = None) -> d
             raise ValueError(f'spec hash mismatch for {name}: got {digest}, want {want}')
         got[name] = digest
     return got
+
+
+def adapter_status_errors(status: dict) -> list[str]:
+    """Validate retained adapter completion evidence and derive its verdict effect."""
+    if not isinstance(status, dict) or status.get('format') != ADAPTER_STATUS_FORMAT:
+        raise ValueError('adapter status format mismatch')
+    outcome=status.get('outcome')
+    if outcome == 'exited':
+        if set(status) != {'format','outcome','returncode'} or type(status.get('returncode')) is not int:
+            raise ValueError('invalid exited adapter status evidence')
+        return [] if status['returncode'] == 0 else [f'adapter returned {status["returncode"]}']
+    if outcome == 'timed_out':
+        if set(status) != {'format','outcome','timeout_sec'} or type(status.get('timeout_sec')) is not int or status['timeout_sec'] <= 0:
+            raise ValueError('invalid timed-out adapter status evidence')
+        return [f'adapter timed out after {status["timeout_sec"]} seconds']
+    if outcome == 'execution_error':
+        if set(status) != {'format','outcome','error'} or not isinstance(status.get('error'), str) or not status['error']:
+            raise ValueError('invalid execution-error adapter status evidence')
+        return ['adapter execution failed: ' + status['error']]
+    raise ValueError(f'invalid adapter outcome label: {outcome!r}')
 
 
 def _metadata_range(m: Media, lba: int, count: int) -> bool:

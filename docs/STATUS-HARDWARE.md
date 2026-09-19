@@ -45,9 +45,16 @@ facts, not qualification or permission for another purchase. Old ~$115/$152 cart
 estimates are not current quotes or approvals. Active assignments live only in
 [Hardware's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead).
 
-PM approves a split-plate direction for the A1 Mini, contingent on recording its
-actual usable build volume: keep every WP-24 base with its matching lid on one plate
-and move the WP-04 button experiment to a second plate. Preserve blindness, the full
-sweeps and controls, regenerate from source and issue a new packet revision. This is
-not permission to print. Hardware now owns method corrections only; it must stop
-before machine-bound rebuild or physical execution if usable volume is unavailable.
+PM approves a source-generated split-plate direction inside the owner-confirmed
+nominal `180 x 180 x 180 mm` envelope: use a stated conservative edge margin, keep
+every WP-24 base with its matching lid on one plate and move the WP-04 button
+experiment to a second plate. Preserve blindness, full sweeps and controls, supports-
+off instructions, and fail-closed bounds checks. This is not permission to print or
+evidence that the full advertised edge is usable.
+
+Michael reports a sensitive food-preparation scale, normal screwdrivers and sockets,
+and likely access to a soldering iron. These are availability facts only. Hardware
+must state the minimum published resolution, accuracy/calibration and capacity before
+using the scale, and must keep torque, displacement, force, sharp-test, audio and
+reference-standard gaps explicit. No purchase request or owner action is blocking the
+current source/tool/packet work.
