@@ -3,13 +3,24 @@
 **Work package:** WP-05 · **Criterion:** A-2 (sustained-write characterization)
 **Date measured:** 16 September 2026 · **Measured by:** Michael
 **Witnessed by:** n/a — Michael ran these himself; see §2
-**Status:** `SUBMITTED FOR AUDIT` — acceptance fields in §11 are deliberately unsigned
+**Status:** `AUDITED — arithmetic only` · Verification P1-R17-V, 18 September 2026
+**Schema:** 1 (legacy, summary-only) — acceptance fields in §11 remain unsigned
 
-> **Scope of this record.** It contains five raw sustained-write runs and a reproducible
-> derivation of every number quoted from them. It is not card qualification, not a card-speed
-> measurement, and not end-to-end copy acceptance. Card identity (A-1), card-versus-path
-> attribution (A-4), atomicity (A-6) and production end-to-end copy time all remain open, and
-> **C-90 is not reopened.** §10 states each exclusion explicitly.
+> **Scope of this record, after independent audit.** Verification independently reproduced
+> all 95 recorded window rates and every pass/fail result, and **accepted that arithmetic**.
+> It **rejected this packet as complete WP-05 A-2 physical evidence** (P1-R17-V-A01), and PM
+> agreed. The reason is structural: these files store *rounded rates*, not the byte counts and
+> timestamps those rates came from, so a short write, a wrong transfer size or an unfilled card
+> cannot be ruled out after the fact.
+>
+> What that leaves is narrow and still worth having: **arithmetic over the exact recorded
+> vectors of one declared path on one evening.** It is not card qualification, not a card-speed
+> measurement, and not end-to-end copy acceptance. Card identity (A-1), attribution (A-4),
+> atomicity (A-6) and production copy time remain open, and **C-90 is not reopened.**
+>
+> **The measurement path has been corrected for the next run** — schema 2 retains the missing
+> primitives, and `characterisation/test_sustained_write.py` holds the controls that prove the
+> gaps are now caught. §13 describes it. **No rerun is requested yet.**
 
 ## 1. What this is evidence for
 
@@ -38,6 +49,11 @@ with a screening bar of **23.3 MB/s** (10% over the C-60 requirement). The tool 
 The four unfilled runs are **not** A-2 deviations and are not substitutes for a filled run. A-2's
 80%-fill condition stands: low logical occupancy in the product does not establish what the flash
 translation layer will do after prior writes and garbage collection over the card's service life.
+
+**And the filled run does not complete A-2 either.** Its `filled_to: 0.8` is a record that the
+`--fill` flag was passed, not a measurement of occupancy: no capacity or free-space figure was
+captured before the fill, after it, or after the run. A-2 asks for a run *on 80%-filled media*,
+and a flag does not establish that state. Schema 2 measures it (§13).
 
 ## 2. Provenance, and the limit on what this record can claim
 
@@ -102,22 +118,35 @@ window of every run.
 
 ## 6. Derivation
 
-`analyse.py` in this directory recomputes every figure in §7 from `raw/*.json`. It deliberately
-**recomputes each verdict from the per-window data instead of trusting the file's own `verdict`
-field**, so an edited or corrupted summary line cannot pass unnoticed. All five recomputed
-verdicts agree with the stored ones; the script exits 0.
+`analyse.py` in this directory derives every figure in §7 from `raw/*.json`. It no longer does
+the arithmetic itself: it calls `characterisation/audit_sustained_write.py`, the shared auditor,
+so this record and any future run are derived by the same audited code. The auditor **recomputes
+from the recorded vector and never uses a stored summary field as an input** — it compares each
+one and fails on disagreement.
 
 ```
-run           fill   worst   best   mean  pairmin  verdict
-onn-v10       -      15.34  25.72  19.13    18.01     FAIL
-pny1          -      26.18  68.20  38.79    37.84     PASS
-pny2          -      25.41  74.07  38.46    36.09     PASS
-pny3          -      25.88  67.11  38.38    37.35     PASS
-pny3-filled   0.8    27.36  74.07  40.59    38.52     PASS
+run           fill    worst  median    best pair(all)  screen
+onn-v10       -       15.34   19.79   25.72     17.76    FAIL
+pny1          -       26.18   67.11   68.20     37.84    PASS
+pny2          -       25.41   53.69   74.07     35.93    PASS
+pny3          -       25.88   65.71   67.11     37.35    PASS
+pny3-filled   0.8     27.36   41.30   74.07     38.52    PASS
 ```
 
-`pairmin` is the lowest rate over any adjacent pair of windows (128 MB); it is a derived
-convenience figure defined in `analyse.py`, not an A-2 criterion.
+**Two corrections to the previous version of this table**, both from the independent audit:
+
+- **`pairmin` was mislabelled** (P1-R17-V-A03). It said "any adjacent pair" and computed only
+  the fixed non-overlapping pairs (0,1), (2,3)…, skipping (1,2), (3,4)…. The column above is now
+  every adjacent pair, which is what the words say. For the onn control it moves 18.00776 →
+  **17.76235**, and for pny2 36.08881 → **35.93428**. Both values are printed side by side by
+  `analyse.py`, and the retained control in `characterisation/test_sustained_write.py` fails if
+  the two are ever confused again. **No pass/fail result changes**: the pair rate is a
+  descriptive statistic and A-2 is judged on the worst single window.
+- **The mean column is gone.** The previous analyser printed the file's *stored* mean without
+  checking it; Verification demonstrated that changing pny1's stored mean to `999.0` printed
+  `999.00` and still exited 0 (P1-R17-V-A02). The auditor now derives the mean and fails on a
+  mismatch, and the column was dropped from the headline table because the median and the worst
+  window are what this record is about.
 
 ## 7. Results — measured facts only
 
@@ -138,13 +167,15 @@ evening**, not about the cards in isolation:
 2. **The negative control failed**, at 0.72× the C-60 requirement. The measurement therefore
    discriminates adequate from inadequate media rather than passing whatever is put in front of
    it. A check that cannot go red has not established what it detects.
-3. **The three PNY samples agree to 1.0%** on the derived 128 MB pair rate (38.12 / 37.88 /
-   37.73 MB/s) — a unit-to-unit consistency screen across three samples of one retail family,
-   which is not statistical qualification of a SKU.
+3. **The three PNY samples agree to 3.0%** on the worst window (26.18 / 25.41 / 25.88 MB/s,
+   spread 0.77 MB/s) — a unit-to-unit screen across three samples of one retail family, which is
+   not statistical qualification of a SKU. *The previous version of this record quoted 1.0% on a
+   pair-rate mean. That was a more flattering statistic than the criterion's own, and it is
+   withdrawn: the figure above is stated on the worst window, which is what A-2 is judged on.*
 
-On the one sample tested both ways, the 80% fill did **not** degrade the result: worst window
-25.88 → 27.36, pair rate 37.73 → 39.86. That is a single observation on a single physical card
-and it does not generalize to the SKU, to other samples, or to the card's later life.
+On the one sample carrying the fill flag, the result was not degraded: worst window 25.88 →
+27.36 on the same physical card. That is a single observation, it does not generalize, **and the
+fill itself is unverified** — see §1 and §13.
 
 ## 8. Hypotheses — explicitly not established
 
@@ -199,14 +230,26 @@ no recorded part number.
   SKU and revision. No rig, firmware or rail traces exist.
 - **End-to-end copy time (A-3).** This is a PC-side media measurement. Guardrail 10: PC card
   throughput is not proof of production end-to-end time.
-- **Independent audit.** Not performed. Method, instruments, conditions, raw data, derivation and
-  uncertainty all remain for Verification.
+- **Complete WP-05 A-2 evidence.** Rejected by independent audit (P1-R17-V-A01) and by the P1-R18
+  disposition. The bytes actually written per window, the transfer's real size and the card's
+  real occupancy are not recoverable from a schema-1 file. **This is the exclusion that governs
+  the rest**: the packet is arithmetic over a recorded vector, nothing more.
 - **C-90.** Not reopened, and this record proposes no change to tape duration. The product is
   C-60 by ADR-018.
 
+**What the independent audit did accept**, and it is worth stating precisely: the immutable
+identity of all five blobs, the arithmetic over all 95 recorded window rates, the exact vector
+minima and pass/fail results, the fact that the control vector goes red, and the path/host/reader
+labels as recorded. Method, instruments, conditions and uncertainty were reviewed; the physical
+run itself could not be, which is the finding.
+
 ## 11. Acceptance
 
-☐ *unsigned — Verification Lead* · ☐ *unsigned — PM*
+☑ **Arithmetic independently reproduced** — Verification Lead, P1-R17-V, 18 September 2026.
+Accepted narrowly: identity, the 95 recorded rates, the minima, the pass/fail results and the
+control going red.
+☐ **Complete WP-05 A-2 physical evidence — not accepted, and not claimable from this packet.**
+☐ *unsigned — PM* (the P1-R18 disposition routes the correction; it accepts no packet)
 
 The Hardware Lead compiled this record and cannot accept it. Michael ran the measurements and
 cannot audit them. Both of those are the rule working, not an obstruction.
@@ -228,3 +271,33 @@ established with the equipment currently in hand.
 
 Also useful, and cheap, when the reader question is next touched: the make and model of any
 second card reader available, so the same cards can be measured through a different path.
+
+## 13. The corrected measurement path — for the next run, not this one
+
+The five files above are immutable and are **not** migrated, rewritten or upgraded. What changed
+is the tool that would produce the next ones. `characterisation/measure_sustained_write.py` is
+now **schema 2**, and each addition closes a specific way the old record could have been wrong
+without anyone being able to tell:
+
+| Schema 1 | Schema 2 | Closes |
+|---|---|---|
+| assumed `os.write()` wrote everything it was asked | loops until the window is complete; records requested bytes, returned bytes and the call count | a short write counted as a full window |
+| stored a rounded MB/s per window | stores monotonic start, end and duration at full precision per window, plus the byte counts | every figure recomputable; a corrupted summary cannot hide |
+| deleted the measurement file | keeps it and records its final size against the bytes written | the transfer being a different size than claimed |
+| recorded `filled_to: 0.8` because a flag was passed | measures total/free/used before the fill, after the fill and after the run, and derives occupancy | a fill that did not happen, or did not reach 80% |
+| fsync outcome unrecorded | records `fsync_ok` and any error per window | a silent sync failure |
+| analyser printed a stored mean it had not checked | `audit_sustained_write.py` derives everything and compares every stored summary, failing on disagreement | P1-R17-V-A02 exactly |
+| "any adjacent pair" computed fixed phase-0 pairs | every adjacent pair `(i, i+1)`, with the fixed statistic retained under its real name | P1-R17-V-A03 |
+
+**Retained controls:** `characterisation/test_sustained_write.py`, run by
+`make -C hardware card-test`. Eleven controls, each injecting the defect it claims to catch:
+short writes (in the tool, against an injected partial writer, and in the record), a stalled
+writer, duration and timestamp corruption, window ordering, byte-count and final-size mismatch,
+a deleted measurement file, a false occupancy, an unmeasured occupancy, legacy summary tampering
+— including the exact `38.79 → 999.0` mutation Verification used — and the adjacent-pair
+distinction. Each targeted failure is also required to survive an unrelated failure being
+present, so a control cannot pass by firing on everything.
+
+**No rerun is requested.** The tool is ready and the audit path is exercised against synthetic
+fixtures; whether and when to ask Michael for another session is PM's call, and the identity
+items in §12 should be collected first since they cost nothing and gate A-6.
