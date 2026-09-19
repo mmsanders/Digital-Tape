@@ -1,0 +1,17 @@
+{
+  "adapter_kind": "product",
+  "errors": [
+    "adapter returned 1",
+    "reset_b did not consume all-slot max + 1",
+    "reset_b result not live after recovery",
+    "reset_b missing B0 entry/header writes",
+    "reset_b public-call sequence differs from script",
+    "reset_b index commit did not have exactly 2 writes + 2 flushes"
+  ],
+  "id": "VT8-001-RB-ALLSLOT",
+  "operation": "reset_b",
+  "post_sha256": "b3fef55d0f9abed54e58318d2f2fa6ae39d309f75c53a3434ede9a43fed7e56d",
+  "pre_sha256": "b3fef55d0f9abed54e58318d2f2fa6ae39d309f75c53a3434ede9a43fed7e56d",
+  "returncode": 1,
+  "status": "FAIL"
+}

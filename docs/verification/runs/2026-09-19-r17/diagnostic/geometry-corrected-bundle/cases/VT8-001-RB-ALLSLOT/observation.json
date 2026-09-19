@@ -1,0 +1,244 @@
+{
+  "adapter_kind": "product",
+  "calls": [
+    {
+      "call": "tape_mount",
+      "phase": "mount",
+      "result": "TAPE_OK",
+      "side": "A"
+    },
+    {
+      "call": "tape_get_info",
+      "phase": "get_info",
+      "result": "TAPE_OK",
+      "side_b_valid": false
+    },
+    {
+      "call": "tape_reset_side_b",
+      "phase": "reset_b",
+      "result": "TAPE_OK"
+    },
+    {
+      "call": "tape_unmount",
+      "phase": "unmount",
+      "result": "TAPE_OK"
+    },
+    {
+      "call": "tape_mount",
+      "phase": "remount",
+      "result": "TAPE_OK",
+      "side": "B"
+    }
+  ],
+  "event_overflow": false,
+  "events": [
+    {
+      "count": 1,
+      "lba": 0,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 18432,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 8,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 9,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 136,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 137,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 8,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 9,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 264,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 265,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 392,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 393,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 265,
+      "op": "write",
+      "phase": "reset_b",
+      "rc": 0
+    },
+    {
+      "op": "flush",
+      "phase": "reset_b",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 264,
+      "op": "write",
+      "phase": "reset_b",
+      "rc": 0
+    },
+    {
+      "op": "flush",
+      "phase": "reset_b",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 0,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 18432,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 8,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 9,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 136,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 137,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 8,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 9,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 264,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 265,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 392,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 393,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 264,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 265,
+      "op": "read",
+      "phase": "remount",
+      "rc": 0
+    }
+  ],
+  "format": "VT8-OPS-OBSERVATION-1",
+  "service_guard": 4096
+}

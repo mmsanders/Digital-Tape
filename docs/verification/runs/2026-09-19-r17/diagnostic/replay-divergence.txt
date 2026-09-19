@@ -1,0 +1,23 @@
+Why replay.py cannot close over a FAILING product run.
+
+replay.py recomputes errors = hardened.check(...) only. runner.py's own
+error list additionally carries runner-level strings such as the adapter's
+nonzero exit, and the comparison is exact. So the two can never agree on a
+run whose adapter exited nonzero. Every hash binding, the spec
+authentication and the independent regeneration of the input fixture all
+PASS; only the verdict-string comparison differs, by exactly one string.
+
+== VT8-001-RB-ALLSLOT
+   input media == independently generated fixture : True
+   adapter returncode                             : 1
+   saved errors / recomputed errors               : 6 / 5
+   saved MINUS recomputed                         : ['adapter returned 1']
+   recomputed MINUS saved                         : []
+
+== VT8-001-REC-ALLOCSEQ
+   input media == independently generated fixture : True
+   adapter returncode                             : 1
+   saved errors / recomputed errors               : 11 / 10
+   saved MINUS recomputed                         : ['adapter returned 1']
+   recomputed MINUS saved                         : []
+
