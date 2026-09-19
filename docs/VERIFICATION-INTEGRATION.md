@@ -13,10 +13,10 @@ performance behaviour was not imported.
 Product main `48cc23fdbe6273dfe73f17fbdddf8e9fcc5ab3d9` now imports corrected
 complete verifier tree `3667a2830ba80dbcedad03b97870d1127001ab59` exactly and test-first.
 Held PR #96 evidence head `088226a3c324a97fe19d4a4285a80af037b097d5` contains two
-PM-authenticated passing raw cases produced without an engine/adapter-tree change.
-Independent Verification now owns a blind, case-bounded raw-evidence disposition.
-Neither the corrected package nor the green run accepts source, allocator/all-slot
-behavior beyond the exact cases, or the package.
+passing raw cases produced without an engine/adapter-tree change. Verification at
+`e77b61fe420e48444cf0791c74fc7e296ef0ccf6` independently accepts exactly those
+reset-side-B and recording/allocation observations. This does not accept source,
+allocator/all-slot behavior beyond the exact cases, PR #96, WP-07 or the package.
 Current work directions live only in role-labeled issues.
 
 ## Imported mount tranche — 7 September 2026
@@ -614,3 +614,36 @@ ancestor to `c0e6a83ae44c2370288594b75915a214ba25deb7`, tree
 through audited head `da97a8534ef6940f1cb8337e9c9fb7b403dc4804`. That correction closes
 only provenance identity. Hardware must repair the method and retained controls;
 Verification re-audits a later exact head before any card acquisition.
+
+## P1-R21 independent VT8 disposition and method-repair route — 19 September 2026 UTC
+
+Verification #16 published one findings file at verifier main
+`e77b61fe420e48444cf0791c74fc7e296ef0ccf6`, tree
+`2e96e8d4e30357944ed4a3efbffacd7356a94cb2`, blob
+`3c2ae6f87eed2edf6dd438615eaf061f6fa47f0f`, SHA-256
+`288a5ef3f3a14b52ab847835b1d90a90b7f4e6c81c93407a13992a68f61ff938`.
+PM authenticated the one-file return and reproduced the full verifier suite.
+
+Accept the report narrowly. `VT8-001-RB-ALLSLOT` independently closes the exact
+B0 entries/flush/header/flush trace, all-slot sequence 901, unchanged superblocks and
+audio, copied live-A entry, selectable Side B and `free_next == H == 3`.
+`VT8-001-REC-ALLOCSEQ` independently closes the exact chunk-3 write at LBA 5120,
+pre-metadata durability flush, B1 entries/flush/header/flush trace, sequence 701,
+two-entry index and `free_next` transition 3 to 4. Both retained exits are zero,
+unmodified replay passes, and the raw audit finds no unexpected call/write, forbidden
+range, callback error or overflow.
+
+Verification remained blind to product/adapter source and Software material. No
+other arm/splice mode, boundary, partial/multi-chunk behavior, refusal/fault, warm/
+abort/zero-frame, recovery/quarantine, privileged operation, performance, atomicity,
+PCM, golden, listening, source, WP-07 or package acceptance follows. PR #96 remains
+held. Software may produce only a new clean split from current main and fresh bound
+evidence for these two contracts; any changed code identity requires another exact
+independent disposition before merge.
+
+Hardware PR #87 method head `10471f37f432c44d6f5beac59d25b3771e057c38` now
+retains an ordered digest-bound write-call trace and closes its local schema, order,
+offset, flush, arithmetic, target and false-summary controls. The five legacy records
+remain unchanged and no schema-2 physical record exists. Verification owns a fresh
+method-only audit of that exact head before any new acquisition; no stored card result
+is promoted by the method repair.
