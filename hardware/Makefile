@@ -10,7 +10,7 @@ CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
+.PHONY: all packet-wp04 packet-check packet-validate atomicity-test card-test card-audit spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
@@ -202,6 +202,24 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
 
+## card-test — the sustained-write measurement and audit path, and its controls
+##
+## Schema 1 stored rounded rates and nothing else, so a short write, a wrong
+## transfer size or an unfilled card could not be detected after the fact
+## (P1-R17-V-A01). Schema 2 retains the primitives; these controls prove the
+## audit actually catches each defect, and that it keeps naming the right one
+## when something unrelated is also wrong.
+card-test:
+	@cd $(CHAR) && $(PY) test_sustained_write.py
+
+## card-audit — re-audit the committed raw records from their primitives
+card-audit:
+	@$(PY) $(CHAR)/audit_sustained_write.py \
+	  measurements/2026-09-16-sustained-write/raw/*.json >/dev/null \
+	  && echo "OK  submitted card records are internally consistent (schema 1, legacy)"
+	@$(PY) measurements/2026-09-16-sustained-write/analyse.py >/dev/null \
+	  && echo "OK  the 16 September record reproduces from its raw vectors"
+
 ## spec-check — spec/hw content and revision must move together
 ##
 ## board-rev-a.md is what firmware/prod writes against, and its value rests on the
@@ -229,6 +247,8 @@ check: thermal-check mech-check
 	@$(MAKE) --no-print-directory solenoid-test
 	@$(MAKE) --no-print-directory fabrication-gate-test
 	@$(MAKE) --no-print-directory atomicity-test
+	@$(MAKE) --no-print-directory card-test
+	@$(MAKE) --no-print-directory card-audit
 	@$(MAKE) --no-print-directory spec-check
 	@$(MAKE) --no-print-directory drc
 	@$(MAKE) --no-print-directory erc
