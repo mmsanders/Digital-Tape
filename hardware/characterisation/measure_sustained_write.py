@@ -58,6 +58,7 @@ device that is mounted, and requires --i-know for a raw block device.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -123,23 +124,53 @@ def space(target: Path) -> dict:
             "occupancy": (used / total) if total else None}
 
 
-def write_fully(fd: int, view: memoryview, writer=os.write) -> tuple[int, int]:
-    """Write every byte of `view`, looping over short writes.
+def write_fully(fd: int, view: memoryview, base_offset: int,
+                writer=os.write) -> list[dict]:
+    """Write every byte of `view`, keeping a record of every call.
 
-    Returns (bytes actually returned by the kernel, number of write calls).
     os.write() is permitted to write less than asked -- on a slow device under
     memory pressure it does. Schema 1 assumed otherwise and counted the
     requested size, which turns a short write into free throughput.
+
+    P1-R19-V01: continuing after a short write is not enough. Returning only
+    (bytes, call count) leaves an auditor unable to prove the continuation
+    resumed at the right offset, or that the counts are truthful -- removing
+    `write_calls`, setting `short_writes` to 99 or changing an offset all
+    passed. So every call is retained in order, with its absolute offset, what
+    was asked and what came back, and the auditor reconstructs the window from
+    the trace rather than believing a summary of it.
     """
+    calls: list[dict] = []
     done = 0
-    calls = 0
     while done < len(view):
+        want = len(view) - done
         n = writer(fd, view[done:])
-        calls += 1
         if n <= 0:
             raise OSError(f"write returned {n} after {done} of {len(view)} bytes")
+        if n > want:
+            raise OSError(f"write returned {n}, more than the {want} requested")
+        calls.append({
+            "seq": None,                       # filled in by the caller, globally
+            "window": None,
+            "offset_bytes": base_offset + done,
+            "requested_bytes": want,
+            "returned_bytes": n,
+        })
         done += n
-    return done, calls
+    return calls
+
+
+def trace_digest(calls: list[dict]) -> str:
+    """Bind the call trace to the record it belongs to.
+
+    Canonical, order-sensitive, and over exactly the fields an auditor checks.
+    A trace that is edited after the fact no longer matches.
+    """
+    h = hashlib.sha256()
+    for c in calls:
+        h.update(f"{c['seq']}|{c['window']}|{c['offset_bytes']}|"
+                 f"{c['requested_bytes']}|{c['returned_bytes']}\n".encode())
+    return h.hexdigest()
 
 
 def fill_to(target: Path, fraction: float, writer=os.write) -> dict:
@@ -166,8 +197,8 @@ def fill_to(target: Path, fraction: float, writer=os.write) -> dict:
         try:
             while written < to_write:
                 n = min(len(chunk), to_write - written)
-                got, _ = write_fully(fd, chunk[:n], writer)
-                written += got
+                for call in write_fully(fd, chunk[:n], written, writer):
+                    written += call["returned_bytes"]
             os.fsync(fd)
         finally:
             os.close(fd)
@@ -198,6 +229,7 @@ def run(target: Path, transfer_mb: int, window_mb: int, writer=os.write,
         flags |= os.O_CREAT | os.O_TRUNC
 
     windows: list[dict] = []
+    trace: list[dict] = []
     fd = os.open(path, flags)
     try:
         requested_total = 0
@@ -206,7 +238,12 @@ def run(target: Path, transfer_mb: int, window_mb: int, writer=os.write,
         while returned_total < total:
             n = min(win, total - returned_total)
             t0 = time.monotonic()
-            got, calls = write_fully(fd, buf[:n], writer)
+            calls = write_fully(fd, buf[:n], returned_total, writer)
+            got = sum(c["returned_bytes"] for c in calls)
+            for c in calls:                      # number them globally, in order
+                c["seq"] = len(trace)
+                c["window"] = len(windows)
+                trace.append(c)
             sync_error = None
             try:
                 os.fsync(fd)          # the stall we care about happens here
@@ -215,11 +252,12 @@ def run(target: Path, transfer_mb: int, window_mb: int, writer=os.write,
             t1 = time.monotonic()
             windows.append({
                 "index": len(windows),
-                "offset_bytes": returned_total,
+                "offset_start_bytes": returned_total,
+                "offset_end_bytes": returned_total + got,
                 "requested_bytes": n,
                 "returned_bytes": got,
-                "write_calls": calls,
-                "short_writes": calls - 1,
+                "write_calls": len(calls),
+                "short_writes": len(calls) - 1,
                 "t_start_monotonic_s": t0,
                 "t_end_monotonic_s": t1,
                 "duration_s": t1 - t0,
@@ -233,9 +271,19 @@ def run(target: Path, transfer_mb: int, window_mb: int, writer=os.write,
                 print(f"  {mb(returned_total):>7,.0f} MB  "
                       f"now {rates[-1]:6.1f} MB/s  "
                       f"worst {min(rates):6.1f} MB/s", flush=True)
-        t_last = time.monotonic()
-        os.fsync(fd)
+
+        # The closing fsync is part of the measured span on purpose: an audit
+        # cannot confirm the data reached the card if the last flush happens
+        # after the clock stops (P1-R19-V02).
+        fs0 = time.monotonic()
+        final_sync_error = None
+        try:
+            os.fsync(fd)
+        except OSError as exc:
+            final_sync_error = str(exc)
+        fs1 = time.monotonic()
         final_size = os.fstat(fd).st_size
+        t_last = time.monotonic()
     finally:
         os.close(fd)
 
@@ -261,7 +309,16 @@ def run(target: Path, transfer_mb: int, window_mb: int, writer=os.write,
         "t_first_monotonic_s": t_first,
         "t_last_monotonic_s": t_last,
         "elapsed_s": t_last - t_first,
+        "final_fsync": {
+            "attempted": True,
+            "ok": final_sync_error is None,
+            "error": final_sync_error,
+            "t_start_monotonic_s": fs0,
+            "t_end_monotonic_s": fs1,
+        },
         "windows": windows,
+        "write_trace": trace,
+        "write_trace_sha256": trace_digest(trace),
         "required_mb_s": REQUIRED_MB_S,
         "required_c90_mb_s": REQUIRED_C90_MB_S,
         "bar_mb_s": BAR_MB_S,

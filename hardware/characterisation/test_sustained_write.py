@@ -45,18 +45,37 @@ LEGACY = Path(__file__).resolve().parents[1] / "measurements" / \
 # --- fixtures ---------------------------------------------------------------
 
 def good_record(n_windows: int = 8, rate_mb_s: float = 40.0,
-                filled: bool = True) -> dict:
-    """A synthetic schema-2 record that must audit clean."""
+                filled: bool = True, short_at: int | None = None) -> dict:
+    """A synthetic schema-2 record that must audit clean.
+
+    `short_at` splits that window into two write calls, so the short-write
+    path is exercised by a fixture that still has to pass every check.
+    """
     dur = (WINDOW_B / MB) / rate_mb_s
-    windows, t = [], 1000.0
+    windows, trace, t, offset = [], [], 1000.0, 0
     for i in range(n_windows):
+        if i == short_at:
+            parts = [(WINDOW_B, WINDOW_B - 4096), (4096, 4096)]
+        else:
+            parts = [(WINDOW_B, WINDOW_B)]
+        start = offset
+        for req, got in parts:
+            trace.append({
+                "seq": len(trace),
+                "window": i,
+                "offset_bytes": offset,
+                "requested_bytes": req,
+                "returned_bytes": got,
+            })
+            offset += got
         windows.append({
             "index": i,
-            "offset_bytes": i * WINDOW_B,
+            "offset_start_bytes": start,
+            "offset_end_bytes": offset,
             "requested_bytes": WINDOW_B,
-            "returned_bytes": WINDOW_B,
-            "write_calls": 1,
-            "short_writes": 0,
+            "returned_bytes": offset - start,
+            "write_calls": len(parts),
+            "short_writes": len(parts) - 1,
             "t_start_monotonic_s": t,
             "t_end_monotonic_s": t + dur,
             "duration_s": dur,
@@ -68,9 +87,13 @@ def good_record(n_windows: int = 8, rate_mb_s: float = 40.0,
     cap = 64 * 1000 * MB
     after_fill = {"applies": True, "reason": None, "total_bytes": cap,
                   "free_bytes": int(cap * 0.2), "used_bytes": int(cap * 0.8),
-                  "occupancy": 0.8}
+                  "occupancy": int(cap * 0.8) / cap}
     empty = {"applies": True, "reason": None, "total_bytes": cap,
              "free_bytes": cap, "used_bytes": 0, "occupancy": 0.0}
+    end = dict(after_fill)
+    end["used_bytes"] = after_fill["used_bytes"] + total
+    end["free_bytes"] = cap - end["used_bytes"]
+    end["occupancy"] = end["used_bytes"] / cap
     return {
         "schema_version": 2,
         "target_kind": "mounted-filesystem",
@@ -84,21 +107,33 @@ def good_record(n_windows: int = 8, rate_mb_s: float = 40.0,
         "expected_final_size_bytes": total,
         "final_size_bytes": total,
         "t_first_monotonic_s": 1000.0,
-        "t_last_monotonic_s": 1000.0 + n_windows * dur,
-        "elapsed_s": n_windows * dur,
+        "t_last_monotonic_s": 1000.0 + n_windows * dur + 0.02,
+        "elapsed_s": n_windows * dur + 0.02,
+        "final_fsync": {"attempted": True, "ok": True, "error": None,
+                        "t_start_monotonic_s": 1000.0 + n_windows * dur,
+                        "t_end_monotonic_s": 1000.0 + n_windows * dur + 0.01},
         "windows": windows,
+        "write_trace": trace,
+        "write_trace_sha256": aud._trace_digest(trace),
         "required_mb_s": msw.REQUIRED_MB_S,
         "required_c90_mb_s": msw.REQUIRED_C90_MB_S,
         "bar_mb_s": msw.BAR_MB_S,
         "fill": {"requested_fraction": 0.8, "performed": filled,
                  "reason": None if filled else "--fill not requested",
                  "before": empty, "after": after_fill if filled else empty,
-                 "ballast_bytes": int(cap * 0.8), "ballast_path": "/mnt/card/_ballast.bin"},
-        "space_after_measurement": after_fill,
+                 "ballast_bytes": int(cap * 0.8) if filled else 0,
+                 "ballast_path": "/mnt/card/_ballast.bin" if filled else None},
+        "space_after_measurement": end,
         "sku": "EXAMPLE-PART-64G", "revision": "A", "cid": "deadbeef",
         "sample": "fixture", "reader": "synthetic",
         "measured_at": "2026-09-19T00:00:00+00:00", "host": "synthetic",
     }
+
+
+def rebind(rec: dict) -> dict:
+    """Recompute the trace digest -- for mutations that legitimately change it."""
+    rec["write_trace_sha256"] = aud._trace_digest(rec["write_trace"])
+    return rec
 
 
 def audit_dict(rec: dict) -> aud.Audit:
@@ -162,14 +197,26 @@ def short_writes_are_looped_not_assumed() -> list[str]:
         seen.append(n)
         return n
 
-    got, calls = msw.write_fully(0, buf, stingy)
+    calls = msw.write_fully(0, buf, 4096, stingy)
     bad = []
+    got = sum(c["returned_bytes"] for c in calls)
     if got != 1000:
         bad.append(f"write_fully returned {got} of 1000 bytes")
-    if calls != 10:
-        bad.append(f"expected 10 short writes, counted {calls}")
+    if len(calls) != 10:
+        bad.append(f"expected 10 short writes, counted {len(calls)}")
     if sum(seen) != 1000:
         bad.append(f"the injected writer was asked for {sum(seen)} bytes, not 1000")
+    # Every call must carry the offset it actually wrote at (P1-R19-V01).
+    want = 4096
+    for c in calls:
+        if c["offset_bytes"] != want:
+            bad.append(f"call at offset {c['offset_bytes']}, expected {want}")
+            break
+        if c["requested_bytes"] != 1000 - (want - 4096):
+            bad.append(f"call requested {c['requested_bytes']}, expected the "
+                       f"remaining {1000 - (want - 4096)}")
+            break
+        want += c["returned_bytes"]
     return bad
 
 
@@ -177,7 +224,7 @@ def a_stalled_write_raises_rather_than_spins() -> list[str]:
     def zero(fd, view):
         return 0
     try:
-        msw.write_fully(0, memoryview(bytearray(10)), zero)
+        msw.write_fully(0, memoryview(bytearray(10)), 0, zero)
     except OSError:
         return []
     return ["a writer returning 0 must raise, not loop forever or report success"]
@@ -185,60 +232,311 @@ def a_stalled_write_raises_rather_than_spins() -> list[str]:
 
 # --- controls: the audit ----------------------------------------------------
 
-def a_short_write_in_the_record_is_caught() -> list[str]:
+def _drop(rec: dict, *keys) -> dict:
+    for k in keys:
+        rec.pop(k, None)
+    return rec
+
+
+def the_schema_is_closed() -> list[str]:
+    """P1-R19-V02: a missing or unknown mandatory field must not pass.
+
+    The old auditor read the fields it recognised and ignored the rest, so
+    deleting one was invisible. Every required field is now dropped in turn and
+    each must be caught by name.
+    """
+    bad = []
+    for key in sorted(aud.S2_REQUIRED):
+        rec = _drop(good_record(), key)
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"dropping required field {key!r} passed the audit")
+        elif not any(key in p for p in a.problems):
+            bad.append(f"dropping {key!r} failed without naming it: {a.problems}")
     rec = good_record()
-    rec["windows"][3]["returned_bytes"] = WINDOW_B - 4096      # window not completed
-    bad = expect_red("short write", rec, "short write")
-    return bad + expect_specific("short write", rec, "short write")
-
-
-def duration_corruption_is_caught() -> list[str]:
+    rec["something_invented"] = 1
+    if audit_dict(rec).ok:
+        bad.append("an unknown top-level field passed a closed schema")
     rec = good_record()
-    rec["windows"][2]["duration_s"] *= 0.5        # claims twice the speed
-    bad = expect_red("duration", rec, "does not match its own")
-    rec2 = good_record()
-    rec2["windows"][2]["t_end_monotonic_s"] = rec2["windows"][2]["t_start_monotonic_s"]
-    bad += expect_red("timestamp", rec2, "is not after start")
-    rec3 = good_record()
-    rec3["windows"][4]["t_start_monotonic_s"] -= 5.0            # out of order
-    bad += expect_red("ordering", rec3, "before the previous window ended")
-    return bad + expect_specific("duration", rec, "does not match its own")
+    del rec["windows"][2]["fsync_ok"]
+    a = audit_dict(rec)
+    if a.ok:
+        bad.append("a missing fsync_ok passed -- it must not read as success")
+    return bad
 
 
-def byte_count_mismatch_is_caught() -> list[str]:
-    rec = mutated(returned_bytes_total=99)
-    bad = expect_red("byte total", rec, "its own windows account for")
-    rec2 = good_record()
-    rec2["windows"] = rec2["windows"][:-1]        # one window short of the transfer
-    bad += expect_red("transfer size", rec2, "not the size it claims")
-    return bad + expect_specific("byte total", rec, "its own windows account for")
+def a_false_summary_is_rejected_not_ignored() -> list[str]:
+    """The audit's own mutation: an inserted worst_window_mb_s = 999.0."""
+    bad = []
+    for field, value in (("worst_window_mb_s", 999.0), ("mean_mb_s", 999.0),
+                         ("verdict", "PASS"), ("windows_mb_s", [1, 2])):
+        rec = good_record()
+        rec[field] = value
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"a stored {field!r} passed; schema 2 holds primitives "
+                       f"and a summary in the file is a contradiction")
+        elif not any(field in p for p in a.problems):
+            bad.append(f"the {field!r} rejection does not name it: {a.problems}")
+    return bad
 
 
-def final_size_mismatch_is_caught() -> list[str]:
-    rec = mutated(final_size_bytes=123)
-    bad = expect_red("final size", rec, "final file size")
-    rec2 = mutated(measurement_file_retained=False)
-    bad += expect_red("deleted file", rec2, "deleted")
-    rec3 = mutated(final_size_bytes=None)
-    bad += expect_red("missing size", rec3, "no final measurement-file size")
-    return bad + expect_specific("final size", rec, "final file size")
-
-
-def a_false_or_missing_fill_is_caught() -> list[str]:
+def an_invented_target_kind_cannot_evade_the_size_branch() -> list[str]:
+    bad = []
     rec = good_record()
-    rec["fill"]["after"]["occupancy"] = 0.31      # claimed 80%, measured 31%
-    bad = expect_red("false fill", rec, "was not filled as claimed")
+    rec["target_kind"] = "something-else"
+    a = audit_dict(rec)
+    if a.ok:
+        bad.append("an invented target_kind passed and skipped the final-size "
+                   "branch entirely")
+    elif not any("target_kind" in p for p in a.problems):
+        bad.append(f"the failure does not name target_kind: {a.problems}")
 
-    rec2 = good_record()
-    rec2["fill"]["after"]["occupancy"] = None     # flag set, nothing measured
-    bad += expect_red("unmeasured fill", rec2, "no post-fill occupancy")
+    # The raw-device branch must be enforced, not merely declared.
+    rec = good_record()
+    rec["target_kind"] = "raw-device"          # still claims a retained file
+    if audit_dict(rec).ok:
+        bad.append("a raw-device record claiming a retained measurement file "
+                   "passed")
+    rec = good_record()
+    rec["target_kind"] = "raw-device"
+    rec["measurement_file_retained"] = False
+    rec["final_size_bytes"] = rec["expected_final_size_bytes"] - 1
+    if audit_dict(rec).ok:
+        bad.append("a device smaller than the transfer passed")
+    return bad
 
-    rec3 = good_record()
-    rec3["fill"]["after"] = {"applies": False, "reason": "invented",
-                             "total_bytes": 1, "free_bytes": None,
-                             "used_bytes": None, "occupancy": None}
-    bad += expect_red("inapplicable fill", rec3, "no post-fill occupancy")
-    return bad + expect_specific("false fill", rec, "was not filled as claimed")
+
+def the_write_trace_is_proven_not_believed() -> list[str]:
+    """P1-R19-V01, every mutation the finding asked for."""
+    bad = []
+
+    def red(name, rec, marker, rebind_digest=False):
+        if rebind_digest:
+            rebind(rec)
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"{name}: passed")
+        elif not any(marker in p for p in a.problems):
+            bad.append(f"{name}: failed without naming {marker!r}: {a.problems}")
+
+    rec = good_record()
+    rec["write_trace"] = rec["write_trace"][:-1]
+    red("a missing call", rec, "trace covers", rebind_digest=True)
+
+    rec = good_record()
+    rec["write_trace"].append(dict(rec["write_trace"][-1]))
+    rec["write_trace"][-1]["seq"] = len(rec["write_trace"]) - 1
+    red("a duplicated call", rec, "offset", rebind_digest=True)
+
+    rec = good_record(short_at=2)
+    w = [c for c in rec["write_trace"] if c["window"] == 2]
+    i, j = w[0]["seq"], w[1]["seq"]
+    rec["write_trace"][i], rec["write_trace"][j] = \
+        rec["write_trace"][j], rec["write_trace"][i]
+    rec["write_trace"][i]["seq"], rec["write_trace"][j]["seq"] = i, j
+    red("a reordered pair", rec, "offset", rebind_digest=True)
+
+    rec = good_record(short_at=2)
+    w = [c for c in rec["write_trace"] if c["window"] == 2][1]
+    w["offset_bytes"] += 7
+    red("a continuation at the wrong offset", rec,
+        "resume where the short write stopped", rebind_digest=True)
+
+    rec = good_record()
+    rec["write_trace"][4]["returned_bytes"] += 1024
+    red("an over-return", rec, "more than the", rebind_digest=True)
+
+    rec = good_record()
+    rec["write_trace"][4]["returned_bytes"] = 0
+    red("a call that wrote nothing", rec, "not progress", rebind_digest=True)
+
+    rec = good_record()
+    rec["write_trace"][2]["returned_bytes"] -= 512   # digest NOT rebound
+    red("an edited trace", rec, "write_trace_sha256")
+
+    rec = good_record()
+    rec["windows"][3]["write_calls"] = 99
+    red("an untruthful call count", rec, "write_calls")
+
+    rec = good_record()
+    rec["windows"][3]["short_writes"] = 99
+    red("an untruthful short-write count", rec, "short_writes")
+
+    rec = good_record()
+    rec["write_trace"] = []
+    red("no trace at all", rec, "write_trace", rebind_digest=True)
+    return bad
+
+
+def window_order_and_offsets_are_enforced() -> list[str]:
+    bad = []
+
+    def red(name, rec, marker):
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"{name}: passed")
+        elif not any(marker in p for p in a.problems):
+            bad.append(f"{name}: failed without naming {marker!r}: {a.problems}")
+
+    rec = good_record()
+    rec["windows"][3]["index"] = 9
+    red("a wrong index", rec, "out of order")
+
+    rec = good_record()
+    rec["windows"][3]["offset_start_bytes"] = 7
+    red("a wrong start offset", rec, "not contiguous")
+
+    rec = good_record()
+    rec["windows"][3]["offset_end_bytes"] += 4096
+    red("an end offset that does not follow", rec, "end offset")
+
+    rec = good_record()
+    rec["windows"][2], rec["windows"][3] = rec["windows"][3], rec["windows"][2]
+    red("two windows swapped", rec, "out of order")
+    return bad
+
+
+def timing_and_the_closing_flush_are_enforced() -> list[str]:
+    bad = []
+
+    def red(name, rec, marker):
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"{name}: passed")
+        elif not any(marker in p for p in a.problems):
+            bad.append(f"{name}: failed without naming {marker!r}: {a.problems}")
+
+    rec = good_record()
+    rec["windows"][2]["duration_s"] *= 0.5
+    red("a corrupt duration", rec, "does not match its own")
+
+    rec = good_record()
+    rec["windows"][2]["t_end_monotonic_s"] = rec["windows"][2]["t_start_monotonic_s"]
+    red("an inverted window", rec, "not after start")
+
+    rec = good_record()
+    rec["windows"][4]["t_start_monotonic_s"] -= 5.0
+    red("overlapping windows", rec, "before the previous window ended")
+
+    rec = good_record()
+    rec["elapsed_s"] *= 2
+    red("a corrupt elapsed", rec, "elapsed")
+
+    rec = good_record()
+    fs = rec["final_fsync"]
+    fs["t_start_monotonic_s"] = rec["t_last_monotonic_s"] + 1.0
+    fs["t_end_monotonic_s"] = rec["t_last_monotonic_s"] + 2.0
+    red("a closing flush after the clock stopped", rec, "outside the measured span")
+
+    rec = good_record()
+    rec["final_fsync"]["ok"] = False
+    red("a failed closing flush", rec, "closing fsync failed")
+
+    rec = good_record()
+    rec["final_fsync"]["attempted"] = False
+    red("no closing flush", rec, "no closing fsync")
+    return bad
+
+
+def totals_and_final_size_are_enforced() -> list[str]:
+    bad = []
+
+    def red(name, rec, marker):
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"{name}: passed")
+        elif not any(marker in p for p in a.problems):
+            bad.append(f"{name}: failed without naming {marker!r}: {a.problems}")
+
+    rec = good_record()
+    rec["requested_bytes_total"] = 99
+    red("a wrong requested total", rec, "requested_bytes_total")
+
+    rec = good_record()
+    rec["returned_bytes_total"] = 99
+    red("a wrong returned total", rec, "returned_bytes_total")
+
+    rec = good_record()
+    rec["expected_final_size_bytes"] += 4096
+    red("a transfer that is not its declared size", rec, "expected")
+
+    rec = good_record()
+    rec["final_size_bytes"] = 123
+    red("a wrong final size", rec, "final file size")
+
+    rec = good_record()
+    rec["measurement_file_retained"] = False
+    red("a deleted measurement file", rec, "deleted")
+    return bad
+
+
+def capacity_accounting_is_enforced() -> list[str]:
+    bad = []
+
+    def red(name, rec, marker):
+        a = audit_dict(rec)
+        if a.ok:
+            bad.append(f"{name}: passed")
+        elif not any(marker in p for p in a.problems):
+            bad.append(f"{name}: failed without naming {marker!r}: {a.problems}")
+
+    rec = good_record()
+    rec["space_after_measurement"]["occupancy"] = 0.01
+    red("occupancy that does not equal used/total", rec, "occupancy")
+
+    rec = good_record()
+    sp = rec["space_after_measurement"]
+    sp["used_bytes"] = sp["total_bytes"]
+    sp["free_bytes"] = sp["total_bytes"]
+    sp["occupancy"] = 1.0
+    red("used + free beyond total", rec, "exceeds total")
+
+    rec = good_record()
+    rec["space_after_measurement"]["used_bytes"] = 0
+    rec["space_after_measurement"]["occupancy"] = 0.0
+    red("used space that shrank across the run", rec, "shrank")
+
+    rec = good_record()
+    rec["fill"]["after"]["occupancy"] = 0.31
+    red("a false fill", rec, "was not filled as claimed")
+
+    rec = good_record()
+    rec["fill"]["after"] = {"applies": False, "reason": "invented",
+                            "total_bytes": 1, "free_bytes": None,
+                            "used_bytes": None, "occupancy": None}
+    red("filesystem accounting declared inapplicable on a filesystem", rec,
+        "inapplicable")
+
+    rec = good_record()
+    rec["fill"]["before"]["used_bytes"] = rec["fill"]["after"]["used_bytes"] + 1
+    rec["fill"]["before"]["occupancy"] = (rec["fill"]["before"]["used_bytes"]
+                                          / rec["fill"]["before"]["total_bytes"])
+    red("a fill that removed data", rec, "less used space")
+    return bad
+
+
+def the_controls_stay_specific_under_noise() -> list[str]:
+    """Each targeted failure must survive an unrelated one being present."""
+    bad = []
+    cases = [
+        ("trace", lambda r: r["write_trace"].pop(), "trace covers"),
+        ("offsets", lambda r: r["windows"][3].__setitem__("offset_start_bytes", 7),
+         "not contiguous"),
+        ("totals", lambda r: r.__setitem__("returned_bytes_total", 99),
+         "returned_bytes_total"),
+    ]
+    for name, mutate, marker in cases:
+        rec = good_record()
+        mutate(rec)
+        rebind(rec)
+        rec["windows"][-1]["fsync_ok"] = False        # unrelated, always fails
+        rec["windows"][-1]["sync_error"] = "injected unrelated failure"
+        a = audit_dict(rec)
+        if not any(marker in p for p in a.problems):
+            bad.append(f"{name}: the targeted failure vanished under unrelated "
+                       f"noise: {a.problems}")
+    return bad
 
 
 def summary_tampering_is_caught_in_legacy_records() -> list[str]:
@@ -316,11 +614,15 @@ CONTROLS = (
     the_good_fixture_passes,
     short_writes_are_looped_not_assumed,
     a_stalled_write_raises_rather_than_spins,
-    a_short_write_in_the_record_is_caught,
-    duration_corruption_is_caught,
-    byte_count_mismatch_is_caught,
-    final_size_mismatch_is_caught,
-    a_false_or_missing_fill_is_caught,
+    the_schema_is_closed,
+    a_false_summary_is_rejected_not_ignored,
+    an_invented_target_kind_cannot_evade_the_size_branch,
+    the_write_trace_is_proven_not_believed,
+    window_order_and_offsets_are_enforced,
+    timing_and_the_closing_flush_are_enforced,
+    totals_and_final_size_are_enforced,
+    capacity_accounting_is_enforced,
+    the_controls_stay_specific_under_noise,
     summary_tampering_is_caught_in_legacy_records,
     every_adjacent_pair_is_what_is_computed,
     an_unreadable_record_fails,
@@ -336,9 +638,11 @@ def main() -> int:
         for f in failures:
             print(f"FAIL sustained-write control: {f}", file=sys.stderr)
         return 1
-    print(f"OK  sustained-write: {len(CONTROLS)} retained controls pass; "
-          f"short writes, timestamps, byte/size accounting, fill occupancy, "
-          f"summary tampering and the adjacent-pair definition all go red")
+    print(f"OK  sustained-write: {len(CONTROLS)} retained controls pass over "
+          f"{len(aud.S2_REQUIRED)} required schema-2 fields; the write-call "
+          f"trace, window order and offsets, timing and the closing flush, "
+          f"totals and final size, capacity accounting, target branch, schema "
+          f"closure, false summaries and legacy tampering all go red")
     return 0
 
 

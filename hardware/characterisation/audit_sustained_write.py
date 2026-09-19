@@ -33,6 +33,7 @@ Two schemas exist and the difference is stated, never blurred:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import statistics
@@ -68,6 +69,15 @@ class Audit:
     @property
     def verdict(self) -> str:
         return "PASS" if self.derived.get("worst", 0.0) >= BAR_MB_S else "FAIL"
+
+
+def _trace_digest(calls: list[dict]) -> str:
+    """The same canonical binding the tool computes, recomputed here."""
+    h = hashlib.sha256()
+    for c in calls:
+        h.update(f"{c['seq']}|{c['window']}|{c['offset_bytes']}|"
+                 f"{c['requested_bytes']}|{c['returned_bytes']}\n".encode())
+    return h.hexdigest()
 
 
 def sliding_pair_rates(rates: list[float], window_bytes: list[int],
@@ -110,91 +120,361 @@ def _close(a: float, b: float, eps: float) -> bool:
     return a is not None and b is not None and math.isclose(a, b, abs_tol=eps)
 
 
+# Schema 2 is a CLOSED schema. Everything required is listed; anything not
+# listed is rejected rather than ignored, because P1-R19-V02 found the opposite
+# arrangement accepting thirteen mutations that removed or corrupted the very
+# primitives the record exists to carry.
+
+S2_REQUIRED = {
+    "schema_version", "target_kind", "measurement_path",
+    "measurement_file_retained", "transfer_mb", "window_mb", "bytes_per_mb",
+    "requested_bytes_total", "returned_bytes_total", "expected_final_size_bytes",
+    "final_size_bytes", "t_first_monotonic_s", "t_last_monotonic_s", "elapsed_s",
+    "final_fsync", "windows", "write_trace", "write_trace_sha256",
+    "required_mb_s", "required_c90_mb_s", "bar_mb_s", "fill",
+    "space_after_measurement", "sku", "revision", "cid", "sample", "reader",
+    "measured_at", "host",
+}
+S2_WINDOW_REQUIRED = {
+    "index", "offset_start_bytes", "offset_end_bytes", "requested_bytes",
+    "returned_bytes", "write_calls", "short_writes", "t_start_monotonic_s",
+    "t_end_monotonic_s", "duration_s", "fsync_ok", "sync_error",
+}
+S2_CALL_REQUIRED = {"seq", "window", "offset_bytes", "requested_bytes",
+                    "returned_bytes"}
+S2_TARGET_KINDS = {"mounted-filesystem", "raw-device"}
+# Schema 2 stores primitives. A summary in the file is not authoritative and is
+# not quietly ignored: it is a contradiction and the record is rejected.
+S2_FORBIDDEN = {"worst_window_mb_s", "mean_mb_s", "median_mb_s", "p05_mb_s",
+                "verdict", "windows_mb_s", "filled_to"}
+
+
+def _num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
 def audit_schema2(rec: dict, a: Audit) -> None:
-    windows = rec.get("windows")
+    # --- closure: required present, forbidden absent, nothing unknown --------
+    keys = set(rec)
+    for missing in sorted(S2_REQUIRED - keys):
+        a.problems.append(f"missing required field {missing!r}")
+    for banned in sorted(S2_FORBIDDEN & keys):
+        a.problems.append(
+            f"{banned!r} is a stored summary; schema 2 holds primitives and "
+            f"derives every figure, so a summary in the file is a contradiction")
+    for unknown in sorted(keys - S2_REQUIRED - S2_FORBIDDEN):
+        a.problems.append(f"unknown field {unknown!r} in a closed schema")
+    if a.problems:
+        return            # nothing below can be trusted on an unsound record
+
+    kind = rec["target_kind"]
+    if kind not in S2_TARGET_KINDS:
+        a.problems.append(
+            f"target_kind {kind!r} is not one of {sorted(S2_TARGET_KINDS)}; an "
+            f"invented kind would evade the branch that checks final size")
+        return
+
+    mb_unit = rec["bytes_per_mb"]
+    if mb_unit != BYTES_PER_MB:
+        a.notes.append(f"record declares 1 MB = {mb_unit} bytes")
+
+    windows = rec["windows"]
     if not windows:
         a.problems.append("no windows recorded")
         return
 
-    mb_unit = rec.get("bytes_per_mb", BYTES_PER_MB)
-    if mb_unit != BYTES_PER_MB:
-        a.notes.append(f"record declares 1 MB = {mb_unit} bytes")
-
+    # --- windows: order, offsets, arithmetic, timing -------------------------
     rates, byts, durs = [], [], []
-    prev_end = None
+    prev_end_t = None
     for i, w in enumerate(windows):
-        where = f"window {w.get('index', i)}"
-        req, got = w.get("requested_bytes"), w.get("returned_bytes")
-        t0, t1 = w.get("t_start_monotonic_s"), w.get("t_end_monotonic_s")
-        dur = w.get("duration_s")
+        where = f"window {i}"
+        for missing in sorted(S2_WINDOW_REQUIRED - set(w)):
+            a.problems.append(f"{where}: missing required field {missing!r}")
+        for unknown in sorted(set(w) - S2_WINDOW_REQUIRED):
+            a.problems.append(f"{where}: unknown field {unknown!r}")
+        if not S2_WINDOW_REQUIRED <= set(w):
+            continue
+        if w["index"] != i:
+            a.problems.append(
+                f"{where}: index {w['index']} is out of order or duplicated")
+        for f in ("offset_start_bytes", "offset_end_bytes", "requested_bytes",
+                  "returned_bytes", "write_calls", "short_writes",
+                  "t_start_monotonic_s", "t_end_monotonic_s", "duration_s"):
+            if not _num(w[f]):
+                a.problems.append(f"{where}: {f} is not a number: {w[f]!r}")
+        if not isinstance(w["fsync_ok"], bool):
+            a.problems.append(f"{where}: fsync_ok must be a boolean, not "
+                              f"{w['fsync_ok']!r} -- a missing flush result "
+                              f"must not read as success")
+        if not S2_WINDOW_REQUIRED <= set(w) or any(
+                not _num(w[f]) for f in ("offset_start_bytes", "returned_bytes",
+                                         "duration_s")):
+            continue
 
-        if req is None or got is None:
-            a.problems.append(f"{where}: missing requested/returned byte counts")
-            continue
-        if got != req:
+        want_start = 0 if i == 0 else windows[i - 1].get("offset_end_bytes")
+        if w["offset_start_bytes"] != want_start:
             a.problems.append(
-                f"{where}: returned {got} of {req} requested bytes -- a short "
-                f"write was not completed, so its rate is not a full window")
-        if t0 is None or t1 is None or dur is None:
-            a.problems.append(f"{where}: missing monotonic timestamps or duration")
-            continue
-        if t1 <= t0:
-            a.problems.append(f"{where}: end {t1} is not after start {t0}")
-            continue
-        if not _close(dur, t1 - t0, TIME_EPS_S):
+                f"{where}: starts at byte {w['offset_start_bytes']}, but the "
+                f"previous window ended at {want_start} -- the transfer is not "
+                f"contiguous")
+        if w["offset_end_bytes"] != w["offset_start_bytes"] + w["returned_bytes"]:
             a.problems.append(
-                f"{where}: stored duration {dur} does not match its own "
-                f"timestamps ({t1 - t0})")
-        if prev_end is not None and t0 < prev_end - TIME_EPS_S:
+                f"{where}: end offset {w['offset_end_bytes']} does not equal "
+                f"start + returned ({w['offset_start_bytes']} + "
+                f"{w['returned_bytes']})")
+        if w["returned_bytes"] != w["requested_bytes"]:
             a.problems.append(
-                f"{where}: starts at {t0}, before the previous window ended "
-                f"({prev_end}) -- the windows are not a single ordered run")
-        if not w.get("fsync_ok", True):
-            a.problems.append(f"{where}: fsync failed: {w.get('sync_error')}")
-        prev_end = t1
-        rates.append((got / mb_unit) / (t1 - t0))
-        byts.append(got)
-        durs.append(t1 - t0)
+                f"{where}: returned {w['returned_bytes']} of "
+                f"{w['requested_bytes']} requested bytes -- the window was not "
+                f"completed")
+        if w["short_writes"] != w["write_calls"] - 1:
+            a.problems.append(
+                f"{where}: short_writes {w['short_writes']} does not equal "
+                f"write_calls - 1 ({w['write_calls'] - 1})")
+        if w["t_end_monotonic_s"] <= w["t_start_monotonic_s"]:
+            a.problems.append(f"{where}: end is not after start")
+            continue
+        span = w["t_end_monotonic_s"] - w["t_start_monotonic_s"]
+        if not _close(w["duration_s"], span, TIME_EPS_S):
+            a.problems.append(
+                f"{where}: stored duration {w['duration_s']} does not match its "
+                f"own timestamps ({span})")
+        if prev_end_t is not None and \
+                w["t_start_monotonic_s"] < prev_end_t - TIME_EPS_S:
+            a.problems.append(
+                f"{where}: starts at {w['t_start_monotonic_s']}, before the "
+                f"previous window ended ({prev_end_t}) -- the windows are not a "
+                f"single ordered run")
+        if not w["fsync_ok"]:
+            a.problems.append(f"{where}: fsync failed: {w['sync_error']}")
+        prev_end_t = w["t_end_monotonic_s"]
+        rates.append((w["returned_bytes"] / mb_unit) / span)
+        byts.append(w["returned_bytes"])
+        durs.append(span)
+
+    # --- the write-call trace: prove it, do not believe it -------------------
+    _audit_trace(rec, windows, a)
 
     if not rates:
         a.problems.append("no usable window primitives")
         return
     a.rates = rates
 
-    # Byte accounting, end to end.
-    summed = sum(byts)
-    if rec.get("returned_bytes_total") not in (None, summed):
+    # --- totals --------------------------------------------------------------
+    summed_req = sum(w["requested_bytes"] for w in windows
+                     if _num(w.get("requested_bytes")))
+    summed_ret = sum(byts)
+    if rec["requested_bytes_total"] != summed_req:
+        a.problems.append(
+            f"requested_bytes_total {rec['requested_bytes_total']} != the "
+            f"{summed_req} its windows request")
+    if rec["returned_bytes_total"] != summed_ret:
         a.problems.append(
             f"returned_bytes_total {rec['returned_bytes_total']} != the "
-            f"{summed} bytes its own windows account for")
-    expected = rec.get("expected_final_size_bytes")
-    if expected is not None and summed != expected:
+            f"{summed_ret} its windows account for")
+    expected = rec["expected_final_size_bytes"]
+    if summed_ret != expected:
         a.problems.append(
-            f"windows account for {summed} bytes but the run expected "
+            f"windows account for {summed_ret} bytes but the run expected "
             f"{expected} -- the transfer is not the size it claims")
+    declared = rec["transfer_mb"] * mb_unit
+    if expected != declared:
+        a.problems.append(
+            f"expected_final_size_bytes {expected} != transfer_mb "
+            f"({rec['transfer_mb']}) x {mb_unit}")
 
-    # Final size. A deleted measurement file cannot be checked, and that is a
-    # gap in the evidence rather than a clean run.
-    final = rec.get("final_size_bytes")
-    if rec.get("target_kind") == "mounted-filesystem":
-        if not rec.get("measurement_file_retained", False):
+    # --- final size, by target branch ---------------------------------------
+    final = rec["final_size_bytes"]
+    if kind == "mounted-filesystem":
+        if rec["measurement_file_retained"] is not True:
             a.problems.append(
                 "measurement file was deleted, so its final size proves nothing")
-        elif final is None:
+        elif not _num(final):
             a.problems.append("no final measurement-file size recorded")
-        elif expected is not None and final != expected:
+        elif final != expected:
             a.problems.append(
                 f"final file size {final} != {expected} bytes written")
-    elif final is not None and expected is not None and final < expected:
-        a.problems.append(f"device size {final} is smaller than the {expected} written")
+    else:   # raw-device
+        if rec["measurement_file_retained"] is not False:
+            a.problems.append(
+                "a raw device has no measurement file to retain; "
+                "measurement_file_retained must be false")
+        if not _num(final):
+            a.problems.append("no device size recorded")
+        elif final < expected:
+            a.problems.append(
+                f"device size {final} is smaller than the {expected} written")
 
-    # Occupancy. A flag is not evidence (P1-R17-V-A01).
-    fill = rec.get("fill") or {}
+    # --- timing at the top level, and the closing flush ----------------------
+    t_first, t_last = rec["t_first_monotonic_s"], rec["t_last_monotonic_s"]
+    if not (_num(t_first) and _num(t_last)) or t_last <= t_first:
+        a.problems.append("top-level timing is missing or not ordered")
+    else:
+        span = t_last - t_first
+        if not _close(rec["elapsed_s"], span, ELAPSED_EPS_S):
+            a.problems.append(
+                f"stored elapsed {rec['elapsed_s']} != {span} from its own "
+                f"first/last timestamps")
+        if sum(durs) > span + ELAPSED_EPS_S:
+            a.problems.append(
+                f"window durations sum to {sum(durs):.3f} s, more than the "
+                f"{span:.3f} s the run took")
+        fs = rec["final_fsync"]
+        if not isinstance(fs, dict) or not {"attempted", "ok", "t_start_monotonic_s",
+                                            "t_end_monotonic_s"} <= set(fs):
+            a.problems.append("final_fsync is missing its required fields")
+        elif fs.get("attempted") is not True:
+            a.problems.append("no closing fsync was attempted, so the run does "
+                              "not establish the data reached the device")
+        elif fs.get("ok") is not True:
+            a.problems.append(f"the closing fsync failed: {fs.get('error')}")
+        elif not (t_first <= fs["t_start_monotonic_s"]
+                  and fs["t_end_monotonic_s"] <= t_last + TIME_EPS_S):
+            a.problems.append(
+                f"the closing fsync ran at [{fs['t_start_monotonic_s']}, "
+                f"{fs['t_end_monotonic_s']}], outside the measured span "
+                f"[{t_first}, {t_last}] -- a flush after the clock stops is "
+                f"time the record does not account for")
+
+    _audit_space(rec, a)
+
+
+def _audit_trace(rec: dict, windows: list, a: Audit) -> None:
+    """Every write call, in order, reconstructing each window from scratch."""
+    trace = rec["write_trace"]
+    if not isinstance(trace, list) or not trace:
+        a.problems.append("write_trace is missing or empty; a window's byte "
+                          "count cannot be proven without its calls")
+        return
+    # Count only THIS function's findings. Bailing because some unrelated check
+    # already failed is how a trace audit silently stops running on exactly the
+    # records that need it most.
+    mine = 0
+    for i, c in enumerate(trace):
+        for missing in sorted(S2_CALL_REQUIRED - set(c)):
+            a.problems.append(f"write call {i}: missing {missing!r}")
+            mine += 1
+        for unknown in sorted(set(c) - S2_CALL_REQUIRED):
+            a.problems.append(f"write call {i}: unknown field {unknown!r}")
+            mine += 1
+    if mine:
+        return
+
+    if [c["seq"] for c in trace] != list(range(len(trace))):
+        a.problems.append(
+            "write_trace sequence numbers are not 0..n-1 in order -- a call was "
+            "duplicated, reordered or skipped")
+        return
+
+    digest = _trace_digest(trace)
+    if rec["write_trace_sha256"] != digest:
+        a.problems.append(
+            f"write_trace_sha256 {rec['write_trace_sha256']!r} does not match "
+            f"the trace it claims to bind ({digest!r})")
+
+    cursor = 0
+    per_window: dict[int, list] = {}
+    for c in trace:
+        i = c["seq"]
+        if not all(_num(c[f]) for f in ("offset_bytes", "requested_bytes",
+                                        "returned_bytes")):
+            a.problems.append(f"write call {i}: non-numeric byte counts")
+            return
+        if c["returned_bytes"] <= 0:
+            a.problems.append(f"write call {i}: returned {c['returned_bytes']} "
+                              f"bytes; a call that wrote nothing is not progress")
+        if c["returned_bytes"] > c["requested_bytes"]:
+            a.problems.append(
+                f"write call {i}: returned {c['returned_bytes']} bytes, more "
+                f"than the {c['requested_bytes']} requested")
+        if c["offset_bytes"] != cursor:
+            a.problems.append(
+                f"write call {i}: starts at offset {c['offset_bytes']}, but the "
+                f"preceding calls end at {cursor} -- the continuation did not "
+                f"resume where the short write stopped")
+            return
+        cursor += c["returned_bytes"]
+        per_window.setdefault(c["window"], []).append(c)
+
+    if set(per_window) != set(range(len(windows))):
+        a.problems.append(
+            f"the trace covers windows {sorted(per_window)}, the record has "
+            f"{len(windows)}")
+        return
+
+    for idx, w in enumerate(windows):
+        calls = per_window[idx]
+        if not S2_WINDOW_REQUIRED <= set(w):
+            continue      # already reported as malformed; do not crash on it
+        got = sum(c["returned_bytes"] for c in calls)
+        if got != w["returned_bytes"]:
+            a.problems.append(
+                f"window {idx}: its calls account for {got} bytes, the window "
+                f"claims {w['returned_bytes']}")
+        if len(calls) != w["write_calls"]:
+            a.problems.append(
+                f"window {idx}: {len(calls)} calls in the trace, the window "
+                f"claims write_calls = {w['write_calls']}")
+        if calls[0]["offset_bytes"] != w["offset_start_bytes"]:
+            a.problems.append(
+                f"window {idx}: its first call is at {calls[0]['offset_bytes']}, "
+                f"the window starts at {w['offset_start_bytes']}")
+        first_req = calls[0]["requested_bytes"]
+        if first_req != w["requested_bytes"]:
+            a.problems.append(
+                f"window {idx}: its first call asked for {first_req} bytes, the "
+                f"window requested {w['requested_bytes']}")
+
+    if cursor != rec["returned_bytes_total"]:
+        a.problems.append(
+            f"the trace writes {cursor} bytes end to end, the record totals "
+            f"{rec['returned_bytes_total']}")
+
+
+def _audit_space(rec: dict, a: Audit) -> None:
+    """Capacity accounting: arithmetic, and before/after consistency."""
+    def check(label: str, sp) -> bool:
+        if not isinstance(sp, dict) or "applies" not in sp:
+            a.problems.append(f"{label}: missing capacity accounting")
+            return False
+        if not sp["applies"]:
+            if rec["target_kind"] != "raw-device":
+                a.problems.append(
+                    f"{label}: declares filesystem accounting inapplicable on a "
+                    f"{rec['target_kind']} target")
+            if not sp.get("reason"):
+                a.problems.append(f"{label}: inapplicable, with no reason given")
+            return False
+        total, free, used = sp.get("total_bytes"), sp.get("free_bytes"), \
+            sp.get("used_bytes")
+        if not all(_num(v) for v in (total, free, used)):
+            a.problems.append(f"{label}: total/free/used are not all numbers")
+            return False
+        if total <= 0 or free < 0 or used < 0:
+            a.problems.append(f"{label}: negative or zero capacity figures")
+        if used + free > total:
+            a.problems.append(
+                f"{label}: used {used} + free {free} exceeds total {total}")
+        occ = sp.get("occupancy")
+        if not _num(occ) or not _close(occ, used / total, 1e-6):
+            a.problems.append(
+                f"{label}: occupancy {occ} does not equal used/total "
+                f"({used / total if total else 'n/a'})")
+        return True
+
+    fill = rec["fill"]
+    if not isinstance(fill, dict) or "performed" not in fill:
+        a.problems.append("fill record is missing")
+        return
+    before_ok = check("fill.before", fill.get("before"))
+    after_ok = check("fill.after", fill.get("after"))
+    end_ok = check("space_after_measurement", rec["space_after_measurement"])
+
     if fill.get("performed"):
-        after = (fill.get("after") or {})
-        occ = after.get("occupancy")
+        after = fill.get("after") or {}
         want = fill.get("requested_fraction")
-        if not after.get("applies", False) or occ is None:
+        occ = after.get("occupancy")
+        if not after_ok or occ is None:
             a.problems.append(
                 "fill was performed but no post-fill occupancy was measured")
         elif want is not None and occ < want - FILL_EPS:
@@ -203,23 +483,28 @@ def audit_schema2(rec: dict, a: Audit) -> None:
                 f"{want:.3f} -- the card was not filled as claimed")
         else:
             a.derived["fill_occupancy"] = occ
+        if before_ok and after_ok:
+            if after["used_bytes"] < (fill.get("before") or {})["used_bytes"]:
+                a.problems.append(
+                    "the fill left less used space than it started with")
+            ballast = fill.get("ballast_bytes")
+            if _num(ballast) and ballast > 0:
+                grew = after["used_bytes"] - fill["before"]["used_bytes"]
+                if grew < ballast * 0.9:
+                    a.problems.append(
+                        f"the fill claims {ballast} bytes of ballast but used "
+                        f"space grew by only {grew}")
     elif fill.get("requested_fraction") is not None and not fill.get("reason"):
-        a.problems.append("a fill fraction was requested but no fill was performed "
-                          "and no reason recorded")
+        a.problems.append("a fill fraction was requested but no fill was "
+                          "performed and no reason recorded")
 
-    # Elapsed.
-    t_first, t_last = rec.get("t_first_monotonic_s"), rec.get("t_last_monotonic_s")
-    if t_first is not None and t_last is not None:
-        span = t_last - t_first
-        if rec.get("elapsed_s") is not None and not _close(rec["elapsed_s"], span,
-                                                           ELAPSED_EPS_S):
+    if after_ok and end_ok:
+        end = rec["space_after_measurement"]
+        if end["used_bytes"] < (fill.get("after") or {})["used_bytes"] - 1:
             a.problems.append(
-                f"stored elapsed {rec['elapsed_s']} != {span} from its own "
-                f"first/last timestamps")
-        if sum(durs) > span + ELAPSED_EPS_S:
-            a.problems.append(
-                f"window durations sum to {sum(durs):.3f} s, more than the "
-                f"{span:.3f} s the run took")
+                "used space shrank across the measurement, but the run only "
+                "writes -- something was deleted, and the record does not say "
+                "what")
 
 
 def audit_schema1(rec: dict, a: Audit) -> None:
@@ -274,6 +559,16 @@ def audit(path: Path) -> Audit:
         a.problems.append(f"unreadable: {exc}")
         return a
 
+    if "schema_version" not in rec:
+        # Absence means schema 1 -- but only for a record that actually looks
+        # like one. A record carrying schema-2 structures without declaring its
+        # version is not legacy evidence, it is an unversioned record.
+        if {"windows", "write_trace", "final_fsync"} & set(rec):
+            a = Audit(path=Path(path), schema=0, legacy=False)
+            a.problems.append(
+                "missing required field 'schema_version' on a record that "
+                "carries schema-2 structures")
+            return a
     schema = int(rec.get("schema_version", 1))
     a = Audit(path=Path(path), schema=schema, legacy=schema < 2)
     if schema >= 2:
@@ -287,7 +582,8 @@ def audit(path: Path) -> Audit:
     if a.rates:
         if schema >= 2:
             byts = [w["returned_bytes"] for w in rec["windows"]]
-            durs = [w["duration_s"] for w in rec["windows"]]
+            durs = [w["t_end_monotonic_s"] - w["t_start_monotonic_s"]
+                    for w in rec["windows"]]
         else:
             # Schema 1 called `window_mb << 20` bytes a "64 MB window" and then
             # divided by 10^6 to get MB/s -- so its windows are 64 MiB and its
@@ -310,8 +606,9 @@ def audit(path: Path) -> Audit:
             "headroom_bar": min(a.rates) / BAR_MB_S,
             "pair_min_sliding": min(sliding_pair_rates(a.rates, byts, durs)),
             "pair_min_fixed_phase0": min(fixed_phase0_pair_rates(a.rates, byts, durs)),
-            "short_writes": sum(w.get("short_writes", 0) for w in rec["windows"])
-            if schema >= 2 else None,
+            "short_writes": sum(w.get("short_writes", 0)
+                                for w in rec["windows"]) if schema >= 2 else None,
+            "write_calls": len(rec.get("write_trace", [])) if schema >= 2 else None,
         }
     return a
 

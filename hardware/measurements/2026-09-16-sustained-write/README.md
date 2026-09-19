@@ -289,6 +289,48 @@ without anyone being able to tell:
 | analyser printed a stored mean it had not checked | `audit_sustained_write.py` derives everything and compares every stored summary, failing on disagreement | P1-R17-V-A02 exactly |
 | "any adjacent pair" computed fixed phase-0 pairs | every adjacent pair `(i, i+1)`, with the fixed statistic retained under its real name | P1-R17-V-A03 |
 
+### The repair after independent audit (P1-R19-V01/V02)
+
+Verification audited the schema-2 *method* — not a run, since none exists — and blocked it.
+Two things were wrong, and both were the same kind of wrong: **the record summarised what it
+should have proven.**
+
+- **V01 — the write-call trace was not retained.** The loop continued correctly after a short
+  write, but kept only the aggregate byte count and a call count. An auditor could not show
+  that the continuation resumed at the right offset, or that `write_calls` was truthful.
+  Removing `write_calls`, setting `short_writes` to 99, removing `offset_bytes` or changing an
+  offset to 7 **all passed**.
+- **V02 — validation failed open.** Thirteen one-at-a-time mutations passed: missing offsets,
+  counts, timing, totals, final size and capacity accounting; a missing `fsync_ok` read as
+  success; an invented `target_kind` skipped the final-size branch entirely; and an inserted
+  `worst_window_mb_s = 999.0` was ignored rather than rejected.
+
+**What schema 2 now retains.** Every write call, in order, with its sequence number, window,
+absolute offset, requested bytes and returned bytes — bound to the record by a SHA-256 over a
+canonical serialisation. Each window carries its start and end offset, so contiguity is
+provable rather than assumed. The closing `fsync` is recorded **inside the measured span**,
+because a flush after the clock stops is time the record does not account for.
+
+**What the auditor now does.** It is a **closed schema**: every required field must be present,
+every unknown field is rejected, and a stored summary is rejected outright rather than ignored
+— schema 2 holds primitives and derives every figure, so a summary in the file is a
+contradiction. The trace is *reconstructed*: contiguous coverage, positive bounded returns,
+continuation offsets, per-window totals and call counts, all checked against the windows that
+claim them. Capacity accounting is checked arithmetically and for before/after consistency, and
+each target kind gets its own final-size branch.
+
+**All fifteen mutations now go red**, each naming the field it broke. Writing the controls also
+turned up two defects of my own: an unrelated earlier failure was suppressing the trace audit
+entirely, and a missing window field crashed the auditor instead of rejecting the record.
+
+**No schema-2 record exists anywhere**, so there is nothing to migrate — the repair is in
+place, and the five schema-1 files are untouched as always.
+
+**Provenance correction.** The prior-head identifier `c0e6a83a474a…` in an earlier assignment
+does not exist as a Git object. The authenticated ancestor is
+**`c0e6a83ae44c2370288594b75915a214ba25deb7`**, tree `4421e11258690936f02734c176589ff0c3dad826`,
+and the five legacy files are byte-identical from it through every head since.
+
 **Retained controls:** `characterisation/test_sustained_write.py`, run by
 `make -C hardware card-test`. Eleven controls, each injecting the defect it claims to catch:
 short writes (in the tool, against an injected partial writer, and in the record), a stalled
