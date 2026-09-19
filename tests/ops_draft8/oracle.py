@@ -10,8 +10,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 CF = 131072
+SAMPLE_RATE = 44100
+NOMINAL_LENGTH_S = 60
+CHUNK_BYTES = 524288
 TAPE_MAX_ENTRIES = 4096
 BLOCK = 512
+BLOCKS_PER_CHUNK = CHUNK_BYTES // BLOCK
 SLOT_BYTES = 65536
 LBA_A0, LBA_A1, LBA_B0, LBA_B1, LBA_CHUNK_BASE = 8, 136, 264, 392, 2048
 HASHES = {
@@ -52,14 +56,20 @@ class Case:
     pre: Media
 
 
-def sb(*, generation=7, high=3, chunks=16, stage=0, blocks=None) -> bytes:
-    if blocks is None: blocks=LBA_CHUNK_BASE+chunks*1024+1
+def derived_total_chunks(nominal_length_s: int) -> int:
+    return (nominal_length_s * SAMPLE_RATE + CF - 1) // CF
+
+
+def sb(*, generation=7, high=3, chunks=None, nominal_length_s=NOMINAL_LENGTH_S,
+       stage=0, blocks=None) -> bytes:
+    if chunks is None: chunks=derived_total_chunks(nominal_length_s)
+    if blocks is None: blocks=LBA_CHUNK_BASE+chunks*BLOCKS_PER_CHUNK+1
     b=bytearray(BLOCK); b[:8]=b'TAPEFS\0\x01'
     struct.pack_into('<H',b,8,1); struct.pack_into('<H',b,10,0)
     struct.pack_into('<I',b,12,generation); struct.pack_into('<B',b,16,0)
     b[20:36]=bytes(range(16))
-    struct.pack_into('<I',b,36,44100); struct.pack_into('<H',b,40,2); struct.pack_into('<H',b,42,16)
-    struct.pack_into('<I',b,44,524288); struct.pack_into('<I',b,48,60); struct.pack_into('<I',b,52,chunks)
+    struct.pack_into('<I',b,36,SAMPLE_RATE); struct.pack_into('<H',b,40,2); struct.pack_into('<H',b,42,16)
+    struct.pack_into('<I',b,44,CHUNK_BYTES); struct.pack_into('<I',b,48,nominal_length_s); struct.pack_into('<I',b,52,chunks)
     struct.pack_into('<I',b,56,high); struct.pack_into('<I',b,60,SLOT_BYTES)
     struct.pack_into('<I',b,64,LBA_A0); struct.pack_into('<I',b,68,LBA_A1)
     struct.pack_into('<I',b,72,LBA_B0); struct.pack_into('<I',b,76,LBA_B1)
@@ -161,8 +171,61 @@ def free_next(m: Media) -> int:
     return mx
 
 
+def fixture_contract_errors(case: Case) -> list[str]:
+    """Prove generated input geometry and case premises before any verdict oracle runs."""
+    errors=[]
+    def req(value, message):
+        if not value: errors.append(message)
+    media=case.pre
+    req(media.primary == media.mirror, 'fixture superblock copies differ')
+    try:
+        superblock=select_sb(media)
+    except Exception as exc:
+        return [f'fixture has no selectable superblock: {exc}']
+    sample_rate=struct.unpack_from('<I',superblock,36)[0]
+    chunk_frames=struct.unpack_from('<I',superblock,44)[0] // 4
+    nominal=struct.unpack_from('<I',superblock,48)[0]
+    stored_chunks=struct.unpack_from('<I',superblock,52)[0]
+    chunk_bytes=struct.unpack_from('<I',superblock,44)[0]
+    chunk_base=struct.unpack_from('<I',superblock,80)[0]
+    reserved=struct.unpack_from('<I',superblock,84)[0]
+    derived=(nominal * sample_rate + chunk_frames - 1) // chunk_frames if chunk_frames else 0
+    req(sample_rate == SAMPLE_RATE and chunk_frames == CF, 'fixture sample/chunk geometry drift')
+    req(chunk_bytes == CHUNK_BYTES, 'fixture chunk_bytes drift')
+    req(tuple(struct.unpack_from('<I',superblock,o)[0] for o in (64,68,72,76)) == tuple(SLOT_LBAS),
+        'fixture index-slot block layout drift')
+    req(chunk_base == LBA_CHUNK_BASE, 'fixture chunk_base drift')
+    req(stored_chunks == derived, 'fixture stored total_chunks differs from frozen derivation')
+    req(chunk_bytes % BLOCK == 0, 'fixture chunk_bytes not block aligned')
+    req(reserved == media.blocks - 1, 'fixture reserved mirror is not the last block')
+    req(chunk_base + stored_chunks * (chunk_bytes // BLOCK) <= reserved,
+        'fixture derived chunk region does not fit before reserved last block')
+    if case.id == 'VT8-001-RB-ALLSLOT':
+        req([structural_sequence(slot) for slot in media.slots] == [10,900,500,500],
+            'reset fixture exact sequence premises drift')
+        req(cartridge_sequence(media) == 900, 'reset fixture all-slot sequence premise drift')
+        req(live_slot(media,0) == 0, 'reset fixture live-A premise drift')
+        req(live_slot(media,1) is None, 'reset fixture degraded-B premise drift')
+        req(parse_entries(media.slots[0]) == [(0,0,128)], 'reset fixture source-entry premise drift')
+    elif case.id == 'VT8-001-REC-ALLOCSEQ':
+        req([structural_sequence(slot) for slot in media.slots] == [10,700,20,None],
+            'record fixture exact sequence premises drift')
+        req(cartridge_sequence(media) == 700, 'record fixture all-slot sequence premise drift')
+        req(live_slot(media,1) == 2, 'record fixture live-B premise drift')
+        req(struct.unpack_from('<I',superblock,56)[0] == 3 and free_next(media) == 3,
+            'record fixture H/free_next premise drift')
+        req(parse_entries(media.slots[2]) == [(0,0,128)], 'record fixture source-entry premise drift')
+        lo,hi=_chunk_bounds(media,3)
+        req(lo == LBA_CHUNK_BASE + 3*BLOCKS_PER_CHUNK and hi <= reserved,
+            'record fixture allocated-chunk block premise drift')
+    else:
+        errors.append('unknown fixture case')
+    return errors
+
+
 def make_cases():
-    blocks=LBA_CHUNK_BASE+16*1024+1; s=sb(blocks=blocks)
+    chunks=derived_total_chunks(NOMINAL_LENGTH_S)
+    blocks=LBA_CHUNK_BASE+chunks*BLOCKS_PER_CHUNK+1; s=sb(chunks=chunks, blocks=blocks)
     # Reset: A0 live at 10; A1 is structurally valid at 900 but semantically invalid for A
     # because its side byte is B. B0/B1 are both semantically valid at equal sequence 500 -> degraded-B.
     reset=Media(blocks,s,s,(
@@ -173,8 +236,13 @@ def make_cases():
     record=Media(blocks,s,s,(
         idx(0,[(0,0,128)],10), idx(1,[(1,0,64)],700),
         idx(1,[(0,0,128)],20), invalid_slot()))
-    return [Case('VT8-001-RB-ALLSLOT','reset_b',reset),
-            Case('VT8-001-REC-ALLOCSEQ','record_splice_128',record)]
+    cases=[Case('VT8-001-RB-ALLSLOT','reset_b',reset),
+           Case('VT8-001-REC-ALLOCSEQ','record_splice_128',record)]
+    for case in cases:
+        errors=fixture_contract_errors(case)
+        if errors:
+            raise ValueError(case.id + ': ' + '; '.join(errors))
+    return cases
 
 
 def _slot_header_lba(i): return SLOT_LBAS[i]

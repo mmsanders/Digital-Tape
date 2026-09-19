@@ -9,9 +9,10 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from hardened import Media, HASHES, check, make_cases, sha256_bytes, verify_spec_dir
+from hardened import (ADAPTER_STATUS_FORMAT, Media, HASHES, adapter_status_errors,
+                      check, make_cases, sha256_bytes, verify_spec_dir)
 
-FORMAT = 'VT8-EVIDENCE-1'
+FORMAT = 'VT8-EVIDENCE-2'
 OBS_FORMAT = 'VT8-OPS-OBSERVATION-1'
 DEFAULT_SPEC_DIR = Path(__file__).resolve().parents[1] / 'mount_draft8' / 'spec'
 
@@ -86,17 +87,19 @@ def run_package(*, adapter: Path, evidence_dir: Path, spec_dir: Path,
             inp = cdir / 'input.vo08'; out = cdir / 'output.vo08'
             inp_gz = cdir / 'input.vo08.gz'; out_gz = cdir / 'output.vo08.gz'
             stdout_p = cdir / 'stdout.txt'; stderr_p = cdir / 'stderr.txt'
-            observation_p = cdir / 'observation.json'; result_p = cdir / 'result.json'
+            observation_p = cdir / 'observation.json'; status_p = cdir / 'adapter-status.json'
+            result_p = cdir / 'result.json'
             inp.write_bytes(case.pre.encode())
             errors = []
-            events = []; calls = []; returncode = None
+            events = []; calls = []; returncode = None; adapter_status = None
             try:
                 r = subprocess.run([str(adapter), case.id, str(inp), str(out)], capture_output=True,
                                    text=True, timeout=timeout)
                 returncode = r.returncode
+                adapter_status = {'format': ADAPTER_STATUS_FORMAT, 'outcome': 'exited',
+                                  'returncode': returncode}
                 stdout_p.write_text(r.stdout); stderr_p.write_text(r.stderr)
-                if r.returncode != 0:
-                    errors.append(f'adapter returned {r.returncode}')
+                errors.extend(adapter_status_errors(adapter_status))
                 if not out.is_file():
                     errors.append('adapter omitted output media')
                 try:
@@ -120,10 +123,20 @@ def run_package(*, adapter: Path, evidence_dir: Path, spec_dir: Path,
                         errors.extend(check(case, post, events, calls))
                     except Exception as exc:
                         errors.append('output/oracle evaluation failed: ' + str(exc))
+            except subprocess.TimeoutExpired:
+                stdout_p.write_text(''); stderr_p.write_text('')
+                adapter_status = {'format': ADAPTER_STATUS_FORMAT, 'outcome': 'timed_out',
+                                  'timeout_sec': timeout}
+                _write_json(observation_p, {'format': OBS_FORMAT, 'runner_error': 'adapter timed out'})
+                errors.extend(adapter_status_errors(adapter_status))
             except Exception as exc:
                 stdout_p.write_text(''); stderr_p.write_text('')
+                adapter_status = {'format': ADAPTER_STATUS_FORMAT, 'outcome': 'execution_error',
+                                  'error': str(exc)}
                 _write_json(observation_p, {'format': OBS_FORMAT, 'runner_error': str(exc)})
-                errors.append('adapter execution failed: ' + str(exc))
+                errors.extend(adapter_status_errors(adapter_status))
+
+            _write_json(status_p, adapter_status)
 
             inp_raw = inp.read_bytes()
             inp_gz.write_bytes(gzip.compress(inp_raw, mtime=0)); inp.unlink()
@@ -133,6 +146,7 @@ def run_package(*, adapter: Path, evidence_dir: Path, spec_dir: Path,
                 'stdout': {'path': str(stdout_p.relative_to(evidence_dir)), 'sha256': file_sha(stdout_p)},
                 'stderr': {'path': str(stderr_p.relative_to(evidence_dir)), 'sha256': file_sha(stderr_p)},
                 'observation': {'path': str(observation_p.relative_to(evidence_dir)), 'sha256': file_sha(observation_p)},
+                'adapter_status': {'path': str(status_p.relative_to(evidence_dir)), 'sha256': file_sha(status_p)},
             }
             if out.is_file():
                 out_raw = out.read_bytes(); out_gz.write_bytes(gzip.compress(out_raw, mtime=0)); out.unlink()
@@ -141,7 +155,8 @@ def run_package(*, adapter: Path, evidence_dir: Path, spec_dir: Path,
             status = 'FAIL' if errors else 'PASS'
             result = {
                 'id': case.id, 'operation': case.operation, 'adapter_kind': adapter_kind,
-                'returncode': returncode, 'status': status, 'errors': errors,
+                'adapter_outcome': adapter_status['outcome'], 'returncode': returncode,
+                'status': status, 'errors': errors,
                 'pre_sha256': files['input']['raw_sha256'],
                 'post_sha256': files.get('output', {}).get('raw_sha256'),
             }
