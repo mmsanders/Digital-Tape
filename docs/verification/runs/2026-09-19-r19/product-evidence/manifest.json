@@ -1,0 +1,111 @@
+{
+  "adapter": {
+    "build": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; adapter -std=c99 -Wall -Wextra -Werror -pedantic -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wvla -Wcast-qual -Wpointer-arith -fno-common -g -O1; candidate engine tree 7f73812ff5ade35d95b848c0df1fd0458aad22ca built -std=c99 -Werror -Wconversion -fno-common -g -Os",
+    "kind": "product",
+    "path": "/home/user/Digital-Tape/tests/ops_adapter/build/vt8_ops_probe",
+    "sha256": "9dc0522ea21fb6a16943a206aa309984b0f783b00a07d4495d024ecdbb158fac",
+    "source": "Digital-Tape pre-run code commit e1aaf5f3f441e5126e821a0bd2cfa54a98894294, tests/ops_adapter tree 6f6df812ae346933dff91aebb739feb0e2f0a113, vt8_ops_probe.c blob b920d111428f5407e604f0d5db12da331c4eed6c"
+  },
+  "cases": [
+    {
+      "errors": [],
+      "files": {
+        "adapter_status": {
+          "path": "cases/VT8-001-RB-ALLSLOT/adapter-status.json",
+          "sha256": "06717e5ef3448ec0e988de82ec13c7b6a037599201c1cf3fa7c879838ec67ef0"
+        },
+        "input": {
+          "path": "cases/VT8-001-RB-ALLSLOT/input.vo08.gz",
+          "raw_sha256": "b39dd5a9aa0a160f1ab923ab76cdb9bbef54f042a525178cfff833b99377bd07",
+          "sha256": "9f55906803926a7474ac663f2558eb7c26cd32758d70fad6f41663a7bb41c897"
+        },
+        "observation": {
+          "path": "cases/VT8-001-RB-ALLSLOT/observation.json",
+          "sha256": "57047481adc2e8cababd329935cf812f7aca5896dc2e98583ab3a11ea50eb29b"
+        },
+        "output": {
+          "path": "cases/VT8-001-RB-ALLSLOT/output.vo08.gz",
+          "raw_sha256": "c1f12d43f12a65d99b06e6486abfa2a93a0945e26fdb4a18303978a2b5e08627",
+          "sha256": "c8332228be6d09b1bf3e7019bba01faeec0613c26869d77e7ee02151aa842840"
+        },
+        "result": {
+          "path": "cases/VT8-001-RB-ALLSLOT/result.json",
+          "sha256": "29a7785e58098e8eb7d21f8521e24546c65d79e0017c6ec28d7da54665596973"
+        },
+        "stderr": {
+          "path": "cases/VT8-001-RB-ALLSLOT/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "path": "cases/VT8-001-RB-ALLSLOT/stdout.txt",
+          "sha256": "6d496aa1aa293f80d768aab2d979323e083db4157ec9ae0091a413d7ed5d0f8b"
+        }
+      },
+      "id": "VT8-001-RB-ALLSLOT",
+      "operation": "reset_b",
+      "status": "PASS"
+    },
+    {
+      "errors": [],
+      "files": {
+        "adapter_status": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/adapter-status.json",
+          "sha256": "06717e5ef3448ec0e988de82ec13c7b6a037599201c1cf3fa7c879838ec67ef0"
+        },
+        "input": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/input.vo08.gz",
+          "raw_sha256": "b3d87522ef3d8789b52916985beea8cdd25a517dc93063095be2abdbb6e7a4d7",
+          "sha256": "876c55a06620ef62e5cbcce102d9e70ed2a428cfac9d604ef7b7d52fe1ff6bde"
+        },
+        "observation": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/observation.json",
+          "sha256": "2231de5dac266be14d192261ecb457b30bb7b61171cf87fe79694879c92bc12d"
+        },
+        "output": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/output.vo08.gz",
+          "raw_sha256": "3e447210d5207de737a335e15546501bb14e73642a46d1fbf0a8790d48870e7f",
+          "sha256": "c8bb23dd86dacdbca420c7a559f8b700ce40107829df3c72f3119d36e93836ca"
+        },
+        "result": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/result.json",
+          "sha256": "3adb94cd3e17d0dec410e777765fb4beef0154660c2fca0832a37f12d9b1a0a2"
+        },
+        "stderr": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "path": "cases/VT8-001-REC-ALLOCSEQ/stdout.txt",
+          "sha256": "af4982f02f6896bfaebe9f7d147f458b98e5f7a6f453f47c03249c57aeca1d56"
+        }
+      },
+      "id": "VT8-001-REC-ALLOCSEQ",
+      "operation": "record_splice_128",
+      "status": "PASS"
+    }
+  ],
+  "format": "VT8-EVIDENCE-2",
+  "hardening_sha256": "0e88b276a1e94920f4df9f6ebf686cbd08f19f3986b63806cea04d83573ee0dc",
+  "oracle_sha256": "3e213af2a2bf5a439fe0aebcc83b7c2ccd1437692107fbc5a6bd6634500dcca5",
+  "run_log": {
+    "path": "run.jsonl",
+    "sha256": "1604cedc5582bc14fb208b0580b16a5177af258c343b0cd54aeb913db6e4ab16"
+  },
+  "runner_sha256": "d7e3ffe198d196e8024edef02abe0fbe9219b374cfe64d64f8fabfe907f1fadb",
+  "spec": {
+    "acceptance.md": {
+      "path": "spec/acceptance.md",
+      "sha256": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7"
+    },
+    "engine-api.md": {
+      "path": "spec/engine-api.md",
+      "sha256": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1"
+    },
+    "tapefs-v1.md": {
+      "path": "spec/tapefs-v1.md",
+      "sha256": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb"
+    }
+  },
+  "spec_source": "/home/user/Digital-Tape/tests/mount_draft8/spec",
+  "verifier_source": "digital-tape-verification 15dd16eb499f5c148bff7c5b4b67ff75ae7a0f32; tests/ops_draft8 tree 3667a2830ba80dbcedad03b97870d1127001ab59 imported at product main 48cc23fdbe6273dfe73f17fbdddf8e9fcc5ab3d9"
+}
