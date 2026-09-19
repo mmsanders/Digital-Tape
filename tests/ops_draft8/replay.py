@@ -6,9 +6,10 @@ import gzip
 import json
 from pathlib import Path
 
-from hardened import HASHES, Media, check, make_cases, sha256_bytes, verify_spec_dir
+from hardened import (HASHES, Media, adapter_status_errors, check, make_cases,
+                      sha256_bytes, verify_spec_dir)
 
-FORMAT = 'VT8-EVIDENCE-1'
+FORMAT = 'VT8-EVIDENCE-2'
 OBS_FORMAT = 'VT8-OPS-OBSERVATION-1'
 
 
@@ -76,27 +77,45 @@ def replay_bundle(root: Path, expected_hashes: dict[str, str] | None = None) -> 
             try:
                 files = entry.get('files', {})
                 inp_raw = _checked_media(root, files.get('input'), cid+' input')
-                out_raw = _checked_media(root, files.get('output'), cid+' output')
                 obs_p = _checked_file(root, files.get('observation'), cid+' observation')
+                status_p = _checked_file(root, files.get('adapter_status'), cid+' adapter status')
                 _checked_file(root, files.get('stdout'), cid+' stdout')
                 _checked_file(root, files.get('stderr'), cid+' stderr')
                 result_p = _checked_file(root, files.get('result'), cid+' result')
                 if Media.decode(inp_raw) != case.pre:
                     raise ValueError('input media differs from independently generated fixture')
-                post = Media.decode(out_raw)
+                out_raw = (_checked_media(root, files.get('output'), cid+' output')
+                           if files.get('output') is not None else None)
+                adapter_status = _load_json(status_p)
+                errors = adapter_status_errors(adapter_status)
                 obs = _load_json(obs_p)
-                if obs.get('format') != OBS_FORMAT:
-                    raise ValueError('observation format mismatch')
-                if obs.get('adapter_kind') != adapter['kind']:
-                    raise ValueError('observation adapter identity mismatch')
-                errors = check(case, post, obs.get('events', []), obs.get('calls', []))
+                if adapter_status['outcome'] == 'exited':
+                    if files.get('output') is None:
+                        errors.append('adapter omitted output media')
+                    if obs.get('parse_error') is not None:
+                        errors.append('adapter observation malformed: ' + str(obs['parse_error']))
+                    else:
+                        if obs.get('format') != OBS_FORMAT:
+                            errors.append('adapter observation format mismatch')
+                        if obs.get('adapter_kind') != adapter['kind']:
+                            errors.append('adapter observation synthetic/product identity mismatch')
+                    if out_raw is not None:
+                        try:
+                            post = Media.decode(out_raw)
+                            errors.extend(check(case, post, obs.get('events', []), obs.get('calls', [])))
+                        except Exception as exc:
+                            errors.append('output/oracle evaluation failed: ' + str(exc))
                 result = _load_json(result_p)
                 expected_status = 'FAIL' if errors else 'PASS'
+                expected_rc = adapter_status.get('returncode') if adapter_status['outcome'] == 'exited' else None
+                if result.get('adapter_outcome') != adapter_status['outcome'] or result.get('returncode') != expected_rc:
+                    raise ValueError('saved adapter outcome does not match retained status evidence')
                 if result.get('status') != expected_status or result.get('errors') != errors:
                     raise ValueError('saved verdict does not match offline recomputation')
                 if entry.get('status') != expected_status or entry.get('errors') != errors:
                     raise ValueError('manifest verdict does not match offline recomputation')
-                if result.get('pre_sha256') != files['input']['raw_sha256'] or result.get('post_sha256') != files['output']['raw_sha256']:
+                expected_post = files.get('output', {}).get('raw_sha256')
+                if result.get('pre_sha256') != files['input']['raw_sha256'] or result.get('post_sha256') != expected_post:
                     raise ValueError('saved media hash binding mismatch')
                 print(cid + ': REPLAY ' + expected_status)
                 if errors:

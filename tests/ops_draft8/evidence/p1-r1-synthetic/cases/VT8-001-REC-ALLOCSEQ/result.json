@@ -1,0 +1,10 @@
+{
+  "adapter_kind": "synthetic",
+  "errors": [],
+  "id": "VT8-001-REC-ALLOCSEQ",
+  "operation": "record_splice_128",
+  "post_sha256": "9944d1740449d81c7678ed5c2d8e246147cad3a7834a6db8244cd30155af0dff",
+  "pre_sha256": "dd232f04e0c823bab7fa5397df290f75e56e0842335d32ad145072058e8cf43b",
+  "returncode": 0,
+  "status": "PASS"
+}

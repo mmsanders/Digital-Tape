@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 18 September 2026 UTC · Owner: PM · P1-R17 clean observed slice integrated; card evidence and ruggedization proposal routed for independent review; scoped Phase 0 freeze unchanged.**
+**Updated: 19 September 2026 UTC · Owner: PM · P1-R19 corrected VT8 verifier package authenticated; hardware methods routed independently; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -135,6 +135,37 @@ card audit and ruggedization criteria review. Software may build a held candidat
 only for the two already-covered VT8-001 cases. See the
 [P1-R17 disposition](REVIEW/P1-R17-PM-DISPOSITION.md).
 
+Verification #13 published findings at verifier main `62630b8...`. PM authenticated
+the exact one-file return and reran the full suite. Accept only the five card files'
+95 stored rates, minima and recorded pass/fail results; the packet does not complete
+WP-05 A-2 because primitive write/time/occupancy evidence is absent. The PR #92
+ruggedization proposal is directionally useful but not executable or auditable;
+Hardware owns the enumerated method corrections before any physical work.
+
+Software #95 returned held draft PR #96 at `b26ffa0...` and correctly stopped:
+the unchanged verifier-owned VT8 fixtures claim 60 seconds and 16 chunks on a device
+too small for the 21 chunks frozen DRAFT-8 derives. Both cases therefore fail mount
+with geometry error and zero writes. Offline replay also omits runner-level adapter
+failure state. Verification owns both package corrections before any Software rerun.
+PR #96 remains held independently because valid overwrite/overdub arm modes and
+multiple frozen behaviors are not covered or complete. See the
+[P1-R18 disposition](REVIEW/P1-R18-PM-DISPOSITION.md).
+
+Verification #14 corrected the 60-second VT8 geometry and runner/replay failure-state
+closure source-first, publishing the complete verifier subtree
+`3667a2830ba80dbcedad03b97870d1127001ab59` at verifier main `15dd16e...`.
+PM authenticated its identities and reproduced package self-tests, exact retained
+replay and the full verifier suite. Software owns an exact complete-tree import before
+an unchanged held PR #96 rerun; no engine or package acceptance follows.
+
+Hardware PR #87 head `da97a85...` now retains schema-2 primitive short-write,
+time, flush, size and occupancy data and derives its summaries; the old five raw files
+remain unchanged and incomplete. It is ready for independent method audit, not a new
+physical run or A-2 acceptance. PR #92 head `33b904a...` resolves B01–B03 and B05–B06,
+but B04 still needs an exact current-eCFR sharp-point/sharp-edge procedure and retained
+controls. A1 Mini usable volume and required physical instruments remain unconfirmed.
+See the [P1-R19 disposition](REVIEW/P1-R19-PM-DISPOSITION.md).
+
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
 directions. The kickoff granted no engine merge or broader acceptance.
@@ -173,10 +204,10 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | Work | State | Next owner |
 |---|---|---|
 | #20 engine | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
-| VT8-001 / WP-07 | Exact hardened tree `4a862fa...` is on main; self-tests pass. Seek and playback service now exist, but arm, feed, commit and reset_side_b remain undefined and neither real-product case has run | Software held implementation/evidence task, then independent Verification |
+| VT8-001 / WP-07 | Corrected complete verifier tree `3667a28...` is authenticated at verifier main `15dd16e...`; current product main still carries the superseded tree. Held PR #96 has not rerun against the correction | Software imports the exact complete tree, then reruns unchanged held evidence |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
-| Hardware | PR #87 is audit-ready but not audited. PR #92 proposes the owned-printer/ruggedization method but is not accepted. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Independent Verification; Hardware awaits the return |
+| Hardware | PR #87 schema-2 acquisition/analysis is ready for independent method audit; old raw data still lacks primitives. PR #92 resolves five method findings but its sharp-point/sharp-edge screen is not executable. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Verification audits PR #87; Hardware closes PR #92 B04 before physical work |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | Library print path retired without a result; A1 Mini setup in progress. Three PNY samples measured, but identity/audit/atomicity/qualification remain open | Hardware; Michael only for hands/wallet facts when requested |
 
@@ -193,14 +224,12 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R17 accepts PR #77's integration identity and scope without widening the exact
-independent observation boundary. PR #87 is routed for exact independent audit and
-PR #92 for independent criteria review. The A1 Mini packet may eventually split into
-one WP-24 matched-pair plate and one WP-04 button plate, contingent on the recorded
-usable bed and a new reproducible packet revision. PR #20/#64 remain held. The
-dashboard remains at the test-on-main rung, 13 of 36, because no complete
-implementation rung or package is accepted. PM publishes no branch KEEP lists or
-routine Michael-issue refreshes.
+P1-R19 authenticates the corrected VT8 verifier package and routes its exact complete
+tree to Software before any unchanged held rerun. Verification owns PR #87's independent
+method audit; Hardware owns only PR #92's remaining sourced B04 closure. PR #20/#64/#96
+remain held. Surge is not activated and Michael has no current blocking task. The
+dashboard remains at 13 of 36 because no complete implementation rung or package is
+accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
 
 ## Phase 1 operating format — 11 September
 

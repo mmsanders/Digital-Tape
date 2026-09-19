@@ -15,6 +15,14 @@ those bytes into the evidence bundle. Its default is the independently authentic
 `tests/mount_draft8/spec/` copy. The repository-root `spec/` is historical and must
 not be used as DRAFT-8 authority.
 
+Both fixtures retain the 60-second nominal duration. Frozen geometry derives
+`ceil(60 * 44100 / 131072) = 21` chunks. With 524,288-byte chunks (1,024 blocks),
+`chunk_base = 2,048`, and one reserved last block, the generated medium is exactly
+`2,048 + 21 * 1,024 + 1 = 23,553` blocks. Generation fails before an adapter runs
+unless the stored chunk count equals that derivation, the full region fits before
+the reserved block, and every case-specific sequence/index/degraded-side/allocation
+premise still holds.
+
 ## Cases
 
 ### `VT8-001-RB-ALLSLOT`
@@ -52,8 +60,11 @@ python3 tests/ops_draft8/selftest.py
 
 It accepts two conforming synthetic observations, rejects the original six mutations,
 and adds controls for P1-R1-V01/V02, the recording chunk-data barrier, callback range
-and return values, and public-call results. It also proves spec-byte authentication
-and that replay fails closed on missing or tampered evidence.
+and return values, and public-call results. It catches mismatched derived/stored chunk
+counts and undersized media before execution. Evidence controls prove a nonzero
+adapter exit remains a failing bundle and replays to the identical failure; missing,
+tampered or relabeled adapter status is rejected; zero-exit evidence replays exactly;
+spec-byte authentication and nonempty-destination retention remain enforced.
 
 A real or synthetic adapter run uses:
 
@@ -70,10 +81,12 @@ python3 tests/ops_draft8/replay.py /path/to/evidence
 ```
 
 The evidence directory persists the exact raw input/final VO08 envelopes as deterministic gzip archives (with both archive and decompressed-raw SHA-256 bindings), adapter stdout
-and stderr, complete callback/public-call observations, per-case verdicts, adapter
-identity/build/source provenance, exact spec bytes and a hash-bound manifest. Replay
-recomputes the verdict without invoking the engine or adapter. Synthetic evidence is
-package evidence only and is never product acceptance.
+and stderr, an explicit `VT8-ADAPTER-STATUS-1` completion record, complete
+callback/public-call observations, per-case verdicts, adapter identity/build/source
+provenance, exact spec bytes and a hash-bound manifest. Replay recomputes both adapter
+outcome and oracle verdict effects without invoking the engine or adapter. A nonzero
+exit can never replay as a conforming PASS. Synthetic evidence is package evidence
+only and is never product acceptance.
 
 See `COVERAGE.md` for assertion/spec mapping and exclusions, and
 `../NEXT-TRANCHES.md` for the dependency-ordered plan beyond this return.

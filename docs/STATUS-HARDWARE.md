@@ -1,6 +1,6 @@
 # Hardware status
 
-**Updated: 18 September 2026 · Owner: PM disposition of submitted Hardware evidence;
+**Updated: 19 September 2026 · Owner: PM disposition of submitted Hardware evidence;
 Hardware retains engineering control.**
 
 PR #18 is merged. PR #47 is merged at
@@ -18,8 +18,8 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
 | Cartridge clasp | Rev-5 library plate did not produce a returned result. Michael has bought an A1 Mini and is setting it up; the printer/process is not yet characterized | Rebase the packet on the owned-printer process, then record printed fit, retention, creep/drop and independent measurement audit |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
-| WP-05 | Draft PR #87 head `c0e6a83...` is audit-ready: five raw sustained-write runs, one 80%-filled PNY observation at 27.36 MB/s, three unfilled PNY screens and an onn negative control at 15.34 MB/s. PM reproduced the derivation | Independent audit now owns the exact packet. Part/revision/CID, reader/card attribution, atomicity and production end-to-end copy remain open; no card is qualified |
-| Ruggedization | Draft PR #92 head `7b80631...` proposes the player-wide failure matrix, staged drop/shake method, negative controls and owned-printer baseline | Independent criteria review precedes acceptance or trials. No live-cell destructive test; dummy-mass work precedes any representative assembled unit |
+| WP-05 | Verification independently reproduced all 95 legacy stored rates. PR #87 head `da97a85...` adds a schema-2 method retaining primitive short-write, time, flush, final-size and before/after capacity/free/occupancy data; the five old raw files are unchanged | Independent Verification audits method/tool readiness before any new physical run. Identity, attribution, atomicity, filled-condition qualification and end-to-end copy remain open; no card is qualified |
+| Ruggedization | Draft PR #92 head `33b904a...` resolves B01–B03 and B05–B06 with executable mechanics, measurements, controls, staging and owned-printer criteria | Close B04 by transcribing and testing the exact current 16 CFR 1500.48/.49 sharp-point, sharp-edge and applicable accessibility-probe procedures. Record source edition/date and retain semantic red controls. No physical or live-cell destructive test |
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
 reproduced by PM; CadQuery was not available in the lead environment and was not
@@ -42,5 +42,5 @@ PM approves a split-plate direction for the A1 Mini, contingent on recording its
 actual usable build volume: keep every WP-24 base with its matching lid on one plate
 and move the WP-04 button experiment to a second plate. Preserve blindness, the full
 sweeps and controls, regenerate from source and issue a new packet revision. This is
-not permission to print and no Hardware assignment is active while Verification
-reviews the proposed criteria.
+not permission to print. Hardware now owns the remaining B04 document/tool correction only; it must stop
+before machine-bound rebuild or physical execution if usable volume is unavailable.
