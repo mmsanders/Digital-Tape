@@ -1,0 +1,21 @@
+TapeFS DRAFT-8 geometry of the VT8-001 fixture superblock
+  oracle.py sb(): nominal_length_s=60 (offset 48), total_chunks=16 (offset 52),
+                  block_count=2048+16*1024+1=18433, lba_superblock_mirror=18432
+
+  Section 2 derivation from the superblock's OWN nominal_length_s=60:
+    frames        = 60 * 44100             = 2646000
+    total_chunks  = ceil(2646000 / 131072) = 21
+
+  Section 2.1 GEOMETRY_OK(60, 18433):
+    line 2  DEVICE_ADDRESSABLE(18433): 18433 > 2048          -> True
+    line 3  2048 + 21*1024 = 23552  <=  18433-1 = 18432    -> False
+
+  Section 4.1 phase 2 step 5 last line, stored == derived:
+    stored total_chunks 16 == derived 21                     -> False
+
+  TWO INDEPENDENT FAILURES. Either alone is TAPE_ERR_GEOMETRY, zero writes.
+
+  nominal_length_s values that derive exactly 16 chunks and satisfy line 3:
+    nominal_length_s = 45
+    nominal_length_s = 46
+    nominal_length_s = 47

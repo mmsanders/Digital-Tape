@@ -1,0 +1,22 @@
+{
+  "adapter_kind": "product",
+  "errors": [
+    "adapter returned 1",
+    "record commit did not consume all-slot max + 1",
+    "record B1 result invalid",
+    "record splice index/allocation not at derived free_next",
+    "record commit not live",
+    "post-record free_next not advanced to 4",
+    "record service produced no audio write observation",
+    "non-empty commit did not perform exactly two flushes",
+    "record commit missing B1 entry/header writes",
+    "record public-call evidence incomplete",
+    "commit index commit did not have exactly 2 writes + 2 flushes"
+  ],
+  "id": "VT8-001-REC-ALLOCSEQ",
+  "operation": "record_splice_128",
+  "post_sha256": "dd232f04e0c823bab7fa5397df290f75e56e0842335d32ad145072058e8cf43b",
+  "pre_sha256": "dd232f04e0c823bab7fa5397df290f75e56e0842335d32ad145072058e8cf43b",
+  "returncode": 1,
+  "status": "FAIL"
+}

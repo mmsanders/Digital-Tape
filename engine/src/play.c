@@ -197,6 +197,10 @@ tape_result tape_seek(tape *t, uint64_t frame)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    /* §10: forbidden while armed. The recording cursor is fixed at arm time
+       (§7) — you cannot seek a tape deck while it is recording, because the
+       head is where the head is. */
+    if (t->rec_armed) { return TAPE_ERR_BUSY; }
 
     total = TAPE_LIVE(t).total_frames;
     if (frame > total) { frame = total; }
@@ -214,6 +218,7 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    if (t->rec_armed) { return TAPE_ERR_BUSY; }   /* §10, with tape_seek */
 
     t->rate_q16_16 = rate_q16_16;
     t->at_end   = false;
@@ -226,9 +231,9 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
  * it touches neither media nor operation state, and quarantine still has to be
  * observable. Not-mounted is TAPE_ERR_NOT_MOUNTED like every ordinary call.
  *
- * recording_armed and frames_owed are always false here because §7 recording is
- * not implemented in this candidate. That is the correct answer for every state
- * this engine can actually reach, not a stub: there is no path that arms.
+ * recording_armed and frames_owed are read from the instance now that §7 has a
+ * path that arms. They were hard false while nothing could arm, which was true
+ * then and would be a lie now.
  */
 tape_result tape_status(const tape *t, tape_status_t *out)
 {
@@ -237,8 +242,8 @@ tape_result tape_status(const tape *t, tape_status_t *out)
 
     out->at_end          = t->at_end;
     out->at_start        = t->at_start;
-    out->recording_armed = false;
-    out->frames_owed     = false;
+    out->recording_armed = t->rec_armed;
+    out->frames_owed     = tape_frames_owed(t);
     /* Same derivations tape_get_info uses, so the two can never disagree. */
     out->entries_free    = TAPE_MAX_ENTRIES - TAPE_LIVE(t).entry_count;
     out->free_chunks     = (t->sb.total_chunks > t->free_next)
@@ -257,11 +262,24 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
 {
     const struct tape_index *idx;
     uint32_t first, end, used = 0u;
+    bool rec_more = false;
 
     if (t == NULL || more_work == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted)                    { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)                     { return TAPE_ERR_FAULTED; }
     if (block_budget == 0u)             { return TAPE_ERR_INVALID_ARG; }
+
+    /*
+     * §7 first: tape_service is the call that clears owed frames, which is why
+     * §10 permits it in both armed rows. It runs ahead of the play window
+     * because a frame the child has already recorded is owed and a frame the
+     * child has not reached yet is not, and because §8 step 2's barrier has to
+     * be behind every chunk write before tape_commit becomes callable.
+     */
+    if (t->rec_armed) {
+        tape_result rc = tape_record_service(t, block_budget, &used, &rec_more);
+        if (rc != TAPE_OK) { return rc; }
+    }
 
     idx = &TAPE_LIVE(t);
     play_target(t, &first, &end);
@@ -270,7 +288,7 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
         t->play_frames = 0u;
         t->play_base = first;
         t->play_ring_valid = true;
-        *more_work = false;
+        *more_work = rec_more;
         return TAPE_OK;
     }
 
@@ -316,7 +334,7 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
         t->play_frames += take;
     }
 
-    *more_work = ((uint32_t)(t->play_base + t->play_frames) < end);
+    *more_work = rec_more || ((uint32_t)(t->play_base + t->play_frames) < end);
     return TAPE_OK;
 }
 

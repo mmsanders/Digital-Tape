@@ -1,0 +1,30 @@
+{
+  "adapter_kind": "product",
+  "calls": [
+    {
+      "call": "tape_mount",
+      "phase": "mount",
+      "result": "TAPE_ERR_GEOMETRY",
+      "side": "A"
+    }
+  ],
+  "event_overflow": false,
+  "events": [
+    {
+      "count": 1,
+      "lba": 0,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    },
+    {
+      "count": 1,
+      "lba": 18432,
+      "op": "read",
+      "phase": "mount",
+      "rc": 0
+    }
+  ],
+  "format": "VT8-OPS-OBSERVATION-1",
+  "service_guard": 4096
+}

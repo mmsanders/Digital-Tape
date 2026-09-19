@@ -1,0 +1,10 @@
+{
+  "adapter_kind": "product",
+  "errors": [],
+  "id": "VT8-001-RB-ALLSLOT",
+  "operation": "reset_b",
+  "post_sha256": "e058a3c303cdf4a08c8957aeb76da89567cb4a0f4644212df72a863fcbb632f5",
+  "pre_sha256": "cf0ea448727963594ba3d8620349996114333ad69d4fe08facfc00497f821177",
+  "returncode": 0,
+  "status": "PASS"
+}

@@ -1,0 +1,10 @@
+{
+  "adapter_kind": "product",
+  "errors": [],
+  "id": "VT8-001-REC-ALLOCSEQ",
+  "operation": "record_splice_128",
+  "post_sha256": "5be6f97eb4dc105579c759cb48298b21dda0ed0bdb511d2dcc0c1bce80f58291",
+  "pre_sha256": "57782d38019c2403463c8e1068d1fff199f762df5561bd86387aba65f7a319c6",
+  "returncode": 0,
+  "status": "PASS"
+}
