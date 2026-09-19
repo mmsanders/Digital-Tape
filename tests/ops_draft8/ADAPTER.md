@@ -20,6 +20,12 @@ Stdout must be one JSON object:
 }
 ```
 
+The runner retains process completion separately as `VT8-ADAPTER-STATUS-1`: an
+exact normal exit code, timeout, or execution error. That record is manifest-bound
+and participates in offline verdict recomputation. An adapter that emits otherwise
+conforming media/JSON but exits nonzero produces a retained failing bundle; replay
+must reproduce that same failure and must never reinterpret it as a conforming PASS.
+
 `adapter_kind` is exactly `product` for a real adapter or `synthetic` for the verifier
 self-test. The runner supplies the immutable adapter source/build provenance; replay
 checks that the observation identity agrees with the manifest.
