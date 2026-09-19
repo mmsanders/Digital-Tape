@@ -20,8 +20,8 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-01 | Repo, agent docs, decision log | Agent | — | Repo and restart agreement published; no independent package acceptance claimed |
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | **Packet WP04-01 rev 5 built and sendable** — carries WP-24's sweep too |
-| WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. Independent method audit blocks a new run: schema 2 lacks ordered per-write primitives and strict validation. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | Rev-6 source packet reproducibly splits WP-24 and WP-04 onto two nominal-A1 plates with 5 mm XY margins; usable area/process and every physical result remain unproved, so printing is held |
+| WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. PR #87's repaired ordered schema-2 method awaits independent re-audit before acquisition. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
@@ -32,7 +32,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean PR #77 slice merged with evidence history intact. Exact 289/289 mount observations, including row 3, are independently accepted; source/helper design and the incomplete package remain held |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact corrected verifier tree `3667a28...` is on main. Two held PR #96 product observations replay PASS and await blind independent disposition; coverage, source and complete-product acceptance remain held |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact reset-Side-B and recording/allocation observations at held PR #96 evidence `088226a...` are independently accepted. A clean split with fresh evidence is still required; all excluded behavior, source and complete-product acceptance remain held |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Clean observed slice merged. Exact ten corrected-cadence product observations are independently accepted, including 698/698 per-render service in each direction. Source, complete package and listening/goldens remain separate |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |

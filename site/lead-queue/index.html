@@ -259,14 +259,14 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R20 · 19 September 2026 UTC",
+      asOf: "P1-R21 · 19 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
         { id: "WP-06", name: "Block device, superblock, index commit", rung: 2,
           note: "The clean mount/playback slice is merged with its evidence history intact. Exact 289/289 mount records are independently accepted; source/helper design and the incomplete package remain held." },
         { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 2,
-          note: "The exact corrected VT8 verifier tree is on main. Two held PR #96 product observations replay PASS and await blind independent disposition; source, uncovered allocator behavior and complete-package acceptance remain held." },
+          note: "Verification independently accepts exactly the reset-Side-B and recording/allocation observations retained at held PR #96. A clean split with fresh evidence is still required; source, excluded behavior and complete-package acceptance remain held." },
         { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
           note: "The clean observed slice is merged. Verification independently accepted the exact ten corrected-cadence observations, including 698/698 service sequences per direction; no source, listening, golden or complete-package acceptance follows." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
