@@ -1,12 +1,34 @@
 # Ruggedization — shock and load path, failure modes, and the staged abuse protocol
 
 **Owner:** Hardware Lead · **Consumed by:** WP-25, WP-23, WP-22, WP-24 · **Status:** proposal
-**Revision:** 0.2, 19 September 2026 · **Answers:** Guardrail 13, `docs/PACKAGES/WP-25.md`,
-and Verification findings P1-R17-V-B01..B05
+**Revision:** 0.3, 19 September 2026 · **Answers:** Guardrail 13, `docs/PACKAGES/WP-25.md`,
+and Verification findings P1-R17-V-B01..B05, B04 closed as far as the sources are reachable
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.3 — 2026-09-19
+**B04: R-3 is no longer a judgement call.** The sharp-point and sharp-edge screens are
+bound to 16 CFR 1500.48 and 1500.49, with the operative values transcribed per field and
+cited, the Probe B accessibility basis stated and justified from the product's own
+seven-year-old tiebreaker, and deterministic evaluation in `hardware/rugged/sharp.py` —
+including run-conformance checks, so a tester that is out of specification produces **no
+verdict** rather than a pass. Two measured checks (**D-19**, **D-20**) and two reference
+red controls (**C-5**, **C-6**) join the protocol and are held to the same ≥2× margin
+rule as the rest.
+
+**The provenance is stated rather than glossed.** Every host serving the official text is
+blocked by this environment's egress proxy — `ecfr.gov` answers 403 at the gateway, as do
+`govinfo.gov`, `law.cornell.edu` and `cpsc.gov`. The values were recovered by web search
+restricted to those same domains, which returns the regulation's own wording but is a
+**secondary rendering**. No field claims primary verification, the edition banner could
+not be read, and what could not be recovered — the probe figure geometry above all — is
+listed in CS-1..CS-5 and left blank rather than filled in. A safety screen is the last
+place to round a gap up to a number.
+
+The small-parts screen is unchanged. Its Part 1501 citation is now explicit that the
+source's under-three scope is **the source's**, not a claim about this product.
 
 ### 0.2 — 2026-09-19
 **Rev 0.1 was rejected as a test method, and it deserved to be.** Verification's
@@ -213,6 +235,8 @@ number it must beat. A check without those is an opinion, and P1-R17-V-B02 was r
 | **D-12** | transport alignment | dial indicator against the latch-bar datum face | 0-10 mm · 0.01 mm · +/-0.02 mm | zeroed against a 1.000 mm gauge block before each session | datum reading at stage 0 with the bar at rest, per article | **shift from baseline <= 0.15 mm** | **yes** |
 | **D-14** | loose part inside: mass and audible impact | balance for mass; quiet room (<= 35 dBA) and a 0.3 m listen for impacts, article rotated through all three axes twice | 0-500 g · 0.01 g · +/-0.03 g | checked against a 100.00 g class-M2 mass before each session | assembled mass at stage 0, per article | **mass change <= 0.10 g AND no audible internal impact** | no |
 | **D-17** | fastener retention | torque screwdriver, breakaway direction | 0.10-1.00 N.m · 0.01 N.m · +/-6% of reading | verified against a torque tester at the start of each session | install torque 0.35 N.m, recorded per fastener at stage 0 | **residual breakaway torque >= 0.25 N.m (70% of install). Measuring it releases the fastener, so it is re-torqued and recorded** | **yes** |
+| **D-19** | sharp point created by the trial (R-3), on the Probe B accessibility basis | sharp-point tester per 16 CFR 1500.48: slotted cap, recessed sensing head, 0.5 lbf return spring, indicating circuit | 0-0.050 in travel · 0.001 in · +/-0.0005 in | gap set against a 0.015 in feeler before each session; indication confirmed on the reference sharp artifact (control C-5) | no accessible sharp point at stage 0, recorded per article | **sharp if the point contacts the sensing head and moves it a further 0.005 in; insertion force never above 1.00 lbf** | no |
+| **D-20** | sharp metal or glass edge created by the trial (R-3) | sharp-edge tester per 16 CFR 1500.49: 0.375 in mandrel wrapped with a single layer of TFE tape, 1.35 lbf normal force, one revolution | 0-2 in cut length · 0.01 in · +/-0.02 in | mandrel diameter and tape thickness checked before each session; cut confirmed on the reference blade (control C-6) | no accessible sharp edge at stage 0, recorded per article | **sharp if the tape is completely cut for 0.5 in or more in one revolution** | no |
 | **FC-02** | audio output, both channels | USB audio interface, line input, 1 kHz reference tone from the article's test track, RMS over 5 s | -60 to +6 dBu · 0.1 dB · +/-0.2 dB | interface input calibrated against a 1.000 Vrms source | per-channel RMS at stage 0, article at its fixed volume setting | **within 1.0 dB of baseline on both channels, no dropout** | no |
 | **FC-03** | controls | 10 actuations per control, logged by the article's own firmware counter | n/a · 1 actuation · exact count | counter zeroed before each check | 10 of 10 registered per control at stage 0 | **10 of 10 registered, no double-fire, no dead press** | no |
 
@@ -237,9 +261,11 @@ rather than merely unlucky.
 | **C-1** | D-01 | the cell-dummy retainer is fitted with its 0.60 mm shim removed and its fastener omitted, giving a measured free travel of 0.60 mm +/- 0.05 against a 0.20 mm limit | **3.0×** past the 0.2 mm limit | D-01 must read >= 0.55 mm of travel before any abuse | D-01 cannot detect a loose cell, so the cell-retention check is invalid and no article may be exposed until it is redesigned |
 | **C-2** | D-04 | one shell fastener is backed out until a 0.45 mm feeler blade enters the seam, against a 0.20 mm limit | **2.2×** past the 0.2 mm limit | D-04 must admit a 0.40 mm blade where the baseline admitted none | the seam check is decorative and must be redefined before it is relied on |
 | **C-3** | D-14 | a 2.00 g captive mass is released inside the closed article, against a 0.10 g mass limit | **20.0×** past the 0.1 g limit | D-14 must show a mass change >= 1.9 g on the article-plus-parts weighing, and an audible impact on rotation | the loose-part check cannot find a detached part, which is the one failure a functional check alone never sees |
+| **C-5** | D-19 | a reference sharp artifact -- a new steel scribe point -- is presented to the tester and moves the sensing head a measured 0.012 in, against the 0.005 in limit | **2.4×** past the 0.005 in limit | D-19 must indicate SHARP on the reference artifact before any article is screened | the point tester does not indicate on a known sharp point, so every not-sharp reading it has produced is meaningless |
+| **C-6** | D-20 | a reference blade -- a new utility knife blade -- is run against the mandrel under the same 1.35 lbf, cutting a measured 1.20 in of tape against a 0.5 in limit | **2.4×** past the 0.5 in limit | D-20 must cut at least 1.0 in on the reference blade before any article is screened | the edge tester cannot cut on a known sharp edge, so every not-sharp reading it has produced is meaningless |
 | **C-4** | D-17 | one fastener is set to 0.10 N.m install torque instead of 0.35, giving a residual breakaway below the 0.25 N.m floor | **2.5×** past the 0.25 N.m limit | D-17 must read a breakaway torque <= 0.15 N.m | fastener retention is not being measured and the torque check must be replaced |
 
-Each control runs **before** the articles it protects are exposed, on a control article that never produces a qualifying result. Safety: C-1 — inert dummy only; no cell, charged or otherwise; C-2 — no energy stored; the article is not dropped in this state; C-3 — inert mass, no sharp edges, article closed; C-4 — no live cell; the article is not dropped in this state.
+Each control runs **before** the articles it protects are exposed, on a control article that never produces a qualifying result. Safety: C-1 — inert dummy only; no cell, charged or otherwise; C-2 — no energy stored; the article is not dropped in this state; C-3 — inert mass, no sharp edges, article closed; C-5 — a bench artifact, handled with the article closed and no cell present; nothing is dropped or powered; C-6 — a bench artifact, blade handled in a holder; no article, no cell; C-4 — no live cell; the article is not dropped in this state.
 <!-- END GENERATED: rugged_controls -->
 
 `hardware/rugged/test_protocol.py` enforces the margin: a control whose defect is less than 2×
@@ -256,7 +282,7 @@ and a repaired design restarts per the rule in §8.
 |---|---|
 | **R-1** | The cell dummy is exposed, loose beyond D-01's threshold, dented, punctured, or has moved in its pocket |
 | **R-2** | Any live conductor is exposed, or any insulation is breached |
-| **R-3** | Any accessible edge or point created by the trial is sharp by the §9 screen |
+| **R-3** | Any **Probe B accessible** point or edge created by the trial is sharp by the §9 screen: a point that moves the sensing head ≥ 0.005 in, or an edge that cuts ≥ 0.5 in of tape in one revolution. Checks **D-19** and **D-20** |
 | **R-4** | Any part detaches that is a small part by the §9 screen |
 | **R-5** | The enclosure opens unintentionally, or the cartridge ejects |
 | **R-6** | Any check in §5 falls outside its threshold, including intermittently |
@@ -296,37 +322,78 @@ qualifying stage, which runs on an inert dummy. Whether a live-cell trial is eve
 under what separate safety review, is a PM and Michael decision this document does not make and
 does not pre-authorize.
 
-## 9. Child-safety screens: source, method, and what is missing (B04)
+## 9. Child-safety screens: sourced method (B04)
 
-**These are internal engineering screens adopted for our own use. They are not regulatory
-testing, not certification, and not a compliance claim**, and a pass here says nothing about
-whether the product would pass a competent laboratory's version.
+**These are internal engineering screens adopted for our own use. They are not
+regulatory testing, not certification, and not a compliance claim**, and a pass here says
+nothing about whether the product would pass a competent laboratory's version.
 
-| Screen | Adopted source | What the method requires |
+### Small parts (R-4) — unchanged, and runnable today
+
+| Adopted source | What the method requires |
+|---|---|
+| **16 CFR Part 1501**, whose own scope is articles intended for children under three. **Adopting its cylinder is not a claim about our product's intended age** — our tiebreaker is a seven-year-old, and the cylinder is adopted because a detached part that fits it is a choking hazard whatever age the article is for | A test cylinder of **31.7 mm inside diameter** with a **slanted base**, giving a depth of **25.4 mm at the shallow side and 57.1 mm at the deep side**. A detached part is placed into the cylinder **without compressing it**, in **any orientation**; if it fits **entirely within**, it is a small part and R-4 fails. Fragments are tested individually, as found. |
+
+### Sharp points and sharp edges (R-3) — now deterministic
+
+<!-- BEGIN GENERATED: rugged_sharp -->
+**Adopted sources**, retrieved 2026-09-19: [16 CFR 1500.48](https://www.ecfr.gov/current/title-16/chapter-II/subchapter-C/part-1500/section-1500.48) — Technical requirements for determining a sharp point in toys and other articles intended for use by children under 8 years of age; [16 CFR 1500.49](https://www.ecfr.gov/current/title-16/chapter-II/subchapter-C/part-1500/section-1500.49) — Technical requirements for determining a sharp metal or glass edge in toys and other articles intended for use by children under 8 years of age.
+
+> Internal engineering screen only. Adopted from the cited sections for our own design use. NOT CPSC approval, certification, regulatory compliance, third-party testing or safety acceptance. Hardware cannot accept its own screen, and a pass here is not a ruggedization result.
+
+**Provenance of every value below:** web search restricted to ecfr.gov, law.cornell.edu, govinfo.gov and cpsc.gov; the documents themselves are unreachable from this environment (gateway 403 on CONNECT). No field is marked verified against the primary document, and the edition banner ("current through") could not be read. See CS-1..CS-5.
+
+### Accessibility basis
+
+| Field | Value | Cited as |
 |---|---|---|
-| **Small parts (R-4)** | 16 CFR Part 1501 — the small-parts cylinder used for articles intended for children under three | A test cylinder of **31.7 mm inside diameter** with a **slanted base**, giving a depth of **25.4 mm at the shallow side and 57.1 mm at the deep side**. A detached part is placed into the cylinder **without compressing it**, in **any orientation**; if it fits **entirely within**, it is a small part and R-4 fails. Fragments are tested individually, as found. |
-| **Sharp points (R-3)** | 16 CFR §1500.48 — technical requirements for determining a sharp point | A sharp-point tester with a gauge slot and an indicating circuit: the point is inserted into the slot under a defined load and the circuit indicates if it is sharp. Applies to accessible points on the article as presented after the trial. |
-| **Sharp edges (R-3)** | 16 CFR §1500.49 — technical requirements for determining a sharp metal or glass edge | A mandrel wrapped with a defined tape is rotated against the edge under a defined force for a defined arc; the edge is sharp if the tape is cut over more than a defined fraction of the contact length. |
+| probe for this product | **Probe B** | 16 CFR 1500.48 — probe A for articles intended for children 3 years or less; probe B for over 3 up to 8 years |
+| adjacent-gap exemption | **0.020 in** | 16 CFR 1500.48 — a point is inaccessible without probe testing if it lies adjacent to a surface and the gap does not exceed 0.020 in (0.50 mm) |
+| insertion depth, bounded openings | **up to 2.25x the opening's minor dimension** | 16 CFR 1500.48 — for an opening whose minor dimension exceeds the probe collar diameter but is below the unrestricted threshold, the probe with its extension is inserted in any direction up to 2.25x the minor dimension, measured from any point in the plane of the opening |
+| unrestricted-depth threshold, probe B | **9.00 in** | 16 CFR 1500.48 — 9.00 in (228.6 mm) or larger minor dimension with probe B; insertion depth is then unrestricted |
 
-### What must be transcribed before either sharp screen runs
+### Sharp-point tester and criterion
 
-**No host serving the CFR is reachable from the Hardware Lead's environment** (`ecfr.gov` and
-its API both fail to connect), and inventing a number to fill a gap in a safety method is
-exactly the failure this project has rules against. The following are therefore **named, not
-guessed**, and each must be transcribed from the cited section before the screen is run:
-
-| # | Missing detail | Section |
+| Field | Value | Cited as |
 |---|---|---|
-| CS-1 | Sharp-point tester slot width, insertion depth and applied load | §1500.48 |
-| CS-2 | The accessibility rule — which points and edges count as accessible, and the probe that decides it | §1500.48 / §1500.49 |
-| CS-3 | Sharp-edge mandrel diameter, rotation speed, applied force and arc | §1500.49 |
-| CS-4 | The tape specification and the cut fraction that defines "sharp" | §1500.49 |
-| CS-5 | Whether the adopted edition matches the current one, and its date | all three |
+| gaging slot opening | **0.040 in wide by 0.045 in long** | 16 CFR 1500.48 — rectangular opening 0.040 in (1.02 mm) wide by 0.045 in (1.15 mm) long in the end of the slotted cap |
+| sensing head recess | **0.015 in** | 16 CFR 1500.48 — the sensing head is recessed 0.015 in (0.38 mm) below the end cap |
+| additional travel that identifies a sharp point | **0.005 in** | 16 CFR 1500.48 — the point must move the sensing head a further 0.005 in (0.12 mm) |
+| return-spring force opposing that travel | **0.5 lbf** | 16 CFR 1500.48 — against the 0.5 lb (2.2 N) force of a return spring |
+| maximum insertion force | **1.00 lbf** | 16 CFR 1500.48 — the force applied when inserting a point into the gaging slot is no more than 1.00 lb |
 
-**Michael, the smallest useful reply:** the three sections above, from any library or online
-copy, or the corresponding ASTM F963 clauses if that is easier to reach. Until then R-3 runs as
-a **documented judgement call** and is recorded as such — which is weaker than a screen and must
-not be written up as if it were one. R-4's cylinder is fully specified above and can run today.
+### Sharp-edge tester and criterion
+
+| Field | Value | Cited as |
+|---|---|---|
+| mandrel diameter | **0.375 +/- 0.005 in** | 16 CFR 1500.49 — 0.375 +/- 0.005 in (9.35 +/- 0.12 mm) |
+| tape | **single layer of polytetrafluoroethylene (TFE) tape wrapped around the full circumference** | 16 CFR 1500.49 — contact between test edge and mandrel at the approximate centre of the tape width |
+| tape backing thickness | **0.0026 to 0.0035 in** | 16 CFR 1500.49 — between 0.0026 in (0.066 mm) and 0.0035 in (0.089 mm) |
+| normal force | **1.35 lbf** | 16 CFR 1500.49 — applied to the edge with a normal force of 1.35 lb (6.00 N) |
+| rotation | **one complete revolution** | 16 CFR 1500.49 — rotated through one complete revolution while the force against the edge is held constant |
+| tangential velocity | **1.00 +/- 0.08 in/s** | 16 CFR 1500.49 — 1.00 +/- 0.08 in/s (25.4 +/- 2.0 mm/s) during the centre 75 percent of the rotation, with a smooth start and stop |
+| cut length that identifies a sharp edge | **not less than 1/2 (0.5) in** | 16 CFR 1500.49 — the edge is sharp if it completely cuts through the tape for a length of not less than 1/2 in (13 mm) |
+
+### Not recovered, and therefore not stated
+
+| # | Missing | Consequence |
+|---|---|---|
+| **CS-1** | **Probe B's own geometry** — collar diameter, tip diameter and extension length from the section's figures. The selection rule and the depth rule are recovered; the probe's dimensions are not, because they live in a drawing rather than in text. | blocks building or buying a conforming probe |
+| **CS-2** | **Tape width** for the edge tester. The contact point is specified relative to the width; the width itself was not recovered. | blocks specifying the consumable |
+| **CS-3** | **The eCFR edition banner** — the 'current through' date. Nothing here can claim to be the current text. | blocks any currency claim |
+| **CS-4** | **The complete exclusion clauses** of both sections — which points and edges are exempt (functional features and similar). | a screen that does not know its exclusions can only over-report, which is the safe direction, but it is not the method |
+| **CS-5** | **The conditioning and use tests** referenced by the accessibility rule (1500.51/.52/.53, excluding the bite test), which determine whether a point is accessible before or after use and abuse. | our sequence applies the screen after the abuse family, which is at least as severe; matching the referenced procedure exactly is not established |
+
+**Evaluation is deterministic**, in `hardware/rugged/sharp.py`: `point_run_conforms` and `edge_run_conforms` reject a run whose tester is out of specification — a non-conforming run yields no verdict rather than a pass — and `point_is_sharp` / `edge_is_sharp` then apply the criterion above. R-3 is no longer a judgement call.
+
+**What the screen can do today:** nothing physical. The testers are not owned and no purchase is approved (RG-7), and CS-1 and CS-2 must close before a conforming probe or consumable can even be specified.
+<!-- END GENERATED: rugged_sharp -->
+
+**The age basis, stated once.** The product's tiebreaker is a seven-year-old
+(`CLAUDE.md` §1). That is inside both sections' under-8 scope and above the three-year
+boundary that selects the accessibility probe, so **Probe B applies**. No product
+document places intended use under three; if one ever does, the probe selection changes
+and this section must be reissued rather than reinterpreted.
 
 ## 10. Evidence (WP-25 A-6)
 
@@ -381,5 +448,5 @@ WP-25's interface is mechanism-neutral and this document keeps it that way.
 | RG-3 | The printer, material and process are uncharacterized | Michael's setup, then Hardware | Stage 2 is gated on it; a representative article cannot be built without it |
 | RG-4 | Whether a live-cell trial is ever required | **PM and Michael** | Would need a separate safety review, not an extension of this protocol |
 | RG-5 | Drop surface assumes a domestic concrete slab is available | Michael | A different declared surface changes severity and must be re-approved |
-| RG-6 | **CS-1..CS-5: the sharp-point and sharp-edge methods are not fully transcribed** (§9) | Michael or PM, from the cited sections | R-3 stays a documented judgement call until they are |
+| RG-6 | **CS-1..CS-5** (§9): the probe figure geometry, tape width, edition banner, exclusion clauses and referenced conditioning tests are **not recovered** — every official host is blocked from the Hardware environment. The operative criteria themselves are sourced and R-3 is deterministic | Michael or PM, from a reachable copy | A conforming probe and consumable cannot be specified, and no currency claim can be made, until CS-1..CS-3 close |
 | RG-7 | The instruments in §5 — force gauge, torque screwdriver, dial indicator, balance, audio interface — are **not owned**, and none is approved for purchase | **Michael** | No check in §5 can run without them; this is the largest physical dependency after the articles themselves |

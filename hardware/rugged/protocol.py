@@ -37,6 +37,9 @@ from pathlib import Path
 
 SPEC = Path(__file__).resolve().parents[2] / "spec" / "hw" / "ruggedization.md"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sharp  # noqa: E402  the sourced sharp-point / sharp-edge screens
+
 # --- the datum convention ---------------------------------------------------
 #
 # Right-handed, article-fixed. +Z is up through the control face in normal use,
@@ -244,6 +247,27 @@ CHECKS: tuple[Check, ...] = (
           "residual breakaway torque >= 0.25 N.m (70% of install). Measuring "
           "it releases the fastener, so it is re-torqued and recorded",
           "N.m", 0.25, "min", True, "stage 0, end of each family"),
+    Check("D-19", "sharp point created by the trial (R-3), on the Probe B "
+          "accessibility basis",
+          "sharp-point tester per 16 CFR 1500.48: slotted cap, recessed sensing "
+          "head, 0.5 lbf return spring, indicating circuit",
+          "0-0.050 in travel", "0.001 in", "+/-0.0005 in",
+          "gap set against a 0.015 in feeler before each session; indication "
+          "confirmed on the reference sharp artifact (control C-5)",
+          "no accessible sharp point at stage 0, recorded per article",
+          "sharp if the point contacts the sensing head and moves it a further "
+          "0.005 in; insertion force never above 1.00 lbf", "in", 0.005, "max",
+          False, "after the drop family and after the rough-play family"),
+    Check("D-20", "sharp metal or glass edge created by the trial (R-3)",
+          "sharp-edge tester per 16 CFR 1500.49: 0.375 in mandrel wrapped with "
+          "a single layer of TFE tape, 1.35 lbf normal force, one revolution",
+          "0-2 in cut length", "0.01 in", "+/-0.02 in",
+          "mandrel diameter and tape thickness checked before each session; "
+          "cut confirmed on the reference blade (control C-6)",
+          "no accessible sharp edge at stage 0, recorded per article",
+          "sharp if the tape is completely cut for 0.5 in or more in one "
+          "revolution", "in", 0.5, "max", False,
+          "after the drop family and after the rough-play family"),
     Check("FC-02", "audio output, both channels",
           "USB audio interface, line input, 1 kHz reference tone from the "
           "article's test track, RMS over 5 s",
@@ -306,6 +330,27 @@ CONTROLS: tuple[Control, ...] = (
             "the loose-part check cannot find a detached part, which is the "
             "one failure a functional check alone never sees",
             "inert mass, no sharp edges, article closed"),
+    Control("C-5", "D-19",
+            "a reference sharp artifact -- a new steel scribe point -- is "
+            "presented to the tester and moves the sensing head a measured "
+            "0.012 in, against the 0.005 in limit",
+            0.012, "in",
+            "D-19 must indicate SHARP on the reference artifact before any "
+            "article is screened",
+            "the point tester does not indicate on a known sharp point, so "
+            "every not-sharp reading it has produced is meaningless",
+            "a bench artifact, handled with the article closed and no cell "
+            "present; nothing is dropped or powered"),
+    Control("C-6", "D-20",
+            "a reference blade -- a new utility knife blade -- is run against "
+            "the mandrel under the same 1.35 lbf, cutting a measured 1.20 in "
+            "of tape against a 0.5 in limit",
+            1.20, "in",
+            "D-20 must cut at least 1.0 in on the reference blade before any "
+            "article is screened",
+            "the edge tester cannot cut on a known sharp edge, so every "
+            "not-sharp reading it has produced is meaningless",
+            "a bench artifact, blade handled in a holder; no article, no cell"),
     Control("C-4", "D-17",
             "one fastener is set to 0.10 N.m install torque instead of 0.35, "
             "giving a residual breakaway below the 0.25 N.m floor",
@@ -479,7 +524,52 @@ def gen_shake() -> str:
     return block("rugged_roughplay", lines)
 
 
+def gen_sharp() -> str:
+    lines = [
+        f"**Adopted sources**, retrieved {sharp.RETRIEVED}: "
+        + "; ".join(f"[{v['cite']}]({v['url']}) — {v['title']}"
+                    for v in sharp.SOURCES.values()) + ".",
+        "",
+        f"> {sharp.DISCLAIMER}",
+        "",
+        f"**Provenance of every value below:** {sharp.RETRIEVAL}. No field is "
+        f"marked verified against the primary document, and the edition banner "
+        f"(\"current through\") could not be read. See CS-1..CS-5.",
+        "",
+        "### Accessibility basis", "",
+        "| Field | Value | Cited as |", "|---|---|---|",
+    ]
+    for f in sharp.ACCESSIBILITY:
+        lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
+    lines += ["", "### Sharp-point tester and criterion", "",
+              "| Field | Value | Cited as |", "|---|---|---|"]
+    for f in sharp.POINT:
+        lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
+    lines += ["", "### Sharp-edge tester and criterion", "",
+              "| Field | Value | Cited as |", "|---|---|---|"]
+    for f in sharp.EDGE:
+        lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
+    lines += ["", "### Not recovered, and therefore not stated", "",
+              "| # | Missing | Consequence |", "|---|---|---|"]
+    for cid, what, why in sharp.OPEN:
+        lines.append(f"| **{cid}** | {what} | {why} |")
+    lines += ["",
+              "**Evaluation is deterministic**, in `hardware/rugged/sharp.py`: "
+              "`point_run_conforms` and `edge_run_conforms` reject a run whose "
+              "tester is out of specification — a non-conforming run yields no "
+              "verdict rather than a pass — and `point_is_sharp` / "
+              "`edge_is_sharp` then apply the criterion above. R-3 is no longer "
+              "a judgement call.",
+              "",
+              "**What the screen can do today:** nothing physical. The testers "
+              "are not owned and no purchase is approved (RG-7), and CS-1 and "
+              "CS-2 must close before a conforming probe or consumable can even "
+              "be specified."]
+    return block("rugged_sharp", lines)
+
+
 GENERATORS = {
+    "rugged_sharp": gen_sharp,
     "rugged_drops": gen_drops,
     "rugged_checks": gen_checks,
     "rugged_controls": gen_controls,

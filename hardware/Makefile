@@ -212,6 +212,7 @@ rugged:
 ## P1-R17-V-B02/B03: a protocol that cannot be held to those is a description.
 rugged-test:
 	@cd rugged && $(PY) test_protocol.py
+	@cd rugged && $(PY) test_sharp.py
 
 ## spec-check — spec/hw content and revision must move together
 ##
