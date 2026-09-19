@@ -1,5 +1,22 @@
 # Independent verification integration
 
+## Current clean integration boundary — 18 September 2026
+
+PR #77 is merged at product main
+`4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
+ten corrected-cadence playback observations and exact 289 mount records are
+independently accepted. That disposition does not accept source/helper design,
+complete WP-06/WP-08, listening, WP-11 goldens or a package. Held PR #20/#64 are
+not ancestors, and uncovered allocator/recording/crash/warm/state/operation and
+performance behaviour was not imported.
+
+The hardened VT8-001 verifier tree remains test-first and unchanged. Its public
+header and adapter now compile against main because `tape_seek` and playback
+`tape_service` exist, but `tape_arm`, `tape_feed`, `tape_commit` and
+`tape_reset_side_b` remain undefined. Therefore neither VT8-001 case has executed
+against the real engine and no allocator/all-slot sequence observation is accepted.
+Current work directions live only in role-labeled issues.
+
 ## Imported mount tranche — 7 September 2026
 
 Source: `mmsanders/digital-tape-verification`, immutable commit
@@ -516,3 +533,29 @@ binary acceptance, a WP-11 golden or listening. PR #20/#64 and uncovered allocat
 recording, crash/recovery, warm-start, state/operations, performance and all hardware
 holds remain. A bounded Software integration may use only the clean independently
 observed PR #77 slice and must preserve Structural Rule 1 and exact accepted blobs.
+
+## P1-R18 card/method findings and VT8 package blocker — 19 September 2026 UTC
+
+Verification #13 published one findings file at verifier main
+`62630b8a1e6dea18d8c4b22057fce06577411896`, tree
+`3a8511cfe67d29ab78233ad56a84f7b6ce90a7aa`, blob
+`713d497510a8ec33016b4d09d7ab6648e064798d`, SHA-256
+`2b1dd9e8ae18419acaf1da5c22e8b1b75d8750caef9590e32689427986cd3d52`.
+PM authenticated the return and reran the full verifier suite.
+
+The independent result accepts only the exact arithmetic over five immutable card
+files: all 95 stored rates reproduce, including the 15.34 MB/s onn negative-control
+failure and four 25.41–27.36 MB/s PNY passes. It rejects WP-05 A-2 completion because
+primitive returned-byte/time/final-size and capacity/free/occupancy evidence are not
+retained. It also rejects PR #92 as an executable/auditable method until Hardware
+resolves findings B01–B06. No card qualification, ruggedization trial or gate change
+follows.
+
+Held draft PR #96 is currently `b26ffa02e8c6f016762689d2bad9aaa8b40b1fc1`.
+Its run proves a verifier-package defect: both unchanged VT8 fixtures claim 60 seconds
+and 16 chunks on an 18,433-block device, while frozen DRAFT-8 derives 21 chunks and
+requires at least 23,552 blocks. Both cases therefore stop at conforming geometry
+rejection before any write. The runner also records nonzero adapter failure outside
+the result that offline replay recomputes, so the retained failing bundle cannot close
+under replay. Verification owns a blind, source-before-evidence correction of both
+defects and stops before product import/run. PR #96 and all existing holds remain.

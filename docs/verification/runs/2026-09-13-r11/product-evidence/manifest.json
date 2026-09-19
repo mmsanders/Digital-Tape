@@ -1,0 +1,58 @@
+{
+  "adapter": {
+    "build": "pre-run code commit 86eb3b77756042c365e2d0353018b981c39c99e8 (clean split candidate); cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 -std=c99 -Werror -Os engine / -O1 adapter; engine sources play.c sha256 d2a904d4f4b15595094d18f52ef3b4aeea30ce11320c2561e09b6ac82a7a49f1, mount.c sha256 324ba896a9f3f894f16e741b8e38b1307b88fcde9918a9c28db5cb204977a2f8, chunks.c sha256 82b5d16bdd3dc7e85d59b0ca8ba82ed0367a333668bd3319e2cd16a921d1391a; engine archive libtape.a sha256 ee75398163cbbe0d9e7674f1905b300773c317204d56b091207c6fcf17767cf9; adapter source sha256 2349aa3a28fd3ce9821794c93143ccec85a8186e94b9fd2cd332d68267073b89; adapter wrapper sha256 ebe108d0b960b389374b57848d14771af31d6154eadb2cb2049c1affe236051b; probe binary sha256 599e544151f9d4c3ca57eb51d61417ce6a38e1d7d29ef6c19370c9ab5580e004",
+    "command": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r11/tests/playback_adapter/complete_adapter.sh",
+    "id": "software-lead-complete-playback-public-api-probe-v1",
+    "kind": "product",
+    "source": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r11/tests/playback_adapter/complete_probe.c",
+    "source_file": {
+      "path": "/tmp/claude-0/-home-user-Digital-Tape/dc126337-de7a-5034-bb6c-b56191bae5f8/scratchpad/r11/tests/playback_adapter/complete_probe.c",
+      "sha256": "2349aa3a28fd3ce9821794c93143ccec85a8186e94b9fd2cd332d68267073b89"
+    }
+  },
+  "assignment": "P1-R8-V",
+  "execution": {
+    "exit_code": 0,
+    "outcome": "exited",
+    "timeout_seconds": 600.0
+  },
+  "files": {
+    "input/package/ADAPTER.md": "10e0c1b2bc7376be63662b5fdd33fa75485c7fefdb6883457c3bebda5df2be2a",
+    "input/package/COVERAGE.md": "62aa8de8d5c1df9a2718d06441ecd2e45cef190d9fae13460ea9aa18d192a0d1",
+    "input/package/README.md": "95adc055c4ba8279ad0b9926f0cc7d134814af378aaf92bd8a84936ad0b16802",
+    "input/package/candidate/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "input/package/candidate/scrub-reverse.pcm": "5f1794e8dcd7c1b3e2c390a1aef33039f5b88b20f682c56c4aa6f94051bd8fa1",
+    "input/package/fixtures/empty.vo08.gz": "95cc2ee3d7c72d42a53ffae9b74c52b21733b492eaa80a4cf06ae0c68655c6af",
+    "input/package/fixtures/fixture.json": "625d215b97168c06875c9f263582673bcc44f0463cedec2875cf8e004bbb4859",
+    "input/package/fixtures/long.vo08.gz": "39603c2c6b44a12a82cf8df9dd43cf529cdc3bad8bcebd642b29ba863cb40c2b",
+    "input/package/fixtures/one.vo08.gz": "985dd4e22beb9671be88b1d94695cfb28beae7949245195d0810e392d76bf73f",
+    "input/package/generate_fixture.py": "1a347dacf4684bee53d4f8aa34e63a1494b13d79687bfcda9d1d8a6bc6bbabfb",
+    "input/package/input/WP-08.md": "ff519e960ed3db6e401baebd12f33d5527f83f0e4dfec12484f498470198a96a",
+    "input/package/oracle.py": "bb799baaca33db435f49661cf80e33bbd254abb0a11d86904b175a824d89b6d9",
+    "input/package/package.json": "52ceaad71d502aab3a49b708918367fbaaf24f0eb4cb3e2750f64cd934ca0c36",
+    "input/package/replay.py": "02f49b8d08b92e9ff934bd12003da0ddde15e662de0ee129b04a32118592d243",
+    "input/package/runner.py": "5bf2d52bf9b99389b83cb7ac16c066df14d151f9e21eeb9cffe6116baf0f28c7",
+    "input/package/spec/acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
+    "input/package/spec/engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+    "input/package/spec/tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+    "output/adapter-exit.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "output/intmin.pcm": "d844e1554b5c802b4cc27c59d7503f3117296f7928d3d24dc87679a3e32a27dd",
+    "output/observation.json": "24a35a3cd5a8364d1909f0ee3e0a90d196b4c1afdedfb3bf9d38d34c775e7ce4",
+    "output/one-intmax.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/reverse-zero.pcm": "911beffad40098d1dc520cbe58946c7179d7f8d9334f9813aabb223bf11ccc47",
+    "output/scrub-forward.pcm": "41e882e74e3c64d929fcc76ad47b52f72ce9ed1541e971497b3c9a04fb46006b",
+    "output/scrub-reverse.pcm": "5f1794e8dcd7c1b3e2c390a1aef33039f5b88b20f682c56c4aa6f94051bd8fa1",
+    "output/side-idle.pcm": "3f9f540229960d11ed73b7ff1fae0b6f26f723ea5c80d238976fc4c902cea28b",
+    "output/side-playing.pcm": "8cde253ff03900ec30ecc695b700913a442ede54fd8b45a1dd06a6fe6e0206e1",
+    "output/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output/stdout.txt": "345b25202ebbd84743188406640661bb838db11aec071c91e22cd978889fa277",
+    "result.json": "1fb3437a3fffb668ce92e3e6391f4d06d1ead07b8b24889a0264c9fe0d75f742"
+  },
+  "oracle_sha256": "bb799baaca33db435f49661cf80e33bbd254abb0a11d86904b175a824d89b6d9",
+  "package_manifest_sha256": "52ceaad71d502aab3a49b708918367fbaaf24f0eb4cb3e2750f64cd934ca0c36",
+  "replay_sha256": "02f49b8d08b92e9ff934bd12003da0ddde15e662de0ee129b04a32118592d243",
+  "runner_sha256": "5bf2d52bf9b99389b83cb7ac16c066df14d151f9e21eeb9cffe6116baf0f28c7",
+  "schema": "playback-complete-draft8-evidence-v1",
+  "source_commit": "62b18deb8b4fbe6e797b00d792ee9f46ac0a8059",
+  "source_tree": "6dbb23bb4626238b0f22427031a551d2ece454fd"
+}
