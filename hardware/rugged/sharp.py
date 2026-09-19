@@ -22,17 +22,26 @@ age claim.
 
 Provenance, stated plainly
 --------------------------
-Every host serving the official text is blocked by this environment's network
-egress proxy -- `ecfr.gov` answers 403 at the gateway, as do `govinfo.gov`,
-`law.cornell.edu` and `cpsc.gov`. The operative values below were recovered by
-web search against those same domains, which returns the regulation's own
-wording but is a **secondary rendering, not the primary document**.
+The official hosts are still refused by this environment's egress proxy. What
+changed in P1-R21 is who looked: **PM retrieved and visually inspected the
+current eCFR text and the three official Federal Register drawings on
+19 September 2026** and published the exact details in
+`docs/REVIEW/P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md`.
 
-So every field carries its provenance, and `verified_primary` is False for all
-of them. That is not a formality: it is the difference between "we transcribed
-the rule" and "we recovered the rule's numbers through a search index", and a
-safety screen should not blur it. What remains unrecoverable this way is listed
-in OPEN and is not guessed -- the probe figure geometry in particular.
+So every value here is transcribed from a **PM-authenticated inspection of the
+primary sources** -- not from a search index, and not from the documents opened
+here. A retained control fails if this file ever describes itself as a direct
+reading.
+
+The eCFR describes itself as **authoritative but unofficial**, Title 16 up to
+date as of 17 September 2026 and last amended the same day. **English units
+govern** under 1500.48(e) and 1500.49(f); metric values are convenience
+approximations, and where both appear the English value binds.
+
+One thing the drawing does NOT say is recorded as carefully as the things it
+does: it prints **no general dimensional tolerance and no surface-finish
+requirement for the probe**. That is a fact about the source. Neither is
+invented here, and a control fails if either is ever filled in.
 """
 
 from __future__ import annotations
@@ -40,18 +49,22 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 RETRIEVED = "2026-09-19"
-RETRY_RECORD = (
-    "P1-R20 named the two sections and three official figure URLs directly and "
-    "asked for direct primary-source transcription. Every one was retried on "
-    "19 September 2026 and every one is still refused by this environment's "
-    "egress proxy: ecfr.gov and img.federalregister.gov both answer 403 at the "
-    "gateway, by direct fetch and by the harness fetch tool. PRIMARY-SOURCE "
-    "TRANSCRIPTION IS THEREFORE NOT ACHIEVED, and this file does not pretend "
-    "otherwise."
-)
-RETRIEVAL = ("web search restricted to ecfr.gov, law.cornell.edu, govinfo.gov "
-             "and cpsc.gov; the documents themselves are unreachable from this "
-             "environment (gateway 403 on CONNECT)")
+# The sources are still unreachable FROM HERE -- ecfr.gov and
+# img.federalregister.gov both answer 403 at this environment's egress gateway.
+# What changed is who looked: PM retrieved and visually inspected the current
+# eCFR text and all three official Federal Register drawings on 19 September
+# 2026 and published the exact details. The values below are transcribed from
+# that authenticated inspection, which is a real chain of custody and is stated
+# as one rather than described as a direct reading.
+SOURCE = ("PM inspection of the current eCFR text and the three official "
+          "Federal Register drawings, 19 September 2026, published at "
+          "docs/REVIEW/P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md")
+ECFR_UP_TO_DATE = "2026-09-17"      # banner: Title 16 up to date as of
+ECFR_LAST_AMENDED = "2026-09-17"    # banner: Title 16 last amended
+ECFR_STATUS = "authoritative but unofficial (the eCFR's own description)"
+GOVERNING_UNITS = ("English units govern under 16 CFR 1500.48(e) and "
+                   "1500.49(f); metric values are convenience approximations")
+RETRIEVAL = SOURCE
 
 SOURCES = {
     "1500.48": {
@@ -61,7 +74,7 @@ SOURCES = {
         "cite": "16 CFR 1500.48",
         "url": "https://www.ecfr.gov/current/title-16/chapter-II/subchapter-C/"
                "part-1500/section-1500.48",
-        "edition_current_through": None,   # the eCFR banner is not readable here
+        "edition_current_through": ECFR_UP_TO_DATE,
     },
     "1500.49": {
         "title": "Technical requirements for determining a sharp metal or glass "
@@ -70,7 +83,7 @@ SOURCES = {
         "cite": "16 CFR 1500.49",
         "url": "https://www.ecfr.gov/current/title-16/chapter-II/subchapter-C/"
                "part-1500/section-1500.49",
-        "edition_current_through": None,
+        "edition_current_through": ECFR_UP_TO_DATE,
     },
 }
 
@@ -98,105 +111,167 @@ class Field:
         return f"{self.value} {self.unit}" if self.unit else str(self.value)
 
 
-# --- Probe B's own geometry (CS-1) ------------------------------------------
-#
-# These seven dimensions come from the P1-R20 assignment, which cites the
-# official figure. They are NOT transcribed from the figure: it is unreachable
-# from here. Their provenance is "the assignment" -- an authoritative internal
-# instruction, and still not the primary document. CS-1 stays open for exactly
-# that reason, and a probe built to these numbers should be checked against the
-# drawing by someone who can open it.
-
-PROBE_B = (
-    Field("a", "0.170", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("b", "0.340", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("c", "1.510", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("d", "0.760", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("e", "2.280", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("f", "1 1/2", "in", "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-    Field("g", "27 25/32", "in",
-          "16 CFR 1500.48 figure, via the P1-R20 assignment"),
-)
-
-# --- use-and-abuse conditioning for the seven-year age band ------------------
+# --- use-and-abuse conditioning for the seven-year band (CS-5) --------------
 
 USE_AND_ABUSE = (
-    Field("impact medium", "1/8 in nominal type IV vinyl-composition tile, "
-          "composition 1 (asbestos free), over at least 2.5 in of concrete, "
-          "impact area at least 3 sq ft", "", "16 CFR 1500.50 — impact medium"),
-    Field("drop test", "4 drops from 3 ft +/- 0.5 in, random orientation", "",
-          "16 CFR 1500.53 — impact, over 36 through 96 months"),
-    Field("torque test", "4 in-lb +/- 0.2 applied evenly over 5 s clockwise to "
-          "180 degrees or until exceeded, held 10 s", "",
-          "16 CFR 1500.53 — torque"),
-    Field("tension test", "15 lb +/- 0.5 applied evenly over 5 s, parallel then "
-          "perpendicular to the major axis, each held 10 s", "",
-          "16 CFR 1500.53 — tension"),
-    Field("compression test", "30 lb +/- 0.5 applied evenly within 5 s through "
-          "the disc, held 10 s", "", "16 CFR 1500.53 — compression"),
+    Field("age band selection", "the applicable band; the MOST STRINGENT band "
+          "when ages span bands or labelling is unclear", "",
+          "16 CFR 1500.50"),
+    Field("units", "English units govern", "", "16 CFR 1500.50"),
+    Field("samples", "previously untested samples, except that TENSION FOLLOWS "
+          "TORQUE on the same sample", "", "16 CFR 1500.50"),
+    Field("preconditioning", "at least 4 hours at 73 +/- 3 degF and 20 to 70 "
+          "percent relative humidity", "", "16 CFR 1500.50"),
+    Field("test start", "within 5 minutes after removal from conditioning", "",
+          "16 CFR 1500.50"),
+    Field("assembly state", "as stated for the article, assembled or "
+          "disassembled", "", "16 CFR 1500.50"),
+    Field("direction of application", "the most severe reasonable direction",
+          "", "16 CFR 1500.50"),
+    Field("impact medium", "nominal 1/8 in type-IV vinyl-composition tile over "
+          "at least 2.5 in of concrete, impact area at least 3 sq ft", "",
+          "16 CFR 1500.53"),
+    Field("drop test", "for toys under 10.0 +/- 0.01 lb: FOUR random-orientation "
+          "drops from 3 ft +/- 0.5 in, WITH EXAMINATION AFTER EVERY DROP", "",
+          "16 CFR 1500.53"),
+    Field("torque test", "4.0 +/- 0.2 in-lb, CLOCKWISE AND COUNTERCLOCKWISE, "
+          "applied within 5 s to 180 degrees or the torque limit, held 10 s",
+          "", "16 CFR 1500.53"),
+    Field("tension test", "15.0 +/- 0.5 lbf parallel and then perpendicular to "
+          "the major axis, each applied within 5 s and held 10 s, on the same "
+          "sample used for torque", "", "16 CFR 1500.53"),
+    Field("compression test", "30.0 +/- 0.5 lbf through a 1.125 +/- 0.015 in "
+          "rigid metal disc, applied within 5 s and held 10 s", "",
+          "16 CFR 1500.53"),
+    Field("conditional methods", "the section's bite and flexure methods where "
+          "their application clauses are met", "", "16 CFR 1500.53"),
 )
 
-# --- crosswalk: the internal method against those conditions -----------------
+# --- crosswalk: the internal method against those conditions ----------------
 
 CROSSWALK = (
-    ("drop height", "1.00 m (+0/-10 mm)", "0.92 m (3 ft +/- 0.5 in)",
-     "ours is ~9% higher, which is more severe -- severity is not equivalence"),
-    ("drop count and orientation", "12 per article, declared, cumulative",
-     "4, random orientation",
-     "neither contains the other: a random sequence can land where our twelve "
-     "never do"),
-    ("impact surface", "bare concrete slab >= 50 mm",
-     "1/8 in vinyl-composition tile over >= 2.5 in concrete",
-     "**a real gap.** Bare concrete is harder, so ours is more severe and NOT "
-     "comparable; a result on one surface does not transfer to the other"),
-    ("articles", "2, explicitly a screen", "as the method specifies",
-     "ours makes no statistical claim"),
-    ("torque", "not performed", "4 in-lb",
-     "**not covered** -- a part that only fails under torque passes our screen"),
-    ("tension", "not performed", "15 lb", "**not covered**, same consequence"),
-    ("compression", "not performed", "30 lb", "**not covered**, same consequence"),
+    ("drop height", "1.00 m (+0/-10 mm)", "3 ft +/- 0.5 in (0.92 m)",
+     "ours is ~9% higher. Severity in one dimension is not equivalence"),
+    ("drop count and orientation", "12 declared orientations, cumulative",
+     "4 random orientations, examination after EVERY drop",
+     "neither contains the other: a random sequence lands where our twelve "
+     "never do. We do examine after every drop, which matches"),
+    ("impact medium", "bare concrete slab >= 50 mm",
+     "nominal 1/8 in type-IV vinyl-composition tile over >= 2.5 in concrete, "
+     "impact area >= 3 sq ft",
+     "**a real gap.** Bare concrete is harder, so ours is a different test, "
+     "not a stricter version of the same one"),
+    ("article mass", "measured per article; planning estimate ~150 g",
+     "the four-drop method applies to toys under 10.0 +/- 0.01 lb",
+     "our article is far under that threshold, so the band applies"),
+    ("torque", "not performed",
+     "4.0 +/- 0.2 in-lb, clockwise AND counterclockwise, within 5 s to 180 "
+     "degrees or the limit, held 10 s",
+     "**not covered.** A part that only fails under torque passes our screen"),
+    ("tension", "not performed",
+     "15.0 +/- 0.5 lbf parallel then perpendicular, each within 5 s, held "
+     "10 s, on the same sample used for torque",
+     "**not covered**, same consequence"),
+    ("compression", "not performed",
+     "30.0 +/- 0.5 lbf through a 1.125 +/- 0.015 in rigid metal disc, within "
+     "5 s, held 10 s",
+     "**not covered**, same consequence"),
+    ("conditional bite and flexure", "not performed",
+     "the section's bite and flexure methods where their application clauses "
+     "are met",
+     "**not covered.** Whether their clauses would even be met here is not "
+     "assessed"),
+    ("preconditioning", "ambient recorded, not controlled",
+     "at least 4 h at 73 +/- 3 degF and 20 to 70 percent RH, test started "
+     "within 5 minutes of removal",
+     "**not covered.** Our articles are not conditioned, and PLA's properties "
+     "move with temperature -- so our result carries a variable the referenced "
+     "method controls"),
+    ("sample rules", "2 articles, each taking the full sequence",
+     "previously untested samples, except tension follows torque on the same "
+     "sample",
+     "compatible in spirit; we run no torque or tension, so the exception does "
+     "not arise"),
     ("shake and tumble", "3 Hz shake, 25 tumbles", "no direct equivalent",
-     "ours goes beyond these conditions; that is extra evidence, not compliance"),
+     "ours goes beyond these conditions. Extra evidence, not compliance"),
     ("when the screen runs", "R-3/R-4 after the abuse families",
-     "accessibility assessed before and after 1500.51/.52/.53 (excluding the "
-     "bite test)",
-     "ours screens after a harsher sequence, but the before side and the exact "
-     "referenced sequence are not reproduced"),
+     "accessible hazards screened BEFORE and AFTER the referenced use-and-abuse "
+     "tests, excluding the bite test",
+     "**partially covered.** We screen after, not before, and our 'before' "
+     "baseline is an inspection rather than the referenced screen"),
+)
+
+# --- Probe B's own geometry (CS-1, closed for the method) -------------------
+#
+# Transcribed from PM's visual inspection of the official Federal Register
+# drawing on 19 September 2026, recorded in
+# docs/REVIEW/P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md. Seven dimensions, the
+# extension thread callout exactly as the drawing labels it, the extension's
+# overall and typical segment lengths, and the joint articulation. What the
+# drawing does not print is recorded immediately below as an absence; nothing
+# missing from the drawing is supplied from anywhere else.
+
+PROBE_B = (
+    Field("a — spherical radius", "0.170", "in",
+          "16 CFR 1500.48 probe drawing (EC03OC91.056 / .058)"),
+    Field("b", "0.340", "in", "16 CFR 1500.48 probe drawing"),
+    Field("c", "1.510", "in", "16 CFR 1500.48 probe drawing"),
+    Field("d — each of three articulated sections", "0.760", "in",
+          "16 CFR 1500.48 probe drawing"),
+    Field("e", "2.280", "in", "16 CFR 1500.48 probe drawing"),
+    Field("f — collar/extension diameter", "1 1/2", "in",
+          "16 CFR 1500.48 probe drawing"),
+    Field("g — overall with extension", "27 25/32", "in",
+          "16 CFR 1500.48 probe drawing"),
+    Field("extension attachment thread", "3/8-16NC-2B THD (TYP)", "",
+          "16 CFR 1500.48 probe drawing, as labelled"),
+    Field("extension", "approximately 24 in overall, 4 in typical segment", "",
+          "16 CFR 1500.48 probe drawing"),
+    Field("joint articulation", "every joint may rotate up to 90 degrees", "",
+          "16 CFR 1500.48 text"),
+)
+
+# Two things the drawing does NOT state. Recorded as absences, because an
+# absence in a source is a fact about the source, and filling it in would be
+# inventing a tolerance for a safety probe.
+PROBE_B_NOT_STATED = (
+    ("general dimensional tolerance",
+     "the drawing prints none; do not infer one from the decimal places"),
+    ("surface finish",
+     "the drawing prints none for the probe. (The MANDREL in 1500.49 does have "
+     "one -- 16 microinches -- and the two must not be conflated.)"),
 )
 
 # --- accessibility (which features get tested at all) ------------------------
 
 ACCESSIBILITY = (
     Field("probe for this product", "Probe B", "",
-          "16 CFR 1500.48 — probe A for articles intended for children 3 years "
-          "or less; probe B for over 3 up to 8 years",
+          "16 CFR 1500.48 — probe A for 3 years or less, probe B for over 3 "
+          "through 8 years",
           note="selected by the product's seven-year-old tiebreaker"),
-    Field("adjacent-gap exemption", "0.020", "in",
-          "16 CFR 1500.48 — a point is inaccessible without probe testing if it "
-          "lies adjacent to a surface and the gap does not exceed 0.020 in "
-          "(0.50 mm)"),
-    Field("insertion depth, bounded openings", "up to 2.25x", "the opening's minor dimension",
-          "16 CFR 1500.48 — for an opening whose minor dimension exceeds the "
-          "probe collar diameter but is below the unrestricted threshold, the "
-          "probe with its extension is inserted in any direction up to 2.25x "
-          "the minor dimension, measured from any point in the plane of the "
-          "opening"),
-    Field("unrestricted-depth threshold, probe B", "9.00", "in",
-          "16 CFR 1500.48 — 9.00 in (228.6 mm) or larger minor dimension with "
-          "probe B; insertion depth is then unrestricted",
-          note="probe A's equivalent threshold is 7.36 in (186.9 mm)"),
+    Field("opening smaller than the collar", "insert to the collar", "",
+          "16 CFR 1500.48 probe access rules"),
+    Field("opening larger than the collar but under 9.00 in",
+          "insert WITH THE EXTENSION in any direction, up to 2.25x the "
+          "opening's minor dimension", "", "16 CFR 1500.48 probe access rules"),
+    Field("opening 9.00 in or larger",
+          "depth unrestricted, subject to any sub-openings encountered", "",
+          "16 CFR 1500.48 probe access rules"),
+    Field("adjacent-gap exemption",
+          "a gap no greater than 0.020 in is inaccessible without probe "
+          "testing", "", "16 CFR 1500.48"),
 )
 
-# --- the sharp-point tester --------------------------------------------------
+# --- the sharp-point tester -------------------------------------------------
 
 POINT = (
     Field("gaging slot opening", "0.040 in wide by 0.045 in long", "",
           "16 CFR 1500.48 — rectangular opening 0.040 in (1.02 mm) wide by "
           "0.045 in (1.15 mm) long in the end of the slotted cap",
           note="Commission instruments use openings no greater than this"),
-    Field("sensing head recess", "0.015", "in",
-          "16 CFR 1500.48 — the sensing head is recessed 0.015 in (0.38 mm) "
-          "below the end cap"),
+    Field("sensing head recess", "at least 0.015", "in",
+          "16 CFR 1500.48 — the sensing head is recessed AT LEAST 0.015 in "
+          "(0.38 mm) below the end cap"),
     Field("additional travel that identifies a sharp point", "0.005", "in",
           "16 CFR 1500.48 — the point must move the sensing head a further "
           "0.005 in (0.12 mm)"),
@@ -205,63 +280,126 @@ POINT = (
     Field("maximum insertion force", "1.00", "lbf",
           "16 CFR 1500.48 — the force applied when inserting a point into the "
           "gaging slot is no more than 1.00 lb"),
+    Field("insertion directions", "from EVERY accessible direction", "",
+          "16 CFR 1500.48 — the point is inserted into the gaging slot from "
+          "every accessible direction"),
+    Field("sharp result", "a lit indicator", "",
+          "16 CFR 1500.48 — the indicator lights when the sensing head is "
+          "moved the further 0.005 in"),
 )
 
 # --- the sharp-edge tester ---------------------------------------------------
 
 EDGE = (
-    Field("mandrel diameter", "0.375 +/- 0.005", "in",
-          "16 CFR 1500.49 — 0.375 +/- 0.005 in (9.35 +/- 0.12 mm)"),
-    Field("tape", "single layer of polytetrafluoroethylene (TFE) tape wrapped "
-          "around the full circumference", "",
-          "16 CFR 1500.49 — contact between test edge and mandrel at the "
-          "approximate centre of the tape width"),
+    Field("mandrel diameter", "0.375 +/- 0.005", "in", "16 CFR 1500.49"),
+    Field("mandrel material and hardness", "steel, at least Rockwell C 40", "",
+          "16 CFR 1500.49"),
+    Field("mandrel surface", "roughness no greater than 16 microinches, with no "
+          "scratches, nicks or burrs", "", "16 CFR 1500.49"),
+    Field("tape", "pressure-sensitive TFE high-temperature electrical "
+          "insulation tape per MIL-I-23594B (1971)", "",
+          "16 CFR 1500.49(e)"),
     Field("tape backing thickness", "0.0026 to 0.0035", "in",
-          "16 CFR 1500.49 — between 0.0026 in (0.066 mm) and 0.0035 in "
-          "(0.089 mm)"),
-    Field("normal force", "1.35", "lbf",
-          "16 CFR 1500.49 — applied to the edge with a normal force of 1.35 lb "
-          "(6.00 N)"),
-    Field("rotation", "one", "complete revolution",
-          "16 CFR 1500.49 — rotated through one complete revolution while the "
-          "force against the edge is held constant"),
+          "16 CFR 1500.49(e)"),
+    Field("tape adhesive", "pressure-sensitive silicone polymer, nominal "
+          "0.003 in thick", "", "16 CFR 1500.49(e)"),
+    Field("tape width", "not less than 1/4 in (6 mm)", "",
+          "16 CFR 1500.49(e)"),
+    Field("tape temperature during testing", "70 to 80", "degF",
+          "16 CFR 1500.49(e)"),
+    Field("tape application", "one UNSTRETCHED layer around the full mandrel "
+          "circumference, ends butted or overlapped no more than 0.10 in", "",
+          "16 CFR 1500.49(e)"),
+    Field("normal force", "up to 1.35", "lbf",
+          "16 CFR 1500.49 — applied normal to the mandrel axis"),
+    Field("mandrel axis angle to the edge", "90 +/- 5", "degrees",
+          "16 CFR 1500.49 — axis held to the edge or its tangent"),
+    Field("linear motion", "prevented; the mandrel rotates without translating",
+          "", "16 CFR 1500.49"),
+    Field("orientation", "seek the WORST-CASE orientation of the edge", "",
+          "16 CFR 1500.49"),
+    Field("rotation", "one complete revolution", "", "16 CFR 1500.49"),
     Field("tangential velocity", "1.00 +/- 0.08", "in/s",
-          "16 CFR 1500.49 — 1.00 +/- 0.08 in/s (25.4 +/- 2.0 mm/s) during the "
-          "centre 75 percent of the rotation, with a smooth start and stop"),
-    Field("cut length that identifies a sharp edge", "not less than 1/2 (0.5)", "in",
-          "16 CFR 1500.49 — the edge is sharp if it completely cuts through the "
-          "tape for a length of not less than 1/2 in (13 mm)"),
+          "16 CFR 1500.49 — through the centre 75 percent of one revolution, "
+          "smooth start and stop"),
+    Field("cut length that identifies a sharp edge",
+          "a complete cut at least 1/2 in (13 mm) long", "",
+          "16 CFR 1500.49"),
 )
 
-# --- what could not be recovered, and is therefore not stated ---------------
+# --- scope, exemptions and when the screen runs (CS-4) ----------------------
 
+EXEMPTIONS = (
+    ("bicycles and cribs",
+     "bicycles, and full-size and non-full-size cribs governed by the named "
+     "parts, are exempt from both sections"),
+    ("necessarily functional features",
+     "a sharp point or edge that is NECESSARILY functional is exempt when no "
+     "nonfunctional sharp feature exists; a toy relying on this requires a "
+     "conspicuous, legible, visible sales label. 1500.48 applies this to "
+     "points, 1500.49 to metal or glass edges, and 1500.49 defines those "
+     "material classes"),
+    ("what this means for Digital-Tape",
+     "the product has NO planned functional sharp point or edge, so the "
+     "functional exemption is not a pass condition here -- it is simply "
+     "unavailable, which is the safer side to be on"),
+)
+
+WHEN_SCREENED = (
+    "Both methods screen accessible hazards BEFORE and AFTER the referenced "
+    "use-and-abuse tests, excluding each section's bite test."
+)
+
+# --- source questions CS-1..CS-5, and what remains open ---------------------
+
+# CS-1..CS-5 are CLOSED FOR THE METHOD by the P1-R21 PM note, which supplied
+# every field this file needs. Closure is conditional and the condition is
+# stated rather than implied: PM's own note says these close only after Hardware
+# binds the exact method AND independent Verification accepts that head. This is
+# the binding half. The acceptance half is not mine to sign.
+
+CLOSED = (
+    ("CS-1", "Probe B geometry",
+     "closed. Seven dimensions, the 3/8-16NC-2B THD (TYP) extension thread, the "
+     "~24 in extension with 4 in typical segment, and 90-degree joint "
+     "articulation. The drawing states NO general dimensional tolerance and NO "
+     "surface finish for the probe; both are recorded as absences and neither "
+     "is invented"),
+    ("CS-2", "edge consumable and apparatus",
+     "closed. MIL-I-23594B (1971) TFE tape: 0.0026-0.0035 in backing, silicone "
+     "adhesive nominal 0.003 in, width >= 1/4 in, 70-80 degF during testing, "
+     "one unstretched layer butted or overlapped <= 0.10 in. Mandrel 0.375 "
+     "+/- 0.005 in, >= Rockwell C 40, <= 16 microinch finish, no nicks"),
+    ("CS-3", "currency",
+     "closed. eCFR Title 16 up to date as of 2026-09-17, last amended "
+     "2026-09-17, retrieved by PM 2026-09-19, authoritative but unofficial. "
+     "No later edition is claimed"),
+    ("CS-4", "scope and exemptions",
+     "closed. Bicycle and crib exemptions; the necessarily-functional exemption "
+     "with its labelling requirement; the before/after screening rule excluding "
+     "the bite test; and the full Probe B access rules"),
+    ("CS-5", "applicable use and abuse",
+     "closed as TRANSCRIPTION. 1500.50 conditioning and sample rules and the "
+     "full 1500.53 method are recorded -- and the crosswalk above states, per "
+     "row, everything our internal method does NOT do. Transcribed is not "
+     "performed"),
+)
+
+# What remains open is no longer about reaching the sources.
 OPEN = (
-    ("CS-1", "**Probe B's figure.** Seven dimensions are now recorded (a..g) "
-             "from the P1-R20 assignment, which cites the figure -- but the "
-             "figure itself is still unreachable, so nothing here is checked "
-             "against the drawing. Tolerances, surface finish and how the "
-             "extension attaches are not recovered at all.",
-     "a probe can be dimensioned but not verified; check it against the figure "
-     "before it is used on anything"),
-    ("CS-2", "**Tape width** for the edge tester. The contact point is "
-             "specified relative to the width; the width itself was not "
-             "recovered.",
-     "blocks specifying the consumable"),
-    ("CS-3", "**The eCFR edition banner** — the 'current through' date. Nothing "
-             "here can claim to be the current text.",
-     "blocks any currency claim"),
-    ("CS-4", "**The complete exclusion clauses** of both sections — which "
-             "points and edges are exempt (functional features and similar).",
-     "a screen that does not know its exclusions can only over-report, which is "
-     "the safe direction, but it is not the method"),
-    ("CS-5", "**The conditioning and use tests** referenced by the "
-             "accessibility rule (1500.51/.52/.53, excluding the bite test), "
-             "which determine whether a point is accessible before or after use "
-             "and abuse.",
-     "our sequence applies the screen after the abuse family, which is at least "
-     "as severe; matching the referenced procedure exactly is not established"),
+    ("RG-8", "**No tester exists.** The point and edge testers, the probe and "
+             "the tape are specified now and owned by nobody. Nothing is "
+             "approved for purchase and no tester construction is authorized.",
+     "the screens cannot be run at all"),
+    ("RG-9", "**The probe has no stated tolerance**, so a fabricated probe "
+             "cannot be shown to conform dimensionally -- only to match the "
+             "nominal figures.",
+     "a home-made probe is an approximation of unknown fidelity"),
+    ("RG-10", "**The regulatory-method gaps in the crosswalk stand**: torque, "
+              "tension, compression, conditional bite and flexure, the tile "
+              "impact medium, and preconditioning.",
+     "our screen is not, and does not become, a regulatory determination"),
 )
-
 
 # --- evaluation: deterministic, given a conforming run ----------------------
 

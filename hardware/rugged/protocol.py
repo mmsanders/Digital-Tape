@@ -526,17 +526,31 @@ def gen_shake() -> str:
 
 def gen_sharp() -> str:
     lines = [
-        f"**Adopted sources**, retrieved {sharp.RETRIEVED}: "
+        f"**Adopted sources**, as transcribed {sharp.RETRIEVED}: "
         + "; ".join(f"[{v['cite']}]({v['url']}) — {v['title']}"
                     for v in sharp.SOURCES.values()) + ".",
         "",
         f"> {sharp.DISCLAIMER}",
         "",
-        f"**{sharp.RETRY_RECORD}**",
+        f"**Provenance of every value below:** {sharp.SOURCE}. The values are "
+        f"transcribed from that authenticated inspection of the primary "
+        f"documents. They were not read from the documents in this "
+        f"environment, and this file does not claim they were.",
         "",
-        f"**Provenance of every value below:** {sharp.RETRIEVAL}. No field is "
-        f"marked verified against the primary document, and the edition banner "
-        f"(\"current through\") could not be read. See CS-1..CS-5.",
+        f"**Edition and currentness.** eCFR Title 16 up to date as of "
+        f"**{sharp.ECFR_UP_TO_DATE}**, last amended "
+        f"**{sharp.ECFR_LAST_AMENDED}**, retrieved {sharp.RETRIEVED}. The "
+        f"eCFR is {sharp.ECFR_STATUS}; no later edition is claimed. "
+        f"{sharp.GOVERNING_UNITS}, and where both appear the English value "
+        f"binds.",
+        "",
+        "**This is not a regulatory determination.** Transcribing a federal "
+        "method and adopting it internally does not make our screen that "
+        "method, does not make a pass a compliance claim, and does not make "
+        "Digital-Tape a tested or certified children's product. The crosswalk "
+        "below states, row by row, every place our internal method differs "
+        "from the referenced conditions — including where ours is harsher, "
+        "which is a difference and not an equivalence.",
         "",
         "### Accessibility basis", "",
         "| Field | Value | Cited as |", "|---|---|---|",
@@ -547,19 +561,25 @@ def gen_sharp() -> str:
               "| Field | Value | Cited as |", "|---|---|---|"]
     for f in sharp.POINT:
         lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
-    lines += ["", "### Sharp-edge tester and criterion", "",
+    lines += ["", "### Sharp-edge tester, consumable and criterion", "",
               "| Field | Value | Cited as |", "|---|---|---|"]
     for f in sharp.EDGE:
         lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
-    lines += ["", "### Not recovered, and therefore not stated", "",
-              "| # | Missing | Consequence |", "|---|---|---|"]
-    for cid, what, why in sharp.OPEN:
-        lines.append(f"| **{cid}** | {what} | {why} |")
-    lines += ["", "### Probe B geometry (CS-1 — dimensioned, not verified)", "",
+    lines += ["", "### Probe B geometry", "",
               "| Dim | Value | Cited as |", "|---|---|---|"]
     for f in sharp.PROBE_B:
         lines.append(f"| {f.name} | **{f.rendered()}** | {f.cite} |")
     lines += ["",
+              "**What the drawing does not state.** An absence in the source "
+              "is a fact about the source. Neither of these is inferred, "
+              "filled in, or carried over from another figure:", ""]
+    for what, why in sharp.PROBE_B_NOT_STATED:
+        lines.append(f"- **{what}** — {why}")
+    lines += ["", "### Scope and exemptions", "",
+              "| Item | Effect |", "|---|---|"]
+    for what, effect in sharp.EXEMPTIONS:
+        lines.append(f"| {what} | {effect} |")
+    lines += ["", f"**When the screens run.** {sharp.WHEN_SCREENED}", "",
               "### Use-and-abuse conditioning for the seven-year band", "",
               "| Condition | Value | Cited as |", "|---|---|---|"]
     for f in sharp.USE_AND_ABUSE:
@@ -571,6 +591,17 @@ def gen_sharp() -> str:
               "|---|---|---|---|"]
     for item, ours, theirs, gap in sharp.CROSSWALK:
         lines.append(f"| {item} | {ours} | {theirs} | {gap} |")
+    lines += ["", "### Source questions CS-1..CS-5 — closed for the method", "",
+              "Closed means the method is now written down from the primary "
+              "sources. It does not mean the method has been performed, that "
+              "apparatus exists, or that anyone has accepted the result.", "",
+              "| # | Question | Disposition |", "|---|---|---|"]
+    for cid, what, how in sharp.CLOSED:
+        lines.append(f"| **{cid}** | {what} | {how} |")
+    lines += ["", "### What remains open", "",
+              "| # | Open | Consequence |", "|---|---|---|"]
+    for cid, what, why in sharp.OPEN:
+        lines.append(f"| **{cid}** | {what} | {why} |")
     lines += ["",
               "**Evaluation is deterministic**, in `hardware/rugged/sharp.py`: "
               "`point_run_conforms` and `edge_run_conforms` reject a run whose "
@@ -579,10 +610,10 @@ def gen_sharp() -> str:
               "`edge_is_sharp` then apply the criterion above. R-3 is no longer "
               "a judgement call.",
               "",
-              "**What the screen can do today:** nothing physical. The testers "
-              "are not owned and no purchase is approved (RG-7), and CS-1 and "
-              "CS-2 must close before a conforming probe or consumable can even "
-              "be specified."]
+              "**What the screen can do today:** nothing physical. The method "
+              "is specified; the apparatus is not owned, no purchase is "
+              "approved and no tester construction is authorized (RG-8). A "
+              "specified method that has never been run is not evidence."]
     return block("rugged_sharp", lines)
 
 
