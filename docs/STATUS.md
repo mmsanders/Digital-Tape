@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 19 September 2026 UTC · Owner: PM · P1-R21 two VT8 observations independently accepted; card method repaired awaiting re-audit; primary sharpness sources recovered; scoped Phase 0 freeze unchanged.**
+**Updated: 19 September 2026 UTC · Owner: PM · P1-R22 clean VT8 candidate routed to Verification; card method independently rejected; rugged source method awaits audit; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -203,6 +203,26 @@ Hardware owns a source-only correction before independent audit. No print or phy
 work is authorized. See the
 [P1-R21 disposition](REVIEW/P1-R21-PM-DISPOSITION.md).
 
+Software #110 returned clean held draft PR #112 at `15fbcfa...`, with pre-run code
+commit `20505f4...` directly atop assigned main and no held PR #20/#64/#96 ancestry.
+PM authenticated the unchanged verifier package tree, evidence identities, exact
+two-case offline replay and green substantive CI. This is a candidate and raw packet,
+not source or WP-07 acceptance; its two invented refusal semantics and every
+unexercised branch remain held for blind independent review.
+
+Verification #17 published `f00da3f...` and rejects PR #87 for new blocker
+`P1-R21-V01`: thirteen malformed schema-2 forms pass and one crashes the auditor.
+The earlier trace defects are repaired and legacy files remain byte-identical, but no
+new acquisition is allowed before Hardware closes the nested schema/type/timestamp/
+metadata boundaries and Verification re-audits a later exact head.
+
+Hardware #111 returned PR #92 at `0943571...`. Its source-method commit binds the PM-
+authenticated sharp-point/edge and use/abuse inputs with retained red controls, while
+the two-plate packet stays byte-identical and the real fabrication gate stays CLOSED.
+CS-1–CS-5 are closed only as Hardware-authored transcription; independent method
+acceptance, apparatus, printing, physical testing and regulatory claims remain held.
+See the [P1-R22 disposition](REVIEW/P1-R22-PM-DISPOSITION.md).
+
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
 directions. The kickoff granted no engine merge or broader acceptance.
@@ -241,12 +261,12 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | Work | State | Next owner |
 |---|---|---|
 | #20 engine | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
-| VT8-001 / WP-07 | Exact corrected verifier tree `3667a28...` is on main. Verification independently accepts exactly two held-PR #96 observations at verifier `e77b61f...`; all exclusions, source and complete-package acceptance remain held | Software prepares a new clean held split and fresh evidence for only those two case contracts; PR #96 remains held |
+| VT8-001 / WP-07 | Exact corrected verifier tree `3667a28...` is on main. Clean held PR #112 at `15fbcfa...` has fresh PM-authenticated evidence for the two independently accepted case contracts, but its source, invented refusals, unexercised branches and complete package are not accepted | Verification performs a blind exact-case audit of PR #112; PR #96 and #112 remain held |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
-| Hardware | PR #87 head `10471f3...` repairs ordered primitives/schema controls and awaits independent re-audit before acquisition. PR #92 head `2b004b5...` has a reproducible two-plate packet; PM recovered the official CS-1–CS-5 inputs, but Hardware has not yet bound them. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Verification audits PR #87; Hardware makes the PR #92 source-only correction, then a later independent audit |
+| Hardware | Verification rejects PR #87 head `10471f3...` under `P1-R21-V01`: thirteen malformed schema-2 forms pass and one crashes. PR #92 head `0943571...` binds CS-1–CS-5 for the method with retained controls and unchanged packet bytes, but has no independent audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware repairs only PR #87's exact verifier findings; PR #92 waits held for later independent audit |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Rev-6 two-plate packet fits inside the nominal A1 envelope with 5 mm XY margins, but usable area/process remain unproved and printing is held. Three PNY samples were measured; the repaired acquisition method awaits independent audit and identity, attribution, atomicity and qualification remain open | Hardware and Verification; Michael only when a fresh hands/wallet task is issued |
+| WP-04 / WP-05 | Rev-6 two-plate packet fits inside the nominal A1 envelope with 5 mm XY margins, but usable area/process remain unproved and printing is held. Three PNY samples were measured; the next-acquisition method is independently rejected pending `P1-R21-V01`, and identity, attribution, atomicity and qualification remain open | Hardware repairs the method; Michael only when a later fresh hands/wallet task is issued |
 
 **New independent package acceptances: none.** Verification independently accepts the
 exact ten corrected-cadence observations and exact clean 289-case mount log. That is
@@ -261,10 +281,10 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R21 accepts exactly two independently dispositioned PR #96 observations, routes a
-clean fresh-evidence split to Software, routes repaired PR #87 method to Verification,
-and gives Hardware a source-only PR #92 correction using PM-recovered official input.
-PR #20/#64/#96 remain held. Surge and Michael are not activated; stale Michael issue
+P1-R22 routes clean held PR #112 to blind exact-case Verification, routes only the
+`P1-R21-V01` repair back to Hardware, and holds PR #92's source-bound rugged method
+for a later audit. No roadmap rung advances. PR #20/#64/#87/#92/#96/#112 remain held.
+Surge and Michael are not activated; stale Michael issue
 #49 stays closed, branches stay intact and current protection is unchanged. The
 dashboard remains at 13 of 36 because no complete implementation rung or package is
 accepted. PM publishes no branch KEEP lists or routine Michael-issue refreshes.
