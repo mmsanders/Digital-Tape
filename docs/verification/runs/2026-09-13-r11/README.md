@@ -158,3 +158,18 @@ make -C tests/mount_draft8 engine PUBLIC_HEADER=tape.h \
 python3 tests/mount_draft8/run.py --adapter tests/mount_draft8/build/engine_probe \
      --log <fresh-log.json>
 ```
+
+## Raw observation identity (WO-6)
+
+`product-evidence/output/observation.json` is now cited by a committed
+`observation.json.sha256` and `OBSERVATION-SOURCE.md` **at this run's root**, recording
+its bytes, SHA-256 and original git blob. **The hash is the citation.**
+
+Those pointers sit outside `product-evidence/` on purpose: the bundle's `manifest.json`
+binds an exact file inventory, and adding anything inside it makes `replay.py` fail with
+`unbound/missing evidence file`. The bundle is byte-for-byte unchanged and every command
+above still behaves exactly as it did before this change. This superseded bundle does
+not replay green against the corrected package (`REPLAY FAIL: assignment`), which is
+pre-existing on main and is the `P1-R13-V01` control working, not a regression. See
+`OBSERVATION-SOURCE.md` for the pending relocation to a release asset and why it does
+not shrink a clone.
