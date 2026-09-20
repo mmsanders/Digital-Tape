@@ -20,7 +20,10 @@ pass=0; fail=0
 
 BAK=$(mktemp -d)
 cp docs/STATUS.md docs/VERIFICATION-INTEGRATION.md "$BAK/"
-PROBE=docs/_hygiene_probe.bin
+# NOT .bin: the repository already ignores *.bin, and the gate
+# deliberately skips ignored paths, so a .bin probe would be invisible to
+# it and this control would pass while establishing nothing.
+PROBE=docs/_hygiene_probe.json
 
 cleanup() {
   cp "$BAK/STATUS.md" docs/STATUS.md
@@ -55,7 +58,8 @@ expect red "VERIFICATION-INTEGRATION.md over 150 lines"
 cp "$BAK/VERIFICATION-INTEGRATION.md" docs/VERIFICATION-INTEGRATION.md
 expect green "VERIFICATION-INTEGRATION.md restored"
 
-# 3. A new docs/ file over 1 MiB, present only in the working tree.
+# 3. A new docs/ file over 1 MiB, untracked but not ignored -- what a
+#    contributor adding raw evidence actually looks like.
 head -c $((1024 * 1024 + 1)) /dev/urandom > "$PROBE"
 expect red "new docs/ file over 1 MiB"
 rm -f "$PROBE"

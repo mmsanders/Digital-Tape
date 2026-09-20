@@ -1,43 +1,41 @@
-# `observation.json` — identity and relocation status
+# `observation.json` — identity and where the bytes live
 
-This file sits at the **run root**, deliberately outside `product-evidence/`. That
-bundle's `manifest.json` binds an exact file inventory, and `replay.py` fails with
-`unbound/missing evidence file` if anything is added inside it. The tamper control is
-working as designed, so the pointers live here and the bundle stays byte-for-byte
-unchanged.
+The raw product observation for the `2026-09-13-r11` run. It is cited by that run's README, by the
+bundle's `manifest.json`, and by the PM dispositions that route the run.
 
-This records the raw product observation for the `2026-09-13-r11` run, cited by that run's
-README, by the bundle's `manifest.json`, and by the PM dispositions that route the run.
-**The SHA-256 is the citation.**
+**The bytes are not in the working tree. The SHA-256 is the citation.**
 
 | Item | Value |
 |---|---|
-| Path | `product-evidence/output/observation.json` |
+| Path when fetched | `product-evidence/output/observation.json` |
+| Release asset | [`r11-observation.json`](https://github.com/mmsanders/Digital-Tape/releases/download/evidence-2026-09/r11-observation.json) |
+| Release | [`evidence-2026-09`](https://github.com/mmsanders/Digital-Tape/releases/tag/evidence-2026-09) |
 | Bytes | `9289887` |
 | SHA-256 | `24a35a3cd5a8364d1909f0ee3e0a90d196b4c1afdedfb3bf9d38d34c775e7ce4` |
 | Original git blob | `cd7cd5c34a7e00bf543a6b9a4abaa23ba0deff52` |
 | Recorded in | `observation.json.sha256` (this directory) |
 
-Verify at any time with `sha256sum -c observation.json.sha256` from this directory.
+## Getting the bytes back
 
-## Status: still in the working tree; relocation pending
+```sh
+tools/fetch-evidence.sh 2026-09-13-r11
+```
 
-WO-6 (repo hygiene) relocates raw evidence over 1 MiB to a GitHub Release asset, leaving
-this file and the `.sha256` in its place. **That move has not happened.** The session
-running WO-6 could not create releases — the API returned
-`403 Creating, editing, or deleting releases is not permitted for this session type` —
-so the bytes stay here and the hash is committed as the citation in the meantime.
+It downloads the asset, checks it against `observation.json.sha256`, and **refuses to
+install anything that does not match**. A mismatch is reported and nothing is written —
+an asset that is not the cited evidence never reaches the bundle.
 
-When the release exists the asset is `r11-observation.json`, and this section is
-replaced by its URL and the fetch-and-verify step. Until then nothing about this bundle
-has changed.
+This file sits at the **run root**, outside `product-evidence/`, on purpose: the bundle's
+`manifest.json` binds an exact file inventory and `replay.py` fails with
+`unbound/missing evidence file` if anything is added inside it. The bundle itself is
+byte-for-byte what it always was.
 
-## Why the move does not shrink a clone
+## Why this does not shrink a clone
 
 Removing a blob from HEAD does not remove it from history, and it should not: this
 repository's dispositions cite these bytes, and Guardrail 3 forbids rewriting history.
 The goal is a working tree an agent can traverse safely, and growth that stops — not
-reclaimed bytes.
+reclaimed bytes. `git clone` is the same size as before.
 
 ## Offline replay
 
@@ -45,10 +43,12 @@ reclaimed bytes.
 
 **This bundle does not replay green against the current package, and that is correct.**
 It is the superseded P1-R12 cadence evidence: it used the once-per-row scrub service
-schedule the corrected package now rejects by name (`P1-R13-V01`), so the current
-`replay.py` returns `REPLAY FAIL: assignment` rather than silently accepting it. That
-failure is **pre-existing on main** and was reproduced there before this change; it is a
-control working, not a regression. The r14 README records that this run is historical and
-must not be read as current.
+schedule the corrected package rejects by name (`P1-R13-V01`), so `replay.py` returns
+`REPLAY FAIL: assignment` rather than silently accepting it. That failure predates the
+relocation — it was reproduced on `main` beforehand — and is a control working, not a
+regression. `tests/IMPORTS.json` declares this bundle `expect: "refuse"`, so a PASS here
+would now fail CI.
 
-The bytes are still cited evidence and are retained unchanged.
+CI fetches these bytes before the evidence-integrity check runs, so the relocation is
+invisible to it. `.gitignore` covers the fetched path, and the docs hygiene gate skips
+ignored files, so having fetched evidence locally never fails a contributor's PR.

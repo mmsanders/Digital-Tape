@@ -47,3 +47,4 @@ tests/**/out/
 # os
 .DS_Store
 Thumbs.db
+docs/verification/runs/*/product-evidence/output/observation.json

@@ -30,6 +30,11 @@ jobs:
         run: cc --version | head -1; python3 --version
       - name: Build engine (package self-tests link against it)
         run: make -C engine all
+      - name: Fetch retained raw evidence
+        # Raw observations over 1 MiB live in a release asset, not the tree
+        # (CLAUDE.md §4). This brings them back and verifies each against its
+        # committed .sha256 before the replay check reads them.
+        run: ./tools/fetch-evidence.sh
       - name: Evidence integrity
         run: |
           BASE="${{ github.event.pull_request.base.sha }}"
