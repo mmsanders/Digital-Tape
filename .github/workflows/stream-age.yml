@@ -1,0 +1,44 @@
+name: held stream age
+
+# CLAUDE.md §4 requires escalation to PM when a stream is held more than three
+# days. The engine stream has been held since 3 September and nothing fired,
+# because nothing was checking. A rule nobody checks is not a rule.
+#
+# Held is detected by the `held` label OR by HELD in the PR title, because this
+# repository has used the title convention since PR #20 and the label is new.
+# Keying on the label alone would have produced a gate that never fires.
+#
+# This posts a notification. It accepts nothing, dispositions nothing and
+# advances no rung, and a long hold may be exactly correct.
+
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List what would be posted without posting"
+        type: boolean
+        default: true
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  stream-age:
+    name: held streams over three days
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check held stream age
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            python3 tools/ci/stream-age.py --dry-run
+          else
+            python3 tools/ci/stream-age.py
+          fi
