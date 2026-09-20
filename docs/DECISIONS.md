@@ -2388,3 +2388,37 @@ qualifying the machine, process, material or part.
 **Rationale and evidence:** [P1-R16 PM disposition](REVIEW/P1-R16-PM-DISPOSITION.md).
 **Cost to reverse:** a fresh PM decision must replace the stress condition or abuse
 boundary before Hardware locks CAD; preserve the submitted raw runs and all failures.
+
+---
+
+## ADR-152 — Preserve the integrated VT8 boundary and audit the A1 Mini method before printing
+
+**Date:** 2026-09-20 UTC · **Owner:** PM under Michael's P1-R24 activation
+
+Authenticate Software's ruleset-required PR #112 synchronization and merge because
+the original code/evidence commits and every scoped candidate, adapter, package, spec
+and run tree remain byte-identical. Keep acceptance limited to the two exact recorded
+observations; landing the splice-only and stage-1 refusal bytes does not accept or
+freeze those semantics.
+
+Accept Verification finding `P1-R23-V01`: repaired PR #87 remains blocked on three
+traceback and eight fail-open adjacent schema/identity forms. No new sustained-write
+acquisition occurs before Hardware repairs those exact boundaries and Verification
+accepts a later exact head.
+
+Treat held PR #120 A1MINI-01 rev 1 as a method candidate, not print permission.
+Independent Verification audits whether its single subjective ladder can support the
+claimed 0.08 mm resolution decision and whether nominal-volume mass coupons are
+interpretable with the available scale. The safe material decision is buy nothing
+now; first-party compatibility/datasheet evidence remains missing, so named PETG/TPU
+products and categorical exclusions are provisional and no Michael issue is opened.
+
+ADR-119's historical premise that Michael would not own a printer is superseded, but
+its zero-closed-strain and matched-pair outcome remains controlling. A design robust
+to material variation is still preferable when material can be chosen. No printer,
+material, process, part or physical result is qualified by this update.
+
+**Rationale and evidence:** [P1-R24 PM disposition](REVIEW/P1-R24-PM-DISPOSITION.md).
+**Cost to reverse:** retain the immutable PR #112 evidence and verifier findings;
+replace the clasp/material or print-method decision only through a new PM disposition
+with applicable independent review.

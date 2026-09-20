@@ -66,6 +66,9 @@ their live body/scope updates before acting; do not execute a historical review.
   independent card-method rejection and held rugged-source-method return.
 - [P1-R23 PM disposition](P1-R23-PM-DISPOSITION.md): narrow clean VT8 observation
   acceptance, repaired card-method routing and current A1 Mini/library/material policy.
+- [P1-R24 PM disposition](P1-R24-PM-DISPOSITION.md): authentication of the narrow
+  PR #112 integration, independent rejection of repaired PR #87, and held A1MINI-01
+  method/material disposition.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

@@ -19,8 +19,13 @@ Current printing policy, recorded 20 September 2026: leave the already-planned
 library test configured for the library printer expected Monday. Default new print
 work to Michael's A1 Mini; retain the library for larger PLA prints that do not fit
 the A1 Mini. Michael currently owns one spool of white Bambu PLA Basic. PETG, TPU and
-specific brands remain recommendations to be justified by Hardware before Michael
-decides whether to buy them. An in-progress test print is not acceptance evidence.
+specific brands remain unapproved. P1-R24's safe current wallet decision is buy
+nothing: use the owned PLA for justified geometry work, defer PETG until a specific
+source-supported test is ready, and defer TPU until a TPU part exists. Held PR #120's
+named products remain provisional because first-party pages/datasheets were not
+retrieved, and its A1MINI-01 packet awaits independent no-print method audit. No
+Michael issue is open for a purchase or print. An in-progress test print is not
+acceptance evidence.
 
 Michael witnesses physical measurements; Verification independently audits method,
 raw data and uncertainty. Estimates and green regression checks are not measurements.
