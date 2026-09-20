@@ -15,6 +15,13 @@ PNY 64 GB V30 samples and a Bambu A1 Mini; these facts supersede the unpurchased
 HTsemi comparison and library-only printing assumptions. Neither purchase is card,
 print-process or product qualification.
 
+Current printing policy, recorded 20 September 2026: leave the already-planned
+library test configured for the library printer expected Monday. Default new print
+work to Michael's A1 Mini; retain the library for larger PLA prints that do not fit
+the A1 Mini. Michael currently owns one spool of white Bambu PLA Basic. PETG, TPU and
+specific brands remain recommendations to be justified by Hardware before Michael
+decides whether to buy them. An in-progress test print is not acceptance evidence.
+
 Michael witnesses physical measurements; Verification independently audits method,
 raw data and uncertainty. Estimates and green regression checks are not measurements.
 Lead work directions are in issues; Michael need not paste instruction files.

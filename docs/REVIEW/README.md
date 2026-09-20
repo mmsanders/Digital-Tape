@@ -50,6 +50,22 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R15 PM disposition](P1-R15-PM-DISPOSITION.md): authentication of the exact
   corrected-package import and fresh cadence-corrected product evidence, plus blind
   Verification routing before any implementation merge.
+- [P1-R16 PM disposition](P1-R16-PM-DISPOSITION.md): exact corrected-cadence return,
+  initial card measurements, owned-printer transition and ruggedization requirement.
+- [P1-R17 PM disposition](P1-R17-PM-DISPOSITION.md): clean Software integration,
+  card-record correction and independent card/rugged-method audit routing.
+- [P1-R18 PM disposition](P1-R18-PM-DISPOSITION.md): card/rugged audit results,
+  VT8 fixture-geometry stop and verifier-first package correction.
+- [P1-R19 PM disposition](P1-R19-PM-DISPOSITION.md): corrected VT8 package route,
+  repaired card method and bounded rugged-source follow-up.
+- [P1-R20 PM disposition](P1-R20-PM-DISPOSITION.md): exact VT8 evidence route,
+  independent card-method blockers and A1 Mini packet/source disposition.
+- [P1-R21 PM disposition](P1-R21-PM-DISPOSITION.md): independent two-case VT8
+  acceptance, repaired card-method re-audit and official source-input routing.
+- [P1-R22 PM disposition](P1-R22-PM-DISPOSITION.md): clean VT8 candidate routing,
+  independent card-method rejection and held rugged-source-method return.
+- [P1-R23 PM disposition](P1-R23-PM-DISPOSITION.md): narrow clean VT8 observation
+  acceptance, repaired card-method routing and current A1 Mini/library/material policy.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

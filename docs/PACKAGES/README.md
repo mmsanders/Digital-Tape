@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 19 September 2026 UTC. Historical phase durations are
+Current status below is updated 20 September 2026 UTC. Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -20,8 +20,8 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-01 | Repo, agent docs, decision log | Agent | — | Repo and restart agreement published; no independent package acceptance claimed |
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | Rev-6 source packet reproducibly splits WP-24 and WP-04 onto two nominal-A1 plates with 5 mm XY margins; usable area/process and every physical result remain unproved, so printing is held |
-| WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. PR #87's repaired ordered schema-2 method awaits independent re-audit before acquisition. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | Existing library test remains on the expected Monday library route. New print work defaults to the A1 Mini, with the library retained for oversized PLA. PR #92 source controls await independent audit; material/process and every physical result remain unproved |
+| WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. PR #87 repaired head `e520c2c...` locally closes `P1-R21-V01` and awaits independent re-audit before acquisition. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
@@ -32,7 +32,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean PR #77 slice merged with evidence history intact. Exact 289/289 mount observations, including row 3, are independently accepted; source/helper design and the incomplete package remain held |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Exact reset-Side-B and recording/allocation observations at held PR #96 evidence `088226a...` are independently accepted. A clean split with fresh evidence is still required; all excluded behavior, source and complete-product acceptance remain held |
+| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | Verification independently accepts the exact two clean PR #112 observations at verifier `391d6a8...`. Software owns an unchanged history-preserving integration decision; invented refusals, excluded behavior, source and complete-package acceptance remain held |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Clean observed slice merged. Exact ten corrected-cadence product observations are independently accepted, including 698/698 per-render service in each direction. Source, complete package and listening/goldens remain separate |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Contract issued; corresponding independent tests must land before implementation |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
