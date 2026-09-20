@@ -51,6 +51,7 @@ import argparse
 import hashlib
 import json
 import math
+from datetime import datetime
 import statistics
 import sys
 from dataclasses import dataclass, field
@@ -83,6 +84,12 @@ class Audit:
     problems: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     derived: dict = field(default_factory=dict)
+    # The parse/compute boundary, made explicit. `_audit_shapes` sets this only
+    # when every type in the record has been settled. Each function that
+    # compares, sums or divides asserts it first, so "validated" is a property
+    # of the record in hand rather than of the order someone remembered to
+    # write the calls in.
+    shapes_validated: bool = False
 
     @property
     def ok(self) -> bool:
@@ -355,6 +362,14 @@ def _audit_shapes(rec: dict, a: "Audit") -> int:
             a.problems.append(f"{name} must be a string, not "
                               f"{type(rec[name]).__name__} {rec[name]!r}")
             bad += 1
+        elif not rec[name].strip():
+            # An empty path is not a path. The record names the file the run
+            # wrote; a blank string names nothing and cannot be reconciled
+            # against the device the trace claims to describe.
+            a.problems.append(
+                f"{name} is empty; it must name the object this run actually "
+                f"wrote, and a blank string names nothing")
+            bad += 1
 
     # Identity and provenance. Typed, then required to say something: PM's
     # P1-R24 direction is that a schema-2 acquisition's identity strings must be
@@ -374,6 +389,21 @@ def _audit_shapes(rec: dict, a: "Audit") -> int:
                 f"{name} is empty; an empty identity marker binds this record "
                 f"to nothing, and a later qualification would cite it")
             bad += 1
+        elif name == "measured_at":
+            # The other identity fields are free text an auditor cannot check:
+            # nothing here can know whether a SKU string names a real part.
+            # `measured_at` is different, because it claims a *format* as well
+            # as a value, and a run that cannot say when it happened cannot be
+            # placed against a card's history, a firmware revision or another
+            # sample. Type plus nonempty let 'bogus' through as a timestamp.
+            try:
+                datetime.fromisoformat(v)
+            except ValueError:
+                a.problems.append(
+                    f"measured_at {v!r} is not an ISO-8601 timestamp; it binds "
+                    f"this record to a moment, and an unparseable marker "
+                    f"cannot order this run against any other")
+                bad += 1
 
     # A denominator, checked before anything divides by it. `bytes_per_mb = 0`
     # reached the per-window rate division and raised ZeroDivisionError
@@ -458,9 +488,62 @@ def _audit_shapes(rec: dict, a: "Audit") -> int:
                 bad += 1
         bad += _audit_space_shape(a, "fill.before: ", fill["before"])
         bad += _audit_space_shape(a, "fill.after: ", fill["after"])
+
+        # A performed fill has to be internally consistent, not merely typed.
+        # WP-05 A-2's filled condition is the whole point of this branch: a
+        # record that claims it filled the card, while saying it asked for no
+        # fraction, moved no ballast or started with no free space, is claiming
+        # the condition without the evidence for it. Each of these passed type
+        # checking and was silently accepted.
+        if fill["performed"] is True:
+            if fill["requested_fraction"] is None:
+                a.problems.append(
+                    "fill: performed is true but requested_fraction is null; a "
+                    "fill that happened was asked for at some fraction, and the "
+                    "filled condition cannot be checked against nothing")
+                bad += 1
+            if _int(fill["ballast_bytes"]) and fill["ballast_bytes"] <= 0:
+                a.problems.append(
+                    f"fill: performed is true but ballast_bytes is "
+                    f"{fill['ballast_bytes']}; a fill that moved no bytes did "
+                    f"not fill anything")
+                bad += 1
+            if not isinstance(fill["ballast_path"], str) or not fill["ballast_path"].strip():
+                a.problems.append(
+                    "fill: performed is true but ballast_path names nothing; "
+                    "the ballast the run wrote must be identifiable")
+                bad += 1
+            before = fill["before"]
+            if (isinstance(before, dict) and before.get("applies") is True
+                    and _int(before.get("free_bytes"))
+                    and before["free_bytes"] <= 0):
+                a.problems.append(
+                    "fill: performed is true but fill.before.free_bytes is 0; "
+                    "there was no space to write ballast into, so the recorded "
+                    "fill could not have happened as described")
+                bad += 1
     bad += _audit_space_shape(a, "space_after_measurement: ",
                               rec["space_after_measurement"])
+    if not bad:
+        # The parse/compute boundary. Only a record whose every type and
+        # denominator has been settled reaches the code that compares, sums and
+        # divides; _require_validated asserts this on the way in.
+        a.shapes_validated = True
     return bad
+
+
+def _require_validated(a: "Audit", who: str) -> None:
+    """The boundary assertion between parse and compute.
+
+    If this ever fires, the fix is in the parse stage, never a `try` here. A
+    computation that can be reached with an unvalidated record is the defect
+    P1-R21-V01 and P1-R23-V01 both found, in three different places.
+    """
+    if not a.shapes_validated:
+        raise AssertionError(
+            f"{who} was reached without a validated record; compute must be "
+            f"unreachable without the parse stage having settled every type "
+            f"and denominator")
 
 
 def _audit_declared(rec: dict, windows: list, a: "Audit") -> None:
@@ -470,6 +553,7 @@ def _audit_declared(rec: dict, windows: list, a: "Audit") -> None:
     it, and the three criterion figures were accepted at any value at all. A
     declared number nobody checks is decoration on a safety record.
     """
+    _require_validated(a, "_audit_declared")
     mb_unit = rec["bytes_per_mb"]
     win_mb = rec["window_mb"]
     if win_mb <= 0:
@@ -684,6 +768,7 @@ def audit_schema2(rec: dict, a: Audit) -> None:
 
 def _audit_trace(rec: dict, windows: list, a: Audit) -> None:
     """Every write call, in order, reconstructing each window from scratch."""
+    _require_validated(a, "_audit_trace")
     trace = rec["write_trace"]
     if not isinstance(trace, list) or not trace:
         a.problems.append("write_trace is missing or empty; a window's byte "
@@ -776,6 +861,7 @@ def _audit_trace(rec: dict, windows: list, a: Audit) -> None:
 
 def _audit_space(rec: dict, a: Audit) -> None:
     """Capacity accounting: arithmetic, and before/after consistency."""
+    _require_validated(a, "_audit_space")
     def check(label: str, sp) -> bool:
         if not isinstance(sp, dict) or "applies" not in sp:
             a.problems.append(f"{label}: missing capacity accounting")

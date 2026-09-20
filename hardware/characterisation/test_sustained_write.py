@@ -1163,8 +1163,229 @@ def the_p1_r23_controls_stay_specific_under_noise() -> list[str]:
     return bad
 
 
+
+# --- the generative control --------------------------------------------------
+#
+# Every audit so far closed the malformed forms it was shown and the next audit
+# found their neighbours: P1-R21-V01 named thirteen, the repair closed 55, and
+# P1-R23-V01 immediately found eleven adjacent ones. Naming instances cannot
+# terminate, because the supply of neighbours is the shape of the record, not a
+# list anybody holds.
+#
+# This control tests the CLASS instead. It walks every leaf of a known-good
+# schema-2 record, applies every mutation the audits have historically found --
+# zero, negative, empty string, nonsense string, null, boolean, list, object, a
+# float where an integer belongs -- and adds an unknown sibling key to every
+# object at every depth. It then asserts the invariant that actually matters:
+#
+#     NO input raises. Ever.
+#
+# A malformed record leaves with a problem report the verifier owns, or it is a
+# value the schema genuinely permits. There is no third outcome, and a traceback
+# is never one of them.
+#
+# The second assertion is the allowlist below. An auditor cannot know that
+# 'bogus' is not a real part number, so free-text identity and diagnostic
+# strings are legitimately accepted -- but they are accepted BY NAME. If a
+# future change starts silently accepting a field that is not on this list, this
+# control goes red, which is the property the named-instance controls could not
+# give us.
+
+MUTATIONS = (
+    ("zero", 0),
+    ("negative", -1),
+    ("empty string", ""),
+    ("nonsense string", "bogus"),
+    ("null", None),
+    ("boolean", True),
+    ("list", []),
+    ("object", {}),
+    ("float where int belongs", 1.5),
+)
+
+# Leaf fields a correct auditor may accept an arbitrary value for, with the
+# reason. Nothing may be added here to make a failing sweep pass: each entry is
+# a field whose value no auditor can check, not a field nobody got round to.
+FREE_TEXT_LEAVES = {
+    "sku": "a part number string; nothing here can know which strings name real parts",
+    "revision": "a revision string; same",
+    "cid": "a card identity string; same",
+    "sample": "an operator's sample label",
+    "reader": "a reader description",
+    "host": "a host description",
+    "measurement_path": "an arbitrary path string is a plausible path",
+    "ballast_path": "likewise",
+    "sync_error": "a diagnostic message from the OS; any string is plausible",
+    "reason": "a free-text note explaining a fill decision",
+    "occupancy": "0 and 0.0 are the same occupancy; an int here is not a different value",
+    "free_bytes": "a card left with no free space after a fill is a real outcome",
+}
+
+
+def _leaves(obj, path=()):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from _leaves(v, path + (k,))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from _leaves(v, path + (i,))
+    else:
+        yield path, obj
+
+
+def _objects(obj, path=()):
+    if isinstance(obj, dict):
+        yield path
+        for k, v in obj.items():
+            yield from _objects(v, path + (k,))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from _objects(v, path + (i,))
+
+
+def _set_at(obj, path, value):
+    cur = obj
+    for step in path[:-1]:
+        cur = cur[step]
+    cur[path[-1]] = value
+
+
+def every_mutation_is_reported_and_none_raises() -> list[str]:
+    """Generative: no mutation of any leaf, at any depth, may raise."""
+    good = good_record()
+    raised, unexplained = [], []
+
+    def check(rec, label, field_name):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "rec.json"
+            path.write_text(json.dumps(rec))
+            try:
+                a = aud.audit(path)
+            except BaseException as exc:       # noqa: BLE001 -- that is the point
+                raised.append(f"{label}: {type(exc).__name__}: {exc}")
+                return
+        if a.ok and field_name not in FREE_TEXT_LEAVES:
+            unexplained.append(label)
+
+    n = 0
+    for path, old in _leaves(good):
+        field_name = str(path[-1])
+        for name, value in MUTATIONS:
+            if value == old and type(value) is type(old):
+                continue                       # not a mutation
+            rec = copy.deepcopy(good)
+            try:
+                _set_at(rec, path, value)
+            except (KeyError, IndexError, TypeError):
+                continue
+            n += 1
+            check(rec, f"{'.'.join(map(str, path))} := {name}", field_name)
+
+    for path in _objects(good):
+        rec = copy.deepcopy(good)
+        cur = rec
+        for step in path:
+            cur = cur[step]
+        if not isinstance(cur, dict):
+            continue
+        cur["__unknown_sibling__"] = 1
+        n += 1
+        check(rec, f"unknown key at {'.'.join(map(str, path)) or '<root>'}",
+              "__unknown_sibling__")
+
+    problems = []
+    if raised:
+        problems.append(
+            f"{len(raised)} of {n} mutations terminated the audit by traceback "
+            f"rather than by report; first: {raised[0]}")
+    if unexplained:
+        problems.append(
+            f"{len(unexplained)} of {n} mutations were accepted silently by a "
+            f"field that is not declared free text; first: {unexplained[0]}. "
+            f"Either the parse stage is missing a check, or the field belongs "
+            f"in FREE_TEXT_LEAVES with a stated reason.")
+    if n < 1000:
+        problems.append(
+            f"only {n} mutations were generated; the sweep is not covering the "
+            f"record and cannot establish what it claims")
+    return problems
+
+
+def compute_is_unreachable_without_a_validated_record() -> list[str]:
+    """The parse/compute boundary is asserted, not merely observed."""
+    a = aud.Audit(path=Path("synthetic"), schema=2, legacy=False)
+    if a.shapes_validated:
+        return ["a fresh Audit claims to be validated before anything parsed it"]
+    for fn, args in (
+        (aud._audit_declared, ({}, [], a)),
+        (aud._audit_trace, ({}, [], a)),
+        (aud._audit_space, ({}, a)),
+    ):
+        try:
+            fn(*args)
+        except AssertionError:
+            continue
+        except BaseException as exc:           # noqa: BLE001
+            return [f"{fn.__name__} reached an unvalidated record and failed "
+                    f"with {type(exc).__name__} instead of the boundary "
+                    f"assertion: {exc}"]
+        return [f"{fn.__name__} ran on an unvalidated record without asserting"]
+    return []
+
+
+def an_unparseable_timestamp_is_rejected() -> list[str]:
+    """`measured_at` claims a format, not just a nonempty string."""
+    rec = good_record()
+    rec["measured_at"] = "bogus"
+    a = audit_dict(rec)
+    if a.ok:
+        return ["measured_at 'bogus' was accepted as the moment this run happened"]
+    if not any("measured_at" in p and "ISO-8601" in p for p in a.problems):
+        return [f"measured_at was rejected without naming the format: {a.problems}"]
+    return []
+
+
+def an_empty_measurement_path_is_rejected() -> list[str]:
+    rec = good_record()
+    rec["measurement_path"] = ""
+    a = audit_dict(rec)
+    if a.ok:
+        return ["an empty measurement_path was accepted as the object written"]
+    return []
+
+
+def a_performed_fill_must_be_internally_consistent() -> list[str]:
+    """WP-05 A-2's filled condition, claimed without the evidence for it."""
+    rec = good_record(filled=True)
+    if rec["fill"]["performed"] is not True:
+        return ["the filled fixture does not report performed=true"]
+    for field_name, value, why in (
+        ("requested_fraction", None, "asked for no fraction"),
+        ("ballast_bytes", 0, "moved no bytes"),
+        ("ballast_path", None, "named no ballast"),
+    ):
+        probe = good_record(filled=True)
+        probe["fill"][field_name] = value
+        a = audit_dict(probe)
+        if a.ok:
+            return [f"fill.performed=true with {field_name}={value!r} was "
+                    f"accepted; the record claims a filled run that {why}"]
+    probe = good_record(filled=True)
+    probe["fill"]["before"]["free_bytes"] = 0
+    a = audit_dict(probe)
+    if a.ok:
+        return ["fill.performed=true with fill.before.free_bytes=0 was accepted; "
+                "there was no space to write ballast into"]
+    return []
+
+
 CONTROLS = (
     the_good_fixture_passes,
+    every_mutation_is_reported_and_none_raises,
+    compute_is_unreachable_without_a_validated_record,
+    an_unparseable_timestamp_is_rejected,
+    an_empty_measurement_path_is_rejected,
+    a_performed_fill_must_be_internally_consistent,
     short_writes_are_looped_not_assumed,
     a_stalled_write_raises_rather_than_spins,
     the_schema_is_closed,
@@ -1219,7 +1440,11 @@ def main() -> int:
           f"timing and the closing flush, totals and final size, capacity "
           f"accounting, target branch, schema closure, false summaries and "
           f"legacy tampering all go red, and every P1-R21-V01 malformed form "
-          f"is rejected by report rather than by traceback")
+          f"is rejected by report rather than by traceback. The generative "
+          f"control sweeps every leaf of the record with nine mutation "
+          f"classes plus an unknown sibling key at every depth, and asserts "
+          f"that none raises and that nothing is accepted silently except the "
+          f"free-text fields declared by name")
     return 0
 
 
