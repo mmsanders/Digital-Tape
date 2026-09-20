@@ -2532,3 +2532,59 @@ paragraphs from `docs/ROLES/pm.md`, retire the `intake` label and supersede this
 Filed intake issues remain as a record and need no unwinding. The phase and bottleneck
 rules are pure scheduling constraints with no artefact to reconstruct. Nothing in the
 frozen bundle, no disposition, no acceptance and no hold depends on any of the four.
+
+---
+
+## ADR-155 — Structural Rule 1 lands in history, not in a separate merge
+
+**Date:** 2026-09-20 UTC · **Owner:** PM under Michael's signed remediation decision D-2
+
+**Decision.** A Phase 1 tranche is **one branch carrying two commits**: an import commit
+byte-identical to a verifier publication whose hash predates it, then the implementation
+commit. The protocol is five steps, not seven:
+
+1. Verification authors and publishes to `digital-tape-verification/main`; that repo's CI
+   proves its package self-tests green.
+2. Software returns one branch, import commit first, implementation commit second, with
+   `tests/IMPORTS.json` declaring the publication tree hash.
+3. CI proves it: subtree byte-identity against the declared publication, every
+   verifier-tree change preceding every `engine/`/`firmware/` change with no commit doing
+   both, package self-tests green, offline replay green, spec bytes matching
+   `spec/VERSION.md`.
+4. Verification disposes blind from the evidence bundle.
+5. PM disposes.
+
+`CLAUDE.md` §3.1 states this. `.github/workflows/evidence-integrity.yml` enforces it and
+`tools/ci/verify-structural-rule-1.py` proves the ordering check goes red.
+
+**Rationale.** A tranche cost seven activations: Verification publishes, PM authenticates
+and reproduces, Software imports test-only, Software implements and runs, PM authenticates
+and reproduces, Verification disposes, PM disposes. Each paid the full context tax, and
+one of those rounds produced nothing but a separate merge commit.
+
+Blindness is what Structural Rule 1 protects, and blindness survives. The implementer
+still cannot tune an assertion: the tree it imported is fixed by a hash Verification
+published *first*, CI proves the subtree matches that hash byte-for-byte, and CI proves
+the import commit precedes the code. What was previously guaranteed by the sequencing of
+two merges is now guaranteed by a check that is itself shown to fail when the sequencing
+is wrong.
+
+**Stated limitation.** The declared publication hash lives in `tests/IMPORTS.json` in this
+repository. CI proves HEAD matches the declaration; it does not, today, prove the
+declaration matches `digital-tape-verification`. What prevents an implementer declaring a
+tree of its own is that CODEOWNERS makes `tests/IMPORTS.json` Michael-owned, so the
+declaration is reviewed rather than self-certified. A cross-repository check would be
+stronger and requires a token that does not exist yet. This is a real gap in the
+mechanisation, recorded rather than glossed: until that token exists, the anchor is a
+human review, not an automated comparison.
+
+Nothing here weakens what acceptance means, licenses reading implementation source before
+authoring tests, or lets a lead relax a test. A collapsed round grants nothing a
+non-collapsed one did not.
+
+**Cost to reverse.** Low. Revert the `CLAUDE.md` §3.1 edit and the two role-charter
+paragraphs, and supersede this ADR. **The two-commit branch shape remains valid under the
+old rule** — a branch whose import commit precedes its implementation commit can always be
+merged as two separate merges instead, so nothing already returned under this protocol has
+to be rebuilt. The CI checks are additive and can stay green under either rule; removing
+them separately costs only the deletion.

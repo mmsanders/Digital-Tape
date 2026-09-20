@@ -14,6 +14,8 @@ Checks, all declared in tests/IMPORTS.json:
   3. offline replay of each retained evidence bundle matches its declared outcome
   4. every copy of a frozen spec file hashes to spec/VERSION.md
   5. manifest adapter kind/ID equals observation adapter kind/ID
+  6. Structural Rule 1 ordering: on a branch carrying both an import and an
+     implementation, every verifier-tree change precedes every engine change
 
 Usage: audit-evidence-integrity.py [BASE_REF]
 Exit 0 green, 1 red, 2 harness error.
@@ -175,6 +177,68 @@ def check_adapter_identity(m):
             ok("adapter-id", f"{b['path']} {a.get('kind')}/{a.get('id')}")
 
 
+# --- 6. Structural Rule 1, mechanised ------------------------------------------
+PKG_PREFIXES = ("tests/mount_draft8/", "tests/ops_draft8/",
+                "tests/playback_draft8/", "tests/playback_complete_draft8/")
+IMPL_PREFIXES = ("engine/", "firmware/")
+
+
+def check_structural_rule_1(base):
+    """Tests land before implementation -- proven from history, not asserted.
+
+    D-2 collapsed the import and the implementation onto one branch. What used
+    to be guaranteed by two separate merges is now guaranteed here: on a branch
+    carrying both, every commit touching a verifier package tree must come
+    strictly before every commit touching engine/ or firmware/, and no single
+    commit may do both.
+
+    This is what preserves verifier blindness under the collapsed protocol. The
+    implementer still cannot tune an assertion, because the imported tree is
+    byte-identical to a publication (check 1) landed in an earlier commit than
+    the code (this check).
+    """
+    if not base:
+        print("  skip  [rule-1] no base ref; ordering not checked")
+        return
+    if run(["git", "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}"]).returncode:
+        print("  skip  [rule-1] base ref unavailable")
+        return
+    r = run(["git", "rev-list", "--reverse", f"{base}..HEAD"])
+    commits = [c for c in r.stdout.split() if c]
+    if not commits:
+        print("  skip  [rule-1] no commits against base")
+        return
+
+    first_impl = None
+    last_pkg = None
+    for i, c in enumerate(commits):
+        files = run(["git", "show", "--pretty=", "--name-only", c]).stdout.split("\n")
+        pkg = any(f.startswith(PKG_PREFIXES) for f in files if f)
+        impl = any(f.startswith(IMPL_PREFIXES) for f in files if f)
+        if pkg and impl:
+            fail("rule-1", f"commit {c[:12]} changes a verifier package tree AND "
+                           f"implementation in the same commit; the import must be "
+                           f"its own commit, landing first")
+            return
+        if pkg and last_pkg is None or pkg:
+            last_pkg = i
+        if impl and first_impl is None:
+            first_impl = i
+
+    if last_pkg is None or first_impl is None:
+        ok("rule-1", "branch carries an import or an implementation, not both")
+        return
+    if last_pkg > first_impl:
+        fail("rule-1",
+             f"commit {commits[last_pkg][:12]} changes a verifier package tree "
+             f"after implementation landed at {commits[first_impl][:12]}. Tests "
+             f"land before implementation (CLAUDE.md §3.1); a package change "
+             f"made after the code is how an assertion gets tuned to fit it.")
+    else:
+        ok("rule-1", f"import at commit {last_pkg + 1} precedes implementation "
+                     f"at commit {first_impl + 1} of {len(commits)}")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else ""
     touched = touched_paths(base)
@@ -187,6 +251,7 @@ def main():
     check_replay(m)
     check_spec_copies(m)
     check_adapter_identity(m)
+    check_structural_rule_1(base)
     print(f"== evidence integrity: {'FAIL' if FAIL else 'PASS'} "
           f"({len(FAIL)} failed) ==")
     print("   A green run here is mechanical authentication only. It is not a")
