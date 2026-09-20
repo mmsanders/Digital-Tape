@@ -5,18 +5,35 @@
 
 PY      := python3
 CAD     := cad/transport
+PROC    := cad/process
 THERMAL := thermal
 CHAR    := characterisation
 MECH    := mech
 SHELL_CAD := cad/cartridge
 
-.PHONY: all packet-wp04 packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
+.PHONY: all packet-wp04 packet-a1mini packet-a1mini-check packet-check packet-validate atomicity-test spec-check spec-bless thermal thermal-check charger solenoid clasp mech-check shell-test packet-duplicates solenoid-test fabrication-gate erc drc check clean tools
 
 all: packet-wp04 thermal mech
 
 ## packet-wp04 — regenerate print packet WP04-01 (plate, STLs, manifest)
 packet-wp04:
 	$(PY) $(CAD)/build_packet.py
+
+## packet-a1mini — regenerate print packet A1MINI-01 (the process coupons)
+##
+## Separate target and separate output directory from packet-wp04 on purpose:
+## the library plate and the A1 Mini plate go to different printers for
+## different questions, and one `make` must never quietly rebuild the other.
+packet-a1mini:
+	$(PY) $(PROC)/build_process_packet.py
+
+## packet-a1mini-check — bounds, ladder resolution and committed-bytes identity
+##
+## Includes its own negative control: the bed check is re-run against a 40 mm
+## bed and must reject the plate, because a bounds check that never rejects
+## anything has not established that the plate fits.
+packet-a1mini-check:
+	@$(PY) $(PROC)/test_process_packet.py
 
 ## packet-validate — the plate must open in a slicer and sit on the bed
 ##

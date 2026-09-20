@@ -1,0 +1,33 @@
+{
+  "packet": "A1MINI-01",
+  "revision": 1,
+  "released": "2026-09-20",
+  "printer": "Bambu Lab A1 Mini (Michael's own)",
+  "bed_mm": [
+    180.0,
+    180.0,
+    180.0
+  ],
+  "margin_mm": 12.0,
+  "max_z_mm": 175.0,
+  "material": "Bambu PLA Basic, white -- the spool already owned",
+  "pin_nominal_mm": 8.0,
+  "socket_clearances_mm": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "mass_coupon_mm": [
+    20.0,
+    20.0,
+    6.0
+  ],
+  "mass_coupon_modelled_volume_mm3": 2400.0,
+  "mass_coupon_count": 3,
+  "objects": 6,
+  "blind": false,
+  "blind_rationale": "nothing is hidden: a socket-entry observation cannot be biased by knowing the clearances, and hiding them would only stop Michael noticing a mislabelled rung"
+}
