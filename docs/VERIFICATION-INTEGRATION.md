@@ -680,3 +680,31 @@ Its bounded method commit transcribes CS-1–CS-5 and retains field-specific red
 controls; PM reproduced those controls, unchanged packet bytes and the still-CLOSED
 five-blocker fabrication gate. The exact head awaits independent audit. No apparatus,
 print, physical run, qualification, safety/compliance conclusion or purchase follows.
+
+## P1-R23 clean-observation acceptance and repaired-method route — 20 September 2026 UTC
+
+Verification #18 published one findings file at verifier main
+`391d6a8308edfca46f639c3a6567c220d7a7b95d`, tree
+`742d135b5d02850b69a8e34fb8a71db35012025d`, directly after
+`f00da3ffbaab62833cce52b29c4999934a37a9d2`. The findings SHA-256 is
+`6a3c90f04d7ba88c6c38af6495d383221480d1dc6f28032bd04804907d9939a3`.
+PM authenticated the one-file return and reproduced the full suite.
+
+Accept its blind disposition narrowly. The exact clean PR #112 reset-Side-B and
+recording/allocation observations authenticate, exit zero, replay PASS and pass an
+independent raw traversal. Required calls, sequences, allocation, durability order,
+unchanged protected media and remount outcomes are present with no unexpected call,
+write, forbidden range, callback error, overflow, hidden retained mutation or tamper.
+The splice-only arm and stage-1 BUSY policies are neither reached nor accepted. No
+source, adapter design, other behavior, atomicity, PCM, golden, listening or complete
+WP-07 acceptance follows. Software owns an exact history-preserving integration
+decision; PM does not merge product code.
+
+Hardware #115 returned repaired PR #87 head
+`e520c2c4de3fb917fb3e0e1bb72a91997cbe8333`, tree
+`deece322ca9001c95c002a3c0cf8d937b14f4d29`, directly after rejected head
+`10471f37f432c44d6f5beac59d25b3771e057c38`. The acquisition writer and five
+legacy schema-1 records are unchanged. PM reproduced 26 retained controls, legacy
+audit and the still-CLOSED fabrication gate. This is Hardware's self-audited repair,
+not closure of `P1-R21-V01`; Verification must independently audit the exact head
+before any new physical acquisition.

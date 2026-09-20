@@ -1,6 +1,6 @@
 # Project status
 
-**Updated: 19 September 2026 UTC · Owner: PM · P1-R22 clean VT8 candidate routed to Verification; card method independently rejected; rugged source method awaits audit; scoped Phase 0 freeze unchanged.**
+**Updated: 20 September 2026 UTC · Owner: PM · P1-R23 clean VT8 observations independently accepted; card repair awaits re-audit; A1 Mini is the new-print default; scoped Phase 0 freeze unchanged.**
 
 ## Current checkpoint (assignments live in issues)
 
@@ -223,6 +223,25 @@ CS-1–CS-5 are closed only as Hardware-authored transcription; independent meth
 acceptance, apparatus, printing, physical testing and regulatory claims remain held.
 See the [P1-R22 disposition](REVIEW/P1-R22-PM-DISPOSITION.md).
 
+Verification #18 published one findings file at verifier main `391d6a8...`. PM
+authenticated its parent/tree/digest and reproduced the full suite. Accept its narrow
+blind disposition: the exact clean PR #112 reset-Side-B and recording/allocation
+observations are independently accepted. The candidate's splice-only arm and stage-1
+BUSY policies remain explicitly unaccepted, as do source, all other behavior and
+complete WP-07. Software owns an unchanged history-preserving integration decision.
+
+Hardware #115 repaired PR #87 at `e520c2c...`, directly atop the rejected head.
+PM reproduced 26 retained schema controls, legacy byte identity, card audit and the
+still-CLOSED five-blocker fabrication gate. The acquisition writer is unchanged.
+This self-audited repair awaits a new independent method audit before any acquisition.
+
+Michael reports an A1 Mini test print in progress and expects the library Monday.
+Leave the existing library job configured for the library; default new prints to the
+A1 Mini and retain the library for oversized PLA. Current stock is white Bambu PLA
+Basic only. Hardware owns a sourced minimum materials/brand recommendation and may
+prepare one distinct next A1 Mini packet; PETG/TPU remain unapproved hypotheses.
+See the [P1-R23 disposition](REVIEW/P1-R23-PM-DISPOSITION.md).
+
 Active assignments and their stop conditions are tracked exclusively in
 [role-labeled issues](ISSUE-WORKFLOW.md). This status records evidence, not work
 directions. The kickoff granted no engine merge or broader acceptance.
@@ -261,12 +280,12 @@ directions. The kickoff granted no engine merge or broader acceptance.
 | Work | State | Next owner |
 |---|---|---|
 | #20 engine | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
-| VT8-001 / WP-07 | Exact corrected verifier tree `3667a28...` is on main. Clean held PR #112 at `15fbcfa...` has fresh PM-authenticated evidence for the two independently accepted case contracts, but its source, invented refusals, unexercised branches and complete package are not accepted | Verification performs a blind exact-case audit of PR #112; PR #96 and #112 remain held |
+| VT8-001 / WP-07 | Verification independently accepts the exact two clean PR #112 observations at verifier `391d6a8...`. Source, invented refusal policies, unexercised branches and complete WP-07 remain unaccepted | Software decides unchanged history-preserving integration of PR #112; PR #96 remains held |
 | WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
 | WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
-| Hardware | Verification rejects PR #87 head `10471f3...` under `P1-R21-V01`: thirteen malformed schema-2 forms pass and one crashes. PR #92 head `0943571...` binds CS-1–CS-5 for the method with retained controls and unchanged packet bytes, but has no independent audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware repairs only PR #87's exact verifier findings; PR #92 waits held for later independent audit |
+| Hardware | PR #87 repaired head `e520c2c...` locally closes all named `P1-R21-V01` forms and awaits independent re-audit. PR #92 head `0943571...` binds CS-1–CS-5 for the method with unchanged packet bytes and also awaits audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Verification re-audits PR #87; Hardware separately recommends A1 Mini materials/brands without changing PR #92 |
 | Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Rev-6 two-plate packet fits inside the nominal A1 envelope with 5 mm XY margins, but usable area/process remain unproved and printing is held. Three PNY samples were measured; the next-acquisition method is independently rejected pending `P1-R21-V01`, and identity, attribution, atomicity and qualification remain open | Hardware repairs the method; Michael only when a later fresh hands/wallet task is issued |
+| WP-04 / WP-05 | Existing library test stays on the expected Monday library route; new prints default to the A1 Mini, with the library retained for oversized PLA. PR #87's repaired next-acquisition method awaits independent re-audit; identity, attribution, atomicity and qualification remain open | Hardware material/packet planning plus Verification method audit; no Michael purchase issue yet |
 
 **New independent package acceptances: none.** Verification independently accepts the
 exact ten corrected-cadence observations and exact clean 289-case mount log. That is
@@ -281,9 +300,10 @@ dependencies, not evidence against the exact-byte paper review. See
 [verification integration](VERIFICATION-INTEGRATION.md) and
 [hardware status](STATUS-HARDWARE.md).
 
-P1-R22 routes clean held PR #112 to blind exact-case Verification, routes only the
-`P1-R21-V01` repair back to Hardware, and holds PR #92's source-bound rugged method
-for a later audit. No roadmap rung advances. PR #20/#64/#87/#92/#96/#112 remain held.
+P1-R23 routes exact accepted PR #112 history to Software for an unchanged integration
+decision, routes repaired PR #87 to Verification, and asks Hardware for a separate
+sourced A1 Mini material/packet plan without changing held PR #92. No roadmap rung
+advances in this PM publication. PR #20/#64/#87/#92/#96/#112 remain held.
 Surge and Michael are not activated; stale Michael issue
 #49 stays closed, branches stay intact and current protection is unchanged. The
 dashboard remains at 13 of 36 because no complete implementation rung or package is

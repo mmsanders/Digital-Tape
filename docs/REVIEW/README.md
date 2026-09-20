@@ -64,6 +64,8 @@ their live body/scope updates before acting; do not execute a historical review.
   acceptance, repaired card-method re-audit and official source-input routing.
 - [P1-R22 PM disposition](P1-R22-PM-DISPOSITION.md): clean VT8 candidate routing,
   independent card-method rejection and held rugged-source-method return.
+- [P1-R23 PM disposition](P1-R23-PM-DISPOSITION.md): narrow clean VT8 observation
+  acceptance, repaired card-method routing and current A1 Mini/library/material policy.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
