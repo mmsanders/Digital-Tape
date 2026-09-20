@@ -387,6 +387,57 @@ coverage registry goes red if any of the fifteen forms loses its control.
 **Still not evidence.** No schema-2 record exists, no physical run has occurred, and this repair
 promotes no stored result. Closing a method is not qualifying a card.
 
+### The third repair after independent audit (P1-R23-V01)
+
+Verification re-audited the repaired head `e520c2c4` and **rejected it again**. It confirmed
+that every form `P1-R21-V01` named is closed and that 55 one-field malformed controls now
+reject by report — and then found **eleven one-field neighbours still open**. All eleven have
+one root: the auditor did not establish that its input *was* a schema-2 record before doing
+arithmetic on it and accepting it.
+
+**Three still terminated by traceback.**
+
+- `bytes_per_mb = 0` reached the per-window rate division.
+- `space_after_measurement.total_bytes = 0` was **reported as invalid and then divided by
+  anyway**, one check later. That is worse than not checking it: the traceback came out of
+  code that had already noticed the problem.
+- `schema_version = "bogus"` was run through `int(...)` **before** any type check, so it
+  raised `ValueError` instead of being reported.
+
+**Eight passed.**
+
+- `schema_version = 3` was audited against the schema-2 contract, because the dispatch read
+  `schema >= 2`. This method documents exactly schemas 1 and 2; auditing an undefined version
+  against the schema-2 contract asserts a contract nobody wrote.
+- Non-string values in **each** of `sku`, `revision`, `cid`, `sample`, `reader`, `measured_at`
+  and `host` were accepted. Those seven were required to be *present* and never required to be
+  *strings* — so an object, a list, a number, a Boolean or `null` could stand in for the card's
+  part number or the time of the run. They are the fields a later qualification would cite.
+
+**What the auditor now does.** The top-level JSON value must be an **object** — a list is valid
+JSON and is not a record, and everything downstream indexes it. The declared version is
+**never coerced**: it must be an exact integer, and the schema-2 path requires exactly 2.
+Every denominator — `bytes_per_mb`, `transfer_mb`, and each capacity object's `total_bytes` —
+is required positive **before** anything divides by it, with a guard left at the division site
+as well. All seven identity fields must be strings, and must be **nonempty after trimming**.
+
+**The nonempty rule is PM's call, not the verifier's.** `P1-R23-V01` explicitly left it open as
+a WP-05 policy question. The P1-R24 assignment decides it, following WP-05's existing
+identity/result binding, and it is recorded as a policy decision here so a later round can tell
+the two apart.
+
+**The acquisition writer refuses before it opens the target.** `--sku`, `--revision`, `--cid`,
+`--sample` and `--reader` silently defaulted to `""`, so the tool would happily spend a whole
+session writing to a card and produce a record bound to nothing. It now refuses at argument
+parsing, before the target is stat'd, filled, opened or written, naming each missing flag. If a
+value genuinely cannot be read — a reader that will not expose the CID is the real case —
+**record that as the value** (`--cid unreadable-on-this-reader`). An honest statement of what
+could not be obtained is auditable; a blank cannot be told apart from an operator who did not
+type it.
+
+**All eleven go red**, each naming its field, and each was confirmed accepted-or-crashing
+against `e520c2c4` first. The retained suite is now **34 controls**.
+
 **No rerun is requested.** The tool is ready and the audit path is exercised against synthetic
 fixtures; whether and when to ask Michael for another session is PM's call, and the identity
 items in §12 should be collected first since they cost nothing and gate A-6. Independent

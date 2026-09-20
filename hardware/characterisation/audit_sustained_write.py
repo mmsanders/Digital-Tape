@@ -196,6 +196,15 @@ S2_WINDOW_FLOAT_FIELDS = ("t_start_monotonic_s", "t_end_monotonic_s",
                           "duration_s")
 S2_FSYNC_FLOAT_FIELDS = ("t_start_monotonic_s", "t_end_monotonic_s")
 
+# The seven members that bind a record to a physical event. They were required
+# to be PRESENT and never required to be STRINGS (P1-R23-V01), so an object, a
+# list, a number, a Boolean or null passed in place of the card's part number or
+# the time of the run. These are the fields a later qualification would cite; a
+# record whose SKU is `null` binds nothing, and a closed schema that does not
+# type them is not closing the part that matters most.
+S2_IDENTITY_FIELDS = ("sku", "revision", "cid", "sample", "reader",
+                      "measured_at", "host")
+
 S2_TARGET_KINDS = {"mounted-filesystem", "raw-device"}
 # Schema 2 stores primitives. A summary in the file is not authoritative and is
 # not quietly ignored: it is a contradiction and the record is rejected.
@@ -284,6 +293,15 @@ def _audit_space_shape(a: "Audit", where: str, sp) -> int:
     if _want_bool(a, where, "applies", sp["applies"]):
         return 1
     bad += _want_int(a, where, "total_bytes", sp["total_bytes"])
+    # Another denominator. `total_bytes = 0` was reported as invalid and then
+    # divided by anyway, one check later (P1-R23-V01). Reporting a bad value and
+    # then using it is worse than not checking it: it produces a traceback from
+    # code that had already noticed the problem.
+    if _int(sp["total_bytes"]) and sp["total_bytes"] <= 0:
+        a.problems.append(
+            f"{where}total_bytes is {sp['total_bytes']}; occupancy is derived "
+            f"by dividing by it, so it must be positive")
+        return bad + 1
     if sp["applies"]:
         # A filesystem: every figure is measured, and `reason` is not needed.
         for name in ("free_bytes", "used_bytes"):
@@ -337,6 +355,38 @@ def _audit_shapes(rec: dict, a: "Audit") -> int:
             a.problems.append(f"{name} must be a string, not "
                               f"{type(rec[name]).__name__} {rec[name]!r}")
             bad += 1
+
+    # Identity and provenance. Typed, then required to say something: PM's
+    # P1-R24 direction is that a schema-2 acquisition's identity strings must be
+    # nonempty after trimming, following WP-05's existing identity/result
+    # binding. An empty marker is not a weaker binding, it is no binding -- it
+    # names no card, no sample, no reader and no moment.
+    for name in S2_IDENTITY_FIELDS:
+        v = rec[name]
+        if not isinstance(v, str):
+            a.problems.append(
+                f"{name} must be a string, not {type(v).__name__} {v!r}; this "
+                f"field binds the record to a physical card, sample, reader, "
+                f"time or host and cannot be an arbitrary value")
+            bad += 1
+        elif not v.strip():
+            a.problems.append(
+                f"{name} is empty; an empty identity marker binds this record "
+                f"to nothing, and a later qualification would cite it")
+            bad += 1
+
+    # A denominator, checked before anything divides by it. `bytes_per_mb = 0`
+    # reached the per-window rate division and raised ZeroDivisionError
+    # (P1-R23-V01).
+    if _int(rec["bytes_per_mb"]) and rec["bytes_per_mb"] <= 0:
+        a.problems.append(
+            f"bytes_per_mb is {rec['bytes_per_mb']}; every rate in this record "
+            f"is divided by it, so it must be positive")
+        bad += 1
+    if _int(rec["transfer_mb"]) and rec["transfer_mb"] <= 0:
+        a.problems.append(f"transfer_mb is {rec['transfer_mb']}; a run that "
+                          f"transfers nothing measures nothing")
+        bad += 1
 
     # --- the closing flush ---------------------------------------------------
     fs_bad = _closed(a, "final_fsync: ", rec["final_fsync"], S2_FSYNC_REQUIRED)
@@ -748,6 +798,11 @@ def _audit_space(rec: dict, a: Audit) -> None:
         if used + free > total:
             a.problems.append(
                 f"{label}: used {used} + free {free} exceeds total {total}")
+        if total <= 0:
+            # Defence in depth: the shape pass rejects this before we get here,
+            # and if it ever stops doing so the failure must still be a report.
+            a.problems.append(f"{label}: total {total} cannot be a denominator")
+            return False
         occ = sp.get("occupancy")
         if not _num(occ) or not _close(occ, used / total, 1e-6):
             a.problems.append(
@@ -852,6 +907,19 @@ def audit(path: Path) -> Audit:
         a.problems.append(f"unreadable: {exc}")
         return a
 
+    # P1-R23-V01: everything below indexes and membership-tests `rec`. A JSON
+    # document whose top-level value is a list, a string or a number is valid
+    # JSON and is not a record, and reaching `"x" in rec` with an int raises
+    # rather than reports. The type of the thing being audited is the first
+    # question, not an assumed one.
+    if not isinstance(rec, dict):
+        a = Audit(path=Path(path), schema=0, legacy=False)
+        a.problems.append(
+            f"the top-level JSON value is {type(rec).__name__}, not an object; "
+            f"a record is a mapping of fields and nothing else can be audited "
+            f"as one")
+        return a
+
     if "schema_version" not in rec:
         # Absence means schema 1 -- but only for a record that actually looks
         # like one. A record carrying schema-2 structures without declaring its
@@ -862,14 +930,35 @@ def audit(path: Path) -> Audit:
                 "missing required field 'schema_version' on a record that "
                 "carries schema-2 structures")
             return a
-    schema = int(rec.get("schema_version", 1))
+    # P1-R23-V01, two defects in one line. `int(...)` COERCED the declared
+    # version before anything had checked its type, so `"bogus"` raised
+    # ValueError instead of being reported; and the dispatch below read
+    # `schema >= 2`, so a record declaring schema 3 was audited against the
+    # schema-2 contract as though the two were the same thing. This method
+    # documents exactly schemas 1 and 2. A version it does not document is not
+    # a version it can audit, and guessing which contract the author meant is
+    # the opposite of a closed schema.
+    declared = rec.get("schema_version", 1)
+    if "schema_version" in rec and not _int(declared):
+        a = Audit(path=Path(path), schema=0, legacy=False)
+        a.problems.append(
+            f"schema_version is {type(declared).__name__} {declared!r}, not an "
+            f"integer; the declared version selects the contract the record is "
+            f"judged against and is not coerced into one")
+        return a
+
+    schema = declared
     a = Audit(path=Path(path), schema=schema, legacy=schema < 2)
-    if schema >= 2:
+    if schema == 2:
         audit_schema2(rec, a)
     elif schema == 1:
         audit_schema1(rec, a)
     else:
-        a.problems.append(f"unknown schema_version {schema}")
+        a.problems.append(
+            f"schema_version {schema} is not a version this method defines; it "
+            f"documents exactly 1 (legacy) and 2, and auditing an undefined "
+            f"version against the schema-2 contract would assert a contract "
+            f"nobody wrote")
         return a
 
     if a.rates:

@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -944,6 +945,224 @@ def every_p1_r21_form_is_covered_and_none_of_them_crash() -> list[str]:
     return bad
 
 
+# --- P1-R23-V01: what the repaired auditor still let through -----------------
+#
+# The independent re-audit closed every form P1-R21-V01 named and then found
+# eleven one-field neighbours still open: three terminated the audit by
+# traceback, eight passed. The root of all eleven is the same -- the auditor did
+# not establish that its input WAS a schema-2 record before doing arithmetic on
+# it. It coerced the declared version, it let schema 3 in through a `>=`, it
+# divided by denominators it had not checked (and, in one case, by a denominator
+# it had already reported as invalid), and it required the seven identity fields
+# to be present without ever requiring them to be strings.
+#
+# Each case below is reproduced as its own control, asserting the message names
+# the field, so none can pass because an unrelated check fired on the same
+# record. Each was confirmed against the rejected head before being recorded.
+
+def _json_audit(payload) -> "aud.Audit":
+    """Audit an arbitrary JSON document, not just a record-shaped dict."""
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "run.json"
+        p.write_text(json.dumps(payload))
+        return aud.audit(p)
+
+
+def a_denominator_is_checked_before_it_divides() -> list[str]:
+    """Two ZeroDivisionErrors, and the worse of the two.
+
+    `bytes_per_mb = 0` reached the per-window rate division. The capacity case
+    is the one worth staring at: the auditor **reported** a non-positive
+    `total_bytes` as a problem and then divided by it one check later. Noticing
+    a bad value and then using it anyway is worse than not checking, because the
+    traceback comes from code that had already been right.
+    """
+    bad = []
+    rec = _deep()
+    rec["bytes_per_mb"] = 0
+    bad += expect_controlled_red("bytes_per_mb = 0", rec, "bytes_per_mb")
+    rec = _deep()
+    rec["space_after_measurement"]["total_bytes"] = 0
+    bad += expect_controlled_red("capacity total_bytes = 0", rec, "total_bytes")
+    rec = _deep()
+    rec["fill"]["before"]["total_bytes"] = 0
+    bad += expect_controlled_red("fill.before total_bytes = 0", rec,
+                                 "fill.before: total_bytes")
+    rec = _deep()
+    rec["bytes_per_mb"] = -1_000_000
+    bad += expect_controlled_red("negative bytes_per_mb", rec, "bytes_per_mb")
+    rec = _deep()
+    rec["transfer_mb"] = 0
+    bad += expect_controlled_red("transfer_mb = 0", rec, "transfer_mb")
+    return bad
+
+
+def the_declared_version_is_not_coerced() -> list[str]:
+    """`int("bogus")` raised before anything had checked the type."""
+    bad = []
+    for value in ("bogus", None, 2.0, [2], {"v": 2}, True):
+        rec = _deep()
+        rec["schema_version"] = value
+        bad += expect_controlled_red(f"schema_version = {value!r}", rec,
+                                     "schema_version")
+    return bad
+
+
+def an_undefined_schema_version_is_not_audited_as_schema_2() -> list[str]:
+    """`schema >= 2` let 3 in through the schema-2 door.
+
+    This method documents exactly 1 and 2. Auditing an undeclared version
+    against the schema-2 contract asserts a contract nobody wrote, and would
+    pass a record whose author meant something else entirely.
+    """
+    bad = []
+    for version in (3, 4, 99, 0, -1):
+        rec = _deep()
+        rec["schema_version"] = version
+        bad += expect_controlled_red(f"schema_version = {version}", rec,
+                                     "schema_version")
+    # ...and the two it does define must still work, or this is over-tightening.
+    if not audit_dict(_deep()).ok:
+        bad.append("schema 2 stopped passing")
+    return bad
+
+
+def the_identity_fields_must_be_strings() -> list[str]:
+    """Seven required fields that were never required to be strings.
+
+    These bind the record to a card, a revision, a physical sample, a reader, a
+    moment and a machine. A record whose SKU is `null` or `{}` binds nothing,
+    and it is exactly what a later qualification would cite.
+    """
+    bad = []
+    wrong = ({"a": 1}, [1, 2], 7, True, None, 12.5, ["h"])
+    for field, value in zip(aud.S2_IDENTITY_FIELDS, wrong):
+        rec = _deep()
+        rec[field] = value
+        bad += expect_controlled_red(f"{field} = {value!r}", rec, field)
+    if len(aud.S2_IDENTITY_FIELDS) != 7:
+        bad.append(f"{len(aud.S2_IDENTITY_FIELDS)} identity fields; the seven "
+                   f"named by the finding are sku, revision, cid, sample, "
+                   f"reader, measured_at and host")
+    return bad
+
+
+def an_empty_identity_binds_nothing() -> list[str]:
+    """PM's P1-R24 direction, not the verifier's finding.
+
+    P1-R23-V01 explicitly left nonempty-after-trimming as an open PM/WP-05
+    policy question. The assignment decides it, following WP-05's existing
+    identity/result binding, so it is enforced here -- and recorded as a policy
+    call rather than a verifier requirement, because the two are not the same
+    kind of thing and a later round should be able to tell them apart.
+    """
+    bad = []
+    for field in aud.S2_IDENTITY_FIELDS:
+        for blank in ("", "   ", "\t\n"):
+            rec = _deep()
+            rec[field] = blank
+            bad += expect_controlled_red(f"{field} = {blank!r}", rec, field)
+    return bad
+
+
+def the_top_level_value_must_be_an_object() -> list[str]:
+    """A list is valid JSON and is not a record.
+
+    Everything downstream membership-tests and indexes it; reaching `"x" in rec`
+    with an int raises rather than reports.
+    """
+    bad = []
+    for payload in ([1, 2, 3], "a string", 42, 3.5, True, None, []):
+        try:
+            a = _json_audit(payload)
+        except Exception as exc:                          # noqa: BLE001
+            bad.append(f"top-level {type(payload).__name__} raised "
+                       f"{type(exc).__name__}: {exc}")
+            continue
+        if a.ok:
+            bad.append(f"top-level {payload!r} was audited as a record")
+        elif not any("top-level JSON value" in p for p in a.problems):
+            bad.append(f"top-level {type(payload).__name__} failed without "
+                       f"naming the shape: {a.problems}")
+    return bad
+
+
+def the_writer_refuses_before_it_opens_the_target() -> list[str]:
+    """The refusal has to come BEFORE the card is touched, not after.
+
+    A run that cannot be bound to a card is not worth the card's write
+    endurance. Refusing afterwards means the operator has spent a session
+    producing a record the auditor will reject.
+    """
+    bad = []
+    if not msw.identity_problems({}):
+        bad.append("a record with no identity at all was accepted by the writer")
+    for flag, key, _what in msw.REQUIRED_IDENTITY:
+        full = {k: "x" for _f, k, _w in msw.REQUIRED_IDENTITY}
+        for blank in (None, "", "  "):
+            probe = dict(full)
+            probe[key] = blank
+            problems = msw.identity_problems(probe)
+            if not problems:
+                bad.append(f"the writer accepted {key}={blank!r}")
+            elif not any(flag in p for p in problems):
+                bad.append(f"the writer's refusal for {key} does not name "
+                           f"{flag}: {problems}")
+        if msw.identity_problems(full):
+            bad.append(f"a complete identity was refused: "
+                       f"{msw.identity_problems(full)}")
+
+    # End to end: run the real CLI against a real directory and prove it wrote
+    # nothing. Checking the function in isolation would not catch a refusal
+    # placed after the first write.
+    with tempfile.TemporaryDirectory() as d:
+        r = subprocess.run(
+            [sys.executable, str(Path(msw.__file__).resolve()), d],
+            capture_output=True, text=True)
+        if r.returncode == 0:
+            bad.append("the writer exited 0 with no identity supplied")
+        leftovers = sorted(p.name for p in Path(d).iterdir())
+        if leftovers:
+            bad.append(f"the writer touched the target before refusing: "
+                       f"{leftovers}")
+        if "--sku is required" not in r.stderr:
+            bad.append(f"the refusal does not name the missing flag: "
+                       f"{r.stderr[:200]}")
+    return bad
+
+
+def the_p1_r23_controls_stay_specific_under_noise() -> list[str]:
+    """One red condition must not mask another.
+
+    Every case above is injected a second time alongside an unrelated, always-
+    failing defect. If the targeted message disappears, the control was only
+    ever firing because the record was broken in general.
+    """
+    bad = []
+    cases = [
+        ("bytes_per_mb", lambda r: r.__setitem__("bytes_per_mb", 0)),
+        ("total_bytes", lambda r: r["space_after_measurement"].__setitem__(
+            "total_bytes", 0)),
+        ("schema_version", lambda r: r.__setitem__("schema_version", "bogus")),
+        ("schema_version", lambda r: r.__setitem__("schema_version", 3)),
+    ] + [(f, (lambda f=f: (lambda r: r.__setitem__(f, None)))())
+         for f in aud.S2_IDENTITY_FIELDS]
+    for marker, mutate in cases:
+        rec = _deep()
+        mutate(rec)
+        rec["windows"][-1]["fsync_ok"] = False        # unrelated, always fails
+        rec["windows"][-1]["sync_error"] = "injected unrelated failure"
+        try:
+            a = audit_dict(rec)
+        except Exception as exc:                      # noqa: BLE001
+            bad.append(f"{marker} raised under noise: {type(exc).__name__}")
+            continue
+        if not any(marker in p for p in a.problems):
+            bad.append(f"{marker}'s failure vanished when an unrelated one was "
+                       f"present: {a.problems}")
+    return bad
+
+
 CONTROLS = (
     the_good_fixture_passes,
     short_writes_are_looped_not_assumed,
@@ -971,6 +1190,14 @@ CONTROLS = (
     a_figure_that_cannot_be_measured_must_be_null,
     an_honest_raw_device_record_still_passes,
     every_p1_r21_form_is_covered_and_none_of_them_crash,
+    a_denominator_is_checked_before_it_divides,
+    the_declared_version_is_not_coerced,
+    an_undefined_schema_version_is_not_audited_as_schema_2,
+    the_identity_fields_must_be_strings,
+    an_empty_identity_binds_nothing,
+    the_top_level_value_must_be_an_object,
+    the_writer_refuses_before_it_opens_the_target,
+    the_p1_r23_controls_stay_specific_under_noise,
 )
 
 
