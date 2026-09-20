@@ -16,9 +16,9 @@ No schematic/board exists yet; a green KiCad job is not ERC/DRC of a nonexistent
 | Fabrication gate | Regression reproduced; the real gate remains **CLOSED/nonzero with five blockers** | No board fabrication or cell charging |
 | Solenoid | TI `CD74HC221E`/`CD74HC221M96` bound to the 3.3 V rail; timing model remains **PROVISIONAL**. The supply-envelope criterion now has a **retained targeted control** in `hardware/thermal/test_solenoid.py` and its own `--mutate-supply` mode, both run by `make -C hardware solenoid-test` | IR-018-16 guaranteed 3.3 V pulse-width limit or independently reviewed bench evidence; placeholder pulse still depends on WP-04 |
 | Safety | Three IR-015 responses indexed in PR #47; acceptance fields unsigned | Independent charger, sustained coil-power and transient-junction acceptance; no fabrication or cell charging |
-| Cartridge clasp | PR #92 head `0943571...` retains rev-6 WP-24 and WP-04 plates inside the nominal `180 x 180 x 180 mm` envelope with 5 mm XY margins, Z ≤175 mm and fail-closed vertex checks. PM reproduced packet identity/validation | Existing library test remains configured for the library. New work defaults to the A1 Mini; usable edges/process and every physical result remain unproved. Record printer, material, profile, fit, retention, creep/drop and independent measurement audit |
+| Cartridge clasp | PR #92 head `0943571...` retains rev-6 WP-24 and WP-04 plates. Held PR #120 head `7b224ff...` adds an internally reproducible A1MINI-01 fit-ladder/mass-coupon candidate on its assigned old base | Existing library test remains configured for the library. Verification audits A1MINI-01 before any print; PR #120 later needs current-main synchronization. Usable process and every physical result remain unproved |
 | Media | Atomicity judge has 43 checks and negative controls | Real rig/firmware/protocol traces, ≥1,000 qualifying cuts per exact SKU/revision; no atomicity PASS yet |
-| WP-05 | PR #87 head `e520c2c...` is an exact self-audited repair of `P1-R21-V01`: 26 retained controls cover 30 top-level and 35 nested fields; the writer and five legacy records are unchanged | Independent Verification re-audits the exact repaired method before any acquisition. No schema-2 physical record exists; identity, attribution, atomicity, filled-condition qualification and end-to-end copy remain open |
+| WP-05 | PR #87 head `e520c2c...` closes the forms named by `P1-R21-V01`, but independent finding `P1-R23-V01` reproduces three traceback and eight fail-open adjacent cases. The writer and five legacy records are unchanged | Hardware repairs the eleven exact boundaries; another independent exact-head re-audit precedes acquisition. No schema-2 physical record exists; identity, attribution, atomicity, filled-condition qualification and end-to-end copy remain open |
 | Ruggedization | PR #92 head `0943571...` transcribes CS-1–CS-5 for the method and passes 23 retained sharp controls, 51 independently restated values and 42 field-specific red mutations. The two-plate packet bytes are unchanged | Wait held for independent audit of the exact head. RG-8–RG-10, apparatus, tool and regulatory-method gaps remain. No print, physical or live-cell destructive test and no compliance claim |
 
 PR #47's spec/thermal/mechanical/solenoid/atomicity/fabrication regressions were
@@ -54,11 +54,18 @@ current source/tool/packet work.
 Michael reports an A1 Mini test print in progress and expects the library to be
 available Monday. Do not reconfigure the existing library test for the A1 Mini.
 Default new prints to the A1 Mini and retain the library for oversized PLA. Current
-owned filament is one spool of white Bambu PLA Basic. Hardware must recommend the
-minimum additional material, printer-proven brand/product/profile and drying/storage/
-nozzle constraints before Michael decides whether to buy anything. PETG and TPU are
-candidate needs, not requirements or purchase approvals. Every result is bound to its
-actual printer/material/profile; an owner-reported print is not acceptance evidence.
+owned filament is one spool of white Bambu PLA Basic. The safe current decision from
+PR #120 is **buy nothing**: existing justified geometry work uses that PLA; PETG waits
+for a specific source-supported test and TPU waits for a real TPU part. The proposed
+Bambu PETG HF/TPU 95A choices and categorical material exclusions remain provisional
+because first-party compatibility pages and datasheets were not retrieved. No Michael
+purchase issue is open. Every result is bound to its actual printer/material/profile;
+an owner-reported print is not acceptance evidence.
+
+ADR-119's historical premise that Michael would not own a printer is superseded.
+Its zero-closed-strain, matched-pair clasp outcome remains controlling because
+material-robust geometry is still preferable when material can be chosen. This is
+not a material, printer, process or part qualification.
 
 PM's [P1-R21 primary-source note](REVIEW/P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md)
 authenticates the current eCFR banner, official Probe B drawings, edge-test tape and

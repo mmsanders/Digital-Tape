@@ -708,3 +708,42 @@ legacy schema-1 records are unchanged. PM reproduced 26 retained controls, legac
 audit and the still-CLOSED fabrication gate. This is Hardware's self-audited repair,
 not closure of `P1-R21-V01`; Verification must independently audit the exact head
 before any new physical acquisition.
+
+## P1-R24 integrated VT8 slice and card-method rejection — 20 September 2026 UTC
+
+Software #118 synchronized and merged PR #112 at product main
+`be7f8f233c9eed5d70c6bc578d169b73e4f83c7c`, tree
+`5f7b1aa5463abc096fa4a6de6056ca00b6430857`. The strict-ruleset synchronization
+merge `6e0de710c9ccc93bf90f9660a58fcdfc8adb1509` preserves the original pre-run
+code `20505f4...` and evidence `15fbcfa...` commits as ancestors. PM compared the
+candidate, synchronized and final-main trees: `engine/`, `tests/ops_adapter/`,
+`tests/ops_draft8/`, `spec/` and the exact run packet are unchanged. Held PR
+#20/#64/#96 heads remain outside ancestry.
+
+The integration changes no independent boundary. Accept only the two exact recorded
+observations already dispositioned at verifier `391d6a8...`; source, helper design,
+the splice-only and stage-1 refusal policies, other behavior, complete WP-07,
+atomicity, PCM, goldens and listening remain unaccepted.
+
+Verification #19 published one findings file at verifier main
+`8ca23c6acfa9e3ec5e96d54f2ec93cb8c329f3c9`, tree
+`02c83fd625aea39057f9c7bc40368a22bafa07aa`, directly after `391d6a8...`.
+The findings SHA-256 is
+`f634781f6bb1f520cb538e8a1a386301eaf04ac877b7a03c831db81095796a16`.
+PM authenticated the one-file return, reran the full verifier suite and reproduced
+all eleven adjacent failures.
+
+Accept `P1-R23-V01`. PR #87 head `e520c2c...` closes every form named in
+`P1-R21-V01` and retains 55 field-specific controlled rejects, two honest baselines,
+the unchanged writer and five byte-identical legacy records. It remains rejected as
+a method: zero `bytes_per_mb`, zero capacity and nonnumeric `schema_version` raise;
+schema 3 and seven non-string identity/provenance values pass. Hardware must repair
+those exact boundaries and obtain another independent exact-head re-audit before any
+new sustained-write acquisition.
+
+Separately, held Hardware PR #120 at exact head `7b224ff...` supplies A1MINI-01
+rev 1 as an unprinted method candidate. Verification receives only a no-print audit
+of its exact Hardware delta against assigned parent `8a7a8ba...`, including whether
+one subjective fit ladder establishes the 0.08 mm sweep resolution and whether the
+nominal-volume mass coupons are interpretable with the available scale. This is not
+a material recommendation, product-code review, merge decision or physical result.
