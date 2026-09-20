@@ -1,0 +1,45 @@
+name: repo hygiene
+
+# Stops docs/ growing into itself. Two jobs: the gate, and proof the gate can
+# go red. A gate nobody has seen fail is a gate nobody has tested (CLAUDE.md §1).
+#
+# This job accepts nothing and advances nothing. It is maintenance.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  hygiene:
+    name: docs size and line budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: docs hygiene
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$BASE" ]; then BASE="${{ github.event.before }}"; fi
+          if [ -z "$BASE" ] || ! git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
+            echo "no usable base ref; running budget checks only"
+            ./tools/ci/audit-docs-hygiene.sh
+          else
+            ./tools/ci/audit-docs-hygiene.sh "$BASE"
+          fi
+
+  hygiene-gate-can-go-red:
+    name: hygiene gate can go red
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: negative control
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$BASE" ] || ! git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
+            BASE=HEAD
+          fi
+          ./tools/ci/verify-docs-hygiene-gate.sh "$BASE"

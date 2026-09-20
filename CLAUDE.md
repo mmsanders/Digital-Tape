@@ -131,6 +131,14 @@ with a pointer and the relocated file's recorded SHA-256. Nothing is summarised 
 nothing a disposition cites is deleted, and every hash stays reachable. A lead that
 cannot state the current position in 120 lines does not yet know it.
 
+**Raw evidence over 1 MiB goes to a release asset, not the tree.** Commit the
+SHA-256 beside the run and cite the hash; the hash is the citation, not the bytes.
+Relocation never deletes — the blob stays in history because dispositions cite it,
+and Guardrail 3 forbids rewriting history. A relocation that breaks offline replay
+of a retained bundle is not done: the fetch-and-verify step ships with it.
+`.github/workflows/repo-hygiene.yml` enforces the budgets and the 1 MiB limit, and
+`tools/ci/verify-docs-hygiene-gate.sh` proves that gate can go red.
+
 ## 5. Hardware boundary
 
 Hardware specs are versioned, not frozen with the byte format. Board interface
