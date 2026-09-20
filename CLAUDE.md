@@ -91,6 +91,14 @@ use it. Untested engine review requires PM escalation and preserves blindness.
 
 Every activation: fetch refs → read Michael's open issue queue → read STATUS and
 the live assignment issue/body/scope updates → work only that bounded assignment.
+**Required reading is exactly four documents plus the issue:** `AGENTS.md`, `CLAUDE.md`,
+`docs/STATUS.md` and the lead's own charter, with the live issue body and its scope
+updates. Everything else — `docs/DECISIONS.md`, `docs/VERIFICATION-INTEGRATION.md`,
+`docs/PACKAGES/README.md`, `docs/PHASE0-FREEZE.md`, `docs/PHASE1-DEVELOPMENT.md` and the
+frozen specs — is **read on demand, for the sections the tranche touches**, entered
+through [the decisions index](docs/DECISIONS-INDEX.md) and
+[spec/NAVIGATION.md](spec/NAVIGATION.md). Not reading a document the tranche does not
+touch is compliance, not a skipped step.
 Answered questions stay answered; unrelated safe work need not wait. PM commits
 durable decisions/evidence to main and publishes complete round work directions
 in a new role-labeled issue for each assigned lead. No duplicate current briefs on
@@ -114,6 +122,14 @@ Keep assignment issues bounded and do not create issues for idle leads. Leads cl
 their own issues after returning or blocking; PM assesses the linked PR/commit and
 opens a fresh issue for any correction or next tranche. Record scope changes
 explicitly. Returning work or closing an issue is not acceptance.
+
+**Standing size budget.** `docs/STATUS.md` is capped at **120 lines** and
+`docs/VERIFICATION-INTEGRATION.md` at **150 lines**. Both are state tables, not
+chronicles: current boundary, current coverage, current owner. When an update would
+exceed the budget, the oldest content moves under `docs/archive/` **in the same commit**,
+with a pointer and the relocated file's recorded SHA-256. Nothing is summarised away,
+nothing a disposition cites is deleted, and every hash stays reachable. A lead that
+cannot state the current position in 120 lines does not yet know it.
 
 ## 5. Hardware boundary
 
