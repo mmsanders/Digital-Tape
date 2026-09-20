@@ -2422,3 +2422,46 @@ material, process, part or physical result is qualified by this update.
 **Cost to reverse:** retain the immutable PR #112 evidence and verifier findings;
 replace the clasp/material or print-method decision only through a new PM disposition
 with applicable independent review.
+
+---
+
+## ADR-153 — Phase 1 tranche minimum, and no re-acceptance after a rebase
+
+**Date:** 2026-09-20 UTC · **Owner:** PM under Michael's signed remediation decision D-4
+
+**Decision.** Two Phase 1 process rules, recorded in
+[the issue workflow](ISSUE-WORKFLOW.md) and [the PM charter](ROLES/pm.md).
+
+1. **Tranche minimum.** A Phase 1 tranche closes at at least three coverage rows or
+twenty-five cases, whichever comes first. A smaller tranche requires a written PM
+exception recorded in the issue. The minimum shapes what PM asks for; it does not widen
+any tranche past its documented coverage boundary, does not license bundling unrelated
+behaviour into one candidate, and never pads a return that came in smaller than planned.
+
+2. **No rebase re-acceptance.** When a candidate needs a clean split from current main,
+the split happens before independent disposition, never after. Where a split becomes
+necessary afterwards, PM authenticates that the evidence is byte-identical and records
+the existing disposition as carrying over, rather than spending an independent round
+re-disposing evidence already accepted.
+
+**Rationale.** Observed tranche sizes fell from 289 mount cases (R11) to ten playback
+families (R11/R15) to two operation cases (R21/R23). The fixed overhead per tranche — PM
+read, PM disposition, status rewrite, dashboard refresh, and the independent round — now
+exceeds the variable cost of the tranche itself, so a two-case tranche pays full freight.
+
+Separately, R21 accepted `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ`, and R23
+accepted the same two cases again on the PR #112 clean split. That is one week's rung
+movement spent twice on the same two cases. Ordering the split before disposition makes
+the second round unnecessary without weakening blindness: Verification still disposes
+evidence it did not help produce, and still disposes exactly what gets integrated.
+
+Neither rule lowers an acceptance bar, changes what independent acceptance means, or
+touches any existing disposition. The two cases accepted at R21 and R23 remain accepted
+on exactly their recorded terms.
+
+**Cost to reverse.** Low. Delete the two sections from `docs/ISSUE-WORKFLOW.md` and the
+two paragraphs from `docs/ROLES/pm.md` and supersede this ADR. No evidence, disposition,
+hash or acceptance depends on either rule, and no tranche already returned is affected.
+The carry-over provision is the only part with a lasting artefact: a disposition carried
+over under it cites the same evidence identity as the original, so reversing it means
+re-running that independent round, not reconstructing anything lost.
