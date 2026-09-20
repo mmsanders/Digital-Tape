@@ -49,6 +49,22 @@ and docs/VERIFICATION-INTEGRATION.md.
 Not reading a document you did not need is compliance, not a skipped step; reading one
 you did need is still your responsibility.
 
+**Mechanical authentication is CI's, not yours.** Subtree identity against the
+declared publication hash, package self-tests, offline replay of retained bundles,
+spec bytes in evidence trees, and manifest-versus-observation adapter identity are
+checked by `.github/workflows/evidence-integrity.yml` on every PR, against
+`tests/IMPORTS.json`. **Do not re-run those suites by hand as a matter of course.**
+Read the CI result and rule on substance: whether the evidence supports the claim,
+what it excludes, what is still held, and who owns the next step.
+
+Reproducing by hand remains available and is sometimes right — a CI result you have
+reason to doubt, a check the workflow does not cover, a disputed identity. When you
+use it, record it in the disposition as a deliberate exception and say why. What is
+no longer required is the routine third execution of every tranche.
+
+A green gate authenticates; it does not accept. Authorship, harness checks, engine
+execution, independent disposition, merge and package acceptance stay separate facts.
+
 Before closing every activated PM round, refresh the hand-maintained `PHASE1`
 snapshot in `site/lead-queue/index.html` from the newly dispositioned facts. Update
 the `asOf` round/date and any stale package notes even when no rung advances; advance

@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "Declared identity of every imported verifier package and retained evidence",
+    "bundle. tools/ci/audit-evidence-integrity.sh checks HEAD against these values.",
+    "",
+    "This file is the machine-readable form of the authentication PM performed by",
+    "hand for twenty rounds. Each tree hash below is attested in the cited document;",
+    "none was invented here. A git tree hash depends only on the entries it names, so",
+    "a subtree byte-identical to the verifier's publication has the same tree hash in",
+    "both repositories -- which is exactly what the cited dispositions assert.",
+    "",
+    "Changing a value here is changing what the repository claims was imported. It is",
+    "Verification/PM's call, never a lead's convenience. CODEOWNERS covers this path."
+  ],
+  "packages": [
+    {
+      "path": "tests/mount_draft8",
+      "tree": "4aaa1499429cbdc658065ac336ecab4783d1d730",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "4ee116fa040bb5ce040325e0076365abf8b0f8f9",
+      "attested_in": "docs/REVIEW/P1-R1-PM-REVIEW.md",
+      "attestation": "Mount package Git tree in both repositories",
+      "selftest": ["make", "-C", "tests/mount_draft8", "check"]
+    },
+    {
+      "path": "tests/ops_draft8",
+      "tree": "3667a2830ba80dbcedad03b97870d1127001ab59",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "15dd16e",
+      "attested_in": "docs/VERIFICATION-INTEGRATION.md",
+      "attestation": "corrected complete verifier tree, imported exactly and test-first at product main 48cc23fd",
+      "superseded_trees": ["4a862fa69ccb2fc4c9afe59c9c9161c3470f9263", "c8a43df69a6be8e2c34bf79a1d79933abf48286a"],
+      "selftest": ["python3", "tests/ops_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/playback_draft8",
+      "tree": "ff810814dbc8079c6903e6f85ed7ee312abd3076",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7a22cbb4447c40c51b7c8b2282a685ed30a46ba6",
+      "attested_in": "docs/archive/verification-integration-history.md",
+      "attestation": "the product subtree hash reproduces ff810814 exactly",
+      "selftest": ["make", "-C", "tests/playback_draft8", "check"]
+    },
+    {
+      "path": "tests/playback_complete_draft8",
+      "tree": "467a34bb0a84672c5bdef9059f2dd326d6435eb6",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da",
+      "attested_in": "docs/verification/runs/2026-09-14-r14/README.md",
+      "attestation": "Imported package tree",
+      "selftest": ["make", "-C", "tests/playback_complete_draft8", "check"]
+    }
+  ],
+  "evidence_bundles": [
+    {
+      "path": "docs/verification/runs/2026-09-14-r14/product-evidence",
+      "replay": "tests/playback_complete_draft8/replay.py",
+      "expect": "pass",
+      "why": "current corrected-cadence evidence; independently accepted at verifier 392d6bb9"
+    },
+    {
+      "path": "docs/verification/runs/2026-09-13-r11/product-evidence",
+      "replay": "tests/playback_complete_draft8/replay.py",
+      "expect": "refuse",
+      "why": "superseded P1-R12 once-per-row cadence evidence. The corrected package rejects it by name (P1-R13-V01). A PASS here would mean the control stopped working, so PASS is the failure condition."
+    }
+  ],
+  "spec_bundle": {
+    "manifest": "spec/VERSION.md",
+    "note": "Every copy of a frozen spec file anywhere under docs/ or tests/ must hash to the value spec/VERSION.md records. These copies are authenticated test baselines held in place by tamper controls VT8-A13 and PB8-A01; they are never deduplicated against spec/."
+  }
+}
