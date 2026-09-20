@@ -7,6 +7,8 @@ Current status below is updated 20 September 2026 UTC. Historical phase duration
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
+New information about a future phase is appended to that phase's package entry here and
+waits there; see [intake](../INTAKE.md). Recording a fact is not scheduling it.
 
 Owner column preserves historical categories: **Agent** means the assigned lead's
 own chat-based work, not an unattended worker pool · **You** needs Michael's hands or
@@ -20,7 +22,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-01 | Repo, agent docs, decision log | Agent | — | Repo and restart agreement published; no independent package acceptance claimed |
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped freeze signed by Michael 8 September 2026 |
 | WP-03 | Engine API specification | **PM** | spec | Exact independently paper-reviewed DRAFT-8 issued via #25; scoped contract freeze signed; operations/state remain unfrozen |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | Existing library test remains on the expected Monday library route. New print work defaults to the A1 Mini, with the library retained for oversized PLA. Held PR #120 A1MINI-01 awaits independent no-print method audit; material/process and every physical result remain unproved |
+| WP-04 | Transport spike: Route A vs Route B | You | hardware | Existing library test remains on the expected Monday library route. New print work defaults to the A1 Mini, with the library retained for oversized PLA. Held PR #120 A1MINI-01 awaits independent no-print method audit; material/process and every physical result remain unproved. Parked as out-of-phase under [intake #129](https://github.com/mmsanders/Digital-Tape/issues/129); the printer facts stand |
 | WP-05 | Parts order #1 | You | hardware | Five stored-rate vectors are independently arithmetically reproduced. Verification rejects PR #87 repaired head `e520c2c...` on `P1-R23-V01`'s eleven adjacent forms; new acquisition stays blocked. A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
@@ -70,7 +72,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-22 | Transport mechanism, production design | You | hardware | Blocked on WP-04 |
 | WP-23 | Enclosure CAD | Either | hardware | Not started |
 | WP-24 | Cartridge shell and carrier PCB | Either | hardware | **In flight** — clasp assessment delivered (ADR-117); variants share the WP04-01 plate |
-| WP-25 | Abuse testing | You | hardware | **In flight as a design input** — player-wide architecture and pre-test plan now precede final enclosure CAD; no physical acceptance yet |
+| WP-25 | Abuse testing | You | hardware | **Phase 4; parked as Phase 1 activity** under [intake #130](https://github.com/mmsanders/Digital-Tape/issues/130). Guardrail 13 stands and still requires ruggedization designed and tested before final enclosure CAD — the guardrail is not parked, the physical/method programme is. Held PR #92 unchanged; no physical acceptance |
 
 **Milestone:** a Teensy-based unit in a finished printed case. A reasonable place to stop.
 

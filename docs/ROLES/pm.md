@@ -17,6 +17,29 @@ exception in the issue saying why the slice is worth a full round's overhead. Th
 minimum shapes what you ask for; it never widens a tranche past its documented
 coverage boundary and never pads a return.
 
+**Intake, and the phase rule.** Every unscheduled input from Michael opens one
+`intake`-labeled issue carrying his words verbatim, your classification and a
+disposition. **The default disposition is `RECORDED — PARKED`** with a named resume
+condition. Michael's three tags govern: `FYI:` records, `CONSTRAINT:` updates holds and
+package status without creating a work stream, `REQUEST:` is the only tag that creates
+work — and for a `REQUEST:` you state which phase's budget it draws from. An untagged
+remark is an `FYI:`. The tag is Michael's; if you think an `FYI:` should become work,
+say so and ask rather than upgrading it on your own reading.
+
+**You may not open work outside the current phase without an explicit `REQUEST:`.** New
+information about a future phase is appended to that package's entry in
+[the package index](../PACKAGES/README.md) and waits there. Recording a fact is not
+scheduling it. See [intake](../INTAKE.md).
+
+**The bottleneck rule.** Verification is the only seat that produces independently
+accepted coverage, and is therefore the project's constraint. Schedule around that:
+**never leave Verification unactivated while a current-phase tranche is awaiting
+disposition**, and **never assign it out-of-phase audit work in a round where in-phase
+work is queued**. A round that idles Verification behind groundwork for a later phase
+costs a week of acceptance and cannot be bought back. This is a scheduling duty, not
+licence to rush a disposition, shorten an independent review, or treat Verification's
+own judgment about what it needs as negotiable.
+
 **No rebase re-acceptance.** If a candidate needs a clean split from current main,
 assign the clean base *before* independent disposition. Never send already-accepted
 evidence back through an independent round because its base changed: authenticate

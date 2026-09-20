@@ -99,5 +99,6 @@ Newest is at the bottom, matching the log.
 | [ADR-151](DECISIONS.md#adr-151--keep-the-filled-media-stress-and-make-ruggedization-pre-cad) | 2026-09-18 | Keep the filled-media stress and make ruggedization pre-CAD | Retain WP-05 A-2's 80%-filled-media condition, clarified as at least one conforming filled run per exact candidate SKU/revision |
 | [ADR-152](DECISIONS.md#adr-152--preserve-the-integrated-vt8-boundary-and-audit-the-a1-mini-method-before-printing) | 2026-09-20 | Preserve the integrated VT8 boundary and audit the A1 Mini method before printing | Authenticate Software's ruleset-required PR #112 synchronization and merge because the original code/evidence commits and every scoped candidate, adapter,… |
 | [ADR-153](DECISIONS.md#adr-153--phase-1-tranche-minimum-and-no-re-acceptance-after-a-rebase) | 2026-09-20 | Phase 1 tranche minimum, and no re-acceptance after a rebase | Two Phase 1 process rules, recorded in [the issue workflow](ISSUE-WORKFLOW.md) and [the PM charter](ROLES/pm.md) |
+| [ADR-154](DECISIONS.md#adr-154--an-intake-queue-a-tag-convention-a-phase-rule-and-a-bottleneck-rule) | 2026-09-20 | An intake queue, a tag convention, a phase rule and a bottleneck rule | Four related changes, documented in [intake](INTAKE.md) and [the PM charter](ROLES/pm.md) |
 
-90 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+91 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

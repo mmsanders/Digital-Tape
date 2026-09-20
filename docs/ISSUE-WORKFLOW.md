@@ -15,6 +15,11 @@ factual status. Do not keep a second current task list or per-round brief on mai
 | Surge | `surge` | [Surge](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asurge) |
 | Michael | `michael` | [Michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) |
 | PM | `pm` | [PM](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Apm) |
+| — (inbound, no lead) | `intake` | [Intake](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Aintake) |
+
+`intake` is the one **inbound** queue: unscheduled input from Michael, default
+disposition `RECORDED — PARKED`, no lead assigned and no work created. It is not an
+assignment label. See [intake](INTAKE.md).
 
 These are routing labels, not model identities or GitHub user assignees. Give each
 assignment one responsible-role label. Dependencies are linked issues, not extra
