@@ -1,0 +1,51 @@
+name: evidence integrity
+
+# The mechanical half of PM authentication, moved off PM's hands.
+#
+# STATUS recorded twenty "PM authenticated / PM reproduced the full suite"
+# events. Every tranche was executed three times -- lead, PM, Verification.
+# These checks are exactly the mechanical ones PM performed by hand. They are
+# not judgment: PM still reads the evidence and rules on substance.
+#
+# A green run here is NOT a disposition, NOT package acceptance and NOT
+# independent review. Those remain separate facts (CLAUDE.md §3.4).
+#
+# .github/CODEOWNERS makes this file and tests/*_draft8/** Michael-owned, so a
+# lead cannot weaken the gate that checks its own work.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  evidence-integrity:
+    name: evidence integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Toolchain
+        run: cc --version | head -1; python3 --version
+      - name: Build engine (package self-tests link against it)
+        run: make -C engine all
+      - name: Evidence integrity
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ] && git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
+            python3 tools/ci/audit-evidence-integrity.py "$BASE"
+          else
+            python3 tools/ci/audit-evidence-integrity.py
+          fi
+
+  evidence-gate-can-go-red:
+    name: evidence gate can go red
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: make -C engine all
+      - name: negative control
+        run: python3 tools/ci/verify-evidence-integrity-gate.py
