@@ -11,6 +11,19 @@ in main. Do not implement/review/merge product code or supply independent accept
 Maintain the signed freeze, disposition independent returns and resolve coverage
 dependencies. Only assign leads with useful bounded work.
 
+**Tranche minimum.** A Phase 1 tranche closes at at least three coverage rows or
+twenty-five cases, whichever comes first. Anything smaller needs a written PM
+exception in the issue saying why the slice is worth a full round's overhead. The
+minimum shapes what you ask for; it never widens a tranche past its documented
+coverage boundary and never pads a return.
+
+**No rebase re-acceptance.** If a candidate needs a clean split from current main,
+assign the clean base *before* independent disposition. Never send already-accepted
+evidence back through an independent round because its base changed: authenticate
+that the evidence is identical and carry the existing disposition over. Re-accepting
+the same two cases on a new base costs a full round and accepts nothing new. See
+[the issue workflow](../ISSUE-WORKFLOW.md).
+
 ## Assignment source and every activation
 
 Current work directions live only in open Digital-Tape issues labeled
