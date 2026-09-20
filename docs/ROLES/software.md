@@ -17,11 +17,20 @@ Read [the issue workflow](../ISSUE-WORKFLOW.md). A notification is a wake-up to
 read the current issue, not permission to execute a stale event payload. Closed,
 superseded, completed or blocked work is not a fresh assignment.
 
-Fetch main and record its commit. Read AGENTS.md, CLAUDE.md in full,
-docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/STATUS.md,
-docs/PHASE0-FREEZE.md and docs/PHASE1-DEVELOPMENT.md. Read the issue body and
-relevant PM/Michael scope updates, then tests/mount_draft8/COVERAGE.md, tests/mount_draft8/ADAPTER.md, docs/VERIFICATION-INTEGRATION.md, and the issue's exact test/source inputs.
-Record issue number/update timestamp and exact input/spec commits before acting.
+Fetch main and record its commit. **Required reading is exactly four documents plus
+your issue:** AGENTS.md, CLAUDE.md, docs/STATUS.md, this charter, and the live issue
+body with its scope updates. Record issue number/update timestamp and exact input/spec
+commits before acting.
+
+**Everything else is read on demand, for the sections your tranche actually touches.**
+Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
+[spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
+three sections your work needs, not the whole bundle. None of the following is required
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
+docs/PHASE1-DEVELOPMENT.md, tests/mount_draft8/COVERAGE.md, tests/mount_draft8/ADAPTER.md,
+docs/VERIFICATION-INTEGRATION.md and the issue's exact test/source inputs.
+Not reading a document you did not need is compliance, not a skipped step; reading one
+you did need is still your responsibility.
 
 Do only the issue's bounded assignment. Comment when starting, report dependencies
 or access failures, and post an evidence-linked return at the stop condition.

@@ -21,11 +21,20 @@ superseded, completed or blocked work is not a fresh assignment.
 Michael's explicit new-round activation authorizes PM to create one fresh
 `pm`-labeled issue before acting; it does not authorize recurring self-assignment.
 
-Fetch main and record its commit. Read AGENTS.md, CLAUDE.md in full,
-docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/STATUS.md,
-docs/PHASE0-FREEZE.md and docs/PHASE1-DEVELOPMENT.md. Read the issue body and
-relevant PM/Michael scope updates, then spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md and docs/VERIFICATION-INTEGRATION.md.
-Record issue number/update timestamp and exact input/spec commits before acting.
+Fetch main and record its commit. **Required reading is exactly four documents plus
+your issue:** AGENTS.md, CLAUDE.md, docs/STATUS.md, this charter, and the live issue
+body with its scope updates. Record issue number/update timestamp and exact input/spec
+commits before acting.
+
+**Everything else is read on demand, for the sections your tranche actually touches.**
+Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
+[spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
+three sections your work needs, not the whole bundle. None of the following is required
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
+docs/PHASE1-DEVELOPMENT.md, spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md
+and docs/VERIFICATION-INTEGRATION.md.
+Not reading a document you did not need is compliance, not a skipped step; reading one
+you did need is still your responsibility.
 
 Before closing every activated PM round, refresh the hand-maintained `PHASE1`
 snapshot in `site/lead-queue/index.html` from the newly dispositioned facts. Update
