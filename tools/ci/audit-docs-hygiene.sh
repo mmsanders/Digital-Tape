@@ -61,8 +61,14 @@ fi
 # this PR. Read from the WORKING TREE and compared against BASE by path, so the
 # check needs no commit of its own and its negative control mutates no git
 # state. A file that was already over the limit at BASE is not this PR's fault.
+# The candidate set is tracked files plus untracked-but-not-ignored ones. It
+# deliberately EXCLUDES ignored paths: raw evidence fetched back by
+# tools/fetch-evidence.sh lands under docs/ at well over 1 MiB, is gitignored,
+# and is not something a contributor is adding to the repository. Scanning the
+# raw filesystem instead would fail every developer who had fetched evidence.
 while IFS= read -r path; do
   [ -n "$path" ] || continue
+  [ -f "$path" ] || continue
   size=$(stat -c%s "$path")
   [ "$size" -gt "$LIMIT" ] || continue
   if git cat-file -e "$BASE:$path" 2>/dev/null; then
@@ -78,7 +84,7 @@ while IFS= read -r path; do
   echo "        Raw evidence over 1 MiB goes to a release asset with a committed"
   echo "        .sha256 next to the run; the hash is the citation. See CLAUDE.md §4."
   fail=1
-done < <(find docs -type f -size +1024k 2>/dev/null)
+done < <(git ls-files --cached --others --exclude-standard -- docs 2>/dev/null)
 
 # Total docs/ growth, warning only.
 size_at() { git ls-tree -r -l "$1" -- docs/ 2>/dev/null | awk '{s+=$4} END {print s+0}'; }

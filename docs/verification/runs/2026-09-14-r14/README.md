@@ -184,15 +184,17 @@ python3 tests/mount_draft8/run.py --adapter tests/mount_draft8/build/engine_prob
      --log <fresh-log.json>
 ```
 
-## Raw observation identity (WO-6)
+## Raw observation (WO-6)
 
-`product-evidence/output/observation.json` is now cited by a committed
-`observation.json.sha256` and `OBSERVATION-SOURCE.md` **at this run's root**, recording
-its bytes, SHA-256 and original git blob. **The hash is the citation.**
+`product-evidence/output/observation.json` is **not in the working tree**. It is a
+release asset, cited by the committed `observation.json.sha256` and
+`OBSERVATION-SOURCE.md` at this run's root. **The hash is the citation.**
 
-Those pointers sit outside `product-evidence/` on purpose: the bundle's `manifest.json`
-binds an exact file inventory, and adding anything inside it makes `replay.py` fail with
-`unbound/missing evidence file`. The bundle is byte-for-byte unchanged and every command
-above still runs as written — replay was re-run and is green. See
-`OBSERVATION-SOURCE.md` for the pending relocation to a release asset and why it does
-not shrink a clone.
+Before running any command above that reads the bundle:
+
+```sh
+tools/fetch-evidence.sh 2026-09-14-r14
+```
+
+That verifies the asset against the committed hash and refuses to install a mismatch.
+The bundle is otherwise byte-for-byte unchanged, and CI fetches automatically.

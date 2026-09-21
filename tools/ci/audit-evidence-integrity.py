@@ -109,6 +109,14 @@ def check_replay(m):
         if not (ROOT / path).is_dir():
             fail("replay", f"{path} is missing")
             continue
+        obs = ROOT / path / "output/observation.json"
+        if not obs.exists():
+            fail("replay",
+                 f"{path}/output/observation.json is absent. Raw evidence over "
+                 f"1 MiB lives in a release asset, not the tree: run "
+                 f"tools/fetch-evidence.sh, which verifies it against the "
+                 f"committed .sha256 before installing it.")
+            continue
         r = run(["python3", b["replay"], path], timeout=1800)
         passed = r.returncode == 0
         if expect == "pass" and not passed:
