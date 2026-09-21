@@ -15,6 +15,11 @@ factual status. Do not keep a second current task list or per-round brief on mai
 | Surge | `surge` | [Surge](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asurge) |
 | Michael | `michael` | [Michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) |
 | PM | `pm` | [PM](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Apm) |
+| — (inbound, no lead) | `intake` | [Intake](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Aintake) |
+
+`intake` is the one **inbound** queue: unscheduled input from Michael, default
+disposition `RECORDED — PARKED`, no lead assigned and no work created. It is not an
+assignment label. See [intake](INTAKE.md).
 
 These are routing labels, not model identities or GitHub user assignees. Give each
 assignment one responsible-role label. Dependencies are linked issues, not extra
@@ -49,6 +54,35 @@ GitHub author identity do not expand the role's product authority.
 8. Do not post routine round-refresh comments on Michael's issue. Comment there only
    when his work changes or becomes blocking. Do not publish or maintain branch KEEP
    lists; branch cleanup is no longer a PM round deliverable.
+
+## Tranche size and ordering (Phase 1)
+
+These two rules exist because the fixed overhead of a tranche — PM read, PM
+disposition, status rewrite, dashboard refresh, and the independent round itself —
+now exceeds the variable cost of the tranche. Observed sizes fell from 289 mount
+cases to ten playback families to **two operation cases**, and a two-case tranche
+pays full freight. Neither rule changes what acceptance means or lowers any bar.
+
+**Tranche minimum.** A Phase 1 tranche closes at **at least three coverage rows or
+twenty-five cases, whichever comes first**. A smaller tranche requires a written PM
+exception recorded in the issue, stating why the smaller slice is worth a full round.
+The minimum governs what PM *asks for* in an assignment; it never licenses widening a
+tranche past its documented coverage boundary, and it is not a reason to bundle
+unrelated behaviour into one candidate. A tranche that turns out smaller than planned
+is returned as it is, with the exception recorded — never padded.
+
+**No rebase re-acceptance.** When a candidate needs a clean split from current main,
+**the split happens before independent disposition, never after.** Assign the clean
+base with the candidate, so Verification disposes exactly the evidence that will be
+integrated.
+
+R21 accepted two operation cases and R23 re-accepted *the same two cases* on a clean
+base — a full round of credits spent on provenance hygiene that ordering alone would
+have made free. Re-disposition of already-accepted evidence is not a second
+acceptance; it is the same acceptance paid for twice. If a clean split becomes
+necessary after disposition, PM records that the existing disposition carries over to
+the identical evidence rather than re-running the independent round, and the carry-over
+is authenticated against exact evidence identity, not against a claim.
 
 ## Lead picks up and returns
 

@@ -1,0 +1,17 @@
+# Raw evidence is bytes, not prose. Marking these binary stops git rendering
+# megabyte diffs of them in PRs, reviews and `git log -p`, and stops a textual
+# merge ever being attempted on an evidence file.
+#
+# It changes how git DISPLAYS and merges these paths. It does not change their
+# content, their blob hashes, or any hash a disposition cites.
+
+*.pcm            binary
+*.wav            binary
+observation.json binary
+
+# Verifier-owned package trees are Verification's. Marking them so a diff is
+# never silently normalised under someone else's line-ending settings.
+tests/mount_draft8/**             -text
+tests/ops_draft8/**               -text
+tests/playback_draft8/**          -text
+tests/playback_complete_draft8/** -text

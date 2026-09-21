@@ -32,15 +32,21 @@ Code exists well ahead of accepted coverage; that gap is coverage, not implement
 
 ## Held and next owner
 
-| Work | State | Next owner |
-|---|---|---|
-| #20 engine | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
-| VT8-001 / WP-07 | PR #112 is integrated at main `be7f8f2...` with exact accepted history preserved. Verification independently accepts only its two recorded observations; source, invented refusal policies, unexercised branches and complete WP-07 remain unaccepted | Held pending a later independently tested tranche; PR #96 remains held |
-| WP-10 / operations freeze | Infrastructure present, actual complete engine crash run not green | Verification |
-| WP-11 | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
-| Hardware | Verification rejects PR #87 repaired head `e520c2c...` on `P1-R23-V01`'s eleven adjacent forms. PR #92 head `0943571...` remains held. PR #120 head `7b224ff...` is a stale-base, advice/method candidate awaiting independent A1MINI-01 audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware repairs PR #87; Verification audits exact PR #120 method without printing |
-| Q-001 | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | Existing library test stays on the expected Monday library route; new prints default to the A1 Mini, with the library retained for oversized PLA. PR #87 is independently rejected; A1MINI-01 is unprinted and unaudited; identity, attribution, atomicity and qualification remain open | Hardware card-method repair plus Verification A1MINI-01 method audit; no Michael purchase/print issue |
+| Work | Held since | State | Next owner |
+|---|---|---|---|
+| #20 engine | 2026-09-03 | Held draft at `2e0e8a4...`; not an ancestor of main. Only the separate clean PR #77 mount/playback slice was merged. No wholesale import of allocator, recording, warm/state or other uncovered behavior. | Held; Software may work only from current scoped issues |
+| VT8-001 / WP-07 | 2026-09-19 | PR #112 is integrated at main `be7f8f2...` with exact accepted history preserved. Verification independently accepts only its two recorded observations; source, invented refusal policies, unexercised branches and complete WP-07 remain unaccepted | Held pending a later independently tested tranche; PR #96 remains held |
+| WP-10 / operations freeze | — | Infrastructure present, actual complete engine crash run not green | Verification |
+| WP-11 | — | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
+| Hardware | 2026-09-18 | Verification rejects PR #87 repaired head `e520c2c...` on `P1-R23-V01`'s eleven adjacent forms. PR #92 head `0943571...` remains held. PR #120 head `7b224ff...` is a stale-base, advice/method candidate awaiting independent A1MINI-01 audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware repairs PR #87; Verification audits exact PR #120 method without printing |
+| Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
+| WP-04 / WP-05 | 2026-09-18 | Existing library test stays on the expected Monday library route; new prints default to the A1 Mini, with the library retained for oversized PLA. PR #87 is independently rejected; A1MINI-01 is unprinted and unaudited; identity, attribution, atomicity and qualification remain open | Hardware card-method repair plus Verification A1MINI-01 method audit; no Michael purchase/print issue |
+
+**Held since** is the date the hold became visible: the day the held PR was opened,
+where the hold is a PR (#20 on 3 September, #96 on 19 September, #87 on 18 September),
+and `—` where the item is blocked on coverage rather than by a dated hold event.
+`CLAUDE.md` §4 requires escalation to PM past three days;
+`.github/workflows/stream-age.yml` checks it daily so the rule is not left to memory.
 
 ## Risks
 

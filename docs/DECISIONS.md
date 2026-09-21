@@ -2422,3 +2422,113 @@ material, process, part or physical result is qualified by this update.
 **Cost to reverse:** retain the immutable PR #112 evidence and verifier findings;
 replace the clasp/material or print-method decision only through a new PM disposition
 with applicable independent review.
+
+---
+
+## ADR-153 — Phase 1 tranche minimum, and no re-acceptance after a rebase
+
+**Date:** 2026-09-20 UTC · **Owner:** PM under Michael's signed remediation decision D-4
+
+**Decision.** Two Phase 1 process rules, recorded in
+[the issue workflow](ISSUE-WORKFLOW.md) and [the PM charter](ROLES/pm.md).
+
+1. **Tranche minimum.** A Phase 1 tranche closes at at least three coverage rows or
+twenty-five cases, whichever comes first. A smaller tranche requires a written PM
+exception recorded in the issue. The minimum shapes what PM asks for; it does not widen
+any tranche past its documented coverage boundary, does not license bundling unrelated
+behaviour into one candidate, and never pads a return that came in smaller than planned.
+
+2. **No rebase re-acceptance.** When a candidate needs a clean split from current main,
+the split happens before independent disposition, never after. Where a split becomes
+necessary afterwards, PM authenticates that the evidence is byte-identical and records
+the existing disposition as carrying over, rather than spending an independent round
+re-disposing evidence already accepted.
+
+**Rationale.** Observed tranche sizes fell from 289 mount cases (R11) to ten playback
+families (R11/R15) to two operation cases (R21/R23). The fixed overhead per tranche — PM
+read, PM disposition, status rewrite, dashboard refresh, and the independent round — now
+exceeds the variable cost of the tranche itself, so a two-case tranche pays full freight.
+
+Separately, R21 accepted `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ`, and R23
+accepted the same two cases again on the PR #112 clean split. That is one week's rung
+movement spent twice on the same two cases. Ordering the split before disposition makes
+the second round unnecessary without weakening blindness: Verification still disposes
+evidence it did not help produce, and still disposes exactly what gets integrated.
+
+Neither rule lowers an acceptance bar, changes what independent acceptance means, or
+touches any existing disposition. The two cases accepted at R21 and R23 remain accepted
+on exactly their recorded terms.
+
+**Cost to reverse.** Low. Delete the two sections from `docs/ISSUE-WORKFLOW.md` and the
+two paragraphs from `docs/ROLES/pm.md` and supersede this ADR. No evidence, disposition,
+hash or acceptance depends on either rule, and no tranche already returned is affected.
+The carry-over provision is the only part with a lasting artefact: a disposition carried
+over under it cites the same evidence identity as the original, so reversing it means
+re-running that independent round, not reconstructing anything lost.
+
+---
+
+## ADR-154 — An intake queue, a tag convention, a phase rule and a bottleneck rule
+
+**Date:** 2026-09-20 UTC · **Owner:** PM under Michael's signed remediation decision D-5
+
+**Decision.** Four related changes, documented in [intake](INTAKE.md) and
+[the PM charter](ROLES/pm.md).
+
+1. **Intake queue.** Every unscheduled input from Michael opens one `intake`-labeled
+issue containing his words verbatim, PM's classification (phase, package, blocking or
+not), and a disposition. The default disposition is `RECORDED — PARKED` with a named
+resume condition. PM converts an intake item into work only if it belongs to the current
+phase or Michael explicitly requests it.
+
+2. **Three-tag convention.** Michael prefixes what he volunteers: `FYI:` records and
+parks; `CONSTRAINT:` changes what is permitted, effective immediately, and creates no new
+work stream; `REQUEST:` creates work and PM states which phase's budget it draws from. An
+untagged remark is treated as `FYI:`. The tag is Michael's; PM asks rather than upgrading
+one on its own reading.
+
+3. **Phase rule.** PM may not open work outside the current phase without an explicit
+`REQUEST:`. New information about a future phase is appended to that package's entry in
+`docs/PACKAGES/README.md` and waits there.
+
+4. **Bottleneck rule.** Verification is the only seat that produces independently
+accepted coverage and is therefore the project's constraint. It is never left
+unactivated while a current-phase tranche awaits disposition, and never assigned
+out-of-phase audit work in a round where in-phase work is queued.
+
+**Rationale.** The `michael` label and `docs/FOR-MICHAEL.md` are an outbound queue —
+work PM needs Michael to do. Nothing was inbound, so a fact mentioned mid-week entered
+the next disposition directly as a live requirement, in the round it arrived, with no
+scheduling step.
+
+Two R16 remarks show the amplification. "I bought an A1 Mini" became a printer-process
+transition: revise the packet around the owned printer, record repeatability, re-audit. A
+ruggedization suggestion became Guardrail 13 plus a WP-25 expansion — a player-wide
+requirement gating final enclosure CAD, requiring a Hardware shock/load-path and
+failure-mode matrix, then an auditable drop/shake protocol, then staged trials, with
+Verification reviewing criteria before any physical test. WP-25 is Phase 4. That same
+round recorded that Verification was not activated until Hardware had an auditable
+packet, so the one seat that can produce Phase 1 acceptance was idled for a round behind
+Phase 4 groundwork.
+
+PM was not malfunctioning: its charter gives it roadmap, scope and risk, and a
+child-safety remark about rough handling is exactly what it should not let slide. What
+was missing is an idle state for information.
+
+**Neither R16 decision is reversed.** Guardrail 13 stands as written. ADR-151's
+ruggedization-before-final-CAD requirement stands. The A1 Mini facts stand. They are
+re-filed as intake items so the precedent is on the record, with dispositions that state
+their phase — the ruggedization requirement may well be right for Phase 4; it was simply
+scheduled into Phase 1.
+
+Nothing here restricts what Michael may say or require, and nothing weakens a hold.
+`CONSTRAINT:` is effective the moment he says it, whatever the queue does afterwards.
+The bottleneck rule is a scheduling duty and is not licence to rush a disposition,
+shorten an independent review, or treat Verification's judgment about what it needs as
+negotiable.
+
+**Cost to reverse.** Low for the queue and tags: delete `docs/INTAKE.md`, remove the
+paragraphs from `docs/ROLES/pm.md`, retire the `intake` label and supersede this ADR.
+Filed intake issues remain as a record and need no unwinding. The phase and bottleneck
+rules are pure scheduling constraints with no artefact to reconstruct. Nothing in the
+frozen bundle, no disposition, no acceptance and no hold depends on any of the four.

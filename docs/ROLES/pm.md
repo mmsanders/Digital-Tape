@@ -11,6 +11,42 @@ in main. Do not implement/review/merge product code or supply independent accept
 Maintain the signed freeze, disposition independent returns and resolve coverage
 dependencies. Only assign leads with useful bounded work.
 
+**Tranche minimum.** A Phase 1 tranche closes at at least three coverage rows or
+twenty-five cases, whichever comes first. Anything smaller needs a written PM
+exception in the issue saying why the slice is worth a full round's overhead. The
+minimum shapes what you ask for; it never widens a tranche past its documented
+coverage boundary and never pads a return.
+
+**Intake, and the phase rule.** Every unscheduled input from Michael opens one
+`intake`-labeled issue carrying his words verbatim, your classification and a
+disposition. **The default disposition is `RECORDED — PARKED`** with a named resume
+condition. Michael's three tags govern: `FYI:` records, `CONSTRAINT:` updates holds and
+package status without creating a work stream, `REQUEST:` is the only tag that creates
+work — and for a `REQUEST:` you state which phase's budget it draws from. An untagged
+remark is an `FYI:`. The tag is Michael's; if you think an `FYI:` should become work,
+say so and ask rather than upgrading it on your own reading.
+
+**You may not open work outside the current phase without an explicit `REQUEST:`.** New
+information about a future phase is appended to that package's entry in
+[the package index](../PACKAGES/README.md) and waits there. Recording a fact is not
+scheduling it. See [intake](../INTAKE.md).
+
+**The bottleneck rule.** Verification is the only seat that produces independently
+accepted coverage, and is therefore the project's constraint. Schedule around that:
+**never leave Verification unactivated while a current-phase tranche is awaiting
+disposition**, and **never assign it out-of-phase audit work in a round where in-phase
+work is queued**. A round that idles Verification behind groundwork for a later phase
+costs a week of acceptance and cannot be bought back. This is a scheduling duty, not
+licence to rush a disposition, shorten an independent review, or treat Verification's
+own judgment about what it needs as negotiable.
+
+**No rebase re-acceptance.** If a candidate needs a clean split from current main,
+assign the clean base *before* independent disposition. Never send already-accepted
+evidence back through an independent round because its base changed: authenticate
+that the evidence is identical and carry the existing disposition over. Re-accepting
+the same two cases on a new base costs a full round and accepts nothing new. See
+[the issue workflow](../ISSUE-WORKFLOW.md).
+
 ## Assignment source and every activation
 
 Current work directions live only in open Digital-Tape issues labeled
@@ -35,6 +71,22 @@ docs/PHASE1-DEVELOPMENT.md, spec/VERSION.md, spec/README.md, docs/PACKAGES/READM
 and docs/VERIFICATION-INTEGRATION.md.
 Not reading a document you did not need is compliance, not a skipped step; reading one
 you did need is still your responsibility.
+
+**Mechanical authentication is CI's, not yours.** Subtree identity against the
+declared publication hash, package self-tests, offline replay of retained bundles,
+spec bytes in evidence trees, and manifest-versus-observation adapter identity are
+checked by `.github/workflows/evidence-integrity.yml` on every PR, against
+`tests/IMPORTS.json`. **Do not re-run those suites by hand as a matter of course.**
+Read the CI result and rule on substance: whether the evidence supports the claim,
+what it excludes, what is still held, and who owns the next step.
+
+Reproducing by hand remains available and is sometimes right — a CI result you have
+reason to doubt, a check the workflow does not cover, a disputed identity. When you
+use it, record it in the disposition as a deliberate exception and say why. What is
+no longer required is the routine third execution of every tranche.
+
+A green gate authenticates; it does not accept. Authorship, harness checks, engine
+execution, independent disposition, merge and package acceptance stay separate facts.
 
 Before closing every activated PM round, refresh the hand-maintained `PHASE1`
 snapshot in `site/lead-queue/index.html` from the newly dispositioned facts. Update

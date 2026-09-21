@@ -1,0 +1,28 @@
+# A lead must not be able to weaken the gate that checks its own work.
+#
+# These paths are Michael's. Everything else follows the ordinary review rules
+# in CLAUDE.md §2 and ruleset 22084355.
+#
+# CODEOWNERS only requests review; it does not block a merge on its own. The
+# blocking part is the ruleset's "require review from Code Owners" setting,
+# which is Michael's to enable in repository settings.
+
+# CI, including the gates that authenticate imported evidence.
+/.github/workflows/    @mmsanders
+/.github/CODEOWNERS    @mmsanders
+
+# The declared identity of every imported verifier package and retained bundle.
+# Changing a value here changes what the repository claims was imported.
+/tests/IMPORTS.json    @mmsanders
+
+# Verifier-owned package trees. Imported verbatim; never edited in this repo.
+/tests/mount_draft8/               @mmsanders
+/tests/ops_draft8/                 @mmsanders
+/tests/playback_draft8/            @mmsanders
+/tests/playback_complete_draft8/   @mmsanders
+
+# The frozen spec bundle and its manifest.
+/spec/tapefs-v1.md     @mmsanders
+/spec/engine-api.md    @mmsanders
+/spec/acceptance.md    @mmsanders
+/spec/VERSION.md       @mmsanders
