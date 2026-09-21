@@ -52,5 +52,12 @@ jobs:
         with:
           fetch-depth: 0
       - run: make -C engine all
+      - name: Fetch retained raw evidence
+        # This job has its OWN checkout. The control's baseline asserts that the
+        # real manifest is green, which needs the real evidence, so this job
+        # needs the fetch exactly as much as the gate job does. Omitting it here
+        # is what broke run 8: five red-detection probes passed and both green
+        # baselines failed, because the bytes were simply absent.
+        run: ./tools/fetch-evidence.sh
       - name: negative control
         run: python3 tools/ci/verify-evidence-integrity-gate.py
