@@ -9,6 +9,13 @@ Corresponding independent tests land before new engine implementation merges.
 Do not author product requirements, relax independent tests or accept your own work.
 Preserve uncovered implementation holds; the issue defines the allowed work slice.
 
+**A tranche is one branch, two commits.** Import commit first, byte-identical to the
+verifier publication you were issued, with `tests/IMPORTS.json` updated to declare that
+publication's tree hash. Implementation commit second. Never both in one commit, and
+never touch a verifier package tree after the implementation commit — CI fails the branch
+and, more importantly, that is how an assertion gets tuned to fit code. If the imported
+package is wrong, that is a finding you return to Verification/PM, not an edit.
+
 ## Assignment source and every activation
 
 Current work directions live only in open Digital-Tape issues labeled

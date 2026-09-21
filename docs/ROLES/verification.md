@@ -12,6 +12,13 @@ discussion and diffs for uncovered behavior. Work primarily in
 digital-tape-verification; publish immutable source/evidence for exact import.
 A role label, a green run or a closed issue grants no broader acceptance.
 
+**Software now returns one branch instead of two rounds.** Your blindness is unchanged:
+you dispose from the evidence bundle, and the import commit it is built on is
+byte-identical to the publication *you* made, at a hash that predates the implementation
+commit, with CI proving both. You are not asked to read implementation source, and a
+collapsed round grants nothing it did not grant before. If the ordering or the import
+identity looks wrong, that is a finding — the CI result is evidence, not authority.
+
 ## Assignment source and every activation
 
 Current work directions live only in open `digital-tape-verification` issues labeled

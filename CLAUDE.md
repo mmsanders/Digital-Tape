@@ -62,9 +62,30 @@ not restore the expired combined product-lead mandate.
 
 ## 3. Spec → independent tests → implementation
 
-1. **Structural Rule 1:** corresponding independent tests land on main before new
-   engine implementation merges. Public branches do not waive verifier blindness.
-   A narrow tranche licenses only its documented coverage boundary.
+1. **Structural Rule 1:** corresponding independent tests land before new engine
+   implementation. Public branches do not waive verifier blindness. A narrow tranche
+   licenses only its documented coverage boundary.
+
+   **They land in history, not necessarily in a separate merge.** A tranche is one
+   branch carrying two commits: an import commit byte-identical to a verifier
+   publication whose hash predates it, then the implementation commit. The protocol is
+   Verification publishes → Software returns that branch → CI proves it → Verification
+   disposes blind → PM disposes. What disappears is a round whose only product was a
+   separate merge commit; what does not disappear is blindness.
+
+   The guarantee moved into CI, it was not dropped.
+   `.github/workflows/evidence-integrity.yml` proves the imported subtree is
+   byte-identical to the declared publication (`tests/IMPORTS.json`), that every
+   verifier-tree change precedes every `engine/`/`firmware/` change and that no commit
+   does both, that package self-tests and offline replay are green, and that spec bytes
+   in evidence trees match `spec/VERSION.md`.
+   `tools/ci/verify-structural-rule-1.py` proves that ordering check goes red.
+   The implementer still cannot tune an assertion: the tree it imported is fixed by a
+   hash Verification published first, and `tests/IMPORTS.json` is Michael-owned in
+   CODEOWNERS, so declaring a different tree is not a lead's to do quietly.
+   A cross-repository check against `digital-tape-verification` would be stronger still
+   and needs a token that does not exist yet; until it does, the declared hash rests on
+   that review.
 2. Integration is mechanical only if it cannot change whether correct code passes:
    include/link paths and equivalent symbol/type plumbing. Assertions, values,
    tolerances, ordering, ranges, skips and case deletion are not mechanical.

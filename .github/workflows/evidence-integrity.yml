@@ -61,3 +61,5 @@ jobs:
         run: ./tools/fetch-evidence.sh
       - name: negative control
         run: python3 tools/ci/verify-evidence-integrity-gate.py
+      - name: Structural Rule 1 ordering can go red
+        run: python3 tools/ci/verify-structural-rule-1.py

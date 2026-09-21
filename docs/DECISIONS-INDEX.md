@@ -100,5 +100,6 @@ Newest is at the bottom, matching the log.
 | [ADR-152](DECISIONS.md#adr-152--preserve-the-integrated-vt8-boundary-and-audit-the-a1-mini-method-before-printing) | 2026-09-20 | Preserve the integrated VT8 boundary and audit the A1 Mini method before printing | Authenticate Software's ruleset-required PR #112 synchronization and merge because the original code/evidence commits and every scoped candidate, adapter,… |
 | [ADR-153](DECISIONS.md#adr-153--phase-1-tranche-minimum-and-no-re-acceptance-after-a-rebase) | 2026-09-20 | Phase 1 tranche minimum, and no re-acceptance after a rebase | Two Phase 1 process rules, recorded in [the issue workflow](ISSUE-WORKFLOW.md) and [the PM charter](ROLES/pm.md) |
 | [ADR-154](DECISIONS.md#adr-154--an-intake-queue-a-tag-convention-a-phase-rule-and-a-bottleneck-rule) | 2026-09-20 | An intake queue, a tag convention, a phase rule and a bottleneck rule | Four related changes, documented in [intake](INTAKE.md) and [the PM charter](ROLES/pm.md) |
+| [ADR-155](DECISIONS.md#adr-155--structural-rule-1-lands-in-history-not-in-a-separate-merge) | 2026-09-20 | Structural Rule 1 lands in history, not in a separate merge | A Phase 1 tranche is one branch carrying two commits: an import commit byte-identical to a verifier publication whose hash predates it, then the… |
 
-91 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+92 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
