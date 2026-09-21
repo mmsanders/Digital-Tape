@@ -68,6 +68,7 @@ method (card characterisation, not engine coverage). No engine finding is open.
 ## Reproduce
 
 ```
+tools/fetch-evidence.sh            # raw observations live in a release asset
 tools/ci/verify-spec-bundle.sh
 make -C tests/mount_draft8 check
 tools/ci/build.sh
