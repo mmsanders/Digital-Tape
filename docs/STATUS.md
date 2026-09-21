@@ -1,9 +1,10 @@
 # Project status
 
-**20 September 2026 UTC · main `d63b73d` · Owner: PM ·** Phase 1 holds three
+**21 September 2026 UTC · main `08014df` · Owner: PM ·** Phase 1 holds three
 independently accepted tranches (289 mount cases, ten playback families, two VT8-001
 operation cases); no package, source or golden is accepted and the dashboard stays at
-13 of 36.
+13 of 36. The eight-work-order remediation round landed and **accepted nothing** — it
+changed how rounds are run, not what is true.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -11,6 +12,34 @@ Per-round integration narrative is in
 [the verification integration history](archive/verification-integration-history.md).
 Active assignments and stop conditions live only in
 [role-labeled issues](ISSUE-WORKFLOW.md); this file records evidence, not work directions.
+
+## Before you run anything
+
+**Raw evidence is not in the tree.** The two large observations live in release
+`evidence-2026-09`; the committed `.sha256` beside each run is the citation. Any command
+that replays a retained bundle needs this first:
+
+```sh
+tools/fetch-evidence.sh          # downloads, verifies, refuses a mismatch
+```
+
+**Required reading is four documents plus your issue** (CLAUDE.md §4): `AGENTS.md`,
+`CLAUDE.md`, this file, your own charter. Everything else is read on demand through
+[the decisions index](DECISIONS-INDEX.md) and [spec/NAVIGATION.md](../spec/NAVIGATION.md).
+
+**What changed in the remediation round**, none of it affecting acceptance:
+
+| Change | Where |
+|---|---|
+| A tranche is one branch, two commits: import then implementation | CLAUDE.md §3.1, ADR-155 |
+| CI does the mechanical authentication; PM rules on substance | `evidence-integrity.yml`, ADR (D-3) |
+| Tranche minimum: 3 coverage rows or 25 cases; split before disposition | ADR-153 |
+| Inbound `intake` queue; default disposition RECORDED — PARKED | [intake](INTAKE.md), ADR-154 |
+| Held streams over three days are escalated automatically | `stream-age.yml` |
+| Size budgets and the 1 MiB evidence limit are enforced | `repo-hygiene.yml` |
+
+Every new gate has a negative control that is proven to go red. Run them with
+`tools/ci/verify-*`.
 
 ## Phase 1 packages
 

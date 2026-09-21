@@ -37,6 +37,10 @@ Report a missing requirement rather than inventing text from an absent document.
 
 ## Reproduce
 
+Raw evidence over 1 MiB lives in release `evidence-2026-09`, not the tree. Before any
+command that replays a retained bundle, run `tools/fetch-evidence.sh`, which verifies
+each asset against its committed `.sha256` and refuses a mismatch.
+
 Run the spec bundle gate, independent package checks, build and unit scripts:
 tools/ci/verify-spec-bundle.sh; make -C tests/mount_draft8 check;
 tools/ci/build.sh; tools/ci/unit.sh.
