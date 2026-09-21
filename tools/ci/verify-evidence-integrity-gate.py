@@ -62,8 +62,28 @@ def expect(want, name, manifest_obj, tmp, saying=None):
         failed += 1
 
 
+def check_preconditions():
+    """The baseline asserts the real manifest is green, so the real evidence
+    has to be present. Say that plainly rather than reporting the control
+    broken when the cause is a missing fetch step."""
+    missing = [b["path"] for b in REAL.get("evidence_bundles", [])
+               if not (ROOT / b["path"] / "output/observation.json").exists()]
+    if missing:
+        print("== evidence integrity gate can go red ==")
+        print("  PRECONDITION UNMET: raw evidence is not present for:")
+        for m in missing:
+            print(f"    {m}")
+        print("  Run tools/fetch-evidence.sh first. This control's baseline")
+        print("  asserts the real manifest is green, which cannot be judged")
+        print("  without the bytes. This is not the gate failing to detect.")
+        return False
+    return True
+
+
 def main():
     global passed, failed
+    if not check_preconditions():
+        return 2
     print("== evidence integrity gate can go red ==")
     with tempfile.TemporaryDirectory() as tmp:
         expect("green", "baseline, real manifest", REAL, tmp)
