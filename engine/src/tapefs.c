@@ -41,7 +41,7 @@ uint64_t tape_rd64(const unsigned char *p)
 /* The writers, byte for byte the readers' inverse. Same reason for the explicit
    assembly: what a commit puts on media must not depend on the host, and a
    struct overlay would make it depend on padding and endianness both. */
-static void tape_wr32(unsigned char *p, uint32_t v)
+void tape_wr32(unsigned char *p, uint32_t v)
 {
     p[0] = (unsigned char)(v & 0xFFu);
     p[1] = (unsigned char)((v >> 8) & 0xFFu);

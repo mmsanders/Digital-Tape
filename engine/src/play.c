@@ -48,7 +48,7 @@ static int64_t play_step(const tape *t)
  * The timeline is the concatenation of the live index's entries in order; each
  * entry is physically contiguous, and entries may jump anywhere in the store.
  */
-static bool timeline_physical(const struct tape_index *idx, uint64_t n, uint64_t *out)
+bool tape_timeline_physical(const struct tape_index *idx, uint64_t n, uint64_t *out)
 {
     uint64_t cursor = 0;
     uint32_t e;
@@ -67,7 +67,7 @@ static bool timeline_physical(const struct tape_index *idx, uint64_t n, uint64_t
 
 /* How many timeline frames from n onward stay inside n's own entry, and so stay
    physically contiguous. Zero if n is past the timeline. */
-static uint32_t timeline_run(const struct tape_index *idx, uint64_t n)
+uint32_t tape_timeline_run(const struct tape_index *idx, uint64_t n)
 {
     uint64_t cursor = 0;
     uint32_t e;
@@ -308,7 +308,7 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
 
         if (used >= block_budget) { break; }
 
-        if (!timeline_physical(idx, n, &phys)) { break; }   /* past the timeline */
+        if (!tape_timeline_physical(idx, n, &phys)) { break; }   /* past the timeline */
 
         lba = t->sb.lba_chunk_base + (uint32_t)(phys / FRAMES_PER_BLOCK);
         if (dev_read(&t->dev, lba, 1u, t->block) != 0) {
@@ -321,7 +321,7 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
 
         off  = (uint32_t)(phys % FRAMES_PER_BLOCK);
         take = FRAMES_PER_BLOCK - off;                      /* rest of this block */
-        run  = timeline_run(idx, n);                        /* rest of this entry */
+        run  = tape_timeline_run(idx, n);                        /* rest of this entry */
         if (run < take) { take = run; }
         room = end - (uint32_t)n;                           /* rest of the window */
         if (room < take) { take = room; }

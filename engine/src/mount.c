@@ -92,7 +92,7 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
     struct tape_sb sb_pri, sb_mir;
     tape_result r_pri, r_mir, rc;
     const struct tape_sb *chosen;
-    bool pri_ok, mir_ok;
+    bool pri_ok, mir_ok, candidate_is_primary;
 
     *repair_lba = 0xFFFFFFFFu;
     /* DEVICE_ADDRESSABLE precedes every callback, including an LBA-0 read. */
@@ -125,9 +125,15 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
                 return TAPE_ERR_INCONSISTENT;
             }
             chosen = &sb_pri;
+            /* §4.6 case 3: equal generation and byte-identical is the healthy
+               resting state, and the tie-break is fixed -- primary candidate,
+               mirror partner -- so two engines update it in the same order. */
+            candidate_is_primary = true;
         } else {
             bool primary_wins = sb_pri.sb_generation > sb_mir.sb_generation;
             chosen = primary_wins ? &sb_pri : &sb_mir;
+            /* §4.6 case 2: the higher generation is the candidate. */
+            candidate_is_primary = primary_wins;
             *repair_lba = primary_wins ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
             memcpy(t->block, primary_wins ? pri : mir, TAPE_BLOCK_SIZE);
         }
@@ -137,10 +143,20 @@ static tape_result resolve_superblock(struct tape *t, uint32_t *repair_lba)
         /* Exactly one valid: it is the candidate, and the partner is recorded as
            needing repair. Whether repair happens is phase 4's business and
            depends on passing admission and both-side validation first. */
+        candidate_is_primary = pri_ok;     /* §4.6 case 1 */
         t->needs_repair = true;
         *repair_lba = pri_ok ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
         memcpy(t->block, pri_ok ? pri : mir, TAPE_BLOCK_SIZE);
     }
+
+    /* The selected bytes, kept verbatim for §8's stage clearing, together with
+       §4.6's partner/candidate roles. Decided here because §4.6 classifies the
+       two copies "exactly as §4.1 phase 1 would", and phase 1 is this function.
+       Re-deriving it later would mean reading both copies again inside a call
+       specified to write twice and read nothing. */
+    memcpy(t->sb_block, candidate_is_primary ? pri : mir, TAPE_BLOCK_SIZE);
+    t->sb_candidate_lba = candidate_is_primary ? TAPE_LBA_SUPERBLOCK : (t->dev.block_count - 1u);
+    t->sb_partner_lba   = candidate_is_primary ? (t->dev.block_count - 1u) : TAPE_LBA_SUPERBLOCK;
 
     t->sb = *chosen;
 
@@ -201,6 +217,12 @@ static void repair_superblock(struct tape *t, uint32_t repair_lba)
     if (dev_flush(&t->dev) != 0)                           { return; }
 
     t->needs_repair = false;
+    /* Both copies now hold the candidate's bytes at equal generation, which is
+       §4.6 case 3: primary candidate, mirror partner. Leaving the pre-repair
+       roles in place would have a later stage clearing write the copy §4.1
+       would now select FIRST, which is exactly the ordering V7-001 forbids. */
+    t->sb_candidate_lba = TAPE_LBA_SUPERBLOCK;
+    t->sb_partner_lba   = t->dev.block_count - 1u;
 }
 
 /*
