@@ -94,6 +94,15 @@
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent set_side and warm-start verifier package published by verification PR #32; imported byte-identically",
       "selftest": ["python3", "tests/transport_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/writability_draft8",
+      "tree": "786221daaf80d15406d9cccf19691c2337ff5908",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "d875730ee5cedc6b88e40fcfe30aa4d81918f549",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent WP-06a v1.1 writability verifier package published by verification PR #33; imported byte-identically",
+      "selftest": ["python3", "tests/writability_draft8/selftest.py"]
     }
   ],
   "evidence_bundles": [
