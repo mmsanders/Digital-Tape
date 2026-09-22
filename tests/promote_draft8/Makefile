@@ -1,0 +1,1 @@
+.PHONY: check\n\ncheck:\n\tpython3 selftest.py\n
