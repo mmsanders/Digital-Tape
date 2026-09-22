@@ -1,11 +1,12 @@
 # Project status
 
-**22 September 2026 UTC · input main `a310521` · Owner: PM ·** Phase 1 now holds
-four independently accepted evidence tranches: 289 mount cases, ten playback families,
-two VT8-001 operation cases, and the exact 26-case WP-09 record bundle at product
-`9d3649d...`. No package, source or golden is accepted and the dashboard stays at
-13 of 36. WP-09's corrected verifier publication is merged in Verification at
-`e9e6ec7...`; Software #165 owns the clean verifier-first product integration/rerun.
+**22 September 2026 UTC · input main `e598b82` · Owner: PM ·** Phase 1 now holds
+five independently accepted evidence tranches: 289 mount cases, ten playback families,
+two VT8-001 operation cases, the exact 26-case WP-09 record bundle, and the exact
+16-case WP-08 transport/warm bundle. No complete package, source or golden is accepted
+and the dashboard stays at 13 of 36. WP-09's clean corrected-verifier integration is
+merged via #167; the exact independently dispositioned transport/warm tranche is now
+integrated via product PR #171 at main `e598b82...`.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -48,8 +49,8 @@ Every new gate has a negative control that is proven to go red. Run them with
 |---|---|---|---|
 | WP-06 block device, superblock, index commit | Exact 289/289 mount observations including row 3, at verifier `392d6bb9...` | `writability_draft8` and `notmounted_draft8` are independently published/imported but unexecuted on the real product; source/helper design and complete WP-06 remain open | Queued — Software after the current record tranche |
 | WP-07 chunk allocator, copy-on-write Side B | Two exact recorded observations — `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` — at verifier `e77b61f...`, re-confirmed on the clean PR #112 split at `391d6a8...` | Invented splice-only and stage-1 BUSY refusal policies; every unexercised branch; source; complete WP-07 | Held pending a later independently tested tranche |
-| WP-08 playback, seek, variable-rate scrub | Exact ten corrected-cadence product observations, 698/698 per-render service in each direction, at verifier `392d6bb9...` | `transport_draft8` adds independent set-side/warm-start coverage on main but has no real-product disposition; source/helper design, complete WP-08, listening and goldens remain open | Queued — Software for the new transport tranche; listening/goldens remain separately held |
-| WP-09 record: overwrite, overdub, splice | Exact 26/26 retained product observations at `9d3649d...`, independently replayed PASS by verifier PR #39 / `e9e6ec7...` under the corrected ARMED-BUSY oracle | Clean verifier-first product integration and ordinary rerun remain; PCM/listening, crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and other stated exclusions remain open | **Software #165** |
+| WP-08 playback, seek, variable-rate scrub | Exact ten corrected-cadence playback observation families plus exact 16/16 set-side/warm-start product observations; transport evidence independently replayed PASS by verifier PR #41 / `334ab2a...` and integrated via product PR #171 at main `e598b82...` | Source/helper design, complete WP-08, byte-exact/listened warm samples and broader goldens remain open | Held pending later independently tested coverage; listening/goldens remain separately held |
+| WP-09 record: overwrite, overdub, splice | Exact 26/26 product observations independently replayed PASS by verifier PR #39 / `e9e6ec7...`; corrected verifier-first integration merged in product PR #167 at main `1db7135...` | PCM/listening, crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and other stated exclusions remain open; complete WP-09 remains unaccepted | Held pending later independently tested coverage |
 | WP-10 crash-injection harness | Narrow independent mount package landed | Complete crash/operation/state run is not green | Verification |
 | WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is unlistened and is not an accepted golden; golden CI stays red | Held — needs Michael's own listening |
 | WP-12 re-spool / defragment pass | None | `respool_draft8` is independently published/imported via #142; real-product execution is outstanding and WP-12a continuation/BUSY/re-entry/FAULTED coverage remains separate | Queued — Software, then Verification |
@@ -83,17 +84,17 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 1. **Card atomicity is unqualified.** No media is qualified to WP-05 A-2; PR #87's method is independently rejected on `P1-R23-V01` and no new acquisition may run.
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **Mechanism and creep trials are unprinted.** A1MINI-01 rev 1 is an unprinted, unaudited method candidate; CAD checks are not measurements.
-4. **Engine code is held by coverage/integration, not by implementation.** WP-09 now has an independently accepted 26-case evidence tranche, but its implementation is still held pending the corrected verifier-first clean integration in #165.
+4. **Engine progress is still coverage-limited.** WP-09's accepted 26-case tranche and WP-08's accepted 16-case transport/warm tranche are both integrated; complete-package acceptance still requires the outstanding independent coverage.
 5. **WP-11 goldens are missing by design.** Golden CI is red until Michael listens; no process change substitutes for that.
 
 ## Standing boundaries
 
-**New independent package acceptances: none.** Four evidence tranches are independently
+**New independent package acceptances: none.** Five evidence tranches are independently
 accepted as exact recorded observations only — not source, helper design, complete
-packages, merge status or goldens. WP-09 contributes the exact 26-case retained bundle;
-its corrected verifier is published, but clean product integration/rerun is still held
-in #165. The other newly imported verifier packages remain test publications only until
-exact real-product evidence is independently dispositioned.
+packages or goldens. WP-09's exact 26-case tranche and WP-08's exact 16-case
+transport/warm tranche are now both integrated on main. The other newly imported
+verifier packages remain test publications only until exact real-product evidence is
+independently dispositioned.
 Main ruleset 22084355 remains active and strict. Missing WP-11 goldens remain an explicit red gate.
 
 Phase 1 operating format, role charters and the issue workflow are in
