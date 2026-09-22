@@ -67,6 +67,8 @@ jobs:
       - run: make -C engine all
       - run: make -C tests/transport_adapter all
       - run: python3 tests/transport_adapter/run_product.py --evidence tests/transport_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
