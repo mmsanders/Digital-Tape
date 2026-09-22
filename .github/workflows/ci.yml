@@ -76,6 +76,24 @@ jobs:
           path: tests/transport_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  respool-package-partial:
+    name: independent respool package — synthetic self-checks + partial product observations (7/8; promote dependency)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/respool_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/respool_adapter all
+      - run: python3 tests/respool_adapter/run_product_partial.py --evidence tests/respool_adapter/evidence/p1-r25-partial
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-respool-partial-product-evidence
+          path: tests/respool_adapter/evidence/p1-r25-partial
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
