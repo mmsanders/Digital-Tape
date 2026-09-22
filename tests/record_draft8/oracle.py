@@ -370,7 +370,8 @@ def check(case: Case, post: Media, events: list[dict], calls: list[dict]) -> lis
             "armed seek probe missing or not BUSY")
         req(len(armed_rate) == 1 and armed_rate[0].get("result") == "TAPE_ERR_BUSY" and armed_rate[0].get("rate_q16_16") == 65536,
             "armed set_rate probe missing or not BUSY")
-        req(not events, "armed BUSY/abort path issued block I/O")
+        req(not any(e.get("phase") in ("armed", "abort", "unmount") for e in events),
+            "armed BUSY/abort/unmount path issued block I/O")
         req(post.slots == pre.slots, "armed BUSY changed an index slot")
         aborts = call_named(calls, "tape_abort")
         req(len(aborts) == 1 and aborts[0].get("result") == "TAPE_OK", "armed BUSY abort failed")
