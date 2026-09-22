@@ -67,6 +67,15 @@
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-12 verifier package published by verification PR #30; imported byte-identically",
       "selftest": ["python3", "tests/respool_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/slot_draft8",
+      "tree": "14860665f297d03867cc1098a02d3f6495a6d935",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "6fc4014a4afa088cbba49c8306f72a77bd3291d8",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent WP-36 source-slot verifier package published by verification PR #31; imported byte-identically",
+      "selftest": ["python3", "tests/slot_draft8/selftest.py"]
     }
   ],
   "evidence_bundles": [
