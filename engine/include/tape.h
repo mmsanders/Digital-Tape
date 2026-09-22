@@ -14,25 +14,20 @@
  *                 §5.5's cartridge_sequence), tape_unmount, tape_get_info,
  *                 tape_set_side, tape_tell, tape_seek, tape_set_rate,
  *                 tape_status, tape_service, tape_render, the WP-07 allocator,
- *                 §8's index commit, §7's tape_arm / tape_feed / tape_commit
- *                 and §9.2's tape_reset_side_b
- *   Partial       tape_arm accepts TAPE_REC_SPLICE only. TAPE_REC_OVERWRITE
- *                 and TAPE_REC_OVERDUB have no independently accepted
- *                 observation and are NOT IMPLEMENTED: arm refuses them with
- *                 TAPE_ERR_INVALID_ARG and writes nothing.
- *
- *                 tape_arm and tape_reset_side_b also REFUSE on stage-1 media
+ *                 §8's index commit, §7's tape_arm / tape_feed / tape_commit,
+ *                 §9.2's tape_reset_side_b, §9.1's three record modes,
+ *                 tape_abort, and §8's stage clearing on tape_arm through
+ *                 §4.6's partner-first superblock update
+ *   Partial       tape_reset_side_b still REFUSES on stage-1 media
  *                 (TAPE_ERR_BUSY, zero writes) instead of performing §8's stage
- *                 clearing, which is a §4.6 superblock update and is promote
- *                 recovery this candidate does not implement.
- *
- *                 Both are statements about THIS ENGINE, not about the format —
- *                 §7 defines all three modes and §8 requires the clearing. See
- *                 engine/src/record.c and treat them as coverage boundaries
- *                 awaiting PM disposition, not as spec.
- *   Declared,     everything else — tape_abort, tape_promote, tape_respool,
- *   not defined   tape_dup, tape_format. Calling one is a link error, which is
- *                 the intended loud failure rather than a silent stub.
+ *                 clearing. §8 states that rule on tape_arm and on
+ *                 tape_reset_side_b; only tape_arm's is independently covered,
+ *                 so only tape_arm's is built. That is a statement about THIS
+ *                 ENGINE, not about the format — see engine/src/ops.c and treat
+ *                 it as a coverage boundary awaiting PM disposition, not spec.
+ *   Declared,     everything else — tape_promote, tape_respool, tape_dup,
+ *   not defined   tape_format. Calling one is a link error, which is the
+ *                 intended loud failure rather than a silent stub.
  *
  * Guardrails this header exists to keep: no allocation ever (the caller owns all
  * storage, §4); no clock and no timeout anywhere (§9); nothing returns a pointer
