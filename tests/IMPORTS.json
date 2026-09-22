@@ -85,6 +85,15 @@
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent format/dup refusal verifier package published by verification PR #35; imported byte-identically",
       "selftest": ["python3", "tests/format_dup_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/transport_draft8",
+      "tree": "05aafde29e3d8048bec669053b1bafcd0104cbd3",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "5d97073ca03014e9d4055014f294709a78506b9e",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent set_side and warm-start verifier package published by verification PR #32; imported byte-identically",
+      "selftest": ["python3", "tests/transport_draft8/selftest.py"]
     }
   ],
   "evidence_bundles": [
