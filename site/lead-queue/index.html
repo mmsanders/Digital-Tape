@@ -245,14 +245,15 @@
     // Hand-maintained from docs/PACKAGES/README.md and docs/STATUS.md. GitHub has no
     // field for package progression, so unlike the queue below this is a dated snapshot,
     // not a live read. `rung` counts rungs FULLY reached on the ladder the working
-    // agreement actually uses: contract issued -> corresponding independent tests on
-    // main -> implementation merged and green against the real engine -> independently
-    // accepted. Partial coverage does not promote a stage and a green run does not
+    // agreement actually uses: contract issued -> the package's required independent
+    // coverage is on main -> implementation merged and green against the real engine ->
+    // independently accepted. A partial verifier tranche on main does not promote a
+    // package stage, and a green run does not
     // accept a package, so the bar is deliberately pessimistic: it can only reach full
     // once Verification has accepted every Phase 1 package.
     const RUNGS = [
       { short: "under contract", label: "Contract issued" },
-      { short: "covered", label: "Corresponding independent tests on main" },
+      { short: "covered", label: "Required independent package coverage on main" },
       { short: "on the engine", label: "Implementation merged, green against the real engine" },
       { short: "accepted", label: "Independently accepted" }
     ];
