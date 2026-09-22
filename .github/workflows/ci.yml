@@ -57,6 +57,25 @@ jobs:
       - run: make -C tests/record_adapter all
       - run: python3 tests/record_adapter/run_product.py --evidence tests/record_adapter/evidence/p1-r25-product
 
+
+  transport-package:
+    name: independent transport/warm package — synthetic self-checks, then product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/transport_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/transport_adapter all
+      - run: python3 tests/transport_adapter/run_product.py --evidence tests/transport_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-transport-product-evidence
+          path: tests/transport_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
