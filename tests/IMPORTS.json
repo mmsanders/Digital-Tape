@@ -49,7 +49,7 @@
       "attested_in": "docs/verification/runs/2026-09-14-r14/README.md",
       "attestation": "Imported package tree",
       "selftest": ["make", "-C", "tests/playback_complete_draft8", "check"]
-    ,
+    },
     {
       "path": "tests/record_draft8",
       "tree": "b7eb335d08f35b70f55fb54b5a0966c52a25688b",
