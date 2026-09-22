@@ -20,7 +20,12 @@
       "source_commit": "4ee116fa040bb5ce040325e0076365abf8b0f8f9",
       "attested_in": "docs/REVIEW/P1-R1-PM-REVIEW.md",
       "attestation": "Mount package Git tree in both repositories",
-      "selftest": ["make", "-C", "tests/mount_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/mount_draft8",
+        "check"
+      ]
     },
     {
       "path": "tests/ops_draft8",
@@ -29,8 +34,14 @@
       "source_commit": "15dd16e",
       "attested_in": "docs/VERIFICATION-INTEGRATION.md",
       "attestation": "corrected complete verifier tree, imported exactly and test-first at product main 48cc23fd",
-      "superseded_trees": ["4a862fa69ccb2fc4c9afe59c9c9161c3470f9263", "c8a43df69a6be8e2c34bf79a1d79933abf48286a"],
-      "selftest": ["python3", "tests/ops_draft8/selftest.py"]
+      "superseded_trees": [
+        "4a862fa69ccb2fc4c9afe59c9c9161c3470f9263",
+        "c8a43df69a6be8e2c34bf79a1d79933abf48286a"
+      ],
+      "selftest": [
+        "python3",
+        "tests/ops_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/playback_draft8",
@@ -39,7 +50,12 @@
       "source_commit": "7a22cbb4447c40c51b7c8b2282a685ed30a46ba6",
       "attested_in": "docs/archive/verification-integration-history.md",
       "attestation": "the product subtree hash reproduces ff810814 exactly",
-      "selftest": ["make", "-C", "tests/playback_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/playback_draft8",
+        "check"
+      ]
     },
     {
       "path": "tests/playback_complete_draft8",
@@ -48,7 +64,12 @@
       "source_commit": "e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da",
       "attested_in": "docs/verification/runs/2026-09-14-r14/README.md",
       "attestation": "Imported package tree",
-      "selftest": ["make", "-C", "tests/playback_complete_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/playback_complete_draft8",
+        "check"
+      ]
     },
     {
       "path": "tests/record_draft8",
@@ -57,7 +78,10 @@
       "source_commit": "af15a8f4e7069aff9e9d5a98728530702a4f1f56",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-09 verifier package published by verification PR #21; imported byte-identically",
-      "selftest": ["python3", "tests/record_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/record_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/respool_draft8",
@@ -66,7 +90,10 @@
       "source_commit": "6519220f161254c0453a30858eb3e7073e2eb82b",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-12 verifier package published by verification PR #30; imported byte-identically",
-      "selftest": ["python3", "tests/respool_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/respool_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/slot_draft8",
@@ -75,7 +102,10 @@
       "source_commit": "6fc4014a4afa088cbba49c8306f72a77bd3291d8",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-36 source-slot verifier package published by verification PR #31; imported byte-identically",
-      "selftest": ["python3", "tests/slot_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/slot_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/format_dup_draft8",
@@ -84,7 +114,10 @@
       "source_commit": "982bac2cfb63ca3037d59be3887b2d66de065a34",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent format/dup refusal verifier package published by verification PR #35; imported byte-identically",
-      "selftest": ["python3", "tests/format_dup_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/format_dup_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/transport_draft8",
@@ -93,7 +126,10 @@
       "source_commit": "5d97073ca03014e9d4055014f294709a78506b9e",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent set_side and warm-start verifier package published by verification PR #32; imported byte-identically",
-      "selftest": ["python3", "tests/transport_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/transport_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/writability_draft8",
@@ -102,7 +138,10 @@
       "source_commit": "d875730ee5cedc6b88e40fcfe30aa4d81918f549",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-06a v1.1 writability verifier package published by verification PR #33; imported byte-identically",
-      "selftest": ["python3", "tests/writability_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/writability_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/notmounted_draft8",
@@ -111,7 +150,22 @@
       "source_commit": "2f0fe952244bf40b4658f6a94904470349871c17",
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-06h not-mounted verifier package published by verification PR #34; imported byte-identically",
-      "selftest": ["python3", "tests/notmounted_draft8/selftest.py"]
+      "selftest": [
+        "python3",
+        "tests/notmounted_draft8/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/promote_draft8",
+      "tree": "2b79e0b07016da3521917c5a276e36994ccccfa6",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "e5e06b06f1aa0755a3b0b15133f1ce680e17f7af",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent promote classification verifier package published by verification PR #37; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/promote_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
