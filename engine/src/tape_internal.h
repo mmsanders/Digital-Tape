@@ -74,6 +74,23 @@ struct tape {
     struct tape_index idx[2];
 
     unsigned char block[TAPE_BLOCK_SIZE];  /* staging; never on the stack */
+    /*
+     * The RAW bytes of the superblock copy §4.1 phase 1 selected, kept from
+     * mount. §8's stage clearing writes a superblock, and it may not read one
+     * first: the §4.6 update is specified as two writes and two flushes, and a
+     * read inside tape_arm would be a block callback the caller did not ask for
+     * in a call that is otherwise pure bookkeeping. Patching the four bytes that
+     * change, in the bytes that were actually selected, also preserves every
+     * field this engine does not model -- a serialise-from-struct would silently
+     * rewrite reserved and label bytes it does not round-trip.
+     */
+    unsigned char sb_block[TAPE_BLOCK_SIZE];
+    /* §4.6's classification, decided once at mount because it is defined over
+       what phase 1 saw. Partner is written first and candidate last. */
+    uint32_t sb_candidate_lba, sb_partner_lba;
+    /* §9.1 overdub reads existing frames before it adds. That read cannot land
+       in `block`, which holds the outgoing mixed block at the same moment. */
+    unsigned char mix_block[TAPE_BLOCK_SIZE];
     /* Raw entry bytes for the slot being parsed. In the instance, not a static:
        tape_dup mounts two cartridges at once, and a shared static would have
        them overwrite each other's index. The caller owns all storage (§4). */
@@ -149,6 +166,7 @@ struct tape {
      * accepted frames are not durable until §8 step 2's flush has returned.
      */
     bool      rec_armed;
+    tape_rec_mode rec_mode;      /* §9.1 mode, fixed at arm with the cursor */
     uint64_t  rec_cursor;        /* the edit point, fixed at arm (§7) */
     uint32_t  rec_first_chunk;   /* first chunk of the contiguous allocated run */
     uint32_t  rec_chunks;        /* chunks allocated to that run so far */
@@ -157,6 +175,10 @@ struct tape {
     uint64_t  rec_base;          /* run-relative index of rec_ring[0]; block aligned */
     uint32_t  rec_buf_frames;    /* frames currently held in rec_ring */
     bool      rec_unflushed;     /* a chunk write is not yet behind a flush */
+    /* §9.1 overdub: frames of the staged block whose existing audio has already
+       been summed in. Nonzero only between two tape_service calls that split one
+       block, and always 0 for overwrite and splice. */
+    uint32_t  rec_mix_done;
 };
 
 /* The mounted side's live index. There is no separate `live` member: it would be
@@ -190,8 +212,10 @@ uint64_t tape_entry_last_chunk(const struct tape_entry *e);
  */
 tape_result tape_index_check_overlap(const struct tape_index *idx, uint16_t *perm);
 
-/* Little-endian readers. Explicit byte assembly: the engine must produce
-   identical results on any host, and a struct overlay would not. */
+/* Little-endian readers and the one writer the superblock patch needs.
+   Explicit byte assembly: the engine must produce identical results on any
+   host, and a struct overlay would not. */
+void     tape_wr32(unsigned char *p, uint32_t v);
 uint16_t tape_rd16(const unsigned char *p);
 uint32_t tape_rd32(const unsigned char *p);
 uint64_t tape_rd64(const unsigned char *p);
@@ -322,6 +346,44 @@ tape_result tape_commit_index(struct tape *t, uint32_t slot_lba, const struct ta
    `budget - *used` blocks, then flush once every accepted frame is on media.
    Called only by tape_service, which owns the budget. */
 tape_result tape_record_service(struct tape *t, uint32_t budget, uint32_t *used, bool *more);
+
+/*
+ * §5.1/§6.3: map timeline frame `n` onto a physical frame index in the chunk
+ * store, and report how many frames from `n` stay inside `n`'s own entry. Used
+ * by playback to fill the play ring and by §9.1 overdub to find the existing
+ * frames it must read before it adds. One implementation, because two would
+ * disagree about the entry boundary eventually.
+ */
+bool tape_timeline_physical(const struct tape_index *idx, uint64_t n, uint64_t *out);
+uint32_t tape_timeline_run(const struct tape_index *idx, uint64_t n);
+
+/*
+ * §8 stage clearing, performed through §4.6's partner-first superblock update:
+ * promote_stage = 0, promote_staging_chunk = 0, a_high_water UNCHANGED and
+ * sb_generation + 1, written to the partner, flushed, written to the candidate,
+ * flushed. Exactly two writes and two flushes, and no read.
+ *
+ * The caller must already have passed its own preconditions, including §4.5
+ * headroom for BOTH counters (§8, engine-api §7). Any failure quarantines the
+ * instance per §7.2.
+ */
+tape_result tape_sb_clear_stage(struct tape *t);
+
+/*
+ * §9.1's one index edit, shared by all three record modes.
+ *
+ * The result is the timeline's head [0, at), then one new entry of `frames`
+ * frames based at `chunk`, then the original timeline from `tail_at` onward:
+ *
+ *   splice    tail_at == at            (nothing is displaced)
+ *   overdub   tail_at == at + frames   (the covered span is replaced)
+ *   overwrite tail_at == UINT64_MAX    (everything from `at` is dropped)
+ *
+ * Returns TAPE_ERR_INDEX_FULL and leaves `idx` untouched if the result would
+ * exceed TAPE_MAX_ENTRIES.
+ */
+tape_result tape_index_replace(struct tape_index *idx, uint64_t at, uint64_t tail_at,
+                               uint32_t chunk, uint64_t frames);
 
 /* §7's OWED predicate: frames tape_feed accepted that are not yet durable.
    §8.1 is why the pending flush counts — a write is not durable until a flush

@@ -32,6 +32,31 @@ jobs:
       # engine defines the six missing public operations.
       - run: python3 tests/ops_draft8/selftest.py
 
+  record-package:
+    name: independent WP-09 record package — synthetic self-checks, then product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Two separable facts, in order, in one job.
+      #
+      # 1. The verifier's own negative controls over its record oracles, run
+      #    against the package's SYNTHETIC stand-in adapter. No engine is built,
+      #    linked or executed here, so a green result is verifier plumbing and
+      #    never product evidence.
+      - run: python3 tests/record_draft8/selftest.py
+      # 2. The PRODUCT observation. The real engine is linked into the
+      #    mechanical adapter in tests/record_adapter, driven through every
+      #    published case, and judged by the package's own check functions,
+      #    imported unmodified. A green result is a raw observation for blind
+      #    Verification disposition — never acceptance, never a listened golden,
+      #    and it observes no PCM at all: the VO08 envelope carries no chunk data.
+      #
+      #    Verification PR #39 corrected the ARMED-BUSY verifier contradiction;
+      #    this is now an ordinary all-cases product run with no exception.
+      - run: make -C engine all
+      - run: make -C tests/record_adapter all
+      - run: python3 tests/record_adapter/run_product.py --evidence tests/record_adapter/evidence/p1-r25-product
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
