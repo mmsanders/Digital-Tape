@@ -100,12 +100,12 @@ def expect(want, name, repo, base):
 
 
 def main():
-    print("== Structural Rule 1 ordering check can go red ==")
+    print("== Structural Rule 1 ordering check can go red for any *_draft8 package ==")
     with tempfile.TemporaryDirectory() as tmp:
         # correct order: the import lands, then the implementation
         repo = build_repo(tmp)
         base = git(repo, "rev-parse", "HEAD").stdout.strip()
-        commit(repo, "tests/ops_draft8/oracle.py", "# imported verbatim\n", "import")
+        commit(repo, "tests/future_draft8/oracle.py", "# imported verbatim\n", "import")
         commit(repo, "engine/src/alloc.c", "/* implementation */\n", "implement")
         expect("green", "import commit precedes implementation", repo, base)
 
@@ -113,13 +113,13 @@ def main():
         repo = build_repo(pathlib.Path(tmp) / "b")
         base = git(repo, "rev-parse", "HEAD").stdout.strip()
         commit(repo, "engine/src/alloc.c", "/* implementation */\n", "implement")
-        commit(repo, "tests/ops_draft8/oracle.py", "# tweaked after the fact\n", "adjust tests")
+        commit(repo, "tests/future_draft8/oracle.py", "# tweaked after the fact\n", "adjust tests")
         expect("red", "package tree changed after implementation", repo, base)
 
         # both in one commit: no separable import
         repo = build_repo(pathlib.Path(tmp) / "c")
         base = git(repo, "rev-parse", "HEAD").stdout.strip()
-        f1 = repo / "tests/ops_draft8/oracle.py"
+        f1 = repo / "tests/future_draft8/oracle.py"
         f2 = repo / "engine/src/alloc.c"
         for f, t in ((f1, "# import\n"), (f2, "/* impl */\n")):
             f.parent.mkdir(parents=True, exist_ok=True)
