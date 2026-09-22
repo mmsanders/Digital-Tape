@@ -73,11 +73,11 @@
     },
     {
       "path": "tests/record_draft8",
-      "tree": "b7eb335d08f35b70f55fb54b5a0966c52a25688b",
+      "tree": "2944f6faae99ad8989a61bf4f536c9e4f22f5741",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "af15a8f4e7069aff9e9d5a98728530702a4f1f56",
+      "source_commit": "e9e6ec76f511099ae7e61e8167776bf430b87b8c",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "independent WP-09 verifier package published by verification PR #21; imported byte-identically",
+      "attestation": "corrected WP-09 verifier/replay package published by Verification PR #39; imported byte-identically; corrected content exercised at 072cdb3b21812f81770944f15d7f59dccb220f67",
       "selftest": [
         "python3",
         "tests/record_draft8/selftest.py"

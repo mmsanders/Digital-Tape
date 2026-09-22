@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 import struct
+import subprocess
+import sys
 import zlib
 
 from oracle import Media, check, idx, make_cases, overdub_saturate, synth_observation
@@ -89,6 +92,20 @@ def main():
         if item.get("fn") == "tape_set_rate" and item.get("phase") == "armed":
             item["result"] = "TAPE_OK"
     expect_fail(busy, post, ev, mutated, "armed set_rate allowed")
+    # Mount callbacks are legitimate and must remain visible; only the armed
+    # probes, abort, and unmount must be callback-free in this case.
+    mount_reads = [{"phase": "mount", "op": "read", "lba": 0, "count": 1}]
+    if check(busy, post, mount_reads, calls):
+        raise AssertionError("verifier still rejects required mount reads")
+    print("PASS armed BUSY permits recorded mount reads")
+    for phase in ("armed", "abort", "unmount"):
+        expect_fail(
+            busy,
+            post,
+            [{"phase": phase, "op": "read", "lba": 0, "count": 1}],
+            calls,
+            f"armed BUSY {phase} issued block I/O",
+        )
 
     rec = cases["WP09-SP-END"]
     post, ev, calls = synth_observation(rec)
@@ -241,6 +258,13 @@ def main():
             # candidate write before the first flush violates §4.6.
             ev_bad[arm_positions[1]], ev_bad[arm_positions[2]] = ev_bad[arm_positions[2]], ev_bad[arm_positions[1]]
             expect_fail_extra(check_extra, args, post, ev_bad, calls, "stage-clear candidate before partner flush")
+
+    replay = Path(__file__).resolve().parent / "replay_product_evidence.py"
+    evidence = Path(__file__).resolve().parent / "evidence" / "p1-r25-product" / "observations.jsonl"
+    proc = subprocess.run([sys.executable, str(replay), str(evidence)], text=True)
+    if proc.returncode != 0:
+        raise AssertionError("P1-R25 product evidence replay failed")
+    print("PASS P1-R25 product evidence replay")
 
     print("PASS all WP-09 record self-tests")
 
