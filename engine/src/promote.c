@@ -346,33 +346,33 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
     while (t->promote_in_progress) {
         bool done = false;
 
-        switch (t->promote_phase) {
-        case PROMOTE_PHASE_COPY_STAGE:
+        /*
+         * Deliberately an if/else chain rather than a switch. Guardrail 09's
+         * link-time backstop rejects compiler-generated jump tables because a
+         * stored engine function address is indistinguishable from an authored
+         * dispatch table. The state space is tiny; explicit control flow keeps
+         * that invariant mechanically decidable.
+         */
+        if (t->promote_phase == PROMOTE_PHASE_COPY_STAGE) {
             rc = promote_copy(t, &t->idx[TAPE_SIDE_B], t->promote_s,
                               block_budget, &used, &done);
             if (rc != TAPE_OK) { goto fail; }
             if (!done) { goto budget_done; }
             promote_reset_copy(t);
             t->promote_phase = PROMOTE_PHASE_COMMIT_A_STAGE;
-            break;
-
-        case PROMOTE_PHASE_COMMIT_A_STAGE:
+        } else if (t->promote_phase == PROMOTE_PHASE_COMMIT_A_STAGE) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_commit_one(t, TAPE_SIDE_A, t->promote_s, &used);
             if (rc != TAPE_OK) { goto fail; }
             t->promote_phase = t->promote_adopt
                              ? PROMOTE_PHASE_SB_STAGE
                              : PROMOTE_PHASE_COMMIT_B_STAGE;
-            break;
-
-        case PROMOTE_PHASE_COMMIT_B_STAGE:
+        } else if (t->promote_phase == PROMOTE_PHASE_COMMIT_B_STAGE) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_commit_one(t, TAPE_SIDE_B, t->promote_s, &used);
             if (rc != TAPE_OK) { goto fail; }
             t->promote_phase = PROMOTE_PHASE_SB_STAGE;
-            break;
-
-        case PROMOTE_PHASE_SB_STAGE:
+        } else if (t->promote_phase == PROMOTE_PHASE_SB_STAGE) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_sb_update(t, t->promote_s + t->promote_len,
                                    TAPE_PROMOTE_STAGE_PHASE1, t->promote_s);
@@ -385,9 +385,7 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
             } else {
                 t->promote_phase = PROMOTE_PHASE_SB_DECLINE;
             }
-            break;
-
-        case PROMOTE_PHASE_SB_DECLINE:
+        } else if (t->promote_phase == PROMOTE_PHASE_SB_DECLINE) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_sb_update(t, t->sb.a_high_water,
                                    TAPE_PROMOTE_STAGE_NONE, 0u);
@@ -398,31 +396,24 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
             promote_finish(t);
             *more_work = false;
             return TAPE_OK;
-
-        case PROMOTE_PHASE_COPY_FINAL:
+        } else if (t->promote_phase == PROMOTE_PHASE_COPY_FINAL) {
             rc = promote_copy(t, &t->idx[TAPE_SIDE_B], 0u,
                               block_budget, &used, &done);
             if (rc != TAPE_OK) { goto fail; }
             if (!done) { goto budget_done; }
             promote_reset_copy(t);
             t->promote_phase = PROMOTE_PHASE_COMMIT_A_FINAL;
-            break;
-
-        case PROMOTE_PHASE_COMMIT_A_FINAL:
+        } else if (t->promote_phase == PROMOTE_PHASE_COMMIT_A_FINAL) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_commit_one(t, TAPE_SIDE_A, 0u, &used);
             if (rc != TAPE_OK) { goto fail; }
             t->promote_phase = PROMOTE_PHASE_COMMIT_B_FINAL;
-            break;
-
-        case PROMOTE_PHASE_COMMIT_B_FINAL:
+        } else if (t->promote_phase == PROMOTE_PHASE_COMMIT_B_FINAL) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_commit_one(t, TAPE_SIDE_B, 0u, &used);
             if (rc != TAPE_OK) { goto fail; }
             t->promote_phase = PROMOTE_PHASE_SB_FINAL;
-            break;
-
-        case PROMOTE_PHASE_SB_FINAL:
+        } else if (t->promote_phase == PROMOTE_PHASE_SB_FINAL) {
             if (block_budget - used < 2u) { goto budget_done; }
             rc = promote_sb_update(t, t->promote_len,
                                    TAPE_PROMOTE_STAGE_NONE, 0u);
@@ -433,8 +424,7 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
             promote_finish(t);
             *more_work = false;
             return TAPE_OK;
-
-        default:
+        } else {
             rc = TAPE_ERR_INCONSISTENT;
             goto fail;
         }
