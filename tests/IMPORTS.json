@@ -20,7 +20,12 @@
       "source_commit": "4ee116fa040bb5ce040325e0076365abf8b0f8f9",
       "attested_in": "docs/REVIEW/P1-R1-PM-REVIEW.md",
       "attestation": "Mount package Git tree in both repositories",
-      "selftest": ["make", "-C", "tests/mount_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/mount_draft8",
+        "check"
+      ]
     },
     {
       "path": "tests/ops_draft8",
@@ -29,8 +34,14 @@
       "source_commit": "15dd16e",
       "attested_in": "docs/VERIFICATION-INTEGRATION.md",
       "attestation": "corrected complete verifier tree, imported exactly and test-first at product main 48cc23fd",
-      "superseded_trees": ["4a862fa69ccb2fc4c9afe59c9c9161c3470f9263", "c8a43df69a6be8e2c34bf79a1d79933abf48286a"],
-      "selftest": ["python3", "tests/ops_draft8/selftest.py"]
+      "superseded_trees": [
+        "4a862fa69ccb2fc4c9afe59c9c9161c3470f9263",
+        "c8a43df69a6be8e2c34bf79a1d79933abf48286a"
+      ],
+      "selftest": [
+        "python3",
+        "tests/ops_draft8/selftest.py"
+      ]
     },
     {
       "path": "tests/playback_draft8",
@@ -39,7 +50,12 @@
       "source_commit": "7a22cbb4447c40c51b7c8b2282a685ed30a46ba6",
       "attested_in": "docs/archive/verification-integration-history.md",
       "attestation": "the product subtree hash reproduces ff810814 exactly",
-      "selftest": ["make", "-C", "tests/playback_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/playback_draft8",
+        "check"
+      ]
     },
     {
       "path": "tests/playback_complete_draft8",
@@ -48,7 +64,24 @@
       "source_commit": "e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da",
       "attested_in": "docs/verification/runs/2026-09-14-r14/README.md",
       "attestation": "Imported package tree",
-      "selftest": ["make", "-C", "tests/playback_complete_draft8", "check"]
+      "selftest": [
+        "make",
+        "-C",
+        "tests/playback_complete_draft8",
+        "check"
+      ]
+    },
+    {
+      "path": "tests/record_draft8",
+      "tree": "b7eb335d08f35b70f55fb54b5a0966c52a25688b",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "af15a8f4e7069aff9e9d5a98728530702a4f1f56",
+      "attested_in": "docs/VERIFICATION-INTEGRATION.md",
+      "attestation": "independent WP-09 verifier package published from verification PR #21; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/record_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
