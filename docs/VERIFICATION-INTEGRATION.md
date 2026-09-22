@@ -5,7 +5,7 @@ accepted. It is not a chronicle. The per-round import narrative for P1-R1 throug
 P1-R24, with every source publication, tree, blob and findings hash, is preserved
 verbatim in [the verification integration history](archive/verification-integration-history.md).
 
-## Current clean integration boundary — 20 September 2026
+## Current clean integration boundary — 22 September 2026
 
 PR #77 is merged at product main
 `4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
@@ -35,11 +35,21 @@ further.
 
 Current work directions live only in role-labeled issues.
 
+On 21–22 September, Verification also published eight additional independent verifier
+packages and product main imported them mechanically, test-first: `record_draft8` (#140;
+verifier `af15a8f...`), `respool_draft8` (#142; `6519220...`), `slot_draft8` (#143;
+`6fc4014...`), `format_dup_draft8` (#144; `982bac2...`), `transport_draft8` (#145;
+`5d97073...`), `writability_draft8` (#146; `d875730...`), `notmounted_draft8` (#147;
+`2f0fe95...`) and `promote_draft8` (#148; `e5e06b0...`). These are publication/import
+facts only: none has a real-product independent disposition yet and they add **zero**
+accepted behavior. P1-R25 routes `record_draft8` first to Software issue #150; the
+others remain queued behind bounded integration rounds.
+
 ## Integration rules that do not change
 
-- Verifier package trees — `tests/mount_draft8/`, `tests/ops_draft8/`,
-  `tests/playback_draft8/`, `tests/playback_complete_draft8/` — are imported **verbatim
-  with modes preserved** and are Verification-owned. No assertion, fixture, expected
+- Verifier package trees declared in `tests/IMPORTS.json` (including every
+  `tests/*_draft8/` publication named above) are imported **verbatim with modes
+  preserved** and are Verification-owned. No assertion, fixture, expected
   sequence, operation argument, ordering, range, tolerance or exclusion is ever changed
   on import. Route a disagreement to Verification/PM.
 - The nested `spec/` inside a package tree is an **authenticated test baseline**, not a
@@ -61,6 +71,12 @@ Current work directions live only in role-labeled issues.
 | WP-08 playback — `tests/playback_draft8/`, `tests/playback_complete_draft8/` | Exact ten corrected-cadence product observation families; 698/698 completed per-render service sequences in each direction | Source and helper design; complete WP-08; listening; goldens | Three-family publication `7a22cbb4447c40c51b7c8b2282a685ed30a46ba6` (subtree `ff810814dbc8079c6903e6f85ed7ee312abd3076`); complete ten-family `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`; corrected `62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`; cadence correction `e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da`; disposition `392d6bb9c948a5924fe18728fab04202bc8e337e` |
 | WP-11 goldens — `tests/playback_draft8/golden/` | **Nothing accepted.** Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is verifier-derived oracle bytes, unlistened, and is **not** an accepted golden. Golden CI stays red until Michael listens | Carried with the WP-08 publications above |
 | WP-10 crash harness | Narrow independent mount package landed | Complete crash/operation/state run is not green | Carried with the WP-06 publication above |
+| WP-06 extension — `writability_draft8`, `notmounted_draft8` | **Nothing newly accepted.** Independent verifier packages are on main | Exact real-product observations/disposition; source/helper design; complete WP-06 | Publications `d875730...`, `2f0fe95...` |
+| WP-08 extension — `transport_draft8` | **Nothing newly accepted.** Independent set-side/warm-start package is on main | Exact real-product observations/disposition; complete WP-08; listening/goldens | Publication `5d97073...` |
+| WP-09 record — `record_draft8` | **Nothing accepted.** Independent verifier package is on main | Software #150 real-product bundle, then blind Verification; explicit property/crash/golden exclusions remain | Publication `af15a8f...` |
+| WP-12 re-spool — `respool_draft8` | **Nothing accepted.** Independent verifier package is on main | Exact real-product observations/disposition; WP-12a continuation/state coverage | Publication `6519220...` |
+| WP-36 source-slot — `slot_draft8` | **Nothing accepted.** Deterministic independent verifier package is on main | Exact real-product observations/disposition; required 100,000-sequence run | Publication `6fc4014...` |
+| Raw/promote operation precursors — `format_dup_draft8`, `promote_draft8` | **Nothing accepted.** Independent verifier packages are on main | Exact real-product observations/disposition and all documented exclusions | Publications `982bac2...`, `e5e06b0...` |
 
 Open independent findings: `P1-R23-V01` rejects Hardware PR #87's sustained-write audit
 method (card characterisation, not engine coverage). No engine finding is open.

@@ -1,10 +1,11 @@
 # Project status
 
-**21 September 2026 UTC · main `08014df` · Owner: PM ·** Phase 1 holds three
-independently accepted tranches (289 mount cases, ten playback families, two VT8-001
-operation cases); no package, source or golden is accepted and the dashboard stays at
-13 of 36. The eight-work-order remediation round landed and **accepted nothing** — it
-changed how rounds are run, not what is true.
+**22 September 2026 UTC · input main `fb6a2c9` · Owner: PM ·** Phase 1 still holds
+three independently accepted tranches (289 mount cases, ten playback families, two
+VT8-001 operation cases); no package, source or golden is accepted and the dashboard
+stays at 13 of 36. Eight additional verifier packages are now independently published
+and mechanically imported, but they have no real-product disposition yet. P1-R25 routes
+the WP-09 record tranche to Software in #150; the remaining imported tranches stay queued.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -45,15 +46,15 @@ Every new gate has a negative control that is proven to go red. Run them with
 
 | Package | Independently accepted | Outstanding | Next owner |
 |---|---|---|---|
-| WP-06 block device, superblock, index commit | Exact 289/289 mount observations including row 3, at verifier `392d6bb9...` | Source and helper design; complete WP-06 package | Held — Software, scoped issue only |
+| WP-06 block device, superblock, index commit | Exact 289/289 mount observations including row 3, at verifier `392d6bb9...` | `writability_draft8` and `notmounted_draft8` are independently published/imported but unexecuted on the real product; source/helper design and complete WP-06 remain open | Queued — Software after the current record tranche |
 | WP-07 chunk allocator, copy-on-write Side B | Two exact recorded observations — `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` — at verifier `e77b61f...`, re-confirmed on the clean PR #112 split at `391d6a8...` | Invented splice-only and stage-1 BUSY refusal policies; every unexercised branch; source; complete WP-07 | Held pending a later independently tested tranche |
-| WP-08 playback, seek, variable-rate scrub | Exact ten corrected-cadence product observations, 698/698 per-render service in each direction, at verifier `392d6bb9...` | Source and helper design; complete WP-08; listening and goldens | Held — separate listening/golden route |
-| WP-09 record: overwrite, overdub, splice | None | Contract issued; corresponding independent tests must land before implementation | Verification |
+| WP-08 playback, seek, variable-rate scrub | Exact ten corrected-cadence product observations, 698/698 per-render service in each direction, at verifier `392d6bb9...` | `transport_draft8` adds independent set-side/warm-start coverage on main but has no real-product disposition; source/helper design, complete WP-08, listening and goldens remain open | Queued — Software for the new transport tranche; listening/goldens remain separately held |
+| WP-09 record: overwrite, overdub, splice | None | `record_draft8` is independently published/imported via #140; real-product execution, blind disposition and its explicit excluded histories/crash/golden work remain outstanding | **Software #150** |
 | WP-10 crash-injection harness | Narrow independent mount package landed | Complete crash/operation/state run is not green | Verification |
 | WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is unlistened and is not an accepted golden; golden CI stays red | Held — needs Michael's own listening |
-| WP-12 re-spool / defragment pass | None | Independent WP-12a coverage and acceptance | Verification |
+| WP-12 re-spool / defragment pass | None | `respool_draft8` is independently published/imported via #142; real-product execution is outstanding and WP-12a continuation/BUSY/re-entry/FAULTED coverage remains separate | Queued — Software, then Verification |
 | WP-13 embedded-readiness audit | None | Held #20 measurements (instance 156456 B, stack 1536/8192, rodata 1040/32768) are implementer evidence, not package acceptance | Held |
-| WP-36 slot capability model | None | Contract issued; corresponding independent tests must land before implementation | Verification |
+| WP-36 slot capability model | None | `slot_draft8` deterministic source-slot coverage is independently published/imported via #143; real-product execution is outstanding and the required 100,000-sequence acceptance run remains separate | Queued — Software, then Verification |
 
 Engine implementation status: 16 of 21 public entry points are defined. `tape_abort`,
 `tape_dup`, `tape_format`, `tape_promote` and `tape_respool` are declared and undefined.
@@ -89,8 +90,10 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 
 **New independent package acceptances: none.** The three accepted tranches above are
 exact recorded observations only — not source, helper design, complete WP-06/WP-07/WP-08,
-merge status or goldens. Main ruleset 22084355 is active and strict. Missing WP-11 goldens
-remain an explicit red gate.
+merge status or goldens. The newly imported record, respool, source-slot, format/dup,
+set-side/warm-start, v1.1-writability, not-mounted and promote packages are test
+publications only until exact real-product evidence is independently dispositioned.
+Main ruleset 22084355 remains active and strict. Missing WP-11 goldens remain an explicit red gate.
 
 Phase 1 operating format, role charters and the issue workflow are in
 [CLAUDE.md §7](../CLAUDE.md), [role charters](ROLES/README.md) and
