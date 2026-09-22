@@ -58,6 +58,15 @@
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-09 verifier package published by verification PR #21; imported byte-identically",
       "selftest": ["python3", "tests/record_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/respool_draft8",
+      "tree": "caf607917240c5a96fd32f526ee8e2a4761ebb24",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "6519220f161254c0453a30858eb3e7073e2eb82b",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent WP-12 verifier package published by verification PR #30; imported byte-identically",
+      "selftest": ["python3", "tests/respool_draft8/selftest.py"]
     }
   ],
   "evidence_bundles": [
