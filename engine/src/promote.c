@@ -18,15 +18,21 @@
 #include "tape_crc32.h"
 #include "dev.h"
 
-#define PROMOTE_PHASE_COPY_STAGE      1u
-#define PROMOTE_PHASE_COMMIT_A_STAGE  2u
-#define PROMOTE_PHASE_COMMIT_B_STAGE  3u
-#define PROMOTE_PHASE_SB_STAGE        4u
-#define PROMOTE_PHASE_SB_DECLINE      5u
-#define PROMOTE_PHASE_COPY_FINAL      6u
-#define PROMOTE_PHASE_COMMIT_A_FINAL  7u
-#define PROMOTE_PHASE_COMMIT_B_FINAL  8u
-#define PROMOTE_PHASE_SB_FINAL        9u
+/*
+ * Sparse state tags are intentional. The indirect-call gate rejects compiler
+ * generated jump tables (a .rodata relocation into .text is indistinguishable
+ * from an authored dispatch table), so keep these far enough apart that -Os
+ * lowers the state machine to direct comparisons.
+ */
+#define PROMOTE_PHASE_COPY_STAGE       7u
+#define PROMOTE_PHASE_COMMIT_A_STAGE  23u
+#define PROMOTE_PHASE_COMMIT_B_STAGE  41u
+#define PROMOTE_PHASE_SB_STAGE        67u
+#define PROMOTE_PHASE_SB_DECLINE     101u
+#define PROMOTE_PHASE_COPY_FINAL     137u
+#define PROMOTE_PHASE_COMMIT_A_FINAL 173u
+#define PROMOTE_PHASE_COMMIT_B_FINAL 211u
+#define PROMOTE_PHASE_SB_FINAL       251u
 
 #define PROMOTE_FRAMES_PER_BLOCK (TAPE_BLOCK_SIZE / TAPE_FRAME_BYTES)
 
