@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -34,7 +35,7 @@ def main() -> int:
     if not probe.exists():
         raise SystemExit(f"probe not found: {probe}")
 
-    product_commit = git("rev-parse", "HEAD")
+    product_commit = os.environ.get("PRODUCT_COMMIT") or git("rev-parse", "HEAD")
     package_tree = git("rev-parse", "HEAD:tests/transport_draft8")
     rows = []
     failures = 0
