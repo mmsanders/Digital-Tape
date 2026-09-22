@@ -103,6 +103,15 @@
       "attested_in": "tests/IMPORTS.json",
       "attestation": "independent WP-06a v1.1 writability verifier package published by verification PR #33; imported byte-identically",
       "selftest": ["python3", "tests/writability_draft8/selftest.py"]
+    },
+    {
+      "path": "tests/notmounted_draft8",
+      "tree": "f5ea4a64044cb5741565a36249f15756b2524015",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "2f0fe952244bf40b4658f6a94904470349871c17",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent WP-06h not-mounted verifier package published by verification PR #34; imported byte-identically",
+      "selftest": ["python3", "tests/notmounted_draft8/selftest.py"]
     }
   ],
   "evidence_bundles": [
