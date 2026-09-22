@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R25 WP-09 verification return · 22 September 2026 UTC",
+      asOf: "P1-R25 transport integration · 22 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -269,9 +269,9 @@
         { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 2,
           note: "PR #112 is integrated with its exact independently observed history intact. Acceptance remains only the two recorded observations; source, invented refusals, excluded behavior and complete-package acceptance remain held." },
         { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
-          note: "The clean observed slice is merged. Verification independently accepted the exact ten corrected-cadence observations. A new set-side/warm-start verifier tranche is on main but has no real-product disposition; no source, listening, golden or complete-package acceptance follows." },
+          note: "The exact ten corrected-cadence observations remain accepted. Verification PR #41 independently replayed the 16-case set-side/warm-start product evidence 16/16 PASS, and product PR #171 is now integrated at main e598b82. This remains a narrow evidence tranche, not source, listening, golden or complete-package acceptance." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
-          note: "The exact 26-case record evidence from held PR #161 is independently replayed 26/26 PASS after Verification corrected the ARMED-BUSY oracle in verifier PR #39. Software #165 now owns the clean corrected-verifier-first integration and ordinary rerun. This is an accepted evidence tranche, not full WP-09 coverage or a merged implementation, so the package rung does not advance." },
+          note: "The exact 26-case record evidence is independently replayed 26/26 PASS after Verification corrected ARMED-BUSY, and clean verifier-first product PR #167 is now merged at main 1db7135. This is still not full required WP-09 package coverage, so the package rung does not advance." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
           note: "Crash infrastructure and the narrow mount package are on main. The complete engine crash, operation and state run is not green, which is what keeps the operations matrix unfrozen." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
