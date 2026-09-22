@@ -551,6 +551,13 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
     /* A fresh mount is the ONLY exit from §7.2's quarantine, and it is one
        because it re-runs §4.1 and resolves the media honestly. */
     t->faulted         = false;
+    /* A remount starts with no in-memory long operation. Any durable promote
+       stage is classified from media after mount; it is never inferred from a
+       stale continuation struct. */
+    t->promote_in_progress = false;
+    t->promote_phase = 0u;
+    t->promote_copy_block = 0u;
+    t->promote_copy_frame = 0u;
 
     /* Phases 1 and 2. No writes anywhere below this line until phase 4. */
     rc = resolve_superblock(t, &repair_lba);
@@ -614,7 +621,9 @@ tape_result tape_unmount(tape *t, uint64_t *out_position_frame)
      * path that forgot to ask. The Faulted row overrides it: there, unmount is
      * the only exit and refusing it would strand the instance (§7.2).
      */
-    if (t->rec_armed && !t->faulted) { return TAPE_ERR_BUSY; }
+    if ((t->rec_armed || t->promote_in_progress) && !t->faulted) {
+        return TAPE_ERR_BUSY;
+    }
 
     /* Permitted in FAULTED — it is the only exit (§7.2). The engine never writes
        position to media (§5, §11): the source slot is read-only, so position
@@ -685,7 +694,7 @@ tape_result tape_set_side(tape *t, tape_side side)
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
     /* §10: B in both armed rows. The recording cursor is a position on THIS
        side's timeline; switching out from under it has no defined meaning. */
-    if (t->rec_armed) { return TAPE_ERR_BUSY; }
+    if (t->rec_armed || t->promote_in_progress) { return TAPE_ERR_BUSY; }
     if (side != TAPE_SIDE_A && side != TAPE_SIDE_B) { return TAPE_ERR_INVALID_ARG; }
 
     /*
