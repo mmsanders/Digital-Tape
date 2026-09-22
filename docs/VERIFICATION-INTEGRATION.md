@@ -35,15 +35,16 @@ further.
 
 Current work directions live only in role-labeled issues.
 
-On 21–22 September, Verification also published eight additional independent verifier
-packages and product main imported them mechanically, test-first: `record_draft8` (#140;
-verifier `af15a8f...`), `respool_draft8` (#142; `6519220...`), `slot_draft8` (#143;
-`6fc4014...`), `format_dup_draft8` (#144; `982bac2...`), `transport_draft8` (#145;
-`5d97073...`), `writability_draft8` (#146; `d875730...`), `notmounted_draft8` (#147;
-`2f0fe95...`) and `promote_draft8` (#148; `e5e06b0...`). These are publication/import
-facts only: none has a real-product independent disposition yet and they add **zero**
-accepted behavior. P1-R25 routes `record_draft8` first to Software issue #150; the
-others remain queued behind bounded integration rounds.
+On 21–22 September, Verification published eight additional independent verifier
+packages and product main imported them mechanically, test-first. WP-09 `record_draft8`
+was originally imported from `af15a8f...`; held product commit `9d3649d...` then
+produced a 26-case evidence bundle. Verification PR #39, merged at `e9e6ec7...`,
+corrected the ARMED-BUSY verifier contradiction and independently replayed that exact
+bundle **26/26 PASS**. Product integration is still held until Software #165 imports the
+corrected verifier bytes first and reruns normally. The other seven verifier packages
+(`respool_draft8`, `slot_draft8`, `format_dup_draft8`, `transport_draft8`,
+`writability_draft8`, `notmounted_draft8`, `promote_draft8`) remain publication/import
+facts without real-product independent disposition.
 
 ## Integration rules that do not change
 
@@ -73,13 +74,14 @@ others remain queued behind bounded integration rounds.
 | WP-10 crash harness | Narrow independent mount package landed | Complete crash/operation/state run is not green | Carried with the WP-06 publication above |
 | WP-06 extension — `writability_draft8`, `notmounted_draft8` | **Nothing newly accepted.** Independent verifier packages are on main | Exact real-product observations/disposition; source/helper design; complete WP-06 | Publications `d875730...`, `2f0fe95...` |
 | WP-08 extension — `transport_draft8` | **Nothing newly accepted.** Independent set-side/warm-start package is on main | Exact real-product observations/disposition; complete WP-08; listening/goldens | Publication `5d97073...` |
-| WP-09 record — `record_draft8` | **Nothing accepted.** Independent verifier package is on main | Software #150 real-product bundle, then blind Verification; explicit property/crash/golden exclusions remain | Publication `af15a8f...` |
+| WP-09 record — `record_draft8` | Exact 26/26 retained product observations at `9d3649d...`, independently replayed PASS under corrected verifier semantics | Corrected verifier-first product integration/rerun (#165); PCM/listening, WP-10 crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and stated exclusions | Original `af15a8f...`; corrected verifier PR #39 merged `e9e6ec7...` (correction/replay `072cdb3...`) |
 | WP-12 re-spool — `respool_draft8` | **Nothing accepted.** Independent verifier package is on main | Exact real-product observations/disposition; WP-12a continuation/state coverage | Publication `6519220...` |
 | WP-36 source-slot — `slot_draft8` | **Nothing accepted.** Deterministic independent verifier package is on main | Exact real-product observations/disposition; required 100,000-sequence run | Publication `6fc4014...` |
 | Raw/promote operation precursors — `format_dup_draft8`, `promote_draft8` | **Nothing accepted.** Independent verifier packages are on main | Exact real-product observations/disposition and all documented exclusions | Publications `982bac2...`, `e5e06b0...` |
 
 Open independent findings: `P1-R23-V01` rejects Hardware PR #87's sustained-write audit
-method (card characterisation, not engine coverage). No engine finding is open.
+method (card characterisation, not engine coverage). WP-09's ARMED-BUSY verifier finding
+is resolved by verifier PR #39; no engine defect was found in that disposition.
 
 ## Reproduce
 
