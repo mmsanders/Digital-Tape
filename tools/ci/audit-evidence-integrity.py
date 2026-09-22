@@ -178,9 +178,16 @@ def check_adapter_identity(m):
 
 
 # --- 6. Structural Rule 1, mechanised ------------------------------------------
-PKG_PREFIXES = ("tests/mount_draft8/", "tests/ops_draft8/",
-                "tests/playback_draft8/", "tests/playback_complete_draft8/")
+# Verifier-owned packages use the top-level tests/*_draft8 convention. Keep this
+# rule convention-based rather than enumerating today's imports: a newly published
+# verifier package is protected on its first product-side import commit, before
+# tests/IMPORTS.json is even used to authenticate its exact tree.
+VERIFIER_PACKAGE_RE = re.compile(r"^tests/[^/]+_draft8(?:/|$)")
 IMPL_PREFIXES = ("engine/", "firmware/")
+
+
+def is_verifier_package_path(path):
+    return bool(VERIFIER_PACKAGE_RE.match(path))
 
 
 def check_structural_rule_1(base):
@@ -213,7 +220,7 @@ def check_structural_rule_1(base):
     last_pkg = None
     for i, c in enumerate(commits):
         files = run(["git", "show", "--pretty=", "--name-only", c]).stdout.split("\n")
-        pkg = any(f.startswith(PKG_PREFIXES) for f in files if f)
+        pkg = any(is_verifier_package_path(f) for f in files if f)
         impl = any(f.startswith(IMPL_PREFIXES) for f in files if f)
         if pkg and impl:
             fail("rule-1", f"commit {c[:12]} changes a verifier package tree AND "
