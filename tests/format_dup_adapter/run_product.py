@@ -64,7 +64,7 @@ def main() -> int:
     print(f"product_tree={product_tree}")
     print(f"format_dup_verifier_tree={package_tree}")
     print(f"verifier_publication={VERIFIER_COMMIT}")
-    return subprocess.call(cmd, cwd=PKG)
+    return subprocess.call(cmd, cwd=ROOT)
 
 
 if __name__ == "__main__":
