@@ -22,12 +22,30 @@ plate if the two ever overlap again.
 
 Four buttons — **A, B, C, N** — one frame, one bar. The letters are 7 mm now.
 
+## Which hole is which
+
+The frame has two openings and they are easy to mix up:
+
+- the **wide channel down the middle, open at the top and the front** — that is
+  where the **button** goes, dropped in from above;
+- the **small square slot low down in the front face** — that is where the
+  **bar** goes, pushed in from the front. It runs through both posts.
+
 ## What to do
 
-1. Drop the **bar** into the two slots in the posts, from the front.
-2. Drop a **button** into the square hole. Its wide top rests on the posts.
-3. **Press it down** with your thumb until something happens.
+1. Push the **bar** in through the low front slot, so it runs through both posts
+   and sticks out either side.
+2. Drop a **button** into the channel **from the top**. Its wide cap will sit on
+   the post tops and stop it going any further.
+3. **Press the cap down** with your thumb until something happens.
 4. **Pull the bar forward** (toward you) and see if the button comes free.
+
+**There is no spring in this and you do not need one.** The button staying down is
+the latch working; it coming free when you pull the bar is the release working. A
+spring is what the real player needs to pop the button back up, and we will fit
+one once we know the latch itself works — a weak spring now would make a failure
+impossible to read, because you could not tell the latch, the spring and friction
+apart.
 
 For each of the four, tell me:
 
@@ -36,9 +54,8 @@ For each of the four, tell me:
 - **did pulling the bar release it?** — yes / no / had to force it
 - anything that broke
 
-Hold the bar with a finger while you press — there is no spring in this, and
-nothing to buy. The button staying down *is* the latch working. It coming free
-when you pull the bar *is* the release working.
+Hold the bar with a finger while you press, so it cannot slide forward on its
+own.
 
 ## N is the one that matters most
 
