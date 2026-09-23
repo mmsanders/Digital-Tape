@@ -101,11 +101,11 @@ static int mem_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     struct media_ctx *m = ctx;
     uint64_t end = (uint64_t)lba + (uint64_t)count;
 
+    trace_extent(m, "read", lba, count);
     if (end > (uint64_t)m->blocks) { return -1; }
     memcpy(dst,
            m->bytes + (size_t)lba * TAPE_BLOCK_SIZE,
            (size_t)count * TAPE_BLOCK_SIZE);
-    trace_extent(m, "read", lba, count);
     return 0;
 }
 
@@ -115,10 +115,10 @@ static int mem_write(void *ctx, uint32_t lba, uint32_t count,
     struct media_ctx *m = ctx;
     uint64_t end = (uint64_t)lba + (uint64_t)count;
 
+    trace_extent(m, "write", lba, count);
     if (end > (uint64_t)m->blocks) { return -1; }
     memcpy(m->bytes + (size_t)lba * TAPE_BLOCK_SIZE,
            src, (size_t)count * TAPE_BLOCK_SIZE);
-    trace_extent(m, "write", lba, count);
     return 0;
 }
 
@@ -126,6 +126,41 @@ static int mem_flush(void *ctx)
 {
     struct media_ctx *m = ctx;
     trace_flush(m);
+    return 0;
+}
+
+static int selfcheck_rejected_callback_trace(void)
+{
+    struct media_ctx m;
+    unsigned char block[TAPE_BLOCK_SIZE];
+    int rr;
+    int wr;
+
+    memset(&m, 0, sizeof m);
+    memset(block, 0, sizeof block);
+    m.blocks = 1u;
+    m.bytes = block;
+    m.trace = true;
+
+    rr = mem_read(&m, 1u, 1u, block);
+    wr = mem_write(&m, 1u, 1u, block);
+
+    if (rr != -1 || wr != -1 || m.overflow || m.event_count != 2u) {
+        fprintf(stderr, "rejected-callback trace self-check failed: rc/read=%d rc/write=%d events=%lu overflow=%d\n",
+                rr, wr, (unsigned long)m.event_count, m.overflow ? 1 : 0);
+        return 1;
+    }
+    if (strcmp(m.events[0].op, "read") != 0
+        || m.events[0].lba != 1u || m.events[0].count != 1u
+        || !m.events[0].has_extent
+        || strcmp(m.events[1].op, "write") != 0
+        || m.events[1].lba != 1u || m.events[1].count != 1u
+        || !m.events[1].has_extent) {
+        fprintf(stderr, "rejected-callback trace self-check captured wrong events\n");
+        return 1;
+    }
+
+    puts("PASS rejected read/write callbacks are retained before refusal");
     return 0;
 }
 
@@ -363,8 +398,12 @@ int main(int argc, char **argv)
     int failed = 0;
     uint32_t iterations = 0u;
 
+    if (argc == 2 && strcmp(argv[1], "--selfcheck-callback-trace") == 0) {
+        return selfcheck_rejected_callback_trace();
+    }
     if (argc != 4) {
         fprintf(stderr, "usage: %s CASE_ID INPUT.vo08 OUTPUT.vo08\n", argv[0]);
+        fprintf(stderr, "       %s --selfcheck-callback-trace\n", argv[0]);
         return 2;
     }
     memset(&media, 0, sizeof media);
