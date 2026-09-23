@@ -136,6 +136,24 @@ jobs:
           path: tests/format_dup_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  writability-package:
+    name: independent writability package — synthetic self-checks, then 8-case product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/writability_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/writability_adapter all
+      - run: python3 tests/writability_adapter/run_product.py --evidence tests/writability_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-writability-product-evidence
+          path: tests/writability_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
