@@ -28,13 +28,24 @@ There are also **three plain blocks**. Those are for the kitchen scale.
 
 | | |
 |---|---|
-| **Printer** | Your A1 Mini |
+| **Printer** | Your A1 Mini, **0.4 mm nozzle** — not the 0.2 |
 | **Material** | The white Bambu PLA Basic you already have. No new filament. |
-| **Profile** | The stock Bambu PLA Basic profile, 0.2 mm layer. **Please do not tune anything.** |
+| **Profile** | Stock **Bambu PLA Basic, 0.20 mm Standard**. **Please do not tune anything.** |
 | **Supports** | **Off.** Nothing here needs them. |
-| **Orientation** | As the file sits. Please don't rotate it. |
+| **Orientation** | As the file sits. **Do not press auto-orient or auto-arrange** — the holes have to point up. |
+| **Infill** | Stock, whatever it already is. Just **write down the number.** |
 | **Plate** | Whichever plate is already on the machine — just tell me which one. |
 | **Expected time** | Wildly under an hour. It is a small plate. |
+
+**Why the 0.4 and not the 0.2.** Not because it is better — because it is the one
+the cartridge plate will use. This print exists to predict *that* print, so every
+setting that differs between the two makes it predict less. Same reason for the
+stock profile: a tuned print would characterise a machine configuration we are not
+going to use again.
+
+**One job, start to finish.** Don't cancel and restart, and don't reprint a single
+coupon on its own afterwards. Three coupons from one session is the whole point of
+there being three.
 
 **If you have already changed settings from stock, that is completely fine — just
 write down what they are.** I want to know what this machine does as you actually
@@ -61,6 +72,12 @@ size do not fit into each other. If hole 1 takes the peg easily, that is a real 
 useful result, not a mistake: it means the machine prints holes wider than asked.
 
 Use the **same peg** for all six holes and keep the second one clean as a spare.
+
+**One extra thing, if you notice it.** The peg has a faint vertical line down one
+side where the printer started each layer. If **turning the peg** changes whether
+it goes into a hole, say so — that line is a real bump and it would mean the fit
+depends on which way round the part happens to be, which matters a lot for a
+cartridge that gets assembled by hand.
 
 **The three blocks.** Weigh each one on the kitchen scale, separately, and write
 down all three numbers — even if they look identical. Especially if they look
