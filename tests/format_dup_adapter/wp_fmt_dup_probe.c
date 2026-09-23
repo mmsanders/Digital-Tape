@@ -465,9 +465,11 @@ static int run_dup(const struct case_cfg *cfg, struct media_ctx *src,
 
     target->advertised_blocks = cfg->dest_blocks;
     target->name = "destination";
+    src->trace = true;
     target->trace = true;
     g_phase = "dup";
     rc = tape_dup(t, &d, uuid, 1u, cfg->dest_nominal, 64u, &more, NULL, NULL);
+    src->trace = false;
     target->trace = false;
 
     c = push_call("dup", "tape_dup", rc);
