@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 22 September 2026 UTC. Historical phase durations are
+Current status below is updated 23 September 2026 UTC. Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -33,15 +33,15 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Clean PR #77 slice merged with evidence history intact. Exact 289/289 mount observations, including row 3, are independently accepted. `writability_draft8` and `notmounted_draft8` are independently published/imported but await real-product evidence; source/helper design and the incomplete package remain held |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Exact 289/289 mount plus 8/8 writability and 34/34 NOT_MOUNTED product observations are independently accepted and integrated. Source/helper design and complete-package acceptance remain held |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | PR #112 is integrated at main `be7f8f2...` with exact independently observed history intact. Acceptance remains only the two recorded observations; invented refusals, excluded behavior, source and complete-package acceptance remain held |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Clean observed slice merged. Exact ten corrected-cadence product observations are independently accepted, including 698/698 per-render service in each direction. `transport_draft8` set-side/warm-start coverage is independently published/imported but awaits real-product evidence. Source, complete package and listening/goldens remain separate |
-| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | `record_draft8` is independently published/imported via product PR #140. P1-R25 Software issue #150 owns real-engine binding and exact evidence; independent product disposition and the package's explicit excluded histories/crash/golden work remain outstanding |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Exact ten corrected-cadence observations plus 16/16 set-side/warm-start product evidence are independently accepted and integrated via #171. Source, complete package and listening/goldens remain separate |
+| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Exact 26/26 product observations are independently accepted and integrated via corrected verifier-first PR #167. The package's explicit history/crash/golden and other excluded coverage remains outstanding |
 | WP-10 | Crash-injection harness | Verification | 2 | Crash infrastructure and narrow independent mount package landed; complete crash/operation/state run not yet green |
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but remain unlistened and are not accepted goldens; golden CI remains red |
-| WP-12 | Re-spool / defragment pass | Agent | 1 | `respool_draft8` is independently published/imported via product PR #142 and awaits real-product evidence. WP-12a continuation/BUSY/re-entry/FAULTED coverage and complete acceptance remain outstanding |
+| WP-12 | Re-spool / defragment pass | Agent | 1 | Exact 8/8 product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage and complete acceptance remain outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
-| WP-36 | Slot capability model | Agent | 1 | `slot_draft8` deterministic source-slot coverage is independently published/imported via product PR #143 and awaits real-product evidence. The required 100,000 random transport-sequence acceptance run remains outstanding |
+| WP-36 | Slot capability model | Agent | 1 | Deterministic source-slot product evidence is independently accepted 5/5 and integrated via product PR #191. Verification issue #54 owns the required 100,000 random transport-sequence test publication; complete WP-36 remains unaccepted |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.
 
