@@ -116,6 +116,26 @@ jobs:
           path: tests/respool_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  format-dup-package:
+    name: independent format/dup package — synthetic self-checks, then product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/format_dup_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/format_dup_adapter all
+      - name: Prove rejected raw-operation callbacks remain observable
+        run: tests/format_dup_adapter/build/wp_fmt_dup_probe --selfcheck-callback-trace
+      - run: python3 tests/format_dup_adapter/run_product.py --evidence tests/format_dup_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-format-dup-product-evidence
+          path: tests/format_dup_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
