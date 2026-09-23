@@ -123,7 +123,39 @@ def run() -> int:
     check(bp.mechanism_signature(a) == bp.mechanism_signature(b),
           "the same part at two bed positions hashes the same")
 
-    n = 7
+    # --- 7. assembled fixture geometry must actually fit -----------------
+    # The rev-5 physical print exposed two omissions no plate-level check saw:
+    # the hook had no path through the carrier guide, and the bar channel ran
+    # through the stem centreline. Check the actual assembled solids so those
+    # failures cannot return while the plate/build checks stay green.
+    frame = latch.test_frame().val()
+    all_buttons = latch.packet_01_variants() + [latch.beam_probe()]
+    fit_volumes = []
+    for v in all_buttons:
+        pressed = latch.carrier(v, label=False).translate(
+            (0, 0, latch.PRESSED_CARRIER_Z)).val()
+        fit_volumes.append(frame.intersect(pressed).Volume())
+    check(max(fit_volumes) < 1e-6,
+          "all nine carriers fit the frame at the fully-pressed position, including the 2.1 mm barb")
+
+    bar = latch.hook_bar().translate(
+        (0, latch.BAR_Y_CENTER, latch.BAR_BASE_Z)).val()
+    check(frame.intersect(bar).Volume() < 1e-6,
+          "the latch bar clears the frame through its offset channel")
+
+    bar_carrier_volumes = []
+    for v in all_buttons:
+        pressed = latch.carrier(v, label=False).translate(
+            (0, 0, latch.PRESSED_CARRIER_Z)).val()
+        bar_carrier_volumes.append(bar.intersect(pressed).Volume())
+    check(max(bar_carrier_volumes) < 1e-6,
+          "the static latched bar sits below the hook shelf without occupying the stem or hook")
+
+    fb = frame.BoundingBox()
+    check(fb.xlen <= 175.0 and fb.ylen <= 175.0 and fb.zlen <= 175.0,
+          "the standalone frame is comfortably inside the A1 Mini 180 mm nominal envelope")
+
+    n = 11
     if FAILED:
         print(f"\n{len(FAILED)} of {n} checks FAILED")
         return 1
