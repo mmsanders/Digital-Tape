@@ -41,6 +41,31 @@ BAR_CHAMFER = 1.2
 
 FRAME_W, FRAME_D, FRAME_H = 30.0, 26.0, 26.0
 
+# Test-frame fit allowances. These are deliberately modest FDM clearances for
+# the A1 Mini / Bambu PLA Basic prototype, not production tolerances.
+FRAME_GUIDE_CLEARANCE = 0.30       # per side around the 10 x 8 mm stem
+FRAME_HOOK_ENTRY_CLEARANCE = 0.40  # beyond the deepest 2.1 mm hook tip
+FRAME_ENTRY_CHAMFER = 0.80         # 45 deg funnel at the top opening
+FRAME_BAR_STEM_OVERLAP = 0.25      # bar inner face beyond the stem face
+FRAME_BAR_CHANNEL_CLEARANCE = 0.30 # per side around the bar
+FRAME_BAR_PASS_CLEARANCE_Z = 0.40  # hook clears under bar at full press
+FRAME_FLOOR_H = 3.0
+FRAME_SPRING_POCKET_DEPTH = 2.0    # leaves a 1 mm bottom skin
+MAX_PACKET_HOOK_DEPTH = 2.10
+
+# Assembly coordinates in the frame. The old fixture placed the bar using the
+# carrier's LOCAL hook height, forgetting that the carrier stops on its cap at
+# the frame top. That put the bar through the stem. Derive everything from the
+# actually pressed carrier position instead.
+FRAME_PRESSED_BASE_Z = FRAME_H - STEM_H
+FRAME_BAR_BOTTOM_Z = (
+    FRAME_PRESSED_BASE_Z + HOOK_Z_TOP + FRAME_BAR_PASS_CLEARANCE_Z
+)
+FRAME_BAR_CENTER_Z = FRAME_BAR_BOTTOM_Z + BAR_H / 2
+FRAME_BAR_CENTER_Y = -(
+    STEM_D / 2 + FRAME_BAR_STEM_OVERLAP + BAR_D / 2
+)
+
 
 @dataclass(frozen=True)
 class Variant:
@@ -141,34 +166,84 @@ def hook_bar() -> cq.Workplane:
     return bar.edges(">Y and >Z").chamfer(BAR_CHAMFER)
 
 
-def test_frame(clearance: float = 0.20) -> cq.Workplane:
-    """A single-station rig: guides one carrier, carries the bar, and leaves the
-    engagement visible so a failure can be seen rather than inferred."""
+def test_frame(clearance: float = FRAME_GUIDE_CLEARANCE) -> cq.Workplane:
+    """Single-station latch rig, corrected for the physical assembly.
+
+    The guide keeps the stem located but adds a narrow -Y keyway for the hook,
+    so even the deepest sweep variant can be inserted without pre-flexing it.
+    The bar is offset to the hook side and placed from the carrier's ACTUAL
+    fully-pressed Z position. A small top chamfer gives the printed opening a
+    forgiving lead-in on the A1 Mini / PLA Basic prototype.
+    """
     slot_w = STEM_W + 2 * clearance
     slot_d = STEM_D + 2 * clearance
+    cut_h = FRAME_H - FRAME_FLOOR_H + 0.02
 
-    f = cq.Workplane("XY").box(FRAME_W, FRAME_D, FRAME_H, centered=(True, True, False))
-    f = (
-        f.faces(">Z").workplane(centerOption="CenterOfBoundBox")
-        .rect(slot_w, slot_d).cutBlind(-(FRAME_H - 3.0))
+    f = cq.Workplane("XY").box(
+        FRAME_W, FRAME_D, FRAME_H, centered=(True, True, False)
     )
-    # Bar channel, across X at the barb's height.
-    f = (
-        f.faces(">X").workplane(centerOption="CenterOfBoundBox")
-        .center(0, HOOK_Z_TOP - FRAME_H / 2 + 1.0)
-        .rect(BAR_D + 0.6, BAR_H + 0.6).cutThruAll()
+
+    # Main stem guide.
+    main_slot = (
+        cq.Workplane("XY")
+        .box(slot_w, slot_d, cut_h, centered=(True, True, False))
+        .translate((0, 0, FRAME_FLOOR_H))
     )
-    # Return-spring pocket in the floor, under the carrier.
-    f = (
-        f.faces("<Z").workplane(centerOption="CenterOfBoundBox")
-        .circle(2.0).cutBlind(-4.0)
+
+    # Hook entry keyway. Only the central HOOK_W strip is opened farther on the
+    # hook side, preserving most of the guide surface around the stem.
+    main_neg_y = -slot_d / 2
+    key_neg_y = -(
+        STEM_D / 2 + MAX_PACKET_HOOK_DEPTH + FRAME_HOOK_ENTRY_CLEARANCE
     )
-    # Inspection window on the front face.
-    f = (
-        f.faces(">Y").workplane(centerOption="CenterOfBoundBox")
-        .center(0, HOOK_Z_TOP - FRAME_H / 2)
-        .rect(FRAME_W * 0.5, 10.0).cutThruAll()
+    key_depth = (main_neg_y - key_neg_y) + 0.20  # overlap avoids a sliver
+    key_center_y = (main_neg_y + key_neg_y) / 2 + 0.10
+    keyway = (
+        cq.Workplane("XY")
+        .box(HOOK_W + 2 * clearance, key_depth, cut_h,
+             centered=(True, True, False))
+        .translate((0, key_center_y, FRAME_FLOOR_H))
     )
+    f = f.cut(main_slot.union(keyway))
+
+    # 45-degree printed lead-in around the opening. Chamfering the outer top
+    # edge too is harmless and avoids brittle sharp corners.
+    f = f.faces(">Z").edges().chamfer(FRAME_ENTRY_CHAMFER)
+
+    # Bar channel. The bar itself stays outside the rigid stem and deliberately
+    # overlaps the hook sweep by FRAME_BAR_STEM_OVERLAP.
+    channel = (
+        cq.Workplane("XY")
+        .box(
+            FRAME_W + 2.0,
+            BAR_D + 2 * FRAME_BAR_CHANNEL_CLEARANCE,
+            BAR_H + 2 * FRAME_BAR_CHANNEL_CLEARANCE,
+            centered=(True, True, True),
+        )
+        .translate((0, FRAME_BAR_CENTER_Y, FRAME_BAR_CENTER_Z))
+    )
+    f = f.cut(channel)
+
+    # Return-spring pocket, open to the carrier cavity but leaving a 1 mm bottom
+    # skin. The spring itself is not part of this reprint.
+    spring = (
+        cq.Workplane("XY")
+        .circle(2.0)
+        .extrude(FRAME_SPRING_POCKET_DEPTH)
+        .translate((0, 0, FRAME_FLOOR_H - FRAME_SPRING_POCKET_DEPTH))
+    )
+    f = f.cut(spring)
+
+    # Put the inspection window on the real engagement height, not the hook's
+    # local-Z value. It cuts through both Y walls so the hook/bar can be viewed
+    # from the convenient side.
+    window = (
+        cq.Workplane("XZ")
+        .box(FRAME_W * 0.5, FRAME_D + 2.0, 10.0,
+             centered=(True, True, True))
+        .translate((0, 0, FRAME_BAR_CENTER_Z))
+    )
+    f = f.cut(window)
     return f
 
 
