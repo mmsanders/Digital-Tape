@@ -154,6 +154,27 @@ jobs:
           path: tests/writability_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  slot-package:
+    name: independent WP-36 slot package — synthetic self-checks, then debug-assert product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/slot_draft8/selftest.py
+      - name: Build engine with debug dev_write assertion enabled
+        run: |
+          make -C engine clean
+          make -C engine all CFLAGS=-UNDEBUG
+      - run: make -C tests/slot_adapter all
+      - run: python3 tests/slot_adapter/run_product.py --evidence tests/slot_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-slot-product-evidence
+          path: tests/slot_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
