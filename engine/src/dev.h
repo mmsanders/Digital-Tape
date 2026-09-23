@@ -39,6 +39,11 @@
 #  define TAPE_TRAP_IF(cond) ((void)0)
 #endif
 
+static inline bool dev_same_context(const tape_dev *a, const tape_dev *b)
+{
+    return a->ctx == b->ctx;
+}
+
 static inline int dev_read(const tape_dev *d,
                            uint32_t lba, uint32_t count, void *buf)
 {
