@@ -17,6 +17,7 @@
  */
 
 #include "tape_internal.h"
+#include "dev.h"
 
 tape_result tape_format(const tape_dev *dev, const uint8_t uuid[16], uint32_t epoch,
                         const char *label, uint32_t nominal_length_s)
@@ -89,7 +90,7 @@ tape_result tape_dup(tape *src, const tape_dev *dst_dev,
      */
 
     /* 1. Aliasing. tape_dev exposes ctx as the available device identity. */
-    if (src->dev.ctx == dst_dev->ctx) { return TAPE_ERR_INVALID_ARG; }
+    if (dev_same_context(&src->dev, dst_dev)) { return TAPE_ERR_INVALID_ARG; }
 
     /* 2. Destination writability. */
     if (dst_dev->write == NULL) { return TAPE_ERR_READ_ONLY; }
