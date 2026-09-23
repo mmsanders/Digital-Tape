@@ -2,11 +2,10 @@
  * wp12_respool_probe.c — mechanical product adapter for the WP-12 respool
  * verifier package.
  *
- * This branch intentionally does not define or emulate tape_promote: #155 is
- * the authoritative promote lane. Therefore the partial runner executes the
- * seven respool cases whose verifier scripts do not call tape_promote. Once the
- * promote result is composed, this adapter can add the package's WP12-EMPTY
- * promote-asymmetry call and the unchanged oracle can run all eight cases.
+ * Composition base is the authoritative #155/#178 tape_promote candidate.
+ * WP12-EMPTY therefore drives the published promote -> respool asymmetry
+ * through the real public API; all eight cases are judged only by the unchanged
+ * independent verifier oracle.
  */
 #ifndef TAPE_PUBLIC_HEADER
 #define TAPE_PUBLIC_HEADER "tape.h"
@@ -345,6 +344,19 @@ static int run_case(const char *id)
     if (c != NULL) { c->side = side_name(side); }
     if (rc != TAPE_OK) { return 1; }
 
+    if (strcmp(id, "WP12-EMPTY") == 0) {
+        bool promote_more = false;
+        g_phase = "promote";
+        rc = tape_promote(t, SEMANTIC_BUDGET, &promote_more, NULL, NULL);
+        c = call_push("promote", "tape_promote", rc);
+        if (c != NULL) {
+            c->has_budget = true;
+            c->block_budget = SEMANTIC_BUDGET;
+            c->has_more = true;
+            c->more_work = promote_more;
+        }
+    }
+
     g_phase = "respool";
     rc = tape_respool(t, SEMANTIC_BUDGET, &more);
     c = call_push("respool", "tape_respool", rc);
@@ -414,10 +426,6 @@ int main(int argc, char **argv)
     if (argc != 4) {
         fprintf(stderr, "usage: %s CASE_ID INPUT.vo08 OUTPUT.vo08\n", argv[0]);
         return 2;
-    }
-    if (strcmp(argv[1], "WP12-EMPTY") == 0) {
-        fprintf(stderr, "WP12-EMPTY requires authoritative tape_promote from Software #155\n");
-        return 3;
     }
     if (media_load(argv[2]) != 0) {
         fprintf(stderr, "failed to load input\n");
