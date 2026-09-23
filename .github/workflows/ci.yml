@@ -76,6 +76,46 @@ jobs:
           path: tests/transport_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  promote-package:
+    name: independent promote package — synthetic self-checks, then product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # First prove the independently published verifier plumbing against its
+      # synthetic adapter; then bind the exact same package to the real engine.
+      - run: python3 tests/promote_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/promote_adapter all
+      - name: Prove rejected callbacks remain observable
+        run: tests/promote_adapter/build/wp_promote_probe --selfcheck-callback-trace
+      - run: python3 tests/promote_adapter/run_product.py --evidence tests/promote_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-promote-product-evidence
+          path: tests/promote_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
+  respool-package:
+    name: independent respool package — synthetic self-checks, then full 8-case product observations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/respool_draft8/selftest.py
+      - run: make -C engine all
+      - run: make -C tests/respool_adapter all
+      - run: python3 tests/respool_adapter/run_product.py --evidence tests/respool_adapter/evidence/p1-r25-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r25-respool-product-evidence
+          path: tests/respool_adapter/evidence/p1-r25-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest

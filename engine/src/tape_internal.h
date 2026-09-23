@@ -150,6 +150,24 @@ struct tape {
     uint64_t  resume_whole_frame;
 
     /*
+     * §9.3 bounded promote continuation state. The independent promote_draft8
+     * tranche covers classification and uninterrupted FRESH paths; these
+     * scalars let that work honor block_budget without allocating or putting a
+     * second full index on the 200 KiB instance. mix_block is the persistent
+     * partial destination block while a compacting copy spans calls.
+     */
+    bool      promote_in_progress;
+    bool      promote_adopt;
+    bool      promote_phase2;
+    uint8_t   promote_phase;
+    uint32_t  promote_s;
+    uint32_t  promote_len;
+    uint32_t  promote_copy_block;
+    uint32_t  promote_copy_frame;
+    uint32_t  promote_next_sequence;
+    uint64_t  promote_frames;
+
+    /*
      * §7 recording. Scalars only: every recorded frame lives in the CALLER's
      * rec_ring (§4), and the chunks it will occupy are a bump-allocated run,
      * so the engine needs no buffer of its own to describe either.

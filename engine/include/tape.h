@@ -25,9 +25,13 @@
  *                 so only tape_arm's is built. That is a statement about THIS
  *                 ENGINE, not about the format — see engine/src/ops.c and treat
  *                 it as a coverage boundary awaiting PM disposition, not spec.
- *   Declared,     everything else — tape_promote, tape_respool, tape_dup,
- *   not defined   tape_format. Calling one is a link error, which is the
- *                 intended loud failure rather than a silent stub.
+ *                 tape_promote implements the independently asserted §9.3.0
+ *                 classification and uninterrupted FRESH adopt/allocate paths.
+ *                 §9.3.3 RESUME/crash closure, progress callback/re-entry and
+ *                 stored-position integration remain explicit coverage holds.
+ *   Declared,     everything else — tape_respool, tape_dup, tape_format.
+ *   not defined   Calling one is a link error, which is the intended loud
+ *                 failure rather than a silent stub.
  *
  * Guardrails this header exists to keep: no allocation ever (the caller owns all
  * storage, §4); no clock and no timeout anywhere (§9); nothing returns a pointer
