@@ -41,6 +41,27 @@ BAR_CHAMFER = 1.2
 
 FRAME_W, FRAME_D, FRAME_H = 30.0, 26.0, 26.0
 
+# A1 Mini / Bambu PLA Basic fit allowances for the rev-5 physical coupon.
+# The original 0.20 mm/side guide left no path for the barb and put the latch
+# bar through the stem centreline. These dimensions preserve stem guidance while
+# giving the barb its own narrow travel groove and moving the bar behind it.
+FRAME_CLEARANCE = 0.35       # per side around the 10 x 8 mm stem
+HOOK_CLEARANCE = 0.35        # around the largest 2.1 mm-deep barb
+FRAME_MAX_HOOK_DEPTH = 2.10
+ENTRY_CHAMFER = 0.80         # 45-degree-ish lead-in; support-free in PLA
+BAR_FACE_CLEARANCE = 0.35    # bar's near face stays behind the stem face
+BAR_TOP_CLEARANCE = 0.20     # static clearance under the hook shelf when latched
+BAR_CHANNEL_CLEARANCE = 0.80 # total extra channel size around the printed bar
+
+# In the fully pressed state the cap underside is flush with the frame top.
+# Place the bar just behind the stem and just below the hook shelf so it can
+# catch the shelf on return without occupying the stem volume.
+PRESSED_CARRIER_Z = FRAME_H - STEM_H
+BAR_Y_CENTER = -(STEM_D / 2 + BAR_FACE_CLEARANCE + BAR_D / 2)
+BAR_TOP_Z = PRESSED_CARRIER_Z + HOOK_Z_ROOT - BAR_TOP_CLEARANCE
+BAR_BASE_Z = BAR_TOP_Z - BAR_H
+BAR_CENTER_Z = BAR_BASE_Z + BAR_H / 2
+
 
 @dataclass(frozen=True)
 class Variant:
@@ -141,22 +162,51 @@ def hook_bar() -> cq.Workplane:
     return bar.edges(">Y and >Z").chamfer(BAR_CHAMFER)
 
 
-def test_frame(clearance: float = 0.20) -> cq.Workplane:
-    """A single-station rig: guides one carrier, carries the bar, and leaves the
-    engagement visible so a failure can be seen rather than inferred."""
+def test_frame(clearance: float = FRAME_CLEARANCE) -> cq.Workplane:
+    """A single-station rig for the latch sweep.
+
+    The stem keeps a close rectangular guide, but the hook gets its own narrow
+    groove on the -Y side. That lets even the 2.1 mm barb enter without forcing
+    the whole guide loose. A small top chamfer helps Bambu PLA Basic parts start
+    cleanly without supports. The bar channel is offset behind the stem rather
+    than through it, and lowered so the bar rests just under the hook shelf in
+    the fully-pressed position.
+    """
     slot_w = STEM_W + 2 * clearance
     slot_d = STEM_D + 2 * clearance
+    cut_depth = FRAME_H - 3.0
+
+    # Preserve guide rails around the stem, and only widen the middle of the
+    # hook-side wall where the 6 mm-wide barb actually travels.
+    hook_relief_w = HOOK_W + 2 * HOOK_CLEARANCE
+    main_back_y = -slot_d / 2
+    hook_back_y = -STEM_D / 2 - FRAME_MAX_HOOK_DEPTH - HOOK_CLEARANCE
+    hook_relief_d = main_back_y - hook_back_y
+    hook_relief_y = (main_back_y + hook_back_y) / 2
 
     f = cq.Workplane("XY").box(FRAME_W, FRAME_D, FRAME_H, centered=(True, True, False))
     f = (
         f.faces(">Z").workplane(centerOption="CenterOfBoundBox")
-        .rect(slot_w, slot_d).cutBlind(-(FRAME_H - 3.0))
+        .rect(slot_w, slot_d).cutBlind(-cut_depth)
     )
-    # Bar channel, across X at the barb's height.
+    f = (
+        f.faces(">Z").workplane(centerOption="CenterOfBoundBox")
+        .center(0, hook_relief_y)
+        .rect(hook_relief_w, hook_relief_d + 0.05).cutBlind(-cut_depth)
+    )
+
+    # Lead-in for real FDM parts. This also lightly breaks the outer top edge;
+    # both chamfers are support-free and harmless for the test fixture.
+    f = f.faces(">Z").edges().chamfer(ENTRY_CHAMFER)
+
+    # Bar channel, across X, offset toward the hook side. 0.8 mm total clearance
+    # is intentionally looser than the carrier guide because this 70 mm bar must
+    # slide freely rather than locate the button.
     f = (
         f.faces(">X").workplane(centerOption="CenterOfBoundBox")
-        .center(0, HOOK_Z_TOP - FRAME_H / 2 + 1.0)
-        .rect(BAR_D + 0.6, BAR_H + 0.6).cutThruAll()
+        .center(BAR_Y_CENTER, BAR_CENTER_Z - FRAME_H / 2)
+        .rect(BAR_D + BAR_CHANNEL_CLEARANCE,
+              BAR_H + BAR_CHANNEL_CLEARANCE).cutThruAll()
     )
     # Return-spring pocket in the floor, under the carrier.
     f = (
