@@ -1,0 +1,50 @@
+{
+  "packet": "A1MINI-BTN-02",
+  "revision": 2,
+  "printer": "Bambu Lab A1 Mini",
+  "nozzle_mm": 0.4,
+  "material": "Bambu PLA Basic",
+  "travel_mm": 8.0,
+  "rest_clearance_mm": 1.5,
+  "bar_air_gap_mm": 0.4,
+  "bar_y": [
+    -8.4,
+    -4.4
+  ],
+  "stem_y": [
+    -4.0,
+    4.0
+  ],
+  "bar_z": [
+    9.0,
+    13.0
+  ],
+  "variants": [
+    {
+      "label": "A",
+      "hook_depth_mm": 1.0,
+      "engagement_mm": 0.6,
+      "note": "shallowest that can engage at all"
+    },
+    {
+      "label": "B",
+      "hook_depth_mm": 1.4,
+      "engagement_mm": 1.0,
+      "note": "centre"
+    },
+    {
+      "label": "C",
+      "hook_depth_mm": 1.8,
+      "engagement_mm": 1.4,
+      "note": "deepest"
+    },
+    {
+      "label": "N",
+      "hook_depth_mm": 0.0,
+      "engagement_mm": -0.4,
+      "note": "NO BARB -- must not latch. If it does, the rig grips by friction and the other three results are void"
+    }
+  ],
+  "blind": false,
+  "blind_rationale": "nothing has latched yet; this asks whether the mechanism works at all, and 'did it click' cannot be biased by knowing the depths"
+}
