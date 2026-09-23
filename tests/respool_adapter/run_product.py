@@ -125,7 +125,7 @@ def main() -> int:
             f"- Product commit: {product_commit}\n"
             f"- Imported respool verifier tree: {package_tree}\n"
             "- Verifier source publication: 6519220f161254c0453a30858eb3e7073e2eb82b\n"
-            f"- observations.partial.jsonl SHA-256: {evidence_hash}\n"
+            f"- observations.jsonl SHA-256: {evidence_hash}\n"
             "- Adapter: tests/respool_adapter/wp12_respool_probe.c\n"
             "- Verdict source: unchanged tests/respool_draft8/oracle.py\n"
             "- Scope: all eight published respool_draft8 cases in verifier order.\n"
