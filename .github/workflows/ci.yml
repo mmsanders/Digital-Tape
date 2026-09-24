@@ -216,6 +216,25 @@ jobs:
           path: tests/wp36_fuzz_adapter/evidence/p1-r26-product
           if-no-files-found: error
 
+  embedded-readiness-package:
+    name: independent WP-13 embedded-readiness audit — six-gate real-product evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: python3 tests/embedded_readiness_draft8/selftest.py
+      - run: python3 -m py_compile tests/embedded_readiness_adapter/collect_product_evidence.py
+      - run: python3 tests/embedded_readiness_adapter/collect_product_evidence.py --evidence tests/embedded_readiness_adapter/evidence/p1-r27-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r27-wp13-embedded-readiness-evidence
+          path: tests/embedded_readiness_adapter/evidence/p1-r27-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
