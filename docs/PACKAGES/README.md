@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 23 September 2026 UTC. Historical phase durations are
+Current status below is updated 24 September 2026 UTC. Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -41,7 +41,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but remain unlistened and are not accepted goldens; golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Exact 8/8 product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage and complete acceptance remain outstanding |
 | WP-13 | Embedded-readiness audit | Agent | 1 | Held #20 measurements: instance 156456 B, stack 1536/8192, rodata 1040/32768; allocator/funnel gates green. Implementer evidence, not package acceptance |
-| WP-36 | Slot capability model | Agent | 1 | Deterministic source-slot product evidence is independently accepted 5/5 and integrated via product PR #191. Verification issue #54 owns the required 100,000 random transport-sequence test publication; complete WP-36 remains unaccepted |
+| WP-36 | Slot capability model | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #57 accepted the frozen package after the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign. Product PR #200 integrated the exact accepted tree unchanged at main `e4a3565...` |
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it.
 

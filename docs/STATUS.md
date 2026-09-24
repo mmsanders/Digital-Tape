@@ -1,13 +1,13 @@
 # Project status
 
-**23 September 2026 UTC · input main `e6606d0` · Owner: PM ·** Phase 1 now has
-independently accepted narrow evidence on main for mount (289/289), playback cadence,
-VT8-001, WP-09 record (26/26), transport/warm (16/16), promote (16/16), respool
-(8/8), format/dup refusal precedence (17/17), writability (8/8), NOT_MOUNTED
-(34/34), and the deterministic WP-36 source-slot precursor (5/5). No complete
-package, source or golden is accepted and the dashboard stays at 13 of 36. The latest
-integration is the mechanically refreshed NOT_MOUNTED binding via product PR #194 at
-main `e6606d0...`.
+**24 September 2026 UTC · input main `e4a3565` · Owner: PM ·** Phase 1 now has its
+first complete independently accepted package: **WP-36 slot capability**. Verification
+PR #57 accepted the frozen package after the deterministic 5/5 precursor plus the exact
+100,000-sequence / 1,997,914-operation NULL-write transport campaign; product PR #200
+integrated the exact accepted tree unchanged. Narrow accepted evidence for mount,
+playback, VT8-001, WP-09 record, transport/warm, promote, respool, format/dup,
+writability and NOT_MOUNTED remains as before. The dashboard advances from **13/36
+to 16/36** because WP-36 moves from 1/4 to 4/4; no other package rung changes.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -85,17 +85,16 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 1. **Card atomicity is unqualified.** No media is qualified to WP-05 A-2; PR #87's method is independently rejected on `P1-R23-V01` and no new acquisition may run.
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **Mechanism and creep trials are unprinted.** A1MINI-01 rev 1 is an unprinted, unaudited method candidate; CAD checks are not measurements.
-4. **Engine progress is still coverage-limited.** The recent promote, respool, format/dup, writability, NOT_MOUNTED and deterministic WP-36 tranches are independently dispositioned and integrated, but complete-package acceptance still requires outstanding independent coverage, including WP-36's 100,000-sequence run.
+4. **Engine progress is still coverage-limited.** WP-36 is now fully accepted and integrated, while the remaining engine packages still require independent closure—especially allocator/COW history, crash durability, long-operation state behavior, embedded-readiness audit and WP-11 goldens/listening.
 5. **WP-11 goldens are missing by design.** Golden CI is red until Michael listens; no process change substitutes for that.
 
 ## Standing boundaries
 
-**New independent package acceptances: none.** The accepted evidence listed above is
-narrow exact observation coverage only — not source, helper design, complete packages
-or goldens. The recent promote, respool, format/dup, writability, NOT_MOUNTED and
-deterministic WP-36 precursor evidence is now integrated on main. WP-36 still requires
-its separate 100,000-sequence acceptance run, and WP-11 still requires Michael's
-listening before any golden acceptance.
+**New independent package acceptance: WP-36.** Verification PR #57 explicitly
+accepted the complete frozen WP-36 package for exact product PR #200, and Software
+merged that exact accepted tree unchanged at main `e4a3565...`. The other accepted
+evidence remains narrow observation coverage only—not source/helper design or complete
+package acceptance. WP-11 still requires Michael's listening before golden acceptance.
 Main ruleset 22084355 remains active and strict. Missing WP-11 goldens remain an explicit red gate.
 
 Phase 1 operating format, role charters and the issue workflow are in

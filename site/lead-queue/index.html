@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R26 post-WP36/NOT_MOUNTED integration · 23 September 2026 UTC",
+      asOf: "P1-R27 complete WP-36 integration · 24 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -280,8 +280,8 @@
           note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage remains separate, so the full coverage rung is not reached." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 1,
           note: "Guardrail gates and the meta job that proves they can go red are green on main, but the budget measurements live inside draft #20 and are implementer evidence, not coverage." },
-        { id: "WP-36", name: "Slot capability model", rung: 1,
-          note: "The deterministic source-slot precursor is independently accepted 5/5 and integrated via #191, including the literal NULL-write/debug-assert boundary. Verification #54 now owns the required 100,000 random transport-sequence tranche; the full coverage rung is not reached." }
+        { id: "WP-36", name: "Slot capability model", rung: 4,
+          note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]
     };
 
