@@ -178,6 +178,18 @@
         "python3",
         "tests/wp36_fuzz_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/crash_core_draft8",
+      "tree": "d99aa7d095ea9ee7228d6bddddd682848dfb8a55",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "18ff453e80fa245ad2d10066a1df262b443905b7",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent bounded WP-10 core crash package published by verification PR #63; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/crash_core_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
