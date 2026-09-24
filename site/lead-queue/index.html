@@ -260,26 +260,26 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R27 complete WP-36 integration · 24 September 2026 UTC",
+      asOf: "P1-R29 parallel verification launch · 24 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
         { id: "WP-06", name: "Block device, superblock, index commit", rung: 2,
           note: "Exact 289/289 mount, 8/8 writability and 34/34 NOT_MOUNTED product observations are independently accepted and integrated on current main. Source/helper design and complete-package acceptance remain held, so the rung does not advance." },
-        { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 2,
-          note: "PR #112 is integrated with its exact independently observed history intact. Acceptance remains only the two recorded observations; source, invented refusals, excluded behavior and complete-package acceptance remain held." },
+        { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 4,
+          note: "Complete frozen WP-07 is independently accepted. Verification PR #67 accepted the 10,000-sequence allocator/COW package; product PR #215 carried the exact accepted evidence onto post-WP13 main and integrated it." },
         { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
           note: "The exact ten corrected-cadence observations remain accepted. Verification PR #41 independently replayed the 16-case set-side/warm-start product evidence 16/16 PASS, and product PR #171 is now integrated at main e598b82. This remains a narrow evidence tranche, not source, listening, golden or complete-package acceptance." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "The exact 26-case record evidence is independently replayed 26/26 PASS after Verification corrected ARMED-BUSY, and clean verifier-first product PR #167 is now merged at main 1db7135. This is still not full required WP-09 package coverage, so the package rung does not advance." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
-          note: "Crash infrastructure and the narrow mount package are on main. The complete engine crash, operation and state run is not green, which is what keeps the operations matrix unfrozen." },
+          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. Full promote, raw format/duplicate identity, full re-spool and remaining long-operation/headroom coverage are still required before the package coverage rung can advance." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
           note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
           note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage remains separate, so the full coverage rung is not reached." },
-        { id: "WP-13", name: "Embedded-readiness audit", rung: 1,
-          note: "Guardrail gates and the meta job that proves they can go red are green on main, but the budget measurements live inside draft #20 and are implementer evidence, not coverage." },
+        { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
+          note: "Complete frozen WP-13 is independently accepted. Verification PR #66 independently reproduced all six gates from raw evidence and accepted exact product PR #206, now integrated on main." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
           note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]
