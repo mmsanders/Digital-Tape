@@ -178,6 +178,18 @@
         "python3",
         "tests/wp36_fuzz_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/allocator_cow_draft8",
+      "tree": "41d07601186856afccde00107a85f27e2423bb2a",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "b0271d0805e1193de354f9244d1830bc163c7054",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent complete WP-07 allocator/COW verifier package published by verification PR #62; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/allocator_cow_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
