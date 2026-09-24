@@ -45,18 +45,19 @@ tape_result tape_reset_side_b(tape *t)
        mount — which is where degraded-B recovery always starts. */
     if (!t->effective_writable) { return TAPE_ERR_READ_ONLY; }
 
-    /* NARROWING, NOT A SPEC CLAIM. §8 requires this call to CLEAR a stale
-       promote_stage before its first index write; clearing it is a §4.6
-       superblock update, which is promote-recovery behaviour neither accepted
-       VT8-001 observation covers. This split refuses instead of committing an
-       index onto stage-1 media, which §8 forbids. Zero writes. The accepted
-       reset observation is promote_stage == 0, so this branch is not exercised.
-       See the header note in engine/src/record.c. */
-    if (t->sb.promote_stage == TAPE_PROMOTE_STAGE_PHASE1) { return TAPE_ERR_BUSY; }
-
-    /* §4.5's tape_reset_side_b row: one `sequence`. No sb_generation is
-       consumed, because nothing in this split writes a superblock. */
-    if (!tape_headroom_ok(t->cartridge_sequence, 1u)) { return TAPE_ERR_SEQUENCE_EXHAUSTED; }
+    /*
+     * §4.5's tape_reset_side_b row reserves one index `sequence`. §8 also
+     * consumes one `sb_generation` when stage clearing applies. Both
+     * reservations are checked only after every reset-B zero-write refusal
+     * above has passed, and before any media write occurs.
+     */
+    if (!tape_headroom_ok(t->cartridge_sequence, 1u)) {
+        return TAPE_ERR_SEQUENCE_EXHAUSTED;
+    }
+    if (t->sb.promote_stage == TAPE_PROMOTE_STAGE_PHASE1
+        && !tape_headroom_ok(t->sb.sb_generation, 1u)) {
+        return TAPE_ERR_SEQUENCE_EXHAUSTED;
+    }
 
     if (t->side_b_valid) {
         dest_slot = (t->live_slot[TAPE_SIDE_B] == 0u) ? 1u : 0u;
@@ -68,6 +69,16 @@ tape_result tape_reset_side_b(tape *t)
     dest_lba = (dest_slot == 0u) ? t->sb.lba_index_b0 : t->sb.lba_index_b1;
 
     seq = t->cartridge_sequence + 1u;
+
+    /*
+     * §8: after all reset-B preconditions, before its first B-index write,
+     * clear an interrupted promote through §4.6's existing partner-first
+     * superblock update. The helper owns quarantine/error propagation.
+     */
+    if (t->sb.promote_stage == TAPE_PROMOTE_STAGE_PHASE1) {
+        rc = tape_sb_clear_stage(t);
+        if (rc != TAPE_OK) { return rc; }
+    }
 
     /* Side A's entries, verbatim, marked as Side B's. Side A's index satisfied
        §5.2's Side-A bound at mount, and every entry it holds is therefore below
