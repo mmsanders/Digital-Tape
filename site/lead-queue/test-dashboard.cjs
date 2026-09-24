@@ -32,10 +32,11 @@ assert.match(roadmap(), new RegExp('aria-valuenow="' + expected + '"'));
 // Segment fills, in order, are exactly the stage rungs -- no stage borrows another's.
 assert.equal([...roadmap().matchAll(/width:(\d+)%/g)].map(m => m[1]).join(),
   Array.from(rungs).map(rung => Math.round(rung / top * 100)).join());
-// A package is only green once it is independently accepted, and none is yet.
-assert.equal(rungs.some(r => r === top), false);
-assert.equal(roadmap().includes('class="seg done"'), false);
-assert.match(roadmap(), /<b>0<\/b> accepted/);
+// A package is only green once it is independently accepted. WP-36 is the first.
+const acceptedNow = Array.from(rungs).filter(rung => rung === top).length;
+assert.equal(acceptedNow, 1);
+assert.equal((roadmap().match(/class="seg done"/g)||[]).length, acceptedNow);
+assert.match(roadmap(), new RegExp('<b>' + acceptedNow + '<\\/b> accepted'));
 
 // The denominator has to be the real Phase 1 package set, or the bar is measuring a
 // list this file invented. Package IDs only -- status is PM's to write, not ours to read.
