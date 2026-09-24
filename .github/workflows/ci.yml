@@ -194,6 +194,28 @@ jobs:
           path: tests/slot_adapter/evidence/p1-r25-product
           if-no-files-found: error
 
+  wp36-fuzz-package:
+    name: independent WP-36 100k source-slot fuzz — debug real-product observations
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tests/wp36_fuzz_draft8/selftest.py
+      - name: Build engine with debug dev_write assertion enabled
+        run: |
+          make -C engine clean
+          make -C engine all CFLAGS=-UNDEBUG
+      - run: make -C tests/wp36_fuzz_adapter all
+      - run: python3 tests/wp36_fuzz_adapter/run_product.py --evidence tests/wp36_fuzz_adapter/evidence/p1-r26-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r26-wp36-100k-product-evidence
+          path: tests/wp36_fuzz_adapter/evidence/p1-r26-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
