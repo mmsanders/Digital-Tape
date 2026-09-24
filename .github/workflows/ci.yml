@@ -216,6 +216,30 @@ jobs:
           path: tests/wp36_fuzz_adapter/evidence/p1-r26-product
           if-no-files-found: error
 
+  allocator-cow-package:
+    name: independent WP-07 allocator/COW — fixed 10k real-product campaign
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: python3 tests/allocator_cow_draft8/selftest.py
+      - run: make -C engine clean all
+      - name: Build product adapter and retain command log
+        run: |
+          set -o pipefail
+          make -C tests/allocator_cow_adapter clean all 2>&1 | tee tests/allocator_cow_adapter/build.log
+      - run: python3 tests/allocator_cow_adapter/run_product.py --evidence tests/allocator_cow_adapter/evidence/p1-r27-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r27-wp07-allocator-cow-evidence
+          path: tests/allocator_cow_adapter/evidence/p1-r27-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
