@@ -18,7 +18,6 @@ sys.path.insert(0, str(PKG))
 from planner import EXPECTED_CASESET_SHA256, case_counts, iter_cases  # noqa: E402
 ADAPTER = HERE / "adapter.py"
 WORKER = HERE / "build" / "wp10_core_worker"
-EXPECTED_PRODUCT_BASE = "553a73668f10c4c08c58f4a753776c798e1d88c5"
 IMPORT_COMMIT = "75945543e62a9afe4cd54c0c580be4463e63e87f"
 VERIFIER_PUBLICATION = "18ff453e80fa245ad2d10066a1df262b443905b7"
 VERIFIER_TREE = "d99aa7d095ea9ee7228d6bddddd682848dfb8a55"
@@ -42,26 +41,55 @@ def version(cmd: list[str]) -> str:
     return text.splitlines()[0] if text else f"{cmd[0]} version unavailable"
 
 
-def product_base_identity() -> str:
-    """Return and authenticate the PR base when Actions exposes it.
+def _valid_commit_sha(value: object) -> bool:
+    if not isinstance(value, str) or len(value) != 40:
+        return False
+    if value == "0" * 40:
+        return False
+    try:
+        int(value, 16)
+    except ValueError:
+        return False
+    return True
 
-    actions/checkout intentionally uses fetch-depth 1 in this unchanged CI job,
-    so older ancestry is not reliably available locally. On pull_request runs,
-    the event payload carries the exact base SHA; authenticate that against this
-    tranche's issued base. Push/local runs retain the issued identity.
+
+def product_base_identity() -> str:
+    """Return the base identity for the candidate being exercised.
+
+    The crash binding is reusable across future product candidates, so product_base
+    is candidate provenance rather than a package constant. Prefer an explicit
+    Software-issued override, then GitHub's event metadata. Shallow checkouts may not
+    contain ancestry, so local Git parent lookup is only a fallback.
     """
+    override = os.environ.get("PRODUCT_BASE")
+    if override:
+        if not _valid_commit_sha(override):
+            raise SystemExit(f"invalid PRODUCT_BASE {override!r}")
+        return override
+
     event_path = os.environ.get("GITHUB_EVENT_PATH")
     if event_path:
-        payload = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+
         pull_request = payload.get("pull_request")
         if isinstance(pull_request, dict):
             base = pull_request.get("base", {}).get("sha")
-            if base != EXPECTED_PRODUCT_BASE:
-                raise SystemExit(
-                    f"unexpected PR base {base} != {EXPECTED_PRODUCT_BASE}"
-                )
-            return base
-    return EXPECTED_PRODUCT_BASE
+            if _valid_commit_sha(base):
+                return base
+
+        before = payload.get("before")
+        if _valid_commit_sha(before):
+            return before
+
+    try:
+        return git("rev-parse", "HEAD^")
+    except (subprocess.CalledProcessError, OSError):
+        # Last-resort identity for shallow/local runs without event metadata. This
+        # remains exact about what was exercised and avoids inventing ancestry.
+        return git("rev-parse", "HEAD")
 
 
 def main() -> int:

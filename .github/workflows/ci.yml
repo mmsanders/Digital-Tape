@@ -268,6 +268,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - run: python3 tests/crash_core_draft8/selftest.py
+      - run: python3 tests/crash_core_adapter/test_provenance.py
       - run: make -C engine clean all
       - name: Build product crash adapter and retain command log
         run: |
