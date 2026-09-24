@@ -132,6 +132,15 @@ static int g_remount_writes;
 static struct rf_snapshot g_pre_snapshot;
 static struct rf_hashes g_hashes;
 
+/* Exported ctypes surface: declare before definitions so the adapter itself
+   remains clean under the repository's -Wmissing-prototypes discipline. */
+void rf_close(void);
+int rf_open(const char *path, int fixture, int mode);
+int rf_get_pre_snapshot(struct rf_snapshot *out);
+int rf_get_hashes(struct rf_hashes *out);
+int rf_case(int target, uint32_t ordinal, int injection, uint32_t landed,
+            struct rf_result *out);
+
 static union aligned_instance g_inst;
 static union aligned_play g_play;
 static union aligned_rec g_rec;
@@ -543,15 +552,6 @@ static int target_event_index(int target, uint32_t ordinal, uint32_t *out)
     if (q >= g_selected_count) { return -3; }
     *out = q;
     return 0;
-}
-
-static bool block_is_metadata(uint32_t lba)
-{
-    return lba == RF_A0 || lba == RF_A0 + 1u
-        || lba == RF_A1 || lba == RF_A1 + 1u
-        || lba == RF_B0 || lba == RF_B0 + 1u
-        || lba == RF_B1 || lba == RF_B1 + 1u
-        || lba == 0u || lba == g_blocks - 1u;
 }
 
 static tape_result fresh_remount(struct rf_info *info)
