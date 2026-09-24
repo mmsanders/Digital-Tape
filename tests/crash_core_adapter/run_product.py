@@ -18,8 +18,8 @@ sys.path.insert(0, str(PKG))
 from planner import EXPECTED_CASESET_SHA256, case_counts, iter_cases  # noqa: E402
 ADAPTER = HERE / "adapter.py"
 WORKER = HERE / "build" / "wp10_core_worker"
-PRODUCT_BASE = "92d6a3402d4908322c191bd3464011ae97f94114"
-IMPORT_COMMIT = "01850817c2f0b3c3f5f2ce47c77ea5f5da92c9c9"
+EXPECTED_PRODUCT_BASE = "553a73668f10c4c08c58f4a753776c798e1d88c5"
+IMPORT_COMMIT = "75945543e62a9afe4cd54c0c580be4463e63e87f"
 VERIFIER_PUBLICATION = "18ff453e80fa245ad2d10066a1df262b443905b7"
 VERIFIER_TREE = "d99aa7d095ea9ee7228d6bddddd682848dfb8a55"
 
@@ -40,6 +40,28 @@ def version(cmd: list[str]) -> str:
     p = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
     text = (p.stdout or p.stderr).strip()
     return text.splitlines()[0] if text else f"{cmd[0]} version unavailable"
+
+
+def product_base_identity() -> str:
+    """Return and authenticate the PR base when Actions exposes it.
+
+    actions/checkout intentionally uses fetch-depth 1 in this unchanged CI job,
+    so older ancestry is not reliably available locally. On pull_request runs,
+    the event payload carries the exact base SHA; authenticate that against this
+    tranche's issued base. Push/local runs retain the issued identity.
+    """
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    if event_path:
+        payload = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        pull_request = payload.get("pull_request")
+        if isinstance(pull_request, dict):
+            base = pull_request.get("base", {}).get("sha")
+            if base != EXPECTED_PRODUCT_BASE:
+                raise SystemExit(
+                    f"unexpected PR base {base} != {EXPECTED_PRODUCT_BASE}"
+                )
+            return base
+    return EXPECTED_PRODUCT_BASE
 
 
 def main() -> int:
@@ -128,8 +150,10 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    product_base = product_base_identity()
+
     provenance = {
-        "product_base": PRODUCT_BASE,
+        "product_base": product_base,
         "verifier_import_commit": IMPORT_COMMIT,
         "product_commit": product_commit,
         "product_tree": tree,
@@ -159,6 +183,7 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    print(f"product_base={product_base}")
     print(f"product_commit={product_commit}")
     print(f"product_tree={tree}")
     print(f"verifier_import_commit={IMPORT_COMMIT}")
