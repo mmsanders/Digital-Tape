@@ -61,8 +61,16 @@ PM may convert an intake item into work only if:
 - it belongs to the **current phase**; or
 - Michael **explicitly requests it** (`REQUEST:`).
 
-Recording a fact is not scheduling it. An intake issue that stays parked for months is
-the system working, not a backlog failure.
+Recording a fact is not scheduling it. A parked intake issue may remain open while its
+filing is incomplete, but it does not need to stay in the live queue forever. Once the
+durable facts, disposition and named resume condition are copied into the canonical
+package/status documentation, PM closes the intake issue as **filed**. Closure means only
+that the intake record has been durably filed; it does not reject, supersede or silently
+schedule the input.
+
+If a resume condition later becomes true, PM opens a fresh role-labeled work issue with
+current scope and exact inputs. Do not reopen the historical intake issue merely to turn a
+parked fact into an assignment.
 
 ## Dispositions
 
