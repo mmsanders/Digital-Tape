@@ -214,6 +214,18 @@
         "python3",
         "tests/crash_core_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/respool_full_draft8",
+      "tree": "5637fbd3e89316889b4bbd52d2a72c95e3c278e1",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "f940acc355d1b2e4eb3ccf4788a14136a030b633",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent full re-spool crash + WP-12a verifier package published by Verification PR #73; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/respool_full_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
