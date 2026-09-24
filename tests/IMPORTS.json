@@ -178,6 +178,18 @@
         "python3",
         "tests/wp36_fuzz_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/embedded_readiness_draft8",
+      "tree": "46c8aa37f1f882e6a371fae7cdb5b96a28ada109",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "82847985cd41e2b4b2fc086079ead7e5f2f7669e",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent complete WP-13 embedded-readiness verifier package published by verification PR #61; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/embedded_readiness_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
