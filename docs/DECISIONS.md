@@ -2610,6 +2610,9 @@ report a raw caller-model table but not claim an engine-observed table write.
 or proof of continuity. Do not invent a public API or edit frozen DRAFT-8 bytes.
 The inconsistent literal engine attribution is logged for a separately issued
 bundle correction; Verification retains authority to reject an unbindable family.
+The issued R29-A/B/C verifier oracles compare harness token equality as a
+restart check; Verification must check whether remaining raw facts establish
+continuity and correct/reissue any oracle that relies on that tautology.
 
 **Rationale.** TapeFS §4.1 phase 2 step 5 rejects the issued 60-second/4-or-8-chunk
 seeds. Engine-api §10 requires BUSY in the promote-in-progress row, but invalid
