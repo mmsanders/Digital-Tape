@@ -41,15 +41,23 @@ opening to about four pages.
 
 ## 1. The shopping list, if you only read one section
 
+> **CORRECTION, 25 September 2026.** The table below recommended buying a spool of
+> PETG. **Michael already owns PETG HF, and PLA Matte, and both nozzles** — he said
+> so in the 23 September notes and I had not carried it into this document. The
+> recommendation is therefore **buy nothing at all**: every material this project
+> currently has a justified use for is already on his shelf. The PETG *reasoning*
+> below still stands and is why that spool is the one to reach for; only the
+> purchase was wrong. TPU is unchanged — still no part to print in it.
+
 | Priority | Buy | For | Spools |
 |---|---|---|---|
 | **1 — buy now** | **Nothing.** | — | 0 |
-| **2 — buy after A1MINI-01 comes back** | One spool of **PETG**, 1.75 mm, any colour that is not white | The cartridge shell pair that `S-2` needs, and the dashboard case in `SH-4` | 1 |
+| **2 — already owned, no purchase** | **Bambu PETG HF** | The cartridge shell pair that `S-2` needs, and the dashboard case in `SH-4` | 0 |
 | **3 — buy only if WP-25 names a compliant part** | One spool of **TPU 95A**, 1.75 mm | A bumper that does not exist in any current drawing | 1 |
 | **Do not buy** | ABS, ASA, nylon/PA, PC, and every CF/GF-filled grade | — | 0 |
 
-**Total if everything lands: two spools.** That is the whole recommendation. The
-rest of this document is why, and what would change it.
+**Total: nothing.** That is the whole recommendation. The rest of this document is
+why, and what would change it.
 
 ### Why "buy nothing now"
 
