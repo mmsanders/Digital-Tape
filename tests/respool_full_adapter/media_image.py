@@ -8,7 +8,7 @@ PKG = ROOT / "tests" / "respool_full_draft8"
 sys.path.insert(0, str(PKG))
 
 from fixture import (  # noqa: E402
-    BASE, pattern_block, pattern_bytes, transaction_media,
+    BASE, decline_case, pattern_block, pattern_bytes, v3_case,
 )
 
 BLOCK = BASE.BLOCK
@@ -24,15 +24,22 @@ def _put(image: bytearray, lba: int, data: bytes) -> None:
 
 
 def build_raw_image(fixture_name: str, pass_name: str, path: Path) -> None:
-    probe_case = {
-        "case_index": 0,
-        "fixture": fixture_name,
-        "pass": pass_name,
-        "mode": "flush_required",
-        "target": "chunk_copy",
-        "injection": {"kind": "before_write", "write_ordinal": 0, "landed_bytes": 0},
-    }
-    pre, _ = transaction_media(probe_case)
+    if fixture_name == "v3_003":
+        case = v3_case()
+        pre = case.pre
+        if pass_name == "pass2":
+            # The published crash contract starts pass 2 from the durable
+            # committed pass-1 image, not from the final two-pass oracle.
+            p = case.passes[0]
+            slots = list(pre.slots)
+            slots[p.slot] = BASE.idx(1, list(p.entries), p.sequence)
+            pre = BASE.Media(pre.blocks, pre.primary, pre.mirror, tuple(slots))
+        elif pass_name != "pass1":
+            raise ValueError("unknown v3_003 pass")
+    elif fixture_name == "no_lower_run" and pass_name == "pass1":
+        pre = decline_case().pre
+    else:
+        raise ValueError("unknown full-respool fixture/pass")
     image = bytearray(pre.blocks * BLOCK)
     _put(image, 0, pre.primary)
     _put(image, pre.blocks - 1, pre.mirror)
