@@ -1,729 +1,903 @@
 #!/usr/bin/env python3
-"""Independent DRAFT-8 promote classification + uninterrupted metadata-path oracle.
-
-Covers TapeFS §4.5 and §9.3.0–§9.3.2 without product implementation imports.
-RESUME/crash behavior, copied-audio byte identity, stored-position integration,
-and WP-12a continuation identity remain separate coverage.
-"""
+"""Independent byte oracle and raw-fact contract validator for R29-A."""
 from __future__ import annotations
-
+import copy
 import hashlib
-import struct
-import zlib
-from dataclasses import dataclass
-from pathlib import Path
 
-CF = 131072
-SAMPLE_RATE = 44100
-NOMINAL_LENGTH_S = 60
-CHUNK_BYTES = 524288
-BLOCK = 512
-BLOCKS_PER_CHUNK = CHUNK_BYTES // BLOCK
-SLOT_BYTES = 65536
-TAPE_MAX_ENTRIES = 4096
-LBA_A0, LBA_A1, LBA_B0, LBA_B1, LBA_CHUNK_BASE = 8, 136, 264, 392, 2048
-SLOT_LBAS = (LBA_A0, LBA_A1, LBA_B0, LBA_B1)
-MAX_COUNTER = 0xFFFFFFFD
-SPEC_HASHES = {
-    "tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
-    "engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
-    "acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7",
-}
+from fixture import (
+    BLOCK, PROMOTED_BLOCK, OLD_A_BLOCK, closure_initial, freeze_media,
+    scenario_initial, snapshot, stage_fixture, target_baseline, transaction,
+)
+from media import (
+    MediaError, free_next, inspect_snapshot, logical_fingerprint,
+    render_sha256, require_unique_structural_sequences, resume_rows,
+)
+from planner import HEADROOM_BRANCHES, PROMOTE_ROW_COLUMNS
 
+MAX_WRITABLE = 0xFFFFFFFD
 
-class VerificationError(Exception):
+class VerificationError(RuntimeError):
     pass
 
 
-def req(cond, msg):
-    if not cond:
-        raise VerificationError(msg)
+def need(c, m):
+    if not c:
+        raise VerificationError(m)
 
 
-def shafile(path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+FORBIDDEN_DERIVED_KEYS = frozenset({
+    "operation_running_after", "work_advanced", "next_continuation_advanced",
+    "state_changed", "recursed", "audio_continues", "source_faulted",
+    "same_operation", "restart_count", "row_matched", "positions_cleared",
+    "headroom_ok", "completed", "no_second_copy", "unique_stage_row",
+})
 
 
-def verify_spec_dir(spec_dir: Path) -> dict[str, str]:
-    out = {}
-    for name, want in SPEC_HASHES.items():
-        p = Path(spec_dir) / name
-        if not p.is_file():
-            raise VerificationError("missing spec byte source: " + str(p))
-        got = shafile(p)
-        if got != want:
-            raise VerificationError(f"spec hash mismatch for {name}: got {got}, want {want}")
-        out[name] = got
-    return out
+def _reject_derived(value, path="observation"):
+    if isinstance(value, dict):
+        for k, v in value.items():
+            need(k not in FORBIDDEN_DERIVED_KEYS, f"derived verdict forbidden: {path}.{k}")
+            _reject_derived(v, path + "." + k)
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            _reject_derived(v, f"{path}[{i}]")
 
 
-@dataclass(frozen=True)
-class Media:
-    blocks: int
-    primary: bytes
-    mirror: bytes
-    slots: tuple[bytes, bytes, bytes, bytes]
-
-    def encode(self) -> bytes:
-        return b"VO08" + struct.pack("<I", self.blocks) + self.primary + self.mirror + b"".join(self.slots)
-
-    @staticmethod
-    def decode(data: bytes) -> "Media":
-        need = 8 + 2 * BLOCK + 4 * SLOT_BYTES
-        if len(data) != need or data[:4] != b"VO08":
-            raise ValueError("bad VO08")
-        blocks = struct.unpack_from("<I", data, 4)[0]
-        p = 8
-        primary = data[p:p + BLOCK]; p += BLOCK
-        mirror = data[p:p + BLOCK]; p += BLOCK
-        slots = tuple(data[p + i * SLOT_BYTES:p + (i + 1) * SLOT_BYTES] for i in range(4))
-        return Media(blocks, primary, mirror, slots)
+def _copy_media(media):
+    return {
+        "total_chunks": media["total_chunks"],
+        "blocks": {k: bytearray(v) for k, v in media["blocks"].items()},
+    }
 
 
-@dataclass(frozen=True)
-class Case:
-    id: str
-    pre: Media
-    mount_side: str
-    expect: str
-    path: str | None
-    seq_needed: int
-    gen_needed: int
-    s: int | None = None
-    length: int | None = None
+def _flush(working, durable):
+    durable["blocks"] = {k: bytearray(v) for k, v in working["blocks"].items()}
 
 
-def derived_total_chunks() -> int:
-    return (NOMINAL_LENGTH_S * SAMPLE_RATE + CF - 1) // CF
+def _full_write(media, w):
+    media["blocks"][w["lba"]][:] = w["data"]
 
 
-def media_blocks() -> int:
-    return LBA_CHUNK_BASE + derived_total_chunks() * BLOCKS_PER_CHUNK + 1
+def _torn_write(working, durable, w, landed):
+    need(1 <= landed < BLOCK, "bad torn length")
+    lba = w["lba"]
+    working["blocks"][lba][:landed] = w["data"][:landed]
+    durable["blocks"][lba][:landed] = w["data"][:landed]
 
 
-def sb(*, generation=7, high=3, stage=0, staging=0) -> bytes:
-    blocks = media_blocks()
-    b = bytearray(BLOCK)
-    b[:8] = b"TAPEFS\0\x01"
-    struct.pack_into("<H", b, 8, 1)
-    struct.pack_into("<H", b, 10, 0)
-    struct.pack_into("<I", b, 12, generation)
-    b[20:36] = bytes(range(16))
-    struct.pack_into("<I", b, 36, SAMPLE_RATE)
-    struct.pack_into("<H", b, 40, 2)
-    struct.pack_into("<H", b, 42, 16)
-    struct.pack_into("<I", b, 44, CHUNK_BYTES)
-    struct.pack_into("<I", b, 48, NOMINAL_LENGTH_S)
-    struct.pack_into("<I", b, 52, derived_total_chunks())
-    struct.pack_into("<I", b, 56, high)
-    struct.pack_into("<I", b, 60, SLOT_BYTES)
-    struct.pack_into("<I", b, 64, LBA_A0)
-    struct.pack_into("<I", b, 68, LBA_A1)
-    struct.pack_into("<I", b, 72, LBA_B0)
-    struct.pack_into("<I", b, 76, LBA_B1)
-    struct.pack_into("<I", b, 80, LBA_CHUNK_BASE)
-    struct.pack_into("<I", b, 84, blocks - 1)
-    struct.pack_into("<I", b, 124, stage)
-    struct.pack_into("<I", b, 128, staging)
-    struct.pack_into("<I", b, 508, zlib.crc32(b[:508]))
-    return bytes(b)
+def prefix_media(scenario, writes):
+    base = _copy_media(scenario_initial(scenario))
+    for w in transaction(scenario)[:writes]:
+        _full_write(base, w)
+    return freeze_media(base)
 
 
-def idx(side: int, entries, sequence: int) -> bytes:
-    b = bytearray(SLOT_BYTES)
-    b[:8] = b"TAPEIDX\x01"
-    total = sum(e[2] for e in entries)
-    struct.pack_into("<IB3xIQ", b, 8, sequence, side, len(entries), total)
-    for i, entry in enumerate(entries):
-        struct.pack_into("<III", b, 512 + 12 * i, *entry)
-    struct.pack_into("<I", b, 60, zlib.crc32(b[:60] + b[512:512 + 12 * len(entries)]))
-    return bytes(b)
+def prefix_snapshot(scenario, writes):
+    return snapshot(prefix_media(scenario, writes))
 
 
-def invalid_slot() -> bytes:
-    return bytes(SLOT_BYTES)
+def completed_snapshot(scenario="fresh_alloc_full"):
+    return prefix_snapshot(scenario, len(transaction(scenario)))
 
 
-def sb_valid(b: bytes) -> bool:
+RERUN_SEEDS = {
+    1: ("fresh_alloc_full", 1),   # copy may be durable, step 2 not committed
+    2: ("fresh_alloc_full", 3),   # A header committed, invalid under old H
+    3: ("fresh_adopt_full", 2),   # adopt: A committed, B unchanged compact run
+    4: ("fresh_alloc_full", 5),   # B high committed, old SB still selected
+    5: ("fresh_alloc_full", 7),   # step 4 complete
+    6: ("fresh_alloc_full", 8),   # low copy durable, no low index
+    7: ("fresh_alloc_full", 10),  # low A committed
+    8: ("fresh_alloc_full", 12),  # low A+B committed
+    9: ("first_use_s0", 4),       # decline reached, clear write not landed
+    10: ("first_use_s0", 6),      # decline clear complete
+    11: ("fresh_alloc_full", 14), # step 9 complete
+}
+
+RERUN_CHUNK_WRITES = {
+    1: 2, 2: 2, 3: 1, 4: 1, 5: 1, 6: 1,
+    7: 0, 8: 0, 9: 0, 10: 0, 11: 0,
+}
+
+
+def rerun_seed_snapshot(row):
+    scenario, writes = RERUN_SEEDS[row]
+    return prefix_snapshot(scenario, writes)
+
+
+def _target_fully_durable(case):
+    inj = case["injection"]
     return (
-        len(b) == BLOCK
-        and b[:8] == b"TAPEFS\0\x01"
-        and struct.unpack_from("<I", b, 508)[0] == zlib.crc32(b[:508])
+        inj["kind"] in ("after_write", "at_flush")
+        and case["mode"] == "write_through"
     )
 
 
-def select_sb(m: Media) -> bytes:
-    pv, mv = sb_valid(m.primary), sb_valid(m.mirror)
-    if pv and mv:
-        gp = struct.unpack_from("<I", m.primary, 12)[0]
-        gm = struct.unpack_from("<I", m.mirror, 12)[0]
-        if gp == gm and m.primary != m.mirror:
-            raise ValueError("equal-generation divergent superblocks")
-        return m.primary if gp >= gm else m.mirror
-    if pv:
-        return m.primary
-    if mv:
-        return m.mirror
-    raise ValueError("no selectable superblock")
-
-
-def parse_entries(slot: bytes):
-    count = struct.unpack_from("<I", slot, 16)[0]
-    return [struct.unpack_from("<III", slot, 512 + 12 * i) for i in range(count)]
-
-
-def total_frames(slot: bytes) -> int:
-    return struct.unpack_from("<Q", slot, 20)[0]
-
-
-def structural_sequence(slot: bytes):
-    if len(slot) != SLOT_BYTES or slot[:8] != b"TAPEIDX\x01":
+def expected_recovery_row(case):
+    if case["scenario"] == "closure":
         return None
-    count = struct.unpack_from("<I", slot, 16)[0]
-    if count > TAPE_MAX_ENTRIES:
-        return None
-    if struct.unpack_from("<I", slot, 60)[0] != zlib.crc32(slot[:60] + slot[512:512 + 12 * count]):
-        return None
-    return struct.unpack_from("<I", slot, 8)[0]
+    scenario = case["scenario"]
+    ordinal = case["injection"].get("write_ordinal", case["injection"].get("flush_ordinal"))
+    durable = ordinal + (1 if _target_fully_durable(case) else 0)
+
+    if scenario == "fresh_alloc_full":
+        if durable <= 2:
+            return 1
+        if durable <= 4:
+            return 2
+        if durable == 5:
+            return 4
+        if durable <= 7:
+            return 5
+        if durable <= 9:
+            return 6
+        if durable <= 11:
+            return 7
+        if durable == 12:
+            return 8
+        return 11
+
+    if scenario == "fresh_adopt_full":
+        if durable <= 1:
+            return 1
+        if durable == 2:
+            return 3
+        if durable <= 4:
+            return 5
+        if durable <= 6:
+            return 6
+        if durable <= 8:
+            return 7
+        if durable == 9:
+            return 8
+        return 11
+
+    if scenario == "first_use_s0":
+        if ordinal <= 1:
+            return 1 if durable <= 1 else 3
+        if ordinal <= 3:
+            return 3 if durable <= 2 else 5
+        if ordinal == 4:
+            return 10 if durable >= 5 else 9
+        return 10
+
+    raise VerificationError("unknown scenario")
+
+def expected_snapshot(case):
+    if case["scenario"] == "closure":
+        info = closure_initial(case["phase"], case["seed"])
+        working = _copy_media(info["media"])
+        durable = _copy_media(info["media"])
+        w = info["target"]
+        kind = case["injection"]["kind"]
+        if kind == "before_partner":
+            pass
+        elif kind == "torn_partner":
+            _torn_write(working, durable, w, case["injection"]["landed_bytes"])
+        elif kind in ("after_partner", "at_partner_flush"):
+            _full_write(working, w)
+            if case["mode"] == "write_through":
+                _full_write(durable, w)
+        else:
+            raise VerificationError("unknown closure injection")
+        return snapshot(freeze_media(durable))
+
+    base = scenario_initial(case["scenario"])
+    working = _copy_media(base)
+    durable = _copy_media(base)
+    tx = transaction(case["scenario"])
+    inj = case["injection"]
+    target = inj.get("write_ordinal", inj.get("flush_ordinal"))
+
+    for i, w in enumerate(tx):
+        if i < target:
+            _full_write(working, w)
+            if case["mode"] == "write_through":
+                _full_write(durable, w)
+            _flush(working, durable)
+            continue
+        if i > target:
+            break
+
+        kind = inj["kind"]
+        if kind == "before_write":
+            pass
+        elif kind == "torn_write":
+            _torn_write(working, durable, w, inj["landed_bytes"])
+        elif kind in ("after_write", "at_flush"):
+            _full_write(working, w)
+            if case["mode"] == "write_through":
+                _full_write(durable, w)
+        else:
+            raise VerificationError("unknown injection")
+        break
+
+    return snapshot(freeze_media(durable))
 
 
-def semantic_valid(slot: bytes, side: int, superblock: bytes) -> bool:
-    if structural_sequence(slot) is None or slot[12] != side:
-        return False
-    entries = parse_entries(slot)
-    if total_frames(slot) != sum(e[2] for e in entries):
-        return False
-    chunks = struct.unpack_from("<I", superblock, 52)[0]
-    high = struct.unpack_from("<I", superblock, 56)[0]
-    intervals = []
-    for first, start, frames in entries:
-        if frames < 1 or start >= CF:
-            return False
-        last = first + (start + frames - 1) // CF
-        if last >= chunks or (side == 0 and last >= high):
-            return False
-        lo = first * CF + start
-        intervals.append((lo, lo + frames))
-    intervals.sort()
-    return not any(intervals[i][1] > intervals[i + 1][0] for i in range(len(intervals) - 1))
+def crash_baseline(case):
+    if case["scenario"] != "closure":
+        return target_baseline(case["scenario"])
+    info = closure_initial(case["phase"], case["seed"])
+    w = info["target"]
+    return [{
+        "ordinal": 0,
+        "phase": w["phase"],
+        "kind": w["kind"],
+        "lba": w["lba"],
+        "count": 1,
+        "sha256": hashlib.sha256(w["data"]).hexdigest(),
+        "flush_ordinal": 0,
+    }]
 
 
-def live_slot(m: Media, side: int):
-    superblock = select_sb(m)
-    ids = (0, 1) if side == 0 else (2, 3)
-    valid = [i for i in ids if semantic_valid(m.slots[i], side, superblock)]
-    if not valid:
-        return None
-    if len(valid) == 1:
-        return valid[0]
-    a, b = valid
-    sa, sbq = structural_sequence(m.slots[a]), structural_sequence(m.slots[b])
-    if sa == sbq:
-        return None
-    return a if sa > sbq else b
+def expected_crash_observation(case):
+    pre = (
+        snapshot(closure_initial(case["phase"], case["seed"])["media"])
+        if case["scenario"] == "closure"
+        else snapshot(scenario_initial(case["scenario"]))
+    )
+    post = expected_snapshot(case)
+    a = inspect_snapshot(post, "A")
+    b = inspect_snapshot(post, "B")
+    obs = {
+        "format": "PROMOTE-OBSERVATION-2",
+        "case_index": case["case_index"],
+        "scope": "crash",
+        "pre_snapshot": pre,
+        "post_snapshot": post,
+        "target_baseline": crash_baseline(case),
+        "injection_fired": True,
+        "actual_mount_A": a["mount_result"],
+        "actual_mount_B": b["mount_result"],
+    }
+    if a["mount_result"] == "TAPE_OK":
+        obs["actual_audio_A_sha256"] = render_sha256(post, "A")
+    if b["mount_result"] == "TAPE_OK":
+        obs["actual_audio_B_sha256"] = render_sha256(post, "B")
+    return obs
 
 
-def cartridge_sequence(m: Media) -> int:
-    vals = [structural_sequence(slot) for slot in m.slots]
-    vals = [v for v in vals if v is not None]
-    return max(vals)
+def _op_state(token="promote-op-1", progress=10, events=100, chunk_writes=(2048,)):
+    return {
+        "operation_token": token,
+        "progress_blocks": progress,
+        "own_device_event_count": events,
+        "chunk_write_lbas": list(chunk_writes),
+    }
 
 
-def entry_last(entry) -> int:
-    first, start, frames = entry
-    return first + (start + frames - 1) // CF
+def _render_probe():
+    return {
+        "fn": "tape_render",
+        "result": "TAPE_OK",
+        "rendered": 2,
+        "output_hex": "0100020003000400",
+        "block_events": [],
+    }
 
 
-def free_next(m: Media) -> int:
-    superblock = select_sb(m)
-    high = struct.unpack_from("<I", superblock, 56)[0]
-    b = live_slot(m, 1)
-    if b is None:
-        return high
-    entries = parse_entries(m.slots[b])
-    return max([high] + [entry_last(e) + 1 for e in entries])
+def _status_probe():
+    return {
+        "calls": [
+            {"fn": "tape_status", "result": "TAPE_OK"},
+            {"fn": "tape_get_info", "result": "TAPE_OK"},
+            {"fn": "tape_tell", "result": "TAPE_OK", "position": 64},
+        ],
+        "block_events": [],
+    }
 
 
-def timeline_len(m: Media) -> int:
-    b = live_slot(m, 1)
-    if b is None:
-        raise ValueError("no live B")
-    frames = total_frames(m.slots[b])
-    return (frames + CF - 1) // CF
+BUSY_COLUMNS = frozenset(set(PROMOTE_ROW_COLUMNS) - {"render", "service", "status_info_tell", "promote"})
+REENTRY_ALLOWED = frozenset({"render", "status_info_tell"})
+FAULTED_ALLOWED = frozenset({"render", "status_info_tell", "abort", "unmount"})
 
 
-def make_media(
-    *,
-    high,
-    a_entries,
-    b_entries,
-    a_seq=10,
-    b_seq=20,
-    partner_seq=700,
-    b1=None,
-    generation=7,
-) -> Media:
-    superblock = sb(generation=generation, high=high)
-    # A1 is deliberately structurally valid but semantically invalid for Side A:
-    # its first chunk equals H. This lets cartridge_sequence include partner_seq
-    # without stealing liveness from the intended A0 fixture.
-    if partner_seq is None:
-        a1 = invalid_slot()
+def expected_contract_observation(case):
+    fam = case["family"]
+    o = {
+        "format": "PROMOTE-OBSERVATION-2",
+        "case_index": case["case_index"],
+        "scope": "contract",
+        "family": fam,
+    }
+
+    if fam == "stage_oracle":
+        snap = snapshot(stage_fixture(case["variant"]))
+        o.update({"variant": case["variant"], "snapshot": snap, "actual_mount_result": inspect_snapshot(snap, "A")["mount_result"]})
+
+    elif fam == "rerun_row":
+        row = case["row"]
+        seed = rerun_seed_snapshot(row)
+        copies = RERUN_CHUNK_WRITES[row]
+        events = [
+            {"op": "write", "kind": "chunk", "lba": 2048 + i * 1024, "count": 1, "rc": 0}
+            for i in range(copies)
+        ]
+        o.update({
+            "row": row,
+            "seed_snapshot": seed,
+            "call_result": "TAPE_OK",
+            "block_events": events,
+            "terminal_snapshot": completed_snapshot(),
+        })
+
+    elif fam == "rerun_special":
+        v = case["variant"]
+        if v == "exact_tail_capacity":
+            o.update({
+                "variant": v,
+                "seed_snapshot": rerun_seed_snapshot(4),
+                "block_count": 2048 + 4 * 1024 + 1,
+                "call_result": "TAPE_OK",
+                "block_events": [{"op": "write", "kind": "chunk", "lba": 2048, "count": 1, "rc": 0}],
+                "terminal_snapshot": completed_snapshot("fresh_adopt_full"),
+            })
+        else:
+            o.update({
+                "variant": v,
+                "attempts": [
+                    {"staging_start": 3, "free_next_before": 4, "chunk_write_lbas": [2048]},
+                    {"staging_start": 3, "free_next_before": 4, "chunk_write_lbas": [2048]},
+                    {"staging_start": 3, "free_next_before": 4, "chunk_write_lbas": [2048]},
+                ],
+            })
+
+    elif fam == "stored_position":
+        calls = []
+        table = {"A": 111, "B": 222}
+        if case["variant"] != "nothing_to_do":
+            calls.append({
+                "result": "TAPE_OK", "more_work": True,
+                "caller_table_before": dict(table),
+                "caller_table_after": dict(table),
+            })
+        calls.append({
+            "result": "TAPE_OK", "more_work": False,
+            "caller_table_before": dict(table),
+            "caller_table_after": {"A": None, "B": None},
+        })
+        o.update({
+            "variant": case["variant"],
+            "position_table_owner": "caller-model",
+            "position_table_before": {"A": 111, "B": 222},
+            "calls": calls,
+        })
+
+    elif fam in ("headroom_exact", "headroom_short"):
+        branch = case["branch"]
+        sn, gn = HEADROOM_BRANCHES[branch]
+        seq = MAX_WRITABLE - sn
+        gen = MAX_WRITABLE - gn
+        if fam == "headroom_short":
+            if case["counter"] == "sequence":
+                seq += 1
+            else:
+                gen += 1
+        refused = fam == "headroom_short"
+        o.update({
+            "branch": branch,
+            "counter_values": {"sequence": seq, "sb_generation": gen},
+            "call_result": "TAPE_ERR_SEQUENCE_EXHAUSTED" if refused else "TAPE_OK",
+            "block_events": [] if refused else [{"op": "write", "kind": "first_branch_write", "lba": 2048, "count": 1, "rc": 0}],
+        })
+        if fam == "headroom_short":
+            o["counter"] = case["counter"]
+
+    elif fam == "headroom_special":
+        v = case["variant"]
+        if v == "fresh_decline_seq_FFFFFFFB":
+            o.update({
+                "variant": v,
+                "counter_values": {"sequence": 0xFFFFFFFB, "sb_generation": 10},
+                "call_result": "TAPE_OK",
+                "index_commit_sequences": [0xFFFFFFFC, 0xFFFFFFFD],
+                "superblock_generations": [11],
+            })
+        elif v == "fresh_alloc_seq_FFFFFFFC":
+            o.update({
+                "variant": v,
+                "counter_values": {"sequence": 0xFFFFFFFC, "sb_generation": 10},
+                "call_result": "TAPE_ERR_SEQUENCE_EXHAUSTED",
+                "block_events": [],
+            })
+        else:
+            o.update({
+                "variant": v,
+                "counter_values": {"sequence": 0xFFFFFFFC, "sb_generation": 10},
+                "call_result": "TAPE_OK",
+                "index_commit_sequences": [],
+                "superblock_generations": [11],
+            })
+
+    elif fam == "zero_needed_reserved":
+        o.update({
+            "counter": case["counter"],
+            "value": case["value"],
+            "call_result": "TAPE_OK",
+            "block_events": [],
+        })
+
+    elif fam == "shared_sequence":
+        o.update({
+            "structural_sequences_before": {"A0": 10, "A1": 9, "B0": 500, "B1": 499},
+            "index_commit_sequences": [501, 502, 503, 504],
+            "call_result": "TAPE_OK",
+        })
+
+    elif fam == "counter_domains":
+        o.update({
+            "index_only": {"sequence_before": 500, "sequence_after": 501, "sb_generation_before": 10, "sb_generation_after": 10},
+            "superblock_only": {"sequence_before": 501, "sequence_after": 501, "sb_generation_before": 10, "sb_generation_after": 11},
+        })
+
+    elif fam == "entry_refusal":
+        result = {
+            "empty_b": "TAPE_ERR_INVALID_ARG",
+            "degraded_b": "TAPE_ERR_NO_VALID_INDEX",
+            "capacity_full": "TAPE_ERR_CARTRIDGE_FULL",
+        }[case["variant"]]
+        o.update({"variant": case["variant"], "call_result": result, "block_events": []})
+
+    elif fam == "promote_in_progress_row":
+        c = case["column"]
+        before = _op_state()
+        o.update({"column": c, "before": before})
+        if c in BUSY_COLUMNS:
+            o.update({
+                "probe": {"fn": c, "result": "TAPE_ERR_BUSY", "block_events": []},
+                "after_probe": _op_state(),
+                "next_continuation": {
+                    "before": _op_state(),
+                    "call": {"fn": "tape_promote", "result": "TAPE_OK", "more_work": True},
+                    "after": _op_state(progress=11, events=101),
+                },
+            })
+        elif c == "promote":
+            o.update({
+                "probe": {"fn": "tape_promote", "result": "TAPE_OK", "more_work": True, "block_events": [{"op": "write", "lba": 2048, "count": 1, "rc": 0}]},
+                "after_probe": _op_state(progress=11, events=101),
+            })
+        elif c == "render":
+            o.update({"probe": _render_probe(), "after_probe": _op_state()})
+        elif c == "service":
+            o.update({"probe": {"fn": "tape_service", "result": "TAPE_OK", "block_events": [{"op": "read", "lba": 2048, "count": 1, "rc": 0}]}, "after_probe": _op_state()})
+        else:
+            o.update({"probe": _status_probe(), "after_probe": _op_state()})
+
+    elif fam == "zero_budget":
+        token = None if case["variant"] == "initiate" else "promote-op-1"
+        before = _op_state(token=token, progress=0 if token is None else 10, events=0 if token is None else 100)
+        o.update({
+            "variant": case["variant"], "before": before,
+            "call": {"fn": "tape_promote", "block_budget": 0, "result": "TAPE_ERR_INVALID_ARG", "block_events": []},
+            "after": dict(before),
+        })
+
+    elif fam == "allowed_mutables":
+        o.update({
+            "before": _op_state(),
+            "initial_args": {"block_budget": 1, "more_work_ptr": "mw-a", "cb": "cb-a", "user": "u-a"},
+            "call_args": {"block_budget": 2, "more_work_ptr": "mw-b", "cb": "cb-b", "user": "u-b"},
+            "call": {"fn": "tape_promote", "result": "TAPE_OK", "more_work": True},
+            "after": _op_state(progress=11, events=101),
+        })
+
+    elif fam == "own_device_failure":
+        o.update({
+            "transport_before": "Playing",
+            "operation_before": _op_state(),
+            "call": {"fn": "tape_promote", "result": "TAPE_ERR_IO", "more_work": False},
+            "own_device_events": [{"op": "write", "lba": 2048, "count": 1, "rc": 5}],
+            "transport_after": "FAULTED",
+        })
+
+    elif fam == "faulted_row":
+        c = case["column"]
+        o["column"] = c
+        if c == "render":
+            o["probe"] = {
+                "calls": [
+                    {"result": "TAPE_OK", "ring_frames_before": 4, "ring_frames_after": 2, "rendered": 2, "output_hex": "0100020003000400"},
+                    {"result": "TAPE_OK", "ring_frames_before": 2, "ring_frames_after": 0, "rendered": 2, "output_hex": "0500060007000800"},
+                    {"result": "TAPE_ERR_UNDERRUN", "ring_frames_before": 0, "ring_frames_after": 0, "rendered": 0, "output_hex": ""},
+                ],
+                "block_events": [],
+            }
+        elif c == "status_info_tell":
+            o["probe"] = _status_probe()
+        elif c == "abort":
+            o["probe"] = {"fn": "tape_abort", "result": "TAPE_OK", "frames_owed_before": 9, "frames_owed_after": 0, "armed_before": True, "block_events": []}
+        elif c == "unmount":
+            o["probe"] = {"fn": "tape_unmount", "result": "TAPE_OK", "block_events": []}
+        else:
+            o["probe"] = {"fn": c, "result": "TAPE_ERR_FAULTED", "block_events": []}
+
+    elif fam == "callback_reentry":
+        c = case["column"]
+        before = {"operation": _op_state(), "callback_entry_count": 1, "callback_max_depth": 1}
+        if c == "render":
+            nested = _render_probe()
+        elif c == "status_info_tell":
+            nested = _status_probe()
+        else:
+            nested = {"fn": c, "result": "TAPE_ERR_BUSY", "block_events": []}
+        o.update({
+            "column": c,
+            "callback_before": before,
+            "nested_call": nested,
+            "callback_after": {"operation": _op_state(), "callback_entry_count": 1, "callback_max_depth": 1},
+            "next_continuation": {
+                "before": _op_state(),
+                "call": {"fn": "tape_promote", "result": "TAPE_OK", "more_work": True},
+                "after": _op_state(progress=11, events=101),
+            },
+        })
+
+    elif fam == "small_budget_completion":
+        o.update({
+            "call_sequence": [
+                {"fn": "tape_promote", "budget": 1, "result": "TAPE_OK", "more_work": True, "operation_token": "adapter-label", "progress_before": 0, "progress_after": 1, "chunk_write_lbas_before": [], "chunk_write_lbas_after": [2048]},
+                {"fn": "tape_promote", "budget": 1, "result": "TAPE_OK", "more_work": True, "operation_token": "adapter-label", "progress_before": 1, "progress_after": 2, "chunk_write_lbas_before": [2048], "chunk_write_lbas_after": [2048, 3072]},
+                {"fn": "tape_promote", "budget": 1, "result": "TAPE_OK", "more_work": False, "operation_token": "adapter-label", "progress_before": 2, "progress_after": 3, "chunk_write_lbas_before": [2048, 3072], "chunk_write_lbas_after": [2048, 3072, 4096]},
+            ],
+            "terminal_snapshot": completed_snapshot(),
+        })
     else:
-        invalid_for_a_chunk = high
-        if invalid_for_a_chunk >= derived_total_chunks():
-            raise ValueError("fixture high leaves no semantically-invalid A partner")
-        a1 = idx(0, [(invalid_for_a_chunk, 0, 64)], partner_seq)
-    b1s = invalid_slot() if b1 is None else idx(1, b1[0], b1[1])
-    return Media(
-        media_blocks(),
-        superblock,
-        superblock,
-        (
-            idx(0, a_entries, a_seq),
-            a1,
-            idx(1, b_entries, b_seq),
-            b1s,
-        ),
-    )
+        raise VerificationError("unknown contract family")
+
+    return o
 
 
-def make_cases() -> list[Case]:
-    empty = make_media(high=3, a_entries=[(0, 0, 128)], b_entries=[])
-    empty_high = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[],
-        partner_seq=0xFFFFFFFF, generation=0xFFFFFFFF,
-    )
-    degraded = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[(0, 0, 64)],
-        b_seq=500, b1=([(1, 0, 32)], 500),
-    )
-    nothing = make_media(high=3, a_entries=[(0, 0, 128)], b_entries=[(0, 0, 128)])
-    nothing_high = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[(0, 0, 128)],
-        partner_seq=0xFFFFFFFF, generation=0xFFFFFFFF,
-    )
-
-    adopt_complete = make_media(
-        high=10, a_entries=[(0, 0, 128)], b_entries=[(10, 0, 2 * CF)],
-        partner_seq=0xFFFFFFFA, generation=0xFFFFFFFB,
-    )
-    adopt_seq_exhausted = make_media(
-        high=10, a_entries=[(0, 0, 128)], b_entries=[(10, 0, 2 * CF)],
-        partner_seq=0xFFFFFFFB, generation=7,
-    )
-    adopt_gen_exhausted = make_media(
-        high=10, a_entries=[(0, 0, 128)], b_entries=[(10, 0, 2 * CF)],
-        partner_seq=700, generation=0xFFFFFFFC,
-    )
-
-    adopt_decline = make_media(
-        high=2, a_entries=[(0, 0, 128)], b_entries=[(2, 0, 10 * CF)],
-        partner_seq=0xFFFFFFFC, generation=0xFFFFFFFB,
-    )
-    decline_seq_exhausted = make_media(
-        high=2, a_entries=[(0, 0, 128)], b_entries=[(2, 0, 10 * CF)],
-        partner_seq=0xFFFFFFFD, generation=7,
-    )
-    decline_gen_exhausted = make_media(
-        high=2, a_entries=[(0, 0, 128)], b_entries=[(2, 0, 10 * CF)],
-        partner_seq=700, generation=0xFFFFFFFC,
-    )
-
-    alloc_complete = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[(3, 1, CF)],
-        partner_seq=0xFFFFFFF9, generation=0xFFFFFFFB,
-    )
-    alloc_seq_exhausted = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[(3, 1, CF)],
-        partner_seq=0xFFFFFFFA, generation=7,
-    )
-    alloc_gen_exhausted = make_media(
-        high=3, a_entries=[(0, 0, 128)], b_entries=[(3, 1, CF)],
-        partner_seq=700, generation=0xFFFFFFFC,
-    )
-
-    full = make_media(high=19, a_entries=[(0, 0, 128)], b_entries=[(19, 10, CF)])
-    full_headroom_first = make_media(
-        high=19, a_entries=[(0, 0, 128)], b_entries=[(19, 10, CF)],
-        partner_seq=0xFFFFFFFA,
-    )
-
-    return [
-        Case("PR-EMPTY", empty, "B", "TAPE_ERR_INVALID_ARG", None, 0, 0),
-        Case("PR-EMPTY-HIGH-COUNTERS", empty_high, "B", "TAPE_ERR_INVALID_ARG", None, 0, 0),
-        Case("PR-DEGRADED", degraded, "A", "TAPE_ERR_NO_VALID_INDEX", None, 0, 0),
-        Case("PR-NOTHING", nothing, "B", "TAPE_OK", None, 0, 0),
-        Case("PR-NOTHING-HIGH-COUNTERS", nothing_high, "B", "TAPE_OK", None, 0, 0),
-
-        Case("PR-ADOPT-COMPLETE", adopt_complete, "B", "TAPE_OK", "adopt-complete", 3, 2, 10, 2),
-        Case("PR-ADOPT-SEQ-EXHAUSTED", adopt_seq_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 3, 2, 10, 2),
-        Case("PR-ADOPT-GEN-EXHAUSTED", adopt_gen_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 3, 2, 10, 2),
-
-        Case("PR-ADOPT-DECLINE", adopt_decline, "B", "TAPE_OK", "adopt-decline", 1, 2, 2, 10),
-        Case("PR-DECLINE-SEQ-EXHAUSTED", decline_seq_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 1, 2, 2, 10),
-        Case("PR-DECLINE-GEN-EXHAUSTED", decline_gen_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 1, 2, 2, 10),
-
-        Case("PR-ALLOC-COMPLETE", alloc_complete, "B", "TAPE_OK", "alloc-complete", 4, 2, 5, 1),
-        Case("PR-ALLOC-SEQ-EXHAUSTED", alloc_seq_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 4, 2, 5, 1),
-        Case("PR-ALLOC-GEN-EXHAUSTED", alloc_gen_exhausted, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 4, 2, 5, 1),
-
-        Case("PR-FULL", full, "B", "TAPE_ERR_CARTRIDGE_FULL", None, 4, 2, 21, 1),
-        Case("PR-FULL-HEADROOM-FIRST", full_headroom_first, "B", "TAPE_ERR_SEQUENCE_EXHAUSTED", None, 4, 2, 21, 1),
-    ]
+def expected_observation(case):
+    if case["scope"] == "crash":
+        return expected_crash_observation(case)
+    return expected_contract_observation(case)
 
 
-def headroom_available(case: Case) -> bool:
-    if case.seq_needed:
-        if cartridge_sequence(case.pre) + case.seq_needed > MAX_COUNTER:
-            return False
-    if case.gen_needed:
-        generation = struct.unpack_from("<I", select_sb(case.pre), 12)[0]
-        if generation + case.gen_needed > MAX_COUNTER:
-            return False
+def _state(v, label, allow_none=False):
+    need(isinstance(v, dict), f"{label} missing")
+    for k in ("progress_blocks", "own_device_event_count"):
+        need(isinstance(v.get(k), int) and not isinstance(v.get(k), bool) and v[k] >= 0, f"{label}.{k}")
+    writes = v.get("chunk_write_lbas")
+    need(isinstance(writes, list) and all(isinstance(x, int) and not isinstance(x, bool) and x >= 2048 for x in writes), f"{label}.chunk_write_lbas")
+    need(len(writes) == len(set(writes)), f"{label} repeated chunk write")
+    return {"progress_blocks": v["progress_blocks"], "own_device_event_count": v["own_device_event_count"], "chunk_write_lbas": writes}
+
+
+def _same_state(a, b, label, allow_none=False):
+    a = _state(a, label + ".before", allow_none)
+    b = _state(b, label + ".after", allow_none)
+    need(a == b, f"{label} state changed")
+
+
+def _advance(a, b, label):
+    a = _state(a, label + ".before")
+    b = _state(b, label + ".after")
+    need(b["progress_blocks"] > a["progress_blocks"], f"{label} no progress")
+    need(b["own_device_event_count"] >= a["own_device_event_count"], f"{label} event regression")
+    need(b["chunk_write_lbas"][:len(a["chunk_write_lbas"])] == a["chunk_write_lbas"], f"{label} chunk-write trace rewound")
+
+
+def _events(events, label):
+    need(isinstance(events, list), f"{label} not list")
+    for i, e in enumerate(events):
+        need(isinstance(e, dict), f"{label}[{i}]")
+        need(e.get("op") in ("read", "write", "flush"), f"{label}[{i}] op")
+        if e.get("op") in ("read", "write"):
+            need(isinstance(e.get("lba"), int) and e["lba"] >= 0, f"{label}[{i}] lba")
+    return events
+
+
+def _validate_render(p, label):
+    need(isinstance(p, dict), f"{label} missing")
+    need(p.get("fn") == "tape_render", f"{label} fn")
+    need(p.get("result") == "TAPE_OK", f"{label} result")
+    need(isinstance(p.get("rendered"), int) and p["rendered"] > 0, f"{label} rendered")
+    raw = bytes.fromhex(p.get("output_hex", ""))
+    need(raw and any(raw), f"{label} silent/empty")
+    need(p.get("block_events") == [], f"{label} media touched")
+
+
+def _validate_status(p, label):
+    need(isinstance(p, dict), f"{label} missing")
+    calls = p.get("calls")
+    need(isinstance(calls, list) and [x.get("fn") for x in calls] == ["tape_status", "tape_get_info", "tape_tell"], f"{label} calls")
+    need(all(x.get("result") == "TAPE_OK" for x in calls), f"{label} result")
+    need(p.get("block_events") == [], f"{label} media touched")
+
+
+def _validate_terminal_promoted(snap):
+    ins = inspect_snapshot(snap, "A")
+    need(ins["mount_result"] == "TAPE_OK", "terminal promote not mountable")
+    sb = ins["sb"]["selected"]
+    need(sb["promote_stage"] == 0 and sb["a_high_water"] == 1, "terminal water/stage")
+    need(ins["A"]["selected"]["entries"] == [(0, 0, 128)], "terminal A layout")
+    need(ins["B"]["selected"]["entries"] == [(0, 0, 128)], "terminal B layout")
+    need(render_sha256(snap, "A") == hashlib.sha256(PROMOTED_BLOCK).hexdigest(), "terminal A audio")
+    need(render_sha256(snap, "B") == hashlib.sha256(PROMOTED_BLOCK).hexdigest(), "terminal B audio")
+    require_unique_structural_sequences(snap)
+
+
+def _validate_contract(case, obs):
+    _reject_derived(obs)
+    fam = case["family"]
+    need(obs.get("family") == fam, "contract family")
+
+    if fam == "stage_oracle":
+        need(obs.get("variant") == case["variant"], "stage variant")
+        snap = obs.get("snapshot")
+        ins = inspect_snapshot(snap, "A")
+        expected = {
+            "row1": ("TAPE_OK", [1]),
+            "row2": ("TAPE_OK", [2]),
+            "row3": ("TAPE_OK", [3]),
+            "row1_s0": ("TAPE_OK", [1]),
+            "unmatched": ("TAPE_ERR_INCONSISTENT", []),
+        }[case["variant"]]
+        need(ins["mount_result"] == expected[0], "stage mount result")
+        need(ins.get("resume_rows", []) == expected[1], "stage row match")
+        need(obs.get("actual_mount_result") == ins["mount_result"], "stage product/raw mismatch")
+
+    elif fam == "rerun_row":
+        row = case["row"]
+        need(obs.get("row") == row, "rerun row")
+        need(obs.get("seed_snapshot") == rerun_seed_snapshot(row), "rerun seed bytes")
+        need(obs.get("call_result") == "TAPE_OK", "rerun result")
+        events = _events(obs.get("block_events"), "rerun events")
+        copies = sum(1 for e in events if e.get("op") == "write" and e.get("kind") == "chunk")
+        need(copies == RERUN_CHUNK_WRITES[row], f"rerun row {row} copied {copies}")
+        _validate_terminal_promoted(obs.get("terminal_snapshot"))
+
+    elif fam == "rerun_special":
+        if case["variant"] == "exact_tail_capacity":
+            need(obs.get("variant") == case["variant"], "tail variant")
+            need(obs.get("seed_snapshot") == rerun_seed_snapshot(4), "tail seed")
+            need(obs.get("call_result") == "TAPE_OK", "tail false full")
+            events = _events(obs.get("block_events"), "tail events")
+            chunk_writes = [e for e in events if e.get("op") == "write" and e.get("kind") == "chunk"]
+            need(len(chunk_writes) == 1 and chunk_writes[0]["lba"] == 2048, "tail did not adopt in place")
+            _validate_terminal_promoted(obs.get("terminal_snapshot"))
+        else:
+            attempts = obs.get("attempts")
+            need(isinstance(attempts, list) and len(attempts) >= 3, "retry attempts")
+            starts = [x.get("staging_start") for x in attempts]
+            frees = [x.get("free_next_before") for x in attempts]
+            need(len(set(starts)) == 1 and starts[0] == 3, "retry consumed staging runs")
+            need(len(set(frees)) == 1 and frees[0] == 4, "retry free_next drift")
+            for x in attempts:
+                need(all(lba < 2048 + 3 * 1024 for lba in x.get("chunk_write_lbas", [])), "retry copied new high staging run")
+
+    elif fam == "stored_position":
+        need(obs.get("variant") == case["variant"], "position variant")
+        need(obs.get("position_table_owner") == "caller-model", "position table falsely attributed to engine")
+        before = obs.get("position_table_before")
+        need(before == {"A": 111, "B": 222}, "position seed")
+        calls = obs.get("calls")
+        need(isinstance(calls, list) and calls, "position calls")
+        current = before
+        for i, c in enumerate(calls):
+            need(c.get("caller_table_before") == current, f"caller table chain {i}")
+            terminal = c.get("result") == "TAPE_OK" and c.get("more_work") is False
+            expected_after = {"A": None, "B": None} if terminal else current
+            need(c.get("caller_table_after") == expected_after, f"caller model transition {i}")
+            if i < len(calls) - 1:
+                need(c.get("more_work") is True, "nonterminal flag")
+            current = expected_after
+        need(calls[-1].get("result") == "TAPE_OK" and calls[-1].get("more_work") is False, "terminal call")
+
+    elif fam in ("headroom_exact", "headroom_short"):
+        branch = case["branch"]
+        need(obs.get("branch") == branch, "headroom branch")
+        sn, gn = HEADROOM_BRANCHES[branch]
+        vals = obs.get("counter_values")
+        need(isinstance(vals, dict), "counter values")
+        ok = ((sn == 0 or vals["sequence"] + sn <= MAX_WRITABLE) and (gn == 0 or vals["sb_generation"] + gn <= MAX_WRITABLE))
+        if fam == "headroom_exact":
+            need(ok and obs.get("call_result") == "TAPE_OK", "exact headroom refused")
+        else:
+            need(not ok, "short case not actually short")
+            need(obs.get("call_result") == "TAPE_ERR_SEQUENCE_EXHAUSTED", "short headroom result")
+            need(obs.get("block_events") == [], "short headroom wrote media")
+
+    elif fam == "headroom_special":
+        v = case["variant"]
+        need(obs.get("variant") == v, "headroom special variant")
+        if v == "fresh_decline_seq_FFFFFFFB":
+            need(obs.get("call_result") == "TAPE_OK", "fresh decline refused")
+            need(obs.get("index_commit_sequences") == [0xFFFFFFFC, 0xFFFFFFFD], "fresh decline sequence writes")
+        elif v == "fresh_alloc_seq_FFFFFFFC":
+            need(obs.get("call_result") == "TAPE_ERR_SEQUENCE_EXHAUSTED", "FC hazard not refused")
+            need(obs.get("block_events") == [], "FC hazard wrote")
+        else:
+            need(obs.get("call_result") == "TAPE_OK", "resume decline refused")
+            need(obs.get("index_commit_sequences") == [], "resume decline committed index")
+
+    elif fam == "zero_needed_reserved":
+        need(obs.get("counter") == case["counter"] and obs.get("value") == case["value"], "reserved case")
+        need(obs.get("call_result") == "TAPE_OK" and obs.get("block_events") == [], "zero-needed consulted counter")
+
+    elif fam == "shared_sequence":
+        seqs = obs.get("structural_sequences_before")
+        need(max(seqs.values()) == 500, "shared base")
+        need(obs.get("index_commit_sequences") == [501, 502, 503, 504], "running sequence base")
+
+    elif fam == "counter_domains":
+        i = obs.get("index_only")
+        s = obs.get("superblock_only")
+        need(i["sequence_after"] == i["sequence_before"] + 1, "index sequence")
+        need(i["sb_generation_after"] == i["sb_generation_before"], "index advanced sb generation")
+        need(s["sequence_after"] == s["sequence_before"], "sb update advanced sequence")
+        need(s["sb_generation_after"] == s["sb_generation_before"] + 1, "sb generation")
+
+    elif fam == "entry_refusal":
+        expected = {"empty_b": "TAPE_ERR_INVALID_ARG", "degraded_b": "TAPE_ERR_NO_VALID_INDEX", "capacity_full": "TAPE_ERR_CARTRIDGE_FULL"}[case["variant"]]
+        need(obs.get("call_result") == expected, "entry refusal result")
+        need(obs.get("block_events") == [], "entry refusal wrote")
+
+    elif fam == "promote_in_progress_row":
+        c = case["column"]
+        need(obs.get("column") == c, "row column")
+        before = obs.get("before")
+        after = obs.get("after_probe")
+        if c in BUSY_COLUMNS:
+            need(obs["probe"].get("result") == "TAPE_ERR_BUSY" and obs["probe"].get("block_events") == [], "BUSY probe")
+            _same_state(before, after, "BUSY")
+            cont = obs.get("next_continuation")
+            need(cont["call"].get("fn") == "tape_promote" and cont["call"].get("result") == "TAPE_OK", "next continuation")
+            _same_state(cont["before"], after, "continuation state")
+            _advance(cont["before"], cont["after"], "next continuation")
+        elif c == "promote":
+            need(obs["probe"].get("result") == "TAPE_OK", "matching continuation")
+            _advance(before, after, "matching continuation")
+        else:
+            _same_state(before, after, c)
+            if c == "render":
+                _validate_render(obs["probe"], "row render")
+            elif c == "status_info_tell":
+                _validate_status(obs["probe"], "row status")
+            else:
+                need(obs["probe"].get("result") == "TAPE_OK", "service result")
+
+    elif fam == "zero_budget":
+        allow_none = case["variant"] == "initiate"
+        _same_state(obs.get("before"), obs.get("after"), "zero budget", allow_none)
+        need(obs["call"].get("block_budget") == 0 and obs["call"].get("result") == "TAPE_ERR_INVALID_ARG", "zero budget result")
+        need(obs["call"].get("block_events") == [], "zero budget media")
+
+    elif fam == "allowed_mutables":
+        need(set(obs.get("initial_args", {})) == {"block_budget", "more_work_ptr", "cb", "user"}, "promote arg surface")
+        need(all(obs["initial_args"][k] != obs["call_args"][k] for k in obs["initial_args"]), "mutables not changed")
+        need(obs["call"].get("result") == "TAPE_OK", "mutable continuation refused")
+        _advance(obs["before"], obs["after"], "mutable continuation")
+
+    elif fam == "own_device_failure":
+        need(obs.get("transport_before") == "Playing", "failure pre transport")
+        need(obs["call"].get("result") == "TAPE_ERR_IO" and obs["call"].get("more_work") is False, "failure termination")
+        events = _events(obs.get("own_device_events"), "failure events")
+        need(any(e.get("op") in ("write", "flush") and e.get("rc", 0) != 0 for e in events), "no own-device fault")
+        need(obs.get("transport_after") == "FAULTED", "own-device failure not faulted")
+
+    elif fam == "faulted_row":
+        c = case["column"]
+        p = obs.get("probe")
+        if c not in FAULTED_ALLOWED:
+            need(p.get("result") == "TAPE_ERR_FAULTED" and p.get("block_events") == [], f"FAULTED {c}")
+        elif c == "render":
+            calls = p.get("calls")
+            need(isinstance(calls, list) and len(calls) >= 3, "faulted render sequence")
+            need(calls[-1]["result"] == "TAPE_ERR_UNDERRUN" and calls[-1]["ring_frames_before"] == 0, "ring did not drain")
+            need(p.get("block_events") == [], "faulted render media")
+        elif c == "status_info_tell":
+            _validate_status(p, "faulted status")
+        elif c == "abort":
+            need(p.get("result") == "TAPE_OK" and p.get("frames_owed_before", 0) > 0 and p.get("frames_owed_after") == 0, "faulted abort")
+            need(p.get("armed_before") is True and p.get("block_events") == [], "faulted armed override")
+        else:
+            need(p.get("result") == "TAPE_OK" and p.get("block_events") == [], "faulted unmount")
+
+    elif fam == "callback_reentry":
+        c = case["column"]
+        before = obs["callback_before"]
+        after = obs["callback_after"]
+        _same_state(before["operation"], after["operation"], "callback nested")
+        need(before["callback_entry_count"] == after["callback_entry_count"] == 1, "callback re-entered")
+        need(before["callback_max_depth"] == after["callback_max_depth"] == 1, "callback recursed")
+        if c == "render":
+            _validate_render(obs["nested_call"], "callback render")
+        elif c == "status_info_tell":
+            _validate_status(obs["nested_call"], "callback status")
+        else:
+            need(obs["nested_call"].get("result") == "TAPE_ERR_BUSY" and obs["nested_call"].get("block_events") == [], "callback BUSY")
+        cont = obs["next_continuation"]
+        _same_state(cont["before"], after["operation"], "post-callback state")
+        _advance(cont["before"], cont["after"], "post-callback continuation")
+
+    elif fam == "small_budget_completion":
+        seq = obs.get("call_sequence")
+        need(isinstance(seq, list) and len(seq) >= 2, "small-budget sequence")
+        need(all(x.get("fn") == "tape_promote" and x.get("budget") == 1 for x in seq), "same function/budget-1")
+        need(any(x.get("more_work") is True for x in seq[:-1]), "no nonterminal call")
+        need(seq[-1].get("more_work") is False, "no terminal call")
+        for a, b in zip(seq, seq[1:]):
+            need(a["progress_after"] == b["progress_before"], "progress discontinuity")
+            need(a["chunk_write_lbas_after"] == b["chunk_write_lbas_before"], "chunk-write trace discontinuity")
+        need(all(x["progress_after"] > x["progress_before"] for x in seq), "no progress")
+        for x in seq:
+            before_writes = x.get("chunk_write_lbas_before")
+            after_writes = x.get("chunk_write_lbas_after")
+            need(isinstance(before_writes, list) and isinstance(after_writes, list), "chunk-write trace missing")
+            need(all(isinstance(v, int) and not isinstance(v, bool) and v >= 2048 for v in before_writes + after_writes), "chunk-write trace malformed")
+            need(after_writes[:len(before_writes)] == before_writes, "chunk-write trace rewound")
+            need(len(after_writes) == len(set(after_writes)), "chunk copy restarted/repeated")
+        writes = seq[-1].get("chunk_write_lbas_after")
+        need(isinstance(writes, list) and len(writes) == len(set(writes)), "chunk copy restarted/repeated")
+        _validate_terminal_promoted(obs.get("terminal_snapshot"))
+
+    else:
+        raise VerificationError("unknown family")
+
+
+def validate_case(case, obs):
+    need(isinstance(obs, dict), "observation object")
+    need(obs.get("format") == "PROMOTE-OBSERVATION-2", "observation format")
+    need(obs.get("case_index") == case["case_index"], "case index")
+    need(obs.get("scope") == case["scope"], "scope")
+
+    if case["scope"] == "contract":
+        _validate_contract(case, obs)
+        return True
+
+    need(obs.get("injection_fired") is True, "injection skipped")
+    exp = expected_crash_observation(case)
+    need(obs.get("pre_snapshot") == exp["pre_snapshot"], "pre snapshot")
+    need(obs.get("target_baseline") == exp["target_baseline"], "target baseline")
+    need(obs.get("post_snapshot") == exp["post_snapshot"], "durable post snapshot")
+
+    post = obs["post_snapshot"]
+    a = inspect_snapshot(post, "A")
+    b = inspect_snapshot(post, "B")
+    need(obs.get("actual_mount_A") == a["mount_result"], "A remount/raw mismatch")
+    need(obs.get("actual_mount_B") == b["mount_result"], "B remount/raw mismatch")
+
+    if a["mount_result"] == "TAPE_OK":
+        need(obs.get("actual_audio_A_sha256") == render_sha256(post, "A"), "A audio digest")
+    if b["mount_result"] == "TAPE_OK":
+        need(obs.get("actual_audio_B_sha256") == render_sha256(post, "B"), "B audio digest")
+
+    if case["scenario"] != "closure":
+        require_unique_structural_sequences(post)
+        if a["mount_result"] == "TAPE_OK":
+            sb = a["sb"]["selected"]
+            if sb["promote_stage"] == 1 and not a.get("degraded_b"):
+                need(len(a.get("resume_rows", [])) == 1, "stage-1 media did not match exactly one resume row")
+            if b["mount_result"] == "TAPE_OK":
+                # B audio is always the promoted source timeline in these fixtures.
+                need(render_sha256(post, "B") == hashlib.sha256(PROMOTED_BLOCK).hexdigest(), "B referenced audio corrupted")
+            ad = render_sha256(post, "A")
+            need(ad in {
+                hashlib.sha256(OLD_A_BLOCK).hexdigest(),
+                hashlib.sha256(PROMOTED_BLOCK).hexdigest(),
+                hashlib.sha256(b"").hexdigest(),
+            }, "A referenced audio corrupted")
+    else:
+        info = closure_initial(case["phase"], case["seed"])
+        if a["mount_result"] == "TAPE_OK":
+            generation = a["sb"]["selected"]["sb_generation"]
+            need(generation >= info["current_generation"], "stale-generation rollback after closure interruption")
+
     return True
 
 
-def fixture_contract_errors(case: Case) -> list[str]:
-    err = []
-    if derived_total_chunks() != 21 or case.pre.blocks != media_blocks():
-        err.append("geometry drift")
-    if case.pre.primary != case.pre.mirror:
-        err.append("fixture superblocks differ")
-    if live_slot(case.pre, 0) != 0:
-        err.append("A0 is not the live Side A slot")
-    if case.id == "PR-DEGRADED":
-        if live_slot(case.pre, 1) is not None:
-            err.append("degraded-B premise")
-    elif live_slot(case.pre, 1) != 2:
-        err.append("B0 is not the live Side B slot")
-
-    if case.id.startswith("PR-EMPTY"):
-        if total_frames(case.pre.slots[2]) != 0 or parse_entries(case.pre.slots[2]):
-            err.append("empty-B premise")
-    if case.id.startswith("PR-NOTHING"):
-        if parse_entries(case.pre.slots[0]) != parse_entries(case.pre.slots[2]):
-            err.append("NOTHING TO DO entry arrays differ")
-    if case.path and case.s is not None and case.length is not None:
-        if timeline_len(case.pre) != case.length:
-            err.append("timeline len premise")
-        b = parse_entries(case.pre.slots[2])
-        adopt = len(b) == 1 and b[0][1] == 0 and b[0][0] >= struct.unpack_from("<I", select_sb(case.pre), 56)[0]
-        if case.path.startswith("adopt") and not adopt:
-            err.append("adopt-in-place premise")
-        if case.path == "alloc-complete" and adopt:
-            err.append("allocating path accidentally adopts")
-        if case.path == "alloc-complete" and free_next(case.pre) != case.s:
-            err.append("allocating S/free_next premise")
-        if case.path == "adopt-complete" and not (case.s >= case.length):
-            err.append("complete disjointness premise")
-        if case.path == "adopt-decline" and not (case.s < case.length):
-            err.append("decline overlap premise")
-
-    if case.id == "PR-FULL":
-        if not headroom_available(case):
-            err.append("FULL case lacks counter headroom")
-        if derived_total_chunks() - free_next(case.pre) >= timeline_len(case.pre):
-            err.append("FULL case has staging room")
-    if case.id == "PR-FULL-HEADROOM-FIRST":
-        if headroom_available(case):
-            err.append("headroom-first case unexpectedly has headroom")
-        if derived_total_chunks() - free_next(case.pre) >= timeline_len(case.pre):
-            err.append("headroom-first case is not also full")
-
-    if "EXHAUSTED" in case.id or case.id == "PR-FULL-HEADROOM-FIRST":
-        if case.seq_needed or case.gen_needed:
-            if headroom_available(case):
-                err.append("exhaustion premise has enough headroom")
-    if case.path and not headroom_available(case):
-        err.append("successful path lacks exact branch headroom")
-    return err
-
-
-def chunk_lba(chunk: int) -> int:
-    return LBA_CHUNK_BASE + chunk * BLOCKS_PER_CHUNK
-
-
-def _commit_events(lba: int) -> list[dict]:
-    return [
-        {"phase": "promote", "op": "write", "lba": lba + 1, "count": 1},
-        {"phase": "promote", "op": "flush"},
-        {"phase": "promote", "op": "write", "lba": lba, "count": 1},
-        {"phase": "promote", "op": "flush"},
-    ]
-
-
-def _sb_events(blocks: int) -> list[dict]:
-    return [
-        {"phase": "promote", "op": "write", "lba": blocks - 1, "count": 1},
-        {"phase": "promote", "op": "flush"},
-        {"phase": "promote", "op": "write", "lba": 0, "count": 1},
-        {"phase": "promote", "op": "flush"},
-    ]
-
-
-def _chunk_events(start: int, length: int) -> list[dict]:
-    return [
-        {"phase": "promote", "op": "write", "lba": chunk_lba(start), "count": length * BLOCKS_PER_CHUNK},
-        {"phase": "promote", "op": "flush"},
-    ]
-
-
-def expected_post(case: Case) -> Media:
-    if case.path is None:
-        return case.pre
-    p = case.pre
-    slots = list(p.slots)
-    base = cartridge_sequence(p)
-    gen0 = struct.unpack_from("<I", select_sb(p), 12)[0]
-    n = total_frames(p.slots[2])
-    s = case.s
-    length = case.length
-    staging_entries = [(s, 0, n)]
-    final_entries = [(0, 0, n)]
-
-    if case.path == "adopt-complete":
-        slots[1] = idx(0, staging_entries, base + 1)
-        slots[0] = idx(0, final_entries, base + 2)
-        slots[3] = idx(1, final_entries, base + 3)
-        final = sb(generation=gen0 + 2, high=length, stage=0, staging=0)
-    elif case.path == "adopt-decline":
-        slots[1] = idx(0, staging_entries, base + 1)
-        final = sb(generation=gen0 + 2, high=s + length, stage=0, staging=0)
-    elif case.path == "alloc-complete":
-        slots[1] = idx(0, staging_entries, base + 1)
-        slots[3] = idx(1, staging_entries, base + 2)
-        slots[0] = idx(0, final_entries, base + 3)
-        slots[2] = idx(1, final_entries, base + 4)
-        final = sb(generation=gen0 + 2, high=length, stage=0, staging=0)
-    else:
-        raise ValueError("unknown success path")
-    return Media(p.blocks, final, final, tuple(slots))
-
-
-def synth_events(case: Case) -> list[dict]:
-    if case.path is None:
-        return []
-    ev = []
-    if case.path == "alloc-complete":
-        ev += _chunk_events(case.s, case.length)
-        ev += _commit_events(LBA_A1)
-        ev += _commit_events(LBA_B1)
-        ev += _sb_events(case.pre.blocks)
-        ev += _chunk_events(0, case.length)
-        ev += _commit_events(LBA_A0)
-        ev += _commit_events(LBA_B0)
-        ev += _sb_events(case.pre.blocks)
-    elif case.path == "adopt-complete":
-        ev += _commit_events(LBA_A1)
-        ev += _sb_events(case.pre.blocks)
-        ev += _chunk_events(0, case.length)
-        ev += _commit_events(LBA_A0)
-        ev += _commit_events(LBA_B1)
-        ev += _sb_events(case.pre.blocks)
-    elif case.path == "adopt-decline":
-        ev += _commit_events(LBA_A1)
-        ev += _sb_events(case.pre.blocks)
-        ev += _sb_events(case.pre.blocks)
-    return ev
-
-
-def _writes(events):
-    return [e for e in events if e.get("op") == "write"]
-
-
-def _write_blocks(events, start: int, stop: int) -> set[int]:
-    out = set()
-    for e in _writes(events):
-        try:
-            first = int(e["lba"])
-            count = int(e.get("count", 1))
-        except (KeyError, TypeError, ValueError):
-            continue
-        lo, hi = max(first, start), min(first + max(count, 0), stop)
-        if lo < hi:
-            out.update(range(lo, hi))
-    return out
-
-
-def expected_chunk_blocks(case: Case) -> set[int]:
-    if case.path is None or case.path == "adopt-decline":
-        return set()
-    runs = [(0, case.length)]
-    if case.path == "alloc-complete":
-        runs.insert(0, (case.s, case.length))
-    out = set()
-    for start, length in runs:
-        out.update(range(chunk_lba(start), chunk_lba(start + length)))
-    return out
-
-
-def expected_metadata_lbas(case: Case) -> list[int]:
-    mirror = case.pre.blocks - 1
-    if case.path == "adopt-complete":
-        return [LBA_A1 + 1, LBA_A1, mirror, 0, LBA_A0 + 1, LBA_A0, LBA_B1 + 1, LBA_B1, mirror, 0]
-    if case.path == "adopt-decline":
-        return [LBA_A1 + 1, LBA_A1, mirror, 0, mirror, 0]
-    if case.path == "alloc-complete":
-        return [
-            LBA_A1 + 1, LBA_A1, LBA_B1 + 1, LBA_B1, mirror, 0,
-            LBA_A0 + 1, LBA_A0, LBA_B0 + 1, LBA_B0, mirror, 0,
-        ]
-    return []
-
-
-def trace_errors(case: Case, events: list[dict]) -> list[str]:
-    err = []
-    if case.path is None:
-        if _writes(events):
-            err.append("zero-write outcome issued a write")
-        return err
-
-    mirror = case.pre.blocks - 1
-    chunk_blocks = _write_blocks(events, LBA_CHUNK_BASE, mirror)
-    if chunk_blocks != expected_chunk_blocks(case):
-        err.append("chunk write coverage/order branch mismatch")
-
-    metadata_set = {
-        0, mirror, LBA_A0, LBA_A0 + 1, LBA_A1, LBA_A1 + 1,
-        LBA_B0, LBA_B0 + 1, LBA_B1, LBA_B1 + 1,
+def failure_reproducer(case, obs, error):
+    return {
+        "format": "PROMOTE-FAILURE-1",
+        "case": case,
+        "phase": case.get("phase"),
+        "injection": case.get("injection"),
+        "error": str(error),
+        "pre_snapshot": obs.get("pre_snapshot") if isinstance(obs, dict) else None,
+        "post_snapshot": obs.get("post_snapshot") if isinstance(obs, dict) else None,
+        "actual_mount_A": obs.get("actual_mount_A") if isinstance(obs, dict) else None,
+        "actual_mount_B": obs.get("actual_mount_B") if isinstance(obs, dict) else None,
     }
-    actual_meta = []
-    meta_event_indexes = []
-    for i, e in enumerate(events):
-        if e.get("op") != "write":
-            continue
-        try:
-            lba = int(e["lba"])
-            count = int(e.get("count", 1))
-        except (KeyError, TypeError, ValueError):
-            err.append("malformed write event")
-            continue
-        if lba in metadata_set:
-            if count != 1:
-                err.append("metadata write is not one block")
-            actual_meta.append(lba)
-            meta_event_indexes.append(i)
-    if actual_meta != expected_metadata_lbas(case):
-        err.append("metadata commit/superblock write order mismatch")
-
-    # Every metadata block write is followed by a flush before another write.
-    for pos in meta_event_indexes:
-        saw_flush = False
-        for later in events[pos + 1:]:
-            if later.get("op") == "flush":
-                saw_flush = True
-                break
-            if later.get("op") == "write":
-                break
-        if not saw_flush:
-            err.append("metadata write lacks immediate durability barrier")
-            break
-
-    # Invariant 21: no below-H chunk write until phase 1's stage=1 superblock
-    # has completed partner-first/candidate-last.
-    high0 = struct.unpack_from("<I", select_sb(case.pre), 56)[0]
-    first_primary = next(
-        (i for i, e in enumerate(events) if e.get("op") == "write" and e.get("lba") == 0),
-        None,
-    )
-    if first_primary is None:
-        err.append("missing phase-1 superblock candidate write")
-    else:
-        for e in events[:first_primary + 1]:
-            if e.get("op") == "write":
-                try:
-                    lba = int(e["lba"])
-                    count = int(e.get("count", 1))
-                except (KeyError, TypeError, ValueError):
-                    continue
-                if lba < chunk_lba(high0) and lba + count > LBA_CHUNK_BASE:
-                    err.append("promote wrote below original a_high_water before phase 2")
-                    break
-    return err
-
-
-def check(case: Case, post: Media, events: list[dict], calls: list[dict]) -> list[str]:
-    err = []
-
-    def need(cond, msg):
-        if not cond:
-            err.append(msg)
-
-    ferr = fixture_contract_errors(case)
-    need(not ferr, "fixture contract: " + ",".join(ferr))
-
-    mounts = [c for c in calls if c.get("fn") == "tape_mount"]
-    need(bool(mounts), "missing tape_mount")
-    if mounts:
-        need(mounts[0].get("result") == "TAPE_OK", "mount failed")
-        need(mounts[0].get("side") == case.mount_side, "wrong mount side for case")
-
-    promotes = [c for c in calls if c.get("fn") == "tape_promote"]
-    need(bool(promotes), "missing tape_promote")
-    if promotes:
-        for c in promotes[:-1]:
-            need(c.get("result") == "TAPE_OK", "non-terminal promote result")
-            need(c.get("more_work") is True, "non-terminal promote did not continue")
-            need(int(c.get("block_budget", 0)) > 0, "non-positive promote budget")
-        last = promotes[-1]
-        need(last.get("result") == case.expect, "terminal promote result")
-        need(last.get("more_work") is False, "terminal more_work not false")
-        need(int(last.get("block_budget", 0)) > 0, "non-positive terminal budget")
-        if case.path is None:
-            need(len(promotes) == 1, "classification/refusal took continuation calls")
-
-    unmounts = [c for c in calls if c.get("fn") == "tape_unmount"]
-    need(bool(unmounts) and unmounts[-1].get("result") == "TAPE_OK", "unmount result")
-
-    expected = expected_post(case)
-    need(post.encode() == expected.encode(), "post-media bytes differ from DRAFT-8 oracle")
-    err.extend(trace_errors(case, events))
-    return err
-
-
-def validate_observation(case: Case, post_bytes: bytes, observation: dict) -> list[str]:
-    err = []
-    if observation.get("format") != "WP-PROMOTE-OBSERVATION-1":
-        err.append("observation format mismatch")
-    if observation.get("case_id") != case.id:
-        err.append("observation case_id mismatch")
-    if observation.get("adapter_kind") not in ("synthetic", "product"):
-        err.append("invalid adapter_kind")
-    if not isinstance(observation.get("adapter_id"), str) or not observation.get("adapter_id", "").strip():
-        err.append("missing adapter_id")
-    calls = observation.get("calls")
-    events = observation.get("events")
-    if not isinstance(calls, list):
-        err.append("calls is not a list"); calls = []
-    if not isinstance(events, list):
-        err.append("events is not a list"); events = []
-    try:
-        post = Media.decode(post_bytes)
-    except (ValueError, struct.error) as exc:
-        return err + ["bad output media: " + str(exc)]
-    return err + check(case, post, events, calls)
-
-
-def synth_calls(case: Case) -> list[dict]:
-    calls = [{"phase": "mount", "fn": "tape_mount", "result": "TAPE_OK", "side": case.mount_side}]
-    if case.path is not None:
-        calls.append({
-            "phase": "promote", "fn": "tape_promote", "result": "TAPE_OK",
-            "more_work": True, "block_budget": 64,
-        })
-        calls.append({
-            "phase": "promote", "fn": "tape_promote", "result": "TAPE_OK",
-            "more_work": False, "block_budget": 64,
-        })
-    else:
-        calls.append({
-            "phase": "promote", "fn": "tape_promote", "result": case.expect,
-            "more_work": False, "block_budget": 64,
-        })
-    calls.append({"phase": "unmount", "fn": "tape_unmount", "result": "TAPE_OK"})
-    return calls
-
-
-def synth_observation(case: Case):
-    return expected_post(case), synth_events(case), synth_calls(case)
