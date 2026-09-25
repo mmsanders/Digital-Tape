@@ -214,6 +214,18 @@
         "python3",
         "tests/crash_core_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/respool_full_draft8",
+      "tree": "7e98b40c6aceb0a5759bfb1499091a4c9f541927",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "50c47c1b9087de52f66d831ef2fe00cc02273087",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected R29-C full re-spool crash + WP-12a verifier package (schema WP10-RESPOOL-OBSERVATION-2; case-set 02c52de7a7c51a6ffafe5c9d5afad9c23032b72fc11aaf206bb27a9c9506d3e1) from Verification correction 7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7, merged by Verification PR #77; imported byte-identically. Supersedes the uncredited PR #73 tree 5637fbd3e89316889b4bbd52d2a72c95e3c278e1 that was never on main",
+      "selftest": [
+        "python3",
+        "tests/respool_full_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
