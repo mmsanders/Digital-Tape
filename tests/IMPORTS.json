@@ -157,11 +157,14 @@
     },
     {
       "path": "tests/promote_draft8",
-      "tree": "2b79e0b07016da3521917c5a276e36994ccccfa6",
+      "tree": "e99ba0f2cf3f9e8cdd22199cbd9cc502cc5638a3",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "e5e06b06f1aa0755a3b0b15133f1ce680e17f7af",
+      "source_commit": "50c47c1b9087de52f66d831ef2fe00cc02273087",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "independent promote classification verifier package published by verification PR #37; imported byte-identically",
+      "attestation": "corrected R29-A full promote crash/resume + WP-12a verifier package (schema PROMOTE-OBSERVATION-2; case-set 8732af9434437d0411731b3e4909a2ca9a1278778e5d9c8947642cec7b793442) from Verification correction 7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7, merged by Verification PR #77; imported byte-identically, superseding tree 2b79e0b07016da3521917c5a276e36994ccccfa6 from verification PR #37",
+      "superseded_trees": [
+        "2b79e0b07016da3521917c5a276e36994ccccfa6"
+      ],
       "selftest": [
         "python3",
         "tests/promote_draft8/selftest.py"

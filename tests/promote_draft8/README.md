@@ -1,75 +1,75 @@
-# Promote — DRAFT-8 classification and uninterrupted metadata paths
+# DRAFT-8 full promote crash/resume + promote long-operation verifier
 
-Verifier-owned package authored independently from TapeFS §4.5 and §9.3.0–§9.3.2.
-It covers entry classification plus representative uninterrupted FRESH branches.
-It is **not** WP-10 crash/RESUME acceptance and is not product acceptance by itself.
+Independent verifier-first publication for Digital-Tape-Verification issue #70
+(P1-R29-VER-A), corrected and republished under issue #76.
 
-The fixtures deliberately keep a high-sequence A partner structurally valid but
-semantically invalid. That makes it contribute to `cartridge_sequence` without
-silently becoming the live Side A index.
+This package is authored from the frozen DRAFT-8 specification bundle and verifier-owned prior patterns. It contains no product implementation code and performs no product disposition.
 
-## Cases
+## Frozen inputs
 
-The package has 16 executable cases:
+- Digital-Tape: `45c08bd7e25aeb6ca858faf4d30d139999f8dbd7`
+- Verification input: `fe432ffac622b9d9e9c68e566d2cb9881f2aee62`
+- `spec/tapefs-v1.md` SHA-256: `3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb`
+- `spec/engine-api.md` SHA-256: `537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1`
+- `spec/acceptance.md` SHA-256: `7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7`
 
-- empty Side B, including counters at `0xFFFFFFFF`: `INVALID_ARG`, zero writes;
-- degraded-B: mount **Side A**, then promote returns `NO_VALID_INDEX`, zero writes;
-- NOTHING TO DO, including counters at `0xFFFFFFFF`: `TAPE_OK`, zero writes;
-- branch-exact sequence and superblock-generation exhaustion for:
-  - FRESH adopt-in-place with phase 2 completing (`sequence_needed=3`, `generation_needed=2`);
-  - FRESH adopt-in-place with step-5 decline (`1`, `2`);
-  - FRESH allocating with phase 2 completing (`4`, `2`);
-- exact counter-boundary successes ending at `0xFFFFFFFD`;
-- cartridge-full with counter headroom, plus a compound full+exhausted case proving
-  counter refusal occurs before the FRESH capacity refusal;
-- uninterrupted adopt-complete, adopt-decline and allocating-complete metadata paths.
+## Package
 
-Completed-path checks bind exact final superblock/index bytes, exact sequence
-consumption, exact +2 superblock generation, stage clearing, partner-first
-superblock writes, index commit ordering, chunk-write destination coverage, and
-the invariant that no below-`a_high_water` chunk write occurs before phase 2.
+- `fixture.py`: byte-exact verifier media and target write plans
+- `media.py`: independent superblock/index parser, selection, stage oracle and PCM reconstruction
+- `planner.py`: deterministic exhaustive 44,311-case manifest
+- `oracle.py`: dual-image durability simulator, recovery/rerun/headroom/WP-12a validators
+- `selftest.py`: positive self-tests and deliberately red negative controls
+- `runner.py`: later product evidence runner
+- `synthetic_adapter.py`: synthetic-only development adapter, explicitly refused by production runner
+- `ADAPTER.md`: raw observation contract
+- `COVERAGE.md`: frozen criteria, exact census and exclusions
 
-The VO08 envelope in this tranche contains superblocks and index slots, not chunk
-payload bytes. Therefore it verifies **where** the uninterrupted path writes but
-does not claim copied-audio byte identity or rendered-audio correctness.
+## Why the audio fixture is one block
+
+The promoted timeline has exactly 128 stereo s16 frames, which is exactly 512 bytes.
+
+DRAFT-8 permits the remainder of a partially referenced chunk to be undefined. A compact copy of this fixture therefore has one required data-block write. The package is exhaustive over every write in this valid full transaction, including all 511 nontrivial torn prefixes. It does not sample a longer data copy.
+
+The fragmented allocating seed still exercises real compaction: its first 64 frames come from chunk 1 and its second 64 frames from chunk 2; phase 1 compacts them into chunk 3 and phase 2 compacts them to chunk 0.
+
+Issue #76 corrects the compact media labels to truthful DRAFT-8 geometry: the
+four-chunk fixtures use 9 seconds and the eight-chunk fixtures use 21 seconds. The
+independent parser now applies phase-0 capacity and ordered phase-2 version/state/
+geometry admission before any index selection. Operation labels are retained only
+as non-causal adapter metadata; budget-1 continuation uses cumulative raw chunk-
+write traces. Stored positions are explicitly caller-owned model state because the
+frozen public engine API exposes no device-side position table.
+
+## Planner
+
+- raw crash injections: **44,204**
+- contract/headroom/re-run: **107**
+- total: **44,311**
+- flush-required: **22,102 crash cases**
+- write-through: **22,102 crash cases**
+- canonical SHA-256: `8732af9434437d0411731b3e4909a2ca9a1278778e5d9c8947642cec7b793442`
+
+See COVERAGE.md for the phase census.
 
 ## Self-test
 
-```sh
-python3 tests/promote_draft8/selftest.py
-```
+Run:
 
-## Product evidence
+    python3 tests/promote_draft8/selftest.py
 
-Implement the contract in `ADAPTER.md`, then run:
+The repository's verifier-package workflow discovers `tests/*_draft8/selftest.py` automatically.
 
-```sh
-python3 tests/promote_draft8/runner.py \
-  --adapter-cmd './wp_promote_probe' \
-  --adapter-kind product \
-  --adapter-id '<stable adapter id>' \
-  --adapter-source '<adapter source path or immutable id>' \
-  --adapter-build '<reproducible build description>' \
-  --product-commit '<Digital-Tape implementation commit>' \
-  --verifier-commit '<Digital-Tape-Verification commit>' \
-  --evidence-dir '<empty evidence directory>'
-```
+The self-test authenticates the exact planner census/digest, target write plans, all three stage-oracle rows plus the S=0 uniqueness and unmatched refusal, all eleven recovery rows, all promote two-interruption closure seeds, every contract family, and negative controls that make each major oracle go red.
 
-The runner authenticates the retained DRAFT-8 TapeFS, Engine API and acceptance
-bytes before executing cases and hash-binds the package, observations, adapter
-status, input/output media and verdicts.
+## Later binding
 
-Replay without invoking the product:
+Read ADAPTER.md first.
 
-```sh
-python3 tests/promote_draft8/replay.py '<evidence directory>'
-```
+The product adapter is a mechanical observer. It must not decide that a stage row is valid, that a BUSY left the operation live, that a copy was unnecessary, that counters had headroom, that positions were cleared at the correct time, or that FAULTED precedence held. It reports concrete bytes/events/states; this package decides.
 
-## Deliberate exclusions
+A successful Software run is retained evidence, not self-acceptance.
 
-RESUME rows, crash boundaries, V7-001 two-interruption closure, WP-12a argument
-stability/re-entry/state-matrix coverage, copied-audio byte identity, rendered
-PCM/listening, random edit histories, and the caller-owned stored-position table
-integration are not covered here. In particular, DRAFT-8's requirement that a
-terminal successful promote clears stored positions remains a separate
-firmware/integration acceptance item.
+## Scope
+
+This is R29-A only. It deliberately excludes R29-B format/duplicate, R29-C re-spool, the already accepted bounded core crash tranche, WP-11, product implementation, and hardware media atomicity.
