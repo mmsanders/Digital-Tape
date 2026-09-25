@@ -214,6 +214,18 @@
         "python3",
         "tests/crash_core_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/format_dup_identity_draft8",
+      "tree": "bd81f66d515c4f71e03efc6edd55f70d1d0383da",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "db3569b6f99bf009ed74680e02ff03d4cdbc8689",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent R29 format/duplicate raw-identity + duplicate WP-12a verifier package published by Verification PR #74; imported byte-identically",
+      "selftest": [
+        "python3",
+        "tests/format_dup_identity_draft8/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
