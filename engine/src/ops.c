@@ -37,8 +37,8 @@ tape_result tape_reset_side_b(tape *t)
     /* §10: reset_b is TAPE_ERR_BUSY in Playing and in every armed and
        long-operation row; it is permitted from Mounted-idle, including the
        degraded-B row, where it is the ONLY recovery there is. */
-    if (t->rec_armed)        { return TAPE_ERR_BUSY; }
-    if (t->rate_q16_16 != 0) { return TAPE_ERR_BUSY; }
+    if (t->rec_armed || t->respool_in_progress) { return TAPE_ERR_BUSY; }
+    if (t->rate_q16_16 != 0)                     { return TAPE_ERR_BUSY; }
 
     /* §4.3, via §10's W. About the MOUNT, not the mounted side: reset_b writes
        a region chosen by the operation, so it is permitted from a Side-A

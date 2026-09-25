@@ -285,6 +285,102 @@ jobs:
           path: tests/crash_core_adapter/evidence/p1-r27-product
           if-no-files-found: error
 
+  respool-full-functional:
+    name: independent full re-spool — clean/headroom + WP-12a product gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # provenance.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 tests/respool_full_draft8/selftest.py
+      - name: Evidence identities match history and fail on the stale PR #227 values
+        run: python3 tests/respool_full_adapter/test_provenance.py
+      - run: make -C engine clean all
+      - run: make -C tests/respool_adapter clean all
+      - run: make -C tests/respool_full_adapter clean all
+      - run: python3 tests/respool_full_adapter/run_functional.py --evidence tests/respool_full_adapter/evidence/functional
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r29-respool-functional-evidence
+          path: tests/respool_full_adapter/evidence/functional
+          if-no-files-found: error
+
+  respool-full-crash:
+    name: independent full re-spool crash — ${{ matrix.fixture }} ${{ matrix.pass_name }} ${{ matrix.mode }} part ${{ matrix.part }}
+    needs: respool-full-functional
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture: [v3_003, no_lower_run]
+        pass_name: [pass1, pass2]
+        mode: [flush_required, write_through]
+        part: [0, 1, 2, 3, 4, 5, 6, 7]
+        exclude:
+          - fixture: no_lower_run
+            pass_name: pass2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # provenance.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 tests/respool_full_draft8/selftest.py
+      - name: Evidence identities match history and fail on the stale PR #227 values
+        run: python3 tests/respool_full_adapter/test_provenance.py
+      - run: make -C engine clean all
+      - run: make -C tests/respool_full_adapter clean all
+      - name: Execute canonical crash shard
+        run: >
+          python3 tests/respool_full_adapter/run_shard.py
+          --fixture ${{ matrix.fixture }}
+          --pass-name ${{ matrix.pass_name }}
+          --mode ${{ matrix.mode }}
+          --part ${{ matrix.part }}
+          --parts 8
+          --evidence tests/respool_full_adapter/evidence/crash
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r29-respool-crash-${{ matrix.fixture }}-${{ matrix.pass_name }}-${{ matrix.mode }}-${{ matrix.part }}
+          path: tests/respool_full_adapter/evidence/crash
+          if-no-files-found: error
+
+  respool-full-aggregate:
+    name: independent full re-spool crash — exact 4,209,696-case aggregate
+    needs: [respool-full-functional, respool-full-crash]
+    if: ${{ always() && needs.respool-full-functional.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # provenance.py checks the declared base/import against history.
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p1-r29-respool-crash-*
+          path: tests/respool_full_adapter/downloads
+      - run: >
+          python3 tests/respool_full_adapter/aggregate.py
+          --input tests/respool_full_adapter/downloads
+          --evidence tests/respool_full_adapter/evidence/aggregate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r29-respool-full-evidence
+          path: tests/respool_full_adapter/evidence/aggregate
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest

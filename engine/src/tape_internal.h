@@ -168,6 +168,27 @@ struct tape {
     uint64_t  promote_frames;
 
     /*
+     * §9.4 / §10 incremental re-spool continuation. Classification is frozen
+     * before the first write; these scalars retain that operation across
+     * block-budgeted calls. respool_block is the one partial outgoing audio
+     * block and must survive allowed tape_service/tape_render calls, which may
+     * reuse the engine's ordinary block scratch.
+     */
+    bool      respool_in_progress;
+    bool      respool_has_pass2;
+    bool      respool_half;      /* first half of a two-block step is durable */
+    uint8_t   respool_phase;
+    uint32_t  respool_len;
+    uint32_t  respool_pass1;
+    uint32_t  respool_pass2;
+    uint32_t  respool_dest;
+    uint32_t  respool_copy_block;
+    uint32_t  respool_copy_frame;
+    uint32_t  respool_next_sequence;
+    uint64_t  respool_frames;
+    unsigned char respool_block[TAPE_BLOCK_SIZE];
+
+    /*
      * §7 recording. Scalars only: every recorded frame lives in the CALLER's
      * rec_ring (§4), and the chunks it will occupy are a bump-allocated run,
      * so the engine needs no buffer of its own to describe either.
@@ -359,6 +380,12 @@ bool tape_headroom_ok(uint32_t current, uint32_t need);
  * instance per §7.2 before returning TAPE_ERR_IO.
  */
 tape_result tape_commit_index(struct tape *t, uint32_t slot_lba, const struct tape_index *idx);
+/* The two §8 halves of tape_commit_index, for long operations that must be
+   able to spend one block per call: entries + flush, then header + flush. */
+tape_result tape_commit_index_entries(struct tape *t, uint32_t slot_lba,
+                                      const struct tape_index *idx);
+tape_result tape_commit_index_header(struct tape *t, uint32_t slot_lba,
+                                     const struct tape_index *idx);
 
 /* §8 steps 1–2 for recording: drain owed frames into the allocated run, at most
    `budget - *used` blocks, then flush once every accepted frame is on media.
@@ -386,6 +413,10 @@ uint32_t tape_timeline_run(const struct tape_index *idx, uint64_t n);
  * instance per §7.2.
  */
 tape_result tape_sb_clear_stage(struct tape *t);
+/* The two §4.6 halves of tape_sb_clear_stage: partner + flush, then
+   candidate + flush. The in-memory superblock changes only after the second. */
+tape_result tape_sb_clear_stage_partner(struct tape *t);
+tape_result tape_sb_clear_stage_candidate(struct tape *t);
 
 /*
  * §9.1's one index edit, shared by all three record modes.

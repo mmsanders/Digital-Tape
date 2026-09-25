@@ -210,7 +210,7 @@ tape_result tape_arm(tape *t, tape_rec_mode mode)
     if (t == NULL)     { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted)   { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)    { return TAPE_ERR_FAULTED; }
-    if (t->rec_armed)  { return TAPE_ERR_BUSY; }
+    if (t->rec_armed || t->respool_in_progress) { return TAPE_ERR_BUSY; }
 
     /*
      * §10: arm is the ONE call gated on the mounted side. W+SideB means an
@@ -289,9 +289,11 @@ tape_result tape_abort(tape *t)
 {
     if (t == NULL)     { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted)   { return TAPE_ERR_NOT_MOUNTED; }
-    /* §10: not armed is TAPE_ERR_BUSY, like every other row that is not the
-       armed one. Deliberately NOT gated on faulted (§7.2). */
-    if (!t->rec_armed) { return TAPE_ERR_BUSY; }
+    /*
+     * §7.2/§10 permits abort in FAULTED even when no recording is armed: it is
+     * one of the four non-I/O escape/observation calls allowed by quarantine.
+     */
+    if (!t->rec_armed && !t->faulted) { return TAPE_ERR_BUSY; }
 
     rec_disarm(t);
     t->free_next = tape_derive_free_next(&t->idx[TAPE_SIDE_B], &t->sb, TAPE_SIDE_B);
