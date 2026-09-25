@@ -176,6 +176,7 @@ struct tape {
      */
     bool      respool_in_progress;
     bool      respool_has_pass2;
+    bool      respool_half;      /* first half of a two-block step is durable */
     uint8_t   respool_phase;
     uint32_t  respool_len;
     uint32_t  respool_pass1;
@@ -379,6 +380,12 @@ bool tape_headroom_ok(uint32_t current, uint32_t need);
  * instance per §7.2 before returning TAPE_ERR_IO.
  */
 tape_result tape_commit_index(struct tape *t, uint32_t slot_lba, const struct tape_index *idx);
+/* The two §8 halves of tape_commit_index, for long operations that must be
+   able to spend one block per call: entries + flush, then header + flush. */
+tape_result tape_commit_index_entries(struct tape *t, uint32_t slot_lba,
+                                      const struct tape_index *idx);
+tape_result tape_commit_index_header(struct tape *t, uint32_t slot_lba,
+                                     const struct tape_index *idx);
 
 /* §8 steps 1–2 for recording: drain owed frames into the allocated run, at most
    `budget - *used` blocks, then flush once every accepted frame is on media.
@@ -406,6 +413,10 @@ uint32_t tape_timeline_run(const struct tape_index *idx, uint64_t n);
  * instance per §7.2.
  */
 tape_result tape_sb_clear_stage(struct tape *t);
+/* The two §4.6 halves of tape_sb_clear_stage: partner + flush, then
+   candidate + flush. The in-memory superblock changes only after the second. */
+tape_result tape_sb_clear_stage_partner(struct tape *t);
+tape_result tape_sb_clear_stage_candidate(struct tape *t);
 
 /*
  * §9.1's one index edit, shared by all three record modes.

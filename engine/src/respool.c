@@ -104,6 +104,7 @@ static void respool_finish(tape *t)
 {
     t->respool_in_progress = false;
     t->respool_phase = 0u;
+    t->respool_half = false;
     respool_reset_copy(t);
 }
 
@@ -209,14 +210,21 @@ static uint32_t b_slot_lba(const struct tape *t, uint32_t slot)
     return slot == 0u ? t->sb.lba_index_b0 : t->sb.lba_index_b1;
 }
 
-static tape_result respool_commit(tape *t, uint32_t dest_chunk, uint32_t *used)
+/*
+ * One §8 index commit, as two single-block halves so a call with
+ * block_budget == 1 still makes progress (engine-api §9). The entries half
+ * installs the new one-run index in memory and writes its entry block; the
+ * header half writes block 0 — the commit point — and only then moves the
+ * live slot, the sequence and free_next. Between the halves the new index is
+ * in memory but not yet selectable on media; the pass destination it names
+ * was fully copied and flushed before either half, so playback of it in the
+ * allowed render/service columns is byte-identical to the old timeline.
+ */
+static tape_result respool_commit_entries(tape *t, uint32_t dest_chunk, uint32_t *used)
 {
     struct tape_index *b = &t->idx[TAPE_SIDE_B];
-    uint32_t slot = inactive_b_slot(t);
-    uint32_t sequence = t->respool_next_sequence;
-    tape_result rc;
 
-    b->sequence = sequence;
+    b->sequence = t->respool_next_sequence;
     b->side = (uint8_t)TAPE_SIDE_B;
     b->entry_count = 1u;
     b->total_frames = t->respool_frames;
@@ -224,12 +232,22 @@ static tape_result respool_commit(tape *t, uint32_t dest_chunk, uint32_t *used)
     b->entries[0].start_frame = 0u;
     b->entries[0].frame_count = (uint32_t)t->respool_frames;
 
-    rc = tape_commit_index(t, b_slot_lba(t, slot), b);
-    *used += 2u; /* one entry block + one header block */
+    *used += tape_index_entry_blocks(b->entry_count);   /* 1 for one run */
+    return tape_commit_index_entries(t, b_slot_lba(t, inactive_b_slot(t)), b);
+}
+
+static tape_result respool_commit_header(tape *t, uint32_t *used)
+{
+    struct tape_index *b = &t->idx[TAPE_SIDE_B];
+    uint32_t slot = inactive_b_slot(t);
+    tape_result rc;
+
+    (*used)++;
+    rc = tape_commit_index_header(t, b_slot_lba(t, slot), b);
     if (rc != TAPE_OK) { return rc; }
 
     t->live_slot[TAPE_SIDE_B] = slot;
-    t->cartridge_sequence = sequence;
+    t->cartridge_sequence = t->respool_next_sequence;
     t->respool_next_sequence++;
     t->free_next = tape_derive_free_next(b, &t->sb, TAPE_SIDE_B);
     return TAPE_OK;
@@ -277,6 +295,7 @@ static tape_result respool_begin(tape *t, bool *terminal)
     t->respool_frames = b->total_frames;
     t->respool_next_sequence = t->cartridge_sequence + 1u;
     respool_reset_copy(t);
+    t->respool_half = false;
     t->respool_phase = stage_clear ? RESPOOL_PHASE_STAGE_CLEAR
                                    : RESPOOL_PHASE_COPY_PASS1;
     *terminal = false;
@@ -316,11 +335,20 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
         bool done = false;
 
         if (t->respool_phase == RESPOOL_PHASE_STAGE_CLEAR) {
-            if (block_budget - used < 2u) { goto budget_done; }
-            rc = tape_sb_clear_stage(t);
-            used += 2u;
-            if (rc != TAPE_OK) { goto fail; }
-            t->respool_phase = RESPOOL_PHASE_COPY_PASS1;
+            /* §4.6 partner then candidate, one block each, so a budget of 1
+               cannot stall here (engine-api §9: the loop must terminate). */
+            if (used >= block_budget) { goto budget_done; }
+            used++;
+            if (!t->respool_half) {
+                rc = tape_sb_clear_stage_partner(t);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+            } else {
+                rc = tape_sb_clear_stage_candidate(t);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = false;
+                t->respool_phase = RESPOOL_PHASE_COPY_PASS1;
+            }
         } else if (t->respool_phase == RESPOOL_PHASE_COPY_PASS1) {
             rc = respool_copy(t, t->respool_pass1, block_budget, &used, &done);
             if (rc != TAPE_OK) { goto fail; }
@@ -328,9 +356,16 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
             respool_reset_copy(t);
             t->respool_phase = RESPOOL_PHASE_COMMIT_PASS1;
         } else if (t->respool_phase == RESPOOL_PHASE_COMMIT_PASS1) {
-            if (block_budget - used < 2u) { goto budget_done; }
-            rc = respool_commit(t, t->respool_pass1, &used);
+            if (used >= block_budget) { goto budget_done; }
+            if (!t->respool_half) {
+                rc = respool_commit_entries(t, t->respool_pass1, &used);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+                goto next_step;
+            }
+            rc = respool_commit_header(t, &used);
             if (rc != TAPE_OK) { goto fail; }
+            t->respool_half = false;
             if (t->respool_has_pass2) {
                 t->respool_dest = t->respool_pass2;
                 respool_reset_copy(t);
@@ -347,9 +382,16 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
             respool_reset_copy(t);
             t->respool_phase = RESPOOL_PHASE_COMMIT_PASS2;
         } else if (t->respool_phase == RESPOOL_PHASE_COMMIT_PASS2) {
-            if (block_budget - used < 2u) { goto budget_done; }
-            rc = respool_commit(t, t->respool_pass2, &used);
+            if (used >= block_budget) { goto budget_done; }
+            if (!t->respool_half) {
+                rc = respool_commit_entries(t, t->respool_pass2, &used);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+                goto next_step;
+            }
+            rc = respool_commit_header(t, &used);
             if (rc != TAPE_OK) { goto fail; }
+            t->respool_half = false;
             respool_finish(t);
             *more_work = false;
             return TAPE_OK;
@@ -358,6 +400,7 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
             goto fail;
         }
 
+next_step:
         if (used >= block_budget) { goto budget_done; }
     }
 
