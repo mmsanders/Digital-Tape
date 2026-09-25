@@ -2588,3 +2588,42 @@ old rule** — a branch whose import commit precedes its implementation commit c
 merged as two separate merges instead, so nothing already returned under this protocol has
 to be rebuilt. The CI checks are additive and can stay green under either rule; removing
 them separately costs only the deletion.
+
+---
+
+## ADR-156 — Hold promote until valid R29-A coverage; model device positions in the caller
+
+**Date:** 2026-09-25 UTC · **Owner:** PM · **Input:** product `8276d8f22da34a53f9f52dae8d3bd1acb3c763d9`, issue #231
+
+**Decision.** Keep the budget-1, mid-promote BUSY and exact-copy defects together in
+the R29-A verifier-first lane. Until independent coverage and disposition, no new
+consumer/release use of `tape_promote`; the unaccepted engine on main is not a
+qualified operation. Republish the R29-A/R29-B invalid-geometry fixtures from
+Verification before either product branch resumes. Route the corrected R29-C head
+`75b36a90cb72e3fa076e62baec1440f48afaf1b6` for blind disposition; its
+budget-1 fix is not covered by the canonical small-budget case.
+
+For the frozen position-clearing sentence, caller-owned device flash is cleared by
+the caller on terminal promote success (`TAPE_OK && !more_work`); a harness may
+report a raw caller-model table but not claim an engine-observed table write.
+`operation_token` is likewise a harness initiation ordinal, not engine identity
+or proof of continuity. Do not invent a public API or edit frozen DRAFT-8 bytes.
+The inconsistent literal engine attribution is logged for a separately issued
+bundle correction; Verification retains authority to reject an unbindable family.
+The issued R29-A/B/C verifier oracles compare harness token equality as a
+restart check; Verification must check whether remaining raw facts establish
+continuity and correct/reissue any oracle that relies on that tautology.
+
+**Rationale.** TapeFS §4.1 phase 2 step 5 rejects the issued 60-second/4-or-8-chunk
+seeds. Engine-api §10 requires BUSY in the promote-in-progress row, but invalid
+fixtures cannot exercise it, and an engine-only patch now would outrun the valid
+independent test. TapeFS §11/engine-api §5 place positions in caller flash while
+the public promote API has no channel to the table. A synthesized token is
+similarly not an engine signal. Exact evidence, exclusions and the next owner
+are in [the arbitration record](REVIEW/P1-R29-PM-ARBITRATION.md).
+
+**Cost to reverse.** A separate, reviewed DRAFT-8 successor bundle would be
+needed to move table ownership or add an API. Immediate promote repair would
+require a valid independently authored test-first tranche and a new, independently
+dispositioned product head. Neither route permits claiming the present invalid
+fixtures or harness token as engine acceptance.

@@ -69,6 +69,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R24 PM disposition](P1-R24-PM-DISPOSITION.md): authentication of the narrow
   PR #112 integration, independent rejection of repaired PR #87, and held A1MINI-01
   method/material disposition.
+- [P1-R29 PM arbitration](P1-R29-PM-ARBITRATION.md): exact-head re-spool routing,
+  A/B fixture geometry block, and promote/caller-position/token rulings; no new
+  independent acceptance.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 

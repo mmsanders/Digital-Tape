@@ -101,5 +101,6 @@ Newest is at the bottom, matching the log.
 | [ADR-153](DECISIONS.md#adr-153--phase-1-tranche-minimum-and-no-re-acceptance-after-a-rebase) | 2026-09-20 | Phase 1 tranche minimum, and no re-acceptance after a rebase | Two Phase 1 process rules, recorded in [the issue workflow](ISSUE-WORKFLOW.md) and [the PM charter](ROLES/pm.md) |
 | [ADR-154](DECISIONS.md#adr-154--an-intake-queue-a-tag-convention-a-phase-rule-and-a-bottleneck-rule) | 2026-09-20 | An intake queue, a tag convention, a phase rule and a bottleneck rule | Four related changes, documented in [intake](INTAKE.md) and [the PM charter](ROLES/pm.md) |
 | [ADR-155](DECISIONS.md#adr-155--structural-rule-1-lands-in-history-not-in-a-separate-merge) | 2026-09-20 | Structural Rule 1 lands in history, not in a separate merge | A Phase 1 tranche is one branch carrying two commits: an import commit byte-identical to a verifier publication whose hash predates it, then the… |
+| [ADR-156](DECISIONS.md#adr-156--hold-promote-until-valid-r29-a-coverage-model-device-positions-in-the-caller) | 2026-09-25 | Hold promote until valid R29-A coverage; model device positions in the caller | Defer three promote fixes to corrected verifier-first R29-A; caller owns stored positions, operation token is harness-only |
 
-92 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+93 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
