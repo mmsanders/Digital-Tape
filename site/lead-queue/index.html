@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R30 corrected R29 routing · 25 September 2026 UTC",
+      asOf: "P1-R31 R29-B release and R29-C/A routing · 25 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -273,11 +273,11 @@
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "The exact 26-case record evidence is independently replayed 26/26 PASS after Verification corrected ARMED-BUSY, and clean verifier-first product PR #167 is now merged at main 1db7135. This is still not full required WP-09 package coverage, so the package rung does not advance." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
-          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. Verification PR #77 corrected and republished R29-A/B/C; old product PRs #227/#229/#230 predate those trees and remain held while Software produces fresh bindings and evidence. No additional package rung advances." },
+          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. Verification #78 now owns blind disposition of corrected R29-C head 175b829 and correction of four frozen-contract conflicts in R29-A; corrected R29-B is released to Software #239. Superseded PRs #227/#229/#230 are closed, while #236/#237 remain held. No additional package rung advances." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
           note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
-          note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. Verification narrowly authenticated #227's retained raw public observations but rejected continuity/no-restart and budget-1 credit. Corrected R29-C now requires a fresh product run; WP-12a and complete WP-12 acceptance remain open." },
+          note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. Superseded #227 is closed. Corrected R29-C PR #236 has a fresh 4,209,696-case product run including budget 1 and raw-trace continuity, but Verification #78 must independently disposition that exact head before any credit. WP-12a and complete WP-12 acceptance remain open." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
           note: "Complete frozen WP-13 is independently accepted. Verification PR #66 independently reproduced all six gates from raw evidence and accepted exact product PR #206, now integrated on main." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
