@@ -5,7 +5,29 @@ accepted. It is not a chronicle. The per-round import narrative for P1-R1 throug
 P1-R24, with every source publication, tree, blob and findings hash, is preserved
 verbatim in [the verification integration history](archive/verification-integration-history.md).
 
-## Current clean integration boundary — 22 September 2026
+## Current verifier publication boundary — 25 September 2026
+
+Verification issue #76 / PR #77 is merged at verifier main
+`50c47c1b9087de52f66d831ef2fe00cc02273087`. Correction commit
+`7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7` republishes exact package trees:
+
+- R29-C `respool_full_draft8`: `7e98b40c6aceb0a5759bfb1499091a4c9f541927`;
+- R29-A `promote_draft8`: `e99ba0f2cf3f9e8cdd22199cbd9cc502cc5638a3`;
+- R29-B `format_dup_identity_draft8`: `f76ab23d17beb9212f8ee1d17d3d1875b74abc7d`.
+
+The corrected packages use truthful compact geometry, phase-0 capacity and ordered
+geometry admission, budget-1 campaigns and cumulative raw copy traces with repeated-
+copy red controls. Adapter operation labels are non-causal. Promote positions are a
+caller-owned model cleared after terminal success. Package self-test workflow
+`36107243960` passed.
+
+No corrected tree is integrated into the product yet. Product PRs #227/#229/#230 and
+their old evidence remain held. Verification narrowly authenticated #227's recorded
+public results but did not accept its continuity/no-restart or minimum-positive-budget
+claims. Fresh exact-tree product evidence and a later blind disposition are required.
+See [P1-R30](REVIEW/P1-R30-PM-DISPOSITION.md).
+
+## Prior clean product integration boundary — 22 September 2026
 
 PR #77 is merged at product main
 `4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
@@ -73,16 +95,18 @@ real-product independent disposition.
 | WP-07 operations — `tests/ops_draft8/` | Two exact recorded observations: `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` | Splice-only arm and stage-1 BUSY refusal policies (invented, unreached); every unexercised branch; source; adapter design; atomicity; complete WP-07 | Hardened tree `4a862fa69ccb2fc4c9afe59c9c9161c3470f9263` from `dcc4d7cdb357cf0b082071390c762c25b650f617`; corrected complete subtree `3667a2830ba80dbcedad03b97870d1127001ab59` at verifier main `15dd16e...`; dispositions `e77b61fe420e48444cf0791c74fc7e296ef0ccf6` and `391d6a8308edfca46f639c3a6567c220d7a7b95d` |
 | WP-08 playback — `tests/playback_draft8/`, `tests/playback_complete_draft8/` | Exact ten corrected-cadence product observation families; 698/698 completed per-render service sequences in each direction | Source and helper design; complete WP-08; listening; goldens | Three-family publication `7a22cbb4447c40c51b7c8b2282a685ed30a46ba6` (subtree `ff810814dbc8079c6903e6f85ed7ee312abd3076`); complete ten-family `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`; corrected `62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`; cadence correction `e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da`; disposition `392d6bb9c948a5924fe18728fab04202bc8e337e` |
 | WP-11 goldens — `tests/playback_draft8/golden/` | **Nothing accepted.** Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is verifier-derived oracle bytes, unlistened, and is **not** an accepted golden. Golden CI stays red until Michael listens | Carried with the WP-08 publications above |
-| WP-10 crash harness | Narrow independent mount package landed | Complete crash/operation/state run is not green | Carried with the WP-06 publication above |
+| WP-10 crash harness | Bounded 28,760-case record/reset/stage-clear tranche accepted and integrated; #227 retained raw public observations authenticated only at the R30 boundary | Corrected R29-A/B/C product evidence and later independent disposition; continuity/no-restart and budget-1 credit remain open | Core disposition Verification PR #69; corrected operation publications at verifier `7408f0a...` |
 | WP-06 extension — `writability_draft8`, `notmounted_draft8` | **Nothing newly accepted.** Independent verifier packages are on main | Exact real-product observations/disposition; source/helper design; complete WP-06 | Publications `d875730...`, `2f0fe95...` |
 | WP-08 extension — `transport_draft8` | Exact 16/16 set-side/warm-start product observations at PR #171 head `dbd5a232...`, independently replayed PASS with zero writes/flushes and integrated at main `e598b82...` | Complete WP-08; byte-exact/listened warm samples, broader playback/rate goldens, crash and long-operation continuation/state | Publication `5d97073...`; disposition verifier PR #41 merged `334ab2a...`; product integration #171 |
 | WP-09 record — `record_draft8` | Exact 26/26 product observations independently replayed PASS; corrected verifier-first product PR #167 merged at `1db7135...` | PCM/listening, WP-10 crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and stated exclusions; complete WP-09 | Original `af15a8f...`; corrected verifier PR #39 merged `e9e6ec7...`; product integration #167 |
-| WP-12 re-spool — `respool_draft8` | **Nothing accepted.** Independent verifier package is on main | Exact real-product observations/disposition; WP-12a continuation/state coverage | Publication `6519220...` |
+| WP-12 re-spool — `respool_draft8`, `respool_full_draft8` | Exact prior 8/8 re-spool tranche accepted and integrated; no corrected R29-C acceptance | Fresh product binding/run against corrected tree; independent continuity/budget-1 disposition; complete WP-12 | Earlier publication `6519220...`; corrected full tree `7e98b40c...` |
 | WP-36 source-slot — `slot_draft8` | **Nothing accepted.** Deterministic independent verifier package is on main | Exact real-product observations/disposition; required 100,000-sequence run | Publication `6fc4014...` |
-| Raw/promote operation precursors — `format_dup_draft8`, `promote_draft8` | **Nothing accepted.** Independent verifier packages are on main | Exact real-product observations/disposition and all documented exclusions | Publications `982bac2...`, `e5e06b0...` |
+| Format/duplicate and promote operations — `format_dup_identity_draft8`, `promote_draft8` | **Nothing accepted from R29-A/B.** Corrected independent verifier packages are published | Fresh exact-tree product bindings/runs, blind disposition and all documented exclusions | Corrected trees `f76ab23d...`, `e99ba0f2...` |
 
 Open independent findings: `P1-R23-V01` rejects Hardware PR #87's sustained-write audit
-method (card characterisation, not engine coverage). WP-09's ARMED-BUSY verifier finding
+method (card characterisation, not engine coverage). `P1-R29-V01` rejects #227's old
+continuity/no-restart and budget-1 evidence while preserving its bounded raw results;
+the corrected R29-C tree requires a new product run. WP-09's ARMED-BUSY verifier finding
 is resolved by PR #39. Transport Verification #40 / PR #41 found no material adapter
 defect and no engine behavior correction was requested.
 

@@ -72,6 +72,9 @@ their live body/scope updates before acting; do not execute a historical review.
 - [P1-R29 PM arbitration](P1-R29-PM-ARBITRATION.md): exact-head re-spool routing,
   A/B fixture geometry block, and promote/caller-position/token rulings; no new
   independent acceptance.
+- [P1-R30 PM disposition](P1-R30-PM-DISPOSITION.md): authentication of Verification
+  #76 / PR #77, corrected R29-A/B/C package identities, the bounded #227 evidence
+  boundary and the clean test-first return to Software; no new acceptance.
 - Returns under this directory, when present, are evidence linked from assignment
   issues; they do not assign the next round.
 
