@@ -168,6 +168,26 @@ struct tape {
     uint64_t  promote_frames;
 
     /*
+     * §9.4 / §10 incremental re-spool continuation. Classification is frozen
+     * before the first write; these scalars retain that operation across
+     * block-budgeted calls. respool_block is the one partial outgoing audio
+     * block and must survive allowed tape_service/tape_render calls, which may
+     * reuse the engine's ordinary block scratch.
+     */
+    bool      respool_in_progress;
+    bool      respool_has_pass2;
+    uint8_t   respool_phase;
+    uint32_t  respool_len;
+    uint32_t  respool_pass1;
+    uint32_t  respool_pass2;
+    uint32_t  respool_dest;
+    uint32_t  respool_copy_block;
+    uint32_t  respool_copy_frame;
+    uint32_t  respool_next_sequence;
+    uint64_t  respool_frames;
+    unsigned char respool_block[TAPE_BLOCK_SIZE];
+
+    /*
      * §7 recording. Scalars only: every recorded frame lives in the CALLER's
      * rec_ring (§4), and the chunks it will occupy are a bump-allocated run,
      * so the engine needs no buffer of its own to describe either.
