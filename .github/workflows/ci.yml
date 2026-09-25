@@ -285,6 +285,31 @@ jobs:
           path: tests/crash_core_adapter/evidence/p1-r27-product
           if-no-files-found: error
 
+  format-dup-identity-package:
+    name: R29 format/duplicate raw identity + dup long-op — exact canonical product campaign
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: python3 tests/format_dup_identity_draft8/selftest.py
+      - run: make -C engine clean all
+      - name: Build mechanical R29 product binding and retain command log
+        run: |
+          set -o pipefail
+          make -C tests/format_dup_identity_adapter clean all 2>&1 | tee tests/format_dup_identity_adapter/build.log
+      - name: Run exact 57,611-case canonical package until PASS or first retained failure
+        run: python3 tests/format_dup_identity_adapter/run_product.py --evidence tests/format_dup_identity_adapter/evidence/p1-r29-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r29-format-dup-identity-product-evidence
+          path: tests/format_dup_identity_adapter/evidence/p1-r29-product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
