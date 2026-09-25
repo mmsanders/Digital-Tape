@@ -123,7 +123,49 @@ def run() -> int:
     check(bp.mechanism_signature(a) == bp.mechanism_signature(b),
           "the same part at two bed positions hashes the same")
 
-    n = 7
+    # --- 7. physical assembly regression --------------------------------
+    # The first printed frame exposed two CAD-integration bugs the old gates did
+    # not cover: the deepest hooks could not enter the stem-size top opening, and
+    # the bar channel passed through the carrier stem. Check the actual assembled
+    # solids, not just each part in isolation.
+    frame = latch.test_frame().val()
+    bar = latch.hook_bar().translate((
+        0, latch.FRAME_BAR_CENTER_Y, latch.FRAME_BAR_BOTTOM_Z
+    )).val()
+
+    check(bar.intersect(frame).Volume() < 1e-6,
+          "the hook bar fits the offset frame channel without touching the frame")
+
+    all_variants = latch.packet_01_variants() + [latch.beam_probe()]
+    pressed = [
+        latch.carrier(v, label=False)
+        .translate((0, 0, latch.FRAME_PRESSED_BASE_Z)).val()
+        for v in all_variants
+    ]
+    check(all(c.intersect(frame).Volume() < 1e-6 for c in pressed),
+          "every carrier, including the 2.1 mm hook, enters fully without frame collision")
+    check(all(c.intersect(bar).Volume() < 1e-6 for c in pressed),
+          "at full press every hook clears below the bar before snapping out")
+
+    # At the retained position, even the shallowest hook must reach the bar.
+    shallow = min(all_variants, key=lambda v: v.hook_depth)
+    latched_base = latch.FRAME_BAR_BOTTOM_Z - latch.HOOK_Z_SHELF
+    latched = (
+        latch.carrier(shallow, label=False)
+        .translate((0, 0, latched_base)).val()
+    )
+    check(latched.intersect(bar).Volume() > 0.1,
+          "the shallowest hook still reaches the bar at the latch position")
+
+    # Retained red control for the exact field failure: centering the bar on Y=0
+    # again must intersect the rigid stem.
+    bad_bar = latch.hook_bar().translate((
+        0, 0, latch.FRAME_BAR_BOTTOM_Z
+    )).val()
+    check(any(c.intersect(bad_bar).Volume() > 0.1 for c in pressed),
+          "RED: a centered bar is detected intersecting the carrier stem")
+
+    n = 12
     if FAILED:
         print(f"\n{len(FAILED)} of {n} checks FAILED")
         return 1
