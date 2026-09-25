@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "tests" / "respool_full_draft8"
 sys.path.insert(0, str(PKG))
 
-from planner import EXPECTED_BY_MODE, EXPECTED_BY_PASS, EXPECTED_CASESET_SHA256, EXPECTED_TOTAL, planner_summary  # noqa: E402
+from planner import EXPECTED_BY_MODE, EXPECTED_BY_PASS, EXPECTED_CASESET_SHA256, EXPECTED_TOTAL_CASES, planner_summary  # noqa: E402
 
 GROUP_TOTAL = {
     ("v3_003", "pass1"): 1_051_653,
@@ -112,8 +112,8 @@ def main() -> int:
 
     plan = planner_summary()
     checks = {
-        "total": total == EXPECTED_TOTAL == 4_209_696,
-        "planner_total": plan["total"] == EXPECTED_TOTAL,
+        "total": total == EXPECTED_TOTAL_CASES == 4_209_696,
+        "planner_total": plan["total"] == EXPECTED_TOTAL_CASES,
         "planner_digest": plan["sha256"] == EXPECTED_CASESET_SHA256,
         "mode_counts": by_mode == EXPECTED_BY_MODE,
         "pass_counts": by_pass == {
