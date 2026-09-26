@@ -1,12 +1,12 @@
 # spec/tapefs-v1.md — TAPEFS v1.0
 
-> **STATUS: DRAFT-8. NOT FROZEN.** V7-001…V7-005, V8C-001…V8C-003, and V8R2-001…V8R2-002 dispositioned.
+> **STATUS: DRAFT-9. NOT FROZEN.** DRAFT-8 media semantics unchanged; V7-001…V7-005, V8C-001…V8C-003, and V8R2-001…V8R2-002 remain dispositioned.
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Status:** freeze candidate for §§1–8; §9–§10 remain open
+**Revision:** DRAFT-9 · **Issued:** 26 Sep 2026 · **Status:** freeze candidate for §§1–8; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off (escalation trigger #1).
-**Supersedes:** DRAFT-7 (5 Sep). Incorporates V7-001…V7-005, V8C-001…V8C-003, and V8R2-001…V8R2-002.
+**Supersedes:** DRAFT-8 (6 Sep). Media semantics are byte-for-byte unchanged below this header; V9-001 is an engine callback-funnel correction.
 
 This is the on-media format for a Digital Tape Player cartridge. It is normative and byte-exact. Where it is ambiguous, that is a defect — report it.
 
