@@ -1,13 +1,13 @@
 # spec/engine-api.md — Tape Engine API v1.0
 
-> **STATUS: DRAFT-8. NOT FROZEN.** V7-001…V7-005 and V8C-001…V8C-003 dispositioned.
+> **STATUS: DRAFT-9. NOT FROZEN.** V9-001 adds the single progress-callback funnel; all DRAFT-8 dispositions remain.
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
+**Revision:** DRAFT-9 · **Issued:** 26 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off.
-**Supersedes:** DRAFT-7 (5 Sep). Incorporates V7-001…V7-005 and independent-review V8C-001…V8C-003.
-**Companion:** `spec/tapefs-v1.md` DRAFT-8, normative for everything on media.
+**Supersedes:** DRAFT-8 (6 Sep). Incorporates V9-001, the single `dev_progress` callback funnel.
+**Companion:** `spec/tapefs-v1.md` DRAFT-9, normative for everything on media.
 
 C99. No operating system. No dynamic allocation, ever. No recursion. No libc file I/O. No floating point in the audio path. No clock. The only coupling to the outside world is the block device in §3.
 
@@ -84,7 +84,7 @@ Callbacks return **0 on success, non-zero on failure** — never engine error co
 
 **Port obligation — device identity.** `tape_dup` must be able to tell two devices apart. The engine compares `dev.ctx` for pointer equality and, where the port supplies a device-identity accessor, that too. **A port that cannot distinguish two devices must not hand the same one to `tape_dup` twice.** The engine cannot verify this; it is a port contract, stated here because it is the only place a caller will look.
 
-**All indirect calls go through three `static inline` wrappers in one file** — `dev_read`, `dev_write`, `dev_flush` in `engine/src/dev.h`. Nothing else dereferences a `tape_dev` member, with one declared exception: `tape_dup`'s aliasing check compares `dev.ctx` and lives in `dev.h` alongside the wrappers. CI checks this at source level and the exception is in the allowlist by name.
+**All indirect calls go through four named `static inline` wrappers in one file, `engine/src/dev.h`.** Three are the device funnels `dev_read`, `dev_write` and `dev_flush`. The fourth is `dev_progress`, which may call only the caller-supplied `tape_progress_fn` for §9 progress reporting. Nothing else dereferences a `tape_dev` member, with one declared exception: `tape_dup`'s aliasing check compares `dev.ctx` and lives in `dev.h` alongside the wrappers. CI checks this at source level and the exception is in the allowlist by name. No fifth wrapper, no other callback type and no indirect call outside `dev.h` is permitted.
 
 Three implementations exist and the engine cannot distinguish them: file-backed (desktop), fault-injecting (crash harness — power-loss-after-N-writes and torn writes, the Verification Lead's, single injector per ADR-025), real SD (firmware).
 
@@ -578,7 +578,7 @@ Assertable at any quiescent point. The property suite generates arbitrary edit s
 12. `free_next` equals `max(a_high_water, max over live-B entries of last + 1)` — recomputed at mount, never stored.
 13. No allocator symbol links into the engine.
 14. `tape_render` performs zero block-device calls.
-15. No indirect call exists outside the three `dev_*` wrappers.
+15. No indirect call exists outside the four named wrappers in `engine/src/dev.h`: `dev_read` calling `tape_dev.read`, `dev_write` calling `tape_dev.write`, `dev_flush` calling `tape_dev.flush`, and `dev_progress` calling only the caller-supplied `tape_progress_fn`. No fifth wrapper or other callback exemption exists.
 16. Maximum stack depth ≤ 8 KiB.
 17. `tape_dup` writes the destination's `state = VALID`, `cartridge_uuid`, `a_high_water` and **source `label`** in the final superblock write, after all chunks and both indices. **The destination's Side A timeline is compacted to `[0, len_A)`, its A0 and B0 slots are written directly with `sequence` 1 and 2, and all four index slots' block 0 are zeroed first** (`tapefs` §9.5) — so no slot surviving from the destination's previous cartridge can outrank the new index.
 18. **`tape_dup` and `tape_format` perform zero writes when any *refusal* precondition fails** — aliasing, writability, geometry or capacity, in the order `tapefs` §9.5 / §9.6 names. Geometry includes `DEVICE_ADDRESSABLE` and is evaluated **before** any destination superblock read *(V8C-001)*. Raw-superblock classification (`tapefs` §9.5 item 5) is a plan, not a refusal; its writes belong to step 1 and run only after every refusal has passed *(V7-003)*.
