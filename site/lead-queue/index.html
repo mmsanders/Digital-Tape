@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R32 PR #79 and R29-B hold · 26 September 2026 UTC",
+      asOf: "P1-R34 DRAFT-9 issuance and R29-B rerun routing · 26 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -273,13 +273,13 @@
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "The exact 26-case record evidence is independently replayed 26/26 PASS after Verification corrected ARMED-BUSY, and clean verifier-first product PR #167 is now merged at main 1db7135. This is still not full required WP-09 package coverage, so the package rung does not advance." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
-          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. PR #79 publishes corrected R29-A tree 2eb707d7 and returns R29-C only for stale evidence identities; its bounded behavior is green, but the exact evidence package is not accepted. R29-B #239 returned blocked by frozen callback/indirect-call conflict (PM #243); product PR #241 stays held and WP-13 red. Software #244 owns the independent R29-C provenance rerun, then #245 the R29-A import. PRs #236/#237 remain held. No additional package rung advances." },
+          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. DRAFT-9 now resolves R29-B's callback/indirect-call contract conflict through exactly the fourth dev_progress funnel, but product PR #241 stays held pending Software #250's exact DRAFT-9 package import and fresh 57,611-case run. R29-A #245 follows #250; Promote remains barred from new consumer/release use. No additional package rung advances." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
           note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
-          note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. Verification PR #79 accepts the bounded raw observations at R29-C head 175b829, including 4,209,696 crash cases, budget 1 and raw-trace continuity, but returns the evidence package because it carries stale PR #227 base/import identities. Software #244 owns a provenance-only rerun; PR #236 stays held. WP-12a and complete WP-12 acceptance remain open." },
+          note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. Verification PR #79 accepted the bounded R29-C behavior while returning its stale evidence identities; corrected PR #236 remains held for provenance-only Verification disposition. WP-12a and complete WP-12 acceptance remain open." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
-          note: "Complete frozen WP-13 is independently accepted for exact product PR #206, integrated on main after Verification PR #66 reproduced all six gates. Held R29-B PR #241 is WP-13 red: its required progress callback conflicts with the frozen three-funnel invariant. PM #243 proposes a narrow signed amendment and independent gate republication; this does not revoke the earlier exact acceptance or accept #241." },
+          note: "The exact DRAFT-8 WP-13 baseline remains independently accepted through Verification PR #66 and product PR #206. Michael approved narrow V9-001; DRAFT-9 is issued at product main 7910ae3 and Verification PR #82 published the revised six-gate package with exactly four named funnels. Software #250 must import and run that package on held PR #241; issuance alone neither accepts #241 nor changes this rung." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
           note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]
