@@ -29,9 +29,11 @@
  *                 classification and uninterrupted FRESH adopt/allocate paths.
  *                 §9.3.3 RESUME/crash closure, progress callback/re-entry and
  *                 stored-position integration remain explicit coverage holds.
- *   Declared,     everything else — tape_respool, tape_dup, tape_format.
- *   not defined   Calling one is a link error, which is the intended loud
- *                 failure rather than a silent stub.
+ *                 tape_format implements tapefs §9.6 in full, and tape_dup
+ *                 §9.5 as a budgeted long operation with the §10
+ *                 Dup-in-progress row, argument stability, destination
+ *                 failure without source fault, and progress-callback
+ *                 re-entry refusal (engine/src/raw_ops.c).
  *
  * Guardrails this header exists to keep: no allocation ever (the caller owns all
  * storage, §4); no clock and no timeout anywhere (§9); nothing returns a pointer
