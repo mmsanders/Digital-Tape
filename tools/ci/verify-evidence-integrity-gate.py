@@ -36,7 +36,7 @@ def run_gate(manifest_obj, tmp, base="HEAD"):
     return r.returncode, r.stdout + r.stderr
 
 
-def expect(want, name, manifest_obj, tmp, saying=None, base="HEAD"):
+def expect(want, name, manifest_obj, tmp, saying=None, base="HEAD", contains=None):
     global passed, failed
     rc, out = run_gate(manifest_obj, tmp, base=base)
     red = rc != 0
@@ -44,6 +44,11 @@ def expect(want, name, manifest_obj, tmp, saying=None, base="HEAD"):
     if good and saying and want == "red" and f"[{saying}]" not in out:
         good = False
         why = f"went red but never named [{saying}]"
+    elif good and contains and want == "red" and contains not in out:
+        # A probe that goes red for some other reason proves nothing about the
+        # classification it names.
+        good = False
+        why = f"went red but not for: {contains!r}"
     else:
         why = f"expected {want}, gate exited {rc}"
     if good:
@@ -78,6 +83,117 @@ def check_preconditions():
     return True
 
 
+SPEC_FILES = ("tapefs-v1.md", "engine-api.md", "acceptance.md")
+
+
+def _real_root(revision):
+    for r in REAL["spec_bundle"]["roots"]:
+        if r["revision"] == revision:
+            return r["path"]
+    return None
+
+
+def _temp_root(tmp, name, source, files=SPEC_FILES, tamper=None):
+    """A spec root outside the repository, copied from `source`."""
+    d = pathlib.Path(tmp) / "roots" / name
+    d.mkdir(parents=True, exist_ok=True)
+    for f in files:
+        data = (ROOT / source / f).read_bytes()
+        if tamper == f:
+            data += b"\n<!-- drift -->\n"
+        (d / f).write_bytes(data)
+    return str(d)
+
+
+def spec_probes(tmp):
+    d8_root = _real_root("DRAFT-8")
+    base = copy.deepcopy(REAL["spec_bundle"])
+
+    def with_roots(extra=(), drop=None, override=None):
+        sb = copy.deepcopy(base)
+        roots = [r for r in sb["roots"] if r["path"] != drop]
+        if override:
+            roots = [dict(r, revision=override[1]) if r["path"] == override[0] else r
+                     for r in roots]
+        sb["roots"] = roots + list(extra)
+        return minimal(spec_bundle=sb)
+
+    # green baseline: the untouched historical repository under the current
+    # canonical bundle. Every red probe below differs from this in one fact.
+    expect("green", "untouched historical roots under the current bundle",
+           with_roots(), tmp)
+
+    # A declared revision whose hashes VERSION.md repeats exactly, so the only
+    # disagreement left is canonical spec/ bytes versus VERSION.md.
+    sb = copy.deepcopy(base)
+    sb["revisions"]["DRAFT-X"] = {f: "1" * 64 for f in SPEC_FILES}
+    sb["manifest"] = _fake_version(tmp, "1", "DRAFT-X")
+    expect("red", "canonical spec/ does not match spec/VERSION.md",
+           minimal(spec_bundle=sb), tmp, "spec-bundle",
+           contains="spec/tapefs-v1.md is ")
+
+    expect("red", "spec/VERSION.md names a revision that is not declared",
+           minimal(spec_bundle=dict(copy.deepcopy(base), manifest=_fake_version(tmp, None, "DRAFT-10"))),
+           tmp, "spec-bundle", contains="bundle DRAFT-10 is not a declared")
+
+    sb = copy.deepcopy(base)
+    sb["revisions"]["DRAFT-8"].pop("acceptance.md")
+    expect("red", "a declared revision is an incomplete hash triple",
+           minimal(spec_bundle=sb), tmp, "spec-bundle",
+           contains="revision DRAFT-8 is not a complete triple")
+
+    expect("red", "a root declares an unknown bundle revision",
+           with_roots(override=(d8_root, "DRAFT-7")), tmp, "spec-copies", contains='declares unknown bundle revision DRAFT-7')
+
+    expect("red", "an embedded spec copy sits in an undeclared root",
+           with_roots(drop=d8_root), tmp, "spec-copies", contains='but no bundle revision is declared for it')
+
+    expect("red", "a DRAFT-8 copy sits in a DRAFT-9-declared root",
+           with_roots(override=(d8_root, "DRAFT-9")), tmp, "spec-copies", contains='is the DRAFT-8 copy, but the root is declared DRAFT-9')
+
+    d9 = _temp_root(tmp, "d9-as-d8", "spec")
+    expect("red", "a DRAFT-9 copy sits in a DRAFT-8-declared root",
+           with_roots(extra=[{"path": d9, "revision": "DRAFT-8"}]), tmp, "spec-copies", contains='is the DRAFT-9 copy, but the root is declared DRAFT-8')
+
+    mixed = _temp_root(tmp, "mixed", d8_root)
+    (pathlib.Path(mixed) / "engine-api.md").write_bytes((ROOT / "spec/engine-api.md").read_bytes())
+    expect("red", "one root mixes revisions (no global either-hash acceptance)",
+           with_roots(extra=[{"path": mixed, "revision": "DRAFT-8"}]), tmp, "spec-copies", contains='engine-api.md is the DRAFT-9 copy, but the root is declared DRAFT-8')
+
+    part = _temp_root(tmp, "partial", "spec", files=SPEC_FILES[:2])
+    expect("red", "a declared root is an incomplete triple",
+           with_roots(extra=[{"path": part, "revision": "DRAFT-9"}]), tmp, "spec-copies", contains='is an incomplete triple: missing acceptance.md')
+
+    drift = _temp_root(tmp, "drift", "spec", tamper="tapefs-v1.md")
+    expect("red", "a copy drifts from its declared revision's hash",
+           with_roots(extra=[{"path": drift, "revision": "DRAFT-9"}]), tmp, "spec-copies", contains='(hash drift)')
+
+    expect("red", "a declared root does not exist",
+           with_roots(extra=[{"path": str(pathlib.Path(tmp) / "absent"), "revision": "DRAFT-9"}]),
+           tmp, "spec-copies", contains='does not exist')
+
+    expect("red", "a root is declared twice",
+           with_roots(extra=[{"path": d8_root, "revision": "DRAFT-8"}]), tmp, "spec-copies", contains='is declared more than once')
+
+    # And the positive half of the migration: a correctly declared DRAFT-9
+    # root is accepted alongside the untouched DRAFT-8 roots.
+    good9 = _temp_root(tmp, "good-d9", "spec")
+    expect("green", "a DRAFT-9 root declared DRAFT-9 beside DRAFT-8 roots",
+           with_roots(extra=[{"path": good9, "revision": "DRAFT-9"}]), tmp)
+
+
+def _fake_version(tmp, digit, revision):
+    """A VERSION.md whose hashes are fake (digit) or the declared ones."""
+    rows = []
+    for f in SPEC_FILES:
+        h = digit * 64 if digit else REAL["spec_bundle"]["revisions"]["DRAFT-9"][f]
+        rows.append(f"| `spec/{f}` | {revision} | `{h}` |")
+    p = pathlib.Path(tmp) / f"VERSION-{revision}-{digit}.md"
+    p.write_text("| File | Revision | SHA-256 |\n|---|---|---|\n" + "\n".join(rows) + "\n",
+                 encoding="utf-8")
+    return str(p)
+
+
 def main():
     global passed, failed
     if not check_preconditions():
@@ -109,21 +225,11 @@ def main():
             minimal(evidence_bundles=[bundle]), tmp, "replay",
         )
 
-        # 4. a spec copy that does not match the bundle manifest.
-        fake_ver = pathlib.Path(tmp) / "VERSION.md"
-        fake_ver.write_text(
-            "| File | Revision | SHA-256 |\n|---|---|---|\n"
-            "| `spec/tapefs-v1.md` | DRAFT-8 | `" + "1" * 64 + "` |\n"
-            "| `spec/engine-api.md` | DRAFT-8 | `" + "2" * 64 + "` |\n"
-            "| `spec/acceptance.md` | DRAFT-8 | `" + "3" * 64 + "` |\n",
-            encoding="utf-8",
-        )
-        spec = copy.deepcopy(REAL["spec_bundle"])
-        spec["manifest"] = str(fake_ver)
-        expect(
-            "red", "spec copy does not match the bundle manifest",
-            minimal(spec_bundle=spec), tmp, "spec-copies",
-        )
+        # 4. spec bundle and embedded copies (#248: bundle-version aware).
+        # Every probe below starts from the real spec_bundle declaration and
+        # changes exactly one fact. Temporary roots live outside the repo, so
+        # no historical byte is touched.
+        spec_probes(tmp)
 
         # 5. manifest adapter identity != observation adapter identity. Give the
         # bundle a tiny replay program whose declared refusal is satisfied, so
