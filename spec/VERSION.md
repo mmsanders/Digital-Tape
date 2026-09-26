@@ -1,6 +1,6 @@
 # spec/VERSION.md — the spec bundle manifest
 
-**Bundle:** DRAFT-8 · **Issued:** 6 Sep 2026 · **Owner:** Program Manager
+**Bundle:** DRAFT-9 · **Issued:** 26 Sep 2026 · **Owner:** Program Manager
 
 `Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment, a surge branch — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
 
@@ -8,9 +8,9 @@
 
 | File | Revision | SHA-256 |
 |---|---|---|
-| `spec/tapefs-v1.md` | DRAFT-8 | `3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb` |
-| `spec/engine-api.md` | DRAFT-8 | `537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1` |
-| `spec/acceptance.md` | DRAFT-8 | `7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7` |
+| `spec/tapefs-v1.md` | DRAFT-9 | `3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d` |
+| `spec/engine-api.md` | DRAFT-9 | `383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6` |
+| `spec/acceptance.md` | DRAFT-9 | `ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d` |
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
@@ -64,4 +64,6 @@ Only the PM issues a new bundle. The Software Lead lands it mechanically:
 3. Run the gate locally. If it is red, the bundle was mis-transcribed — do not adjust the hashes to match the files.
 4. If a spec file is *wrong*, that is a `pm-decision` issue, not an edit in this PR.
 
-This DRAFT-8 text was drafted by surge support on `surge/draft-8-freeze-candidate` (PR #25) for the PM to issue. The status banner inside the three hashed files remains **NOT FROZEN**. Merging this PR onto `main` is the issue of the bundle; it is not a freeze and it is not authorisation for anyone else to edit `spec/` on `main`.
+DRAFT-8 was drafted by surge support on `surge/draft-8-freeze-candidate` (PR #25), issued by the PM, independently reviewed, and frozen by Michael's recorded 8 September 2026 signature.
+
+DRAFT-9 is the PM's narrow V9-001 correction authorized by Michael on 25 September 2026 Pacific time: it adds exactly one `dev_progress` → caller-supplied `tape_progress_fn` indirect-call funnel in `engine/src/dev.h`. It changes no media semantics, exported engine ABI, callback signature or numeric resource limit. Its **NOT FROZEN** banners remain until the candidate bytes and revised WP13-G5 gate receive independent review and the PM records issuance. Merging an unreviewed candidate branch is not authorization to implement against it.
