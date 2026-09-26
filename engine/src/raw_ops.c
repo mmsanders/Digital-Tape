@@ -82,7 +82,9 @@ tape_result tape_dup(tape *src, const tape_dev *dst_dev,
     /* Ordinary source-instance state gates. No destination callback occurs. */
     if (!src->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (src->faulted) { return TAPE_ERR_FAULTED; }
-    if (src->rec_armed || src->promote_in_progress) { return TAPE_ERR_BUSY; }
+    if (src->rec_armed || src->promote_in_progress || src->respool_in_progress) {
+        return TAPE_ERR_BUSY;
+    }
 
     /*
      * §9.5 items 1..4 — exact normative order, all before any destination

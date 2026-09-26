@@ -43,8 +43,16 @@ bool tape_headroom_ok(uint32_t current, uint32_t need)
     return (uint64_t)current + (uint64_t)need <= 0xFFFFFFFDu;
 }
 
-tape_result tape_commit_index(struct tape *t, uint32_t slot_lba,
-                              const struct tape_index *idx)
+/*
+ * §8 steps 3–4: the entry array, then its barrier. Split from the header half
+ * so a long operation can spend exactly one block per call (engine-api §9: at
+ * most block_budget blocks, and the loop must terminate for any budget >= 1).
+ * The serialised entries stay in t->entry_bytes for the header half's CRC, so
+ * nothing may reuse entry_bytes between the two halves — every mutator that
+ * could is BUSY while a long operation is in progress (§10).
+ */
+tape_result tape_commit_index_entries(struct tape *t, uint32_t slot_lba,
+                                      const struct tape_index *idx)
 {
     uint32_t blocks = tape_index_serialize_entries(idx, t->entry_bytes);
 
@@ -59,17 +67,29 @@ tape_result tape_commit_index(struct tape *t, uint32_t slot_lba,
     /* step 4 — the barrier. Unconditional: §8 does not make it depend on
        whether the entry array happened to be empty. */
     if (dev_flush(&t->dev) != 0) { t->faulted = true; return TAPE_ERR_IO; }
+    return TAPE_OK;
+}
 
-    /* step 5 — block 0, and THE COMMIT POINT. */
+/* §8 steps 5–6: block 0, THE COMMIT POINT, then its barrier. Requires the
+   entry bytes the matching tape_commit_index_entries call left behind. */
+tape_result tape_commit_index_header(struct tape *t, uint32_t slot_lba,
+                                     const struct tape_index *idx)
+{
     tape_index_header_block(idx, t->entry_bytes, t->block);
     if (dev_write(&t->dev, slot_lba, 1u, t->block) != 0) {
         t->faulted = true;
         return TAPE_ERR_IO;
     }
-    /* step 6 */
     if (dev_flush(&t->dev) != 0) { t->faulted = true; return TAPE_ERR_IO; }
-
     return TAPE_OK;
+}
+
+tape_result tape_commit_index(struct tape *t, uint32_t slot_lba,
+                              const struct tape_index *idx)
+{
+    tape_result rc = tape_commit_index_entries(t, slot_lba, idx);
+    if (rc != TAPE_OK) { return rc; }
+    return tape_commit_index_header(t, slot_lba, idx);
 }
 
 /*
@@ -90,7 +110,7 @@ tape_result tape_commit_index(struct tape *t, uint32_t slot_lba,
  * t->sb_block, which mount kept. A read here would be a block callback in a
  * call whose observable trace §4.6 fixes at four events.
  */
-tape_result tape_sb_clear_stage(struct tape *t)
+tape_result tape_sb_clear_stage_partner(struct tape *t)
 {
     unsigned char *blk = t->sb_block;
 
@@ -104,8 +124,15 @@ tape_result tape_sb_clear_stage(struct tape *t)
         return TAPE_ERR_IO;
     }
     if (dev_flush(&t->dev) != 0) { t->faulted = true; return TAPE_ERR_IO; }
+    return TAPE_OK;
+}
 
-    if (dev_write(&t->dev, t->sb_candidate_lba, 1u, blk) != 0) {
+/* The candidate half. t->sb_block already holds the patched bytes from the
+   partner half; the in-memory superblock is not touched until both are on
+   media, exactly as when the two halves ran in one call. */
+tape_result tape_sb_clear_stage_candidate(struct tape *t)
+{
+    if (dev_write(&t->dev, t->sb_candidate_lba, 1u, t->sb_block) != 0) {
         t->faulted = true;
         return TAPE_ERR_IO;
     }
@@ -120,4 +147,11 @@ tape_result tape_sb_clear_stage(struct tape *t)
     t->sb_candidate_lba         = TAPE_LBA_SUPERBLOCK;
     t->sb_partner_lba           = t->dev.block_count - 1u;
     return TAPE_OK;
+}
+
+tape_result tape_sb_clear_stage(struct tape *t)
+{
+    tape_result rc = tape_sb_clear_stage_partner(t);
+    if (rc != TAPE_OK) { return rc; }
+    return tape_sb_clear_stage_candidate(t);
 }

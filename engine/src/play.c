@@ -200,7 +200,7 @@ tape_result tape_seek(tape *t, uint64_t frame)
     /* §10: forbidden while armed. The recording cursor is fixed at arm time
        (§7) — you cannot seek a tape deck while it is recording, because the
        head is where the head is. */
-    if (t->rec_armed) { return TAPE_ERR_BUSY; }
+    if (t->rec_armed || t->respool_in_progress) { return TAPE_ERR_BUSY; }
 
     total = TAPE_LIVE(t).total_frames;
     if (frame > total) { frame = total; }
@@ -218,7 +218,9 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
-    if (t->rec_armed) { return TAPE_ERR_BUSY; }   /* §10, with tape_seek */
+    if (t->rec_armed || t->respool_in_progress) {
+        return TAPE_ERR_BUSY;   /* §10, with tape_seek */
+    }
 
     t->rate_q16_16 = rate_q16_16;
     t->at_end   = false;
@@ -354,8 +356,12 @@ tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *render
 
     if (t == NULL || out == NULL || rendered == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
-    if (t->faulted)  { return TAPE_ERR_FAULTED; }
 
+    /*
+     * §7.2/§10 permits render in FAULTED so already-buffered audio can drain.
+     * It performs no device I/O; once the retained ring is exhausted the normal
+     * ring-short path reports UNDERRUN.
+     */
     *rendered = 0u;
     total = TAPE_LIVE(t).total_frames;
     mx    = play_max_pos(t);

@@ -1,17 +1,12 @@
 /*
- * respool.c — WP-12 deterministic re-spool tranche.
+ * respool.c — incremental DRAFT-8 re-spool / WP-12a implementation.
  *
- * Normative: spec/tapefs-v1.md §4.5, §7, §8 and §9.4; engine-api §9.
+ * Normative: spec/tapefs-v1.md §4.5, §7, §8 and §9.4; engine-api §9–§10.
  *
- * This slice implements the independently covered one-call semantic tranche:
- * empty/no-op, pass classification, one/two-pass copying, commit ordering,
- * sequence headroom, degraded/full refusals and §8 stage clearing. WP-12a's
- * small-budget continuation/state machine remains deliberately outside this
- * issue; a positive budget too small to finish the already-classified semantic
- * operation is refused before the first write rather than silently exceeding
- * the caller's budget.
+ * Classification is completed before the first write. The resulting operation
+ * is retained in caller-owned instance state so every call performs at most
+ * block_budget block reads/writes and can resume without repeating work.
  */
-
 #include <string.h>
 
 #include "tape_internal.h"
@@ -19,11 +14,12 @@
 
 #define RESPOOL_FRAMES_PER_BLOCK (TAPE_BLOCK_SIZE / TAPE_FRAME_BYTES)
 
-static uint32_t respool_data_blocks(uint64_t frames)
-{
-    return (uint32_t)((frames + (uint64_t)RESPOOL_FRAMES_PER_BLOCK - 1u)
-                      / (uint64_t)RESPOOL_FRAMES_PER_BLOCK);
-}
+/* Sparse tags keep the state machine as direct control flow under Guardrail 09. */
+#define RESPOOL_PHASE_STAGE_CLEAR  7u
+#define RESPOOL_PHASE_COPY_PASS1  31u
+#define RESPOOL_PHASE_COMMIT_PASS1 73u
+#define RESPOOL_PHASE_COPY_PASS2  127u
+#define RESPOOL_PHASE_COMMIT_PASS2 191u
 
 static bool entry_intersects_run(const struct tape_entry *e,
                                  uint32_t first, uint32_t count)
@@ -58,7 +54,6 @@ static bool runs_intersect(uint32_t a_first, uint32_t a_count,
     return (uint64_t)a_first < b_end && (uint64_t)b_first < a_end;
 }
 
-/* Lowest pass-1 run satisfying §9.4(a,b). */
 static bool find_pass1(const struct tape *t, uint32_t len, uint32_t *out)
 {
     uint32_t first;
@@ -77,7 +72,8 @@ static bool find_pass1(const struct tape *t, uint32_t len, uint32_t *out)
     return false;
 }
 
-/* Lowest qualifying run below pass 1 after pass 1 is the live Side-B layout. */
+/* Pass 2 may reclaim the OLD B run after pass 1 commits; it must avoid A and
+ * the pass-1 destination, which is the sole live B copy at that point. */
 static bool find_pass2(const struct tape *t, uint32_t len, uint32_t pass1,
                        uint32_t *out)
 {
@@ -98,37 +94,59 @@ static bool find_pass2(const struct tape *t, uint32_t len, uint32_t pass1,
     return false;
 }
 
-/*
- * Copy the timeline represented by src into a compact run beginning at
- * dest_chunk. The output layout starts at frame 0 of the first destination
- * chunk. One block of engine scratch is the outgoing block and mix_block is the
- * source block, so no heap or large stack buffer is introduced.
- */
-static tape_result copy_timeline(struct tape *t, const struct tape_index *src,
-                                 uint32_t dest_chunk)
+static void respool_reset_copy(tape *t)
 {
-    uint64_t frame = 0u;
-    uint64_t total = src->total_frames;
-    uint32_t out_block = 0u;
+    t->respool_copy_block = 0u;
+    t->respool_copy_frame = 0u;
+}
 
-    while (frame < total) {
+static void respool_finish(tape *t)
+{
+    t->respool_in_progress = false;
+    t->respool_phase = 0u;
+    t->respool_half = false;
+    respool_reset_copy(t);
+}
+
+/*
+ * Incrementally copy the CURRENT live B timeline into one compact run. The
+ * dedicated respool_block persists across calls because tape_service is allowed
+ * during respool and may reuse the engine's ordinary block scratch.
+ *
+ * Each device read/write consumes one unit of block_budget; flushes are barriers
+ * and consume no block units.
+ */
+static tape_result respool_copy(tape *t, uint32_t dest_chunk,
+                                uint32_t budget, uint32_t *used, bool *done)
+{
+    const struct tape_index *src = &t->idx[TAPE_SIDE_B];
+    uint32_t total_blocks =
+        (uint32_t)((t->respool_frames + (uint64_t)RESPOOL_FRAMES_PER_BLOCK - 1u)
+                   / (uint64_t)RESPOOL_FRAMES_PER_BLOCK);
+
+    *done = false;
+    while (t->respool_copy_block < total_blocks) {
+        uint64_t block_start =
+            (uint64_t)t->respool_copy_block * (uint64_t)RESPOOL_FRAMES_PER_BLOCK;
         uint32_t want = RESPOOL_FRAMES_PER_BLOCK;
-        uint32_t made = 0u;
-        uint64_t left = total - frame;
-        uint32_t dest_lba;
 
-        if (left < (uint64_t)want) { want = (uint32_t)left; }
-        memset(t->block, 0, TAPE_BLOCK_SIZE);
+        if (t->respool_frames - block_start < (uint64_t)want) {
+            want = (uint32_t)(t->respool_frames - block_start);
+        }
+        if (t->respool_copy_frame == 0u) {
+            memset(t->respool_block, 0, TAPE_BLOCK_SIZE);
+        }
 
-        while (made < want) {
+        if (t->respool_copy_frame < want) {
+            uint64_t timeline = block_start + (uint64_t)t->respool_copy_frame;
             uint64_t physical;
             uint32_t source_lba;
             uint32_t source_off;
             uint32_t source_room;
             uint32_t run;
             uint32_t take;
-            uint64_t timeline = frame + (uint64_t)made;
 
+            if (*used >= budget) { return TAPE_OK; }
             if (!tape_timeline_physical(src, timeline, &physical)) {
                 return TAPE_ERR_NO_VALID_INDEX;
             }
@@ -137,37 +155,48 @@ static tape_result copy_timeline(struct tape *t, const struct tape_index *src,
             source_off = (uint32_t)(physical % (uint64_t)RESPOOL_FRAMES_PER_BLOCK);
             source_room = RESPOOL_FRAMES_PER_BLOCK - source_off;
             run = tape_timeline_run(src, timeline);
-            take = want - made;
+            take = want - t->respool_copy_frame;
             if (take > source_room) { take = source_room; }
             if (take > run) { take = run; }
             if (take == 0u) { return TAPE_ERR_NO_VALID_INDEX; }
 
-            if (dev_read(&t->dev, source_lba, 1u, t->mix_block) != 0) {
+            if (dev_read(&t->dev, source_lba, 1u, t->block) != 0) {
+                return TAPE_ERR_IO;
+            }
+            (*used)++;
+            memcpy(t->respool_block
+                       + (size_t)t->respool_copy_frame * TAPE_FRAME_BYTES,
+                   t->block + (size_t)source_off * TAPE_FRAME_BYTES,
+                   (size_t)take * TAPE_FRAME_BYTES);
+            t->respool_copy_frame += take;
+            continue;
+        }
+
+        if (*used >= budget) { return TAPE_OK; }
+        {
+            uint64_t dest_lba =
+                (uint64_t)t->sb.lba_chunk_base
+                + (uint64_t)dest_chunk * (uint64_t)TAPE_CHUNK_BLOCKS
+                + (uint64_t)t->respool_copy_block;
+            if (dest_lba >= (uint64_t)t->dev.block_count) {
+                return TAPE_ERR_GEOMETRY;
+            }
+            if (dev_write(&t->dev, (uint32_t)dest_lba, 1u,
+                          t->respool_block) != 0) {
                 t->faulted = true;
                 return TAPE_ERR_IO;
             }
-            memcpy(t->block + (size_t)made * TAPE_FRAME_BYTES,
-                   t->mix_block + (size_t)source_off * TAPE_FRAME_BYTES,
-                   (size_t)take * TAPE_FRAME_BYTES);
-            made += take;
         }
-
-        dest_lba = t->sb.lba_chunk_base
-                 + dest_chunk * TAPE_CHUNK_BLOCKS + out_block;
-        if (dev_write(&t->dev, dest_lba, 1u, t->block) != 0) {
-            t->faulted = true;
-            return TAPE_ERR_IO;
-        }
-
-        frame += (uint64_t)want;
-        out_block++;
+        (*used)++;
+        t->respool_copy_block++;
+        t->respool_copy_frame = 0u;
     }
 
-    /* §8 step 2: no index bytes land before copied audio is durable. */
     if (dev_flush(&t->dev) != 0) {
         t->faulted = true;
         return TAPE_ERR_IO;
     }
+    *done = true;
     return TAPE_OK;
 }
 
@@ -181,101 +210,68 @@ static uint32_t b_slot_lba(const struct tape *t, uint32_t slot)
     return slot == 0u ? t->sb.lba_index_b0 : t->sb.lba_index_b1;
 }
 
-static tape_result commit_compact_pass(struct tape *t, uint32_t dest_chunk)
+/*
+ * One §8 index commit, as two single-block halves so a call with
+ * block_budget == 1 still makes progress (engine-api §9). The entries half
+ * installs the new one-run index in memory and writes its entry block; the
+ * header half writes block 0 — the commit point — and only then moves the
+ * live slot, the sequence and free_next. Between the halves the new index is
+ * in memory but not yet selectable on media; the pass destination it names
+ * was fully copied and flushed before either half, so playback of it in the
+ * allowed render/service columns is byte-identical to the old timeline.
+ */
+static tape_result respool_commit_entries(tape *t, uint32_t dest_chunk, uint32_t *used)
 {
     struct tape_index *b = &t->idx[TAPE_SIDE_B];
-    uint64_t frames = b->total_frames;
-    uint32_t slot = inactive_b_slot(t);
-    uint32_t sequence = t->cartridge_sequence + 1u;
-    tape_result rc;
 
-    rc = copy_timeline(t, b, dest_chunk);
-    if (rc != TAPE_OK) { return rc; }
-
-    b->sequence = sequence;
+    b->sequence = t->respool_next_sequence;
     b->side = (uint8_t)TAPE_SIDE_B;
     b->entry_count = 1u;
-    b->total_frames = frames;
+    b->total_frames = t->respool_frames;
     b->entries[0].first_chunk_id = dest_chunk;
     b->entries[0].start_frame = 0u;
-    b->entries[0].frame_count = (uint32_t)frames;
+    b->entries[0].frame_count = (uint32_t)t->respool_frames;
 
-    rc = tape_commit_index(t, b_slot_lba(t, slot), b);
+    *used += tape_index_entry_blocks(b->entry_count);   /* 1 for one run */
+    return tape_commit_index_entries(t, b_slot_lba(t, inactive_b_slot(t)), b);
+}
+
+static tape_result respool_commit_header(tape *t, uint32_t *used)
+{
+    struct tape_index *b = &t->idx[TAPE_SIDE_B];
+    uint32_t slot = inactive_b_slot(t);
+    tape_result rc;
+
+    (*used)++;
+    rc = tape_commit_index_header(t, b_slot_lba(t, slot), b);
     if (rc != TAPE_OK) { return rc; }
 
     t->live_slot[TAPE_SIDE_B] = slot;
-    t->cartridge_sequence = sequence;
+    t->cartridge_sequence = t->respool_next_sequence;
+    t->respool_next_sequence++;
     t->free_next = tape_derive_free_next(b, &t->sb, TAPE_SIDE_B);
     return TAPE_OK;
 }
 
-/*
- * Conservative block-work estimate for this tranche. It counts one source read
- * plus one destination write for each copied data block, the one-entry array
- * and header writes for each commit, and the two superblock writes if §8 stage
- * clearing applies. Flushes are barriers rather than blocks.
- *
- * The published semantic budget (65535) comfortably exceeds every fixture. A
- * smaller positive budget belongs to WP-12a; this slice refuses it before any
- * write instead of violating "at most block_budget".
- */
-static bool semantic_budget_fits(uint32_t block_budget, uint32_t data_blocks,
-                                 uint32_t passes, bool stage_clear)
+/* Classify the whole operation before its first write. */
+static tape_result respool_begin(tape *t, bool *terminal)
 {
-    uint64_t need = (uint64_t)passes
-                  * ((uint64_t)data_blocks * 2u + 2u);
-    if (stage_clear) { need += 2u; }
-    return (uint64_t)block_budget >= need;
-}
-
-tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
-{
-    struct tape_index *b;
-    uint64_t frames;
+    const struct tape_index *b = &t->idx[TAPE_SIDE_B];
     uint32_t len;
     uint32_t pass1;
     uint32_t pass2 = 0u;
     uint32_t seq_need;
-    uint32_t data_blocks;
     bool pass2_possible;
     bool stage_clear;
-    tape_result rc;
 
-    if (t == NULL || more_work == NULL) { return TAPE_ERR_INVALID_ARG; }
-    if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
-    *more_work = false;
-    if (t->faulted) { return TAPE_ERR_FAULTED; }
+    *terminal = true;
+    if (b->total_frames == 0u) { return TAPE_OK; }
 
-    /* §10 degraded-B overrides the ordinary idle/playing rows for respool. */
-    if (!t->side_b_valid) { return TAPE_ERR_NO_VALID_INDEX; }
-
-    /* Respool starts only from mounted-idle. */
-    if (t->rec_armed || t->rate_q16_16 != 0) { return TAPE_ERR_BUSY; }
-
-    /* §4.3 permission is about the mount, not the mounted side. */
-    if (!t->effective_writable) { return TAPE_ERR_READ_ONLY; }
-
-    /* §9.1: checked after state/writability. */
-    if (block_budget == 0u) { return TAPE_ERR_INVALID_ARG; }
-
-    b = &t->idx[TAPE_SIDE_B];
-    frames = b->total_frames;
-
-    /* §9.4 / V4-005: zero-consumption no-op. Do not consult either counter. */
-    if (frames == 0u) { return TAPE_OK; }
-
-    len = tape_chunks_for_frames(frames);
+    len = tape_chunks_for_frames(b->total_frames);
     if (len == 0u) { return TAPE_ERR_NO_VALID_INDEX; }
-
-    /* All zero-write refusals are classified before stage clearing or copying. */
     if (!find_pass1(t, len, &pass1)) { return TAPE_ERR_CARTRIDGE_FULL; }
 
     pass2_possible = find_pass2(t, len, pass1, &pass2);
-
-    /*
-     * §4.5: pass 2 is optional. If geometry permits it but only one sequence
-     * remains, reserve one and stop after mandatory pass 1.
-     */
     if (pass2_possible && tape_headroom_ok(t->cartridge_sequence, 2u)) {
         seq_need = 2u;
     } else {
@@ -290,24 +286,130 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
         return TAPE_ERR_SEQUENCE_EXHAUSTED;
     }
 
-    data_blocks = respool_data_blocks(frames);
-    if (!semantic_budget_fits(block_budget, data_blocks, seq_need, stage_clear)) {
-        return TAPE_ERR_INVALID_ARG;
-    }
-
-    /* §8: after every operation precondition, before the first chunk/index write. */
-    if (stage_clear) {
-        rc = tape_sb_clear_stage(t);
-        if (rc != TAPE_OK) { return rc; }
-    }
-
-    rc = commit_compact_pass(t, pass1);
-    if (rc != TAPE_OK) { return rc; }
-
-    if (seq_need == 2u) {
-        rc = commit_compact_pass(t, pass2);
-        if (rc != TAPE_OK) { return rc; }
-    }
-
+    t->respool_in_progress = true;
+    t->respool_has_pass2 = (seq_need == 2u);
+    t->respool_len = len;
+    t->respool_pass1 = pass1;
+    t->respool_pass2 = pass2;
+    t->respool_dest = pass1;
+    t->respool_frames = b->total_frames;
+    t->respool_next_sequence = t->cartridge_sequence + 1u;
+    respool_reset_copy(t);
+    t->respool_half = false;
+    t->respool_phase = stage_clear ? RESPOOL_PHASE_STAGE_CLEAR
+                                   : RESPOOL_PHASE_COPY_PASS1;
+    *terminal = false;
     return TAPE_OK;
+}
+
+tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
+{
+    uint32_t used = 0u;
+    tape_result rc;
+    bool terminal;
+
+    if (t == NULL || more_work == NULL) { return TAPE_ERR_INVALID_ARG; }
+    if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
+    *more_work = false;
+    if (t->faulted) { return TAPE_ERR_FAULTED; }
+
+    /* A continuation has already passed every operation precondition. */
+    if (t->respool_in_progress) {
+        if (block_budget == 0u) { return TAPE_ERR_INVALID_ARG; }
+    } else {
+        if (!t->side_b_valid) { return TAPE_ERR_NO_VALID_INDEX; }
+        if (t->rec_armed || t->rate_q16_16 != 0 || t->promote_in_progress) {
+            return TAPE_ERR_BUSY;
+        }
+        if (!t->effective_writable) { return TAPE_ERR_READ_ONLY; }
+        if (block_budget == 0u) { return TAPE_ERR_INVALID_ARG; }
+
+        rc = respool_begin(t, &terminal);
+        if (rc != TAPE_OK || terminal) {
+            *more_work = false;
+            return rc;
+        }
+    }
+
+    while (t->respool_in_progress) {
+        bool done = false;
+
+        if (t->respool_phase == RESPOOL_PHASE_STAGE_CLEAR) {
+            /* §4.6 partner then candidate, one block each, so a budget of 1
+               cannot stall here (engine-api §9: the loop must terminate). */
+            if (used >= block_budget) { goto budget_done; }
+            used++;
+            if (!t->respool_half) {
+                rc = tape_sb_clear_stage_partner(t);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+            } else {
+                rc = tape_sb_clear_stage_candidate(t);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = false;
+                t->respool_phase = RESPOOL_PHASE_COPY_PASS1;
+            }
+        } else if (t->respool_phase == RESPOOL_PHASE_COPY_PASS1) {
+            rc = respool_copy(t, t->respool_pass1, block_budget, &used, &done);
+            if (rc != TAPE_OK) { goto fail; }
+            if (!done) { goto budget_done; }
+            respool_reset_copy(t);
+            t->respool_phase = RESPOOL_PHASE_COMMIT_PASS1;
+        } else if (t->respool_phase == RESPOOL_PHASE_COMMIT_PASS1) {
+            if (used >= block_budget) { goto budget_done; }
+            if (!t->respool_half) {
+                rc = respool_commit_entries(t, t->respool_pass1, &used);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+                goto next_step;
+            }
+            rc = respool_commit_header(t, &used);
+            if (rc != TAPE_OK) { goto fail; }
+            t->respool_half = false;
+            if (t->respool_has_pass2) {
+                t->respool_dest = t->respool_pass2;
+                respool_reset_copy(t);
+                t->respool_phase = RESPOOL_PHASE_COPY_PASS2;
+            } else {
+                respool_finish(t);
+                *more_work = false;
+                return TAPE_OK;
+            }
+        } else if (t->respool_phase == RESPOOL_PHASE_COPY_PASS2) {
+            rc = respool_copy(t, t->respool_pass2, block_budget, &used, &done);
+            if (rc != TAPE_OK) { goto fail; }
+            if (!done) { goto budget_done; }
+            respool_reset_copy(t);
+            t->respool_phase = RESPOOL_PHASE_COMMIT_PASS2;
+        } else if (t->respool_phase == RESPOOL_PHASE_COMMIT_PASS2) {
+            if (used >= block_budget) { goto budget_done; }
+            if (!t->respool_half) {
+                rc = respool_commit_entries(t, t->respool_pass2, &used);
+                if (rc != TAPE_OK) { goto fail; }
+                t->respool_half = true;
+                goto next_step;
+            }
+            rc = respool_commit_header(t, &used);
+            if (rc != TAPE_OK) { goto fail; }
+            t->respool_half = false;
+            respool_finish(t);
+            *more_work = false;
+            return TAPE_OK;
+        } else {
+            rc = TAPE_ERR_INCONSISTENT;
+            goto fail;
+        }
+
+next_step:
+        if (used >= block_budget) { goto budget_done; }
+    }
+
+budget_done:
+    *more_work = t->respool_in_progress;
+    return TAPE_OK;
+
+fail:
+    respool_finish(t);
+    *more_work = false;
+    return rc;
 }
