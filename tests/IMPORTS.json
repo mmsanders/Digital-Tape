@@ -232,6 +232,76 @@
   ],
   "spec_bundle": {
     "manifest": "spec/VERSION.md",
-    "note": "Every copy of a frozen spec file anywhere under docs/ or tests/ must hash to the value spec/VERSION.md records. These copies are authenticated test baselines held in place by tamper controls VT8-A13 and PB8-A01; they are never deduplicated against spec/."
+    "note": "Canonical spec/*.md must match spec/VERSION.md, whose bundle revision must be one declared below with identical hashes. Every embedded copy of a frozen spec file under docs/ or tests/ must sit in a root listed in 'roots' and must hash to that root's declared revision; there is no global either-revision acceptance. These copies are authenticated historical baselines held in place by tamper controls VT8-A13 and PB8-A01; they are never rewritten or deduplicated against spec/. A new imported package or retained bundle carrying spec copies must add its root here with its explicit revision. Revision triples are PM-issued facts (#248).",
+    "revisions": {
+      "DRAFT-8": {
+        "tapefs-v1.md": "3bffa0ec46d7ba3779b02cbee6fac1edaf5094553f78270ee379759655147cbb",
+        "engine-api.md": "537eadc423e1a7bde726d689206b8fe93bef164d57e48e8ff71e07eaf8a7e3a1",
+        "acceptance.md": "7f78fba7b66b4fc6e96d15399c62468249bb30fbccbb59bf9f57b4532f56b6b7"
+      },
+      "DRAFT-9": {
+        "tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d",
+        "engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
+        "acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d"
+      }
+    },
+    "roots": [
+      {
+        "path": "docs/verification/runs/2026-09-12-r2/synthetic-evidence/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "docs/verification/runs/2026-09-13-r11/product-evidence/input/package/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "docs/verification/runs/2026-09-14-r14/product-evidence/input/package/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "docs/verification/runs/2026-09-19-r21/product-evidence/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/mount_draft8/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/ops_draft8/evidence/p1-r1-synthetic/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/ops_draft8/evidence/p1-r18-synthetic/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_complete_draft8/evidence/p1-r13-synthetic/input/package/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_complete_draft8/evidence/p1-r6-synthetic/input/package/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_complete_draft8/evidence/p1-r8-synthetic/input/package/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_complete_draft8/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_draft8/evidence/p1-r2-synthetic/input/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_draft8/evidence/p1-r4-synthetic/input/spec",
+        "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/playback_draft8/spec",
+        "revision": "DRAFT-8"
+      }
+    ]
   }
 }
