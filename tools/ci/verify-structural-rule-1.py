@@ -50,11 +50,16 @@ def build_repo(tmp):
     # something consistent to verify and only the ordering check can speak.
     (repo / "docs").mkdir(parents=True, exist_ok=True)
     (repo / "spec").mkdir(parents=True, exist_ok=True)
+    # The same bytes serve as the canonical spec/ files and as one declared
+    # embedded root, so the bundle-version checks (#248) are satisfied too.
     rows = []
+    triple = {}
     for name in ("tapefs-v1.md", "engine-api.md", "acceptance.md"):
         text = f"# a stand-in for frozen {name}\n"
         (repo / "docs" / name).write_text(text, encoding="utf-8")
+        (repo / "spec" / name).write_text(text, encoding="utf-8")
         digest = hashlib.sha256(text.encode()).hexdigest()
+        triple[name] = digest
         rows.append(f"| `spec/{name}` | DRAFT-8 | `{digest}` |")
     (repo / "spec/VERSION.md").write_text(
         "| File | Revision | SHA-256 |\n|---|---|---|\n" + "\n".join(rows) + "\n",
@@ -63,7 +68,11 @@ def build_repo(tmp):
     (repo / "tests").mkdir(parents=True, exist_ok=True)
     (repo / "tests/IMPORTS.json").write_text(json.dumps({
         "packages": [], "evidence_bundles": [],
-        "spec_bundle": {"manifest": "spec/VERSION.md"},
+        "spec_bundle": {
+            "manifest": "spec/VERSION.md",
+            "revisions": {"DRAFT-8": triple},
+            "roots": [{"path": "docs", "revision": "DRAFT-8"}],
+        },
     }), encoding="utf-8")
 
     git(repo, "init", "-q", "-b", "main")

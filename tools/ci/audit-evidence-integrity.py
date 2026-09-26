@@ -12,7 +12,8 @@ Checks, all declared in tests/IMPORTS.json:
   1. imported verifier subtree hash equals the declared publication tree
   2. package self-tests green for every tests/*_draft8/ package touched
   3. offline replay of each retained evidence bundle matches its declared outcome
-  4. every copy of a frozen spec file hashes to spec/VERSION.md
+  4. canonical spec/*.md match spec/VERSION.md, a declared revision; every
+     embedded spec copy sits in a declared root and matches that root's revision
   5. manifest adapter kind/ID equals observation adapter kind/ID
   6. Structural Rule 1 ordering: on a branch carrying both an import and an
      implementation, every verifier-tree change precedes every engine change
@@ -131,28 +132,149 @@ def check_replay(m):
             ok("replay", f"{path} {'PASS' if passed else 'refused'} as declared")
 
 
-# --- 4. spec bytes in every evidence and package tree ------------------------
-def check_spec_copies(m):
-    vp = pathlib.Path(m["spec_bundle"]["manifest"])
-    ver = (vp if vp.is_absolute() else ROOT / vp).read_text(encoding="utf-8")
-    want = dict(re.findall(r"`spec/([a-z0-9.-]+\.md)`\s*\|[^|]*\|\s*`([0-9a-f]{64})`", ver))
-    if len(want) != 3:
-        fail("spec-copies", f"could not parse 3 hashes from {m['spec_bundle']['manifest']}")
+# --- 4. spec bytes: canonical bundle, and every embedded copy per root -----
+# The bundle is versioned. Historical packages and retained evidence carry the
+# spec bytes they were authenticated against, and those bytes are never
+# rewritten (CLAUDE.md §3.1, §4). So an embedded copy is checked against the
+# revision its own root DECLARES in tests/IMPORTS.json -- never inferred from a
+# directory name, and never "either revision is fine everywhere".
+SPEC_FILES = ("tapefs-v1.md", "engine-api.md", "acceptance.md")
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+VERSION_ROW = re.compile(
+    r"`spec/([a-z0-9.-]+\.md)`\s*\|\s*([A-Za-z0-9.-]+)\s*\|\s*`([0-9a-f]{64})`")
+
+
+def _sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _abs(path):
+    p = pathlib.Path(path)
+    return (p if p.is_absolute() else ROOT / p).resolve()
+
+
+def _rel(path):
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _declared_revisions(sb):
+    revs = sb.get("revisions")
+    if not isinstance(revs, dict) or not revs:
+        fail("spec-bundle", "tests/IMPORTS.json declares no spec bundle revisions")
+        return None, {}
+    complete = {}
+    for name, triple in revs.items():
+        if (not isinstance(triple, dict) or set(triple) != set(SPEC_FILES)
+                or not all(isinstance(v, str) and HEX64.match(v) for v in triple.values())):
+            fail("spec-bundle", f"revision {name} is not a complete triple of "
+                                f"{', '.join(SPEC_FILES)} SHA-256 values")
+            continue
+        complete[name] = triple
+    return revs, complete
+
+
+def _check_canonical(sb, complete):
+    vp = _abs(sb["manifest"])
+    rows = VERSION_ROW.findall(vp.read_text(encoding="utf-8"))
+    files = {f for f, _, _ in rows}
+    if len(rows) != 3 or files != set(SPEC_FILES):
+        fail("spec-bundle", f"could not parse exactly one row per spec file from {sb['manifest']}")
         return
-    checked = 0
+    current = {r for _, r, _ in rows}
+    if len(current) != 1:
+        fail("spec-bundle", f"{sb['manifest']} mixes revisions {sorted(current)}")
+        return
+    rev = current.pop()
+    want = {f: h for f, _, h in rows}
+    if rev not in complete:
+        fail("spec-bundle", f"{sb['manifest']} bundle {rev} is not a declared "
+                            f"complete revision in tests/IMPORTS.json")
+        return
+    for f in SPEC_FILES:
+        if want[f] != complete[rev][f]:
+            fail("spec-bundle", f"{sb['manifest']} records {f} {want[f][:16]}…, but "
+                                f"declared {rev} is {complete[rev][f][:16]}…")
+    for f in SPEC_FILES:
+        got = _sha256(ROOT / "spec" / f)
+        if got != want[f]:
+            fail("spec-bundle", f"spec/{f} is {got[:16]}…, {sb['manifest']} says {want[f][:16]}…")
+    if not any(c == "spec-bundle" for c, _ in FAIL):
+        ok("spec-bundle", f"spec/*.md match {sb['manifest']} ({rev})")
+
+
+def check_spec_copies(m):
+    sb = m["spec_bundle"]
+    revs, complete = _declared_revisions(sb)
+    if revs is None:
+        return
+    _check_canonical(sb, complete)
+
+    roots = sb.get("roots")
+    if not isinstance(roots, list) or not roots:
+        fail("spec-copies", "tests/IMPORTS.json declares no spec copy roots")
+        return
+    declared = {}
+    for r in roots:
+        path, rev = r.get("path"), r.get("revision")
+        if not path or not rev:
+            fail("spec-copies", f"malformed root declaration {r}")
+            continue
+        key = _abs(path)
+        if key in declared:
+            fail("spec-copies", f"{path} is declared more than once")
+            continue
+        if rev not in revs:
+            fail("spec-copies", f"{path} declares unknown bundle revision {rev}")
+            continue
+        declared[key] = (path, rev)
+
+    found = {}
     for top in ("docs", "tests"):
         for f in (ROOT / top).rglob("*.md"):
-            if f.name not in want:
+            if f.name in SPEC_FILES:
+                found.setdefault(f.parent.resolve(), set()).add(f.name)
+    for parent in sorted(found):
+        if parent not in declared:
+            fail("spec-copies", f"{_rel(parent)} holds {', '.join(sorted(found[parent]))} "
+                                f"but no bundle revision is declared for it")
+
+    by_rev = {}
+    for key, (path, rev) in sorted(declared.items()):
+        if not key.is_dir():
+            fail("spec-copies", f"declared root {path} does not exist")
+            continue
+        triple = complete.get(rev)
+        if triple is None:
+            fail("spec-copies", f"{path} declares {rev}, whose hash triple is incomplete")
+            continue
+        missing = [n for n in SPEC_FILES if not (key / n).is_file()]
+        if missing:
+            fail("spec-copies", f"{path} is an incomplete triple: missing {', '.join(missing)}")
+        for n in SPEC_FILES:
+            f = key / n
+            if not f.is_file():
                 continue
-            got = hashlib.sha256(f.read_bytes()).hexdigest()
-            checked += 1
-            if got != want[f.name]:
-                fail("spec-copies", f"{f.relative_to(ROOT)} is {got[:16]}…, "
-                                    f"bundle says {want[f.name][:16]}…")
-    if checked == 0:
+            got = _sha256(f)
+            if got == triple[n]:
+                continue
+            other = [o for o, t in complete.items() if o != rev and t[n] == got]
+            if other:
+                fail("spec-copies", f"{path}/{n} is the {other[0]} copy, but the root "
+                                    f"is declared {rev}")
+            else:
+                fail("spec-copies", f"{path}/{n} is {got[:16]}…, declared {rev} is "
+                                    f"{triple[n][:16]}… (hash drift)")
+        by_rev[rev] = by_rev.get(rev, 0) + 1
+    if not found:
         fail("spec-copies", "found no spec copies to check — the check is not working")
     elif not any(c == "spec-copies" for c, _ in FAIL):
-        ok("spec-copies", f"{checked} copies all match spec/VERSION.md")
+        summary = ", ".join(f"{n} {r}" for r, n in sorted(by_rev.items()))
+        ok("spec-copies", f"{sum(len(v) for v in found.values())} copies in "
+                          f"{len(declared)} declared roots ({summary}) all match "
+                          f"their declared revision")
 
 
 # --- 5. adapter identity binding ---------------------------------------------
