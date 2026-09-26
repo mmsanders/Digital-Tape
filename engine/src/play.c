@@ -197,6 +197,7 @@ tape_result tape_seek(tape *t, uint64_t frame)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
     /* §10: forbidden while armed. The recording cursor is fixed at arm time
        (§7) — you cannot seek a tape deck while it is recording, because the
        head is where the head is. */
@@ -219,6 +220,7 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
     if (t->rec_armed) { return TAPE_ERR_BUSY; }   /* §10, with tape_seek */
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     t->rate_q16_16 = rate_q16_16;
     t->at_end   = false;
@@ -267,6 +269,8 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
     if (t == NULL || more_work == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted)                    { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)                     { return TAPE_ERR_FAULTED; }
+    /* §10 permits service in the Dup-in-progress row; §9.1 re-entry does not. */
+    if (t->in_callback)                 { return TAPE_ERR_BUSY; }
     if (block_budget == 0u)             { return TAPE_ERR_INVALID_ARG; }
 
     /*

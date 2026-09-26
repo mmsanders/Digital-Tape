@@ -211,6 +211,7 @@ tape_result tape_arm(tape *t, tape_rec_mode mode)
     if (!t->mounted)   { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)    { return TAPE_ERR_FAULTED; }
     if (t->rec_armed)  { return TAPE_ERR_BUSY; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     /*
      * §10: arm is the ONE call gated on the mounted side. W+SideB means an
@@ -292,6 +293,7 @@ tape_result tape_abort(tape *t)
     /* §10: not armed is TAPE_ERR_BUSY, like every other row that is not the
        armed one. Deliberately NOT gated on faulted (§7.2). */
     if (!t->rec_armed) { return TAPE_ERR_BUSY; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     rec_disarm(t);
     t->free_next = tape_derive_free_next(&t->idx[TAPE_SIDE_B], &t->sb, TAPE_SIDE_B);
@@ -311,6 +313,7 @@ tape_result tape_feed(tape *t, const int16_t *in, uint32_t frames, uint32_t *acc
     if (!t->mounted)                    { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)                     { return TAPE_ERR_FAULTED; }
     if (!t->rec_armed)                  { return TAPE_ERR_BUSY; }
+    if (tape_dup_row_busy(t))           { return TAPE_ERR_BUSY; }
 
     *accepted = 0u;
     if (frames == 0u) { return TAPE_OK; }
@@ -535,6 +538,7 @@ tape_result tape_commit(tape *t)
     if (t->faulted)    { return TAPE_ERR_FAULTED; }
     /* §10: commit is TAPE_ERR_BUSY in every row that is not armed. */
     if (!t->rec_armed) { return TAPE_ERR_BUSY; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
     /* §7.1: it refuses while frames are owed. The caller services until
        frames_owed clears, then commits. */
     if (tape_frames_owed(t)) { return TAPE_ERR_BUSY; }

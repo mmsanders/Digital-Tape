@@ -21,7 +21,7 @@
 #ifndef TAPE_SRC_DEV_H
 #define TAPE_SRC_DEV_H
 
-#include "tape_dev.h"
+#include "tape.h"
 
 /*
  * Guardrail 06: a write reaching a read-only device must be a loud crash, not
@@ -62,6 +62,18 @@ static inline int dev_write(const tape_dev *d,
 static inline int dev_flush(const tape_dev *d)
 {
     return d->flush(d->ctx);
+}
+
+/*
+ * engine-api §9's progress notification is the one engine callback that is not
+ * a tape_dev member. It is called here, beside the three device wrappers, so
+ * "no indirect call outside dev.h" (invariant 15, WP-13) stays decidable by
+ * construction. Counts only; the caller owns what a second is.
+ */
+static inline void dev_progress(tape_progress_fn cb, void *user,
+                                uint32_t blocks_done, uint32_t blocks_total)
+{
+    cb(user, blocks_done, blocks_total);
 }
 
 #endif /* TAPE_SRC_DEV_H */

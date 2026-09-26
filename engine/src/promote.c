@@ -338,6 +338,7 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted) { return TAPE_ERR_FAULTED; }
     if (t->rec_armed || t->rate_q16_16 != 0) { return TAPE_ERR_BUSY; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
     if (!t->effective_writable) { return TAPE_ERR_READ_ONLY; }
     if (block_budget == 0u) { return TAPE_ERR_INVALID_ARG; }
 
