@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R41 R29-A integrated; held R29-C carry-forward issued · 27 September 2026 UTC",
+      asOf: "P1-R42 held R29-C combined candidate routed · 27 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -277,7 +277,7 @@
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
           note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
-          note: "Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance and carried forward PR #79's bounded behavior. A dry current-main merge conflicts in CI, the import manifest and relevant engine paths, so Software #270 is building a fresh held combined candidate for disposition; complete WP-12 and WP-12a remain open." },
+          note: "Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance and carried forward PR #79's bounded behavior. Software #270 returned held PR #272 with both accepted histories/packages and a fresh 48-shard PASS. Its new conflict-resolved engine tree and cross-operation BUSY behavior are routed to Verification #87; complete WP-12 and WP-12a remain open." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
           note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
