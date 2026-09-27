@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R36 R29-B independent disposition and integration routing · 27 September 2026 UTC",
+      asOf: "P1-R37 R29-A package-defect disposition and final correction routing · 27 September 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -273,13 +273,13 @@
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "The exact 26-case record evidence is independently replayed 26/26 PASS after Verification corrected ARMED-BUSY, and clean verifier-first product PR #167 is now merged at main 1db7135. This is still not full required WP-09 package coverage, so the package rung does not advance." },
         { id: "WP-10", name: "Crash-injection harness", rung: 2,
-          note: "Verification PR #69 accepted the bounded 28,760-case record/reset/stage-clear crash tranche and product PR #217 integrated it. Verification #83 now independently accepts exact held PR #241 head 74f1173 for 57,611/57,611 bounded R29-B cases and all six DRAFT-9 WP-13 gates; the flagged AST header-completeness point is non-blocking. Software #255 owns exact integration without rewriting the head. R29-A #245 stays queued and Promote remains barred from new consumer/release use. No additional package rung advances." },
+          note: "Verification PR #69 accepted the bounded 28,760-case core tranche. Verification #83 accepted 57,611/57,611 bounded R29-B cases at exact PR #241 head 74f1173, now integrated at main 867fd4a. Held R29-A PR #257 validates 44,309/44,311 Software observations, including all 44,204 crash cases, but two unreachable allocating-decline cases fail and two pass vacuously. Verification #84 owns the final bounded package correction and binding audit. Promote remains barred from new consumer/release use; no additional package rung advances." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
           note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
           note: "Exact 8/8 re-spool product evidence is independently accepted and integrated through the #180 chain. Verification PR #79 accepted the bounded R29-C behavior while returning its stale evidence identities; corrected PR #236 remains held for provenance-only Verification disposition. WP-12a and complete WP-12 acceptance remain open." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
-          note: "The exact DRAFT-8 WP-13 baseline remains independently accepted through Verification PR #66 and product PR #206. Verification #83 independently accepts all six DRAFT-9 gates at exact held PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 owns exact integration. This renewed evidence does not add a fifth rung." },
+          note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
           note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]
