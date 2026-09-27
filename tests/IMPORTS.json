@@ -255,6 +255,18 @@
         "python3",
         "tests/respool_full_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/sequential_wp06_r44",
+      "tree": "21d4507149d6b565242df2120148b95eadcadd2f",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "db2a56901d44defa753d8a715c639be232838215",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected R44 WP-06 sequential mount/commit verifier package (38 cases: repair/retry, degraded-B recovery, format->commit->remount, two refusals; seven killed controls) published at Verification PR #91 head db2a56901d44defa753d8a715c639be232838215 (full tree a2aefa54f9da9ac757de3181cdaf3da3aedd2b70) after Verification #94 correction; imported byte-identically. Supersedes the pre-correction tree eea87e41, never imported",
+      "selftest": [
+        "python3",
+        "tests/sequential_wp06_r44/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

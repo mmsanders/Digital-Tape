@@ -1,0 +1,3 @@
+# WP-06 R44 sequential package
+
+This is verifier-owned authoring against issued DRAFT-9, not a Product PASS. `python3 selftest.py` exercises the raw-block oracle, seven red controls and a spoofed-private-label invariance check. `python3 runner.py observations.jsonl --manifest manifest.json --adapter-kind product --adapter-source-sha SHA256 --product-commit SHA --product-tree SHA` replays a separately built adapter's retained evidence. The runner refuses an existing manifest and refuses missing/extra/duplicate cases. See `ADAPTER.md` for the public API and raw observation contract; `COVERAGE.md` maps cases to requirements and exclusions.
