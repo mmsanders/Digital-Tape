@@ -92,6 +92,11 @@ integrity manifest.
 
 ## Evidence and residual holds
 
+- Verification #86 independently accepted exact product PR #263 head
+  `8a4d2a17138fd89e91f970a2c69c9f8fa0a8d920`: 44,307/44,307 canonical and
+  diagnostic cases, 25/25 B6 crafted cases and all six red controls. This is bounded
+  R29-A evidence, not complete WP-10/WP-12a acceptance; Promote remains barred from
+  new consumer/release use until PM-controlled Software integration.
 - #27 lands verifier tests before implementation. Ten package checks pass; 289 engine
   observations on the held branch pass after two DRAFT-8 fixes. At signing the
   independent disposition was pending; the 11 September Verification return now
