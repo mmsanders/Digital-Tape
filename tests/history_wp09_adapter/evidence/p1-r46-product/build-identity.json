@@ -1,0 +1,16 @@
+{
+  "adapter_source_sha256": "5daad8de9ee13b119c7f4fefc44de7059896ab7366ba1a5a546aade198d9298c",
+  "build_command": "make -C engine clean all && make -C tests/history_wp09_adapter clean all",
+  "edit_count": 10000,
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "fixture": "tape_format of a blank sparse device sized for 12,000 chunks (nominal_length_s 35,666), uuid WP09-R44-history, then tape_mount(B); one continuous history, no restart",
+  "import_commit": "d48e66b2fe83fd6e3d102ee5a7f1ecc4c07393f6",
+  "makefile_sha256": "2a588e8b26a9b357cb237a57ba60e55352b8d378128bb98728fc466516ce0b5f",
+  "plan_sha256": "c41c8159862c40b759e059c3ed57b43ee94fd40ef7cb89f060fa5044d67be19c",
+  "product_base": "2890ea1eeaa94d53630cf64ca49e5f86afef2965",
+  "run_command": "tests/history_wp09_adapter/build/wp09_adapter > observations.jsonl",
+  "run_product_sha256": "df0f7b39117390c39945e2c7f9a0222fad7ab4fde04da7cd0152279aa2d2f609",
+  "schema": "wp09-r44-product-build-identity-1",
+  "verifier_source_commit": "5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a",
+  "verifier_tree": "fa4e2d1686914f9dfe9aa8c6c7705bdbfce0266f"
+}
