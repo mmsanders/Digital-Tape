@@ -255,6 +255,19 @@
         "python3",
         "tests/respool_full_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/crossrun_wp08_r44",
+      "tree": "9ed67a8594476822ba5ee35e07a1bf048e23100e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "58ca7599157d1da7c13794fb0f0859feb2210374",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected R44/R45 WP-08 cross-run playback property verifier package (33 seeded cases: boundary seeks +/-1, signed/fractional rates, endpoint clamps, three render/service subdivisions; nine killed red controls and spoof-label invariance) published at Verification PR #93 head 58ca7599157d1da7c13794fb0f0859feb2210374 (full tree 635825e18101f899fb707ad4b1ab2e39233cd3ce) after Verification #94 correction; imported byte-identically. Supersedes the original tree 2c0f598a, never imported",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/crossrun_wp08_r44/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
