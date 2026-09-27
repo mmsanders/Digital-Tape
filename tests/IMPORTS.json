@@ -157,11 +157,16 @@
     },
     {
       "path": "tests/promote_draft8",
-      "tree": "2b79e0b07016da3521917c5a276e36994ccccfa6",
+      "tree": "197d2f2adbc9dba40d78bc1a1cd37c162858784b",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "e5e06b06f1aa0755a3b0b15133f1ce680e17f7af",
+      "source_commit": "9a036f1dd5645acdf7c52866bd10c78e14cc2d49",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "independent promote classification verifier package published by verification PR #37; imported byte-identically",
+      "attestation": "final corrected R29-A full promote crash/resume + WP-12a verifier package (schema PROMOTE-OBSERVATION-2; 44,307 cases; case-set 71be17545262d3b35fed9213b9305f71e4c8956693fbf4ec8f6d06f9f7ba80aa) published at 9a036f1dd5645acdf7c52866bd10c78e14cc2d49 by Verification #84 (final publication merge 2b2ae3b330a863744e96a79ae2e9192b39aea7df); imported byte-identically for #261, superseding tree 2b79e0b07016da3521917c5a276e36994ccccfa6 from verification PR #37. Trees e99ba0f2cf3f9e8cdd22199cbd9cc502cc5638a3 (PR #237) and 2eb707d7e8ea721085164b85f5e2f397e115a036 (PR #257) carry no credit",
+      "superseded_trees": [
+        "2b79e0b07016da3521917c5a276e36994ccccfa6",
+        "e99ba0f2cf3f9e8cdd22199cbd9cc502cc5638a3",
+        "2eb707d7e8ea721085164b85f5e2f397e115a036"
+      ],
       "selftest": [
         "python3",
         "tests/promote_draft8/selftest.py"
