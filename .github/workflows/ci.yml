@@ -432,6 +432,47 @@ jobs:
           path: tests/respool_full_adapter/evidence/aggregate
           if-no-files-found: error
 
+  sequential-wp06-package:
+    name: independent WP-06 R44 sequential — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 tests/sequential_wp06_r44/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/sequential_wp06_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/sequential_wp06_adapter/run_product.py
+          --replay tests/sequential_wp06_adapter/evidence/p1-r46-product
+          --out tests/sequential_wp06_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/sequential_wp06_adapter/run_product.py
+          --evidence tests/sequential_wp06_adapter/evidence/product
+          --retained tests/sequential_wp06_adapter/evidence/p1-r46-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Non-canonical findings diagnostic
+        if: always()
+        run: python3 tests/sequential_wp06_adapter/diagnostic_findings.py tests/sequential_wp06_adapter/evidence/product/observations.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r46-wp06-sequential-product-evidence
+          path: |
+            tests/sequential_wp06_adapter/evidence/product
+            tests/sequential_wp06_adapter/evidence/replay
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
