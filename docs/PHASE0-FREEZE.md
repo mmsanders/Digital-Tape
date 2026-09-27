@@ -102,9 +102,10 @@ integrity manifest.
 - WP-11 golden CI is still red. No full WP-10, hardware measurement or card-atomicity
   acceptance is claimed. Raw destructive operation outcomes retain their exact spec
   boundaries; a paper freeze does not establish physical media atomicity.
-- Held product PR #241 and its previous 57,611/57,611 Software run are not accepted.
-  Software issue #250 owns the exact DRAFT-9 package import and complete R29-B rerun;
-  independent disposition remains required before any merge or coverage credit.
+- Verification #83 independently accepted exact held product PR #241 head `74f1173`
+  for bounded R29-B (57,611/57,611) and DRAFT-9 WP-13 (all six gates). Software #255
+  owns exact integration without rewriting that disposed head. This does not grant
+  complete WP-10 or WP-12a acceptance.
 - The original program’s Phase 0 spike/buying tasks are not all accepted. This is
   the narrower format/API freeze gate, not a claim that WP-04/05/34 are complete.
 
