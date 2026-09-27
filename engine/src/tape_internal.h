@@ -168,6 +168,38 @@ struct tape {
     uint64_t  promote_frames;
 
     /*
+     * §9.5 bounded duplicate continuation, on the SOURCE instance (engine-api
+     * §10: only the source's row applies; the destination is a raw device).
+     * dup_dev is the destination captured at initiation: continuation calls
+     * must match it by ctx (§9.1 argument stability) and all destination I/O
+     * uses this copy. dup_sb holds the primary copy read by classification and
+     * then the planned step-1 bytes, so a budget of 1 may stop between the two
+     * step-1 writes. A compacting copy that spans calls keeps its partial
+     * destination block in mix_block, exactly as promote does; neither promote
+     * nor overdub can run while a duplicate is in progress.
+     */
+    bool      dup_in_progress;
+    uint8_t   dup_phase;
+    uint8_t   dup_zero_next;
+    tape_dev  dup_dev;
+    uint8_t   dup_uuid[16];
+    uint32_t  dup_epoch;
+    uint32_t  dup_nominal;
+    uint32_t  dup_total_chunks;
+    uint32_t  dup_first_lba, dup_second_lba;
+    uint32_t  dup_copy_block;
+    uint32_t  dup_copy_frame;
+    uint32_t  dup_copy_blocks;
+    uint32_t  dup_done, dup_total;
+    unsigned char dup_sb[TAPE_BLOCK_SIZE];
+    /*
+     * engine-api §9.1 no re-entry: true only while tape_progress_fn runs. Every
+     * call on this instance except tape_render, tape_status, tape_get_info and
+     * tape_tell returns TAPE_ERR_BUSY with no state change while it is set.
+     */
+    bool      in_callback;
+
+    /*
      * §7 recording. Scalars only: every recorded frame lives in the CALLER's
      * rec_ring (§4), and the chunks it will occupy are a bump-allocated run,
      * so the engine needs no buffer of its own to describe either.
@@ -407,6 +439,16 @@ tape_result tape_index_replace(struct tape_index *idx, uint64_t at, uint64_t tai
    §8.1 is why the pending flush counts — a write is not durable until a flush
    has returned, so tape_commit may not assume the barrier already happened. */
 bool tape_frames_owed(const struct tape *t);
+
+/*
+ * engine-api §10 Dup-in-progress row and §9.1 no re-entry, for the eleven
+ * columns that are B there (seek, set_rate, arm, feed, commit, abort, set_side,
+ * reset_b, promote, respool, unmount). tape_service is B only under re-entry.
+ */
+static inline bool tape_dup_row_busy(const struct tape *t)
+{
+    return t->in_callback || t->dup_in_progress;
+}
 
 /* Return the instance to the disarmed state. tape_mount calls it so a remount
    on a reused instance cannot inherit a previous mount's armed bookkeeping. */

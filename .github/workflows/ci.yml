@@ -217,22 +217,29 @@ jobs:
           if-no-files-found: error
 
   embedded-readiness-package:
-    name: independent WP-13 embedded-readiness audit — six-gate real-product evidence
+    # DRAFT-9 (#243/#247) replaced the three-funnel WP13-G5 with four named
+    # funnels. The product is measured against the DRAFT-9 package; the
+    # accepted DRAFT-8 package and its collector stay in the tree unchanged.
+    name: independent WP-13 embedded-readiness audit (DRAFT-9) — six-gate real-product evidence
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - run: python3 tests/embedded_readiness_draft8/selftest.py
-      - run: python3 -m py_compile tests/embedded_readiness_adapter/collect_product_evidence.py
-      - run: python3 tests/embedded_readiness_adapter/collect_product_evidence.py --evidence tests/embedded_readiness_adapter/evidence/p1-r27-product
+          # the collector checks the declared base/import against history
+          fetch-depth: 0
+      - run: python3 tests/embedded_readiness_draft9/selftest.py
+      - name: Toolchain, including the clang AST call-expression scanner
+        run: cc --version | head -1; clang --version | head -1
+      - run: python3 -m py_compile tests/embedded_readiness_adapter/collect_product_evidence_draft9.py
+      - run: python3 tests/embedded_readiness_adapter/collect_product_evidence_draft9.py --evidence tests/embedded_readiness_adapter/evidence/p1-r34-draft9-product
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: p1-r27-wp13-embedded-readiness-evidence
-          path: tests/embedded_readiness_adapter/evidence/p1-r27-product
+          name: p1-r34-wp13-draft9-embedded-readiness-evidence
+          path: tests/embedded_readiness_adapter/evidence/p1-r34-draft9-product
           if-no-files-found: error
 
   allocator-cow-package:
@@ -283,6 +290,33 @@ jobs:
         with:
           name: p1-r27-wp10-core-crash-evidence
           path: tests/crash_core_adapter/evidence/p1-r27-product
+          if-no-files-found: error
+
+  format-dup-identity-package:
+    name: R29-B format/duplicate raw identity + dup long-op — exact canonical product campaign
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 tests/format_dup_identity_draft8/selftest.py
+      - run: make -C engine clean all
+      - name: Build mechanical R29-B product binding and retain command log
+        run: |
+          set -o pipefail
+          make -C tests/format_dup_identity_adapter clean all 2>&1 | tee tests/format_dup_identity_adapter/build.log
+      - name: Run exact 57,611-case canonical package until PASS or first retained failure
+        run: python3 tests/format_dup_identity_adapter/run_product.py --evidence tests/format_dup_identity_adapter/evidence/p1-r34-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r34-format-dup-identity-product-evidence
+          path: tests/format_dup_identity_adapter/evidence/p1-r34-product
           if-no-files-found: error
 
   dashboard:

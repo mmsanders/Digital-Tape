@@ -33,6 +33,7 @@ tape_result tape_reset_side_b(tape *t)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     /* §10: reset_b is TAPE_ERR_BUSY in Playing and in every armed and
        long-operation row; it is permitted from Mounted-idle, including the

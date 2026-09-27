@@ -245,6 +245,7 @@ tape_result tape_respool(tape *t, uint32_t block_budget, bool *more_work)
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     *more_work = false;
     if (t->faulted) { return TAPE_ERR_FAULTED; }
+    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     /* §10 degraded-B overrides the ordinary idle/playing rows for respool. */
     if (!t->side_b_valid) { return TAPE_ERR_NO_VALID_INDEX; }

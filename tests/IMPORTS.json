@@ -214,6 +214,30 @@
         "python3",
         "tests/crash_core_draft8/selftest.py"
       ]
+    },
+    {
+      "path": "tests/format_dup_identity_draft8",
+      "tree": "f76ab23d17beb9212f8ee1d17d3d1875b74abc7d",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "50c47c1b9087de52f66d831ef2fe00cc02273087",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected R29-B format/duplicate raw-identity + duplicate WP-12a verifier package (schema FMTDUP-ID-OBSERVATION-2; case-set c493e77dff948df48d9c67c51ef4b68f0a61d2e02615b2d08760a594e79dc4e3) from Verification correction 7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7, merged by Verification PR #77; imported byte-identically. Supersedes the uncredited PR #74 tree bd81f66d515c4f71e03efc6edd55f70d1d0383da that was never on main",
+      "selftest": [
+        "python3",
+        "tests/format_dup_identity_draft8/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/embedded_readiness_draft9",
+      "tree": "8e5d0853755e54032b7d5304caf1190a03376393",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "74a2f96d5fa50972f2a20bc391fc6bd363554cb1",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "independent DRAFT-9 WP-13 embedded-readiness verifier package (four named callback funnels including dev_progress -> tape_progress_fn; complete source and call-expression inventories) published by Verification PR #82 at 74a2f96d5fa50972f2a20bc391fc6bd363554cb1; imported byte-identically. A new package beside the accepted tests/embedded_readiness_draft8, which is unchanged",
+      "selftest": [
+        "python3",
+        "tests/embedded_readiness_draft9/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
@@ -301,6 +325,10 @@
       {
         "path": "tests/playback_draft8/spec",
         "revision": "DRAFT-8"
+      },
+      {
+        "path": "tests/embedded_readiness_draft9/spec",
+        "revision": "DRAFT-9"
       }
     ]
   }
