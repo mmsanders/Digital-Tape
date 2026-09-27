@@ -197,7 +197,7 @@ tape_result tape_seek(tape *t, uint64_t frame)
     if (t == NULL)   { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
-    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
+    if (tape_long_op_row_busy(t)) { return TAPE_ERR_BUSY; }
     /* §10: forbidden while armed. The recording cursor is fixed at arm time
        (§7) — you cannot seek a tape deck while it is recording, because the
        head is where the head is. */
@@ -220,7 +220,7 @@ tape_result tape_set_rate(tape *t, int32_t rate_q16_16)
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted)  { return TAPE_ERR_FAULTED; }
     if (t->rec_armed) { return TAPE_ERR_BUSY; }   /* §10, with tape_seek */
-    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
+    if (tape_long_op_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     t->rate_q16_16 = rate_q16_16;
     t->at_end   = false;
@@ -358,7 +358,9 @@ tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *render
 
     if (t == NULL || out == NULL || rendered == NULL) { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
-    if (t->faulted)  { return TAPE_ERR_FAULTED; }
+    /* §7.2 / §10: render stays allowed in FAULTED. It touches only the ring,
+       and with tape_service refused there it drains and then underruns, which
+       is the audible signal that the tape stopped. */
 
     *rendered = 0u;
     total = TAPE_LIVE(t).total_frames;

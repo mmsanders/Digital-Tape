@@ -625,7 +625,7 @@ tape_result tape_unmount(tape *t, uint64_t *out_position_frame)
      * path that forgot to ask. The Faulted row overrides it: there, unmount is
      * the only exit and refusing it would strand the instance (§7.2).
      */
-    if ((t->rec_armed || t->promote_in_progress || tape_dup_row_busy(t))
+    if ((t->rec_armed || t->promote_in_progress || tape_long_op_row_busy(t))
         && !t->faulted) {
         return TAPE_ERR_BUSY;
     }
@@ -700,7 +700,7 @@ tape_result tape_set_side(tape *t, tape_side side)
     /* §10: B in both armed rows. The recording cursor is a position on THIS
        side's timeline; switching out from under it has no defined meaning. */
     if (t->rec_armed || t->promote_in_progress) { return TAPE_ERR_BUSY; }
-    if (tape_dup_row_busy(t)) { return TAPE_ERR_BUSY; }
+    if (tape_long_op_row_busy(t)) { return TAPE_ERR_BUSY; }
     if (side != TAPE_SIDE_A && side != TAPE_SIDE_B) { return TAPE_ERR_INVALID_ARG; }
 
     /*

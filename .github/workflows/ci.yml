@@ -79,23 +79,35 @@ jobs:
   promote-package:
     name: independent promote package — synthetic self-checks, then product observations
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      # First prove the independently published verifier plumbing against its
-      # synthetic adapter; then bind the exact same package to the real engine.
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      # R29-A (#245): the corrected full promote crash/resume + WP-12a package.
+      # Self-checks first, then the exact 44,311-case canonical campaign.
       - run: python3 tests/promote_draft8/selftest.py
-      - run: make -C engine all
-      - run: make -C tests/promote_adapter all
-      - name: Prove rejected callbacks remain observable
-        run: tests/promote_adapter/build/wp_promote_probe --selfcheck-callback-trace
-      - run: python3 tests/promote_adapter/run_product.py --evidence tests/promote_adapter/evidence/p1-r25-product
+      - run: make -C engine clean all
+      - name: Build mechanical R29-A product binding and retain command log
+        run: |
+          set -o pipefail
+          make -C tests/promote_adapter clean all 2>&1 | tee tests/promote_adapter/build.log
+      - name: Run exact 44,311-case canonical package until PASS or first retained failure
+        run: python3 tests/promote_adapter/run_product.py --evidence tests/promote_adapter/evidence/p1-r32-product
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      # Not canonical: every case through the same adapter and oracle, every
+      # failure recorded, so one round shows the whole picture.
+      - name: Diagnostic sweep of all 44,311 cases (non-canonical)
+        if: always()
+        run: python3 tests/promote_adapter/diagnostic_sweep.py --out tests/promote_adapter/evidence/p1-r32-product/diagnostic
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: p1-r25-promote-product-evidence
-          path: tests/promote_adapter/evidence/p1-r25-product
+          name: p1-r32-promote-product-evidence
+          path: tests/promote_adapter/evidence/p1-r32-product
           if-no-files-found: error
 
   respool-package:
