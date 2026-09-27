@@ -104,9 +104,9 @@ integrity manifest.
   boundaries; a paper freeze does not establish physical media atomicity.
 - Verification #83 independently accepted exact product PR #241 head `74f1173` for
   bounded R29-B (57,611/57,611) and DRAFT-9 WP-13 (all six gates); Software #255
-  integrated it at main `867fd4a`. Verification #84 published corrected R29-A tree
-  `197d2f2a`; Software #261 owns its mechanical product repack and B6 raw evidence.
-  This does not grant complete WP-10 or WP-12a acceptance.
+  integrated it at main `867fd4a`. Final R29-A PR #263 carries corrected tree
+  `197d2f2a`, complete Software evidence and B6 raw proof; Verification #86 owns its
+  exact-head disposition. This does not grant complete WP-10 or WP-12a acceptance.
 - The original program’s Phase 0 spike/buying tasks are not all accepted. This is
   the narrower format/API freeze gate, not a claim that WP-04/05/34 are complete.
 
