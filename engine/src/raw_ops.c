@@ -608,7 +608,9 @@ tape_result tape_dup(tape *src, const tape_dev *dst_dev,
     /* §10 source row. A duplicate in progress is the ✓ continuation cell. */
     if (!src->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (src->faulted) { return TAPE_ERR_FAULTED; }
-    if (src->rec_armed || src->promote_in_progress) { return TAPE_ERR_BUSY; }
+    if (src->rec_armed || src->promote_in_progress || src->respool_in_progress) {
+        return TAPE_ERR_BUSY;
+    }
 
     /* §9.1: zero budget after the state matrix, no state change. */
     if (block_budget == 0u) {

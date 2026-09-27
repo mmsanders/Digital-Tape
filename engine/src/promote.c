@@ -612,7 +612,7 @@ tape_result tape_promote(tape *t, uint32_t block_budget, bool *more_work,
     if (!t->mounted) { return TAPE_ERR_NOT_MOUNTED; }
     if (t->faulted) { return TAPE_ERR_FAULTED; }
     if (t->rec_armed || t->rate_q16_16 != 0) { return TAPE_ERR_BUSY; }
-    if (t->dup_in_progress) { return TAPE_ERR_BUSY; }
+    if (t->dup_in_progress || t->respool_in_progress) { return TAPE_ERR_BUSY; }
     if (!t->effective_writable) { return TAPE_ERR_READ_ONLY; }
     /* §9.1: after the state matrix and writability, no state change. */
     if (block_budget == 0u) {

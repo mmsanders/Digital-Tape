@@ -562,6 +562,10 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
     t->promote_copy_frame = 0u;
     t->dup_in_progress = false;
     t->dup_phase = 0u;
+    t->respool_in_progress = false;
+    t->respool_phase = 0u;
+    t->respool_copy_block = 0u;
+    t->respool_copy_frame = 0u;
 
     /* Phases 1 and 2. No writes anywhere below this line until phase 4. */
     rc = resolve_superblock(t, &repair_lba);
@@ -638,6 +642,8 @@ tape_result tape_unmount(tape *t, uint64_t *out_position_frame)
     }
     t->mounted = false;
     t->faulted = false;
+    t->respool_in_progress = false;
+    t->respool_phase = 0u;
     return TAPE_OK;
 }
 
