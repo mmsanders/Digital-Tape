@@ -150,11 +150,11 @@ struct tape {
     uint64_t  resume_whole_frame;
 
     /*
-     * §9.3 bounded promote continuation state. The independent promote_draft8
-     * tranche covers classification and uninterrupted FRESH paths; these
-     * scalars let that work honor block_budget without allocating or putting a
-     * second full index on the 200 KiB instance. mix_block is the persistent
-     * partial destination block while a compacting copy spans calls.
+     * §9.3 promote continuation state: scalars only, so a budget of 1 can stop
+     * between any two block operations without allocating or putting a second
+     * full index on the 200 KiB instance. mix_block is the persistent partial
+     * destination block while a compacting copy spans calls. promote_done and
+     * promote_total are the progress callback's counts, in block units.
      */
     bool      promote_in_progress;
     bool      promote_adopt;
@@ -165,6 +165,7 @@ struct tape {
     uint32_t  promote_copy_block;
     uint32_t  promote_copy_frame;
     uint32_t  promote_next_sequence;
+    uint32_t  promote_done, promote_total;
     uint64_t  promote_frames;
 
     /*
@@ -441,13 +442,15 @@ tape_result tape_index_replace(struct tape_index *idx, uint64_t at, uint64_t tai
 bool tape_frames_owed(const struct tape *t);
 
 /*
- * engine-api §10 Dup-in-progress row and §9.1 no re-entry, for the eleven
- * columns that are B there (seek, set_rate, arm, feed, commit, abort, set_side,
- * reset_b, promote, respool, unmount). tape_service is B only under re-entry.
+ * engine-api §10 Promote-in-progress and Dup-in-progress rows and §9.1 no
+ * re-entry, for the columns that are B in both rows (seek, set_rate, arm,
+ * feed, commit, abort, set_side, reset_b, respool, unmount). Each long
+ * operation checks its own continuation column itself; tape_service is B only
+ * under re-entry.
  */
-static inline bool tape_dup_row_busy(const struct tape *t)
+static inline bool tape_long_op_row_busy(const struct tape *t)
 {
-    return t->in_callback || t->dup_in_progress;
+    return t->in_callback || t->dup_in_progress || t->promote_in_progress;
 }
 
 /* Return the instance to the disarmed state. tape_mount calls it so a remount
