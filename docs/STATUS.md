@@ -1,14 +1,14 @@
 # Project status
 
-**27 September 2026 UTC · input main `97723d7` · Owner: Software #261 ·** Phase 1 has
+**27 September 2026 UTC · input main `a356bd9` · Owner: Software #267 ·** Phase 1 has
 three complete independently accepted packages: **WP-07 allocator/COW, WP-13 embedded
 readiness and WP-36 slot capability**. The accepted bounded WP-10 core crash tranche is
 also integrated through product PR #217 / Verification PR #69, but full WP-10 remains
 open. The dashboard remains **21/36 rungs (58%)**. Accepted bounded R29-B and DRAFT-9
-WP-13 are integrated at main `867fd4a`. Verification #84 published the final corrected
-44,307-case R29-A tree `197d2f2a`, confirmed F1–F3, accepted bindings B1–B5 and isolated
-B6 to raw setup-media evidence. Obsolete PR #257 is closed without merge; Software #261
-owns one mechanical repack/rerun with the unchanged engine implementation. No rung advanced.
+WP-13 are integrated at main `867fd4a`. Verification #86 independently accepted exact
+R29-A PR #263: 44,307/44,307 canonical and diagnostic PASS, the audited engine tree,
+25/25 B6 crafted cases and all six red controls. Software #267 owns current-main
+integration of that immutable candidate. No rung advanced.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -53,16 +53,16 @@ Every new gate has a negative control that is proven to go red. Run them with
 | WP-07 chunk allocator, copy-on-write Side B | **COMPLETE.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package; its exact evidence was mechanically carried onto post-WP13 main and integrated by product PR #215 | None for frozen WP-07 | Accepted / integrated |
 | WP-08 playback, seek, variable-rate scrub | Exact ten corrected-cadence playback observation families plus exact 16/16 set-side/warm-start product observations; transport evidence independently replayed PASS by verifier PR #41 / `334ab2a...` and integrated via product PR #171 at main `e598b82...` | Source/helper design, complete WP-08, byte-exact/listened warm samples and broader goldens remain open | Held pending later independently tested coverage; listening/goldens remain separately held |
 | WP-09 record: overwrite, overdub, splice | Exact 26/26 product observations independently replayed PASS by verifier PR #39 / `e9e6ec7...`; corrected verifier-first integration merged in product PR #167 at main `1db7135...` | PCM/listening, crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and other stated exclusions remain open; complete WP-09 remains unaccepted | Held pending later independently tested coverage |
-| WP-10 crash-injection harness | Verification PR #69 accepted the bounded core tranche. Verification #83 accepted 57,611/57,611 bounded R29-B cases at exact PR #241 head `74f1173`; Software #255 integrated that candidate at main `867fd4a` | Verification #84 corrected R29-A to 44,307 cases and accepted B1–B5; B6 requires raw setup-media proof. Full operations and WP-12a remain open | Software #261 exact-tree repack/rerun, then independent disposition |
+| WP-10 crash-injection harness | Verification PR #69 accepted the bounded core tranche. Verification #83 accepted 57,611/57,611 bounded R29-B cases at exact PR #241 head `74f1173`; Software #255 integrated that candidate at main `867fd4a`. Verification #86 accepted exact R29-A PR #263, including 44,307/44,307 canonical/diagnostic evidence and B6 25/25 plus six red controls | PR #263 still requires current-main integration. Full operations and WP-12a remain open | Software #267 exact accepted-head integration |
 | WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is unlistened and is not an accepted golden; golden CI stays red | Held — needs Michael's own listening |
-| WP-12 re-spool / defragment pass | Exact 8/8 respool product evidence independently accepted via Verification #44 / PR #45 and integrated through the #180 chain | Verification narrowly authenticated #227's retained raw public observations but rejected its continuity/no-restart and budget-1 claims. Corrected R29-C requires a fresh product binding/run; WP-12a and complete WP-12 acceptance remain separate | Software — corrected R29-C binding and fresh evidence |
+| WP-12 re-spool / defragment pass | Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance and carried forward PR #79's bounded behavior | Accepted PR #236 remains on a stale held branch and requires mechanical carry-forward after R29-A; complete WP-12/WP-12a remain separate | PM/Software integration after PR #263 |
 | WP-13 embedded-readiness audit | **DRAFT-9 is independently accepted and integrated.** Verification #83 authenticated all six gates at exact PR #241 head `74f1173`, including 16/16 sources, exactly four funnels and zero forbidden/ambiguous calls; Software #255 integrated it at main `867fd4a` | None for the accepted DRAFT-9 boundary | Accepted / integrated |
 | WP-36 slot capability model | **COMPLETE.** Verification PR #57 accepted the deterministic precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign; product PR #200 integrated it unchanged | None for frozen WP-36 | Accepted / integrated |
 
-Engine implementation now includes respool and bounded format/duplicate paths. Closed
-PR #257's corrected Promote engine tree is the mechanical source for #261, but its old
-import/evidence is obsolete. **Do not use Promote in a new consumer or release** before
-the corrected R29-A import/run and independent disposition. The
+Engine implementation now includes respool and bounded format/duplicate paths. Held
+PR #263 carries the independently accepted, unchanged corrected Promote engine tree
+with the final verifier import and B6 evidence. **Do not use Promote in a new consumer
+or release** before Software #267 completes PM-controlled integration. The
 caller-owned position table and harness-only operation token are PM-ruled in
 ADR-156, not independently accepted engine behavior.
 
@@ -70,7 +70,7 @@ ADR-156, not independently accepted engine behavior.
 
 | Work | Held since | State | Next owner |
 |---|---|---|---|
-| WP-10 / operations freeze | — | Bounded core and R29-B are accepted/integrated. Verification #84 published corrected R29-A tree `197d2f2a` (44,307 cases), B1–B5 PASS and B6 BLOCK only on missing raw setup-media proof; PR #257 is superseded | Software #261 mechanical repack/rerun, then Verification exact-head disposition |
+| WP-10 / operations freeze | — | Bounded core and R29-B are accepted/integrated. Verification #86 accepted exact final R29-A PR #263 with complete 44,307-case evidence, exact audited engine tree and B6 raw proof | Software #267 exact accepted-head integration |
 | WP-11 | — | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
 | Hardware | 2026-09-18 | Verification rejects PR #87 repaired head `e520c2c...` on `P1-R23-V01`'s eleven adjacent forms. PR #92 head `0943571...` remains held. PR #120 head `7b224ff...` is a stale-base, advice/method candidate awaiting independent A1MINI-01 audit. Timing stays PROVISIONAL and fabrication/charging stay CLOSED with five blockers | Hardware repairs PR #87; Verification audits exact PR #120 method without printing |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
@@ -87,7 +87,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 1. **Card atomicity is unqualified.** No media is qualified to WP-05 A-2; PR #87's method is independently rejected on `P1-R23-V01` and no new acquisition may run.
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **Mechanism and creep trials are unprinted.** A1MINI-01 rev 1 is an unprinted, unaudited method candidate; CAD checks are not measurements.
-4. **Engine progress is still coverage-limited.** WP-07, WP-13 and WP-36 are complete within their exact accepted boundaries; bounded R29-B is integrated. Promote remains held pending #261's exact-tree R29-A run, B6 raw proof and independent disposition. This is not complete WP-10 or WP-12a. WP-06/WP-08/WP-09/WP-12 and WP-11 listening/goldens remain incomplete.
+4. **Engine progress is still coverage-limited.** WP-07, WP-13 and WP-36 are complete within their exact accepted boundaries; bounded R29-B is integrated. Exact R29-A PR #263 is independently accepted but remains held pending Software #267 integration. Accepted PR #236 still needs current-main carry-forward next. This is not complete WP-10 or WP-12a. WP-06/WP-08/WP-09/WP-12 and WP-11 listening/goldens remain incomplete.
 5. **WP-11 goldens are missing by design.** Golden CI is red until Michael listens; no process change substitutes for that.
 
 ## Standing boundaries
