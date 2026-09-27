@@ -290,9 +290,11 @@ tape_result tape_abort(tape *t)
 {
     if (t == NULL)     { return TAPE_ERR_INVALID_ARG; }
     if (!t->mounted)   { return TAPE_ERR_NOT_MOUNTED; }
-    /* §10: not armed is TAPE_ERR_BUSY, like every other row that is not the
-       armed one. Deliberately NOT gated on faulted (§7.2). */
-    if (!t->rec_armed) { return TAPE_ERR_BUSY; }
+    /*
+     * §7.2/§10 permits abort in FAULTED even when no recording is armed: it is
+     * one of the four non-I/O escape/observation calls allowed by quarantine.
+     */
+    if (!t->rec_armed && !t->faulted) { return TAPE_ERR_BUSY; }
     if (tape_long_op_row_busy(t)) { return TAPE_ERR_BUSY; }
 
     rec_disarm(t);
