@@ -1,0 +1,16 @@
+{
+  "adapter_source_sha256": "45c3dbec4c0b8f96e84f95f2b911546afea95ea4e07bbc9c1aa7a0aa7e91135a",
+  "build_command": "make -C engine clean all && make -C tests/crossrun_wp08_adapter clean all",
+  "case_count": 33,
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "fixture_sha256": "0086d401ae865f45c3c437ffd66bf024235f6e9aeb96002cedebc309df43bd02",
+  "import_commit": "2928853b748e6e0f4ea1c30cb665e2a2cc1d9e9d",
+  "makefile_sha256": "a04860fcf678950a7f85ceec86054c69cbb845708b85699ee422123871d46fc4",
+  "plan_sha256": "08f584f6367c737283090a535111c17414b06de4ef318f7054e527f90ebe7d6c",
+  "product_base": "2890ea1eeaa94d53630cf64ca49e5f86afef2965",
+  "run_command": "tests/crossrun_wp08_adapter/build/wp08_adapter > observations.jsonl; tests/crossrun_wp08_adapter/build/wp08_adapter --fixture > fixture.json",
+  "run_product_sha256": "858c137126cafa9c89df2840958caf4eb20624a6e4df302454c62cb9b83e838e",
+  "schema": "wp08-r44-product-build-identity-1",
+  "verifier_source_commit": "58ca7599157d1da7c13794fb0f0859feb2210374",
+  "verifier_tree": "9ed67a8594476822ba5ee35e07a1bf048e23100e"
+}
