@@ -1,0 +1,68 @@
+{
+  "roundtrip-chunk-boundary": {
+    "blocks_written": 2,
+    "flush_callbacks": 2,
+    "write_callbacks": 2,
+    "writes": [
+      {
+        "count": 1,
+        "lba": 393
+      },
+      {
+        "count": 1,
+        "lba": 392
+      }
+    ]
+  },
+  "roundtrip-empty-commit": {
+    "blocks_written": 0,
+    "flush_callbacks": 0,
+    "write_callbacks": 0,
+    "writes": []
+  },
+  "roundtrip-entry-block-boundary": {
+    "blocks_written": 3,
+    "flush_callbacks": 2,
+    "write_callbacks": 2,
+    "writes": [
+      {
+        "count": 2,
+        "lba": 393
+      },
+      {
+        "count": 1,
+        "lba": 392
+      }
+    ]
+  },
+  "roundtrip-max-entries": {
+    "blocks_written": 97,
+    "flush_callbacks": 2,
+    "write_callbacks": 2,
+    "writes": [
+      {
+        "count": 96,
+        "lba": 265
+      },
+      {
+        "count": 1,
+        "lba": 264
+      }
+    ]
+  },
+  "roundtrip-one-frame": {
+    "blocks_written": 2,
+    "flush_callbacks": 2,
+    "write_callbacks": 2,
+    "writes": [
+      {
+        "count": 1,
+        "lba": 393
+      },
+      {
+        "count": 1,
+        "lba": 392
+      }
+    ]
+  }
+}
