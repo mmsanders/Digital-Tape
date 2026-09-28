@@ -268,6 +268,19 @@
         "-B",
         "tests/crossrun_wp08_r44/selftest.py"
       ]
+    },
+    {
+      "path": "tests/history_wp09_r44",
+      "tree": "fa4e2d1686914f9dfe9aa8c6c7705bdbfce0266f",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected R44/R45 WP-09 seeded record-history verifier package (seed 0x9E3779B9, 10,000 continuous overwrite/overdub/splice edits, 25 exact-PCM checkpoints, 12 remounts; nine killed red controls and spoof-label invariance; retained synthetic trace labelled not-Product) published at Verification PR #92 head 5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a (full tree a87cd548ac884ae7e0e4551b21fa73c124a59bcd) after Verification #94 correction; imported byte-identically. Supersedes the original tree b44531d7, never imported",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/history_wp09_r44/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
