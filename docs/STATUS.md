@@ -1,6 +1,6 @@
 # Project status
 
-**28 September 2026 UTC · input main `2415de1` · Owner: Software #292 / Verification #97 ·** Phase 1 has
+**28 September 2026 UTC · input main `025352f` · Owner: Software #292/#294 ·** Phase 1 has
 three complete independently accepted packages: **WP-07 allocator/COW, WP-13 embedded
 readiness and WP-36 slot capability**. The accepted bounded WP-10 core crash tranche is
 also integrated through product PR #217 / Verification PR #69, but full WP-10 remains
@@ -16,7 +16,8 @@ Verification #95 independently accepted bounded WP-08 33/33 at exact Product #28
 head; #96 accepted bounded WP-09 10,000 edits/25 checkpoints at exact Product #288
 head. Both remain unmerged; Software #292 owns sequential integration and the
 `tests/IMPORTS.json` union. WP-06 #286 is 34/38 canonical; frozen-contract oracle
-conflicts go to Verification #97 before a fresh Product binding. No rung advanced.
+conflicts were corrected by Verification #97, which published subtree `3fe1810`;
+Software #294 owns the fresh two-commit Product binding after #292. No rung advanced.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -57,7 +58,7 @@ Every new gate has a negative control that is proven to go red. Run them with
 
 | Package | Independently accepted | Outstanding | Next owner |
 |---|---|---|---|
-| WP-06 block device, superblock, index commit | Exact 289/289 mount observations plus independently accepted 8/8 writability and 34/34 NOT_MOUNTED product evidence, all integrated on current main | Held Product PR #286 is canonical FAIL 4/38: wrong reset API name and callback-versus-block count in verifier oracle; complete WP-06 remains open | Verification #97 — correct and republish oracle |
+| WP-06 block device, superblock, index commit | Exact 289/289 mount observations plus independently accepted 8/8 writability and 34/34 NOT_MOUNTED product evidence, all integrated on current main | Held Product PR #286's 34/38 canonical result exposed wrong reset API and callback-versus-block accounting; Verification #97 corrected oracle at subtree `3fe1810` and replayed old evidence 38/38, but did not accept Product; complete WP-06 remains open | Software #294 — fresh import/binding after #292 |
 | WP-07 chunk allocator, copy-on-write Side B | **COMPLETE.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package; its exact evidence was mechanically carried onto post-WP13 main and integrated by product PR #215 | None for frozen WP-07 | Accepted / integrated |
 | WP-08 playback, seek, variable-rate scrub | Earlier ten corrected-cadence families and 16/16 set-side/warm-start observations integrated; Verification #95 PASS on exact held PR #287 head `54d1520`, 33/33 bounded cross-run cases and seven causal controls | Accepted new tranche remains unmerged; complete WP-08/listened goldens remain open | Software #292 — integrate accepted identity |
 | WP-09 record: overwrite, overdub, splice | Earlier 26/26 product observations integrated; Verification #96 PASS on exact held PR #288 head `08ec1c4`, 10,000 edits, 25 checkpoints and eight causal controls | Accepted new tranche remains unmerged; complete WP-09 remains open | Software #292 — integrate after #287 |
@@ -94,7 +95,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 1. **Card atomicity is unqualified.** No media is qualified to WP-05 A-2; PR #87's method is independently rejected on `P1-R23-V01` and no new acquisition may run.
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **Mechanism and creep trials are unprinted.** A1MINI-01 rev 1 is an unprinted, unaudited method candidate; CAD checks are not measurements.
-4. **Engine progress is still coverage-limited.** WP-07, WP-13 and WP-36 are complete within exact boundaries; bounded R29-A/B/C are integrated. WP-08/#287 and WP-09/#288 have independent bounded PASS but await Software #292 integration; WP-06/#286 needs verifier oracle correction and fresh Product evidence. WP-10, WP-12, WP-12a and WP-11 listening/goldens remain incomplete.
+4. **Engine progress is still coverage-limited.** WP-07, WP-13 and WP-36 are complete within exact boundaries; bounded R29-A/B/C are integrated. WP-08/#287 and WP-09/#288 have independent bounded PASS but await Software #292 integration; WP-06/#286 needs a fresh corrected-package Product binding in #294 and independent disposition. WP-10, WP-12, WP-12a and WP-11 listening/goldens remain incomplete.
 5. **WP-11 goldens are missing by design.** Golden CI is red until Michael listens; no process change substitutes for that.
 
 ## Standing boundaries
