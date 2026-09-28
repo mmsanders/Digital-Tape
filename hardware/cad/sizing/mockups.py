@@ -105,6 +105,58 @@ def prism_xz(pts_xz, y0, length):
         cq.Solid.extrudeLinear(cq.Face.makeFromWires(w), cq.Vector(0, length, 0)))
 
 
+def prism_yz(pts_yz, x0, length):
+    """A prism whose cross-section lies in the YZ plane, extruded along +X."""
+    w = cq.Wire.makePolygon([cq.Vector(x0, y, z) for y, z in pts_yz], close=True)
+    return cq.Workplane().add(
+        cq.Solid.extrudeLinear(cq.Face.makeFromWires(w), cq.Vector(length, 0, 0)))
+
+
+def _ridge_pts(face, zc, proud, inward, half_base, half_top):
+    return [(face + inward, zc - half_base), (face, zc - half_base),
+            (face - proud, zc - half_top), (face - proud, zc + half_top),
+            (face, zc + half_base), (face + inward, zc + half_base)]
+
+
+def ridge_y(side_y, H, zc, x0, length, face_y, proud, inward, half_base, half_top):
+    """ridge() for the top (+1) and bottom (-1) edges instead of the sides."""
+    pts = _ridge_pts(face_y, zc, proud, inward, half_base, half_top)
+    if side_y > 0:
+        pts = [(H - y, z) for y, z in pts]
+    return prism_yz(pts, x0, length)
+
+
+def _rr_wire(W, H, r, inset, z):
+    """Rounded rectangle inset by `inset`, corner radius shrinking to match --
+    the flat face of a box whose edge blends are bigger than its plan corners."""
+    w, h, rc = W - 2 * inset, H - 2 * inset, max(r - inset, 0.25)
+    wire = cq.Wire.makePolygon([(0, 0, 0), (w, 0, 0), (w, h, 0), (0, h, 0)], close=True)
+    return wire.fillet2D(rc, wire.Vertices()).translate(cq.Vector(inset, inset, z))
+
+
+def _bed_edge_profile(R, steps=8):
+    """(height above face, inset) for an edge round of radius R that prints
+    face-down: the lower half of the round (flatter than 45 deg, which would
+    sag) is replaced by the 45 deg chamfer tangent to it. Invisible in the
+    hand, and no support needed."""
+    if R <= 0:
+        return [(0.0, 0.0)]
+    pts = [(0.0, R * (2 - math.sqrt(2)))]
+    for i in range(steps + 1):
+        phi = math.radians(45 + 45 * i / steps)
+        pts.append((R - R * math.cos(phi), R - R * math.sin(phi)))
+    return pts
+
+
+def rounded_body(W, H, T, r, r_back, r_front):
+    """The outer mould line: plan corners r, back-face edges r_back, front-face
+    edges r_front, both faces print-safe (see _bed_edge_profile)."""
+    secs = [(h, i) for h, i in _bed_edge_profile(r_back)]
+    secs += [(T - h, i) for h, i in reversed(_bed_edge_profile(r_front))]
+    wires = [_rr_wire(W, H, r, i, z) for z, i in secs]
+    return cq.Workplane().add(cq.Solid.makeLoft(wires, True))
+
+
 def ridge(side_x, W, zc, y0, length, face_x, proud, inward, half_base, half_top):
     """A trapezoidal ridge standing `proud` off a vertical face at x = face_x.
 
@@ -112,9 +164,7 @@ def ridge(side_x, W, zc, y0, length, face_x, proud, inward, half_base, half_top)
     of a millimetre proud of a thin wall made the kernel drop the whole tray.
     `side_x` is -1 for the left wall (ridge points -X), +1 for the right.
     """
-    pts = [(face_x + inward, zc - half_base), (face_x, zc - half_base),
-           (face_x - proud, zc - half_top), (face_x - proud, zc + half_top),
-           (face_x, zc + half_base), (face_x + inward, zc + half_base)]
+    pts = _ridge_pts(face_x, zc, proud, inward, half_base, half_top)
     if side_x > 0:
         pts = [(W - x, z) for x, z in pts]
     return prism_xz(pts, y0, length)
@@ -122,28 +172,47 @@ def ridge(side_x, W, zc, y0, length, face_x, proud, inward, half_base, half_top)
 
 # ---------------------------------------------------------------- the shell
 
-def shell_pair(W, H, T, r, zs):
+def shell_pair(W, H, T, r, zs, edges=None, detents_on="sides"):
     """Tray (back, z 0..zs+tongue) and lid (front, zs..T), rabbet-jointed.
 
     The seam is the plane z = zs. The lid's skirt drops over the tray's tongue.
+    `edges` = (r_back, r_front) rounds the two big faces; None leaves them square.
+    `detents_on` = "sides" (the long edges) or "ends" (top and bottom).
     """
-    tray = (slab(W, H, r, 0, 0, FLOOR)
-            .union(ring(W, H, r, 0, -WALL, FLOOR, zs))
-            .union(ring(W, H, r, -TONGUE_IN, -WALL, zs, zs + TONGUE_H)))
-    lid = (slab(W, H, r, 0, T - FLOOR, T)
-           .union(ring(W, H, r, 0, -WALL, zs + SKIRT_H, T - FLOOR))
-           .union(ring(W, H, r, 0, -SKIRT_T, zs, zs + SKIRT_H)))
+    if edges:
+        body = rounded_body(W, H, T, r, *edges)
+        tray = (body.intersect(box(-5, -5, -1, W + 5, H + 5, zs))
+                .cut(slab(W, H, r, -WALL, FLOOR, zs + 1))
+                .union(ring(W, H, r, -TONGUE_IN, -WALL, zs, zs + TONGUE_H)))
+        lid = (body.intersect(box(-5, -5, zs, W + 5, H + 5, T + 1))
+               .cut(slab(W, H, r, -WALL, zs - 1, T - FLOOR))
+               .cut(slab(W, H, r, -SKIRT_T, zs - 1, zs + SKIRT_H)))
+    else:
+        tray = (slab(W, H, r, 0, 0, FLOOR)
+                .union(ring(W, H, r, 0, -WALL, FLOOR, zs))
+                .union(ring(W, H, r, -TONGUE_IN, -WALL, zs, zs + TONGUE_H)))
+        lid = (slab(W, H, r, 0, T - FLOOR, T)
+               .union(ring(W, H, r, 0, -WALL, zs + SKIRT_H, T - FLOOR))
+               .union(ring(W, H, r, 0, -SKIRT_T, zs, zs + SKIRT_H)))
 
-    # Detents on the long sides: a ridge on the tongue, a groove in the skirt.
+    # Detents: a ridge on the tongue, a groove in the skirt, two per edge.
     zc = zs + TONGUE_H / 2
-    for y in (H * 0.3, H * 0.7):
-        for sx in (-1, 1):
-            tray = tray.union(ridge(sx, W, zc, y - 2.5, 5.0, face_x=TONGUE_IN,
-                                    proud=DETENT_H, inward=0.5,
-                                    half_base=1.0, half_top=0.5))
-            lid = lid.cut(ridge(sx, W, zc, y - 2.7, 5.4, face_x=SKIRT_T,
-                                proud=DETENT_H + 0.05, inward=0.3,
-                                half_base=1.1, half_top=0.6))
+    tongue_ridge = dict(proud=DETENT_H, inward=0.5, half_base=1.0, half_top=0.5)
+    skirt_groove = dict(proud=DETENT_H + 0.05, inward=0.3, half_base=1.1, half_top=0.6)
+    if detents_on == "sides":
+        for y in (H * 0.3, H * 0.7):
+            for sx in (-1, 1):
+                tray = tray.union(ridge(sx, W, zc, y - 2.5, 5.0, face_x=TONGUE_IN,
+                                        **tongue_ridge))
+                lid = lid.cut(ridge(sx, W, zc, y - 2.7, 5.4, face_x=SKIRT_T,
+                                    **skirt_groove))
+    else:
+        for x in (W * 0.3, W * 0.7):
+            for sy in (-1, 1):
+                tray = tray.union(ridge_y(sy, H, zc, x - 2.5, 5.0, face_y=TONGUE_IN,
+                                          **tongue_ridge))
+                lid = lid.cut(ridge_y(sy, H, zc, x - 2.7, 5.4, face_y=SKIRT_T,
+                                      **skirt_groove))
     # Pry notch in the skirt, bottom edge centre: a thumbnail or a coin opens it.
     lid = lid.cut(box(W / 2 - 6, -1, zs - 0.1, W / 2 + 6, SKIRT_T + 0.2, zs + 1.6))
     return tray, lid
@@ -166,6 +235,18 @@ def coin_grid(W, H, r, z0, height, pitch=24.0, t=1.2):
     return ribs.intersect(inner)
 
 
+def prism_line(pts, width, z0, z1):
+    """A strip `width` wide following a polyline -- an engraved line."""
+    out = None
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        L = math.hypot(x1 - x0, y1 - y0)
+        seg = (box(0, -width / 2, z0, L, width / 2, z1)
+               .rotate((0, 0, 0), (0, 0, 1), math.degrees(math.atan2(y1 - y0, x1 - x0)))
+               .translate((x0, y0, 0)))
+        out = seg if out is None else out.union(seg)
+    return out
+
+
 def groove_rr(W, H, r, inset, width, depth, z_face, up):
     """An engraved rounded-rectangle outline on a face (door seams, windows)."""
     z0, z1 = (z_face - depth, z_face + 1) if up else (z_face - 1, z_face + depth)
@@ -178,54 +259,144 @@ def groove_rect(x, y, w, h, r, width, depth, z_face, up):
 
 # ---------------------------------------------------------------- WM-2
 
+RIB_W, RIB_P = 0.6, 1.2   # the real ribs are ~1 mm pitch; 0.6 is what a 0.4 nozzle
+                          # can leave standing between two grooves on the bed
+
+
+def _grooves_along_y(x_list, y0, y1, z0, z1, w=RIB_W):
+    g = None
+    for x in x_list:
+        b = box(x - w / 2, y0, z0, x + w / 2, y1, z1)
+        g = b if g is None else g.union(b)
+    return g
+
+
+def _poly_prism(pts_xy, z0, z1):
+    return (cq.Workplane().workplane(offset=z0).polyline(pts_xy).close()
+            .extrude(z1 - z0))
+
+
 def wm2():
+    """Sony WM-2 outer mould line.
+
+    Size 80 x 109 x 29.5 (walkman.land, 1981 ad). Everything else was measured
+    off an orthographic fan render Michael supplied (its plan is 80:109 to 0.1 %,
+    so 9.2 px/mm) and cross-checked against walkman.land product photos, which
+    also supplied the DC IN jack the render leaves out. Good to about +-1 mm;
+    not measured on a real unit. Coordinates: x across from the left edge seen
+    from the controls face, y up from the bottom edge, z from the back (door).
+    """
     W, H, T, r = 80.0, 109.0, 29.5, 2.0
-    zs = 20.5                                   # door half 20.5, controls half 9
-    tray, lid = shell_pair(W, H, T, r, zs)
+    R_BACK, R_FRONT = 3.0, 2.0         # edge rounds, from the edge-on views
+    zs = 13.6        # print seam: the real black/silver line is at 12.3, but the
+                     # door-edge slots and the OPEN slider end at 13.5
+    tray, lid = shell_pair(W, H, T, r, zs, edges=(R_BACK, R_FRONT), detents_on="ends")
     tray = tray.union(coin_grid(W, H, r, FLOOR, 8.0))
 
-    # --- controls face (z = T, on the lid) -----------------------------------
-    # The black ribbed triangle behind the wheel, 0.8 mm down.
-    tri = (cq.Workplane().workplane(offset=T - 0.8)
-           .polyline([(47, H + 1), (W + 1, H + 1), (W + 1, 72)]).close().extrude(2))
-    lid = lid.cut(tri)
-    # Button wells: the button shape stands flush inside a 1.5 mm moat.
-    ang = -35
-    for cx, cy, L, Wd in ((47, 86, 22, 9), (37, 71, 22, 10), (56, 61, 22, 10)):
-        lid = lid.cut(stadium(cx, cy, L, Wd, ang, T - 1.5, T + 1))
-    lid = lid.union(stadium(37, 71, 16, 6.5, ang, T - 1.5, T))       # FWD/PLAY
-    lid = lid.union(stadium(56, 61, 16, 6.5, ang, T - 1.5, T))       # STOP
-    for d in (-5.5, 5.5):                                            # FF, REW
-        c = math.radians(ang)
-        lid = lid.union(cyl(47 + d * math.cos(c), 86 + d * math.sin(c), 2.6,
-                            T - 1.5, T))
-    lid = lid.cut(cyl(51, 75, 1.2, T - 0.8, T + 1))                  # battery LED
+    # ======================= controls face (z = T, the lid) ===================
+    # Black ribbed zone: triangle behind the wheel plus a strip down the right
+    # edge. Real ribs are about 1 mm pitch; here 0.6 mm grooves at 1.2, 0.4 deep.
+    diag = [(47.8, H), (73.6, 75.1), (73.6, 0.0)]
+    lid = lid.cut(prism_line(diag, 0.6, T - 0.4, T + 1))              # boundary
+    zone = _poly_prism([(49.2, H - 2.2), (74.9, 75.6), (74.9, 2.2),
+                        (W - 2.2, 2.2), (W - 2.2, H - 2.2)], T - 0.4, T + 1)
+    xs = [49.6 + RIB_P * i for i in range(24)]
+    lid = lid.cut(_grooves_along_y(xs, 0, H, T - 0.4, T + 1).intersect(zone))
 
-    # Volume wheel, rim exposed at the top-right corner. A cup inside the lid
-    # carries it, so it is attached rather than a floating island.
-    wc = (72.0, 101.0)
-    body = slab(W, H, r, 0, 24.6, T)
-    cup = cyl(*wc, 10.0, 24.6, T).intersect(body)
-    lid = lid.union(cup).cut(cyl(*wc, 9.0, 25.6, T + 1))
-    wheel = cyl(*wc, 8.0, 25.6, T)
-    for i in range(40):
-        a = 2 * math.pi * i / 40
-        wheel = wheel.cut(box(-0.4, 7.3, 25.6, 0.4, 9.0, T + 1)
-                          .rotate((0, 0, 0), (0, 0, 1), math.degrees(a))
+    # Button wells at +40 deg, square to the diagonal. Buttons stand flush in a
+    # moat: they print against the bed, so they cannot stand proud of it.
+    A = 40.0
+    WELL = 1.5
+    for cx, cy, L, Wd in ((45.0, 91.3, 22.0, 7.5),      # FF / REW
+                          (46.5, 77.5, 23.0, 8.5),      # FWD (PLAY)
+                          (59.7, 73.5, 20.5, 8.5)):     # STOP
+        lid = lid.cut(stadium(cx, cy, L, Wd, A, T - WELL, T + 1))
+    lid = lid.union(stadium(45.8, 76.9, 18.5, 5.2, A, T - WELL - 0.2, T))   # PLAY
+    lid = lid.union(stadium(59.7, 73.5, 16.0, 5.2, A, T - WELL - 0.2, T))   # STOP
+    for bx, by in ((41.0, 87.8), (50.4, 95.9)):                            # FF, REW
+        lid = lid.union(cyl(bx, by, 2.1, T - WELL - 0.2, T))
+    lid = lid.cut(cyl(40.2, 72.6, 1.6, T - 0.3, T + 1))       # green PLAY dot, felt
+    lid = lid.cut(cyl(59.2, 88.6, 0.9, T - 0.8, T + 1))       # battery LED
+    lid = lid.cut(cyl(51.8, 105.2, 1.4, T - 0.5, T + 1))      # the corner screw
+
+    # Volume wheel: face flush with the front, rim showing through a notch in
+    # the top edge. A cup inside the lid carries it.
+    wc, WR, WT = (65.4, 100.6), 8.0, 4.5
+    cup = cyl(*wc, WR + 1.8, T - WT - 1.0, T).intersect(
+        box(-1, -1, T - WT - 1.0, W + 1, H + 1, T + 1)).intersect(
+        rounded_body(W, H, T, r, R_BACK, R_FRONT))
+    lid = (lid.union(cup).cut(cyl(*wc, WR + 0.8, T - WT, T + 1))
+           .cut(box(59.5, H - 3.0, T - WT, 72.0, H + 1, T + 1)))
+    wheel = cyl(*wc, WR, T - WT, T)
+    for i in range(44):
+        wheel = wheel.cut(box(-0.35, WR - 0.5, T - WT - 0.1, 0.35, WR + 1, T + 1)
+                          .rotate((0, 0, 0), (0, 0, 1), 360.0 * i / 44)
                           .translate((*wc, 0)))
+    for rr in (2.5, 4.5):                                     # the ringed cap
+        wheel = wheel.cut(ring(2 * rr, 2 * rr, rr - 0.01, 0, -0.5, T - 0.3, T + 1)
+                          .translate((wc[0] - rr, wc[1] - rr, 0)))
     lid = lid.union(wheel)
 
-    # --- door face (z = 0, on the tray) ---------------------------------------
-    tray = tray.cut(groove_rr(W, H, r, 3.0, 0.8, 0.7, 0, up=False))          # door seam
-    tray = tray.cut(groove_rect(18, 50, 44, 22, 3, 0.8, 0.7, 0, up=False))   # window
-    for dx in (-11, 11):
-        tray = tray.cut(cyl(40 + dx, 61, 3.5, -1, 0.7))                      # hubs
+    # ======================= door face (z = 0, the tray) ======================
+    tray = tray.cut(box(72.2 - 0.3, -1, -1, 72.2 + 0.3, H + 1, 0.5))       # hinge strip
+    tray = tray.cut(_grooves_along_y([73.6 + RIB_P * i for i in range(4)], 2.5, H - 2.5,
+                                     -1, 0.4))
+    tray = tray.cut(cyl(74.7, 57.4, 0.9, -1, 0.8))                          # door pin
+    tray = tray.cut(groove_rect(12.7, 19.0, 31.2, 70.5, 4.3, 0.8, 0.6, 0, up=False))
+    tray = tray.cut(groove_rect(23.0, 45.0, 11.5, 19.0, 1.5, 0.6, 0.4, 0, up=False))
+    for hy in (76.3, 35.7):                                                 # hubs
+        tray = tray.cut(ring(6.6, 6.6, 3.29, 0, -0.7, -1, 0.5).translate((29.5, hy - 3.3, 0)))
 
-    # --- edges -----------------------------------------------------------------
-    for x in (46, 55):                                            # two phone jacks
-        tray = tray.cut(rod(2.8, 2.0, (x, H - 1.5, 10), (0, 1, 0)))
-    tray = tray.union(box(W - 0.5, 32, 7, W + 1.2, 40, 13))        # tape switch
-    tray = tray.union(box(-1.0, 92, 8, 0.5, 98, 13))               # hotline button
+    # ======================= edges ============================================
+    DOOR_Z = 6.8                              # the door's edge line, 3 sides
+    tray = tray.cut(box(-1, 2, DOOR_Z - 0.25, 0.4, H - 2, DOOR_Z + 0.25))
+    for yb in ((-1, 0.4), (H - 0.4, H + 1)):
+        tray = tray.cut(box(2, yb[0], DOOR_Z - 0.25, 72.2, yb[1], DOOR_Z + 0.25))
+
+    # Slanted slots in the top and bottom edges, just inside the door line,
+    # with a block behind each so a coin cannot get out.
+    slot = [(5.6, DOOR_Z), (23.3, DOOR_Z), (26.3, 13.4), (9.0, 13.4)]
+    for y_out, y_in in ((H + 1, H - 3.0), (-1, 3.0)):
+        y0, y1 = min(y_out, y_in), max(y_out, y_in)
+        yb0, yb1 = (H - 5.0, H - 1.9) if y_out > H else (1.9, 5.0)
+        tray = tray.union(box(3.5, yb0, FLOOR - 0.1, 28.5, yb1, zs))
+        tray = tray.cut(prism_xz(slot, y0, y1 - y0))
+
+    # Left side: the OPEN slider (in a recess, just in front of the door line)
+    # and the DC IN jack near the bottom.
+    tray = tray.cut(box(-1, 25.4, DOOR_Z, 0.8, 41.8, 13.5))
+    knob = box(0.2, 27.4, 7.6, 0.85, 39.8, 12.7)
+    for gy in (30.5, 33.6, 36.7):
+        knob = knob.cut(box(0.1, gy - 0.3, 7.5, 0.5, gy + 0.3, 12.8))
+    tray = tray.union(knob)
+    lid = lid.cut(rod(1.4, 3.0, (-0.01, 6.5, 19.5), (1, 0, 0)))
+    lid = lid.cut(rod(2.5, 0.4, (-0.01, 6.5, 19.5), (1, 0, 0)))
+
+    # Top edge: headphone jacks A and B, near the front.
+    for jx in (32.0, 42.7):
+        lid = lid.cut(rod(1.75, 3.0, (jx, H + 0.01, 22.8), (0, -1, 0)))
+        lid = lid.cut(rod(3.2, 0.4, (jx, H + 0.01, 22.8), (0, -1, 0)))
+    # Hinge pins, top and bottom, right-hand end.
+    for py, d in ((H + 0.01, -1), (-0.01, 1)):
+        tray = tray.cut(rod(0.9, 1.0, (76.3, py, 9.6), (0, d, 0)))
+    # Bottom edge: a small hole, and the rating plate's outline.
+    lid = lid.cut(rod(1.2, 1.0, (50.4, -0.01, 22.0), (0, 1, 0)))
+    plate_o = box(53.4, -1, 14.3, 73.0, 0.3, 27.0)
+    lid = lid.cut(plate_o.cut(box(53.8, -2, 14.7, 72.6, 1, 26.6)))
+
+    # Right side: ribs all along it, the TAPE NORM/METAL switch, two screws.
+    zr = [3.6 + RIB_P * i for i in range(20)]
+    ribs = None
+    for z in zr:
+        b = box(W - 0.3, 2.2, z - RIB_W / 2, W + 1, H - 2.2, z + RIB_W / 2)
+        ribs = b if ribs is None else ribs.union(b)
+    tray = tray.cut(ribs)
+    lid = lid.cut(ribs)
+    lid = lid.cut(box(W - 0.5, 39.8, 15.2, W + 1, 57.7, 22.3))
+    lid = lid.union(box(W - 0.6, 48.2, 16.0, W - 0.1, 52.0, 21.5))       # slider
+    for sy in (17.6, 92.6):
+        lid = lid.cut(rod(0.9, 0.5, (W + 0.01, sy, 16.6), (-1, 0, 0)))
+
     return dict(name="WM-2", W=W, H=H, T=T, r=r, zs=zs, tray=tray, lid=lid,
                 target_g=280, target_note="280 g incl. AA battery (1981 ad)")
 
@@ -344,20 +515,20 @@ def self_test():
         "floating island": (check("island", good.union(box(60, 0, 0, 65, 5, 5))), True),
         "too big for the bed": (check("big", box(0, 0, 0, 171, 50, 10)), True),
     }
-    m = ours()
-    m_nogroove = dict(m, lid=m["lid"].union(ring(m["W"], m["H"], m["r"], 0, -SKIRT_T,
-                                                  m["zs"], m["zs"] + SKIRT_H)))
-    m_noridge = dict(m, tray=shell_pair(m["W"], m["H"], m["T"], m["r"], m["zs"])[0]
-                     .cut(ring(m["W"], m["H"], m["r"], 0, -TONGUE_IN,
-                               m["zs"], m["zs"] + TONGUE_H)))
-    cases["real joint passes"] = (check_joint(m), False)
-    cases["skirt without grooves"] = (check_joint(m_nogroove), True)
-    cases["tongue without ridges"] = (check_joint(m_noridge), True)
+    for m in (wm2(), ours()):
+        W, H, r, zs = m["W"], m["H"], m["r"], m["zs"]
+        nogroove = dict(m, lid=m["lid"].union(ring(W, H, r, 0, -SKIRT_T, zs, zs + SKIRT_H)))
+        noridge = dict(m, tray=m["tray"].cut(ring(W, H, r, 0, -TONGUE_IN,
+                                                   zs, zs + TONGUE_H)))
+        tag = m["name"].split()[0]
+        cases[f"{tag}: real joint passes"] = (check_joint(m), False)
+        cases[f"{tag}: skirt, no grooves"] = (check_joint(nogroove), True)
+        cases[f"{tag}: tongue, no ridges"] = (check_joint(noridge), True)
     ok = True
     for label, (found, want_red) in cases.items():
         red = bool(found)
         ok &= red == want_red
-        print(f"  {'ok ' if red == want_red else 'BAD'} {label:24s} "
+        print(f"  {'ok ' if red == want_red else 'BAD'} {label:30s} "
               f"{'red' if red else 'green'}{': ' + found[0] if found else ''}")
     return 0 if ok else 1
 
@@ -401,7 +572,7 @@ def build():
         print(f"  {n:22s} {W} x {H} x {T} mm  shell <= {g:5.1f} g solid  "
               f"target {tg} g -> ~{coins} nickels  ({note})")
     (OUT / "manifest.json").write_text(json.dumps({
-        "packet": "SIZE-01", "revision": 1, "released": "2026-09-28",
+        "packet": "SIZE-01", "revision": 2, "released": "2026-09-28",
         "printer": "Bambu Lab A1 Mini", "nozzle_mm": 0.4, "material": "PLA Basic",
         "joint": {"type": "rabbet + 4 detents + pry notch", "clearance_per_side_mm": CLR,
                   "detent_interference_mm": DETENT_H - CLR},

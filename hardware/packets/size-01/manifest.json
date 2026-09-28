@@ -1,6 +1,6 @@
 {
   "packet": "SIZE-01",
-  "revision": 1,
+  "revision": 2,
   "released": "2026-09-28",
   "printer": "Bambu Lab A1 Mini",
   "nozzle_mm": 0.4,
@@ -18,7 +18,7 @@
         109.0,
         29.5
       ],
-      "shell_mass_upper_bound_g": 71.5,
+      "shell_mass_upper_bound_g": 71.4,
       "target_g": 280,
       "nickels_approx": 42,
       "target_note": "280 g incl. AA battery (1981 ad)"

@@ -1,11 +1,14 @@
 # Print packet SIZE-01 — how big should it be in the hand?
 
 **Two life-size hollow mockups you can open, fill with coins and hold.** Three plates, A1 Mini.
-Hardware Lead · rev 1, 28 Sep 2026 · sizing study, layout A
+Hardware Lead · rev 2, 28 Sep 2026 · sizing study, layout A
 
-**Don't print this yet.** It is up for review first, as agreed. Look at `preview.png` and
-`size-01-assembled.step` (sent to you directly; at 2.7 MB it is not kept in git, and
-`python3 hardware/cad/sizing/mockups.py` rebuilds it), and tell me what to change.
+**Print plate 1 (the WM-2) first.** Ours (plates 2 and 3) is still up for discussion.
+`preview.png` shows both. `size-01-assembled.step` is 2.7 MB, so it is not kept in git;
+`python3 hardware/cad/sizing/mockups.py` rebuilds it.
+
+**Rev 2 reshaped the WM-2's outer surface from measurements, not by eye.** See "How close is
+the WM-2" below.
 
 ---
 
@@ -13,7 +16,7 @@ Hardware Lead · rev 1, 28 Sep 2026 · sizing study, layout A
 
 | | Outside | Where the numbers come from |
 |---|---|---|
-| **Sony WM-2 (1981)** | 80 × 109 × 29.5 mm | walkman.land, which matches the 1981 ad. Control positions are traced by eye from photos, so they are good to a few mm but not measured |
+| **Sony WM-2 (1981)** | 80 × 109 × 29.5 mm | walkman.land, which matches the 1981 ad. Shape and controls are measured from an orthographic render and checked against product photos, to about ±1 mm |
 | **Digital-Tape, layout A** | 92 × 97 × 42 mm | `layout_study.py`: two cartridges stacked. Every part inside it is an **estimate** except the cartridge's working size |
 
 The WM-2 is a **size reference, not a design reference**. It shows you what a real, loved,
@@ -25,12 +28,40 @@ inside, with corner bumper pads and five raised edge keys roughed in. Those five
 
 | File | Contents | Size on bed | Prints on |
 |---|---|---|---|
-| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side) | 167 × 109 × 24 mm | outer faces |
+| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side) | 165 × 109 × 17 mm | outer faces |
 | `plate-2-ours-back.stl` | Our back half | 96 × 100 × 33 mm | outer face |
 | `plate-3-ours-front.stl` | Our front half | 95 × 97 × 13 mm | outer face |
 
 Plate 1 uses nearly the whole 180 mm bed but fits inside a 5 mm margin. Each of ours is
 too big to share a bed with its other half, so ours takes two plates.
+
+## How close is the WM-2
+
+The outer size comes from walkman.land and the 1981 ad. Everything else was measured off the
+orthographic fan render Michael sent. Its outline is 80:109 to within 0.1 %, so
+it measures at 9.2 px/mm. Each feature was then checked against the walkman.land photos.
+Expect **about ±1 mm**. None of it was measured on a real unit.
+
+| Feature | Rev 1 | Rev 2 |
+|---|---|---|
+| Edges | Square | Back-face edges round 3 mm, front-face 2 mm, plan corners 2 mm |
+| Buttons | Wrong angle (−35°) | +40°, square to the black diagonal. Positions overlay the render |
+| Volume wheel | Guessed | Ø16 at the measured centre, rim showing through a notch in the top edge |
+| Black ribbed zone | A flat triangle | Triangle plus the strip down the right edge, ribbed |
+| Cassette window | Landscape (wrong) | Portrait, 31 × 70 mm, hubs and label window where they are |
+| Door | Not shown | Hinge strip on the back, door line round the other three edges |
+| Jacks | Near the back | Near the front, where they are |
+| Edges' other features | A made-up "hotline" button | OPEN slider, DC IN jack, TAPE NORM/METAL switch, ribbed right side, top and bottom slots, hinge pins, rating plate outline |
+
+**Not reproduced:** the SONY and WALKMAN II lettering, the door arrow, and the
+VOLUME wedge. The real buttons stand about 1 mm proud. Here they are flush, because that
+face prints against the bed. The real black/silver line is at 12.3 mm from the back; the
+print seam is at 13.6, so the slots and the OPEN slider stay in one piece. The reference
+shows the back edge on the hinge side a little rounder than the rest. That edge uses the same 3 mm.
+
+**Edges that print face-down.** A rounded edge touching the bed would start almost flat and
+sag. The lowest part of each round is replaced by a 45° chamfer tangent to it. You won't
+see it, and nothing needs support.
 
 ## Settings
 
@@ -50,7 +81,8 @@ I have not sliced these. Bambu Studio will give you the time and grams. The mass
 
 The halves join the way I expect the real shell to. The back half has a thin **tongue**
 around its rim, and the front half's **skirt** drops over it. Four small ridges on the tongue
-click into grooves in the skirt, two on each long side.
+click into grooves in the skirt: on ours, two on each long side; on the WM-2, two on the
+top edge and two on the bottom, which keeps them clear of the side switches and ribs.
 
 - **To close:** line up the halves and press around the edge until you feel the clicks.
 - **To open:** at the middle of the bottom edge there is a **notch**. Put a fingernail or a
