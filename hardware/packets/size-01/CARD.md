@@ -1,15 +1,17 @@
 # Print packet SIZE-01 — how big should it be in the hand?
 
-**Two life-size hollow mockups you can open, fill with coins and hold.** Four plates, A1 Mini.
-Hardware Lead · rev 3, 28 Sep 2026 · sizing study, layout A
+**Two life-size hollow mockups you can open, fill with coins and hold.** A1 Mini.
+Hardware Lead · rev 4, 28 Sep 2026 · sizing study, layout A
 
-**Print plate 0 first: the edge coupon, a small print. Then plate 1 (the WM-2).** Ours
-(plates 2 and 3) is still up for discussion.
+**Plate 0 is done: coupon 3 (65°) won, and the WM-2 is now set to it.** Plate 1 can go now,
+at coupon 3's quality. Plate 0b (optional, small) tests two ways to make the round smoother
+before you do. Ours (plates 2 and 3) is still up for discussion.
 `preview.png` shows both. `size-01-assembled.step` is about 5 MB, so it is not kept in git;
 `python3 hardware/cad/sizing/mockups.py` rebuilds it.
 
 **Rev 2 reshaped the WM-2's outer surface from measurements, not by eye.** **Rev 3** gives
-it the reference's much softer back edges. See "How close is the WM-2" and "Edges" below.
+it the reference's much softer back edges. **Rev 4** sets the edge limit to 65° from plate 0
+and adds plate 0b. See "How close is the WM-2" and "Edges" below.
 
 ---
 
@@ -30,6 +32,7 @@ inside, with corner bumper pads and five raised edge keys roughed in. Those five
 | File | Contents | Size on bed | Prints on |
 |---|---|---|---|
 | `plate-0-edge-coupon.stl` | Four copies of the WM-2's hinge-side back corner, one per overhang limit. See "Edges" | 61 × 61 × 9 mm | outer face |
+| `plate-0b-edge-smoothing.stl` | Optional. The same corner four ways, to test smoothing (marked with a bar). See "Edges" | 61 × 61 × 9 mm | outer face |
 | `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side). Sent directly: at 1.3 MB it is rebuilt by the script, not kept in git. `wm2-tray.stl` + `wm2-lid.stl` are the same two parts | 165 × 109 × 17 mm | outer faces |
 | `plate-2-ours-back.stl` | Our back half | 96 × 100 × 33 mm | outer face |
 | `plate-3-ours-front.stl` | Our front half | 95 × 97 × 13 mm | outer face |
@@ -70,8 +73,8 @@ below it.
 
 So the round is kept exactly as measured down to the height where it becomes steeper than
 a limit angle. Below that it runs straight at the limit angle to the bed, as a tangent line,
-so there is no crease. At the default **55°** that straight part is only the bottom 1.1 to
-1.5 mm of a round about 6 mm deep. The rest is the measured curve. **Nothing needs
+so there is no crease. At **65°**, the limit now set, that straight part is only about the
+bottom millimetre of a round about 6 mm deep. The rest is the measured curve. **Nothing needs
 support, and no injection moulding is needed for this shape.** A moulded part would get the
 last millimetre too, and that is the whole difference.
 
@@ -81,12 +84,41 @@ edge on the WM-2, with the real ribs:
 | Dimples on the face | Limit | Expect |
 |---|---|---|
 | 1 | 45° | Cleanest, a visible bevel at the bottom |
-| 2 | 55° | **Current default** |
+| 2 | 55° | The default before plate 0 |
 | 3 | 65° | Closer to the real curve, may be rough underneath |
 | 4 | none, the true curve | **The control.** It should droop or curl at the bed edge; if it doesn't, the limit is costing us nothing |
 
-Run a fingernail along the bottom edge of each. Tell me the steepest one that is still
-clean. I'll set the WM-2 to that before you print plate 1, the long one.
+**Result, 28 Sep (Michael):** "#3 is the cleanest overall. #4 prints but the outside of the
+fillet is getting pretty bumpy and uneven." The control failed the way it should, so the
+limit is doing real work. **The WM-2 is now set to 65°.**
+
+In Michael's photos, the bumps sit where the ribs cross the flattest part of the round, and
+#4 has small beads along its bed edge. On that nearly flat part, each groove is cut into a
+surface that is almost horizontal, so every layer steps in and out by the groove depth on
+top of the overhang.
+
+**Plate 0b (optional): can the round be smoother?** Same corner, marked with a **bar**
+beside the dimples so it can't be mixed up with plate 0. Two changes are tested together:
+
+- **Thin layers through the round (slicer only).** Each layer then has to reach out less
+  far past the one below. In Bambu Studio, right-click each part → **Height range
+  Modifier**, 0 to 7 mm, layer height **0.08 mm**. The **Variable layer height** tool
+  does the same job if the menu differs in your version. Use the same setting on plate 1
+  if 0b looks better.
+- **Ribs faded (model).** Grooves are left off where the round is flatter than 50°, the
+  bottom ~2 mm of its height. That is 3 to 5 grooves.
+
+| Bar + dimples | Limit | Ribs |
+|---|---|---|
+| 1 | 65° | faded |
+| 2 | 65° | full, as plate 0 #3 |
+| 3 | none, the true curve | faded |
+| 4 | none, the true curve | full, as plate 0 #4 |
+
+Put each next to its plate 0 twin (2 beside #3, 4 beside #4) and you see what thin layers
+alone did. Compare 1 with 2, and 3 with 4, and you see what fading the ribs did. If 3 is
+clean, the true curve prints and I drop the limit. I have not printed any of this. These
+are expectations, not results.
 
 ## Settings
 
@@ -94,7 +126,7 @@ clean. I'll set the WM-2 to that before you print plate 1, the long one.
 |---|---|
 | Printer / nozzle | A1 Mini, **0.4 mm** |
 | Material | **PLA Basic**, one spool per plate, no swaps mid-print |
-| Profile | Stock 0.20 mm Standard. Default walls and infill are fine |
+| Profile | Stock 0.20 mm Standard. Default walls and infill are fine. Optional: 0.08 mm layers from 0 to 7 mm (see plate 0b) |
 | **Supports** | **Off.** Nothing needs them. The edge keys have a 45° underside for exactly this reason |
 | Orientation | **Leave it as loaded.** Every part already sits on its outer face. Rotating one onto its side would need supports |
 | Brim | Not needed |

@@ -1,11 +1,11 @@
 {
   "packet": "SIZE-01",
-  "revision": 3,
+  "revision": 4,
   "released": "2026-09-28",
   "printer": "Bambu Lab A1 Mini",
   "nozzle_mm": 0.4,
   "material": "PLA Basic",
-  "edge_overhang_limit_deg": 55.0,
+  "edge_overhang_limit_deg": 65.0,
   "edge_coupon": {
     "file": "plate-0-edge-coupon.stl",
     "dimples_to_limit_deg": {
@@ -13,6 +13,30 @@
       "2": 55.0,
       "3": 65.0,
       "4": null
+    },
+    "result": "3 (65 deg) cleanest overall; 4 (unclamped) printed but bumpy and uneven -- Michael, 28 Sep 2026"
+  },
+  "edge_coupon_b": {
+    "file": "plate-0b-edge-smoothing.stl",
+    "marker": "a bar beside the dimples",
+    "print_with": "0.08 mm layers over the first 7 mm",
+    "dimples_to_limit_deg_and_rib_fade_deg": {
+      "1": [
+        65.0,
+        50.0
+      ],
+      "2": [
+        65.0,
+        null
+      ],
+      "3": [
+        null,
+        50.0
+      ],
+      "4": [
+        null,
+        null
+      ]
     }
   },
   "joint": {
@@ -28,7 +52,7 @@
         109.0,
         29.5
       ],
-      "shell_mass_upper_bound_g": 71.8,
+      "shell_mass_upper_bound_g": 71.7,
       "target_g": 280,
       "nickels_approx": 42,
       "target_note": "280 g incl. AA battery (1981 ad)"

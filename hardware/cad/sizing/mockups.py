@@ -373,19 +373,25 @@ WM2_BACK = {
 }
 WM2_BACK["top"] = WM2_BACK["bottom"]
 WM2_FRONT = {k: circle_edge(2.0) for k in ("left", "right", "bottom", "top")}
-MAX_OVERHANG = 55.0      # deg from vertical, for the bed-side edge rounds;
-                         # the edge coupon exists to settle this number
+MAX_OVERHANG = 65.0      # deg from vertical, for the bed-side edge rounds.
+                         # Settled by coupon plate 0 on Michael's A1 Mini, 28 Sep:
+                         # 65 "cleanest overall"; unclamped printed but bumpy.
 
 
 def wm2_oml(max_overhang_deg=MAX_OVERHANG):
     return OML(80.0, 109.0, 29.5, 2.0, WM2_BACK, WM2_FRONT, max_overhang_deg)
 
 
-def surface_ribs(oml, x_start, x_end_front, y0, y1, depth=0.4):
+def surface_ribs(oml, x_start, x_end_front, y0, y1, depth=0.4, fade_deg=None):
     """Grooves that wrap round the right-hand side the way the real ribs do:
     from the back face at x_start, round the hinge edge, up the side, round the
     front edge and onto the front face as far as x_end_front. Spaced by arc
-    length, each one square to the surface, cut `depth` into the skin."""
+    length, each one square to the surface, cut `depth` into the skin.
+
+    fade_deg: leave out grooves where the round, printed face-down, overhangs
+    more than this (from vertical). There each groove is cut into a nearly
+    horizontal surface, so every layer steps in and out by the groove depth on
+    top of the overhang -- the bumpy edge on coupon 4. None keeps them all."""
     W, T = oml.W, oml.T
     pts = [(x_start, 0.0)]
     n = 300
@@ -405,6 +411,11 @@ def surface_ribs(oml, x_start, x_end_front, y0, y1, depth=0.4):
             px, pz = xa + f * (xb - xa), za + f * (zb - za)
             tx, tz = (xb - xa) / L, (zb - za) / L
             nx, nz = tz, -tx                      # outward, to the right of travel
+            on_face = pz < 0.05 or pz > T - 0.05
+            steep = math.degrees(math.atan2(abs(tx), abs(tz)))   # 90 = horizontal
+            if fade_deg is not None and not on_face and steep > fade_deg:
+                s_at += RIB_P
+                continue
             h = RIB_W / 2
             quad = [(px - tx * h - nx, pz - tz * h - nz), (px + tx * h - nx, pz + tz * h - nz),
                     (px + tx * h + nx, pz + tz * h + nz), (px - tx * h + nx, pz - tz * h + nz)]
@@ -432,20 +443,26 @@ def check_overhang(name, oml, limit_deg=MAX_OVERHANG, dz=0.05):
 
 
 COUPON_LIMITS = (45.0, 55.0, 65.0, None)   # None: the measured round, unclamped
+RIB_FADE = 50.0          # plate 0b: ribs left off where the round is flatter than this
+# Plate 0b, to be printed with thin layers through the round: (limit, rib fade).
+COUPON_B = ((65.0, RIB_FADE), (65.0, None), (None, RIB_FADE), (None, None))
 
 
-def edge_coupon(limit, dots):
+def edge_coupon(limit, dots, fade_deg=None, bar=False):
     """The WM-2's hinge-side back corner, 28 x 28 x 9 mm, at one overhang limit.
-    `dots` dimples on its (bed-side) face say which one it is."""
+    `dots` dimples on its (bed-side) face say which one it is; `bar` adds a
+    short groove beside them to mark plate 0b."""
     oml = wm2_oml(limit)
     W = oml.W
     keep = box(W - 28, 0, -1, W + 1, 28, 9)
     part = (oml.body(0.0).cut(oml.body(WALL), clean=False)
             .intersect(keep, clean=False))
-    part = part.cut(surface_ribs(oml, 72.9, W - 2.3, 2.5, 27.0).intersect(keep, clean=False),
-                    clean=False)
+    part = part.cut(surface_ribs(oml, 72.9, W - 2.3, 2.5, 27.0, fade_deg=fade_deg)
+                    .intersect(keep, clean=False), clean=False)
     for k in range(dots):
         part = part.cut(cyl(W - 24 + 3.0 * k, 22.0, 0.8, -1, 0.6), clean=False)
+    if bar:
+        part = part.cut(box(W - 24.8, 18.6, -1, W - 13.2, 19.4, 0.6), clean=False)
     return part
 
 
@@ -725,6 +742,17 @@ def build():
     exporters.export(plate0, str(OUT / "plate-0-edge-coupon.stl"))
     b0 = whole(plate0)[1].BoundingBox()
     print(f"  {'plate-0-edge-coupon':20s} {b0.xlen:6.1f} x {b0.ylen:6.1f} x {b0.zlen:5.1f} mm")
+    coupons_b = []
+    for i, (lim, fade) in enumerate(COUPON_B):
+        c = edge_coupon(lim, i + 1, fade_deg=fade, bar=True)
+        problems += check(f"coupon-b{i + 1}", c)
+        coupons_b.append(for_print(c, False).translate(((i % 2) * 33.0, (i // 2) * 33.0, 0)))
+    plate0b = coupons_b[0]
+    for c in coupons_b[1:]:
+        plate0b = plate0b.add(c)
+    exporters.export(plate0b, str(OUT / "plate-0b-edge-smoothing.stl"))
+    bb = whole(plate0b)[1].BoundingBox()
+    print(f"  {'plate-0b-edge-smooth':20s} {bb.xlen:6.1f} x {bb.ylen:6.1f} x {bb.zlen:5.1f} mm")
 
     for m in (wm2(), ours()):
         key = "wm2" if m["name"] == "WM-2" else "ours"
@@ -762,12 +790,19 @@ def build():
         print(f"  {n:22s} {W} x {H} x {T} mm  shell <= {g:5.1f} g solid  "
               f"target {tg} g -> ~{coins} nickels  ({note})")
     (OUT / "manifest.json").write_text(json.dumps({
-        "packet": "SIZE-01", "revision": 3, "released": "2026-09-28",
+        "packet": "SIZE-01", "revision": 4, "released": "2026-09-28",
         "printer": "Bambu Lab A1 Mini", "nozzle_mm": 0.4, "material": "PLA Basic",
         "edge_overhang_limit_deg": MAX_OVERHANG,
         "edge_coupon": {"file": "plate-0-edge-coupon.stl",
                         "dimples_to_limit_deg": {str(i + 1): lim for i, lim in
-                                                 enumerate(COUPON_LIMITS)}},
+                                                 enumerate(COUPON_LIMITS)},
+                        "result": "3 (65 deg) cleanest overall; 4 (unclamped) printed "
+                                  "but bumpy and uneven -- Michael, 28 Sep 2026"},
+        "edge_coupon_b": {"file": "plate-0b-edge-smoothing.stl",
+                          "marker": "a bar beside the dimples",
+                          "print_with": "0.08 mm layers over the first 7 mm",
+                          "dimples_to_limit_deg_and_rib_fade_deg": {
+                              str(i + 1): [lim, fade] for i, (lim, fade) in enumerate(COUPON_B)}},
         "joint": {"type": "rabbet + 4 detents + pry notch", "clearance_per_side_mm": CLR,
                   "detent_interference_mm": DETENT_H - CLR},
         "mockups": [{"name": n, "mm": [W, H, T], "shell_mass_upper_bound_g": round(g, 1),
