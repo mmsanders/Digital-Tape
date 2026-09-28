@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 24 September 2026 UTC. Historical phase durations are
+Current status below is updated 28 September 2026 UTC. Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -33,10 +33,10 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Exact 289/289 mount plus 8/8 writability and 34/34 NOT_MOUNTED product observations are independently accepted and integrated. Source/helper design and complete-package acceptance remain held |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Earlier mount/writability/NOT_MOUNTED evidence plus Verification #98's corrected 38/38 sequential tranche are independently accepted and integrated through Product #297. Verification #101 owns a complete criterion ledger and only genuine missing closure cases |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package. Product PR #215 mechanically carried the accepted bytes onto post-WP13 main and integrated them unchanged |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Exact ten corrected-cadence observations plus 16/16 set-side/warm-start product evidence are independently accepted and integrated via #171. Source, complete package and listening/goldens remain separate |
-| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Exact 26/26 product observations are independently accepted and integrated via corrected verifier-first PR #167. The package's explicit history/crash/golden and other excluded coverage remains outstanding |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Earlier corrected-cadence and set-side/warm-start evidence plus Verification #95's bounded 33/33 cross-run tranche are independently accepted and integrated through Product #287. Verification #100 owns exact two-toolchain arithmetic portability; listening/goldens remain separate |
+| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Earlier 26/26 record evidence plus Verification #96's bounded 10,000-edit/25-checkpoint history are independently accepted and integrated through Product #288. Verification #99 is authoring the positive capacity short-accept tranche; crash/golden and complete-package coverage remain open |
 | WP-10 | Crash-injection harness | Verification | 2 | **Bounded core tranche accepted, package still open.** Verification PR #69 accepted 28,760/28,760 record/reset/stage-clear injections including 12,312 V7-001 closure cases; product PR #217 integrated exact accepted evidence. Remaining full promote, raw format/dup identity, full re-spool and long-operation/headroom families are next |
 | WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but remain unlistened and are not accepted goldens; golden CI remains red |
 | WP-12 | Re-spool / defragment pass | Agent | 1 | Exact 8/8 product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage and complete acceptance remain outstanding |
