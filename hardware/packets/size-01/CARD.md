@@ -4,7 +4,7 @@
 Hardware Lead · rev 2, 28 Sep 2026 · sizing study, layout A
 
 **Print plate 1 (the WM-2) first.** Ours (plates 2 and 3) is still up for discussion.
-`preview.png` shows both. `size-01-assembled.step` is 2.7 MB, so it is not kept in git;
+`preview.png` shows both. `size-01-assembled.step` is about 5 MB, so it is not kept in git;
 `python3 hardware/cad/sizing/mockups.py` rebuilds it.
 
 **Rev 2 reshaped the WM-2's outer surface from measurements, not by eye.** See "How close is
