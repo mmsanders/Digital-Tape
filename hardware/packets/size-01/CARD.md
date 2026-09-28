@@ -1,14 +1,15 @@
 # Print packet SIZE-01 — how big should it be in the hand?
 
-**Two life-size hollow mockups you can open, fill with coins and hold.** Three plates, A1 Mini.
-Hardware Lead · rev 2, 28 Sep 2026 · sizing study, layout A
+**Two life-size hollow mockups you can open, fill with coins and hold.** Four plates, A1 Mini.
+Hardware Lead · rev 3, 28 Sep 2026 · sizing study, layout A
 
-**Print plate 1 (the WM-2) first.** Ours (plates 2 and 3) is still up for discussion.
+**Print plate 0 first: the edge coupon, a small print. Then plate 1 (the WM-2).** Ours
+(plates 2 and 3) is still up for discussion.
 `preview.png` shows both. `size-01-assembled.step` is about 5 MB, so it is not kept in git;
 `python3 hardware/cad/sizing/mockups.py` rebuilds it.
 
-**Rev 2 reshaped the WM-2's outer surface from measurements, not by eye.** See "How close is
-the WM-2" below.
+**Rev 2 reshaped the WM-2's outer surface from measurements, not by eye.** **Rev 3** gives
+it the reference's much softer back edges. See "How close is the WM-2" and "Edges" below.
 
 ---
 
@@ -28,7 +29,8 @@ inside, with corner bumper pads and five raised edge keys roughed in. Those five
 
 | File | Contents | Size on bed | Prints on |
 |---|---|---|---|
-| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side). Sent directly: at 1.5 MB it is rebuilt by the script, not kept in git. `wm2-tray.stl` + `wm2-lid.stl` are the same two parts | 165 × 109 × 17 mm | outer faces |
+| `plate-0-edge-coupon.stl` | Four copies of the WM-2's hinge-side back corner, one per overhang limit. See "Edges" | 61 × 61 × 9 mm | outer face |
+| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side). Sent directly: at 1.3 MB it is rebuilt by the script, not kept in git. `wm2-tray.stl` + `wm2-lid.stl` are the same two parts | 165 × 109 × 17 mm | outer faces |
 | `plate-2-ours-back.stl` | Our back half | 96 × 100 × 33 mm | outer face |
 | `plate-3-ours-front.stl` | Our front half | 95 × 97 × 13 mm | outer face |
 
@@ -42,9 +44,9 @@ orthographic fan render Michael sent. Its outline is 80:109 to within 0.1 %, so
 it measures at 9.2 px/mm. Each feature was then checked against the walkman.land photos.
 Expect **about ±1 mm**. None of it was measured on a real unit.
 
-| Feature | Rev 1 | Rev 2 |
+| Feature | Rev 1 | Rev 2 / 3 |
 |---|---|---|
-| Edges | Square | Back-face edges round 3 mm, front-face 2 mm, plan corners 2 mm |
+| Edges | Square | Rev 2: 3 mm back, 2 mm front. **Rev 3: measured profiles.** The back door's long edges have a soft round about 6 mm deep (rounder on the hinge side), its short ends about 2 mm; the front edges are 2 mm; plan corners 2 mm |
 | Buttons | Wrong angle (−35°) | +40°, square to the black diagonal. Positions overlay the render |
 | Volume wheel | Guessed | Ø16 at the measured centre, rim showing through a notch in the top edge |
 | Black ribbed zone | A flat triangle | Triangle plus the strip down the right edge, ribbed |
@@ -56,12 +58,35 @@ Expect **about ±1 mm**. None of it was measured on a real unit.
 **Not reproduced:** the SONY and WALKMAN II lettering, the door arrow, and the
 VOLUME wedge. The real buttons stand about 1 mm proud. Here they are flush, because that
 face prints against the bed. The real black/silver line is at 12.3 mm from the back; the
-print seam is at 13.6, so the slots and the OPEN slider stay in one piece. The reference
-shows the back edge on the hinge side a little rounder than the rest. That edge uses the same 3 mm.
+print seam is at 13.6, so the slots and the OPEN slider stay in one piece.
 
-**Edges that print face-down.** A rounded edge touching the bed would start almost flat and
-sag. The lowest part of each round is replaced by a 45° chamfer tangent to it. You won't
-see it, and nothing needs support.
+## Edges: the one place printing and moulding differ
+
+Each profile was measured from the reference's edge-on views, one pixel row at a time.
+Both big faces print against the bed, so each edge round starts at the bed. The real round
+flattens out into the face. That lowest part overhangs further than a printer can build
+without support; each new layer would have to reach out almost a millimetre past the one
+below it.
+
+So the round is kept exactly as measured down to the height where it becomes steeper than
+a limit angle. Below that it runs straight at the limit angle to the bed, as a tangent line,
+so there is no crease. At the default **55°** that straight part is only the bottom 1.1 to
+1.5 mm of a round about 6 mm deep. The rest is the measured curve. **Nothing needs
+support, and no injection moulding is needed for this shape.** A moulded part would get the
+last millimetre too, and that is the whole difference.
+
+**Plate 0 settles the limit.** Four copies of the hinge-side back corner, the roundest
+edge on the WM-2, with the real ribs:
+
+| Dimples on the face | Limit | Expect |
+|---|---|---|
+| 1 | 45° | Cleanest, a visible bevel at the bottom |
+| 2 | 55° | **Current default** |
+| 3 | 65° | Closer to the real curve, may be rough underneath |
+| 4 | none, the true curve | **The control.** It should droop or curl at the bed edge; if it doesn't, the limit is costing us nothing |
+
+Run a fingernail along the bottom edge of each. Tell me the steepest one that is still
+clean. I'll set the WM-2 to that before you print plate 1, the long one.
 
 ## Settings
 

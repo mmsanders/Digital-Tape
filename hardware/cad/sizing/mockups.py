@@ -126,35 +126,112 @@ def ridge_y(side_y, H, zc, x0, length, face_y, proud, inward, half_base, half_to
     return prism_yz(pts, x0, length)
 
 
-def _rr_wire(W, H, r, inset, z):
-    """Rounded rectangle inset by `inset`, corner radius shrinking to match --
-    the flat face of a box whose edge blends are bigger than its plan corners."""
-    w, h, rc = W - 2 * inset, H - 2 * inset, max(r - inset, 0.25)
+def _rr_wire4(W, H, r, il, ir, ib, it, z):
+    """Rounded rectangle pulled in by a different amount on each side. The corner
+    radius shrinks with the largest pull -- the flat face of a box whose edge
+    blends are bigger than its plan corners has near-square corners."""
+    w, h = W - il - ir, H - ib - it
+    rc = max(r - max(il, ir, ib, it), 0.25)
     wire = cq.Wire.makePolygon([(0, 0, 0), (w, 0, 0), (w, h, 0), (0, h, 0)], close=True)
-    return wire.fillet2D(rc, wire.Vertices()).translate(cq.Vector(inset, inset, z))
+    return wire.fillet2D(rc, wire.Vertices()).translate(cq.Vector(il, ib, z))
 
 
-def _bed_edge_profile(R, steps=8):
-    """(height above face, inset) for an edge round of radius R that prints
-    face-down: the lower half of the round (flatter than 45 deg, which would
-    sag) is replaced by the 45 deg chamfer tangent to it. Invisible in the
-    hand, and no support needed."""
-    if R <= 0:
-        return [(0.0, 0.0)]
-    pts = [(0.0, R * (2 - math.sqrt(2)))]
-    for i in range(steps + 1):
-        phi = math.radians(45 + 45 * i / steps)
-        pts.append((R - R * math.cos(phi), R - R * math.sin(phi)))
-    return pts
+def circle_edge(R, steps=12):
+    """(height above the face, inset) table for a plain circular edge round."""
+    return [(R - R * math.cos(a), R - R * math.sin(a))
+            for a in (math.pi / 2 * i / steps for i in range(steps + 1))]
 
 
-def rounded_body(W, H, T, r, r_back, r_front):
-    """The outer mould line: plan corners r, back-face edges r_back, front-face
-    edges r_front, both faces print-safe (see _bed_edge_profile)."""
-    secs = [(h, i) for h, i in _bed_edge_profile(r_back)]
-    secs += [(T - h, i) for h, i in reversed(_bed_edge_profile(r_front))]
-    wires = [_rr_wire(W, H, r, i, z) for z, i in secs]
-    return cq.Workplane().add(cq.Solid.makeLoft(wires, True))
+def printable(table, max_overhang_deg, dz=0.02):
+    """Clamp an edge profile so it prints face-down without support.
+
+    Going down towards the bed, the inset may grow by at most tan(limit) per mm
+    of height; below the point where the real profile gets flatter than that,
+    the surface continues as the straight line at the limit. That is the
+    tangent line to the round, so the round is untouched above it.
+    Returns a function height -> inset."""
+    zs = [z for z, _ in table]
+    top = max(zs)
+
+    def f(z):
+        if z >= top:
+            return 0.0
+        for (z0, i0), (z1, i1) in zip(table, table[1:]):
+            if z0 <= z <= z1:
+                return i0 + (i1 - i0) * (z - z0) / (z1 - z0)
+        return table[0][1]
+    if max_overhang_deg is None:
+        return f
+    s = math.tan(math.radians(max_overhang_deg))
+    n = int(math.ceil(top / dz))
+    step = top / n
+    out = [f(top)]
+    for k in range(1, n + 1):                 # walking down from the top
+        out.append(min(f(top - k * step), out[-1] + s * step))
+
+    def g(z):                                 # piecewise linear between samples
+        if z >= top:
+            return 0.0
+        u = (top - max(z, 0.0)) / step
+        k = min(int(u), n - 1)
+        return out[k] + (out[k + 1] - out[k]) * (u - k)
+    return g
+
+
+class OML:
+    """Outer mould line: a box W x H x T with plan corners r and a separately
+    measured edge profile on each of the eight face edges.
+
+    back / front: dict side -> table of (height above that face, inset), sides
+    'left', 'right', 'bottom', 'top'. Both big faces print against the bed, so
+    both get printable(). body(e) is the same shape shrunk by e everywhere --
+    e = WALL gives the cavity, e = 0.4 the skin the ribs are cut in."""
+
+    def __init__(self, W, H, T, r, back, front, max_overhang_deg=50.0):
+        self.W, self.H, self.T, self.r = W, H, T, r
+        self.back = {k: printable(v, max_overhang_deg) for k, v in back.items()}
+        self.front = {k: printable(v, max_overhang_deg) for k, v in front.items()}
+        self.hb = max(max(z for z, _ in v) for v in back.values())
+        self.hf = max(max(z for z, _ in v) for v in front.values())
+        self._cache = {}
+
+    SIDES = ("left", "right", "bottom", "top")
+
+    def inset(self, side, z):
+        """Horizontal inset of one side at height z (0 = back face)."""
+        return max(self.back[side](z), self.front[side](self.T - z))
+
+    def _zs(self, e, step):
+        """Heights for the profile polygons: fine through the rounds, one jump
+        across the straight middle."""
+        lo = [e + step * k for k in range(int(self.hb / step) + 1)]
+        hi = [self.T - e - step * k for k in range(int(self.hf / step) + 1)]
+        return sorted(set([round(z, 6) for z in lo + hi + [e + self.hb, self.T - e - self.hf]]))
+
+    def _x(self, side, z, e):
+        h_b, h_f = z - e, self.T - e - z
+        return e + max(self.back[side](h_b), self.front[side](h_f))
+
+    def body(self, e=0.0, step=0.1):
+        """The OML shrunk by e: an XZ profile prism, a YZ profile prism and the
+        plan outline, intersected. All faces planar, facets `step` apart --
+        a lofted surface here broke every later boolean's shape clean-up."""
+        if e in self._cache:
+            return self._cache[e]
+        W, H, T = self.W, self.H, self.T
+        zs = self._zs(e, step)
+        xz = ([(self._x("left", z, e), z) for z in zs]
+              + [(W - self._x("right", z, e), z) for z in reversed(zs)])
+        yz = ([(self._x("bottom", z, e), z) for z in zs]
+              + [(H - self._x("top", z, e), z) for z in reversed(zs)])
+        b = (prism_xz(xz, -1.0, H + 2.0)
+             .intersect(prism_yz(yz, -1.0, W + 2.0))
+             .intersect(slab(W, H, self.r, -e, e - 1, T - e + 1)))
+        self._cache[e] = b
+        return b
+
+    def skin(self, depth):
+        return self.body(0.0).cut(self.body(depth))
 
 
 def ridge(side_x, W, zc, y0, length, face_x, proud, inward, half_base, half_top):
@@ -172,21 +249,26 @@ def ridge(side_x, W, zc, y0, length, face_x, proud, inward, half_base, half_top)
 
 # ---------------------------------------------------------------- the shell
 
-def shell_pair(W, H, T, r, zs, edges=None, detents_on="sides"):
+def shell_pair(W, H, T, r, zs, oml=None, detents_on="sides"):
     """Tray (back, z 0..zs+tongue) and lid (front, zs..T), rabbet-jointed.
 
     The seam is the plane z = zs. The lid's skirt drops over the tray's tongue.
-    `edges` = (r_back, r_front) rounds the two big faces; None leaves them square.
+    `oml` (an OML) shapes the outside and the cavity follows it at WALL; None
+    leaves a square-edged box. The seam must sit where the sides are straight.
     `detents_on` = "sides" (the long edges) or "ends" (top and bottom).
     """
-    if edges:
-        body = rounded_body(W, H, T, r, *edges)
-        tray = (body.intersect(box(-5, -5, -1, W + 5, H + 5, zs))
-                .cut(slab(W, H, r, -WALL, FLOOR, zs + 1))
-                .union(ring(W, H, r, -TONGUE_IN, -WALL, zs, zs + TONGUE_H)))
-        lid = (body.intersect(box(-5, -5, zs, W + 5, H + 5, T + 1))
-               .cut(slab(W, H, r, -WALL, zs - 1, T - FLOOR))
-               .cut(slab(W, H, r, -SKIRT_T, zs - 1, zs + SKIRT_H)))
+    if oml:
+        # clean=False: the shape upgrader chokes merging the lofted faces
+        # ("courbes non jointives"); the solids are fine without it.
+        body, cavity = oml.body(0.0), oml.body(WALL)
+        tray = (body.intersect(box(-5, -5, -1, W + 5, H + 5, zs), clean=False)
+                .cut(cavity.intersect(box(-5, -5, -1, W + 5, H + 5, zs + 1), clean=False),
+                     clean=False)
+                .union(ring(W, H, r, -TONGUE_IN, -WALL, zs, zs + TONGUE_H), clean=False))
+        lid = (body.intersect(box(-5, -5, zs, W + 5, H + 5, T + 1), clean=False)
+               .cut(cavity.intersect(box(-5, -5, zs - 1, W + 5, H + 5, T + 1), clean=False),
+                    clean=False)
+               .cut(slab(W, H, r, -SKIRT_T, zs - 1, zs + SKIRT_H), clean=False))
     else:
         tray = (slab(W, H, r, 0, 0, FLOOR)
                 .union(ring(W, H, r, 0, -WALL, FLOOR, zs))
@@ -218,9 +300,10 @@ def shell_pair(W, H, T, r, zs, edges=None, detents_on="sides"):
     return tray, lid
 
 
-def coin_grid(W, H, r, z0, height, pitch=24.0, t=1.2):
+def coin_grid(W, H, r, z0, height, pitch=24.0, t=1.2, oml=None):
     """Low ribs so coins stack in cells instead of sliding. Cells fit a nickel."""
-    inner = slab(W, H, r, -WALL + 0.3, z0, z0 + height)   # bite into the wall
+    inner = (oml.body(WALL - 0.3).intersect(box(-1, -1, z0, W + 1, H + 1, z0 + height))
+             if oml else slab(W, H, r, -WALL + 0.3, z0, z0 + height))   # bite into the wall
     ribs = None
     x = WALL + pitch
     while x < W - WALL - 4:
@@ -271,12 +354,107 @@ def _grooves_along_y(x_list, y0, y1, z0, z1, w=RIB_W):
     return g
 
 
+# WM-2 edge profiles: (height above the face, horizontal inset), mm. Read from
+# the silhouettes of the reference render's edge-on views (top view 11.73 px/mm,
+# side view 9.46 px/mm), row by row, and smoothed; the left side averages the
+# top and bottom views, which differ by up to 0.8 mm there. The back door's long
+# edges carry a soft round of about 6 mm, rounder on the hinge (right) side; its
+# short ends and every front edge are about 2 mm.
+WM2_BACK = {
+    "left":  [(0.0, 6.0), (0.3, 5.6), (0.7, 4.0), (1.1, 3.1), (1.5, 2.6), (2.0, 2.0),
+              (2.5, 1.6), (3.0, 1.25), (3.5, 0.95), (4.0, 0.72), (4.5, 0.52),
+              (5.0, 0.36), (5.5, 0.22), (6.2, 0.0)],
+    "right": [(0.0, 7.8), (0.1, 7.6), (0.43, 5.9), (0.77, 4.7), (1.1, 4.0), (1.45, 3.45),
+              (1.8, 3.0), (2.13, 2.6), (2.47, 2.2), (2.81, 1.88), (3.15, 1.5),
+              (3.5, 1.2), (3.84, 0.95), (4.18, 0.77), (4.52, 0.6), (4.9, 0.45),
+              (5.4, 0.26), (6.2, 0.0)],
+    "bottom": [(0.0, 2.0), (0.4, 1.4), (0.8, 1.0), (1.2, 0.7), (1.6, 0.5), (2.0, 0.35),
+               (2.5, 0.2), (3.0, 0.1), (3.6, 0.0)],
+}
+WM2_BACK["top"] = WM2_BACK["bottom"]
+WM2_FRONT = {k: circle_edge(2.0) for k in ("left", "right", "bottom", "top")}
+MAX_OVERHANG = 55.0      # deg from vertical, for the bed-side edge rounds;
+                         # the edge coupon exists to settle this number
+
+
+def wm2_oml(max_overhang_deg=MAX_OVERHANG):
+    return OML(80.0, 109.0, 29.5, 2.0, WM2_BACK, WM2_FRONT, max_overhang_deg)
+
+
+def surface_ribs(oml, x_start, x_end_front, y0, y1, depth=0.4):
+    """Grooves that wrap round the right-hand side the way the real ribs do:
+    from the back face at x_start, round the hinge edge, up the side, round the
+    front edge and onto the front face as far as x_end_front. Spaced by arc
+    length, each one square to the surface, cut `depth` into the skin."""
+    W, T = oml.W, oml.T
+    pts = [(x_start, 0.0)]
+    n = 300
+    for k in range(n + 1):
+        z = T * k / n
+        pts.append((W - oml.inset("right", z), z))
+    pts.append((x_end_front, T))
+    arc = [0.0]
+    for (a, b), (c, d) in zip(pts, pts[1:]):
+        arc.append(arc[-1] + math.hypot(c - a, d - b))
+    grooves, s_at = None, RIB_P / 2
+    for i in range(len(pts) - 1):
+        (xa, za), (xb, zb) = pts[i], pts[i + 1]
+        L = arc[i + 1] - arc[i]
+        while L > 1e-9 and s_at <= arc[i + 1]:
+            f = (s_at - arc[i]) / L
+            px, pz = xa + f * (xb - xa), za + f * (zb - za)
+            tx, tz = (xb - xa) / L, (zb - za) / L
+            nx, nz = tz, -tx                      # outward, to the right of travel
+            h = RIB_W / 2
+            quad = [(px - tx * h - nx, pz - tz * h - nz), (px + tx * h - nx, pz + tz * h - nz),
+                    (px + tx * h + nx, pz + tz * h + nz), (px - tx * h + nx, pz - tz * h + nz)]
+            g = prism_xz(quad, y0, y1 - y0)
+            grooves = g if grooves is None else grooves.union(g)
+            s_at += RIB_P
+    return grooves.intersect(oml.skin(depth))
+
+
+def check_overhang(name, oml, limit_deg=MAX_OVERHANG, dz=0.05):
+    """Every bed-side edge round must stay within the overhang limit."""
+    s = math.tan(math.radians(limit_deg)) + 1e-6
+    bad = []
+    for face, fns in (("back", oml.back), ("front", oml.front)):
+        for side, g in fns.items():
+            z = 0.0
+            while z < 8.0:
+                slope = (g(z) - g(z + dz)) / dz
+                if slope > s:
+                    bad.append(f"{name}: {face}/{side} edge overhangs "
+                               f"{math.degrees(math.atan(slope)):.0f} deg at {z:.2f} mm")
+                    break
+                z += dz
+    return bad
+
+
+COUPON_LIMITS = (45.0, 55.0, 65.0, None)   # None: the measured round, unclamped
+
+
+def edge_coupon(limit, dots):
+    """The WM-2's hinge-side back corner, 28 x 28 x 9 mm, at one overhang limit.
+    `dots` dimples on its (bed-side) face say which one it is."""
+    oml = wm2_oml(limit)
+    W = oml.W
+    keep = box(W - 28, 0, -1, W + 1, 28, 9)
+    part = (oml.body(0.0).cut(oml.body(WALL), clean=False)
+            .intersect(keep, clean=False))
+    part = part.cut(surface_ribs(oml, 72.9, W - 2.3, 2.5, 27.0).intersect(keep, clean=False),
+                    clean=False)
+    for k in range(dots):
+        part = part.cut(cyl(W - 24 + 3.0 * k, 22.0, 0.8, -1, 0.6), clean=False)
+    return part
+
+
 def _poly_prism(pts_xy, z0, z1):
     return (cq.Workplane().workplane(offset=z0).polyline(pts_xy).close()
             .extrude(z1 - z0))
 
 
-def wm2():
+def wm2(max_overhang_deg=MAX_OVERHANG):
     """Sony WM-2 outer mould line.
 
     Size 80 x 109 x 29.5 (walkman.land, 1981 ad). Everything else was measured
@@ -286,12 +464,12 @@ def wm2():
     not measured on a real unit. Coordinates: x across from the left edge seen
     from the controls face, y up from the bottom edge, z from the back (door).
     """
-    W, H, T, r = 80.0, 109.0, 29.5, 2.0
-    R_BACK, R_FRONT = 3.0, 2.0         # edge rounds, from the edge-on views
+    oml = wm2_oml(max_overhang_deg)
+    W, H, T, r = oml.W, oml.H, oml.T, oml.r
     zs = 13.6        # print seam: the real black/silver line is at 12.3, but the
                      # door-edge slots and the OPEN slider end at 13.5
-    tray, lid = shell_pair(W, H, T, r, zs, edges=(R_BACK, R_FRONT), detents_on="ends")
-    tray = tray.union(coin_grid(W, H, r, FLOOR, 8.0))
+    tray, lid = shell_pair(W, H, T, r, zs, oml=oml, detents_on="ends")
+    tray = tray.union(coin_grid(W, H, r, FLOOR, 8.0, oml=oml))
 
     # ======================= controls face (z = T, the lid) ===================
     # Black ribbed zone: triangle behind the wheel plus a strip down the right
@@ -324,7 +502,7 @@ def wm2():
     wc, WR, WT = (65.4, 100.6), 8.0, 4.5
     cup = cyl(*wc, WR + 1.8, T - WT - 1.0, T).intersect(
         box(-1, -1, T - WT - 1.0, W + 1, H + 1, T + 1)).intersect(
-        rounded_body(W, H, T, r, R_BACK, R_FRONT))
+        oml.body(0.0))
     lid = (lid.union(cup).cut(cyl(*wc, WR + 0.8, T - WT, T + 1))
            .cut(box(59.5, H - 3.0, T - WT, 72.0, H + 1, T + 1)))
     wheel = cyl(*wc, WR, T - WT, T)
@@ -339,8 +517,6 @@ def wm2():
 
     # ======================= door face (z = 0, the tray) ======================
     tray = tray.cut(box(72.2 - 0.3, -1, -1, 72.2 + 0.3, H + 1, 0.5))       # hinge strip
-    tray = tray.cut(_grooves_along_y([73.6 + RIB_P * i for i in range(4)], 2.5, H - 2.5,
-                                     -1, 0.4))
     tray = tray.cut(cyl(74.7, 57.4, 0.9, -1, 0.8))                          # door pin
     tray = tray.cut(groove_rect(12.7, 19.0, 31.2, 70.5, 4.3, 0.8, 0.6, 0, up=False))
     tray = tray.cut(groove_rect(23.0, 45.0, 11.5, 19.0, 1.5, 0.6, 0.4, 0, up=False))
@@ -384,12 +560,9 @@ def wm2():
     plate_o = box(53.4, -1, 14.3, 73.0, 0.3, 27.0)
     lid = lid.cut(plate_o.cut(box(53.8, -2, 14.7, 72.6, 1, 26.6)))
 
-    # Right side: ribs all along it, the TAPE NORM/METAL switch, two screws.
-    zr = [3.6 + RIB_P * i for i in range(20)]
-    ribs = None
-    for z in zr:
-        b = box(W - 0.3, 2.2, z - RIB_W / 2, W + 1, H - 2.2, z + RIB_W / 2)
-        ribs = b if ribs is None else ribs.union(b)
+    # Right side: ribs from the back strip round the hinge edge, up the side and
+    # round onto the front strip; the TAPE NORM/METAL switch; two screws.
+    ribs = surface_ribs(oml, 72.9, W - 2.3, 2.5, H - 2.5)
     tray = tray.cut(ribs)
     lid = lid.cut(ribs)
     lid = lid.cut(box(W - 0.5, 39.8, 15.2, W + 1, 57.7, 22.3))
@@ -397,7 +570,7 @@ def wm2():
     for sy in (17.6, 92.6):
         lid = lid.cut(rod(0.9, 0.5, (W + 0.01, sy, 16.6), (-1, 0, 0)))
 
-    return dict(name="WM-2", W=W, H=H, T=T, r=r, zs=zs, tray=tray, lid=lid,
+    return dict(name="WM-2", W=W, H=H, T=T, r=r, zs=zs, tray=tray, lid=lid, oml=oml,
                 target_g=280, target_note="280 g incl. AA battery (1981 ad)")
 
 
@@ -515,6 +688,8 @@ def self_test():
         "floating island": (check("island", good.union(box(60, 0, 0, 65, 5, 5))), True),
         "too big for the bed": (check("big", box(0, 0, 0, 171, 50, 10)), True),
     }
+    cases["WM-2 edges at the limit pass"] = (check_overhang("WM-2", wm2_oml()), False)
+    cases["WM-2 edges, unclamped"] = (check_overhang("WM-2 raw", wm2_oml(None)), True)
     for m in (wm2(), ours()):
         W, H, r, zs = m["W"], m["H"], m["r"], m["zs"]
         nogroove = dict(m, lid=m["lid"].union(ring(W, H, r, 0, -SKIRT_T, zs, zs + SKIRT_H)))
@@ -538,9 +713,24 @@ def build():
     report, problems, assy = [], [], cq.Assembly()
     x_view = 0.0
     parts_out = {}
+    coupons = []
+    for i, lim in enumerate(COUPON_LIMITS):
+        c = edge_coupon(lim, i + 1)
+        problems += check(f"coupon-{lim or 'raw'}", c)
+        c = for_print(c, False)
+        coupons.append(c.translate(((i % 2) * 33.0, (i // 2) * 33.0, 0)))
+    plate0 = coupons[0]
+    for c in coupons[1:]:
+        plate0 = plate0.add(c)
+    exporters.export(plate0, str(OUT / "plate-0-edge-coupon.stl"))
+    b0 = whole(plate0)[1].BoundingBox()
+    print(f"  {'plate-0-edge-coupon':20s} {b0.xlen:6.1f} x {b0.ylen:6.1f} x {b0.zlen:5.1f} mm")
+
     for m in (wm2(), ours()):
         key = "wm2" if m["name"] == "WM-2" else "ours"
         problems += check_joint(m)
+        if "oml" in m:
+            problems += check_overhang(m["name"], m["oml"])
         tray_p, lid_p = for_print(m["tray"], False), for_print(m["lid"], True)
         for nm, p in (("tray", tray_p), ("lid", lid_p)):
             problems += check(f"{key}-{nm}", p)
@@ -572,8 +762,12 @@ def build():
         print(f"  {n:22s} {W} x {H} x {T} mm  shell <= {g:5.1f} g solid  "
               f"target {tg} g -> ~{coins} nickels  ({note})")
     (OUT / "manifest.json").write_text(json.dumps({
-        "packet": "SIZE-01", "revision": 2, "released": "2026-09-28",
+        "packet": "SIZE-01", "revision": 3, "released": "2026-09-28",
         "printer": "Bambu Lab A1 Mini", "nozzle_mm": 0.4, "material": "PLA Basic",
+        "edge_overhang_limit_deg": MAX_OVERHANG,
+        "edge_coupon": {"file": "plate-0-edge-coupon.stl",
+                        "dimples_to_limit_deg": {str(i + 1): lim for i, lim in
+                                                 enumerate(COUPON_LIMITS)}},
         "joint": {"type": "rabbet + 4 detents + pry notch", "clearance_per_side_mm": CLR,
                   "detent_interference_mm": DETENT_H - CLR},
         "mockups": [{"name": n, "mm": [W, H, T], "shell_mass_upper_bound_g": round(g, 1),

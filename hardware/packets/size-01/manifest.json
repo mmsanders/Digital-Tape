@@ -1,10 +1,20 @@
 {
   "packet": "SIZE-01",
-  "revision": 2,
+  "revision": 3,
   "released": "2026-09-28",
   "printer": "Bambu Lab A1 Mini",
   "nozzle_mm": 0.4,
   "material": "PLA Basic",
+  "edge_overhang_limit_deg": 55.0,
+  "edge_coupon": {
+    "file": "plate-0-edge-coupon.stl",
+    "dimples_to_limit_deg": {
+      "1": 45.0,
+      "2": 55.0,
+      "3": 65.0,
+      "4": null
+    }
+  },
   "joint": {
     "type": "rabbet + 4 detents + pry notch",
     "clearance_per_side_mm": 0.05,
@@ -18,7 +28,7 @@
         109.0,
         29.5
       ],
-      "shell_mass_upper_bound_g": 71.4,
+      "shell_mass_upper_bound_g": 71.8,
       "target_g": 280,
       "nickels_approx": 42,
       "target_note": "280 g incl. AA battery (1981 ad)"
