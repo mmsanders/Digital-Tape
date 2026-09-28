@@ -28,7 +28,7 @@ inside, with corner bumper pads and five raised edge keys roughed in. Those five
 
 | File | Contents | Size on bed | Prints on |
 |---|---|---|---|
-| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side) | 165 × 109 × 17 mm | outer faces |
+| `plate-1-wm2.stl` | WM-2 back (door side) + WM-2 front (controls side). Sent directly: at 1.5 MB it is rebuilt by the script, not kept in git. `wm2-tray.stl` + `wm2-lid.stl` are the same two parts | 165 × 109 × 17 mm | outer faces |
 | `plate-2-ours-back.stl` | Our back half | 96 × 100 × 33 mm | outer face |
 | `plate-3-ours-front.stl` | Our front half | 95 × 97 × 13 mm | outer face |
 

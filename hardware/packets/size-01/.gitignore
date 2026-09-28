@@ -1,2 +1,5 @@
-# 2.7 MB and rebuilt by hardware/cad/sizing/mockups.py; kept out of the tree (CLAUDE.md s4, 1 MiB).
+# Over the 1 MiB tree limit (CLAUDE.md s4) and rebuilt byte-for-byte by
+# hardware/cad/sizing/mockups.py; sent to Michael directly. The two halves it
+# is made of, wm2-tray.stl and wm2-lid.stl, are committed.
 size-01-assembled.step
+plate-1-wm2.stl
