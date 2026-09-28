@@ -1,0 +1,39 @@
+{
+  "packet": "SIZE-01",
+  "revision": 1,
+  "released": "2026-09-28",
+  "printer": "Bambu Lab A1 Mini",
+  "nozzle_mm": 0.4,
+  "material": "PLA Basic",
+  "joint": {
+    "type": "rabbet + 4 detents + pry notch",
+    "clearance_per_side_mm": 0.05,
+    "detent_interference_mm": 0.2
+  },
+  "mockups": [
+    {
+      "name": "WM-2",
+      "mm": [
+        80.0,
+        109.0,
+        29.5
+      ],
+      "shell_mass_upper_bound_g": 71.5,
+      "target_g": 280,
+      "nickels_approx": 42,
+      "target_note": "280 g incl. AA battery (1981 ad)"
+    },
+    {
+      "name": "Digital-Tape layout A",
+      "mm": [
+        92.0,
+        97.0,
+        42.0
+      ],
+      "shell_mass_upper_bound_g": 91.6,
+      "target_g": 150,
+      "nickels_approx": 12,
+      "target_note": "~150 g EST (thermal-budget.md): no motor, no AA cells"
+    }
+  ]
+}

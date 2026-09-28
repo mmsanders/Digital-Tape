@@ -9,9 +9,9 @@ envelopes; coloured blocks are parts. Left to right:
 
 Source: `hardware/cad/sizing/layout_study.py`. Part sizes are tagged there:
 `[REPO]` from this repository, `[EST]` my estimate — **only the cartridge size is
-from the repo, and it is itself a working number (SH-1)**. The Walkman figures are
-search-index summaries attributed to walkman.land, which this environment cannot
-open.
+from the repo, and it is itself a working number (SH-1)**. The Walkman figures were
+first taken from search-index summaries; on 27 Sep 2026 they were read directly
+from walkman.land and match (the WM-2 also matches its 1981 ad).
 
 | | W × H × T mm | volume |
 |---|---|---:|
