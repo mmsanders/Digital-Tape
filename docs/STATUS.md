@@ -1,20 +1,21 @@
 # Project status
 
-**29 September 2026 UTC · input main `39d2076` · Owner: Software #306/#307, Verification #103/#104/#105, PM #308 ·**
+**29 September 2026 UTC · input main `39d2076` · Owner: Verification #107/#108/#105, Software #313/#314, PM #308 ·**
 Phase 1 has three complete independently accepted packages: **WP-07 allocator/COW, WP-13
 embedded readiness and WP-36 slot capability**. The accepted bounded WP-10 core crash
 tranche is integrated through product PR #217 / Verification PR #69, but full WP-10
 remains open. The dashboard remains **21/36 rungs (58%)**. Bounded R29-A/B/C, WP-06
 #297 (38/38), WP-08 #287 (33/33) and WP-09 #288 (10,000 edits) are independently
 accepted and integrated; per-round detail is in the archives below.
-PM #305 (R53) reviewed Verification's R52 returns. Verification #99 publishes 27/27 WP-09
-positive capacity short-accept cases at `87ae574`, and Software #306 binds them.
-Verification #101 found seven observable WP-06 closure gaps at `778413d`, and Software #307
-binds them. #101 also found two literal WP-06e clauses unreachable under the frozen stage
-oracle; PM #308 decides that spec question. PM found that Verification #100 / PR #102's
-C adapter and Python oracle both omit reverse frame 0, contrary to Engine API §6.2.
-Verification #103 corrects that. Verification #104 (WP-12/WP-12a) and #105 (WP-10) reconcile
-coverage against DRAFT-9 and publish only genuine gaps. The findings are verifier evidence, not Product acceptance.
+PM #305 (R53) status. Product PR #311 binds WP-09 capacity short accept at 27/27 with no
+engine change, and awaits independent disposition in Verification #107. Product PR #312
+passes 5 of 7 WP-06 gap rows. PM upheld Software's finding that the verifier's live-B floor
+predicate rejects lawful promote phase 2 and re-spool pass 2 (TapeFS §9.3.2, §9.4).
+Verification #108 corrects it, and #312 is held for a rebind. PM dispositioned two
+publications as ready for binding: the corrected WP-08 two-toolchain arithmetic
+(`3dbd225`, 41 vectors; Software #313) and WP-12/WP-12a closure gaps (`bbaa4f0`, 3 rows /
+7 cases; Software #314). Verification #105 (WP-10 ledger) is in progress, and PM #308
+holds the WP-06e spec question. Verifier evidence is not Product acceptance.
 No rung advanced.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -56,13 +57,13 @@ Every new gate has a negative control that is proven to go red. Run them with
 
 | Package | Independently accepted | Outstanding | Next owner |
 |---|---|---|---|
-| WP-06 block device, superblock, index commit | Exact 289/289 mount, 8/8 writability and 34/34 NOT_MOUNTED evidence integrated; Verification #98 PASS on #297's corrected 38/38 sequential cases and nine causal controls, integrated at main `8dfe543` | Complete WP-06 open; two WP-06e clauses unreachable under frozen stage oracle | Software #307 — seven gap rows; PM #308 — spec decision |
+| WP-06 block device, superblock, index commit | Exact 289/289 mount, 8/8 writability and 34/34 NOT_MOUNTED evidence integrated; Verification #98 PASS on #297's corrected 38/38 sequential cases and nine causal controls, integrated at main `8dfe543` | Complete WP-06 open; two WP-06e clauses unreachable under frozen stage oracle | Verification #108 — floor-predicate fix, then #312 rebind; PM #308 — spec decision |
 | WP-07 chunk allocator, copy-on-write Side B | **COMPLETE.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package; its exact evidence was mechanically carried onto post-WP13 main and integrated by product PR #215 | None for frozen WP-07 | Accepted / integrated |
-| WP-08 playback, seek, variable-rate scrub | Earlier ten corrected-cadence families and 16/16 set-side/warm-start observations; Verification #95 PASS on #287's 33/33 bounded cross-run cases and seven causal controls, integrated at main `abd8481` | Two-toolchain arithmetic (PR #102 held: reverse frame-0 oracle defect), complete WP-08 and listened goldens open | Verification #103 — corrected publication |
-| WP-09 record: overwrite, overdub, splice | Earlier 26/26 observations; Verification #96 PASS on #288's 10,000 edits, 25 checkpoints and eight causal controls, integrated unchanged at main `fa25ae0` | Capacity short accept published (27/27 synthetic), not Product-bound; full WP-09 open | Software #306 — Structural Rule 1 binding |
+| WP-08 playback, seek, variable-rate scrub | Earlier ten corrected-cadence families and 16/16 set-side/warm-start observations; Verification #95 PASS on #287's 33/33 bounded cross-run cases and seven causal controls, integrated at main `abd8481` | Two-toolchain publication `3dbd225` PASS-ready (41 vectors), not Product-bound; complete WP-08 and listened goldens open | Software #313 — Structural Rule 1 binding |
+| WP-09 record: overwrite, overdub, splice | Earlier 26/26 observations; Verification #96 PASS on #288's 10,000 edits, 25 checkpoints and eight causal controls, integrated unchanged at main `fa25ae0` | Capacity short accept bound in held PR #311 (27/27), not independently disposed; full WP-09 open | Verification #107 — independent disposition |
 | WP-10 crash-injection harness | Verification PR #69 accepted the bounded core tranche. Verification #83 accepted 57,611/57,611 bounded R29-B cases, integrated at main `867fd4a`. Verification #86 accepted exact R29-A PR #263; Software #267 integrated its unchanged package/engine identities at main `215204b` | Full operations and WP-12a remain open | Verification #105 — DRAFT-9 criterion ledger, top three gaps |
 | WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Candidate PCM is unlistened and is not an accepted golden; golden CI stays red | Held — needs Michael's own listening |
-| WP-12 re-spool / defragment pass | Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance, carrying PR #79 behavior. Verification #87 accepted exact combined PR #272's three-row composition; Software #276 integrated its accepted identities unchanged at main `788cb76` | Complete WP-12/WP-12a remain separate | Verification #104 — DRAFT-9 criterion ledger, genuine gaps only |
+| WP-12 re-spool / defragment pass | Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance, carrying PR #79 behavior. Verification #87 accepted exact combined PR #272's three-row composition; Software #276 integrated its accepted identities unchanged at main `788cb76` | Complete WP-12/WP-12a remain separate | Software #314 — bind 3 gap rows from `bbaa4f0`; ledger 28/36 already accepted |
 | WP-13 embedded-readiness audit | **DRAFT-9 is independently accepted and integrated.** Verification #83 authenticated all six gates at exact PR #241 head `74f1173`, including 16/16 sources, exactly four funnels and zero forbidden/ambiguous calls; Software #255 integrated it at main `867fd4a` | None for the accepted DRAFT-9 boundary | Accepted / integrated |
 | WP-36 slot capability model | **COMPLETE.** Verification PR #57 accepted the deterministic precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign; product PR #200 integrated it unchanged | None for frozen WP-36 | Accepted / integrated |
 
