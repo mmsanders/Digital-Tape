@@ -1,0 +1,269 @@
+{
+  "E-RECORD-PROMOTE": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "arm",
+        "tape_arm",
+        "TAPE_OK"
+      ],
+      [
+        "record",
+        "tape_feed",
+        "TAPE_OK"
+      ],
+      [
+        "record",
+        "tape_service",
+        "TAPE_OK"
+      ],
+      [
+        "commit",
+        "tape_commit",
+        "TAPE_OK"
+      ],
+      [
+        "promote",
+        "tape_promote",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_unmount",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_mount",
+        "TAPE_OK"
+      ]
+    ],
+    "chunks_written_by_step": {
+      "promote": [
+        0
+      ],
+      "record": [
+        3
+      ]
+    },
+    "snapshots": [
+      "after_arm",
+      "after_promote",
+      "before"
+    ],
+    "writes_by_step": {
+      "arm": 2,
+      "commit": 2,
+      "mount": 0,
+      "promote": 11,
+      "record": 1,
+      "remount": 0
+    }
+  },
+  "E-RESPOOL-FULL": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "exercise",
+        "tape_respool",
+        "TAPE_ERR_CARTRIDGE_FULL"
+      ]
+    ],
+    "chunks_written_by_step": {},
+    "snapshots": [
+      "after",
+      "before"
+    ],
+    "writes_by_step": {
+      "mount": 0
+    }
+  },
+  "E-SIDEA-REFUSE": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "exercise",
+        "tape_arm",
+        "TAPE_ERR_READ_ONLY"
+      ]
+    ],
+    "chunks_written_by_step": {},
+    "snapshots": [
+      "after",
+      "before"
+    ],
+    "writes_by_step": {
+      "mount": 0
+    }
+  },
+  "F-LIVEB-PROMOTE-FLOOR": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "exercise",
+        "tape_promote",
+        "TAPE_OK"
+      ]
+    ],
+    "chunks_written_by_step": {
+      "exercise": [
+        0,
+        1,
+        4,
+        5
+      ]
+    },
+    "snapshots": [
+      "before"
+    ],
+    "writes_by_step": {
+      "exercise": 2062,
+      "mount": 0
+    }
+  },
+  "F-LIVEB-RESPOOL-FLOOR": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "exercise",
+        "tape_respool",
+        "TAPE_OK"
+      ]
+    ],
+    "chunks_written_by_step": {
+      "exercise": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "snapshots": [
+      "before"
+    ],
+    "writes_by_step": {
+      "exercise": 2054,
+      "mount": 0
+    }
+  },
+  "F-STAGE-DEGRADED-ABSENT": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "mount",
+        "tape_get_info",
+        "TAPE_OK"
+      ],
+      [
+        "reset",
+        "tape_reset_side_b",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_unmount",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_get_info",
+        "TAPE_OK"
+      ],
+      [
+        "switch",
+        "tape_set_side",
+        "TAPE_OK"
+      ]
+    ],
+    "chunks_written_by_step": {},
+    "snapshots": [
+      "after_remount",
+      "after_reset",
+      "before"
+    ],
+    "writes_by_step": {
+      "mount": 0,
+      "remount": 0,
+      "reset": 4
+    }
+  },
+  "F-STAGE-DEGRADED-DIVERGENT": {
+    "calls": [
+      [
+        "mount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "mount",
+        "tape_get_info",
+        "TAPE_OK"
+      ],
+      [
+        "reset",
+        "tape_reset_side_b",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_unmount",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_mount",
+        "TAPE_OK"
+      ],
+      [
+        "remount",
+        "tape_get_info",
+        "TAPE_OK"
+      ],
+      [
+        "switch",
+        "tape_set_side",
+        "TAPE_OK"
+      ]
+    ],
+    "chunks_written_by_step": {},
+    "snapshots": [
+      "after_remount",
+      "after_reset",
+      "before"
+    ],
+    "writes_by_step": {
+      "mount": 0,
+      "remount": 0,
+      "reset": 4
+    }
+  }
+}
