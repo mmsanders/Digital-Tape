@@ -294,6 +294,19 @@
         "-B",
         "tests/sequential_wp06_r44/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp06_closure_r52",
+      "tree": "d4850f628443707bf967ec65bbd781be9eaad9f2",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "778413d3c2dca7255aa086b5f8fda8f5094c674e",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-06 R52 closure-ledger and observable-gap verifier package (45-row coverage ledger SHA-256 93f9c89e41c3846a31830164b082ec76b43d15a984640ec4fc6f16a539d71bd6; seven observable gap rows and two contract-blocked WP-06e rows routed to PM #308; gap plan SHA-256 db9f826a3af4e3c7a2b01780ace2baa9bb5257aead873e484d25173b0c1b8119; oracle SHA-256 1340ddb84e04a34474a17b987b32b46d5b56725be40670fb51f5bc4a4e997cb1, replay SHA-256 65aefa0010232c325f43b97a82cde712fb53c814b4f7742a5ae6d44dd9547336, audit SHA-256 17c3efecf2e16e0fbdbfce1629dd0eaf31fd827ca5dae33180d94d866be447bd, self-test SHA-256 4c55018f0caa29d3cdea9e3508ec9d1a07297b7fc49d055a2736c1ee4e76850c; seven row-specific killed red controls) published under Verification #101 Return C at commit 778413d3c2dca7255aa086b5f8fda8f5094c674e (whole tree 615513f589a22c0cb31125cba77f5706519ace31, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-101-wp06-closure, not Verification main; issued by PM Product #307 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and not full WP-06 closure",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp06_closure_r52/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
