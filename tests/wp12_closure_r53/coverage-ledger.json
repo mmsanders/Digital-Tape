@@ -1,0 +1,56 @@
+{
+  "schema": "wp12-r53-ledger-v1",
+  "criteria": "acceptance.md DRAFT-9 Stream 1 WP-12 and WP-12a (text byte-identical to DRAFT-8)",
+  "allowed_statuses": [
+    "accepted exact evidence",
+    "uncovered: published here",
+    "unreachable under DRAFT-9",
+    "vacuous under DRAFT-9 signature"
+  ],
+  "dispositions": {
+    "R25": "respool_draft8 8/8 incl. WP12-EMPTY/TWOPASS/DECLINE/FULL/DEGRADED/SEQ-EXHAUSTED/ONE-COMMIT/STAGE-CLEAR; Product PR #180 head 262db463680798c63fde8b18232e60bdbda15f0a; Verification #44 comment 5789778005, findings/P1-R25-PROMOTE-RESPOOL-DISPOSITION-2026-09-22.md",
+    "R29-C": "respool_full_draft8 4,209,696 crash cases digest 02c52de7a7c51a6ffafe5c9d5afad9c23032b72fc11aaf206bb27a9c9506d3e1 + functional/WP-12a row; Product PR #236 ff0a5cbce6087804a8a54ab7584253aa41467607; Verification #81 comment 5847350457",
+    "R29-A": "promote_draft8 44,307 cases digest 71be17545262d3b35fed9213b9305f71e4c8956693fbf4ec8f6d06f9f7ba80aa; Product PR #263 8a4d2a17138fd89e91f970a2c69c9f8fa0a8d920; Verification #86 comment 5856700150",
+    "R29-B": "format_dup_identity_draft8 57,611 cases digest c493e77dff948df48d9c67c51ef4b68f0a61d2e02615b2d08760a594e79dc4e3; Product PR #241; Verification #83 comment 5850755575",
+    "C272": "combined three-row long-op composition; Product PR #272 338861251be19a014bc9c85b1418625a3dcd109a tree eeb8c4480f98ec6fdf614be0e47c1bf68a3c9569; R29-C/A/B replayed; Verification #87 comment 5857453398"
+  },
+  "rows": [
+    {"id": "WP12.completed_pass.exactly_one_entry", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-TWOPASS/WP12-DECLINE post media; R29-C functional 'completed pass is exactly one B entry'"},
+    {"id": "WP12.completed_pass.renders_bit_identical", "status": "uncovered: published here", "package_cases": ["RENDER-TWOPASS", "RENDER-DECLINE", "RENDER-FRAGMENTED"], "why_uncovered": "R29-C compares raw SHA-256 of copied chunk regions only; R25 COVERAGE.md explicitly excludes rendered-audio preservation. No package drives tape_render before and after a completed pass."},
+    {"id": "WP12.invariant10.every_write_both_sides", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-A06; R29-C invariant-10 check at every planned chunk write across 4,209,696 injections"},
+    {"id": "WP12.v3_003.pass1_to_12_14", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-TWOPASS (A04); R29-C V3-003 pass 1"},
+    {"id": "WP12.v3_003.pass2_runs_reclaims_10_12", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-TWOPASS (A05); R29-C V3-003 pass-2 crash set preserving sole live [12,14)"},
+    {"id": "WP12.no_lower_run.declines_pass2_intact", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-DECLINE (A07); R29-C no-lower-run pass 1"},
+    {"id": "WP12.destinations.floor_and_disjoint", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-A06; R29-C destination >= a_high_water and disjoint from live A/B"},
+    {"id": "WP12.empty_b.respool_ok_zero_writes_valid_index", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-EMPTY (A01); R29-C empty-B case"},
+    {"id": "WP12.empty_b.promote_invalid_arg_same_test", "status": "accepted exact evidence", "evidence": ["R25", "R29-A"], "cases": "R25 WP12-EMPTY asserts respool TAPE_OK and promote TAPE_ERR_INVALID_ARG on one fixture in one case (A01+A02); R29-A empty-B entry refusal"},
+    {"id": "WP12.insufficient_space.cartridge_full_changes_nothing", "status": "accepted exact evidence", "evidence": ["R25", "R29-C"], "cases": "R25 WP12-FULL (A08); R29-C no-qualifying-destination refusal"},
+
+    {"id": "WP12a.small_budget.repeated_same_fn_terminates.respool", "status": "accepted exact evidence", "evidence": ["R29-C", "C272"], "cases": "R29-C functional: 8,196 literal block_budget=1 calls, cumulative raw write trace, single terminal more_work=false"},
+    {"id": "WP12a.small_budget.repeated_same_fn_terminates.promote", "status": "accepted exact evidence", "evidence": ["R29-A", "C272"], "cases": "R29-A small_budget_completion"},
+    {"id": "WP12a.small_budget.repeated_same_fn_terminates.dup", "status": "accepted exact evidence", "evidence": ["R29-B", "C272"], "cases": "R29-B LONG-01 small_budget_completion"},
+    {"id": "WP12a.in_progress.45_cells_33_busy", "status": "accepted exact evidence", "evidence": ["R29-C", "R29-A", "R29-B", "C272"], "cases": "R29-C respool row 15/15; R29-A promote_in_progress_row x15; R29-B dup_in_progress_row x15; composed three-row check at C272"},
+    {"id": "WP12a.in_progress.render_service_allowed_audio_continues.dup", "status": "accepted exact evidence", "evidence": ["R29-B", "C272"], "cases": "R29-B dup row render cell requires non-silent rendered PCM and zero block events; LONG-09"},
+    {"id": "WP12a.in_progress.audio_continues.respool_promote", "status": "unreachable under DRAFT-9", "pm_finding": true, "citation": "engine-api §10: Playing row marks promote and respool B, and every in-progress row marks set_rate B, so a running respool or promote always has retained rate 0. render/service are allowed and exercised (R29-C, R29-A render fixed to retained rate 0), but acceptance WP-12a's 'audio must not stop', stated 'for each of respool, promote and dup', is observable only for dup."},
+    {"id": "WP12a.changed_argument.dup", "status": "accepted exact evidence", "evidence": ["R29-B", "C272"], "cases": "R29-B changed_argument dst_ctx/new_uuid/epoch/dst_nominal_length_s + allowed_mutables (LONG-05/06)"},
+    {"id": "WP12a.changed_argument.promote", "status": "vacuous under DRAFT-9 signature", "citation": "engine-api §9: tape_promote(t, block_budget, more_work, cb, user); §9.1 lets exactly block_budget/more_work/cb/user vary, so no fixed continuation argument exists. R29-A allowed_mutables proves the four may vary."},
+    {"id": "WP12a.changed_argument.respool", "status": "vacuous under DRAFT-9 signature", "citation": "engine-api §9: tape_respool(t, block_budget, more_work) has no fixed continuation argument; PM confirmed N/A in R29-C (#72/#73)."},
+    {"id": "WP12a.zero_budget.initiation_and_continuation", "status": "accepted exact evidence", "evidence": ["R29-C", "R29-A", "R29-B"], "cases": "zero_budget initiation+continuation in all three packages"},
+    {"id": "WP12a.dup.destination_failure_from_playing", "status": "accepted exact evidence", "evidence": ["R29-B", "C272"], "cases": "R29-B destination_failure_playing (LONG-09): not FAULTED, rate/position/ring unchanged, Playing row, audio continues"},
+    {"id": "WP12a.own_device_failure.respool.write_and_flush", "status": "accepted exact evidence", "evidence": ["R29-C"], "cases": "R29-C oracle requires own-device failures {write, flush} each -> TAPE_ERR_IO, more_work=false, FAULTED"},
+    {"id": "WP12a.own_device_failure.promote.write", "status": "accepted exact evidence", "evidence": ["R29-A"], "cases": "R29-A own_device_failure (write, rc 5) -> TAPE_ERR_IO, more_work=false, FAULTED"},
+    {"id": "WP12a.promote.continuation_flush_failure_faults", "status": "uncovered: published here", "package_cases": ["F-PROMOTE-FLUSH"], "why_uncovered": "R29-A has one own_device_failure case whose oracle accepts write OR flush; its fixture is a write failure. Unlike R29-C, no promote flush failure on a continuation is required."},
+    {"id": "WP12a.own_device_failure.dup", "status": "unreachable under DRAFT-9", "citation": "tapefs §9.5 writes only the destination and engine-api §7.2 excludes destination failure from FAULTED, so a tape_dup continuation never issues a write or flush against its own (source) device. Not a contract conflict: the WP-12a clause is conditional on such a failure. Complement accepted: R29-B already-FAULTED source (LONG-10)."},
+    {"id": "WP12a.faulted.eleven_f_cells_zero_ops_incl_service", "status": "accepted exact evidence", "evidence": ["R29-C", "R29-A"], "cases": "R29-C faulted_row; R29-A faulted_row x15"},
+    {"id": "WP12a.faulted.four_allowed_calls", "status": "accepted exact evidence", "evidence": ["R29-C", "R29-A"], "cases": "render, status/info/tell, abort, unmount in both faulted rows"},
+    {"id": "WP12a.faulted.abort_clears_frames_owed_no_media", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-C"], "cases": "R29-A faulted abort frames_owed 9->0 with zero block events"},
+    {"id": "WP12a.faulted.render_drains_then_underruns", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-C"], "cases": "R29-A Playing-fixture ring drain to TAPE_ERR_UNDERRUN; R29-C faulted_ring_drain"},
+    {"id": "WP12a.faulted.overrides_armed", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-C"], "cases": "R29-A armed_before abort; R29-C faulted_over_armed respool FAULTED"},
+    {"id": "WP12a.faulted.row_on_continuation_faulted_instance", "status": "uncovered: published here", "package_cases": ["F-RESPOOL-WRITE", "F-RESPOOL-HEADER-FLUSH", "F-PROMOTE-WRITE", "F-PROMOTE-FLUSH"], "why_uncovered": "The clause says the continuation failure puts the instance in FAULTED 'then' the 11 F cells are asserted, and names the V5-001 path (re-spool pass-1 header write lands, its flush fails, then arm+feed). R29-A reaches its Faulted row through a tape_arm write-failure fixture; R29-C's faulted_row observation carries no causal link to its own-device failures. No package probes the row on the instance the failing continuation quarantined, nor the pass-1 header-flush path specifically."},
+    {"id": "WP12a.busy.leaves_operation_running", "status": "accepted exact evidence", "evidence": ["R29-C", "R29-A", "R29-B", "C272"], "cases": "BUSY cell leaves raw chunk-write trace unchanged, next continuation prefix-extends it without repeating a copied LBA (R29-C, R29-A, R29-B LONG-03)"},
+    {"id": "WP12a.reentrancy.four_exempt_calls_succeed", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-B", "C272"], "cases": "callback_reentry render/status_info_tell for promote and dup"},
+    {"id": "WP12a.reentrancy.others_busy_no_state_change_no_recursion", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-B", "C272"], "cases": "callback_reentry x15 each incl. matching continuation and both siblings; callback depth 1"},
+    {"id": "WP12a.reentrancy.next_continuation_still_advances", "status": "accepted exact evidence", "evidence": ["R29-A", "R29-B", "C272"], "cases": "R29-A next ordinary continuation after callback BUSY; R29-B LONG-08"},
+    {"id": "WP12a.reentrancy.respool", "status": "vacuous under DRAFT-9 signature", "citation": "engine-api §9: tape_respool takes no tape_progress_fn, so no callback can be on the stack during it; PM confirmed N/A in R29-C (#72/#73). Re-entry into respool from promote/dup callbacks is covered at C272."}
+  ]
+}
