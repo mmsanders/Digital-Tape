@@ -1,0 +1,23 @@
+{
+  "schema": "wp10-backlog-update-r54-v1",
+  "source_backlog": {
+    "package": "tests/wp10_backlog_r53/backlog-update.json",
+    "publication": "fd139dfa42a9447d889c700b0818e3d1f9099e81",
+    "sha256": "ea4b10316f77de4153eda9d1f0aa1cc50874adf61e2d4fc4fbe13dca53201c13"
+  },
+  "published_here": [
+    {"id": "WP10.session.load.mount_repair_write", "former_rank": 1, "package_row": 1,
+     "injection_points": {"REPAIR-PRIMARY-ONLY": 1028, "REPAIR-MIRROR-ONLY": 1028, "REPAIR-MIRROR-STALE": 1028, "REPAIR-PRIMARY-STALE": 1028}},
+    {"id": "WP10.dup.rerun_completes", "former_rank": 2, "package_row": 2,
+     "injection_points": {"blank": 11302, "healthy_pair": 13358, "equal_divergent": 13358, "exhaustion_candidate": 13358, "exhaustion_equal_divergent": 13358}},
+    {"id": "WP10.dup.destination_shape.mounts_both_sides_high_label", "former_rank": 3, "package_row": 3,
+     "completion_cases": 8}
+  ],
+  "backlog": [
+    {"rank": 1, "former_rank": 4, "id": "WP10.counters.v5_015.reset_b_and_stage_clear_generation", "harm": "wrong error code or partial write before refusal"},
+    {"rank": 2, "former_rank": 5, "id": "WP10.headroom.zero_needed_reserved.empty_respool_each_counter_each_value", "harm": "wrong error code"},
+    {"rank": 3, "former_rank": 6, "id": "WP10.op.respool.post_crash_render", "harm": "render path only; raw bytes already proven"}
+  ],
+  "pm_rulings_carried": ["At a torn blank-mirror boundary both TAPE_ERR_BAD_MAGIC and TAPE_ERR_CRC conform (PR #109 disposition).",
+                          "Engine work accounting (budget per call, write partitioning) is not pinned beyond what the spec forces (#115)."]
+}

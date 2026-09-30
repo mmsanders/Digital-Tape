@@ -1,0 +1,21 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "478ad0f31aacda62b8cd130f2336b50c6c3b4c12babc91fe6ea02562f87f2774",
+  "case_count": 68854,
+  "caseset_sha256": "6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3",
+  "evidence_sha256": "ae828d6a4098be3cf2d5b1fa5fa4fb617a6b4943b28a0d922102d7ff529ca21b",
+  "product_commit": null,
+  "product_tree": null,
+  "row1": 4112,
+  "row1_by_mode": {
+    "flush_required": 2056,
+    "write_through": 2056
+  },
+  "row2": 64734,
+  "row2_by_mode": {
+    "flush_required": 32367,
+    "write_through": 32367
+  },
+  "row3": 8,
+  "schema": "wp10-backlog-r54-manifest-v1"
+}

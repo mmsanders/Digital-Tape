@@ -1,0 +1,15 @@
+{
+  "adapter_source_sha256": "05d906fb14f224c77cd721cccfdc3be466faed0b0bcf73a02d98ad9f539098f3",
+  "build_command": "make -C engine clean all && make -C tests/wp12_closure_adapter clean all",
+  "case_count": 7,
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "fixtures": "device images written from the package's fixtures.py builders; fixtures.chunk_audio in every chunk a live Side-B entry references (render and respool_v3_003 fixtures)",
+  "import_commit": "1c1c036e5050eb10db3532fd6fc8571b250414c7",
+  "makefile_sha256": "752ab1b1a2395a01fd575dcb2fa475b0a75197efc1595edf3bd2de498dcc6c08",
+  "plan_file_sha256": "e44e57c3dc1650f98c78d9b8012efcae1dacc071c76aa190aebf06f1223b3fd6",
+  "product_base": "66c6abc69d83cff10da32a6b446690fcd0b927fb",
+  "run_product_sha256": "d3851993550b4c1d2c5ae13ae9b29beb5f4519fd166256c421ea9e53a1d62c07",
+  "schema": "wp12-r53-product-build-identity-1",
+  "verifier_source_commit": "c65ed4357c9d4b9fe915910e0a669d335e611a80",
+  "verifier_tree": "5641e39d5b72f367468e2a8d121f6a0e6106fc2f"
+}

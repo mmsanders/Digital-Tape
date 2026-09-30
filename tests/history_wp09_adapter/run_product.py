@@ -35,7 +35,10 @@ VERIFIER_TREE = "fa4e2d1686914f9dfe9aa8c6c7705bdbfce0266f"
 VERIFIER_SOURCE = "5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a"
 PRODUCT_BASE = "2890ea1eeaa94d53630cf64ca49e5f86afef2965"
 IMPORT_COMMIT = "d48e66b"
-ENGINE_TREE = "054d27ab6e3e72f61118ff7d99e19e48741d05b2"
+# The engine this binding was independently accepted on. The retained evidence must
+# keep naming it; the current engine/ is checked by byte-identical regeneration
+# (--retained), not by pinning HEAD to it (PM ruling, #320).
+ACCEPTED_ENGINE_TREE = "054d27ab6e3e72f61118ff7d99e19e48741d05b2"
 BUILD_COMMAND = "make -C engine clean all && make -C tests/history_wp09_adapter clean all"
 
 sys.path.insert(0, str(PACKAGE))
@@ -61,8 +64,6 @@ def check_provenance() -> None:
         raise SystemExit(f"import {imp} does not carry tree {VERIFIER_TREE}")
     if subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor", imp, "HEAD"]).returncode:
         raise SystemExit(f"import {imp} is not an ancestor of HEAD")
-    if git("rev-parse", "HEAD:engine") != ENGINE_TREE:
-        raise SystemExit("engine tree at HEAD is not the issued " + ENGINE_TREE)
 
 
 def write_gzip(src: Path, dst: Path) -> None:
@@ -110,6 +111,14 @@ def verify_retained(retained: Path) -> bytes:
     return data
 
 
+def check_accepted_engine(retained: Path) -> None:
+    """Ruling (a): the retained evidence still records the engine it was accepted on."""
+    named = json.loads((retained / "build-identity.json").read_text())["engine_tree"]
+    if named != ACCEPTED_ENGINE_TREE:
+        raise SystemExit(f"retained provenance names engine {named}, not the accepted "
+                         f"{ACCEPTED_ENGINE_TREE}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -120,6 +129,7 @@ def main() -> int:
     a = ap.parse_args()
 
     check_provenance()
+    print("current engine/ tree " + git("rev-parse", "HEAD:engine"))
     head = git("rev-parse", "HEAD")
     product_commit = os.environ.get("PRODUCT_COMMIT") or head
     product_tree = git("rev-parse", product_commit + "^{tree}")
@@ -128,6 +138,7 @@ def main() -> int:
     if a.replay:
         retained = a.replay if a.replay.is_absolute() else ROOT / a.replay
         data = verify_retained(retained)
+        check_accepted_engine(retained)
         ident = json.loads((retained / "build-identity.json").read_text())
         out = fresh_dir(a.out or Path("build/wp09-replay"))
         jsonl = out / "observations.jsonl"
@@ -180,6 +191,7 @@ def main() -> int:
     if a.retained:
         retained = a.retained if a.retained.is_absolute() else ROOT / a.retained
         data = verify_retained(retained)
+        check_accepted_engine(retained)
         if data != jsonl.read_bytes():
             raise SystemExit("regenerated JSONL differs from the committed retained evidence")
         print("regenerated JSONL is byte-identical to the retained evidence")

@@ -1,0 +1,41 @@
+{
+  "by_kind": {
+    "complete": 6,
+    "crash": 57532,
+    "empty_family": 1
+  },
+  "cases": 57539,
+  "crash_by_scenario_mode": {
+    "DUP-BLANK/flush_required": 5651,
+    "DUP-BLANK/write_through": 5651,
+    "DUP-EMPTY-BLANK/flush_required": 4108,
+    "DUP-EMPTY-BLANK/write_through": 4108,
+    "DUP-EMPTY-REUSABLE/flush_required": 5136,
+    "DUP-EMPTY-REUSABLE/write_through": 5136,
+    "DUP-REUSABLE-STALE/flush_required": 6679,
+    "DUP-REUSABLE-STALE/write_through": 6679,
+    "FMT-BLANK/flush_required": 3082,
+    "FMT-BLANK/write_through": 3082,
+    "FMT-REUSABLE-STALE/flush_required": 4110,
+    "FMT-REUSABLE-STALE/write_through": 4110
+  },
+  "fired": 57532,
+  "remount_results": {
+    "ro_A": {
+      "TAPE_ERR_BAD_MAGIC": 22590,
+      "TAPE_ERR_INCOMPLETE": 25769,
+      "TAPE_OK": 9179
+    },
+    "rw_A": {
+      "TAPE_ERR_BAD_MAGIC": 22590,
+      "TAPE_ERR_INCOMPLETE": 25769,
+      "TAPE_OK": 9179
+    },
+    "rw_B": {
+      "TAPE_ERR_BAD_MAGIC": 22590,
+      "TAPE_ERR_INCOMPLETE": 25769,
+      "TAPE_OK": 9179
+    }
+  },
+  "repairing_mounts": 18140
+}

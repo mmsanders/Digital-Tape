@@ -1,0 +1,39 @@
+{
+  "adapter_source_sha256": "0246a30b55d14239ebeb9c1a0e8c71550a8fed82dcdbda8c618eada75e27b38c",
+  "build": "each compiler builds engine/src/*.c and wp08p_adapter.c together with the package FLAGS",
+  "byte_identical_observations": true,
+  "case_count": 41,
+  "clang": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+  },
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "gcc": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "generated_header_sha256": "7e1013abfe6484589fd47c889fae3e713be08de9982caa4ddb1611c32f62e9cf",
+  "import_commit": "8e204a41eaec9ba89ab15439516d9142f32b698b",
+  "observations_sha256": "8a2369d663a06cad91c205397d6a3a4e0af81706129328843b08613b09bcdd8b",
+  "plan_file_sha256": "7b8b133629bc833025d32e42f34f757e14d10e5f18abecf09de4b9d705b682e6",
+  "product_base": "66c6abc69d83cff10da32a6b446690fcd0b927fb",
+  "run_product_sha256": "f75fb250b5c27985c311e22cc10a0740c6b86b44f707c6f0f9f7be40ab8f70bb",
+  "schema": "wp08-portability-r52-product-manifest-1",
+  "scope": "Product observations; the package oracle decides; not acceptance",
+  "verifier_source_commit": "b843298b55a17d450905bc1ae56c4092f9cffa14",
+  "verifier_tree": "d803deeff4356b6f70ff7f255c9bd6f31aa09790"
+}
