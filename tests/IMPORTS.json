@@ -333,6 +333,19 @@
         "-B",
         "tests/wp10_backlog_r54/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_final_r54",
+      "tree": "598ebcd8f0914040558f565809b90bdb22bb8221",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7c0410e0042d00c05b72affccd4de0a03ce8abd6",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 final backlog verifier package (Verification #118): rows reset_b/stage-clear one short of headroom (13 contract cases), zero-needed empty re-spool cells (6), post-crash re-spool render (5 fixtures, injections from the binding's own clean trace), and dup re-run crash (207,560 injections over 16 interruption representatives, 103,780 per mode); case set 159b4ac64a5e653df2625a025f5f8cf13bcb90fed9a11905a1733f7a97167cd1; closing ledger SHA-256 4ab66f55a0689889a6f8fa5652b9bdee7a5f39fdf692cf38fd43927ef04ce80c; oracle SHA-256 b720b5b1ec698781345e23fa2eaf6f62270c57eb0f73c3e4d0a798221f4c851b, model SHA-256 7714fe5e3dd215bd9a1ee1665c9ccde32c09b92f31533afdc09693bdd1fea66a, replay SHA-256 a72211914d40b3194825e412d1f06ca6fe78ced92b1bab2b56e19abb1b0efa72, self-test SHA-256 c1b24b0bd073da25537ca57afa3bb251c74ae8e07afa0c0b3398f81f5a3abda2; deps.py blob 41d1e5ed equals #110's and its eight pins equal Product main; dupmodel.py blob 53d0b75e equals tests/wp10_backlog_r54/model.py on Product main; PM ruling V-R54-03 (48 cells) binds this tranche to DRAFT-9 as published) published at commit 7c0410e0042d00c05b72affccd4de0a03ce8abd6 (whole tree 88097e3838006921770930b756199c2e1f354e16), reachable from Verification PR #125; issued by PM Product #334 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_final_r54/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

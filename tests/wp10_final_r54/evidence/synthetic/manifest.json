@@ -1,0 +1,22 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "a11391bdca8cdd500b5345a4f491112aac2aacd303ec7ed7cadea9dd850f231c",
+  "case_count": 207584,
+  "caseset_sha256": "159b4ac64a5e653df2625a025f5f8cf13bcb90fed9a11905a1733f7a97167cd1",
+  "evidence_sha256": "222524428680ad785912a2e8ba90a8689edf5d61daef70c27e30a9387df8aa7b",
+  "findings": {
+    "v_r54_03_resurrected_previous_superblock": 48
+  },
+  "product_commit": null,
+  "product_tree": null,
+  "row1": 13,
+  "row2": 6,
+  "row3_groups": 5,
+  "row3_injections": 24672,
+  "row4": 207560,
+  "row4_by_mode": {
+    "flush_required": 103780,
+    "write_through": 103780
+  },
+  "schema": "wp10-final-r54-manifest-v1"
+}
