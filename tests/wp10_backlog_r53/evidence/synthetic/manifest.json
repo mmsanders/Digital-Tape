@@ -1,0 +1,25 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "35fda1657b54027c0f2639fd959c9ba5c3393631b792cd9ba790aaee90a6d51a",
+  "case_count": 79820,
+  "caseset_sha256": "036e255eb2a704d041b87eb21116900ea307ba450a5cf72f3b0440dffdd3b2d7",
+  "evidence_sha256": "8d02930a805cdbf180eb30675229216c57028ae9dcdb86cbc249c120ed742c61",
+  "product_commit": null,
+  "product_tree": null,
+  "row1_by_mode": {
+    "flush_required": 12330,
+    "write_through": 12330
+  },
+  "row1_crash": 24660,
+  "row2_by_campaign": {
+    "C69": 28760,
+    "R29B": 26392
+  },
+  "row2_by_mode": {
+    "flush_required": 27570,
+    "write_through": 27582
+  },
+  "row2_frontier": 55152,
+  "row3_injections": 9252,
+  "schema": "wp10-backlog-r53-manifest-v1"
+}

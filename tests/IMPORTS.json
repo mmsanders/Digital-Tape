@@ -307,6 +307,19 @@
         "-B",
         "tests/capacity_wp09_r52/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_backlog_r53",
+      "tree": "7f80e382fc915aec4d9b8e1a9226b6c22a2da3f8",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "fd139dfa42a9447d889c700b0818e3d1f9099e81",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 backlog rows 1-3 verifier package (Verification #110, PR #113; row 1 fragmented dup C-90 to C-60, 24,660 injections + 2 completions; row 2 free_next after every remountable C69 (28,760) and R29-B (26,392) injection, 55,152; row 3 recording tape_service audio writes, 6 groups; case set 036e255eb2a704d041b87eb21116900ea307ba450a5cf72f3b0440dffdd3b2d7; oracle SHA-256 77db18f3ededab8242f873e56167a4068c510368b8754e95e2421009becf64e5, dupfrag 5687f0cf, deps e424efda, replay cd72ab2c, audit e3d91a47, self-test 2754cbdc, backlog-update ea4b1031; nine causal controls; deps.py pins crash_core_draft8 and format_dup_identity_draft8 planner/oracle/media/fixture blobs, all equal to Product main 66c6abc6) published at commit fd139dfa42a9447d889c700b0818e3d1f9099e81 (whole tree 994ae2641eb7dd76f9011863cef005143bb07ecd, parent 0ac2f8ed) on branch verification/issue-110-wp10-backlog, not Verification main; issued by PM Product #322 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_backlog_r53/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
