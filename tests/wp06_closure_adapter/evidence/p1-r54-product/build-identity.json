@@ -1,0 +1,15 @@
+{
+  "adapter_source_sha256": "0af5652252d7b51d74dc87523bb439a7232c0a0028d0027e54ae91cbacf96fc9",
+  "build_command": "make -C engine clean all && make -C tests/wp06_closure_adapter clean all",
+  "case_count": 7,
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "fixtures": "raw media per gap_plan fixture on a fresh flat device per case; every superblock field per tapefs \u00a74, uuid ASCII WP06-R52-closure, sb_generation 10; see README.md for each fixture's indices",
+  "import_commit": "051d292c3646b7a31a43fe5462ef3dbec022c2f0",
+  "makefile_sha256": "5d09e0988578a66cb335a8da65e866279340c9af0b2c5829df119a5ca575cb74",
+  "plan_sha256": "db9f826a3af4e3c7a2b01780ace2baa9bb5257aead873e484d25173b0c1b8119",
+  "product_base": "66c6abc69d83cff10da32a6b446690fcd0b927fb",
+  "run_product_sha256": "0d20547632d0f68020e482a30d68b3b8cc83b840341a47ea651ef469097d08b4",
+  "schema": "wp06-r52-product-build-identity-1",
+  "verifier_source_commit": "6b92e5f43de89efa71069084028376cdbc636bf4",
+  "verifier_tree": "b216baa2a9c160b2a14b3eac25567c5a260eed2f"
+}
