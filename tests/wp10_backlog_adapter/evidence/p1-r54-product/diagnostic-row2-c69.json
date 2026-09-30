@@ -1,0 +1,157 @@
+{
+  "by_family": [
+    {
+      "campaign_equal": true,
+      "cases": 2056,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "chunk_sha256",
+        "image_sha256"
+      ],
+      "family": "record_commit",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "overdub"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 2056,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "chunk_sha256",
+        "image_sha256"
+      ],
+      "family": "record_commit",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "overwrite"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 2056,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "chunk_sha256",
+        "image_sha256"
+      ],
+      "family": "record_commit",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "splice"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 4,
+      "chunks_as_pre": true,
+      "differing_fields": [],
+      "family": "reset_b",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "degraded_equal"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 2052,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "image_sha256"
+      ],
+      "family": "reset_b",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "degraded_equal"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 24,
+      "chunks_as_pre": true,
+      "differing_fields": [],
+      "family": "reset_b",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "healthy"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 2032,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "image_sha256"
+      ],
+      "family": "reset_b",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "healthy"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 88,
+      "chunks_as_pre": true,
+      "differing_fields": [],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "arm"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 6072,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "image_sha256"
+      ],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "arm"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 88,
+      "chunks_as_pre": true,
+      "differing_fields": [],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "reset_b"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 6072,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "image_sha256"
+      ],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "reset_b"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 88,
+      "chunks_as_pre": true,
+      "differing_fields": [],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "respool"
+    },
+    {
+      "campaign_equal": true,
+      "cases": 6072,
+      "chunks_as_pre": true,
+      "differing_fields": [
+        "image_sha256"
+      ],
+      "family": "stage_clear",
+      "free_chunks_ok": true,
+      "metadata_equal": true,
+      "variant": "respool"
+    }
+  ],
+  "canonical": false,
+  "cases": 28760,
+  "cases_outside_the_finding": [],
+  "cases_outside_the_finding_count": 0
+}

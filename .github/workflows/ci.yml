@@ -514,6 +514,52 @@ jobs:
             tests/capacity_wp09_adapter/evidence/replay
           if-no-files-found: error
 
+  wp10-backlog-package:
+    name: independent WP-10 backlog rows 1-3 — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_backlog_r53/audit.py
+      - run: python3 -B tests/wp10_backlog_r53/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_backlog_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_adapter/run_product.py
+          --replay tests/wp10_backlog_adapter/evidence/p1-r54-product/observations.jsonl.gz
+          --retained tests/wp10_backlog_adapter/evidence/p1-r54-product
+          --out tests/wp10_backlog_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_adapter/run_product.py
+          --evidence tests/wp10_backlog_adapter/evidence/product
+          --retained tests/wp10_backlog_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp10_backlog_adapter/negative_controls.py tests/wp10_backlog_adapter/evidence/product/observations.jsonl.gz
+      - name: Row-2 C69 plan finding (non-canonical diagnostic)
+        if: always()
+        run: python3 -B tests/wp10_backlog_adapter/diagnostic_row2_c69.py --out tests/wp10_backlog_adapter/evidence/product/diagnostic-row2-c69.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp10-backlog-product-evidence
+          path: |
+            tests/wp10_backlog_adapter/evidence/product
+            tests/wp10_backlog_adapter/evidence/replay
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
