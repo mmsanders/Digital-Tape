@@ -111,7 +111,9 @@ def build_and_run(gcc: str, clang: str) -> tuple[dict, dict, str]:
             cmd = [path, *FLAGS, "-I", str(tmp), "-I", str(ROOT / "engine" / "include"),
                    *sources, str(ADAPTER_SRC), "-o", str(exe)]
             subprocess.run(cmd, check=True)
-            streams[family] = subprocess.run([str(exe)], check=True, capture_output=True).stdout
+            stream = tmp / f"{family}.jsonl"
+            subprocess.run([str(exe), str(stream)], check=True)
+            streams[family] = stream.read_bytes()
             meta[family] = {"identity": identity, "flags": list(FLAGS)}
     return streams, meta, sha(text.encode())
 

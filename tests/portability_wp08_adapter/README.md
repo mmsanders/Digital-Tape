@@ -91,13 +91,19 @@ It also requires a one-byte Clang divergence to be detected. Result: 7/7 killed.
 Produced on Windows: GCC `gcc.EXE (Rev4, Built by MSYS2 project) 16.2.0` and Clang
 `clang version 22.1.8` (MSYS2 UCRT64), both with the package flags. The CI job
 regenerates it with ubuntu-latest's GCC and Clang and requires byte identity. A second
-local run regenerated it byte-identically.
+local run regenerated it byte-identically, and the stream equals the one ubuntu-latest's
+GCC 13.3.0 and Clang 18.1.3 produced in CI: four builds, one byte stream.
+
+The adapter writes its stream to a file opened `"wb"`. The first retained evidence
+went through `stdout`, whose text mode on Windows turned each of the 41 newlines into
+CRLF. That was the only difference from the Linux stream, and it is why that first CI
+regeneration did not match.
 
 | File | SHA-256 |
 |---|---|
-| stream (either compiler, uncompressed) | `c5aad871c89554a905dfdc883d3b0744540d15ba336b6a00f11cc7273c745544` |
-| `gcc.jsonl.gz` = `clang.jsonl.gz` | `98573ef88f8e6fc49d78846886867c2643531c9bdbf639ec0aa5bf19953fb6a4` |
-| `manifest.json` (compiler identities, flags, adapter, header, engine tree) | `d0dd37d5c4cb5d319ac8b36f69b7f2941ef3f46e69daeae88ccbc09032c35541` |
+| stream (either compiler, uncompressed) | `2f6ed528d01d188b284ef5d481140c4721922ce1d60c227e1223c961948cef47` |
+| `gcc.jsonl.gz` = `clang.jsonl.gz` | `906f5790ac5fa35e5df4642c63057c8f5f979f08f64866ef3da00dab0548fe4d` |
+| `manifest.json` (compiler identities, flags, adapter, header, engine tree) | `078cbaedef27a968b7f9639455e7b030bfee248173517773df7260344b90b2f9` |
 
 ## Exclusions
 

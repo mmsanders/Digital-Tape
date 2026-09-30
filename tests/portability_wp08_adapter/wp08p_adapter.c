@@ -11,7 +11,7 @@
  * entries are the row's runs, then tape_mount(B), tape_seek, tape_set_rate,
  * tape_service(7) until more_work is false, one tape_render, tape_tell and
  * tape_status. Every callback is recorded against the call that caused it.
- * One JSON object per row on stdout.
+ * One JSON object per row, written to OUTPUT_JSONL.
  */
 #include "tape.h"
 
@@ -55,6 +55,8 @@ static const uint8_t k_uuid[16] = {0x57,0x50,0x30,0x38,0x2d,0x52,0x35,0x32,0x2d,
 
 static unsigned char *g_media;
 static uint32_t g_block_count;
+/* Opened "wb": a text-mode stdout would turn every newline into CRLF on Windows. */
+static FILE *g_out;
 
 /* ------------------------------------------------------------------------ */
 /* per-call callback lists                                                   */
@@ -249,7 +251,7 @@ static void build_fixture(const struct vector *v)
 static void hex(const unsigned char *p, size_t n)
 {
     size_t i;
-    for (i = 0u; i < n; ++i) printf("%02x", (unsigned)p[i]);
+    for (i = 0u; i < n; ++i) fprintf(g_out, "%02x", (unsigned)p[i]);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -273,20 +275,20 @@ static void run(const struct vector *v)
     build_fixture(v);
 
     /* Raw identity, read directly from media before the engine runs. */
-    printf("{\"case\":\"%s\",\"fixture_sha256\":\"%s\",\"raw_superblock\":\"", v->id, v->fixture_sha256);
+    fprintf(g_out, "{\"case\":\"%s\",\"fixture_sha256\":\"%s\",\"raw_superblock\":\"", v->id, v->fixture_sha256);
     hex(blk(0u), BLOCK);
-    printf("\",\"raw_B0\":\"");
+    fprintf(g_out, "\",\"raw_B0\":\"");
     hex(blk(LBA_B0), BLOCK);
     hex(blk(LBA_B0 + 1u), (size_t)rd32(blk(LBA_B0) + 16) * 12u);
-    printf("\",\"raw_B1\":\"");
+    fprintf(g_out, "\",\"raw_B1\":\"");
     hex(blk(LBA_B1), BLOCK);
-    printf("\",\"raw_run_pcm\":[");
+    fprintf(g_out, "\",\"raw_run_pcm\":[");
     for (k = 0u; k < v->run_count; ++k) {
-        printf("%s\"", k ? "," : "");
+        fprintf(g_out, "%s\"", k ? "," : "");
         hex(blk(LBA_CHUNK_BASE + (2u * k + 1u) * CHUNK_BLOCKS) + 4u * RUN_START_FRAME, (size_t)v->runs[k] * 4u);
-        printf("\"");
+        fprintf(g_out, "\"");
     }
-    printf("],\"schema\":\"wp08-portability-r52-v1\",\"trace\":[");
+    fprintf(g_out, "],\"schema\":\"wp08-portability-r52-v1\",\"trace\":[");
 
     memset(g_mem, 0, g_mem_len);
     memset(g_play, 0, TAPE_PLAY_RING_MIN);
@@ -301,54 +303,57 @@ static void run(const struct vector *v)
 
     ev_reset();
     r = tape_mount(t, TAPE_SIDE_B, 0u, NULL);
-    printf("{\"block_events\":[%s],\"fn\":\"tape_mount\",\"result\":\"%s\"},", g_ev, rname(r));
+    fprintf(g_out, "{\"block_events\":[%s],\"fn\":\"tape_mount\",\"result\":\"%s\"},", g_ev, rname(r));
 
     ev_reset();
     r = tape_seek(t, v->seek);
-    printf("{\"block_events\":[%s],\"fn\":\"tape_seek\",\"frame\":%" PRIu64 ",\"result\":\"%s\"},", g_ev, v->seek, rname(r));
+    fprintf(g_out, "{\"block_events\":[%s],\"fn\":\"tape_seek\",\"frame\":%" PRIu64 ",\"result\":\"%s\"},", g_ev, v->seek, rname(r));
 
     ev_reset();
     r = tape_set_rate(t, v->rate);
-    printf("{\"block_events\":[%s],\"fn\":\"tape_set_rate\",\"rate_q16_16\":%" PRId32 ",\"result\":\"%s\"},", g_ev, v->rate, rname(r));
+    fprintf(g_out, "{\"block_events\":[%s],\"fn\":\"tape_set_rate\",\"rate_q16_16\":%" PRId32 ",\"result\":\"%s\"},", g_ev, v->rate, rname(r));
 
     for (;;) {
         bool more = false;
         ev_reset();
         r = tape_service(t, SERVICE_BUDGET, &more);
-        printf("{\"block_events\":[%s],\"budget\":%u,\"fn\":\"tape_service\",\"more_work\":%s,\"result\":\"%s\"},",
+        fprintf(g_out, "{\"block_events\":[%s],\"budget\":%u,\"fn\":\"tape_service\",\"more_work\":%s,\"result\":\"%s\"},",
                g_ev, SERVICE_BUDGET, more ? "true" : "false", rname(r));
         if (r != TAPE_OK || !more || ++guard > 10000u) break;
     }
 
     ev_reset();
     r = tape_render(t, out, v->requested, &rendered);
-    printf("{\"block_events\":[%s],\"fn\":\"tape_render\",\"rendered\":%" PRIu32 ",\"requested\":%" PRIu32 ",\"result\":\"%s\"},",
+    fprintf(g_out, "{\"block_events\":[%s],\"fn\":\"tape_render\",\"rendered\":%" PRIu32 ",\"requested\":%" PRIu32 ",\"result\":\"%s\"},",
            g_ev, rendered, v->requested, rname(r));
     if (rendered > MAX_FRAMES) { fprintf(stderr, "%s: rendered %u\n", v->id, (unsigned)rendered); exit(3); }
 
     ev_reset();
     r = tape_tell(t, &tell);
-    printf("{\"fn\":\"tape_tell\",\"value\":%" PRIu64 "},", tell);
+    fprintf(g_out, "{\"fn\":\"tape_tell\",\"value\":%" PRIu64 "},", tell);
     if (r != TAPE_OK || g_ev_len) { fprintf(stderr, "%s: tape_tell %s\n", v->id, rname(r)); exit(3); }
 
     memset(&st, 0, sizeof st);
     ev_reset();
     r = tape_status(t, &st);
-    printf("{\"at_end\":%s,\"at_start\":%s,\"fn\":\"tape_status\",\"result\":\"%s\"}],",
+    fprintf(g_out, "{\"at_end\":%s,\"at_start\":%s,\"fn\":\"tape_status\",\"result\":\"%s\"}],",
            st.at_end ? "true" : "false", st.at_start ? "true" : "false", rname(r));
     if (g_ev_len) { fprintf(stderr, "%s: tape_status made callbacks\n", v->id); exit(3); }
 
-    printf("\"at_end\":%s,\"at_start\":%s,\"pcm_hex\":\"", st.at_end ? "true" : "false", st.at_start ? "true" : "false");
+    fprintf(g_out, "\"at_end\":%s,\"at_start\":%s,\"pcm_hex\":\"", st.at_end ? "true" : "false", st.at_start ? "true" : "false");
     for (k = 0u; k < rendered; ++k) {
         uint16_t l = (uint16_t)out[2u * k], rr = (uint16_t)out[2u * k + 1u];
-        printf("%02x%02x%02x%02x", (unsigned)(l & 0xffu), (unsigned)(l >> 8), (unsigned)(rr & 0xffu), (unsigned)(rr >> 8));
+        fprintf(g_out, "%02x%02x%02x%02x", (unsigned)(l & 0xffu), (unsigned)(l >> 8), (unsigned)(rr & 0xffu), (unsigned)(rr >> 8));
     }
-    printf("\",\"rendered\":%" PRIu32 ",\"tell\":%" PRIu64 "}\n", rendered, tell);
+    fprintf(g_out, "\",\"rendered\":%" PRIu32 ",\"tell\":%" PRIu64 "}\n", rendered, tell);
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     uint32_t i;
+    if (argc != 2) { fprintf(stderr, "usage: %s OUTPUT_JSONL\n", argv[0]); return 2; }
+    g_out = fopen(argv[1], "wb");
+    if (g_out == NULL) { fprintf(stderr, "cannot open %s\n", argv[1]); return 2; }
     g_media = calloc((size_t)(LBA_CHUNK_BASE + TOTAL_CHUNKS * CHUNK_BLOCKS + 1u), BLOCK);
     g_mem_len = tape_instance_size();
     g_mem = calloc(1u, g_mem_len);
@@ -356,5 +361,5 @@ int main(void)
     g_rec = calloc(1u, TAPE_REC_RING_MIN);
     if (g_media == NULL || g_mem == NULL || g_play == NULL || g_rec == NULL) { fprintf(stderr, "oom\n"); return 3; }
     for (i = 0u; i < VECTOR_COUNT; ++i) run(&VECTORS[i]);
-    return 0;
+    return fclose(g_out) == 0 ? 0 : 3;
 }
