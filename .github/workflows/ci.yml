@@ -514,6 +514,48 @@ jobs:
             tests/capacity_wp09_adapter/evidence/replay
           if-no-files-found: error
 
+  wp06-closure-package:
+    name: independent WP-06 R52 closure gaps — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp06_closure_r52/audit.py
+      - run: python3 -B tests/wp06_closure_r52/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp06_closure_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp06_closure_adapter/run_product.py
+          --replay tests/wp06_closure_adapter/evidence/p1-r54-product
+          --out tests/wp06_closure_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp06_closure_adapter/run_product.py
+          --evidence tests/wp06_closure_adapter/evidence/product
+          --retained tests/wp06_closure_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case oracle outcomes; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp06_closure_adapter/negative_controls.py tests/wp06_closure_adapter/evidence/product/observations.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp06-closure-product-evidence
+          path: |
+            tests/wp06_closure_adapter/evidence/product
+            tests/wp06_closure_adapter/evidence/replay
+          if-no-files-found: error
+
   wp10-backlog-r54-package:
     name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
     runs-on: ubuntu-latest
