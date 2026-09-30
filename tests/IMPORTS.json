@@ -359,6 +359,19 @@
         "-B",
         "tests/portability_wp08_r52/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp12_closure_r53",
+      "tree": "5641e39d5b72f367468e2a8d121f6a0e6106fc2f",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "c65ed4357c9d4b9fe915910e0a669d335e611a80",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected WP-12/WP-12a R53 closure-ledger and gap verifier package (Verification #115, PR #106; 36-row coverage ledger SHA-256 795c05fec6f6655499afbd13b2f329d35dde4d154619e7387530a96b246076d4 unchanged: 28 accepted, 3 published gap rows, 2 unreachable, 3 vacuous; 7 gap cases; canonical plan 55e36eac067f3780789592bf8acffdb8860fd77e1a5a963be266ba35482497dc; gap_plan.json SHA-256 e44e57c3dc1650f98c78d9b8012efcae1dacc071c76aa190aebf06f1223b3fd6; oracle SHA-256 c45c3cce265ac4cf578a8c9b7b006a94a7643de2e4a300ace32b6f9ed6afe128, replay ca02a9b7, audit da440fc4, fixtures 526a9a3c, self-test 316a3a21; F-PROMOTE-WRITE, F-PROMOTE-FLUSH and F-RESPOOL-WRITE inject at the first own-device write/flush on any continuation call, with top-level fault_call_index; seven killed causal controls; fixtures.py pins respool_draft8/oracle.py blob 3c63f190 and promote_draft8/fixture.py blob 51c676bf, both equal to the copies on Product main 66c6abc6) published at commit c65ed4357c9d4b9fe915910e0a669d335e611a80 (whole tree 2b8b176bf6b0fa42f43f970cc1dbad6b936a92fc) on branch verification/issue-104-wp12-closure, not Verification main; issued by PM Product #324 and imported byte-identically by exact commit. Supersedes tree 928fba57db92c13a311cbc5336e37b4af0f270a6 (commit bbaa4f08), imported only on held Product PR #317 and never on main. Synthetic verifier evidence, not Product acceptance, and no complete WP-12/WP-12a claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp12_closure_r53/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
