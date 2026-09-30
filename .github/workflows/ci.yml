@@ -473,6 +473,48 @@ jobs:
             tests/sequential_wp06_adapter/evidence/replay
           if-no-files-found: error
 
+  wp10-final-package:
+    name: independent WP-10 final backlog (#118) — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_final_r54/audit.py
+      - run: python3 -B tests/wp10_final_r54/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_final_adapter clean all
+      - name: Offline replay of the retained evidence (release asset, fetched and hash-verified)
+        if: always()
+        run: >
+          python3 tests/wp10_final_adapter/run_product.py
+          --replay tests/wp10_final_adapter/evidence/p1-r55-product
+          --out tests/wp10_final_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/wp10_final_adapter/run_product.py
+          --evidence tests/wp10_final_adapter/evidence/product
+          --retained tests/wp10_final_adapter/evidence/p1-r55-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-row census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp10_final_adapter/negative_controls.py tests/wp10_final_adapter/evidence/product/wp10-final-r54-product-observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r55-wp10-final-product-evidence
+          path: |
+            tests/wp10_final_adapter/evidence/product
+            tests/wp10_final_adapter/evidence/replay
+          if-no-files-found: error
+
   capacity-wp09-package:
     name: independent WP-09 R52 capacity short accept — product replay
     runs-on: ubuntu-latest
