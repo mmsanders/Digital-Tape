@@ -556,6 +556,26 @@ jobs:
             tests/wp10_closure_adapter/evidence/replay
           if-no-files-found: error
 
+  accepted-binding-regression-gate:
+    name: accepted bindings regenerate on the current engine — gate can go red
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # the runners check the declared base/import against history.
+          fetch-depth: 0
+      - run: make -C engine clean all
+      - run: |
+          for d in crossrun_wp08 history_wp09 sequential_wp06 capacity_wp09; do
+            make -C tests/${d}_adapter clean all
+          done
+      # PM #320 ruling 3: retained provenance names the accepted engine, and a fresh
+      # build on the current engine/ regenerates the accepted observations
+      # byte-identically. The per-binding jobs run the gate; this proves it can fail.
+      - run: python3 -B tools/ci/verify-engine-regression-gate.py
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest
