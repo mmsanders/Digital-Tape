@@ -307,6 +307,19 @@
         "-B",
         "tests/capacity_wp09_r52/selftest.py"
       ]
+    },
+    {
+      "path": "tests/portability_wp08_r52",
+      "tree": "d803deeff4356b6f70ff7f255c9bd6f31aa09790",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "b843298b55a17d450905bc1ae56c4092f9cffa14",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "corrected WP-08 R52 exact two-toolchain playback arithmetic verifier package (Verification #114, PR #102; 41 vectors; canonical plan 6a8a87b1271054abbb1fe596292f9a416062ced0ec735fdd4c15bb71498b763c unchanged; oracle SHA-256 5b5f1612828210042cdcc89c01791125e9697b7b27c146ecef4032b3439c6559, ADAPTER.md SHA-256 5ce98138df0f43568b8282fda89a2de5f7f2cc7d572403a6e7e4882a236eec9f, replay SHA-256 b47849024823b251e2e223a1ac80fc86f0d95aab4a7b3929f0b091aa4d6dae89, self-test SHA-256 f9bf8607d9f20d632185c93dac793d1a141bc7b39d617fccf5796873edcf02d9, reference adapter SHA-256 7138bab160eb07569ccff1e2b4eb2700775249fdf2fcb597eabab6fb88869513; mount/service read callbacks permitted, zero writes/flushes, both superblock copies read on mount; byte-identical GCC/Clang reference streams; seventeen killed red controls) published at commit b843298b55a17d450905bc1ae56c4092f9cffa14 (whole tree c0bd16ba32b723c28d883c14b635ad750cf73459) on branch verification/issue-100-playback-portability, not Verification main; issued by PM Product #323 and imported byte-identically by exact commit. Supersedes tree d1ba52f7a756ee982cdcf03e0369a2b91bc44301 (commit 3dbd2252), imported only on held Product PR #316 and never on main. Verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/portability_wp08_r52/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
