@@ -1,0 +1,41 @@
+{
+  "adapter_sha256": "7138bab160eb07569ccff1e2b4eb2700775249fdf2fcb597eabab6fb88869513",
+  "byte_identical_observations": true,
+  "case_count": 41,
+  "clang": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+  },
+  "clang_gzip_sha256": "f351c0c7d30ea9ab45931f65847948b664327f54e1c41d481b49ab21da506a3a",
+  "gcc": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  "gcc_gzip_sha256": "f351c0c7d30ea9ab45931f65847948b664327f54e1c41d481b49ab21da506a3a",
+  "generated_header_sha256": "92514a645a3bed751aae4c6148ad58d5de06ec084365e81fd1e2991e9431215a",
+  "observations_sha256": "a7a5a3f7f8b8352a0cb94a59f8ce4934af751f3114bf69d216b141a715dce28e",
+  "plan_sha256": "6a8a87b1271054abbb1fe596292f9a416062ced0ec735fdd4c15bb71498b763c",
+  "red_controls_killed": 17,
+  "schema": "wp08-portability-r52-manifest-v1",
+  "scope": "verifier reference adapter; not Product acceptance",
+  "spec_sha256": {
+    "spec/acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d",
+    "spec/engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
+    "spec/tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d"
+  },
+  "verdict": "PASS"
+}
