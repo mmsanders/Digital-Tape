@@ -543,8 +543,17 @@ static tape_result dup_run(tape *t, uint32_t budget, uint32_t *used)
             t->dup_phase = DUP_PHASE_A0_HEADER;
         } else if (ph == DUP_PHASE_A0_HEADER) {
             raw_index_header(t->block, (uint8_t)TAPE_SIDE_A, 1u, frames);
-            rc = dup_put(t, TAPE_LBA_INDEX_A0, t->block, used);
-            if (rc != TAPE_OK) { return rc; }
+            if (frames != 0u) {
+                rc = dup_put(t, TAPE_LBA_INDEX_A0, t->block, used);
+                if (rc != TAPE_OK) { return rc; }
+            } else {
+                /* §9.5 step 3, empty source: A0 and B0 headers "exactly as
+                   tape_format §9.6 step 3 does" — both written, then one
+                   flush, which B0's dup_put supplies. */
+                if (dev_write(&t->dup_dev, TAPE_LBA_INDEX_A0, 1u, t->block) != 0) { return TAPE_ERR_IO; }
+                (*used)++;
+                t->dup_done++;
+            }
             t->dup_phase = (frames != 0u) ? DUP_PHASE_B0_ENTRIES : DUP_PHASE_B0_HEADER;
         } else if (ph == DUP_PHASE_B0_ENTRIES) {
             raw_index_entries(t->block, frames);
