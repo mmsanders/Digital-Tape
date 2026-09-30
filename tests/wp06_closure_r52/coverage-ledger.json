@@ -1,0 +1,68 @@
+{
+  "schema": "wp06-r52-ledger-v1",
+  "allowed_statuses": ["accepted exact evidence", "covered only synthetically", "missing Product observation", "outside WP-06"],
+  "rows": [
+    {"id":"WP06.roundtrip","status":"accepted exact evidence","evidence":"sequential-r44: roundtrip-*; Product 535d1e5e60367f6acef92a8287a7120715698b11; disposition issue-98 comment 5864298560"},
+    {"id":"WP06.mount.refusal.phases0-4","status":"accepted exact evidence","evidence":"mount 289/289; Product 9204512b7f3f06ce6ce202db9f1e2a92e56e8d0b; disposition 392d6bb9c948a5924fe18728fab04202bc8e337e"},
+    {"id":"WP06.commit.max97.exact2flush","status":"accepted exact evidence","evidence":"sequential-r44 2/3/97-block commit cases; issue-98 comment 5864298560"},
+    {"id":"WP06.commit.noop.zero_io","status":"accepted exact evidence","evidence":"sequential-r44 empty-commit plus WP09 Product observations"},
+
+    {"id":"WP06a.v11.effective_read_only","status":"accepted exact evidence","evidence":"writability 8/8; Product 87e84702df5f717a4ac14a65ea69455b637721b7; disposition d875730ee5cedc6b88e40fcfe30aa4d81918f549"},
+    {"id":"WP06a.arm_reset_promote_respool.read_only","status":"accepted exact evidence","evidence":"writability 8/8"},
+    {"id":"WP06a.feed_commit.busy","status":"accepted exact evidence","evidence":"writability 8/8"},
+    {"id":"WP06a.repair_skipped.needs_repair","status":"accepted exact evidence","evidence":"writability 8/8"},
+
+    {"id":"WP06b.undefined_state_and_stage","status":"accepted exact evidence","evidence":"mount 289/289 named undefined-field cases"},
+    {"id":"WP06c.interval_overlap_refuse","status":"accepted exact evidence","evidence":"mount 289/289 interval matrix"},
+    {"id":"WP06c.splice_disjoint_accept","status":"accepted exact evidence","evidence":"mount 289/289 interval matrix"},
+    {"id":"WP06c.cross_side_chunk_reference_accept","status":"accepted exact evidence","evidence":"mount 289/289 both-side validation cases"},
+    {"id":"WP06c.zero_chunk_reads","status":"accepted exact evidence","evidence":"mount 289/289 raw callback observations"},
+
+    {"id":"WP06d.geometry.boundaries_and_stored_chunks","status":"accepted exact evidence","evidence":"mount 289/289 geometry cases"},
+    {"id":"WP06d.v2_torn.zero_write","status":"accepted exact evidence","evidence":"mount 289/289"},
+    {"id":"WP06d.equal_sequence.refuse","status":"accepted exact evidence","evidence":"mount 289/289"},
+    {"id":"WP06d.preread.mount_format_dup","status":"accepted exact evidence","evidence":"format/dup 17/17 plus mount 289/289; Product 88bd04d2388520150c2e81d0f9f15c1551ae3751"},
+
+    {"id":"WP06e.stage_clear.arm_record_commit","status":"accepted exact evidence","evidence":"WP09-STAGE-CLEAR; Product 9d3649d87f2adb093d18b34825e38ca9573ba0a5"},
+    {"id":"WP06e.stage_clear.arm_reset_respool.first_write","status":"accepted exact evidence","evidence":"WP10 core 28760/28760; Product 14873bc2df31a5dac26692f838866619305bc50c"},
+    {"id":"WP06e.stage1.arm.sequence_headroom","status":"accepted exact evidence","evidence":"WP09-STAGE-REFUSE"},
+    {"id":"WP06e.stage1.arm.side_a","status":"missing Product observation","package_cases":["E-SIDEA-REFUSE"]},
+    {"id":"WP06e.stage1.respool.no_destination","status":"missing Product observation","package_cases":["E-RESPOOL-FULL"]},
+    {"id":"WP06e.stage1.record.then_promote","status":"missing Product observation","package_cases":["E-RECORD-PROMOTE"]},
+    {"id":"WP06e.stage1.arm.index_full","status":"missing Product observation","package_cases":[],"blocker":"Unobservable under frozen 9.3.3: every mountable stage-1 live B has one entry and therefore cannot be index-full."},
+    {"id":"WP06e.stage1.respool.empty","status":"missing Product observation","package_cases":[],"blocker":"Unobservable through public calls: stage-1 plus zero-entry B matches no RESUME row and mount refuses."},
+    {"id":"WP06e.no_index_commit_while_stage1","status":"accepted exact evidence","evidence":"WP10 core stage-clear write-order observations"},
+    {"id":"WP06e.promote.phase2.exception","status":"accepted exact evidence","evidence":"WP10 core promote crash/resume observations"},
+
+    {"id":"WP06f.sideA_unselectable.both_requests","status":"accepted exact evidence","evidence":"mount 289/289"},
+    {"id":"WP06f.degraded.two_causes.mount_results","status":"accepted exact evidence","evidence":"mount 289/289 and sequential-r44"},
+    {"id":"WP06f.degraded.fifteen_cells","status":"accepted exact evidence","evidence":"sequential-r44 21 degraded cases; Product 535d1e5e60367f6acef92a8287a7120715698b11"},
+    {"id":"WP06f.reset.remount.switch.absent","status":"accepted exact evidence","evidence":"sequential-r44 degraded-invalid-reset_b"},
+    {"id":"WP06f.reset.remount.switch.divergent","status":"accepted exact evidence","evidence":"sequential-r44 degraded-divergent-reset_b"},
+    {"id":"WP06f.stage1.degraded.mount","status":"accepted exact evidence","evidence":"mount 289/289 M-degraded-*-stage1-*"},
+    {"id":"WP06f.stage1.degraded_absent.reset","status":"missing Product observation","package_cases":["F-STAGE-DEGRADED-ABSENT"]},
+    {"id":"WP06f.stage1.degraded_divergent.reset","status":"missing Product observation","package_cases":["F-STAGE-DEGRADED-DIVERGENT"]},
+    {"id":"WP06f.sideA_liveB.free_next","status":"accepted exact evidence","evidence":"mount 289/289 free_next cases"},
+    {"id":"WP06f.sideA_liveB.promote_floor","status":"missing Product observation","package_cases":["F-LIVEB-PROMOTE-FLOOR"]},
+    {"id":"WP06f.sideA_liveB.respool_floor","status":"missing Product observation","package_cases":["F-LIVEB-RESPOOL-FLOOR"]},
+
+    {"id":"WP06g.resume.rows.accept","status":"accepted exact evidence","evidence":"mount 289/289 plus WP10 core"},
+    {"id":"WP06g.unmatched.stage.refuse.zero_write","status":"accepted exact evidence","evidence":"mount 289/289 unmatched stage cases"},
+    {"id":"WP06g.all_mount_failures.zero_write","status":"accepted exact evidence","evidence":"mount 289/289 and sequential-r44 refusal cases"},
+    {"id":"WP06h.all17.before_after_unmount","status":"accepted exact evidence","evidence":"NOT_MOUNTED 34/34; Product 242f6d8f9de67dcca50f0f973a09988607429662"},
+
+    {"id":"helper.source_design_language","status":"outside WP-06","evidence":"Source/code-quality review explicitly excluded by issue 101"},
+    {"id":"WP10.full_crash_atomicity","status":"outside WP-06","evidence":"Explicit issue exclusion"},
+    {"id":"WP11.WP12.full_scope","status":"outside WP-06","evidence":"Only accepted setup facts are imported; full work packages excluded"}
+  ],
+  "authenticated_identities": {
+    "mount_disposition_commit":"392d6bb9c948a5924fe18728fab04202bc8e337e",
+    "mount_findings_sha256":"ded9a314fb636a8d6fceca9593054849f28b4bc49f8a6ec5cac7e22c0330c532",
+    "writability_publication":"d875730ee5cedc6b88e40fcfe30aa4d81918f549",
+    "not_mounted_publication":"2f0fe952244bf40b4658f6a94904470349871c17",
+    "sequential_publication":"87d41f58e33e63b7265defcef392d6f4d3219ca7",
+    "sequential_observations_sha256":"ede1620acf523b36d2e2481ed8c4bb2c476178c5bc1959380cc201734fd7395f",
+    "wp09_publication":"072cdb3b21812f81770944f15d7f59dccb220f67",
+    "wp10_core_publication":"18ff453e80fa245ad2d10066a1df262b443905b7"
+  }
+}
