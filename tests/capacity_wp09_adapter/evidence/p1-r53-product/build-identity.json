@@ -1,0 +1,15 @@
+{
+  "adapter_source_sha256": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120",
+  "build_command": "make -C engine clean all && make -C tests/capacity_wp09_adapter clean all",
+  "case_count": 27,
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "fixture": "raw stage-0 media per ADAPTER.md on a fresh flat device per row (block_count 2048 + 1024 x total_chunks + 1; nominal_length_s 9/12/15 s for 4/5/6 chunks; uuid ASCII WP09-R52-capshrt; sb_generation 7; empty Side-A index A0 at sequence 1; live B0 sequence 3 [(2,0,12)]; B1 zero; seed frames (100+i,-200-i) in chunk 2)",
+  "import_commit": "aba7735e388e219f4804658c5be3f8cc43258a1f",
+  "makefile_sha256": "81e6c4b41d7034bc2324ec09c5b1e0def23b38ccc4aef7db9b2d7c19d9ee2b10",
+  "plan_file_sha256": "ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501",
+  "product_base": "39d2076fa204991ec9c0d43f00b502942556bf9a",
+  "run_product_sha256": "009bea2f161a2ccb207b17d8aa6d1d15450ff1ddb5b5085418e0f8c0f14270e6",
+  "schema": "wp09-capacity-r52-product-build-identity-1",
+  "verifier_source_commit": "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5",
+  "verifier_tree": "85043f530c95257721347a6d991a0d205b299e4f"
+}

@@ -1,0 +1,1055 @@
+{
+  "capacity-overdub-end-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131084,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overdub-end-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393228,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overdub-end-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262156,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-overdub-middle-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131078,
+    "render_events_from_call": 0,
+    "service_calls": 1027,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overdub-middle-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393222,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overdub-middle-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262150,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-overdub-start-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131072,
+    "render_events_from_call": 0,
+    "service_calls": 1027,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overdub-start-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393216,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overdub-start-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262144,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-overwrite-end-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131084,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overwrite-end-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393228,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overwrite-end-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262156,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-overwrite-middle-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131078,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overwrite-middle-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393222,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overwrite-middle-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262150,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-overwrite-start-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131072,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-overwrite-start-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393216,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-overwrite-start-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262144,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-splice-end-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131084,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-splice-end-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393228,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-splice-end-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262156,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-splice-middle-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131084,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-splice-middle-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393228,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-splice-middle-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262156,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  },
+  "capacity-splice-start-one-free-one-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 1,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 131084,
+    "render_events_from_call": 0,
+    "service_calls": 1026,
+    "service_chunks": [
+      3
+    ],
+    "service_write_blocks": 1025
+  },
+  "capacity-splice-start-three-free-4095-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 4095,
+      "events_from_call": 0,
+      "requested": 4096,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 393228,
+    "render_events_from_call": 0,
+    "service_calls": 97,
+    "service_chunks": [
+      3,
+      4,
+      5
+    ],
+    "service_write_blocks": 3073
+  },
+  "capacity-splice-start-two-free-seventeen-left": {
+    "commit_events": [
+      [
+        "write",
+        393
+      ],
+      [
+        "flush",
+        null
+      ],
+      [
+        "write",
+        392
+      ],
+      [
+        "flush",
+        null
+      ]
+    ],
+    "final_feed": {
+      "accepted": 17,
+      "events_from_call": 0,
+      "requested": 64,
+      "result": "TAPE_ERR_CARTRIDGE_FULL"
+    },
+    "free_chunks_after": 0,
+    "premature_commit": {
+      "events_from_call": 0,
+      "result": "TAPE_ERR_BUSY"
+    },
+    "remounted_frames": 262156,
+    "render_events_from_call": 0,
+    "service_calls": 129,
+    "service_chunks": [
+      3,
+      4
+    ],
+    "service_write_blocks": 2049
+  }
+}

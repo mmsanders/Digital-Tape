@@ -296,6 +296,19 @@
       ]
     },
     {
+      "path": "tests/capacity_wp09_r52",
+      "tree": "85043f530c95257721347a6d991a0d205b299e4f",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-09 R52 positive capacity short-accept verifier package (27 cases: overwrite/overdub/splice x start/middle/end x 1/17/4095-frame accepted prefix; canonical plan 620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278, plan.json file SHA-256 ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501; oracle SHA-256 e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b, replay SHA-256 da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6, self-test SHA-256 5f9ceb5a648b1e9074946c36214920b2ea82de2219076e90a9e5bfeca59e7ff1; seven killed red controls) published under Verification #99 at commit 87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5 (whole tree 07dca0ac8cc2c83f685f0317c600c7be56eaa916, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-99-capacity-short-accept, not Verification main; issued by PM Product #306 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/capacity_wp09_r52/selftest.py"
+      ]
+    },
+    {
       "path": "tests/wp10_closure_r53",
       "tree": "2a514c902b9b38901abe6841017cc110987c1ecd",
       "source_repo": "mmsanders/digital-tape-verification",

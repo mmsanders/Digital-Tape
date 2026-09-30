@@ -1,0 +1,21 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "7f4deb37a20c2e242aa12487bee178253e8da56c9d1a04b7c57c358c33cd6608",
+  "case_count": 27,
+  "evidence_file": "observations.jsonl.gz",
+  "evidence_file_sha256": "7b59c665f05d9f75bd97fa7dbfa2728e1339e2daba5c6058c5d95c32a253450f",
+  "observations_sha256": "fb97d16acc2d56d5ba2ba31500dd6a0b21239e2a612c45642603ff65d701f549",
+  "oracle_sha256": "e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b",
+  "plan_sha256": "620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278",
+  "product_commit": null,
+  "product_tree": null,
+  "replay_sha256": "da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6",
+  "schema": "wp09-capacity-r52-manifest-v1",
+  "scope": "offline observation replay; not Product acceptance unless adapter_kind=product",
+  "spec_sha256": {
+    "spec/acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d",
+    "spec/engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
+    "spec/tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d"
+  },
+  "verdict": "PASS"
+}
