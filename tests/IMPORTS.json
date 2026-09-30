@@ -294,6 +294,19 @@
         "-B",
         "tests/sequential_wp06_r44/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp12_closure_r53",
+      "tree": "928fba57db92c13a311cbc5336e37b4af0f270a6",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "bbaa4f083a78316575a2f974a22b19ecdcf33fab",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-12/WP-12a R53 closure-ledger and gap verifier package (36-row coverage ledger SHA-256 795c05fec6f6655499afbd13b2f329d35dde4d154619e7387530a96b246076d4: 28 accepted, 3 published gap rows, 2 unreachable, 3 vacuous; 7 gap cases; canonical plan 2333ec3483d9ba386c0394a64c63b7154a5289564c3d196cef5fa57add2c68ea; oracle SHA-256 5fb125461630b24d5ae08a9287010fa76d5a7d59dd0457854f72f872eda02d92, replay SHA-256 ca02a9b7820cf485839cc45d72fff2b5bfce62c5d4471ff6c8725eb4f2dcda7f, audit SHA-256 da440fc47e4ad77dbc41e895711d359644a70943796cfe19234777899d5271c2, fixtures SHA-256 526a9a3ccd3d0b85b4269279d1d4092086953438e4c7a24e0afccfb54a893e05, self-test SHA-256 d3d89fb6bd039fef3a9270cdee6c15ba91755da5f736dd8ed56414a904de226a; six killed causal controls; fixtures.py pins respool_draft8/oracle.py blob 3c63f190 and promote_draft8/fixture.py blob 51c676bf, both equal to the copies on Product main 39d2076) published under Verification #104 / PR #106 at commit bbaa4f083a78316575a2f974a22b19ecdcf33fab (whole tree 45f8aa39ddcab5400946faa8c3cefb52e7aa3cae, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-104-wp12-closure, not Verification main; issued by PM Product #314 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-12/WP-12a claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp12_closure_r53/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
