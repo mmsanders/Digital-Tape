@@ -1,6 +1,6 @@
 # Project status
 
-**30 September 2026 UTC · input main `e4e15a0` · Owner: Verification #127→#128→#126; PM #305/#308 ·**
+**30 September 2026 UTC · input main `2e54e0f` · Owner: Verification #127→#128→#126, Software #337; PM #305 ·**
 Phase 1 has three complete independently accepted packages: **WP-07 allocator/COW, WP-13
 embedded readiness and WP-36 slot capability**. The dashboard remains **21/36 rungs (58%)**.
 Bounded R29-A/B/C, WP-06 #297 (38/38), WP-08 #287 (33/33), WP-09 #288 (10,000 edits) and
@@ -78,6 +78,7 @@ independently accepted engine behavior.
 | WP-10 / operations freeze | — | Bounded core, R29-B, R29-A and exact combined R29-C PR #272 are independently accepted and integrated; complete operations/WP-12a remain open | Held pending further independent coverage |
 | WP-11 | — | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Held pending a separately issued listening/golden route |
 | Hardware | 2026-09-18 | **PARKED by Michael 29 Sep ([#309](https://github.com/mmsanders/Digital-Tape/issues/309)).** PR #87 repair `e294d51` unaudited; Verification #20 (A1MINI-01, PR #120) closed without a finding; PR #92 held. Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | None PM-issued; Michael works with Hardware directly. Resume on Michael `REQUEST:` or Phase 2 |
+| DRAFT-10 spec revision (#308) | 2026-09-30 | **PARKED by Michael 30 Sep.** Docket: V-R54-03 blank detection (blocks complete WP-10 and the §9 freeze), two WP-06e clauses (block complete WP-06), three PM-ruled wording items. V-R54-01 split out as Software #337 (CI only) | PM — resume when only spec-blocked work remains, a spec finding blocks the critical path, or at the Phase 1 close gate |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
 | WP-04 / WP-05 | 2026-09-18 | PARKED with Hardware (#309). PR #87 not re-audited; A1MINI-01 unaudited; identity, attribution, atomicity and qualification remain open | None PM-issued; resume with Hardware |
 
