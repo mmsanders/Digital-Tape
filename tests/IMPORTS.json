@@ -320,6 +320,19 @@
         "-B",
         "tests/wp10_closure_r53/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_backlog_r53",
+      "tree": "caae666068e05c2c5e010e9b3e16e8583d3c707b",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "f327599194ac5ae6d3b4c3f1d1e20a4a8beca747",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 backlog rows 1-3 verifier package, row-2 C69 corrected (Verification #110 / PR #113, corrected under #124; observation schema wp10-backlog-r53-observation-v2: C69 row 2 binds pre/post metadata and chunk digests instead of a whole-snapshot hash; rows 1 and 3 and row-2 R29-B unchanged; case set 036e255eb2a704d041b87eb21116900ea307ba450a5cf72f3b0440dffdd3b2d7; oracle SHA-256 2f0f33496dbc11d565461e24615d23d3487c537d6cd2c1e6c880795071b295a3, dupfrag SHA-256 5687f0cfdc4985e05ff0751f1d8c1bb50c446941db6e83298771f76196019633, deps SHA-256 e424efdacc1f706125ea257b461c108b3055b5de2f62b820d229827ea5a4327a, replay SHA-256 cd72ab2cddb042a2b88a5095fc1c6a64aea02f199ecbbac2f8c102bd7a5ab216, self-test SHA-256 6f9aadb2007862f2ef8f91ea1efde7a73abaa4fea0cdea665b0e85c15c8ccd46; deps.py pins the accepted crash_core_draft8 and format_dup_identity_draft8 planner/oracle/media/fixture blobs, equal to Product main) published at commit f327599194ac5ae6d3b4c3f1d1e20a4a8beca747 (whole tree 40d969de035e31422cb28fe2c59b32ead9f75839), reachable from Verification PR #125; supersedes subtree 7f80e382fc915aec4d9b8e1a9226b6c22a2da3f8, imported only on held Product PR #329 and never on main; issued by PM Product #333 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_backlog_r53/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
