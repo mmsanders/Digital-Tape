@@ -1,0 +1,33 @@
+{
+  "accepted_worker_origins": {
+    "wp10b_c69_worker.c": "tests/crash_core_adapter/wp10_core_worker.c 46ec919d5aed74c4e3364904afe8df01c18f12bff6c22ec6fd8d8b8ffc5acc0f + remount get_info",
+    "wp10b_r29b_worker.c": "tests/format_dup_identity_adapter/r29_format_dup_worker.c c6a43b9d2df2668d11e036592142b79738e62502fdd01b974dc90d14b6d318cf, crash path only + remount get_info",
+    "wp10b_row1.c": "held PR #318 tests/wp10_closure_adapter/wp10c_adapter.c, per-device geometry + dst_chunk_lbas"
+  },
+  "adapter_source_sha256": "9b07d6319bc89ac3e5759265520b921d7684889d76064ba630b34e1187c1e268",
+  "build_command": "make -C engine clean all && make -C tests/wp10_backlog_adapter clean all",
+  "caseset_sha256": "036e255eb2a704d041b87eb21116900ea307ba450a5cf72f3b0440dffdd3b2d7",
+  "census": {
+    "cases": 79820,
+    "row1": 24662,
+    "row2": {
+      "C69": 28760,
+      "R29B": 26392
+    },
+    "row3_groups": 6
+  },
+  "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+  "import_commit": "71f24ac944d586f8ead70d6928d3d4e259ac6dce",
+  "makefile_sha256": "2336237f46e52d305b3bbd49d1a0e385ca37693d279174d91936d79cad9853d6",
+  "product_base": "b05f6afc01ec7dea652bd2fe3c49a7f20eea6dc2",
+  "run_product_sha256": "76b181a3054ddb394fc1485f50509e0c9b99cc9cfb31bf60acda2467b6ffc034",
+  "schema": "wp10-backlog-r53-product-build-identity-1",
+  "sources_sha256": {
+    "wp10b_c69_worker.c": "a7f2a18b23717aa469d5e24699b841f50e3b44039099f24a373d3db0e510928d",
+    "wp10b_r29b_worker.c": "7ee94154a6f6025a304a1940812c5af02fc6c2ee66e6f1b9991bd4e376f153ec",
+    "wp10b_row1.c": "200bc67f251bf812dbb483f09dc9aa707f1237faefd9a1e82b536c5051740d44",
+    "wp10b_row3.c": "e8e3b8dbf8f9d3b65085c739566b8c705831fe7f44d812311d2b51f89a56536d"
+  },
+  "verifier_source_commit": "f327599194ac5ae6d3b4c3f1d1e20a4a8beca747",
+  "verifier_tree": "caae666068e05c2c5e010e9b3e16e8583d3c707b"
+}
