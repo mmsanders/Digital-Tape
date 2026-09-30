@@ -45,6 +45,10 @@ PRODUCT_BASE = "39d2076fa204991ec9c0d43f00b502942556bf9a"
 IMPORT_COMMIT = "aba7735"
 PLAN_FILE_SHA256 = "ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501"
 BUILD_COMMAND = "make -C engine clean all && make -C tests/capacity_wp09_adapter clean all"
+# The engine this binding was independently accepted on. The retained evidence must
+# keep naming it; the current engine/ is checked by byte-identical regeneration
+# (--retained), not by pinning HEAD to it (PM ruling, #320).
+ACCEPTED_ENGINE_TREE = "054d27ab6e3e72f61118ff7d99e19e48741d05b2"
 
 CHUNK_FRAMES = 131072
 FEED_MAX = 4096
@@ -167,6 +171,14 @@ def verify_retained(retained: Path) -> bytes:
     return data
 
 
+def check_accepted_engine(retained: Path) -> None:
+    """Ruling (a): the retained evidence still records the engine it was accepted on."""
+    named = json.loads((retained / "build-identity.json").read_text())["engine_tree"]
+    if named != ACCEPTED_ENGINE_TREE:
+        raise SystemExit(f"retained provenance names engine {named}, not the accepted "
+                         f"{ACCEPTED_ENGINE_TREE}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -177,6 +189,7 @@ def main() -> int:
     a = ap.parse_args()
 
     check_provenance()
+    print("current engine/ tree " + git("rev-parse", "HEAD:engine"))
     head = git("rev-parse", "HEAD")
     product_commit = os.environ.get("PRODUCT_COMMIT") or head
     product_tree = git("rev-parse", product_commit + "^{tree}")
@@ -185,6 +198,7 @@ def main() -> int:
     if a.replay:
         retained = a.replay if a.replay.is_absolute() else ROOT / a.replay
         data = verify_retained(retained)
+        check_accepted_engine(retained)
         ident = json.loads((retained / "build-identity.json").read_text())
         out = fresh_dir(a.out or Path("build/wp09-capacity-replay"))
         jsonl = out / "observations.jsonl"
@@ -244,6 +258,7 @@ def main() -> int:
 
     if a.retained:
         retained = a.retained if a.retained.is_absolute() else ROOT / a.retained
+        check_accepted_engine(retained)
         if verify_retained(retained) != jsonl.read_bytes():
             raise SystemExit("regenerated JSONL differs from the committed retained evidence")
         print("regenerated JSONL is byte-identical to the retained evidence")

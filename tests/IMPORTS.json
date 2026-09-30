@@ -309,6 +309,32 @@
       ]
     },
     {
+      "path": "tests/wp10_closure_r53",
+      "tree": "2a514c902b9b38901abe6841017cc110987c1ecd",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "86904a30765eb415d1283fcd1cbb511f2569ed7c",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 R53 crash-injection closure-ledger and top-three gap verifier package (61-row coverage ledger SHA-256 369566e280a197a42e0be5c233f66241cde41268f9642881a107341669d27817: 48 accepted, 3 published, 9 backlog, 1 unreachable; 57,532 injection points split 28,766 flush-required / 28,766 write-through, plus 6 completion and 1 empty-family case; case set SHA-256 72717654d563905b8e76c79959757b0ae625a3f2353944c2818baf35ca83bf0e; model SHA-256 d581ff2c3ca6815fef9478748e91b922c5afed249b4f8aa19f2c85efc8ddf474, oracle SHA-256 f843cea4d586a9c802c3e1913d0b64eecce6397075ff34cbad080e951354970b, replay SHA-256 7934854df4cc7e9a2802e624d51346dd1bc6326cbe6d28adc2f18117c8442adc, audit SHA-256 60bf66c7bea69b61447416c8c780231b526c2f161465b800990fe9e2085d039c, self-test SHA-256 a867870e91609db50d5895400429b0396d416c3ab766368c13e3e8e073fee80f; seven causal controls killed with and without trace binding; model.py pins format_dup_identity_draft8/fixture.py blob 86df43a254479464559e299855e900d5637836a9, equal to the copy on Product main 6e88b0f) published under Verification #105 / PR #109 at commit 86904a30765eb415d1283fcd1cbb511f2569ed7c (whole tree 905d93f65bc24c887c8a20e3b8b1e5c9f3e2d863, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-105-wp10-closure, not Verification main; issued by PM Product #315 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_closure_r53/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/wp10_backlog_r54",
+      "tree": "d6e9a2427ed9b6c4b703c65dc44eb7e13224cabc",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "dea9b521ccee76a69cfd0d517903eb27474d41fc",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 backlog r54 verifier package (Verification #116, PR #117; row 1 mount phase-4 repair crash, 4 shapes, 4,112 injections; row 2 tape_dup re-run on the same destination after every interruption, 5 shapes, 64,734 injections; row 3 eight completed labelled copies; case set 6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3; oracle SHA-256 c3f469ed0716d509231ca1b7c343b96ffdaedc1e5b796c78a21941ca6e9a2b2a, model 57b72ab0, deps b0872c84, replay 437d63e5, audit 564966f7, self-test ff088325; seven causal controls; deps.py pins format_dup_identity_draft8 planner/oracle/media/fixture blobs, all equal to Product main 66c6abc6) published at commit dea9b521ccee76a69cfd0d517903eb27474d41fc (whole tree 482213a32cfb1edb1accf5783f62532ca8b76ae0, parent 0ac2f8ed) on branch verification/issue-116-wp10-backlog, not Verification main; issued by PM Product #325 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_backlog_r54/selftest.py"
+      ]
+    },
+    {
       "path": "tests/wp06_closure_r52",
       "tree": "b216baa2a9c160b2a14b3eac25567c5a260eed2f",
       "source_repo": "mmsanders/digital-tape-verification",

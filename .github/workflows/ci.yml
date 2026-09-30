@@ -556,6 +556,111 @@ jobs:
             tests/wp06_closure_adapter/evidence/replay
           if-no-files-found: error
 
+  wp10-backlog-r54-package:
+    name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_backlog_r54/audit.py
+      - run: python3 -B tests/wp10_backlog_r54/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_backlog_r54_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_r54_adapter/run_product.py
+          --replay tests/wp10_backlog_r54_adapter/evidence/p1-r54-product/observations.jsonl.gz
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+          --out tests/wp10_backlog_r54_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_r54_adapter/run_product.py
+          --evidence tests/wp10_backlog_r54_adapter/evidence/product
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp10_backlog_r54_adapter/negative_controls.py tests/wp10_backlog_r54_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp10-backlog-r54-product-evidence
+          path: |
+            tests/wp10_backlog_r54_adapter/evidence/product
+            tests/wp10_backlog_r54_adapter/evidence/replay
+          if-no-files-found: error
+
+  wp10-closure-package:
+    name: independent WP-10 R53 crash-injection gaps — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_closure_r53/audit.py
+      - run: python3 -B tests/wp10_closure_r53/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_closure_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp10_closure_adapter/run_product.py
+          --replay tests/wp10_closure_adapter/evidence/p1-r53-product
+          --out tests/wp10_closure_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the retained evidence
+        if: always()
+        run: >
+          python3 tests/wp10_closure_adapter/run_product.py
+          --evidence tests/wp10_closure_adapter/evidence/product
+          --retained tests/wp10_closure_adapter/evidence/p1-r53-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: The oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp10_closure_adapter/negative_controls.py tests/wp10_closure_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r53-wp10-closure-product-evidence
+          path: |
+            tests/wp10_closure_adapter/evidence/product
+            tests/wp10_closure_adapter/evidence/replay
+          if-no-files-found: error
+
+  accepted-binding-regression-gate:
+    name: accepted bindings regenerate on the current engine — gate can go red
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # the runners check the declared base/import against history.
+          fetch-depth: 0
+      - run: make -C engine clean all
+      - run: |
+          for d in crossrun_wp08 history_wp09 sequential_wp06 capacity_wp09; do
+            make -C tests/${d}_adapter clean all
+          done
+      # PM #320 ruling 3: retained provenance names the accepted engine, and a fresh
+      # build on the current engine/ regenerates the accepted observations
+      # byte-identically. The per-binding jobs run the gate; this proves it can fail.
+      - run: python3 -B tools/ci/verify-engine-regression-gate.py
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest

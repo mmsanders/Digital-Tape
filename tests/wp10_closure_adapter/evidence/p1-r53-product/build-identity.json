@@ -1,0 +1,14 @@
+{
+  "adapter_input_sha256": "939c67e96be57e9bc7f9f156dda36c1e8015358258185492b4ee3abe7d020e4a",
+  "adapter_source_sha256": "726b04532a826b8246a1c86ea048fcd2fe3dafb3efb6b77005b71fd53dcedf19",
+  "build_command": "make -C engine clean all && make -C tests/wp10_closure_adapter clean all",
+  "case_count": 57539,
+  "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+  "import_commit": "2d641f4f611a9b1c4320ca99e029dfb543bd0559",
+  "makefile_sha256": "5644b89ce1e01935ac1fd2d56011ca8cacda4b7a6309d242f207267bfc0a543a",
+  "product_base": "6e88b0f2458614dd9303bc6be8fc4d35535bdb73",
+  "run_product_sha256": "43198853f570f7f7cefaf9f1258b862a79140e7ac001a89edef357c42a3dd91e",
+  "schema": "wp10-r53-product-build-identity-1",
+  "verifier_source_commit": "86904a30765eb415d1283fcd1cbb511f2569ed7c",
+  "verifier_tree": "2a514c902b9b38901abe6841017cc110987c1ecd"
+}
