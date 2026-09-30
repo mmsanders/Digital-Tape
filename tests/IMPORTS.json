@@ -294,6 +294,19 @@
         "-B",
         "tests/sequential_wp06_r44/selftest.py"
       ]
+    },
+    {
+      "path": "tests/portability_wp08_r52",
+      "tree": "d1ba52f7a756ee982cdcf03e0369a2b91bc44301",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "3dbd22520f0c9d30da38d60fe883c7b4f8e9fbe7",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-08 R52 exact two-toolchain playback arithmetic verifier package (41 vectors; canonical plan 6a8a87b1271054abbb1fe596292f9a416062ced0ec735fdd4c15bb71498b763c; oracle SHA-256 c8d497f19e8777f496c5e91a79411c45c257e9bc3109fc7ef4961eef4bce7933, replay SHA-256 820cd38b9af28760e1a1bc33c9cd165684bdae37c0451e2f0310ba0887233f6f, self-test SHA-256 eeb6775c40b283a08c186a175dc778ca2ebfceb28f0a2205b8c18e6fc40fea21, reference adapter SHA-256 805eb80961c0d8d66f801eddf4163b4106f62bab012d7e367b1914b79478af9c; byte-identical GCC/Clang reference streams; twelve killed red controls) published under Verification #103 / PR #102 at commit 3dbd22520f0c9d30da38d60fe883c7b4f8e9fbe7 (whole tree beecccc46769a53d83e5d67189eba8f41fee541b, parent 363d5bf5952e692821072b7c72755ed5ce981281) on branch verification/issue-100-playback-portability, not Verification main; issued by PM Product #313 and imported byte-identically by exact commit. Verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/portability_wp08_r52/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
