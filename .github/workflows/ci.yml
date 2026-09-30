@@ -473,6 +473,40 @@ jobs:
             tests/sequential_wp06_adapter/evidence/replay
           if-no-files-found: error
 
+  portability-wp08-package:
+    name: independent WP-08 R52 two-toolchain playback — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - name: Toolchains
+        run: gcc --version | head -1; clang --version | head -1
+      - run: python3 -B tests/portability_wp08_r52/selftest.py
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: python3 tests/portability_wp08_adapter/run_product.py --replay tests/portability_wp08_adapter/evidence/p1-r53-product
+      - name: Canonical GCC and Clang run; the fresh streams must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/portability_wp08_adapter/run_product.py
+          --evidence tests/portability_wp08_adapter/evidence/product
+          --retained tests/portability_wp08_adapter/evidence/p1-r53-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Diagnostics and red controls on the Product streams
+        if: always()
+        run: python3 -B tests/portability_wp08_adapter/negative_controls.py tests/portability_wp08_adapter/evidence/product
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r53-wp08-portability-product-evidence
+          path: tests/portability_wp08_adapter/evidence/product
+          if-no-files-found: error
+
   dashboard:
     name: lead-queue dashboard behaviour
     runs-on: ubuntu-latest

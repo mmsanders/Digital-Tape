@@ -1,0 +1,39 @@
+{
+  "adapter_source_sha256": "5aa288aae3b69cf8aade883735570838af46031423f53b1581ebbc43e0eda50e",
+  "build": "each compiler builds engine/src/*.c and wp08p_adapter.c together with the package FLAGS",
+  "byte_identical_observations": true,
+  "case_count": 41,
+  "clang": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "clang version 22.1.8 (https://github.com/msys2/MINGW-packages d34feaaa1d0aff624c870910b6f2589aa40d20de)"
+  },
+  "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+  "gcc": {
+    "flags": [
+      "-std=c99",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-strict-overflow"
+    ],
+    "identity": "gcc.EXE (Rev4, Built by MSYS2 project) 16.2.0"
+  },
+  "generated_header_sha256": "7e1013abfe6484589fd47c889fae3e713be08de9982caa4ddb1611c32f62e9cf",
+  "import_commit": "1dd1c8ee75fbf3fdd9ad3232386014be0ddba19d",
+  "observations_sha256": "c5aad871c89554a905dfdc883d3b0744540d15ba336b6a00f11cc7273c745544",
+  "plan_file_sha256": "7b8b133629bc833025d32e42f34f757e14d10e5f18abecf09de4b9d705b682e6",
+  "product_base": "39d2076fa204991ec9c0d43f00b502942556bf9a",
+  "run_product_sha256": "a03396d60626daaff82366a151e9c2bd337e012c7ada22b1a6fd78498ed7dec4",
+  "schema": "wp08-portability-r52-product-manifest-1",
+  "scope": "Product observations; the package oracle decides; not acceptance",
+  "verifier_source_commit": "3dbd22520f0c9d30da38d60fe883c7b4f8e9fbe7",
+  "verifier_tree": "d1ba52f7a756ee982cdcf03e0369a2b91bc44301"
+}
