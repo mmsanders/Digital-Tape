@@ -468,9 +468,9 @@
         "acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d"
       },
       "DRAFT-10": {
-        "tapefs-v1.md": "a8d12392b3e87d3d09c17940d52e7171f3b26dd7f1367089562da63a870f6c75",
+        "tapefs-v1.md": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba",
         "engine-api.md": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
-        "acceptance.md": "b43a41e55c4040f7ee24500bd66a57504437ee9e09f3724e850f61ecf03e7071"
+        "acceptance.md": "50aa63bd751fdc6b4636de0eb48253887be19b7ec2841768449217b4e9b9e547"
       }
     },
     "roots": [
