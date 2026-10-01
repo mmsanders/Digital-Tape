@@ -1,18 +1,62 @@
 name: engine
 
 on:
+  # main pushes only: a PR branch push is covered by its pull_request run, and
+  # running both doubled every PR's cost (#347). Cite the pull_request run, or
+  # a workflow_dispatch run on the exact head SHA (docs/ISSUE-WORKFLOW.md).
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+# A newer push to the same PR cancels the superseded run. Every other run (main
+# pushes, dispatches) gets a group of its own run id, so main runs never cancel
+# or queue behind each other and every main commit keeps its complete run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Separate jobs, not one script, so each result is legible on its own. The build
 # going green must not be hidden behind the golden suite going red -- a
 # permanently-red pipeline stops being read, and then the first real failure
 # arrives against a background of red.
 jobs:
+  # Docs-only PRs skip the engine suite (#347). Every heavy job needs this one
+  # and runs unless it positively said docs_only == 'true'; if it fails or is
+  # unsure, the output is not 'true' and the whole suite runs. Skipped jobs
+  # report "skipped", which satisfies the ruleset's required checks. main
+  # pushes and workflow_dispatch are always full.
+  changes:
+    name: classify changes (docs-only PRs skip the engine suite)
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The pull_request merge commit and its first parent (the base).
+          fetch-depth: 2
+      - name: Classifier negative controls
+        run: python3 -B tools/ci/verify-change-classifier.py
+      - name: Classify
+        id: classify
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "full: $EVENT runs the whole suite"
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # HEAD is the PR merge commit; diff it against the base it merges into.
+          test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 3
+          git diff -z --no-renames --name-only HEAD^1 HEAD | python3 -B tools/ci/classify-changes.py
+
   verifier-package:
     name: independent DRAFT-8 mount package self-checks (not engine acceptance)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +64,8 @@ jobs:
 
   ops-package:
     name: independent VT8-001 package self-checks (synthetic, not engine acceptance)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +80,8 @@ jobs:
 
   record-package:
     name: independent WP-09 record package — synthetic self-checks, then product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,6 +108,8 @@ jobs:
 
   transport-package:
     name: independent transport/warm package — synthetic self-checks, then product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +128,8 @@ jobs:
 
   promote-package:
     name: independent promote package — synthetic self-checks, then product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -117,6 +169,8 @@ jobs:
 
   respool-package:
     name: independent respool package — synthetic self-checks, then full 8-case product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -135,6 +189,8 @@ jobs:
 
   format-dup-package:
     name: independent format/dup package — synthetic self-checks, then product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -155,6 +211,8 @@ jobs:
 
   writability-package:
     name: independent writability package — synthetic self-checks, then 8-case product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -173,6 +231,8 @@ jobs:
 
   notmounted-package:
     name: independent not-mounted package — synthetic self-checks, then 34-case product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -192,6 +252,8 @@ jobs:
 
   slot-package:
     name: independent WP-36 slot package — synthetic self-checks, then debug-assert product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -213,6 +275,8 @@ jobs:
 
   wp36-fuzz-package:
     name: independent WP-36 100k source-slot fuzz — debug real-product observations
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -238,6 +302,8 @@ jobs:
     # funnels. The product is measured against the DRAFT-9 package; the
     # accepted DRAFT-8 package and its collector stay in the tree unchanged.
     name: independent WP-13 embedded-readiness audit (DRAFT-9) — six-gate real-product evidence
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -261,6 +327,8 @@ jobs:
 
   allocator-cow-package:
     name: independent WP-07 allocator/COW — fixed 10k real-product campaign
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -285,6 +353,8 @@ jobs:
 
   crash-core-package:
     name: independent WP-10 core crash — bounded real-product campaign
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -311,6 +381,8 @@ jobs:
 
   format-dup-identity-package:
     name: R29-B format/duplicate raw identity + dup long-op — exact canonical product campaign
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -338,6 +410,8 @@ jobs:
 
   respool-full-functional:
     name: independent full re-spool — clean/headroom + WP-12a product gate
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -434,6 +508,8 @@ jobs:
 
   sequential-wp06-package:
     name: independent WP-06 R44 sequential — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -475,6 +551,8 @@ jobs:
 
   wp10-final-package:
     name: independent WP-10 final backlog (#118) — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -517,6 +595,8 @@ jobs:
 
   wp10-backlog-package:
     name: independent WP-10 backlog rows 1-3 — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -560,6 +640,8 @@ jobs:
 
   capacity-wp09-package:
     name: independent WP-09 R52 capacity short accept — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -601,6 +683,8 @@ jobs:
 
   wp12-closure-package:
     name: independent WP-12/WP-12a R53 closure gaps — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -643,6 +727,8 @@ jobs:
 
   portability-wp08-package:
     name: independent WP-08 R52 two-toolchain playback — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -677,6 +763,8 @@ jobs:
 
   wp06-closure-package:
     name: independent WP-06 R52 closure gaps — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -719,6 +807,8 @@ jobs:
 
   strengthen-r55-package:
     name: "independent #126 strengthening rows (strengthen_r55) — product replay"
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -761,6 +851,8 @@ jobs:
 
   wp10-backlog-r54-package:
     name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -804,6 +896,8 @@ jobs:
 
   wp10-closure-package:
     name: independent WP-10 R53 crash-injection gaps — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -846,6 +940,8 @@ jobs:
 
   accepted-binding-regression-gate:
     name: accepted bindings regenerate on the current engine — gate can go red
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -866,6 +962,8 @@ jobs:
 
   dashboard:
     name: lead-queue dashboard behaviour
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -881,6 +979,8 @@ jobs:
 
   playback-package:
     name: independent playback/golden package self-checks (synthetic, not engine acceptance)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -899,6 +999,8 @@ jobs:
 
   playback-complete-package:
     name: independent complete playback package self-checks (synthetic, not engine acceptance)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -917,6 +1019,8 @@ jobs:
 
   crossrun-wp08-package:
     name: independent WP-08 R44 cross-run playback — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -958,6 +1062,8 @@ jobs:
 
   build:
     name: build (-Werror)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -967,6 +1073,8 @@ jobs:
 
   history-wp09-package:
     name: independent WP-09 R44 seeded record history — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -1008,6 +1116,8 @@ jobs:
 
   spec:
     name: spec bundle matches VERSION.md
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

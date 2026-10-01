@@ -107,6 +107,15 @@ fixtures and substantial reports remain versioned in the appropriate repository;
 link them from the return. Mark the comment Ready for PM review or Blocked and stop.
 Do not mark your own implementation independently accepted.
 
+**Citing CI (#347).** The `engine` workflow (`ci.yml`) runs on `pull_request`, on `main`
+pushes and on `workflow_dispatch`. It no longer runs on pushes to other branches. As CI
+evidence, cite the PR's `pull_request` run: that run tests the merge of the head into
+current main, which equals the head tree once the head is up to date with main, as the
+ruleset requires before merge. When an exact-head run is needed, dispatch the workflow on
+that branch and cite that run with its SHA. A newer push cancels the PR's older run. A
+docs-only PR (only `docs/**` outside `docs/verification/**`, `site/**` and root `*.md`)
+skips the engine jobs, which report "skipped". It is not engine evidence.
+
 After posting the return, the lead closes its own issue. Closure means only that the
 lead has stopped work on that bounded assignment; it does **not** mean the return is
 correct, merged, accepted or independently verified. A blocked return may also be
