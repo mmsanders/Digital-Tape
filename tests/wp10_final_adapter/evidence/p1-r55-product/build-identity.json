@@ -1,0 +1,30 @@
+{
+  "adapter_origin": "tests/wp10_backlog_r54_adapter/wp10r54_adapter.c (#330) device, settling, remounts and dup runner; row 1-4 case drivers new",
+  "adapter_source_sha256": "5dace9f012b37485ecf9284480042d94f742a10b9bc01918ed142afbe458cbda",
+  "build_command": "make -C engine clean all && make -C tests/wp10_final_adapter clean all",
+  "caseset_sha256": "159b4ac64a5e653df2625a025f5f8cf13bcb90fed9a11905a1733f7a97167cd1",
+  "census": {
+    "cases": 207584,
+    "row1": 13,
+    "row2": 6,
+    "row3": 5,
+    "row3_injections": 24672,
+    "row4": 207560,
+    "row4_by_mode": {
+      "flush_required": 103780,
+      "write_through": 103780
+    }
+  },
+  "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+  "import_commit": "f5ffeef9faa2c9295a45a48a1498adc26e5cb1a6",
+  "makefile_sha256": "8409c4335bc1e973d39d7292cd9c346bd25881f4b5b04be6ff78110ed8d7c7e8",
+  "product_base": "d1ef20292c443ec55be2c32945f3171b8d7ec04d",
+  "release_asset": "https://github.com/mmsanders/Digital-Tape/releases/download/evidence-p1-r55-wp10-final/wp10-final-r54-product-observations.jsonl.gz",
+  "run_product_sha256": "5da82ffb5f4bb4404a4f63fab01395df84b8d8ba0581a705efb1d829c10ef9f8",
+  "schema": "wp10-final-r54-product-build-identity-1",
+  "sources_sha256": {
+    "wp10f_adapter.c": "d778e20e228eafc187611dd0467326e1c83267ebbeb4b8eb2af78031150508ce"
+  },
+  "verifier_source_commit": "7c0410e0042d00c05b72affccd4de0a03ce8abd6",
+  "verifier_tree": "598ebcd8f0914040558f565809b90bdb22bb8221"
+}

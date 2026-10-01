@@ -1,0 +1,605 @@
+{
+ "schema": "wp10-closing-ledger-v1",
+ "criteria": "acceptance.md DRAFT-9 Stream 2 WP-10 (text byte-identical to DRAFT-8)",
+ "source_ledger": {
+  "package": "tests/wp10_closure_r53/coverage-ledger.json",
+  "publication": "86904a30765eb415d1283fcd1cbb511f2569ed7c",
+  "sha256": "369566e280a197a42e0be5c233f66241cde41268f9642881a107341669d27817",
+  "row_ids": [
+   "WP10.session.format.reusable_superblock_writes",
+   "WP10.format_dup.steps2_3.reusable_stale_slot1",
+   "WP10.format_dup.blank_media_table",
+   "WP10.session.load.mount_repair_write",
+   "WP10.session.play_seek_scrub.no_change",
+   "WP10.session.record_commit.overwrite_overdub_splice",
+   "WP10.session.record_audio_service_writes",
+   "WP10.session.reset_b_incl_degraded_third_outcome",
+   "WP10.session.respool_both_passes",
+   "WP10.session.promote_all_9_3_4_boundaries",
+   "WP10.session.stage_clear_arm_reset_respool",
+   "WP10.session.duplicate_superblock_writes",
+   "WP10.promote.four_point_superblock_writes",
+   "WP10.v7_001.two_interruption.promote",
+   "WP10.v7_001.two_interruption.stage_clear",
+   "WP10.v5_010.both_durability_modes",
+   "WP10.v6_003.shared_sequence_base",
+   "WP10.headroom.empty_respool_0xFFFFFFFD",
+   "WP10.headroom.resume_step5_decline_0xFFFFFFFC",
+   "WP10.headroom.fresh_decline_0xFFFFFFFB",
+   "WP10.headroom.one_short_converses",
+   "WP10.headroom.zero_needed_reserved.promote",
+   "WP10.headroom.zero_needed_reserved.empty_respool_each_counter_each_value",
+   "WP10.counters.v5_015.promote_every_branch",
+   "WP10.counters.v5_015.respool",
+   "WP10.counters.v5_015.arm_record",
+   "WP10.counters.v5_015.reset_b_and_stage_clear_generation",
+   "WP10.counters.format_dup_generation_fallback",
+   "WP10.raw_admission.destination_shapes",
+   "WP10.raw_admission.refusal_before_superblock_reads",
+   "WP10.step1.performed_order_generation2_torn_first",
+   "WP10.fallback.zero_nonselectable_first",
+   "WP10.equal_divergent_crash_oracle",
+   "WP10.v6_007.final_superblock_two_points.reusable",
+   "WP10.universal.free_next_after_every_injection",
+   "WP10.universal.live_index_5_2_disjointness",
+   "WP10.universal.index_only_ops_advance_sequence_not_generation",
+   "WP10.universal.superblock_updates_advance_generation",
+   "WP10.universal.repair_advanced_neither",
+   "WP10.universal.identity_boundary_gen1_seq1_2",
+   "WP10.universal.no_shared_sequence_fresh_promote",
+   "WP10.universal.referenced_audio_intact",
+   "WP10.universal.promote_stage_invariant25_corrupt_case_degraded_exempt",
+   "WP10.op.reset_b.third_outcome",
+   "WP10.op.respool.pre_or_post_layout_never_overwritten",
+   "WP10.op.respool.post_crash_render",
+   "WP10.op.promote.eleven_rows",
+   "WP10.op.promote.s_equals_0",
+   "WP10.op.promote.stored_position",
+   "WP10.op.promote.rerun_every_row_exact_tail_repeated_crash",
+   "WP10.op.promote.empty_b_invalid_arg",
+   "WP10.dup.empty_source.every_boundary",
+   "WP10.dup.destination_shape.mounts_both_sides_high_label",
+   "WP10.dup.destination_shape.layout_preserving_rejected_c90_to_c60",
+   "WP10.dup.source_unchanged",
+   "WP10.dup.permitted_outcome_set.reusable",
+   "WP10.dup.refusals_write_nothing_zero_callbacks_order",
+   "WP10.dup.rerun_completes",
+   "WP10.format.reusable_outcomes",
+   "WP10.format.geometry_zero_callbacks",
+   "WP10.contract.blank_neither_valid_crc_vs_bad_magic"
+  ]
+ },
+ "allowed_statuses": [
+  "accepted exact evidence",
+  "published; Product binding disposed PASS",
+  "published; Product binding pending",
+  "unreachable under DRAFT-9",
+  "vacuous under DRAFT-9"
+ ],
+ "accepted_dispositions": {
+  "C69": "crash_core_draft8 28,760 cases (16,448 first-interruption + 12,312 V7-001 closure), digest 6c924fd7bdd54b180084fe58cc50ef49d96fc068b968b8022383685ecf235c96, both modes; Product PR #217 14873bc2df31a5dac26692f838866619305bc50c; Verification #68 comment 5817432053 / PR #69",
+  "R29-C": "respool_full_draft8 4,209,696 cases (2,104,848 per mode), digest 02c52de7a7c51a6ffafe5c9d5afad9c23032b72fc11aaf206bb27a9c9506d3e1; Product PR #236 ff0a5cbce6087804a8a54ab7584253aa41467607; Verification #81 comment 5847350457",
+  "R29-A": "promote_draft8 44,307 cases (44,204 crash = 22,102 per mode + 103 contract), digest 71be17545262d3b35fed9213b9305f71e4c8956693fbf4ec8f6d06f9f7ba80aa; Product PR #263 8a4d2a17138fd89e91f970a2c69c9f8fa0a8d920; Verification #86 comment 5856700150",
+  "R29-B": "format_dup_identity_draft8 57,611 cases (57,568 crash = 14 scenarios x 4,112, both modes, 4 superblock writes each + 43 contract), digest c493e77dff948df48d9c67c51ef4b68f0a61d2e02615b2d08760a594e79dc4e3; Product PR #241; Verification #83 comment 5850755575",
+  "C272": "combined PR #272 338861251be19a014bc9c85b1418625a3dcd109a re-ran R29-A/B/C unchanged; Verification #87 comment 5857453398",
+  "R25-RESPOOL": "respool_draft8 8/8; Product PR #180 262db463680798c63fde8b18232e60bdbda15f0a; findings/P1-R25-PROMOTE-RESPOOL-DISPOSITION-2026-09-22.md",
+  "R25-FMTDUP": "format_dup_draft8 17/17 refusal matrix; findings/P1-R25-FORMAT-DUP-DISPOSITION-2026-09-22.md",
+  "R25-WP09": "record_draft8 WP-09 structural cases incl. WP09-A15 arm SEQUENCE_EXHAUSTED and zero-accepted commit matrix; findings/P1-R25-WP09-DISPOSITION-2026-09-22.md",
+  "MOUNT": "mount_draft8 289/289 incl. 20 M-repair-* variants (generation retained, stale or corrupt partner) and M-ownership free_chunks derivation; findings/mount-observation-disposition-2026-09-11.md",
+  "R25-TRANSPORT": "transport/playback render paths with zero block-device calls; findings/P1-R25-TRANSPORT-DISPOSITION-2026-09-22.md"
+ },
+ "packages": {
+  "R53-CLOSURE": {
+   "package": "tests/wp10_closure_r53",
+   "publication": "86904a30765eb415d1283fcd1cbb511f2569ed7c",
+   "subtree": "2a514c902b9b38901abe6841017cc110987c1ecd",
+   "verification_issue": 105,
+   "product_binding": "Digital-Tape PR #318 head 691fbdb1bf3bf47cacb52b9c46947962f60e4dd2",
+   "disposition": "Verification #119 PASS 57,539/57,539 (findings/P1-R54-WP10PD-PR318-DISPOSITION-2026-09-30.md)"
+  },
+  "R53-BACKLOG": {
+   "package": "tests/wp10_backlog_r53",
+   "publication": "f327599194ac5ae6d3b4c3f1d1e20a4a8beca747",
+   "subtree": "caae666068e05c2c5e010e9b3e16e8583d3c707b",
+   "verification_issue": 110,
+   "correction": "Verification #124: row-2 C69 snapshot binding (schema v2); supersedes subtree 7f80e382",
+   "product_binding": "Digital-Tape PR #329 (held; PM issues the rebind onto subtree caae6660)",
+   "disposition": null
+  },
+  "R54-BACKLOG": {
+   "package": "tests/wp10_backlog_r54",
+   "publication": "dea9b521ccee76a69cfd0d517903eb27474d41fc",
+   "subtree": "d6e9a2427ed9b6c4b703c65dc44eb7e13224cabc",
+   "verification_issue": 116,
+   "product_binding": "Digital-Tape PR #330 head 4f062b76c47ca53a643a60827ef652c5ad20c065",
+   "disposition": "Verification #120 PASS 68,854/68,854 (findings/P1-R54-WP10CD-PR330-DISPOSITION-2026-09-30.md)"
+  },
+  "R54-FINAL": {
+   "package": "tests/wp10_final_r54",
+   "publication": "this commit",
+   "verification_issue": 118,
+   "product_binding": null,
+   "disposition": null
+  }
+ },
+ "rows": [
+  {
+   "id": "WP10.session.format.reusable_superblock_writes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "format x 7 raw shapes x 4 SB writes x (before, torn 1..511, after, flush) x 2 modes = 28,784"
+  },
+  {
+   "id": "WP10.format_dup.steps2_3.reusable_stale_slot1",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R53-CLOSURE"
+  },
+  {
+   "id": "WP10.format_dup.blank_media_table",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R53-CLOSURE"
+  },
+  {
+   "id": "WP10.session.load.mount_repair_write",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R54-BACKLOG"
+  },
+  {
+   "id": "WP10.session.play_seek_scrub.no_change",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R25-TRANSPORT",
+    "R29-B"
+   ],
+   "cases": "render/seek/set_rate issue zero block-device calls, so no write boundary exists to inject; R29-B dup render cell asserts zero block events"
+  },
+  {
+   "id": "WP10.session.record_commit.overwrite_overdub_splice",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69"
+   ],
+   "cases": "record commit x 3 modes, 2,056 each"
+  },
+  {
+   "id": "WP10.session.record_audio_service_writes",
+   "status": "published; Product binding pending",
+   "package_ref": "R53-BACKLOG"
+  },
+  {
+   "id": "WP10.session.reset_b_incl_degraded_third_outcome",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69"
+   ],
+   "cases": "reset B healthy + degraded/equal-sequence (C10-07, C10-08), 2,056 each"
+  },
+  {
+   "id": "WP10.session.respool_both_passes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-C",
+    "C272"
+   ],
+   "cases": "V3-003 pass 1 + pass 2 + no-lower-run, every chunk/entry/header write and flush"
+  },
+  {
+   "id": "WP10.session.promote_all_9_3_4_boundaries",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "C272"
+   ],
+   "cases": "R29-A-CRASH-01..16 over FRESH alloc, adopt-in-place and S=0 paths"
+  },
+  {
+   "id": "WP10.session.stage_clear_arm_reset_respool",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69"
+   ],
+   "cases": "stage clear via arm/reset B/re-spool, 6,160 each incl. closure"
+  },
+  {
+   "id": "WP10.session.duplicate_superblock_writes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "dup x 7 raw shapes x 4 SB writes x 2 modes = 28,784"
+  },
+  {
+   "id": "WP10.promote.four_point_superblock_writes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "steps 4 / 5-decline / 9 partner, flush, candidate, flush; before and after each (R29-A-CRASH-04/05)"
+  },
+  {
+   "id": "WP10.v7_001.two_interruption.promote",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "R29-A-CRASH-17/18: 3 updates x 4 seeds, 12,336 cases"
+  },
+  {
+   "id": "WP10.v7_001.two_interruption.stage_clear",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69"
+   ],
+   "cases": "C10-12/13: 4 seeds x 3 callers x 2 modes x 513, 12,312 cases"
+  },
+  {
+   "id": "WP10.v5_010.both_durability_modes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69",
+    "R29-A",
+    "R29-B",
+    "R29-C"
+   ],
+   "cases": "every accepted campaign splits exactly 50/50 by mode; this package likewise (28,766 each)"
+  },
+  {
+   "id": "WP10.v6_003.shared_sequence_base",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "C69"
+   ],
+   "cases": "R29-A-CRASH-19 global structural max, running 501..504; C69 degraded reset writes 501 over A=10/B=500"
+  },
+  {
+   "id": "WP10.headroom.empty_respool_0xFFFFFFFD",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-C",
+    "R25-RESPOOL"
+   ],
+   "cases": "empty re-spool at cartridge_sequence 0xFFFFFFFD: TAPE_OK, zero writes"
+  },
+  {
+   "id": "WP10.headroom.resume_step5_decline_0xFFFFFFFC",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "RESUME-at-step-5 decline at 0xFFFFFFFC completes committing no index"
+  },
+  {
+   "id": "WP10.headroom.fresh_decline_0xFFFFFFFB",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "FRESH allocating decline at 0xFFFFFFFB completes phase 1"
+  },
+  {
+   "id": "WP10.headroom.one_short_converses",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "R29-C"
+   ],
+   "cases": "R29-A 12 one-short + 2 specials; R29-C one-commit branch exhaustion"
+  },
+  {
+   "id": "WP10.headroom.zero_needed_reserved.promote",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "NOTHING-TO-DO at sequence and sb_generation 0xFFFFFFFE / 0xFFFFFFFF (4 cases)"
+  },
+  {
+   "id": "WP10.headroom.zero_needed_reserved.empty_respool_each_counter_each_value",
+   "status": "published; Product binding pending",
+   "package_ref": "R54-FINAL"
+  },
+  {
+   "id": "WP10.counters.v5_015.promote_every_branch",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "eight non-zero branches at threshold, 14 one-short refusals incl. sequence 0xFFFFFFFC"
+  },
+  {
+   "id": "WP10.counters.v5_015.respool",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-C",
+    "R25-RESPOOL"
+   ],
+   "cases": "WP12-SEQ-EXHAUSTED, WP12-ONE-COMMIT"
+  },
+  {
+   "id": "WP10.counters.v5_015.arm_record",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R25-WP09"
+   ],
+   "cases": "WP09-A15 arm at 0xFFFFFFFD refuses, zero writes"
+  },
+  {
+   "id": "WP10.counters.v5_015.reset_b_and_stage_clear_generation",
+   "status": "published; Product binding pending",
+   "package_ref": "R54-FINAL"
+  },
+  {
+   "id": "WP10.counters.format_dup_generation_fallback",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "exhaustion_candidate and exhaustion_equal_divergent shapes; zeroing fallback, no wrapped generation"
+  },
+  {
+   "id": "WP10.raw_admission.destination_shapes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "mirror-only (V6-008), generation 0, v2-only (V7-003), equal-divergent (V8C-003), exhaustion x equal-divergent (V8R2-001)"
+  },
+  {
+   "id": "WP10.raw_admission.refusal_before_superblock_reads",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B",
+    "R25-FMTDUP"
+   ],
+   "cases": "R29-B-RAW-01; R25-FMTDUP RAW-A01"
+  },
+  {
+   "id": "WP10.step1.performed_order_generation2_torn_first",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B-RAW-02..06, RAW-09, RAW-10"
+  },
+  {
+   "id": "WP10.fallback.zero_nonselectable_first",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B-RAW-11..13"
+  },
+  {
+   "id": "WP10.equal_divergent_crash_oracle",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B-RAW-14/15 with and without headroom"
+  },
+  {
+   "id": "WP10.v6_007.final_superblock_two_points.reusable",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B-RAW-17/18: mirror, flush, primary, flush + every torn primary, both modes"
+  },
+  {
+   "id": "WP10.universal.free_next_after_every_injection",
+   "status": "published; Product binding pending",
+   "package_ref": "R53-BACKLOG"
+  },
+  {
+   "id": "WP10.universal.live_index_5_2_disjointness",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69",
+    "R29-A",
+    "R29-B",
+    "R29-C"
+   ],
+   "cases": "C10-14 and each package's raw Â§5.2 parser"
+  },
+  {
+   "id": "WP10.universal.index_only_ops_advance_sequence_not_generation",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69",
+    "R29-A",
+    "R29-C"
+   ],
+   "cases": "C10-05/07; R29-A-CRASH-20; R29-C ordinary stage-0 commits"
+  },
+  {
+   "id": "WP10.universal.superblock_updates_advance_generation",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "C69",
+    "R29-B"
+   ],
+   "cases": "promote 4/5-decline/9 (R29-A-CRASH-16/20), stage clear (C10-11), format/dup step 1 generation 2 (R29-B-RAW-09)"
+  },
+  {
+   "id": "WP10.universal.repair_advanced_neither",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "MOUNT"
+   ],
+   "cases": "M-repair-* 20 variants: invalid and stale lower-generation partner, generation retained, one partner block"
+  },
+  {
+   "id": "WP10.universal.identity_boundary_gen1_seq1_2",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B-RAW-16"
+  },
+  {
+   "id": "WP10.universal.no_shared_sequence_fresh_promote",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "R29-A-CRASH-14 after every FRESH injection"
+  },
+  {
+   "id": "WP10.universal.referenced_audio_intact",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69",
+    "R29-A",
+    "R29-C"
+   ],
+   "cases": "C10-06, R29-A-CRASH-15, R29-C raw region hashes"
+  },
+  {
+   "id": "WP10.universal.promote_stage_invariant25_corrupt_case_degraded_exempt",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "MOUNT"
+   ],
+   "cases": "R29-A-CRASH-07/08/09; MOUNT M-stage-row*/M-stage-unmatched-*"
+  },
+  {
+   "id": "WP10.op.reset_b.third_outcome",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "C69"
+   ],
+   "cases": "C10-08"
+  },
+  {
+   "id": "WP10.op.respool.pre_or_post_layout_never_overwritten",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-C"
+   ],
+   "cases": "every pass-2 injection preserves the sole live pass-1 copy; raw region hashes (post-crash tape_render not driven: backlog rank 9)"
+  },
+  {
+   "id": "WP10.op.respool.post_crash_render",
+   "status": "published; Product binding pending",
+   "package_ref": "R54-FINAL"
+  },
+  {
+   "id": "WP10.op.promote.eleven_rows",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "R29-A-CRASH-10..13"
+  },
+  {
+   "id": "WP10.op.promote.s_equals_0",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "R29-A-CRASH-03/09"
+  },
+  {
+   "id": "WP10.op.promote.stored_position",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "5 caller-model stored-position cases"
+  },
+  {
+   "id": "WP10.op.promote.rerun_every_row_exact_tail_repeated_crash",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A"
+   ],
+   "cases": "R29-A-RERUN-01..05"
+  },
+  {
+   "id": "WP10.op.promote.empty_b_invalid_arg",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-A",
+    "R25-RESPOOL"
+   ],
+   "cases": "entry refusal empty B; WP12-EMPTY"
+  },
+  {
+   "id": "WP10.dup.empty_source.every_boundary",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R53-CLOSURE"
+  },
+  {
+   "id": "WP10.dup.destination_shape.mounts_both_sides_high_label",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R54-BACKLOG"
+  },
+  {
+   "id": "WP10.dup.destination_shape.layout_preserving_rejected_c90_to_c60",
+   "status": "published; Product binding pending",
+   "package_ref": "R53-BACKLOG"
+  },
+  {
+   "id": "WP10.dup.source_unchanged",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B source_before/source_after raw source events; also asserted on every dup case here"
+  },
+  {
+   "id": "WP10.dup.permitted_outcome_set.reusable",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "R29-B crash oracle over the 7 shapes"
+  },
+  {
+   "id": "WP10.dup.refusals_write_nothing_zero_callbacks_order",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R25-FMTDUP"
+   ],
+   "cases": "DUP-A01..A06 incl. block_count 0/1/LBA_CHUNK_BASE zero callbacks and 1->2->3->4 order"
+  },
+  {
+   "id": "WP10.dup.rerun_completes",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R54-BACKLOG"
+  },
+  {
+   "id": "WP10.format.reusable_outcomes",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R29-B"
+   ],
+   "cases": "format x 7 raw shapes crash oracle"
+  },
+  {
+   "id": "WP10.format.geometry_zero_callbacks",
+   "status": "accepted exact evidence",
+   "evidence": [
+    "R25-FMTDUP"
+   ],
+   "cases": "FMT-A02..A04"
+  },
+  {
+   "id": "WP10.contract.blank_neither_valid_crc_vs_bad_magic",
+   "status": "published; Product binding disposed PASS",
+   "package_ref": "R53-CLOSURE",
+   "pm_ruling": "PM ruling carried since the #109 disposition: at a torn blank-mirror boundary both TAPE_ERR_BAD_MAGIC and TAPE_ERR_CRC conform. The R53 package asserts exactly that and counts CRC answers (0 on Product #318)."
+  },
+  {
+   "id": "WP10.dup.rerun_crash",
+   "status": "published; Product binding pending",
+   "package_ref": "R54-FINAL",
+   "origin": "Verification #116 finding: a re-run that skips the step-1 barrier ends byte-identical, so only a crash inside the re-run exposes it at outcome level."
+  }
+ ]
+}
