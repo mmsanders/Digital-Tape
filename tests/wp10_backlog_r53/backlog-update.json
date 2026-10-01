@@ -1,0 +1,33 @@
+{
+  "schema": "wp10-backlog-update-r53-v1",
+  "source_ledger": {
+    "package": "tests/wp10_closure_r53/coverage-ledger.json",
+    "issued_publication": "86904a30765eb415d1283fcd1cbb511f2569ed7c",
+    "issued_sha256": "369566e280a197a42e0be5c233f66241cde41268f9642881a107341669d27817",
+    "text_repair_publication": "0feccce6a3b6e7755b517172ae711fff30ef14d5",
+    "text_repair_sha256": "207adca74515426bb2cf9152e92b85cff36c26ce693b2c95a6bd25d22f5501d1"
+  },
+  "published_here": [
+    {"id": "WP10.dup.destination_shape.layout_preserving_rejected_c90_to_c60", "former_rank": 1,
+     "status": "uncovered: published here", "package_rows": [1],
+     "injection_points": {"DUP-FRAG-BLANK": 11302, "DUP-FRAG-REUSABLE": 13358},
+     "assertion": "Fragmented 21 s / 8-chunk source (Side A entries at chunks 6, 2, 7) onto a 9 s / 4-chunk destination that passes capacity: every destination chunk-region callback lies in [0, len_A), none at chunk id >= total_chunks, and the completed copy is one entry {0,0,128} with a_high_water 1 rendering the fragments in timeline order. Every write/flush boundary, both durability modes, blank and reusable destinations."},
+    {"id": "WP10.universal.free_next_after_every_injection", "former_rank": 2,
+     "status": "uncovered: published here", "package_rows": [2],
+     "injection_points": {"C69": 28760, "R29B": 26392},
+     "assertion": "After every accepted C69 and R29-B injection whose durable state remounts, tape_get_info free_chunks == total_chunks - max(a_high_water, live-B last+1) (a_high_water in degraded-B), derived from the accepted campaign's own durable-state model. R29-B's other 31,176 injections remount INCOMPLETE / INCONSISTENT / BAD_MAGIC / VERSION by that model and cannot observe a frontier. Superseded overwrite chunks are never counted: the frontier is taken over the live index only."},
+    {"id": "WP10.session.record_audio_service_writes", "former_rank": 3,
+     "status": "uncovered: published here", "package_rows": [3],
+     "injection_points": {"per_group": "3 one-block writes x 513 + one per observed flush", "groups": 6},
+     "assertion": "Overwrite / overdub / splice of 384 frames at block_budget 1 on the C69 record fixture: injection at each of the three audio writes tape_service makes at free_next chunk 2 and at each flush it issues, before commit, both modes. Metadata and live chunk 0 byte-identical; remount selects the pre-operation Side B (free_chunks 3, exact PCM)."}
+  ],
+  "backlog": [
+    {"rank": 1, "former_rank": 4, "id": "WP10.session.load.mount_repair_write", "harm": "torn or wrong-copy phase-4 repair leaves an unmountable cartridge"},
+    {"rank": 2, "former_rank": 5, "id": "WP10.dup.rerun_completes", "harm": "destination stuck INCOMPLETE after an interrupted copy (recoverable by format)"},
+    {"rank": 3, "former_rank": 6, "id": "WP10.dup.destination_shape.mounts_both_sides_high_label", "harm": "unusable sandbox side on a completed copy"},
+    {"rank": 4, "former_rank": 7, "id": "WP10.counters.v5_015.reset_b_and_stage_clear_generation", "harm": "wrong error code or partial write before refusal"},
+    {"rank": 5, "former_rank": 8, "id": "WP10.headroom.zero_needed_reserved.empty_respool_each_counter_each_value", "harm": "wrong error code"},
+    {"rank": 6, "former_rank": 9, "id": "WP10.op.respool.post_crash_render", "harm": "render path only; raw bytes already proven"}
+  ],
+  "pm_rulings_carried": ["At a torn blank-mirror boundary both TAPE_ERR_BAD_MAGIC and TAPE_ERR_CRC conform (PR #109 disposition)."]
+}
