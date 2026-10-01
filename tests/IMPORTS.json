@@ -715,6 +715,26 @@
       },
       "observations_sha256": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f",
       "reason": "Not in PM #337's list. WP-09 record_draft8 R25 evidence: Verification #38 (commit cbe7f93) disposed Product head 9d3649d87f2adb093d18b34825e38ca9573ba0a5 with retained evidence SHA-256 a88850df…; that head is not in this repository and these bytes (re-committed by e4858b88 as a mechanically equivalent corrected-oracle result) do not hash to it, so they cannot be pinned as accepted. Pinned here byte-for-byte as-is; PM to rule."
+    },
+    {
+      "path": "tests/wp08_mapping_adapter/evidence/p1-r57-product",
+      "files": {
+        "SHA256SUMS": "f2fd1d9456a73f1c5ea08e1fbe046af07a9e6d3dafdd0489249ec047e879b636",
+        "build-identity.json": "864dd874de069d4dda45a73916181497d59366be61097f49010a90ab1f012de4",
+        "observations.jsonl.gz": "136c77ed0c9f299ebb11e991e37fc7cef2005b9865bb6c09ca9e13ef620b82a2"
+      },
+      "observations_sha256": "6098222435464a3861643e2d90e1ae9f7d3dc213bfe2445c8fa7065e1a26c003",
+      "reason": "held for independent disposition (Product #345)"
+    },
+    {
+      "path": "tests/wp09_gaps_adapter/evidence/p1-r57-product",
+      "files": {
+        "SHA256SUMS": "fbad70d7ddde3304d98a44d2ee66174138b9cc7f17a09b8f6df32cd79e558541",
+        "build-identity.json": "354e82ce59c1eb283b384f392f3b0302abb4ed6c9468610581a2ca8c2763faf1",
+        "observations.jsonl.gz": "ba361839e5caf7056915cda61dbbd50efbb05c846e6d29dfde0aca0bdada1b3e"
+      },
+      "observations_sha256": "4c93da494e2f4523c64d8217180620dc3e379c3419d89cb512958bb0318c79d2",
+      "reason": "held for independent disposition (Product #345)"
     }
   ]
 }
