@@ -1,0 +1,12 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "2be651cd469c2013ad2424a28370b592aecf07ba12cc00979e6e492db365f459",
+  "case_count": 62,
+  "caseset_sha256": "9eca914a4f2ed87db31bb5cd1212b89dec52731e37cdd76e1fb8aa2af8424e30",
+  "evidence_sha256": "ffc7f2781e7dcbbd3d6186b42df5b1448cce21dfa0baf79bcdb29bed555ffc1b",
+  "product_commit": null,
+  "product_tree": null,
+  "row1": 60,
+  "row2": 2,
+  "schema": "wp08-mapping-r56-manifest-v1"
+}

@@ -1,0 +1,12 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "929ae0fbb0978272559508b1653250f56b7143d2a01de574bcabfb0a60643401",
+  "case_count": 8,
+  "caseset_sha256": "5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0",
+  "evidence_sha256": "32ca117bdfdaa82fa6bf822df92bc2edb016c0cf013cb210d2190089f250d013",
+  "product_commit": null,
+  "product_tree": null,
+  "row1": 3,
+  "row2": 5,
+  "schema": "wp09-gaps-r56-manifest-v1"
+}

@@ -1,0 +1,22 @@
+{
+  "adapter_source_sha256": "118d9a998b723dde98f320b8caa91232e086cd2c5d254156954c2ad330b2af1f",
+  "build_command": "make -C engine clean all && make -C tests/wp09_gaps_adapter clean all",
+  "caseset_sha256": "5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0",
+  "census": {
+    "cases": 8,
+    "row1": 3,
+    "row2": 5,
+    "wp10_final_bundle_jsonl": "3ba932d24221f9c7612170e6db23f9c84c9036fb4888f25966ec61fbc7201be3"
+  },
+  "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+  "import_commit": "acdf00438ede16b7280e590134c767527cccf781",
+  "makefile_sha256": "8f8cbe37937b12d8cdd451f79cb650e402181de1ab64c6efff1ba1205444b892",
+  "product_base": "480121099e33b6caf2a9f3169f39538135d0f6c6",
+  "run_product_sha256": "727f756a3497310579e7ff2024eaa5bceefe18e905561f90170df4cc76221537",
+  "schema": "wp09-gaps-r56-product-build-identity-1",
+  "sources_sha256": {
+    "wp09g_adapter.c": "fb6718e3e6a0c7e7980f51e7f5bcb2ec62274c0de4421f9b46e62662339cce49"
+  },
+  "verifier_source_commit": "508ada857a5badf376da4428e87791333f1f0657",
+  "verifier_tree": "d8d6d6f8a9df02cb6125b73bedbde422afe5d909"
+}

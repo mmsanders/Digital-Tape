@@ -103,7 +103,13 @@ jobs:
       #    this is now an ordinary all-cases product run with no exception.
       - run: make -C engine all
       - run: make -C tests/record_adapter all
-      - run: python3 tests/record_adapter/run_product.py --evidence tests/record_adapter/evidence/p1-r25-product
+      # #345 (the #320 pattern): regenerate on the current engine into a fresh
+      #    directory and require byte-identity with the in-tree p1-r25-product
+      #    bytes, which are never rewritten here.
+      - run: >
+          python3 tests/record_adapter/run_product.py
+          --evidence tests/record_adapter/evidence/product
+          --retained tests/record_adapter/evidence/p1-r25-product
 
 
   transport-package:
@@ -847,6 +853,90 @@ jobs:
           path: |
             tests/strengthen_r55_adapter/evidence/product
             tests/strengthen_r55_adapter/evidence/replay
+          if-no-files-found: error
+
+  wp08-mapping-r56-package:
+    name: "independent WP-08 mapped-run rows (#129) — product replay"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp08_mapping_r56/audit.py
+      - run: python3 -B tests/wp08_mapping_r56/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp08_mapping_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp08_mapping_adapter/run_product.py
+          --replay tests/wp08_mapping_adapter/evidence/p1-r57-product
+          --out tests/wp08_mapping_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/wp08_mapping_adapter/run_product.py
+          --evidence tests/wp08_mapping_adapter/evidence/product
+          --retained tests/wp08_mapping_adapter/evidence/p1-r57-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-row census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp08_mapping_adapter/negative_controls.py tests/wp08_mapping_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r57-wp08-mapping-product-evidence
+          path: |
+            tests/wp08_mapping_adapter/evidence/product
+            tests/wp08_mapping_adapter/evidence/replay
+          if-no-files-found: error
+
+  wp09-gaps-r56-package:
+    name: "independent #130 rows (overdub saturation, V-R55-01 trace floor) — product replay"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp09_gaps_r56/audit.py
+      - run: python3 -B tests/wp09_gaps_r56/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp09_gaps_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp09_gaps_adapter/run_product.py
+          --replay tests/wp09_gaps_adapter/evidence/p1-r57-product
+          --out tests/wp09_gaps_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256 (row 2 fetches the accepted #336 asset)
+        if: always()
+        run: >
+          python3 tests/wp09_gaps_adapter/run_product.py
+          --evidence tests/wp09_gaps_adapter/evidence/product
+          --retained tests/wp09_gaps_adapter/evidence/p1-r57-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-row census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp09_gaps_adapter/negative_controls.py tests/wp09_gaps_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r57-wp09-gaps-product-evidence
+          path: |
+            tests/wp09_gaps_adapter/evidence/product
+            tests/wp09_gaps_adapter/evidence/replay
           if-no-files-found: error
 
   wp10-backlog-r54-package:
