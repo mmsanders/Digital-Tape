@@ -1,0 +1,10 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "5854fd670c9bef370ebc507b41238e01e51c65ae1c0c238adf71d8407d087cab",
+  "case_count": 7,
+  "evidence_sha256": "87b0cca239a5ad2d2ab86fda0da0eb97a01d3c963a2f90fd9411984933eec034",
+  "plan_sha256": "db9f826a3af4e3c7a2b01780ace2baa9bb5257aead873e484d25173b0c1b8119",
+  "product_commit": null,
+  "product_tree": null,
+  "schema": "wp06-r52-manifest-v1"
+}

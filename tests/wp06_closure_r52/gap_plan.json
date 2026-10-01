@@ -1,0 +1,22 @@
+{
+  "schema": "wp06-r52-plan-v1",
+  "spec": {
+    "product_commit": "2cdad5f43b593754244221f42e79de4a4e61179c",
+    "tapefs_sha256": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d",
+    "engine_api_sha256": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
+    "acceptance_sha256": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d"
+  },
+  "cases": [
+    {"id":"E-SIDEA-REFUSE","row":"WP06e.stage1.arm.side_a","fixture":"stage1_row1","action":"mount_A_then_arm","expected":"TAPE_ERR_READ_ONLY"},
+    {"id":"E-RESPOOL-FULL","row":"WP06e.stage1.respool.no_destination","fixture":"stage1_row1_no_destination","action":"mount_B_then_respool","expected":"TAPE_ERR_CARTRIDGE_FULL"},
+    {"id":"E-RECORD-PROMOTE","row":"WP06e.stage1.record.then_promote","fixture":"stage1_row1","action":"arm_record_commit_then_promote","expected":"TAPE_OK"},
+    {"id":"F-STAGE-DEGRADED-ABSENT","row":"WP06f.stage1.degraded_absent.reset","fixture":"stage1_degraded_absent","action":"mount_A_reset_remount_switch_B","expected":"TAPE_OK"},
+    {"id":"F-STAGE-DEGRADED-DIVERGENT","row":"WP06f.stage1.degraded_divergent.reset","fixture":"stage1_degraded_divergent","action":"mount_A_reset_remount_switch_B","expected":"TAPE_OK"},
+    {"id":"F-LIVEB-PROMOTE-FLOOR","row":"WP06f.sideA_liveB.promote_floor","fixture":"sideA_live_recorded_B","action":"mount_A_then_promote","expected":"TAPE_OK"},
+    {"id":"F-LIVEB-RESPOOL-FLOOR","row":"WP06f.sideA_liveB.respool_floor","fixture":"sideA_live_recorded_B","action":"mount_A_then_respool","expected":"TAPE_OK"}
+  ],
+  "blocked_rows": [
+    {"row":"WP06e.stage1.arm.index_full","reason":"Every non-degraded stage-1 mount must match tapefs 9.3.3; all three rows require live Side B to be exactly one entry. With TAPE_MAX_ENTRIES=4096 this leaves 4095 entries_free, so no record mode can produce the required TAPE_ERR_INDEX_FULL precondition."},
+    {"row":"WP06e.stage1.respool.empty","reason":"A valid empty Side B has a zero-entry index. No tapefs 9.3.3 RESUME row accepts zero entries, so stage-1 plus empty is rejected by tape_mount with TAPE_ERR_INCONSISTENT before tape_respool is callable."}
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "wp12-r53-plan-v1",
+  "inputs": {
+    "product_commit": "39d2076fa204991ec9c0d43f00b502942556bf9a",
+    "verification_commit": "0ac2f8eda377264c97c798b34a2ee4fdc421025d",
+    "tapefs_sha256": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d",
+    "engine_api_sha256": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
+    "acceptance_sha256": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d"
+  },
+  "render": {"respool_block_budget": 64, "render_frames_per_call": 4096, "rate_q16_16": 65536},
+  "fault_probe_order": ["arm", "feed", "seek", "set_rate", "service", "commit", "set_side",
+                        "reset_b", "promote", "respool", "dup", "render", "status_info_tell",
+                        "abort", "unmount"],
+  "cases": [
+    {"id": "RENDER-TWOPASS", "kind": "render", "fixture": "RENDER-TWOPASS",
+     "rows": ["WP12.completed_pass.renders_bit_identical"]},
+    {"id": "RENDER-DECLINE", "kind": "render", "fixture": "RENDER-DECLINE",
+     "rows": ["WP12.completed_pass.renders_bit_identical"]},
+    {"id": "RENDER-FRAGMENTED", "kind": "render", "fixture": "RENDER-FRAGMENTED",
+     "rows": ["WP12.completed_pass.renders_bit_identical"]},
+    {"id": "F-RESPOOL-WRITE", "kind": "fault", "op": "respool", "fixture": "respool_v3_003",
+     "mount_side": "B", "block_budget": 64,
+     "inject": {"op": "write", "rule": "first_on_continuation"},
+     "rows": ["WP12a.faulted.row_on_continuation_faulted_instance"]},
+    {"id": "F-RESPOOL-HEADER-FLUSH", "kind": "fault", "op": "respool", "fixture": "respool_v3_003",
+     "mount_side": "B", "block_budget": 64,
+     "inject": {"op": "flush", "rule": "first_after_write", "lba": 392, "count": 1},
+     "rows": ["WP12a.faulted.row_on_continuation_faulted_instance"]},
+    {"id": "F-PROMOTE-WRITE", "kind": "fault", "op": "promote", "fixture": "promote_fresh_alloc_full",
+     "mount_side": "B", "block_budget": 1,
+     "inject": {"op": "write", "rule": "first_on_continuation"},
+     "rows": ["WP12a.faulted.row_on_continuation_faulted_instance"]},
+    {"id": "F-PROMOTE-FLUSH", "kind": "fault", "op": "promote", "fixture": "promote_fresh_alloc_full",
+     "mount_side": "B", "block_budget": 1,
+     "inject": {"op": "flush", "rule": "first_on_continuation"},
+     "rows": ["WP12a.promote.continuation_flush_failure_faults",
+              "WP12a.faulted.row_on_continuation_faulted_instance"]}
+  ]
+}

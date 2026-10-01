@@ -557,6 +557,167 @@ jobs:
             tests/capacity_wp09_adapter/evidence/replay
           if-no-files-found: error
 
+  wp12-closure-package:
+    name: independent WP-12/WP-12a R53 closure gaps — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp12_closure_r53/audit.py
+      - run: python3 -B tests/wp12_closure_r53/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp12_closure_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp12_closure_adapter/run_product.py
+          --replay tests/wp12_closure_adapter/evidence/p1-r54-product
+          --out tests/wp12_closure_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp12_closure_adapter/run_product.py
+          --evidence tests/wp12_closure_adapter/evidence/product
+          --retained tests/wp12_closure_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case outcomes; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp12_closure_adapter/negative_controls.py tests/wp12_closure_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp12-closure-product-evidence
+          path: |
+            tests/wp12_closure_adapter/evidence/product
+            tests/wp12_closure_adapter/evidence/replay
+          if-no-files-found: error
+
+  portability-wp08-package:
+    name: independent WP-08 R52 two-toolchain playback — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - name: Toolchains
+        run: gcc --version | head -1; clang --version | head -1
+      - run: python3 -B tests/portability_wp08_r52/selftest.py
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: python3 tests/portability_wp08_adapter/run_product.py --replay tests/portability_wp08_adapter/evidence/p1-r54-product
+      - name: Canonical GCC and Clang run; the fresh streams must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/portability_wp08_adapter/run_product.py
+          --evidence tests/portability_wp08_adapter/evidence/product
+          --retained tests/portability_wp08_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-vector outcomes and red controls on the Product streams
+        if: always()
+        run: python3 -B tests/portability_wp08_adapter/negative_controls.py tests/portability_wp08_adapter/evidence/product
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp08-portability-product-evidence
+          path: tests/portability_wp08_adapter/evidence/product
+          if-no-files-found: error
+
+  wp06-closure-package:
+    name: independent WP-06 R52 closure gaps — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp06_closure_r52/audit.py
+      - run: python3 -B tests/wp06_closure_r52/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp06_closure_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp06_closure_adapter/run_product.py
+          --replay tests/wp06_closure_adapter/evidence/p1-r54-product
+          --out tests/wp06_closure_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp06_closure_adapter/run_product.py
+          --evidence tests/wp06_closure_adapter/evidence/product
+          --retained tests/wp06_closure_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case oracle outcomes; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp06_closure_adapter/negative_controls.py tests/wp06_closure_adapter/evidence/product/observations.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp06-closure-product-evidence
+          path: |
+            tests/wp06_closure_adapter/evidence/product
+            tests/wp06_closure_adapter/evidence/replay
+          if-no-files-found: error
+
+  wp10-backlog-r54-package:
+    name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_backlog_r54/audit.py
+      - run: python3 -B tests/wp10_backlog_r54/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_backlog_r54_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_r54_adapter/run_product.py
+          --replay tests/wp10_backlog_r54_adapter/evidence/p1-r54-product/observations.jsonl.gz
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+          --out tests/wp10_backlog_r54_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/wp10_backlog_r54_adapter/run_product.py
+          --evidence tests/wp10_backlog_r54_adapter/evidence/product
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-case census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/wp10_backlog_r54_adapter/negative_controls.py tests/wp10_backlog_r54_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r54-wp10-backlog-r54-product-evidence
+          path: |
+            tests/wp10_backlog_r54_adapter/evidence/product
+            tests/wp10_backlog_r54_adapter/evidence/replay
+          if-no-files-found: error
+
   wp10-closure-package:
     name: independent WP-10 R53 crash-injection gaps — product replay
     runs-on: ubuntu-latest
