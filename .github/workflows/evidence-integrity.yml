@@ -43,6 +43,12 @@ jobs:
           else
             python3 tools/ci/audit-evidence-integrity.py
           fi
+      - name: Product evidence pins
+        # V-R54-01 (#337): every retained Product bundle under
+        # tests/*_adapter/evidence/p1-r*-product is pinned byte for byte in
+        # tests/IMPORTS.json (Michael-owned), so a PR cannot change engine/,
+        # regenerate, and reseal a bundle and its SHA256SUMS while staying green.
+        run: python3 -B tools/ci/audit-product-evidence-pins.py
 
   evidence-gate-can-go-red:
     name: evidence gate can go red
@@ -61,5 +67,7 @@ jobs:
         run: ./tools/fetch-evidence.sh
       - name: negative control
         run: python3 tools/ci/verify-evidence-integrity-gate.py
+      - name: Product evidence pin audit can go red
+        run: python3 -B tools/ci/verify-product-evidence-pins-gate.py
       - name: Structural Rule 1 ordering can go red
         run: python3 tools/ci/verify-structural-rule-1.py

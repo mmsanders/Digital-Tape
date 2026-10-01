@@ -504,5 +504,191 @@
         "revision": "DRAFT-9"
       }
     ]
-  }
+  },
+  "product_evidence_pins": [
+    {
+      "path": "tests/crossrun_wp08_adapter/evidence/p1-r46-product",
+      "files": {
+        "SHA256SUMS": "b558d3f7f2a07d04d42536bc0a1453fb87439718ffa51777348e803b7803cb78",
+        "build-identity.json": "eec7efffa6e2c3ac3f19c5935da291cfa503f1d59093842b0529ab099060076c",
+        "fixture.json": "0086d401ae865f45c3c437ffd66bf024235f6e9aeb96002cedebc309df43bd02",
+        "observations.jsonl": "5031874ef51248e95f916f90831af322729dfc07a30d35d8b804ede3ddc8fcd3"
+      },
+      "observations_sha256": "5031874ef51248e95f916f90831af322729dfc07a30d35d8b804ede3ddc8fcd3",
+      "product_pr": 287,
+      "accepted_head": "54d1520004214b207ea36584742591cc5e5cab6f",
+      "verification": "Verification #95",
+      "disposition": "https://github.com/mmsanders/digital-tape-verification/issues/95 (closing disposition comment)",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/history_wp09_adapter/evidence/p1-r46-product",
+      "files": {
+        "SHA256SUMS": "bf495f121766010d3d8355ea5c440b7a08c6feee88868b8c1b235c5f6c717351",
+        "build-identity.json": "6ccb8423e2d734b6e6e3fe821d977e352ebd3780763740be9cf6435b5726eb5b",
+        "observations.jsonl.gz": "81396a71dcbd0115a2d3732c5ff3f7f99e47d016dcb3e9da82f2ad0ea1b91f45"
+      },
+      "observations_sha256": "699876471e1fa95ad63b3f36f2a33c191ab3fbd975b5cc60f8aaadad42afb1b4",
+      "product_pr": 288,
+      "accepted_head": "08ec1c4ad1a60ded6a1429323a1c7bf495f81842",
+      "verification": "Verification #96",
+      "disposition": "https://github.com/mmsanders/digital-tape-verification/issues/96 (closing disposition comment)",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/sequential_wp06_adapter/evidence/p1-r48-product",
+      "files": {
+        "SHA256SUMS": "479a7607ecab094640f87ca259cca3cd17685676ca10592f0543f00a395ab80e",
+        "build-identity.json": "788de7a89259ea667edd42189276c89819c0543aaa6e20ab25bd1cb193e6db2c",
+        "commit-census.json": "a1f909819502180a1851bb4d07310b1a7c8885fb0a5b8ba70ce57133ad3a8737",
+        "observations.jsonl.gz": "1ecb322879b45b1d7aff6bbad8d2a3800de72f37491b16b905b1777539587d5d"
+      },
+      "observations_sha256": "ede1620acf523b36d2e2481ed8c4bb2c476178c5bc1959380cc201734fd7395f",
+      "product_pr": 297,
+      "accepted_head": "535d1e5e60367f6acef92a8287a7120715698b11",
+      "verification": "Verification #98",
+      "disposition": "https://github.com/mmsanders/digital-tape-verification/issues/98 (closing disposition comment)",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/capacity_wp09_adapter/evidence/p1-r53-product",
+      "files": {
+        "SHA256SUMS": "5cc9df8b3225065cfafa42daa405156684d3c073d5e2f9f65149d8394f5fa4e2",
+        "build-identity.json": "d59b7e3af6c092fa347ae4b584cb83fc88e13743aab61a994af4b8b00b16a586",
+        "case-census.json": "53b6b19f8ccc8cb7244d68416e6736635594f8bc188286e84808227f0360958a",
+        "observations.jsonl.gz": "a43dbfa7caf49023fda09c902b3509ab28b8c7946cb569d927435e7f6bc07bf9"
+      },
+      "observations_sha256": "30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58",
+      "product_pr": 311,
+      "accepted_head": "92f9280cf99232627d4117385ba67de50ed30f49",
+      "verification": "Verification #107",
+      "disposition": "verification commit 91b24c3cb711a5151a86d3893902cfd82ea5019b (PR #112) findings/P1-R53-WP09D-CAPACITY-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp10_closure_adapter/evidence/p1-r53-product",
+      "files": {
+        "SHA256SUMS": "eebb0d3631ff0b31f7afd4fd73193793360b805bc5d16b6f9b80843f33b74901",
+        "build-identity.json": "5d219d3c11240f8c681ff6234b4388a2ba843cfde91ea0979508813bb2edfc57",
+        "case-census.json": "9c3da35bc002d600c25dbd723c09950df5f9206a8e88419a55d26d4032002d44",
+        "observations.jsonl.gz": "cbe3691a5d24a9a86056286b8fa1cdb0110a62a52cd49a6b62edd72427cb3438"
+      },
+      "observations_sha256": "26472ddbf65c99c032845caaddbbbe081322c5403df47a0e9dbbe54de22b280d",
+      "product_pr": 318,
+      "accepted_head": "691fbdb1bf3bf47cacb52b9c46947962f60e4dd2",
+      "verification": "Verification #119",
+      "disposition": "verification commit e072c1c findings/P1-R54-WP10PD-PR318-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp10_backlog_r54_adapter/evidence/p1-r54-product",
+      "files": {
+        "SHA256SUMS": "87a36dcf8123898f2b8e137a78e146cda41a451dcf2b1d97cfe103d80560e5e9",
+        "build-identity.json": "d1f0a25ba7f4bd77f99152c4c86840177818f6ad62335498f311614da44617bd",
+        "observations.jsonl.gz": "b4492d4bda9b4b2700c0f755c72e4d89034da0dae27c7760b0f0f5e9699ca631"
+      },
+      "observations_sha256": "3a0cff6118e938cf6a59ef2c3b85149a67885b27c63a33a18deed36f8ab9347e",
+      "product_pr": 330,
+      "accepted_head": "4f062b76c47ca53a643a60827ef652c5ad20c065",
+      "verification": "Verification #120",
+      "disposition": "verification commit ae024f9 findings/P1-R54-WP10CD-PR330-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp06_closure_adapter/evidence/p1-r54-product",
+      "files": {
+        "SHA256SUMS": "abf60a91d5acd75e3a89172897cdfe80c8516f8ca6d113dff48434eb07ef5190",
+        "build-identity.json": "a74a70c082f70bc9341784c303b604009e3866909a28a394a6592f9455b759e1",
+        "case-census.json": "6ad4daa8b4cc288c6c1bc6127a80fd4583346b3d6844da24eb3658a52b4efd61",
+        "observations.jsonl.gz": "389d7340acf57800685757ec4d1aba3252b8a1d45718d682690b2514b1c45b83"
+      },
+      "observations_sha256": "c494589ec12d2648a57b8b062e7a49986eef8d21a3b5996400db0b6114d75b07",
+      "product_pr": 326,
+      "accepted_head": "c5ac824b8f96be1bc16851988f4bff686b153c17",
+      "verification": "Verification #121",
+      "disposition": "verification commit a4c9230 findings/P1-R54-WP06D-PR326-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/portability_wp08_adapter/evidence/p1-r54-product",
+      "files": {
+        "SHA256SUMS": "508bfbc2924330e0dfaddb493b084c613a73f19681837e2274307e6b1cc166a8",
+        "clang.jsonl.gz": "b100b5641e7f1612b02f9ef63913f9502697d61dfb019d7551907a94459de950",
+        "gcc.jsonl.gz": "b100b5641e7f1612b02f9ef63913f9502697d61dfb019d7551907a94459de950",
+        "manifest.json": "b7740435804669bc37a84c2deff1264682c7f3f58eaf3f910ba124714e876a82"
+      },
+      "observations_sha256": "8a2369d663a06cad91c205397d6a3a4e0af81706129328843b08613b09bcdd8b",
+      "product_pr": 327,
+      "accepted_head": "32173accde31efb151ff59545b135a78ab8ec9bf",
+      "verification": "Verification #122",
+      "disposition": "verification commit b929f2d (header fix db07bfd) findings/P1-R54-WP08D-PR327-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp12_closure_adapter/evidence/p1-r54-product",
+      "files": {
+        "SHA256SUMS": "cf92f802c554a6764f4144c018ce0d1daf0b24b1c32c5b180bb949700df49c38",
+        "build-identity.json": "80759ec70b60316acc73b36b6bec43d4f1547302ec37ff1f3aca7716f3cd9066",
+        "case-census.json": "87f390f441b0247a8d2c946cfdbdeefc4dde70e581dfb8772d8fa2317ec3b0ff",
+        "observations.jsonl.gz": "5e611991603a66b9c5b78d310b2104df827f41564eaa2d960d1aac8bb18f7c0e"
+      },
+      "observations_sha256": "3e1fe20d41e60f0a51eed6b2ce1e9045ff9f39c96809360abe54678da5959ec2",
+      "product_pr": 328,
+      "accepted_head": "c126515d631338b63798613025985f73c1a8d355",
+      "verification": "Verification #123",
+      "disposition": "verification commit 94870eb findings/P1-R54-WP12D-PR328-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp10_backlog_adapter/evidence/p1-r55-product",
+      "files": {
+        "SHA256SUMS": "e742f7a63a95d07571af2446bc4a1c112657f98e01c53205cda7f8bb8046705e",
+        "build-identity.json": "07c0eeac0e1a367d68b166e9b5d888da2553d9bad99db205e61d3dfb43e72a35",
+        "observations.jsonl.gz": "7c6f81519c65454f54731bcfc4dbc96b4d0bf93beceb35b17f7d790449a69729"
+      },
+      "observations_sha256": "720db7adf090d5548df85256ef24599217e27f648b62abd3d6758b641d904742",
+      "product_pr": 335,
+      "accepted_head": "d5540f111101eca03be1c90135888fa262363bf6",
+      "verification": "Verification #127",
+      "disposition": "verification commit 229d5a2 findings/P1-R55-WP10BD-PR335-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/wp10_final_adapter/evidence/p1-r55-product",
+      "files": {
+        "SHA256SUMS": "2f2b4f987865fb6cf9f31507973a1c79efa292410121fccfdd7280337e0afdba",
+        "build-identity.json": "5c4e6ae482a41edb937cc67e5f5d55494b870e35f6f33c720283aa24750b65d6"
+      },
+      "observations_sha256": "3ba932d24221f9c7612170e6db23f9c84c9036fb4888f25966ec61fbc7201be3",
+      "product_pr": 336,
+      "accepted_head": "68f919684f5ea8ea9877092d0e019cd1353142ba",
+      "verification": "Verification #128",
+      "disposition": "verification commit a74a814 findings/P1-R55-WP10FD-PR336-DISPOSITION-2026-09-30.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    },
+    {
+      "path": "tests/strengthen_r55_adapter/evidence/p1-r56-product",
+      "files": {
+        "SHA256SUMS": "d2185814d416845ffef8b6733b43d9facae02773b422d7ee0a53e04050133d6f",
+        "build-identity.json": "27871c5da7bdfc861dbfddecc176b676b41347191f5c083969a5078d53fd929d",
+        "observations.jsonl.gz": "f6c975daec0293736c15dd5cbe03d78d30315d09568cd7208ab2ce76a16f63b2"
+      },
+      "observations_sha256": "877a5dc7aa8f9ae5687202138eee6e1c84c0b7a7bc6935cac12f7e9464672aa8",
+      "product_pr": 343,
+      "accepted_head": "f2bff1f93a089e0f46ae3817efc410e1e81564d3",
+      "verification": "Verification #131",
+      "disposition": "verification commit 3120a1d findings/P1-R56-STRD-PR343-DISPOSITION-2026-10-01.md",
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+    }
+  ],
+  "retained_unaccepted_bundles": [
+    {
+      "path": "tests/record_adapter/evidence/p1-r25-product",
+      "files": {
+        "observations.jsonl": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f"
+      },
+      "observations_sha256": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f",
+      "reason": "Not in PM #337's list. WP-09 record_draft8 R25 evidence: Verification #38 (commit cbe7f93) disposed Product head 9d3649d87f2adb093d18b34825e38ca9573ba0a5 with retained evidence SHA-256 a88850df…; that head is not in this repository and these bytes (re-committed by e4858b88 as a mechanically equivalent corrected-oracle result) do not hash to it, so they cannot be pinned as accepted. Pinned here byte-for-byte as-is; PM to rule."
+    }
+  ]
 }
