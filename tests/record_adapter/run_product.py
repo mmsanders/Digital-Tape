@@ -26,6 +26,12 @@ changes, and it changes in BOTH directions: a named case that starts PASSING
 fails the run too, so the exception cannot be forgotten once it stops being
 true. It is a Software annotation on CI, not a disposition; only PM and
 Verification can dispose of a verifier assertion.
+
+--retained DIR (#345, the #320 pattern) is a current-engine regression check.
+The fresh observations.jsonl written to --evidence must be byte-identical to
+DIR/observations.jsonl, the in-tree p1-r25-product bytes. Those bytes are never
+rewritten: a difference fails the run and is reported, not resealed. The
+current engine/ tree is printed so the run records it, and nothing pins it.
 """
 from __future__ import annotations
 
@@ -71,7 +77,7 @@ def plan():
 
 
 def run(adapter: Path, workdir: Path, evidence: Path | None,
-        expect_blocked: set[str]) -> int:
+        expect_blocked: set[str], retained: Path | None = None) -> int:
     workdir.mkdir(parents=True, exist_ok=True)
     if evidence is not None:
         evidence.mkdir(parents=True, exist_ok=True)
@@ -161,6 +167,15 @@ def run(adapter: Path, workdir: Path, evidence: Path | None,
                 f.write(json.dumps(rec, sort_keys=True) + "\n")
         print(f"evidence: {path} sha256={sha256(path.read_bytes())}")
 
+        if retained is not None:
+            want = (retained / "observations.jsonl").read_bytes()
+            got = path.read_bytes()
+            if got != want:
+                print(f"REGRESSION: regenerated observations.jsonl {sha256(got)} differs from the "
+                      f"retained {retained / 'observations.jsonl'} {sha256(want)} (not resealed)")
+                return 1
+            print(f"regenerated observations.jsonl is byte-identical to the retained bundle {sha256(want)}")
+
     return 1 if failures else 0
 
 
@@ -169,6 +184,8 @@ def main() -> int:
     ap.add_argument("--adapter", default=str(HERE / "build" / "wp09_rec_probe"))
     ap.add_argument("--workdir", default=str(HERE / "build" / "media"))
     ap.add_argument("--evidence", default=None)
+    ap.add_argument("--retained", default=None,
+                    help="committed evidence directory the fresh JSONL must equal byte for byte")
     ap.add_argument("--expect-blocked", action="append", default=[],
                     help="case id whose failure is a known package blocker")
     args = ap.parse_args()
@@ -176,9 +193,15 @@ def main() -> int:
     if not adapter.exists():
         print(f"adapter not built: {adapter}", file=sys.stderr)
         return 2
+    if args.retained and not args.evidence:
+        ap.error("--retained needs --evidence (a fresh directory)")
+    tree = subprocess.run(["git", "-C", str(HERE.parents[1]), "rev-parse", "HEAD:engine"],
+                          capture_output=True, text=True).stdout.strip()
+    print(f"current engine/ tree {tree or 'unknown'}")
     return run(adapter, Path(args.workdir),
                Path(args.evidence) if args.evidence else None,
-               set(args.expect_blocked))
+               set(args.expect_blocked),
+               Path(args.retained) if args.retained else None)
 
 
 if __name__ == "__main__":
