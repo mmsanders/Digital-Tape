@@ -411,6 +411,32 @@
         "-B",
         "tests/strengthen_r55/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp08_mapping_r56",
+      "tree": "466bf8193e53a39a4e5a51710ede9cd2b2458858",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "5b7c3641e972bdbf080885ac01142927434487fa",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-08 mapped-run rows verifier package (Verification #129, DRAFT-9): WP08.seek_boundary.mapped_runs (60 cases: Sides A/B x every mapped run boundary and intra-run chunk crossing x seek offset -1/0/+1 x rate +/-1.0x) and WP08.reverse_end.mapped_timeline (2 cases: exact 559-frame reverse from max_pos per side) on one C69 cartridge with five runs (block-unaligned and odd start_frame, shared chunk, chunk-spanning run, different A/B orders); case set 9eca914a4f2ed87db31bb5cd1212b89dec52731e37cdd76e1fb8aa2af8424e30; oracle SHA-256 7eab5a76bbadefd569e77e0986bfd9645bcbaf1d0a94b469029b2ba83b63ea9c, rows SHA-256 f918fc56142822f9864f02f1eee8ee63f4c6fc5b2c244e5000b981b7b3b261a0, replay SHA-256 f18a941a7c22a5615233f3855328291a96745683ce9524416f9132baa886ac2d, self-test SHA-256 0ef5498113a51abe2d886cafb3cd6ec4f960154eb97f333f6f48f8424c9e623d, pins SHA-256 45229260a6dfcf587c7af69bbb77a3cb7203d07af43907e736695ac76e22f759; six killed red controls) published at commit 5b7c3641e972bdbf080885ac01142927434487fa (whole tree 6f3ef7d2f75bbe56e8e1714d2150874674c66d72, parent 3120a1dcad254b1c9e118ee3339ad28df387cb6a), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp08_mapping_r56/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/wp09_gaps_r56",
+      "tree": "d8d6d6f8a9df02cb6125b73bedbde422afe5d909",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "508ada857a5badf376da4428e87791333f1f0657",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "#130 verifier package (Verification #130, DRAFT-9): WP09.overdub.full_scale_saturation (3 cases: start, middle, straddle-end; every rail pair on both channels, engine-api §8 clamp and §11 append pass-through) and WP10.respool_render.trace_floor (V-R55-01, 5 fixtures over the accepted #118 row-3 observations: tapefs §8 per-commit floor and §9.4 commit count); case set 5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0; oracle SHA-256 f8909a5c886074cd2e9c6ab48b0635b56059a47f5efd78904439d0ade6180c3b, rows SHA-256 0396cbc6093eed61639bacb2a8cd3ee0baa2324fa9e488d56fb3a9c6cfb5936b, replay SHA-256 fa0b77b7eb2f2521c70e7c94b18ac6f7647a69124e3d054a9bff97c40578a81c, self-test SHA-256 0fe70eb4e53d9b0314a953391c8c1a6acb575c50ff1d635f82db57ffbc9f5582, pins SHA-256 689757c37bde14f78ff2bc9b484c48addccaf6d379d5e3147816eb9854cb5faf; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed, oracle.py db7509a9 and its synthetic evidence faf6d486) published at commit 508ada857a5badf376da4428e87791333f1f0657 (whole tree 42901094c14516fbfa90a7df46e94bd390b34378, parent ad9b6c23464f417be91fcf7e2baf477f5df703f3), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp09_gaps_r56/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
