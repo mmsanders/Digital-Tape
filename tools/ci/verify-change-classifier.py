@@ -11,21 +11,27 @@ removes coverage. This script shows:
    classifier that never says "full" (or that admits one forbidden class)
    cannot pass it;
 3. the CLI, fed NUL-separated paths as ci.yml feeds it, writes the GitHub
-   output the workflow reads.
+   output the workflow reads;
+4. every ci.yml job is directly docs-only gated unless it is the classifier
+   itself or is on the explicit transitively-gated allow-list. The allow-list
+   dependency is checked too, and an ungated-job mutant must be rejected.
 
-Exit status 1 if any expectation fails or any broken classifier survives.
+Exit status 1 if any expectation fails, any broken classifier survives, or the
+workflow gate invariant/negative control fails.
 """
 from __future__ import annotations
 
 import importlib.util
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools/ci/classify-changes.py"
+WORKFLOW = ROOT / ".github/workflows/ci.yml"
 
 spec = importlib.util.spec_from_file_location("classify_changes", SCRIPT)
 C = importlib.util.module_from_spec(spec)
@@ -109,6 +115,124 @@ MUTANTS = [never_full, any_instead_of_all, empty_is_docs, admits_docs_verificati
            admits_any_markdown, admits_github, prefix_without_slash]
 
 
+GATE_NEEDLE = "needs.changes.outputs.docs_only != 'true'"
+
+# These jobs are already transitively docs-only gated and have dependency/result
+# semantics worth preserving. Each exemption names a directly gated prerequisite;
+# the audit below verifies both the dependency and the prerequisite's direct gate.
+TRANSITIVE_GATE_ALLOWLIST = {
+    "respool-full-crash": "respool-full-functional",
+    "respool-full-aggregate": "respool-full-functional",
+    "gates": "build",
+    "meta": "build",
+    "unit": "build",
+    "golden": "build",
+}
+
+
+def workflow_jobs(text):
+    """Return top-level ci.yml job blocks keyed by job id."""
+    lines = text.splitlines()
+    try:
+        start = lines.index("jobs:") + 1
+    except ValueError:
+        return {}
+    jobs = {}
+    current = None
+    block = []
+    for line in lines[start:]:
+        m = re.match(r"^  ([A-Za-z0-9_-]+):\s*$", line)
+        if m:
+            if current is not None:
+                jobs[current] = "\n".join(block)
+            current = m.group(1)
+            block = [line]
+        elif current is not None:
+            block.append(line)
+    if current is not None:
+        jobs[current] = "\n".join(block)
+    return jobs
+
+
+def job_needs(block):
+    """Return job ids listed by a job-level needs: entry."""
+    lines = block.splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"^    needs:\s*(.*)$", line)
+        if not m:
+            continue
+        tail = m.group(1).strip()
+        if tail:
+            return set(re.findall(r"[A-Za-z0-9_-]+", tail))
+        result = set()
+        for continuation in lines[i + 1:]:
+            m2 = re.match(r"^      -\s*([A-Za-z0-9_-]+)\s*$", continuation)
+            if m2:
+                result.add(m2.group(1))
+                continue
+            if continuation.startswith("      "):
+                continue
+            break
+        return result
+    return set()
+
+
+def has_direct_docs_gate(block):
+    """True only for a job-level if: that reads the changes job output."""
+    m = re.search(r"^    if:\s*(.*)$", block, flags=re.MULTILINE)
+    return bool(m and GATE_NEEDLE in m.group(1))
+
+
+def workflow_gate_failures(text):
+    """Audit direct gates plus the explicit, dependency-checked exemptions."""
+    jobs = workflow_jobs(text)
+    failures = []
+    if "changes" not in jobs:
+        return ["missing classifier job 'changes'"]
+
+    for job, block in jobs.items():
+        if job == "changes" or job in TRANSITIVE_GATE_ALLOWLIST:
+            continue
+        needs = job_needs(block)
+        if "changes" not in needs:
+            failures.append(f"{job}: missing job-level needs: changes")
+        if not has_direct_docs_gate(block):
+            failures.append(f"{job}: missing job-level docs-only if gate")
+
+    for job, upstream in TRANSITIVE_GATE_ALLOWLIST.items():
+        block = jobs.get(job)
+        if block is None:
+            failures.append(f"{job}: stale allow-list entry; job missing")
+            continue
+        if upstream not in job_needs(block):
+            failures.append(f"{job}: allow-list prerequisite {upstream!r} is not in needs")
+            continue
+        upstream_block = jobs.get(upstream)
+        if upstream_block is None or "changes" not in job_needs(upstream_block) or not has_direct_docs_gate(upstream_block):
+            failures.append(f"{job}: allow-list prerequisite {upstream!r} is not directly docs-only gated")
+    return failures
+
+
+def remove_job_docs_gate(text, job):
+    """Negative-control mutation: remove one job's job-level docs-only if."""
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines) if line == f"  {job}:"), None)
+    if start is None:
+        raise AssertionError(f"negative-control job missing: {job}")
+    end = next((i for i in range(start + 1, len(lines))
+                if re.match(r"^  [A-Za-z0-9_-]+:\s*$", lines[i])), len(lines))
+    removed = False
+    out = []
+    for i, line in enumerate(lines):
+        if start < i < end and re.match(r"^    if:\s*", line) and GATE_NEEDLE in line:
+            removed = True
+            continue
+        out.append(line)
+    if not removed:
+        raise AssertionError(f"negative-control gate missing: {job}")
+    return "\n".join(out) + ("\n" if text.endswith("\n") else "")
+
+
 def cli(paths):
     with tempfile.TemporaryDirectory() as t:
         out = pathlib.Path(t) / "out"
@@ -131,6 +255,26 @@ def main() -> int:
               + (f", e.g. {caught[0][0]} -> {caught[0][2]}" if caught else ""))
         if not caught:
             bad += 1
+    workflow = WORKFLOW.read_text()
+    gate_failures = workflow_gate_failures(workflow)
+    if gate_failures:
+        bad += 1
+        for failure in gate_failures:
+            print("FAIL workflow gate: " + failure)
+    else:
+        jobs = workflow_jobs(workflow)
+        direct = len(jobs) - 1 - len(TRANSITIVE_GATE_ALLOWLIST)
+        print(f"ok    workflow gate audit: {direct} direct, "
+              f"{len(TRANSITIVE_GATE_ALLOWLIST)} dependency-checked exemptions, 1 classifier")
+
+    ungated = remove_job_docs_gate(workflow, "wp08-mapping-r56-package")
+    ungated_failures = workflow_gate_failures(ungated)
+    caught = any(f.startswith("wp08-mapping-r56-package:") for f in ungated_failures)
+    print(("killed   " if caught else "SURVIVED ") +
+          "ungated-job negative control: wp08-mapping-r56-package" +
+          (f" -> {ungated_failures[0]}" if caught else ""))
+    if not caught:
+        bad += 1
     for paths, want_out in ((["docs/STATUS.md", "README.md"], "docs_only=true\n"),
                             (["docs/STATUS.md", "engine/src/tape.c"], "docs_only=false\n"),
                             ([], "docs_only=false\n")):
