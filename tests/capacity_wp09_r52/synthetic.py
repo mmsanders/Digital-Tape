@@ -25,15 +25,30 @@ from oracle import (
 )
 
 
+CHUNK_BYTES = BLOCK * BLOCKS_PER_CHUNK
+# nominal_length_s whose tapefs §2 ceiling derives exactly total_chunks 4 / 5 / 6 (GEOMETRY_OK).
+NOMINAL_LENGTH_S = {4: 9, 5: 12, 6: 15}
+
+
 def superblock(case):
+    """A complete tapefs §4 superblock (ADAPTER.md "Fixture"), primary and mirror identical.
+
+    #126: the earlier synthetic wrote block_count as a u64 at offset 36, where §4 places sample_rate,
+    channels and bits_per_sample; the mirror LBA belongs at offset 84.  The oracle never parsed those
+    bytes, so no verdict changes; the synthetic fixture now matches the fixture ADAPTER.md specifies."""
     block_count = LBA_CHUNK_BASE + case.total_chunks * BLOCKS_PER_CHUNK + 1
     b = bytearray(BLOCK)
     b[:8] = b"TAPEFS\0\x01"
-    struct.pack_into("<I", b, 12, 7)
+    struct.pack_into("<HH", b, 8, 1, 0)                      # version 1.0
+    struct.pack_into("<I", b, 12, 7)                         # sb_generation
+    b[16] = 0                                                # VALID
     b[20:36] = bytes.fromhex("52525252525252525252525252525252")
-    struct.pack_into("<Q", b, 36, block_count)
+    struct.pack_into("<IHHI", b, 36, 44100, 2, 16, CHUNK_BYTES)
+    struct.pack_into("<I", b, 48, NOMINAL_LENGTH_S[case.total_chunks])
     struct.pack_into("<I", b, 52, case.total_chunks)
-    struct.pack_into("<I", b, 56, 2)
+    struct.pack_into("<I", b, 56, 2)                         # a_high_water
+    struct.pack_into("<I", b, 60, 128 * BLOCK)               # index slot bytes
+    struct.pack_into("<IIIIII", b, 64, 8, 136, LBA_B0, LBA_B1, LBA_CHUNK_BASE, block_count - 1)
     struct.pack_into("<I", b, 508, zlib.crc32(b[:508]))
     return b.hex()
 

@@ -11,11 +11,32 @@ oracle.
 For the selected row in `evidence/plan.json`, construct the raw stage-0 fixture
 described below, byte-for-byte, with an independently chosen cartridge UUID:
 
-- Side A high-water is 2.
-- Live B0 has sequence 3 and exactly `[(2, 0, 12)]`; B1 is invalid.
-- The primary and mirror superblocks agree and `total_chunks` is the row value.
+- **Superblock (tapefs §4), primary and mirror byte-identical:** every §4 field
+  filled, as `synthetic.py`'s `superblock()` demonstrates:
+  - version 1.0, `state` VALID, any UUID, and an inert `sb_generation`;
+  - sample rate 44,100, 2 channels, 16 bits, `chunk_bytes` 524,288;
+  - `nominal_length_s` 9 / 12 / 15 for `total_chunks` 4 / 5 / 6, so that §2
+    derives exactly the stored `total_chunks` (GEOMETRY_OK);
+  - `a_high_water` 2;
+  - index slot bytes 65,536;
+  - LBAs A0 8, A1 136, B0 264, B1 392, chunk base 2048, and mirror
+    `block_count − 1`, where `block_count = 2048 + total_chunks × 1024 + 1`.
+
+  A fixture missing these fields is unmountable (§4.1 phase 2).
+- **Side A:** A0 is a structurally valid, **empty** Side-A index at **sequence
+  1**, and A1 is invalid (zero). tapefs §4.2 step 1 needs a selectable Side A
+  for any mount. §5.5 makes `cartridge_sequence` the maximum over every
+  structurally valid slot, so the oracle's expected commit at sequence 4 holds
+  only if no A slot is at sequence 3 or above.
+- **Side B:** live B0 has sequence 3 and exactly `[(2, 0, 12)]`; B1 is invalid.
 - Consequently, raw-media derivation gives `free_next == 3` and one, two, or
-  three allocatable chunks.
+  three allocatable chunks, and `cartridge_sequence == 3`.
+
+(#126 maintenance.) This text specifies the fixture #99 relied on but did not
+state, and that the #107 disposition verified from Product adapter source. No
+assertion changes. `raw_before` keeps its four keys. The A-slot premise is
+checked from raw bytes by the separate row
+`tests/strengthen_r55` `WP09.capacity.fixture_a_slot_premise`.
 - Seeded Side-B PCM frames are `(100+i, -200-i)` for `i=0..11`.
 - Every input frame is the deterministic per-case sample defined in
   `oracle.input_sample`; the adapter must read the plan/input, not duplicate an

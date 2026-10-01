@@ -1,0 +1,13 @@
+{
+  "adapter_kind": "synthetic",
+  "adapter_source_sha256": "88109c7f340dbbd0e533c2c9c7064a7f0877e62bfb0a6f83c76eb0c14199ecf9",
+  "case_count": 40,
+  "caseset_sha256": "9ee1c5d6083dda0e9fd3f331a56dbc4903d659a157daa91615ff30212101ebea",
+  "evidence_sha256": "82c302cbb023b17c645d672bd559ea4ddd861ab7ca414b26329b32060c98d065",
+  "product_commit": null,
+  "product_tree": null,
+  "row1": 12,
+  "row2": 1,
+  "row3": 27,
+  "schema": "strengthen-r55-manifest-v1"
+}

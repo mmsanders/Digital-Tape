@@ -297,11 +297,11 @@
     },
     {
       "path": "tests/capacity_wp09_r52",
-      "tree": "85043f530c95257721347a6d991a0d205b299e4f",
+      "tree": "4c754247d2769a9033d7b921cbd248e3e943b62a",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5",
+      "source_commit": "7a914cd7c76bcc933e896a26fa0b3b7349c11b2d",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "WP-09 R52 positive capacity short-accept verifier package (27 cases: overwrite/overdub/splice x start/middle/end x 1/17/4095-frame accepted prefix; canonical plan 620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278, plan.json file SHA-256 ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501; oracle SHA-256 e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b, replay SHA-256 da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6, self-test SHA-256 5f9ceb5a648b1e9074946c36214920b2ea82de2219076e90a9e5bfeca59e7ff1; seven killed red controls) published under Verification #99 at commit 87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5 (whole tree 07dca0ac8cc2c83f685f0317c600c7be56eaa916, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-99-capacity-short-accept, not Verification main; issued by PM Product #306 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "attestation": "WP-09 R52 positive capacity short-accept verifier package (27 cases: overwrite/overdub/splice x start/middle/end x 1/17/4095-frame accepted prefix; canonical plan 620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278, plan.json file SHA-256 ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501; oracle SHA-256 e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b, replay SHA-256 da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6, self-test SHA-256 5f9ceb5a648b1e9074946c36214920b2ea82de2219076e90a9e5bfeca59e7ff1; seven killed red controls) published under Verification #99 at commit 87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5 (whole tree 07dca0ac8cc2c83f685f0317c600c7be56eaa916, parent 0ac2f8eda377264c97c798b34a2ee4fdc421025d) on branch verification/issue-99-capacity-short-accept, not Verification main; issued by PM Product #306 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance. Maintenance re-import under PM Product #340 (Verification #126, publication commit 7a914cd7c76bcc933e896a26fa0b3b7349c11b2d, whole tree d415ef5582bd1ab723b0eb6fd1dc166aeabc1bf0, reachable from Verification PR #125): tree 4c754247d2769a9033d7b921cbd248e3e943b62a replaces 85043f530c95257721347a6d991a0d205b299e4f; only ADAPTER.md, README.md, synthetic.py (blob edf6d9b0, SHA-256 ab7c5224efa87d860df25645d737bbb906f91f119130f36c61bd51f1be5a23c6) and the synthetic evidence and manifest change; oracle.py, replay.py, selftest.py and plan.json are byte-identical, so by PM ruling the accepted #107 PASS carries over with no new disposition",
       "selftest": [
         "python3",
         "-B",
@@ -397,6 +397,19 @@
         "python3",
         "-B",
         "tests/wp10_final_r54/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/strengthen_r55",
+      "tree": "72d24675fc40432c29d7f225bac3169124e5d12f",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7a914cd7c76bcc933e896a26fa0b3b7349c11b2d",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "#126 strengthening rows verifier package (Verification #126, DRAFT-9): row 1 WP10.dup.destination_shape.copied_audio_every_block (12 cases: 6 frame counts x blank/healthy_pair destinations, coordinate-unique audio), row 2 WP06f.sideA_liveB.respool_pass2_run (1 case, C69 layout, pass 2 must run), row 3 WP09.capacity.fixture_a_slot_premise (27 cases over the #99 capacity plan, six-key raw_before); case set 9ee1c5d6083dda0e9fd3f331a56dbc4903d659a157daa91615ff30212101ebea; oracle SHA-256 87d8191879cbcca859ba92870c03520f0936440d376c7ffb32e5683054d285fc, rows SHA-256 1a6ca0fa538338c5a348de80aa1a7ef9982a4906893e6cd677a7276ced2833ca, replay SHA-256 9c7cbc0868c6b3b2b77f6ee92a1f69f8d49360c2975aed131717f4b99206a82c, self-test SHA-256 c9b9a34c69b79ba21f74ac67f86d8c8141b4bded6702fe67adc033e8913147b1, pins SHA-256 ab1e336e8a0a46017609b0b14c0b154a09bb2433792cd6e921927e47f90f2652; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed and capacity_wp09_r52 oracle.py df7f6095, synthetic.py edf6d9b0; nine killed red controls) published at commit 7a914cd7c76bcc933e896a26fa0b3b7349c11b2d (whole tree d415ef5582bd1ab723b0eb6fd1dc166aeabc1bf0, parent aeaf3e26553437e48654142dc7a414a6538468bb), reachable from Verification PR #125; issued by PM Product #340 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/strengthen_r55/selftest.py"
       ]
     }
   ],
