@@ -1,8 +1,8 @@
 # Phase 0 freeze record
 
-**Status: FROZEN AT DRAFT-9 — MICHAEL APPROVED V9-001 ON 25 SEPTEMBER 2026
-PACIFIC TIME; PM ISSUED IT ON 26 SEPTEMBER 2026 UTC.** The original scoped
-DRAFT-8 signature remains recorded below.
+**Status: FROZEN AT DRAFT-10 — MICHAEL AUTHORIZED V10-001…V10-005 ON 1 OCTOBER 2026
+UTC; PM ISSUED THEM THROUGH PRODUCT PR #352.** The DRAFT-9 (V9-001) amendment and the
+original scoped DRAFT-8 signature remain recorded below.
 
 Michael requested a freeze-ready repository and delegated PM, Software and Hardware
 authority for this push. The working agreement reserves final format-freeze sign-off
@@ -10,7 +10,35 @@ to Michael. Michael signed this exact scoped decision in the project conversatio
 “Consider it signed by me, and do what you need to do to represent that in main.”
 This records his approval; it does not grant independent implementation acceptance.
 
-## Current amendment and publication
+## Current amendment and publication: DRAFT-10
+
+Michael authorized the exact amendments in the project conversation: “I authorize DRAFT-10 amendments V10-001…V10-005 as in PR #352. Please continue”.
+PM accepted that as the reserved freeze-amendment approval. PM issued DRAFT-10 by
+merging product PR [#352](https://github.com/mmsanders/Digital-Tape/pull/352) at head
+`ec6b9813af60202eed322e14d320cfaa8546484e`. Its exact bytes are:
+
+| File | SHA-256 |
+|---|---|
+| spec/tapefs-v1.md | 2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba |
+| spec/engine-api.md | aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a |
+| spec/acceptance.md | 50aa63bd751fdc6b4636de0eb48253887be19b7ec2841768449217b4e9b9e547 |
+
+**No field, layout or CRC changes.** V10-001 (Verification finding V-R54-03) changes only
+what raw `tape_format`/`tape_dup` write to a destination with no structurally valid
+superblock: it is blank only if both blocks are entirely zero, and otherwise it is residue,
+zeroed before step 2. That edits §4.6 item 5, inside the frozen §§1–8, as a description of
+raw format/dup only. V10-002…V10-005 are clarifications that PM rulings had already applied
+(WP-06e reachability, `BAD_MAGIC`/`CRC`, the WP-06f re-spool floor and the WP-12a audio clause).
+
+Independent review was Verification #133 on r1 (finding `645d4de`: 528 DRAFT-9
+resurrections, 0 under DRAFT-10, over 16.9M two-interruption images on 14 shapes) and
+Verification #136 on r2 (finding `cc3ba4a`: an exact crash table over 12.8M states,
+READY). r3 applied #136's one non-blocking wording note in its own proposed text, with no
+change to any permitted set. Issuance is not implementation or acceptance: V10-001 needs
+republished verifier rows, an engine change under Structural Rule 1, and independent
+disposition. Under `tapefs` §14, §9 freezes at the first fully green WP-10 run.
+
+## Previous amendment: DRAFT-9
 
 Michael selected the recommended fourth-funnel proposal in the project conversation:
 “Let’s take the recommended fourth-funnel proposal if you’re good with it. Proceed to
