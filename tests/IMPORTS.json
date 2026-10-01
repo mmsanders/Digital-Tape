@@ -440,6 +440,11 @@
         "tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d",
         "engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6",
         "acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d"
+      },
+      "DRAFT-10": {
+        "tapefs-v1.md": "285410578ab6efd9e23a64ead8ace49973c6c048b36a627c97e0845d5560cde8",
+        "engine-api.md": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
+        "acceptance.md": "0a3488d9f77be47883721c75071fa4fa360ec2551f10ca18c9140f8e54b6f7a3"
       }
     },
     "roots": [

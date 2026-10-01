@@ -1,6 +1,6 @@
 # spec/VERSION.md — the spec bundle manifest
 
-**Bundle:** DRAFT-9 · **Issued:** 26 Sep 2026 · **Owner:** Program Manager
+**Bundle:** DRAFT-10 · **Issued:** on Michael's authorization (below) · **Owner:** Program Manager
 
 `Digital-Tape` `main` is the **single canonical publication point** for these documents. A copy anywhere else — a verification branch, a PM communiqué, a chat attachment, a surge branch — is a courtesy copy and is not authoritative. If a courtesy copy disagrees with `main`, `main` wins, and the disagreement is a finding.
 
@@ -8,9 +8,9 @@
 
 | File | Revision | SHA-256 |
 |---|---|---|
-| `spec/tapefs-v1.md` | DRAFT-9 | `3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d` |
-| `spec/engine-api.md` | DRAFT-9 | `383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6` |
-| `spec/acceptance.md` | DRAFT-9 | `ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d` |
+| `spec/tapefs-v1.md` | DRAFT-10 | `285410578ab6efd9e23a64ead8ace49973c6c048b36a627c97e0845d5560cde8` |
+| `spec/engine-api.md` | DRAFT-10 | `aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a` |
+| `spec/acceptance.md` | DRAFT-10 | `0a3488d9f77be47883721c75071fa4fa360ec2551f10ca18c9140f8e54b6f7a3` |
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
@@ -67,3 +67,5 @@ Only the PM issues a new bundle. The Software Lead lands it mechanically:
 DRAFT-8 was drafted by surge support on `surge/draft-8-freeze-candidate` (PR #25), issued by the PM, independently reviewed, and frozen by Michael's recorded 8 September 2026 signature.
 
 DRAFT-9 is the PM's narrow V9-001 correction authorized by Michael on 25 September 2026 Pacific time: it adds exactly one `dev_progress` → caller-supplied `tape_progress_fn` indirect-call funnel in `engine/src/dev.h`. It changes no media semantics, exported engine ABI, callback signature or numeric resource limit. Verification PR #82 independently reviewed the exact bytes and published the revised WP13-G5 package; PM issued the bundle through product PR #247 at main `7910ae3701fbfd94b5ea0558a69a29955da1dd5c`. The hashed documents retain their reviewed **NOT FROZEN** banners; `docs/PHASE0-FREEZE.md` supersedes those banners for exact V9-001. No implementation or acceptance follows from issuance alone.
+
+DRAFT-10 is the PM's docket revision (Product #308), resumed at Michael's instruction on 1 October 2026 after every Phase 1 engine package was reconciled against DRAFT-9. It changes **no field, layout or CRC**. One item changes behaviour: **V10-001** (Verification finding V-R54-03) makes raw `tape_format`/`tape_dup` treat a destination with no structurally valid superblock as blank only when both blocks are entirely zero, and zero any residue first, closing a two-interruption path that could remount a copy under the previous UUID. The rest are clarifications already applied by PM rulings: **V10-002** drops two WP-06e examples unreachable under the §9.3.3 stage oracle; **V10-003** lets blank-media rows read `TAPE_ERR_BAD_MAGIC` or `TAPE_ERR_CRC`, matching §4.1; **V10-004** states the WP-06f re-spool floor as §9.4 does; **V10-005** scopes WP-12a's audio-continues clause to a Playing source. `engine-api.md` changes only its header. Issuance requires Verification's independent adversarial review of these exact bytes and Michael's authorization, recorded here when given. Embedded spec copies under `docs/` and `tests/` keep their declared DRAFT-8/DRAFT-9 roots (`tests/IMPORTS.json` `spec_bundle`). No implementation or acceptance follows from issuance alone.

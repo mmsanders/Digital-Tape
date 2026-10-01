@@ -1,13 +1,13 @@
 # spec/engine-api.md — Tape Engine API v1.0
 
-> **STATUS: DRAFT-9. NOT FROZEN.** V9-001 adds the single progress-callback funnel; all DRAFT-8 dispositions remain.
+> **STATUS: DRAFT-10. NOT FROZEN.** No API, ABI, result-code or state-matrix change from DRAFT-9; revision bumped in step with the bundle. V9-001 and all DRAFT-8 dispositions remain.
 > `tapefs-v1.md` §§1–8 and `engine-api.md` §§2–8, §12 are the **freeze candidate**; operations and the
 > state matrix freeze at the first green WP-10 run. Hashes in `spec/VERSION.md` are authoritative.
 
-**Revision:** DRAFT-9 · **Issued:** 26 Sep 2026 · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
+**Revision:** DRAFT-10 · **Issued:** on Michael's authorization, recorded in `spec/VERSION.md` · **Status:** §§2–8 and §12 are the freeze candidate; §9–§10 remain open
 **Owner:** Program Manager. Changes require PM sign-off.
-**Supersedes:** DRAFT-8 (6 Sep). Incorporates V9-001, the single `dev_progress` callback funnel.
-**Companion:** `spec/tapefs-v1.md` DRAFT-9, normative for everything on media.
+**Supersedes:** DRAFT-9 (26 Sep). Text unchanged below this header. V10-001 is a `tapefs` §9.5/§9.6 behaviour correction behind the existing `tape_format` and `tape_dup` signatures and result codes.
+**Companion:** `spec/tapefs-v1.md` DRAFT-10, normative for everything on media.
 
 C99. No operating system. No dynamic allocation, ever. No recursion. No libc file I/O. No floating point in the audio path. No clock. The only coupling to the outside world is the block device in §3.
 
