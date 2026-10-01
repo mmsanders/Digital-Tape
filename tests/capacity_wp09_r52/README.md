@@ -15,7 +15,7 @@ python3 selftest.py
 python3 replay.py evidence/observations.jsonl.gz \
   --manifest /tmp/wp09-r52-synthetic-manifest.json \
   --adapter-kind synthetic \
-  --adapter-source-sha256 7f4deb37a20c2e242aa12487bee178253e8da56c9d1a04b7c57c358c33cd6608
+  --adapter-source-sha256 ab7c5224efa87d860df25645d737bbb906f91f119130f36c61bd51f1be5a23c6
 (cd evidence && sha256sum -c SHA256SUMS)
 ```
 
@@ -47,3 +47,14 @@ case plan; its canonical digest is printed by the self-test and replay.
 See `COVERAGE.md` for the assertion boundary.  This package does not claim
 whole-WP acceptance, firmware behavior, crash coverage, performance, or audio
 quality.
+
+## #126 maintenance
+
+- `ADAPTER.md` now specifies the full fixture: a §4 superblock, an empty A0 at
+  sequence 1, and an invalid A1.
+- `synthetic.py` writes a complete §4 superblock. It previously wrote
+  `block_count` as a u64 at offset 36, where `sample_rate`, `channels` and
+  `bits_per_sample` belong.
+- The synthetic evidence is regenerated.
+- `oracle.py`, `replay.py`, `selftest.py`'s assertions and `plan.json` are
+  unchanged, so every accepted Product replay stands.

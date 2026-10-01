@@ -717,6 +717,48 @@ jobs:
             tests/wp06_closure_adapter/evidence/replay
           if-no-files-found: error
 
+  strengthen-r55-package:
+    name: "independent #126 strengthening rows (strengthen_r55) — product replay"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/strengthen_r55/audit.py
+      - run: python3 -B tests/strengthen_r55/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/strengthen_r55_adapter clean all
+      - name: Offline replay of the committed evidence
+        if: always()
+        run: >
+          python3 tests/strengthen_r55_adapter/run_product.py
+          --replay tests/strengthen_r55_adapter/evidence/p1-r56-product
+          --out tests/strengthen_r55_adapter/evidence/replay
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+        if: always()
+        run: >
+          python3 tests/strengthen_r55_adapter/run_product.py
+          --evidence tests/strengthen_r55_adapter/evidence/product
+          --retained tests/strengthen_r55_adapter/evidence/p1-r56-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Per-row census; the oracle rejects mutated Product evidence
+        if: always()
+        run: python3 -B tests/strengthen_r55_adapter/negative_controls.py tests/strengthen_r55_adapter/evidence/product/observations.jsonl.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r56-strengthen-r55-product-evidence
+          path: |
+            tests/strengthen_r55_adapter/evidence/product
+            tests/strengthen_r55_adapter/evidence/replay
+          if-no-files-found: error
+
   wp10-backlog-r54-package:
     name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
     runs-on: ubuntu-latest

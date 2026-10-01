@@ -40,6 +40,13 @@ ADAPTER_BIN = HERE / "build" / ("capacity_adapter.exe" if os.name == "nt" else "
 ENGINE_LIB = ROOT / "build" / "engine" / "libtape.a"
 
 VERIFIER_TREE = "85043f530c95257721347a6d991a0d205b299e4f"
+# #340 maintenance re-import (Verification #126, publication 7a914cd7): only ADAPTER.md,
+# README.md, synthetic.py and the synthetic evidence changed. PM ruled the accepted PASS
+# carries over because oracle, replay, self-test and plan are byte-identical, so that is
+# checked here; the accepted VERIFIER_TREE stays the one this binding was accepted on.
+MAINTENANCE_TREE = "4c754247d2769a9033d7b921cbd248e3e943b62a"
+MAINTENANCE_IMPORT = "6feb6fe"
+UNCHANGED_BY_MAINTENANCE = ("oracle.py", "replay.py", "selftest.py", "evidence/plan.json")
 VERIFIER_SOURCE = "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5"
 PRODUCT_BASE = "39d2076fa204991ec9c0d43f00b502942556bf9a"
 IMPORT_COMMIT = "aba7735"
@@ -68,8 +75,16 @@ def sha256_file(path: Path) -> str:
 
 
 def check_provenance() -> None:
-    if git("rev-parse", "HEAD:tests/capacity_wp09_r52") != VERIFIER_TREE:
-        raise SystemExit("verifier tree at HEAD is not " + VERIFIER_TREE)
+    if git("rev-parse", "HEAD:tests/capacity_wp09_r52") != MAINTENANCE_TREE:
+        raise SystemExit("verifier tree at HEAD is not " + MAINTENANCE_TREE)
+    for name in UNCHANGED_BY_MAINTENANCE:
+        if git("rev-parse", f"{VERIFIER_TREE}:{name}") != git("rev-parse", f"{MAINTENANCE_TREE}:{name}"):
+            raise SystemExit(f"maintenance re-import changed {name}: the accepted PASS does not carry over")
+    mimp = git("rev-parse", MAINTENANCE_IMPORT)
+    if git("rev-parse", mimp + ":tests/capacity_wp09_r52") != MAINTENANCE_TREE:
+        raise SystemExit(f"maintenance import {mimp} does not carry tree {MAINTENANCE_TREE}")
+    if subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor", mimp, "HEAD"]).returncode:
+        raise SystemExit(f"maintenance import {mimp} is not an ancestor of HEAD")
     imp = git("rev-parse", IMPORT_COMMIT)
     if git("rev-parse", imp + "^") != PRODUCT_BASE:
         raise SystemExit(f"import {imp} parent is not the declared base {PRODUCT_BASE}")

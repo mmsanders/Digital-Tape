@@ -1,0 +1,27 @@
+{
+  "adapter_origin": "str55_adapter.c: device and render shapes from tests/wp10_final_adapter/wp10f_adapter.c (#334), row 1-2 drivers new; str55_capacity.c: tests/capacity_wp09_adapter/capacity_adapter.c (#311) with A0/A1 added to raw_before",
+  "adapter_source_sha256": "18ed238934df525909d886c8d4d6f2c15a05f351a47601b72e67c837ef123558",
+  "build_command": "make -C engine clean all && make -C tests/strengthen_r55_adapter clean all",
+  "capacity_verifier_tree": "4c754247d2769a9033d7b921cbd248e3e943b62a",
+  "caseset_sha256": "9ee1c5d6083dda0e9fd3f331a56dbc4903d659a157daa91615ff30212101ebea",
+  "census": {
+    "cases": 40,
+    "row1": 12,
+    "row2": 1,
+    "row2_metadata_writes": 4,
+    "row2_respool_calls": 1,
+    "row3": 27
+  },
+  "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+  "import_commit": "6feb6fe3fff9f14a794421015fad791a33a2619d",
+  "makefile_sha256": "0f84151ce973fff11171167c6ab59969aa0c33c96f6ae4992e31469b290bd087",
+  "product_base": "00c69783143bbb736e9c53598799baaa67ee0d39",
+  "run_product_sha256": "262d42e78cf8b96fb952e30ae67c8a4e13d2e15962b9095a702f7e31e88f75c2",
+  "schema": "strengthen-r55-product-build-identity-1",
+  "sources_sha256": {
+    "str55_adapter.c": "825c4376a7bceade34853ff94a43895b0b61705d0a04210b3e7e1fb1bc51dd98",
+    "str55_capacity.c": "9b726452d68cc08a7e2b289e1f8d1bca2d893d8f1669690748af150870563adb"
+  },
+  "verifier_source_commit": "7a914cd7c76bcc933e896a26fa0b3b7349c11b2d",
+  "verifier_tree": "72d24675fc40432c29d7f225bac3169124e5d12f"
+}
