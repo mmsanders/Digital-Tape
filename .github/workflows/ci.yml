@@ -857,6 +857,8 @@ jobs:
 
   wp08-mapping-r56-package:
     name: "independent WP-08 mapped-run rows (#129) — product replay"
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -899,6 +901,8 @@ jobs:
 
   wp09-gaps-r56-package:
     name: "independent #130 rows (overdub saturation, V-R55-01 trace floor) — product replay"
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
