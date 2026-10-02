@@ -40,6 +40,9 @@ GitHub author identity do not expand the role's product authority.
    authoritative manifest, scope, dependencies, deliverables, checks/evidence,
    permissions/holds, next owner and stop condition. An immutable review link may
    provide evidence, but it must not substitute for the assignment body.
+   A Verification publishing assignment's stop condition includes merging the
+   publication PR into verification main (merge commit only). Cite only merged
+   commits; a PR head is a candidate, not a publication (ADR-157).
 5. Do not create a no-work issue: an issue is an activation signal, not a round
    attendance record. Do not create another active copy of the same assignment.
    When superseding work, link the replacement and carry forward completed work

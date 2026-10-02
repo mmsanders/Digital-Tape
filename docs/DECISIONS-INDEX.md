@@ -102,5 +102,6 @@ Newest is at the bottom, matching the log.
 | [ADR-154](DECISIONS.md#adr-154--an-intake-queue-a-tag-convention-a-phase-rule-and-a-bottleneck-rule) | 2026-09-20 | An intake queue, a tag convention, a phase rule and a bottleneck rule | Four related changes, documented in [intake](INTAKE.md) and [the PM charter](ROLES/pm.md) |
 | [ADR-155](DECISIONS.md#adr-155--structural-rule-1-lands-in-history-not-in-a-separate-merge) | 2026-09-20 | Structural Rule 1 lands in history, not in a separate merge | A Phase 1 tranche is one branch carrying two commits: an import commit byte-identical to a verifier publication whose hash predates it, then the… |
 | [ADR-156](DECISIONS.md#adr-156--hold-promote-until-valid-r29-a-coverage-model-device-positions-in-the-caller) | 2026-09-25 | Hold promote until valid R29-A coverage; model device positions in the caller | Defer three promote fixes to corrected verifier-first R29-A; caller owns stored positions, operation token is harness-only |
+| [ADR-157](DECISIONS.md#adr-157--a-verifier-publication-is-a-commit-on-verification-main) | 2026-10-02 | A verifier publication is a commit on verification main | Twelve imported packages cited commits only on open verification PR branches; Verification merges its own publications, CI gates every citation |
 
-93 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+94 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

@@ -2627,3 +2627,78 @@ needed to move table ownership or add an API. Immediate promote repair would
 require a valid independently authored test-first tranche and a new, independently
 dispositioned product head. Neither route permits claiming the present invalid
 fixtures or harness token as engine acceptance.
+
+---
+
+## ADR-157 — A verifier publication is a commit on verification main
+
+**Date:** 2026-10-02 UTC · **Owner:** PM under Michael's direct assignment, Product #357 ·
+**Input:** product `f19087f`, verification main `0ac2f8e` → `d99044b`
+
+**Finding.** From 27 Sep (#91–#93) to 2 Oct, nothing merged into
+`digital-tape-verification/main`. Twelve PRs stayed open (#102, #106, #109, #111,
+#112, #113, #117, #125, #134, #135, #137, #139), and #125 stayed a draft. Product
+imported **twelve** packages whose `tests/IMPORTS.json` `source_commit` existed only on
+those branches. Eleven sat on open PRs. One, `87d41f5`, a correction pushed to the
+`wp06-sequential-r44` branch after PR #91 had already merged, was on no PR at all.
+Every imported tree was byte-identical to its cited commit, so no disposition or
+acceptance is wrong. The exposure was that deleting, rebasing or squash-merging one of
+those branches would have orphaned an accepted citation. That had already happened
+once: Phase-0 `mount_draft8` and `playback_draft8` cite commits that no longer exist,
+and their trees survive only because `62b18de` carried them to main.
+
+**Cause.** ADR-155 step 1 says Verification "publishes to `digital-tape-verification/main`",
+but no charter gave any seat the merge.
+- The Verification charter says only "publish immutable source/evidence".
+- The PM charter forbids PM merging product code and says nothing about the verification repo.
+- The R45 PM hold on #91–#93 ("this PR's current tree is not an issued Product test
+  import") taught a pattern: a hold kept the PR open, and a disposition cited the
+  head SHA.
+
+From then on, assignments asked for "immutable publications", returns quoted head SHAs,
+and dispositions accepted them. Each step was locally correct, so nobody noticed the
+merge never happened. Nothing mechanical checked it either: ADR-155's stated limitation
+assumed a cross-repository check needed a token, but the verification repo is public.
+Two weaker contributors:
+- Verification main had no ruleset, and squash and rebase merges were enabled. Either
+  would re-orphan a cited SHA.
+- One Claude Code verification session opened its PR as a draft by default.
+
+**Decision.**
+1. **Publication means merged.** A verifier package is published when its commit is an
+   ancestor of `digital-tape-verification/main`. A PR head is a candidate, not a
+   publication. Product may not cite, import or bind a commit that is not on verification main.
+2. **Verification merges its own publication PRs** into its own repository, with a
+   merge commit (never squash or rebase), once that repo's CI is green and before
+   returning the issue. Merging a publication is not acceptance, review or
+   disposition, so it costs no independence. A correction is a new commit plus a new
+   PR, never a push to an already-merged branch. Publication PRs are opened ready,
+   not draft. PM merges as a backstop only when Verification is unavailable, and
+   never changes content when doing so.
+3. **A hold is expressed by not importing, never by leaving a PR unmerged.** A
+   later correction supersedes on main by a new commit. The superseded commit stays
+   in history and stays citable.
+4. **CI enforces it.** `.github/workflows/verifier-publication.yml` runs
+   `tools/ci/audit-verifier-publications.py` on every PR, on every push to main and daily.
+   For every cited `source_commit`, it checks that the commit exists, is on verification
+   main and carries the declared tree. `tools/ci/verify-verifier-publications-gate.py`
+   proves it goes red on an unmerged branch, a squash merge, a wrong tree and a
+   missing commit. The two Phase-0 citations are pinned exceptions: carrier `62b18de`
+   and exact tree, no new entries.
+5. **Verification main should be hardened (Michael's settings):** a ruleset blocking
+   force-push and deletion, and merge commits as the only allowed merge method. Repository
+   settings are not writable from a lead session. Until Michael applies them, the gate's
+   daily run is what catches a squash, rebase or rewrite.
+
+**Recovery performed (#357).** PM opened PR #140 for the orphan `87d41f5`. It then merged
+#140, #102, #106, #109, #111, #112, #113, #117, #125, #134, #135, #137 and #139, in that
+order, all as merge commits. The only conflict was #113 against #125: both add
+`tests/wp10_backlog_r53`. PM resolved it to #125's #124-corrected tree `caae6660`, the
+tree Product declares, through a merge commit on #125's branch (`516832b`); #113's
+original `fd139df` stays in history. Verification main is now `d99044b`, and all 33
+cited publications pass the gate. No tree hash, `IMPORTS.json` value, disposition or
+acceptance changed.
+
+**Cost to reverse.** Low. Delete the workflow and two scripts, revert the charter
+lines and relax the verification ruleset. Nothing accepted depends on the gate, only on
+the commits now being on main, and reversing does not un-merge them.

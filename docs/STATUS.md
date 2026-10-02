@@ -1,6 +1,9 @@
 # Project status
 
-**1 October 2026 UTC · input main `d8243c9` · Owner: Verification #138; PM #305 ·**
+**2 October 2026 UTC · input main `f19087f` · Owner: PM #305, #357 ·**
+**Verification main is current again (PM #357, ADR-157):** twelve publication PRs and one orphaned
+correction, unmerged since 27 Sep, merged unchanged at verifier `d99044b`. All 33 cited packages are now
+on verification main with their declared trees; CI gates this from now on. No acceptance changed.
 Phase 1 has three complete independently accepted packages: **WP-07 allocator/COW, WP-13
 embedded readiness and WP-36 slot capability**. The dashboard remains **21/36 rungs (58%)**.
 **DRAFT-10 is issued**: Michael authorized V10-001…V10-005 on 1 Oct and PM merged #352 at
@@ -45,6 +48,7 @@ tools/fetch-evidence.sh          # downloads, verifies, refuses a mismatch
 | Tranche minimum: 3 coverage rows or 25 cases; split before disposition | ADR-153 |
 | Inbound `intake` queue; default disposition RECORDED — PARKED | [intake](INTAKE.md), ADR-154 |
 | Held streams over three days are escalated automatically | `stream-age.yml` |
+| A verifier citation must be a commit on verification main; Verification merges its own publications | ADR-157, `verifier-publication.yml` |
 | Size budgets and the 1 MiB evidence limit are enforced | `repo-hygiene.yml` |
 
 Every new gate has a negative control that is proven to go red. Run them with
