@@ -47,3 +47,17 @@ A permitted-looking wrapper outside `dev.h` is forbidden. A header that is not
 self-contained counts as covered only when a translation unit that parsed
 reaches it; each standalone clang log is retained. The DRAFT-8
 function-address-in-data backstop still reports violations.
+
+## Issued bundle after DRAFT-9 (#359)
+
+The verifier package fails closed unless the evidence names `spec_bundle:
+"DRAFT-9"` with the hashes of its own embedded spec copies (`ADAPTER.md`). The
+collector therefore reports those as the **criteria bundle**, taken from the
+package, and separately records the **issued bundle** read from
+`spec/VERSION.md` as `issued_spec_bundle`/`issued_spec_hashes` (each file checked
+against the manifest). It refuses to measure unless the issued `acceptance.md`
+has exactly one WP-13 row and that row is byte-identical to DRAFT-9's
+(`wp13_acceptance_row_sha256` `f4529484…`): the PM ruling under which the
+DRAFT-9 WP-13 acceptance carries over (ADR-153). A bundle that changes the row
+stops the gate; it needs a new verifier package, not a collector edit.
+`tools/ci/verify-wp13-carryover-gate.py` proves that check goes red.
