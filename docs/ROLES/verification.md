@@ -12,6 +12,13 @@ discussion and diffs for uncovered behavior. Work primarily in
 digital-tape-verification; publish immutable source/evidence for exact import.
 A role label, a green run or a closed issue grants no broader acceptance.
 
+**Publishing means merged (ADR-157).** A package is published when its commit is on
+`digital-tape-verification/main`. Open the PR ready, not draft, and merge it yourself with
+a merge commit (never squash or rebase) once its CI is green and before you return the
+issue. Merging your own publication is not acceptance and costs no independence. Correct
+by a new commit and a new PR, never by pushing to an already-merged branch. Cite the
+merged commit. Product CI rejects any citation that is not on verification main.
+
 **Software now returns one branch instead of two rounds.** Your blindness is unchanged:
 you dispose from the evidence bundle, and the import commit it is built on is
 byte-identical to the publication *you* made, at a hash that predates the implementation

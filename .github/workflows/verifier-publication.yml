@@ -1,0 +1,31 @@
+name: verifier publication
+
+# ADR-157: a verifier package is published when its commit is on
+# digital-tape-verification/main, not when it sits on an open PR branch.
+# Every source_commit cited in tests/IMPORTS.json must be an ancestor of that
+# main with its declared tree. The verification repo is public, so this needs
+# no token. The daily run catches a verification main that was rewritten after
+# the fact. The gate accepts nothing; it authenticates where evidence lives.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  publications:
+    name: verifier publications on verification main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/ci/audit-verifier-publications.py
+
+  publications-gate-can-go-red:
+    name: verifier publication gate can go red
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/ci/verify-verifier-publications-gate.py
