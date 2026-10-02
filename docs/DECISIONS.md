@@ -2702,3 +2702,48 @@ acceptance changed.
 **Cost to reverse.** Low. Delete the workflow and two scripts, revert the charter
 lines and relax the verification ruleset. Nothing accepted depends on the gate, only on
 the commits now being on main, and reversing does not un-merge them.
+
+---
+
+## ADR-158 — Pre-routed two-stage rounds, and the Phase 1 closing round
+
+**Date:** 2026-10-02 UTC · **Owner:** PM under Michael's direction, Product #365 · **Input:** product
+`17a088c`, verification main `ffaad65`
+
+**Decision.**
+1. **A round may be pre-routed.** PM issues the Verification and Software assignments together, each
+   in two stages that name their trigger.
+   - Verification publishes (Stage 1), then disposes the exact Software head **directly** when
+     Software's return lands (Stage 2), with no PM routing issue in between.
+   - Software builds what needs no verifier input (Stage 1), then imports and binds the publication
+     in the same PR (Stage 2).
+   - PM enters once, after the disposition.
+
+   Every independence rule is unchanged:
+   - publication precedes import (ADR-155/157, CI-enforced);
+   - Verification still disposes blind on behaviour it had not yet covered;
+   - nothing merges before a PASS;
+   - PM still disposes the outcome.
+2. **PM issues interface contracts up front** so both leads can build in parallel. The first is
+   `docs/WP11-CLI-CONTRACT.md` (`tapectl`). It composes the public API and is not an engine API.
+3. **Test-only hook.** Host and test builds may expose `tape_test_interp()` from
+   `engine/test/tape_test_hooks.h`, so the WP-11 §8 differential can reach all 2³² fractions.
+   The public API cannot: Q16.16 rates do not reach 32-bit fractions. The hook is never in the
+   library or firmware objects and never in `engine/include/`, and WP-13 gates stay unchanged.
+4. **Phase 1 closing round** (#143 Verification, #366 Software, #367 Michael):
+   - WP-11 goldens from public-domain Grieg (*In the Hall of the Mountain King*, Musopen / Czech
+     National Symphony Orchestra) and a CC0 sung voice;
+   - the WP-11 portability and mutation gates;
+   - WP-12/12a ledger closure under DRAFT-10;
+   - WP-08/09 closure on Michael's listening.
+
+   Michael listens as soon as Verification publishes, in parallel with Software.
+
+**Rationale.** A tranche used to cost four or five activations (PM routes, lead works, PM routes,
+lead disposes, PM disposes), and each one re-reads the same context. The PM hops between
+publication, binding and disposition added no judgment. The routing they performed is fully
+determined by the issue, and CI now authenticates identity and order. Removing them roughly halves
+a tranche's activations without moving any acceptance boundary.
+
+**Cost to reverse.** Low. Issue future rounds single-stage. The contract doc and test hook are
+removable; nothing accepted depends on the round structure.

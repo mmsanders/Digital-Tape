@@ -43,6 +43,8 @@ GitHub author identity do not expand the role's product authority.
    A Verification publishing assignment's stop condition includes merging the
    publication PR into verification main (merge commit only). Cite only merged
    commits; a PR head is a candidate, not a publication (ADR-157).
+   A round may be pre-routed (ADR-158): the Verification and Software issues each carry two
+   named stages, Verification disposes Software's exact head directly, and PM enters once.
 5. Do not create a no-work issue: an issue is an activation signal, not a round
    attendance record. Do not create another active copy of the same assignment.
    When superseding work, link the replacement and carry forward completed work
