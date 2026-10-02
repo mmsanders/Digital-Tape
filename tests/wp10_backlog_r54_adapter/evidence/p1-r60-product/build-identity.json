@@ -1,0 +1,23 @@
+{
+  "adapter_origin": "tests/wp10_backlog_adapter/wp10b_row1.c (PR #329) device, settling and trace; row 1-3 case drivers new",
+  "adapter_source_sha256": "a87e0fc8f7ecd05de9e48385fcf45e466b9f425d766b74a6a9a3228ecb8258b1",
+  "build_command": "make -C engine clean all && make -C tests/wp10_backlog_r54_adapter clean all",
+  "caseset_sha256": "6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3",
+  "census": {
+    "cases": 68854,
+    "row1": 4112,
+    "row2": 64734,
+    "row3": 8
+  },
+  "engine_tree": "5bbe9b4e51fabf38eaf78c9ed26faf90b0b62495",
+  "import_commit": "a34d409d388707ca37678fe0cad530b7154acd4f",
+  "makefile_sha256": "6d267171eaa645d1e3b7ab336b1d0e1ce22a35e03f49bc5b5a305ea9cdcc882c",
+  "product_base": "56619e8a2ebc0429756e2047e7b326f31264aac1",
+  "run_product_sha256": "2a62396055df57c88bb86dfea4cc9fe0e04232ed0d8319f2d9d7f7cf096e467e",
+  "schema": "wp10-backlog-r54-product-build-identity-1",
+  "sources_sha256": {
+    "wp10r54_adapter.c": "836a0ef936d644f5e81442a2a95d281e2c4b369e7c4190223bbece62c5b9e906"
+  },
+  "verifier_source_commit": "5ca24fb9c0773e715889c235c339ef035e87d63b",
+  "verifier_tree": "05aae3f798fbb6d2e6eba72f3d2e38b0c722ca9d"
+}

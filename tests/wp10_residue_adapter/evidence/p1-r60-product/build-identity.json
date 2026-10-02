@@ -1,0 +1,22 @@
+{
+  "adapter_source_sha256": "08b911a2c5e03944ed92ecb731f22de051c62956a799c27806fe42ebf894bb8e",
+  "build_command": "make -C engine clean all && make -C tests/wp10_residue_adapter clean all",
+  "caseset_sha256": "849a82ab2e8e4b207a52789e2c6e9dd247c3db947431e7beb4ed14916f04b1f8",
+  "engine_tree": "5bbe9b4e51fabf38eaf78c9ed26faf90b0b62495",
+  "groups": 8208,
+  "import_commit": "a34d409d388707ca37678fe0cad530b7154acd4f",
+  "makefile_sha256": "25abc4096d85f870c53f655cd595648ecb3aaf4adb0c39e9846b0c8cc1fd0472",
+  "product_base": "56619e8a2ebc0429756e2047e7b326f31264aac1",
+  "product_commit": "f31ef48503d221e097513bbb8078dcd7570ebc89",
+  "product_tree": "ba0af449026a5b8c3b7ef8527814621409e1f242",
+  "release_asset": {
+    "name": "wp10-residue-d10-product-observations.jsonl.gz",
+    "tag": "evidence-p1-r60-wp10-residue"
+  },
+  "schema": "wp10-residue-d10-product-build-identity-1",
+  "sources_sha256": {
+    "wp10res_adapter.c": "d78ff57128c1bf0fea17dd0ed9386df23c718692d78988a509a21a6c0f3bf539"
+  },
+  "verifier_source_commit": "5ca24fb9c0773e715889c235c339ef035e87d63b",
+  "verifier_tree": "e1b885301768d7b541a5704c526881a800d7116b"
+}

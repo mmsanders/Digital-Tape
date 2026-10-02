@@ -1,0 +1,92 @@
+{
+  "adapter_kind": "product",
+  "adapter_source_sha256": "08b911a2c5e03944ed92ecb731f22de051c62956a799c27806fe42ebf894bb8e",
+  "caseset_sha256": "849a82ab2e8e4b207a52789e2c6e9dd247c3db947431e7beb4ed14916f04b1f8",
+  "closure_reruns": 24672,
+  "group_count": 8208,
+  "groups": {
+    "R1.dup": 4088,
+    "R1.format": 4088,
+    "R2.dup": 12,
+    "R2.format": 12,
+    "R3.dup": 4,
+    "R3.format": 4
+  },
+  "injections": {
+    "R1.dup": 8466392,
+    "R1.format": 8429520,
+    "R2.dup": 80148,
+    "R2.format": 49320
+  },
+  "injections_total": 17025380,
+  "outcomes_reached": {
+    "R1.dup.after": [
+      "completed"
+    ],
+    "R1.dup.residue": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R1.dup.sb_mirror": [
+      "TAPE_ERR_BAD_MAGIC",
+      "completed"
+    ],
+    "R1.dup.sb_primary": [
+      "completed"
+    ],
+    "R1.dup.steps23": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R1.format.after": [
+      "completed"
+    ],
+    "R1.format.residue": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R1.format.sb_mirror": [
+      "TAPE_ERR_BAD_MAGIC",
+      "completed"
+    ],
+    "R1.format.sb_primary": [
+      "completed"
+    ],
+    "R1.format.steps23": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R2.dup.after": [
+      "completed"
+    ],
+    "R2.dup.residue": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R2.dup.sb_mirror": [
+      "TAPE_ERR_BAD_MAGIC",
+      "completed"
+    ],
+    "R2.dup.sb_primary": [
+      "completed"
+    ],
+    "R2.dup.steps23": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R2.format.after": [
+      "completed"
+    ],
+    "R2.format.residue": [
+      "TAPE_ERR_BAD_MAGIC"
+    ],
+    "R2.format.sb_mirror": [
+      "TAPE_ERR_BAD_MAGIC",
+      "completed"
+    ],
+    "R2.format.sb_primary": [
+      "completed"
+    ],
+    "R2.format.steps23": [
+      "TAPE_ERR_BAD_MAGIC"
+    ]
+  },
+  "product_commit": "f31ef48503d221e097513bbb8078dcd7570ebc89",
+  "product_tree": "ba0af449026a5b8c3b7ef8527814621409e1f242",
+  "schema": "wp10-residue-d10-manifest-v1",
+  "stream_sha256": "7df707f197d9d944880af2b95932accc6ea8daca61a950f7161d34eda6a753ea"
+}

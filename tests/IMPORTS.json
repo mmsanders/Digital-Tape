@@ -639,7 +639,15 @@
       "accepted_head": "4f062b76c47ca53a643a60827ef652c5ad20c065",
       "verification": "Verification #120",
       "disposition": "verification commit ae024f9 findings/P1-R54-WP10CD-PR330-DISPOSITION-2026-09-30.md",
-      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states",
+      "superseded": {
+        "id": "S2",
+        "record": "tests/wp10_residue_d10/SUPERSESSION.json sha256 6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2 (Verification #138, publication 5ca24fb9c0773e715889c235c339ef035e87d63b)",
+        "cases": 5110,
+        "by": "tests/wp10_backlog_r54_adapter/evidence/p1-r60-product (wp10_backlog_r54 tree 05aae3f7)",
+        "issue": 359,
+        "note": "Bundle unchanged; cited by Verification #120. Under the DRAFT-10 package the 5,110 S2 cases change rerun.trace_sha256 only; the other 63,744 cases are byte-identical in p1-r60-product."
+      }
     },
     {
       "path": "tests/wp06_closure_adapter/evidence/p1-r54-product",
@@ -711,7 +719,25 @@
       "accepted_head": "68f919684f5ea8ea9877092d0e019cd1353142ba",
       "verification": "Verification #128",
       "disposition": "verification commit a74a814 findings/P1-R55-WP10FD-PR336-DISPOSITION-2026-09-30.md",
-      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+      "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states",
+      "superseded": {
+        "id": "S1",
+        "record": "tests/wp10_residue_d10/SUPERSESSION.json sha256 6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2 (Verification #138, publication 5ca24fb9c0773e715889c235c339ef035e87d63b)",
+        "cases": 22604,
+        "index_ranges": [
+          [
+            131548,
+            142849
+          ],
+          [
+            182924,
+            194225
+          ]
+        ],
+        "by": "tests/wp10_residue_adapter/evidence/p1-r60-product (wp10_residue_d10 R1)",
+        "issue": 359,
+        "note": "Bundle unchanged and still replays green. On the V10-001 engine every case outside S1 regenerates byte-identically; S1 cases are retired, not edited."
+      }
     },
     {
       "path": "tests/strengthen_r55_adapter/evidence/p1-r56-product",
@@ -768,5 +794,25 @@
       "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
     }
   ],
-  "retained_unaccepted_bundles": []
+  "retained_unaccepted_bundles": [
+    {
+      "path": "tests/wp10_backlog_r54_adapter/evidence/p1-r60-product",
+      "files": {
+        "SHA256SUMS": "0c5ff9f1c1d8bba9d95f84b430d668dbf61c2ed1a23cd2cffbb8920e32af37a1",
+        "build-identity.json": "4f72144213e42d564b3588c6ed01cf878e735c254908b0dddd27ad66dd02ef6a",
+        "observations.jsonl.gz": "934c8c863a173cceec6bea08c4e74bfa7e117beaf21660eb1699b027c172a8a7"
+      },
+      "observations_sha256": "7491f304d85a78fb17d2668ce660de8ea3991c69a4320a1774c9c9ea55a3396f",
+      "reason": "#359 rebind of wp10_backlog_r54 at tree 05aae3f7 on the V10-001 engine; replaces p1-r54-product under supersession S2. Awaiting Verification disposition."
+    },
+    {
+      "path": "tests/wp10_residue_adapter/evidence/p1-r60-product",
+      "files": {
+        "SHA256SUMS": "e9a2268698c47d5e5269ecd8275e14f3b7036dee1ffff3a23f845171fb348e59",
+        "build-identity.json": "8b59c2bc511678541ebfce4eda998efb6a82e0b1d7f60f49515ba7ecbab105dd",
+        "manifest.json": "ddc48bc993059901b055a3616d51065b7de87af7e80c347ed7bb2f27203592c6"
+      },
+      "reason": "#359 binding of wp10_residue_d10 (17,025,380 injections) on the V10-001 engine; stream 7df707f197d9d944880af2b95932accc6ea8daca61a950f7161d34eda6a753ea, gzip is release asset evidence-p1-r60-wp10-residue/wp10-residue-d10-product-observations.jsonl.gz 473e5a1311ee1125923c03a3293acdb7e753508c01e974fa322edf2c8726cd7d. Awaiting Verification disposition."
+    }
+  ]
 }

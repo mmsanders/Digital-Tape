@@ -583,17 +583,21 @@ jobs:
           --out tests/wp10_final_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+      # DRAFT-10 V10-001 (#359): supersession S1 retires the 22,604 row-4 cases of
+      # tests/wp10_residue_d10/SUPERSESSION.json; every other case must regenerate
+      # byte-identically. The accepted stream above still replays green.
+      - name: Canonical run; every case outside S1 must equal the accepted stream
         if: always()
         run: >
           python3 tests/wp10_final_adapter/run_product.py
           --evidence tests/wp10_final_adapter/evidence/product
           --retained tests/wp10_final_adapter/evidence/p1-r55-product
+          --superseded tests/wp10_residue_d10/SUPERSESSION.json
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Per-row census; the oracle rejects mutated Product evidence
+      - name: Per-row census; the oracle rejects mutated accepted Product evidence
         if: always()
-        run: python3 -B tests/wp10_final_adapter/negative_controls.py tests/wp10_final_adapter/evidence/product/wp10-final-r54-product-observations.jsonl.gz
+        run: python3 -B tests/wp10_final_adapter/negative_controls.py tests/wp10_final_adapter/evidence/p1-r55-product/wp10-final-r54-product-observations.jsonl.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -967,8 +971,8 @@ jobs:
         if: always()
         run: >
           python3 tests/wp10_backlog_r54_adapter/run_product.py
-          --replay tests/wp10_backlog_r54_adapter/evidence/p1-r54-product/observations.jsonl.gz
-          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+          --replay tests/wp10_backlog_r54_adapter/evidence/p1-r60-product/observations.jsonl.gz
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r60-product
           --out tests/wp10_backlog_r54_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -977,7 +981,7 @@ jobs:
         run: >
           python3 tests/wp10_backlog_r54_adapter/run_product.py
           --evidence tests/wp10_backlog_r54_adapter/evidence/product
-          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r54-product
+          --retained tests/wp10_backlog_r54_adapter/evidence/p1-r60-product
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Per-case census; the oracle rejects mutated Product evidence
@@ -986,10 +990,50 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: p1-r54-wp10-backlog-r54-product-evidence
+          name: p1-r60-wp10-backlog-r54-product-evidence
           path: |
             tests/wp10_backlog_r54_adapter/evidence/product
             tests/wp10_backlog_r54_adapter/evidence/replay
+          if-no-files-found: error
+
+  wp10-residue-package:
+    # DRAFT-10 V10-001 (#359): residue destinations, Verification #138.
+    name: independent WP-10 residue destinations (V10-001) — product replay
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # run_product.py checks the declared base/import against history.
+          fetch-depth: 0
+      - run: python3 -B tests/wp10_residue_d10/audit.py
+      - run: python3 -B tests/wp10_residue_d10/selftest.py
+      - run: make -C engine clean all
+      - run: make -C tests/wp10_residue_adapter clean all
+      - name: Offline replay of the retained evidence (release asset, fetched and hash-verified)
+        if: always()
+        run: >
+          python3 tests/wp10_residue_adapter/run_product.py
+          --replay tests/wp10_residue_adapter/evidence/p1-r60-product
+          --out tests/wp10_residue_adapter/evidence/replay
+      - name: Canonical run; the fresh stream and replay manifest must equal the committed ones
+        if: always()
+        run: >
+          python3 tests/wp10_residue_adapter/run_product.py
+          --evidence tests/wp10_residue_adapter/evidence/product
+          --retained tests/wp10_residue_adapter/evidence/p1-r60-product
+        env:
+          PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-r60-wp10-residue-product-evidence
+          path: |
+            tests/wp10_residue_adapter/evidence/product
+            tests/wp10_residue_adapter/evidence/replay
           if-no-files-found: error
 
   wp10-closure-package:
