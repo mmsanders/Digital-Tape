@@ -307,6 +307,8 @@ jobs:
     # DRAFT-9 (#243/#247) replaced the three-funnel WP13-G5 with four named
     # funnels. The product is measured against the DRAFT-9 package; the
     # accepted DRAFT-8 package and its collector stay in the tree unchanged.
+    # DRAFT-10 (#359, ADR-153): the WP-13 row is byte-identical to DRAFT-9's, so
+    # the DRAFT-9 package still audits the product under the issued bundle.
     name: independent WP-13 embedded-readiness audit (DRAFT-9) — six-gate real-product evidence
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
@@ -321,6 +323,8 @@ jobs:
       - name: Toolchain, including the clang AST call-expression scanner
         run: cc --version | head -1; clang --version | head -1
       - run: python3 -m py_compile tests/embedded_readiness_adapter/collect_product_evidence_draft9.py
+      # #359: the issued bundle is accepted only while its WP-13 row is DRAFT-9's.
+      - run: python3 -B tools/ci/verify-wp13-carryover-gate.py
       - run: python3 tests/embedded_readiness_adapter/collect_product_evidence_draft9.py --evidence tests/embedded_readiness_adapter/evidence/p1-r34-draft9-product
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}

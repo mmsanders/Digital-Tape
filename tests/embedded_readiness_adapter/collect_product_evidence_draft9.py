@@ -47,8 +47,16 @@ VERIFIER_TREE = "8e5d0853755e54032b7d5304caf1190a03376393"
 VERIFIER_PUBLICATION = "74a2f96d5fa50972f2a20bc391fc6bd363554cb1"
 IMPORT_COMMIT = "69496d184761a1b66d3d921e420f9725bdc6c5d1"
 PRODUCT_BASE = "7910ae3701fbfd94b5ea0558a69a29955da1dd5c"
+# The bundle whose WP-13 criteria the verifier package audits. Its oracle fails
+# closed on any other spec_bundle/spec_hashes, so the evidence names this bundle
+# and the hashes of the package's own embedded copies of it.
 SPEC_BUNDLE = "DRAFT-9"
 SPEC_FILES = ("spec/tapefs-v1.md", "spec/engine-api.md", "spec/acceptance.md")
+# The issued bundle is read from spec/VERSION.md. It is accepted only while its
+# WP-13 acceptance row is byte-identical to DRAFT-9's (PM #359, ADR-153: the
+# DRAFT-9 WP-13 acceptance then carries over without re-acceptance).
+WP13_ROW_PREFIX = b"| **WP-13** "
+DRAFT9_WP13_ROW_SHA256 = "f4529484711ce086d3f9519b64d2fe33f4f85f04ef1fa21235de43ca3903c9b3"
 DEV_H = "engine/src/dev.h"
 DEVICE_FUNNELS = {"dev_read": "read", "dev_write": "write", "dev_flush": "flush"}
 PROGRESS_FUNNEL = "dev_progress"
@@ -57,12 +65,44 @@ PROGRESS_TYPE = "tape_progress_fn"
 Fail = d8.Fail
 
 
-def spec_identity():
-    """The canonical spec/ bytes this product is built against."""
-    ver = (ROOT / "spec" / "VERSION.md").read_text(encoding="utf-8")
-    if f"**Bundle:** {SPEC_BUNDLE}" not in ver:
-        raise Fail(f"spec/VERSION.md is not bundle {SPEC_BUNDLE}")
-    return {p: d8.sha(ROOT / p) for p in SPEC_FILES}
+def issued_bundle(root=ROOT):
+    """The issued bundle named by spec/VERSION.md, with every file's bytes
+    checked against the manifest hash."""
+    ver = (root / "spec" / "VERSION.md").read_text(encoding="utf-8")
+    m = d8.re.search(r"\*\*Bundle:\*\* ([A-Z0-9-]+)", ver)
+    if not m:
+        raise Fail("spec/VERSION.md names no bundle")
+    manifest = dict(d8.re.findall(r"^\| `(spec/[^`]+)` \| [A-Z0-9-]+ \| `([0-9a-f]{64})` \|$", ver, d8.re.M))
+    if set(manifest) != set(SPEC_FILES):
+        raise Fail(f"spec/VERSION.md manifest lists {sorted(manifest)}, expected {list(SPEC_FILES)}")
+    hashes = {p: d8.sha(root / p) for p in SPEC_FILES}
+    for p in SPEC_FILES:
+        if hashes[p] != manifest[p]:
+            raise Fail(f"{p} is {hashes[p]}, spec/VERSION.md says {manifest[p]}")
+    return m.group(1), hashes
+
+
+def wp13_row_sha256(path):
+    rows = [line for line in path.read_bytes().split(b"\n") if line.startswith(WP13_ROW_PREFIX)]
+    if len(rows) != 1:
+        raise Fail(f"{path} has {len(rows)} WP-13 acceptance rows, expected exactly 1")
+    return hashlib.sha256(rows[0]).hexdigest()
+
+
+def spec_identity(root=ROOT, pkg=PKG):
+    """The criteria bundle the package audits, and the issued bundle the product
+    is built against. Refuses any issued bundle whose WP-13 row is not DRAFT-9's."""
+    issued, issued_hashes = issued_bundle(root)
+    row = wp13_row_sha256(root / "spec" / "acceptance.md")
+    if row != DRAFT9_WP13_ROW_SHA256:
+        raise Fail(f"issued bundle {issued} WP-13 acceptance row is {row}, not DRAFT-9's "
+                   f"{DRAFT9_WP13_ROW_SHA256}; the DRAFT-9 WP-13 acceptance does not carry over")
+    criteria = {p: d8.sha(pkg / p) for p in SPEC_FILES}
+    if wp13_row_sha256(pkg / "spec" / "acceptance.md") != DRAFT9_WP13_ROW_SHA256:
+        raise Fail("verifier package's embedded DRAFT-9 WP-13 row is not the pinned row")
+    return {"spec_bundle": SPEC_BUNDLE, "spec_hashes": criteria,
+            "issued_spec_bundle": issued, "issued_spec_hashes": issued_hashes,
+            "wp13_acceptance_row_sha256": row}
 
 
 def verify_provenance():
@@ -299,7 +339,7 @@ def main():
         if pc != head:
             raise Fail(f"workspace/head mismatch PRODUCT_COMMIT={pc} HEAD={head}")
         pt = d8.git("rev-parse", "HEAD^{tree}")
-        spec_hashes = spec_identity()
+        spec = spec_identity()
         versions = {"cc": d8.version(os.environ.get("CC", "cc")), "nm": d8.version("nm"),
                     "readelf": d8.version("readelf"), "size": d8.version("size"),
                     "objdump": d8.version("objdump"), "ar": d8.version("ar"),
@@ -323,7 +363,7 @@ def main():
             "provenance": {
                 "product_commit": pc, "product_tree": pt, "product_base": PRODUCT_BASE,
                 "verifier_import_commit": IMPORT_COMMIT, "verifier_publication": VERIFIER_PUBLICATION,
-                "verifier_tree": vt, "spec_bundle": SPEC_BUNDLE, "spec_hashes": spec_hashes,
+                "verifier_tree": vt, **spec,
                 "engine_makefile_sha256": d8.sha(ENGINE / "Makefile"), "tool_versions": versions,
                 "engine_source_inventory_count": len(inv), "engine_object_count": len(obj["objects"]),
             },
@@ -347,7 +387,7 @@ def main():
         (ev / "runner.log").write_text("$ " + " ".join(cmd) + "\n" + rr.stdout)
         prov = {"product_commit": pc, "product_tree": pt, "product_base": PRODUCT_BASE,
                 "import_commit": IMPORT_COMMIT, "verifier_publication": VERIFIER_PUBLICATION,
-                "verifier_tree": vt, "spec_bundle": SPEC_BUNDLE, "spec_hashes": spec_hashes,
+                "verifier_tree": vt, **spec,
                 "evidence_sha256": d8.sha(ep),
                 "result_sha256": d8.sha(rp) if rp.is_file() else "MISSING", "runner_exit": rr.returncode,
                 "raw_build_log_sha256": d8.sha(raw / "build.log"),
@@ -359,7 +399,9 @@ def main():
         for r in ind["call_expression_inventory"]:
             counts[r["classification"]] = counts.get(r["classification"], 0) + 1
         print(f"product_commit={pc}\nproduct_tree={pt}\nverifier_import_commit={IMPORT_COMMIT}\n"
-              f"verifier_tree={vt}\nspec_bundle={SPEC_BUNDLE}")
+              f"verifier_tree={vt}\nspec_bundle={SPEC_BUNDLE}\n"
+              f"issued_spec_bundle={spec['issued_spec_bundle']}\n"
+              f"wp13_acceptance_row_sha256={spec['wp13_acceptance_row_sha256']}")
         print(f"ram_summed_bytes={obj['data'] + obj['bss'] + inst}\nrodata_bytes={obj['rodata']}\n"
               f"allocator_forbidden_refs={len(obj['forbidden'])}\nstack_max_path_bytes={st['max_path_bytes']}")
         print(f"source_inventory={len(inv)}\ncall_expressions={len(ind['call_expression_inventory'])} {counts}")
