@@ -103,5 +103,6 @@ Newest is at the bottom, matching the log.
 | [ADR-155](DECISIONS.md#adr-155--structural-rule-1-lands-in-history-not-in-a-separate-merge) | 2026-09-20 | Structural Rule 1 lands in history, not in a separate merge | A Phase 1 tranche is one branch carrying two commits: an import commit byte-identical to a verifier publication whose hash predates it, then the… |
 | [ADR-156](DECISIONS.md#adr-156--hold-promote-until-valid-r29-a-coverage-model-device-positions-in-the-caller) | 2026-09-25 | Hold promote until valid R29-A coverage; model device positions in the caller | Defer three promote fixes to corrected verifier-first R29-A; caller owns stored positions, operation token is harness-only |
 | [ADR-157](DECISIONS.md#adr-157--a-verifier-publication-is-a-commit-on-verification-main) | 2026-10-02 | A verifier publication is a commit on verification main | Twelve imported packages cited commits only on open verification PR branches; Verification merges its own publications, CI gates every citation |
+| [ADR-158](DECISIONS.md#adr-158--pre-routed-two-stage-rounds-and-the-phase-1-closing-round) | 2026-10-02 | Pre-routed two-stage rounds, and the Phase 1 closing round | Verification disposes Software's head directly, no PM hop; PM-issued tapectl contract; test-only interp hook; WP-11 goldens from public-domain Grieg |
 
-94 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+95 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

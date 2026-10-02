@@ -1,6 +1,9 @@
 # Project status
 
-**2 October 2026 UTC · input main `1b02f04` · Owner: PM #363 ·**
+**2 October 2026 UTC · input main `17a088c` · Owner: Verification #143, Software #366, Michael #367 ·**
+**Phase 1 closing round issued (PM #365, ADR-158)**: WP-11 goldens (public-domain Grieg + CC0 voice),
+`tapectl` per `docs/WP11-CLI-CONTRACT.md`, portability and mutation gates, WP-12/08/09 closure. Pre-routed:
+Verification disposes Software's head directly; Michael listens as soon as references publish.
 Phase 1 has five complete independently accepted packages: **WP-06 block device, WP-07 allocator/COW,
 WP-10 crash-injection harness, WP-13 embedded readiness and WP-36 slot capability**. Dashboard
 **25/36 rungs (69%)**.
@@ -60,7 +63,7 @@ Every new gate has a negative control that is proven to go red. Run them with
 | WP-08 playback, seek, variable-rate scrub | Earlier ten corrected-cadence families and 16/16 set-side/warm-start observations; Verification #95 PASS on #287's 33/33 bounded cross-run cases and seven causal controls, integrated at main `abd8481`; Verification #122 PASS on #327's 41/41 two-toolchain vectors, integrated at `523a7fd` | Complete WP-08 and listened goldens open | Held — WP-11 listening |
 | WP-09 record: overwrite, overdub, splice | Earlier 26/26 observations; Verification #96 PASS on #288's 10,000 edits, 25 checkpoints and eight causal controls, integrated unchanged at main `fa25ae0`; Verification #107 PASS on #311's 27/27 capacity short accept, integrated unchanged at main `66c6abc` | Full WP-09 open | Accepted / integrated (bounded) |
 | WP-10 crash-injection harness | Verification PR #69 accepted the bounded core tranche. Verification #83 accepted 57,611/57,611 bounded R29-B cases, integrated at main `867fd4a`. Verification #86 accepted exact R29-A PR #263; Software #267 integrated its unchanged package/engine identities at main `215204b`. Verification #119 PASS on #318 (57,539; engine `81ad8ec2`) and #120 on #330 (68,854), integrated at `b05f6af`/`d1ef202` | **COMPLETE.** Verification #141: DRAFT-10 ledger 63 rows, zero open; V10-001 bound and disposed | Accepted / integrated |
-| WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Manifest empty, no CLI. The candidate PCM are synthetic arithmetic vectors, not listenable goldens. Portability and mutation gates also open | Route pending Michael's source-audio choice (PM #363) |
+| WP-11 CLI harness and golden regression | Seven exact product PCM outputs byte-match verifier candidates | Manifest empty, no CLI. The candidate PCM are synthetic arithmetic vectors, not listenable goldens. Portability and mutation gates also open | Verification #143 → Software #366 → Michael #367 (ADR-158) |
 | WP-12 re-spool / defragment pass | Exact 8/8 re-spool evidence is integrated. Verification #81 accepted corrected PR #236's 4,209,696-case R29-C evidence/provenance, carrying PR #79 behavior. Verification #87 accepted exact combined PR #272's three-row composition; Software #276 integrated its accepted identities unchanged at main `788cb76`. Verification #123 PASS on #328's 7/7 gap cases, integrated at `e4e15a0` | Complete WP-12/WP-12a remain separate | Held behind WP-10 / WP-12a |
 | WP-13 embedded-readiness audit | **DRAFT-9 is independently accepted and integrated.** Verification #83 authenticated all six gates at exact PR #241 head `74f1173`, including 16/16 sources, exactly four funnels and zero forbidden/ambiguous calls; Software #255 integrated it at main `867fd4a` | Real-product gate red since DRAFT-10 (collector hard-codes DRAFT-9); acceptance carries over, criteria unchanged | Software #359 Task A restores the gate |
 | WP-36 slot capability model | **COMPLETE.** Verification PR #57 accepted the deterministic precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign; product PR #200 integrated it unchanged | None for frozen WP-36 | Accepted / integrated |
@@ -76,7 +79,7 @@ independently accepted engine behavior.
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | — | WP-10 complete (#141); WP-12/WP-12a closure remains open | Held pending WP-12/WP-12a coverage |
-| WP-11 | — | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Route proposed in PM #363; needs Michael's source audio |
+| WP-11 | — | Exact corrected-cadence product PCM hashes are independently byte-compared, but candidate PCM remains unlistened and is not an accepted golden; golden CI stays red | Issued: #143, #366, #367 |
 | Hardware | 2026-09-18 | **PARKED by Michael 29 Sep ([#309](https://github.com/mmsanders/Digital-Tape/issues/309)).** PR #87 repair `e294d51` unaudited; Verification #20 (A1MINI-01, PR #120) closed without a finding; PR #92 held. Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | None PM-issued; Michael works with Hardware directly. Resume on Michael `REQUEST:` or Phase 2 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Software #359 (V10-001 tranche), then Verification |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
