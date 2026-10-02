@@ -46,9 +46,9 @@ static const unsigned char raw_idx_magic[8] = { 'T', 'A', 'P', 'E', 'I', 'D', 'X
 #define DUP_PHASE_SB_MIRROR     241u
 #define DUP_PHASE_SB_PRIMARY    253u
 
-#define RAW_STEP1_SKIP     0u   /* neither copy structurally valid: blank */
+#define RAW_STEP1_SKIP     0u   /* neither copy valid, both blocks all zero: blank */
 #define RAW_STEP1_TEMPLATE 1u   /* v1 WIP barrier template, §9.5 item 5 */
-#define RAW_STEP1_ZERO     2u   /* §4.5 generation-exhausted fallback */
+#define RAW_STEP1_ZERO     2u   /* §4.5 generation-exhausted fallback, or residue */
 
 struct raw_plan {
     uint8_t  kind;
@@ -60,6 +60,16 @@ static void raw_wr64(unsigned char *p, uint64_t v)
 {
     tape_wr32(p, (uint32_t)(v & 0xFFFFFFFFu));
     tape_wr32(p + 4, (uint32_t)(v >> 32));
+}
+
+static bool raw_block_zero(const unsigned char *blk)
+{
+    size_t i;
+
+    for (i = 0u; i < TAPE_BLOCK_SIZE; i++) {
+        if (blk[i] != 0u) { return false; }
+    }
+    return true;
 }
 
 static bool raw_sb_structural(const unsigned char *blk, uint32_t *generation)
@@ -81,6 +91,9 @@ static bool raw_sb_structural(const unsigned char *blk, uint32_t *generation)
  * Equal-generation-divergent has no §4.1 candidate: the healthy-pair tie-break
  * decides only the ORDER (mirror first), and the template's other fields are
  * zeroed because there is no selected candidate to copy them from.
+ *
+ * Neither copy structurally valid (V10-001): blank only if both blocks are
+ * entirely zero; any non-zero byte is residue, zeroed mirror then primary.
  */
 static void raw_classify(unsigned char *pri, const unsigned char *mir,
                          uint32_t mirror_lba, struct raw_plan *plan)
@@ -91,9 +104,16 @@ static void raw_classify(unsigned char *pri, const unsigned char *mir,
     int cand; /* 0 none, 1 primary, 2 mirror */
 
     if (!pv && !mv) {
-        plan->kind = RAW_STEP1_SKIP;
-        plan->first_lba = 0u;
-        plan->second_lba = 0u;
+        if (raw_block_zero(pri) && raw_block_zero(mir)) {
+            plan->kind = RAW_STEP1_SKIP;
+            plan->first_lba = 0u;
+            plan->second_lba = 0u;
+        } else {
+            plan->kind = RAW_STEP1_ZERO;
+            plan->first_lba = mirror_lba;
+            plan->second_lba = TAPE_LBA_SUPERBLOCK;
+            memset(pri, 0, TAPE_BLOCK_SIZE);
+        }
         return;
     }
 
@@ -267,8 +287,9 @@ tape_result tape_format(const tape_dev *dev, const uint8_t uuid[16], uint32_t ep
     if (dev_read(dev, mirror_lba, 1u, mir) != 0) { return TAPE_ERR_IO; }
     raw_classify(pri, mir, mirror_lba, &plan);
 
-    /* 1. WIP barrier template or generation-exhausted zeros, partner first,
-          selected candidate last, a flush behind each. Skipped on blank media. */
+    /* 1. WIP barrier template, generation-exhausted zeros (partner first,
+          selected candidate last) or residue zeros (mirror, then primary), a
+          flush behind each. Skipped on blank media. */
     if (plan.kind != RAW_STEP1_SKIP) {
         if (raw_write_flush(dev, plan.first_lba, pri) != 0) { return TAPE_ERR_IO; }
         if (raw_write_flush(dev, plan.second_lba, pri) != 0) { return TAPE_ERR_IO; }
