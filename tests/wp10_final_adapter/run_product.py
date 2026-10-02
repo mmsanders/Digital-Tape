@@ -18,6 +18,13 @@ committed in SHA256SUMS; --replay fetches it when absent and refuses a mismatch.
   --retained DIR   also require the fresh JSONL to equal the committed SHA-256
   --replay DIR     offline: verify the retained evidence (fetching the asset if
                    needed) and replay it, no adapter
+  --superseded F   with --retained: DRAFT-10 V10-001 supersession (#359). F is
+                   tests/wp10_residue_d10/SUPERSESSION.json, checked against its
+                   pinned SHA-256. Every case outside its S1 index ranges must be
+                   byte-identical to the retained accepted stream; the S1 cases are
+                   retired, not compared, and the fresh stream is not replayed (the
+                   unchanged oracle still encodes the DRAFT-9 S1 expectations). The
+                   accepted stream itself still replays green with --replay.
 """
 from __future__ import annotations
 
@@ -262,6 +269,44 @@ def retained_gzip(retained: Path) -> Path:
     return gz
 
 
+SUPERSESSION_SHA256 = "6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2"
+
+
+def superseded_indices(path: Path) -> set:
+    """S1's retired case indices, from the verifier's pinned supersession record."""
+    if sha256_file(path) != SUPERSESSION_SHA256:
+        raise SystemExit(f"{path} is not the pinned supersession record {SUPERSESSION_SHA256}")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    s1 = [e for e in record["superseded"] if e["id"] == "S1"]
+    if len(s1) != 1:
+        raise SystemExit("supersession record has no single S1 entry")
+    s1 = s1[0]
+    if (s1["package"], s1["subtree"], s1["caseset_sha256"]) != ("tests/wp10_final_r54", VERIFIER_TREE,
+                                                                 CASESET_SHA256):
+        raise SystemExit("S1 does not name this package, tree and case set")
+    out = set()
+    for rep in s1["representatives"]:
+        for lo, hi in rep["index_ranges"]:
+            out.update(range(lo, hi + 1))
+    if len(out) != s1["cases"]:
+        raise SystemExit(f"S1 ranges cover {len(out)} cases, record says {s1['cases']}")
+    return out
+
+
+def compare_with_supersession(data: bytes, retained: Path, retired: set) -> dict:
+    """Case-by-case comparison of the fresh stream with the retained accepted one."""
+    old = gzip.decompress(retained_gzip(retained).read_bytes()).split(b"\n")
+    new = data.split(b"\n")
+    if len(old) != len(new):
+        raise SystemExit(f"fresh stream has {len(new) - 1} cases, retained {len(old) - 1}")
+    changed = [i for i, (a, b) in enumerate(zip(old, new)) if a != b]
+    outside = [i for i in changed if i not in retired]
+    if outside:
+        raise SystemExit(f"{len(outside)} case(s) outside S1 differ from the accepted stream, first {outside[:5]}")
+    kept = len(new) - 1 - len(retired)
+    return {"identical_outside_s1": kept, "s1_retired": len(retired), "s1_changed": len(changed)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -269,6 +314,7 @@ def main() -> int:
     g.add_argument("--replay", type=Path, help="retained evidence directory")
     ap.add_argument("--retained", type=Path, help="committed evidence directory (SHA256SUMS)")
     ap.add_argument("--out", type=Path, help="with --replay: fresh directory for the manifest")
+    ap.add_argument("--superseded", type=Path, help="with --retained: the V10-001 supersession record")
     a = ap.parse_args()
 
     check_provenance()
@@ -322,6 +368,17 @@ def main() -> int:
     }, indent=2, sort_keys=True) + "\n", newline="\n")
     print(f"observations.jsonl {len(data)} bytes {sums['observations.jsonl']}; gzip {gz.stat().st_size} bytes "
           f"{sums[ASSET]}")
+
+    if a.retained and a.superseded:
+        retained = a.retained if a.retained.is_absolute() else ROOT / a.retained
+        sup = a.superseded if a.superseded.is_absolute() else ROOT / a.superseded
+        result = compare_with_supersession(data, retained, superseded_indices(sup))
+        (out / "supersession.json").write_text(json.dumps({**result, "record": SUPERSESSION_SHA256, "id": "S1"},
+                                                          indent=2, sort_keys=True) + "\n", newline="\n")
+        print(f"{result['identical_outside_s1']} cases byte-identical to the accepted stream; "
+              f"{result['s1_retired']} S1 cases retired by supersession {SUPERSESSION_SHA256[:8]} "
+              f"({result['s1_changed']} changed)")
+        return 0
 
     if a.retained:
         retained = a.retained if a.retained.is_absolute() else ROOT / a.retained
