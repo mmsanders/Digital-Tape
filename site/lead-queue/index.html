@@ -260,7 +260,7 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R60 WP-06 closed on Verification #138 DRAFT-10 ledger; V10-001 tests published at verifier 5ca24fb; Software #359 restores WP-13 gate then V10-001 · 2 October 2026 UTC",
+      asOf: "P1-R62 WP-10 closed on Verification #141 (V10-001 PASS at db31c29; DRAFT-10 ledger 63/0); WP-11 golden route awaits source audio · 2 October 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -272,10 +272,10 @@
           note: "Earlier corrected-cadence, set-side/warm-start and #287's bounded 33/33 cross-run evidence is integrated. The corrected two-toolchain arithmetic publication (41 vectors, identical GCC/Clang output, both reverse-playback defects fixed) was accepted 41/41 on #327 (Verification #122) and integrated at main 523a7fd. #346's 62 seek-mapping cases (Verification #132) are integrated at d3b735e. Listening and complete-package acceptance remain held." },
         { id: "WP-09", name: "Record: overwrite, overdub, splice", rung: 1,
           note: "Earlier 26-case record evidence and #288's bounded 10,000-edit history are integrated at main fa25ae0. Verification #107 accepted #311's 27/27 capacity short-accept cases; Software #319 integrated them unchanged at main 66c6abc. #346's 8 gap cases and the record bundle (Verification #132) are integrated at d3b735e. Listening, crash/durability and complete WP-09 acceptance remain open." },
-        { id: "WP-10", name: "Crash-injection harness", rung: 2,
-          note: "Verification PR #69 accepted the bounded 28,760-case core tranche. Bounded R29-B is integrated at main 867fd4a. Verification #86 accepted exact R29-A PR #263: 44,307/44,307 canonical and diagnostic PASS, 25/25 B6 crafted cases and all six red controls; Software #267 integrated its accepted identities unchanged at main 215204b. Complete WP-10/WP-12a remains open, so no additional package rung advances. Verification #119/#120 accepted #318 (57,539, conformant empty-source dup fix; engine 81ad8ec2) and #330 (68,854), integrated at main d1ef202. #335 (79,820) and #336 (207,584) are accepted and integrated. DRAFT-10 is issued; its V10-001 residue rows (V-R54-03) are next, via Verification #138 and then a Software engine tranche." },
+        { id: "WP-10", name: "Crash-injection harness", rung: 4,
+          note: "Complete WP-10 is independently accepted. Verification #141 passed exact Product #362 (V10-001 residue: 17,025,380 injections; S1/S2 supersessions; S3 unchanged) and closed the DRAFT-10 WP-10 ledger at 63 rows, zero open. Earlier bounded core, R29-A/B/C, R53/R54 and backlog tranches are carried within their exact boundaries." },
         { id: "WP-11", name: "CLI harness and golden regressions", rung: 1,
-          note: "Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but they remain unlistened and are not accepted goldens. The missing-golden CI job stays red." },
+          note: "No golden is accepted. The golden manifest has zero cases and there is no CLI yet; the seven matched candidate PCM outputs are synthetic arithmetic vectors, not listenable goldens. The route needs a CLI, Verification-authored golden cases from Michael's chosen source audio, and Michael's own listening; portability and mutation gates are also open." },
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
           note: "Exact 8/8 re-spool evidence is integrated. Verification #81 accepted PR #236's bounded 4,209,696-case R29-C evidence; Verification #87 accepted exact combined PR #272's three long-operation rows, callback and FAULTED behavior. Software #276 integrated unchanged identities at main 788cb76. Complete WP-12 and WP-12a remain open. Verification #104's DRAFT-9 ledger finds 28 of 36 WP-12/WP-12a rows already accepted and publishes 3 genuine gap rows, accepted 7/7 on #328 (Verification #123) and integrated at main e4e15a0." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
