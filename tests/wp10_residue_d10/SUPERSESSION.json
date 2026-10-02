@@ -1,0 +1,458 @@
+{
+ "schema": "wp10-residue-d10-supersession-v1",
+ "verification_issue": 138,
+ "spec": {
+  "product_main": "d8243c95c88f38ce8b7fd6ad0de4280dd735d7a1",
+  "tapefs_sha256": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba",
+  "engine_api_sha256": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
+  "acceptance_sha256": "50aa63bd751fdc6b4636de0eb48253887be19b7ec2841768449217b4e9b9e547"
+ },
+ "basis": "acceptance WP-10 'Residue destinations' (V10-001): 'this replaces the DRAFT-9 V-R54-03 cells'; tapefs §9.5 item 5 / step 1 and §9.6 step 1 (residue is not blank)",
+ "superseded": [
+  {
+   "id": "S1",
+   "package": "tests/wp10_final_r54",
+   "publication_commit": "7c0410e0042d00c05b72affccd4de0a03ce8abd6",
+   "branch": "claude/wizardly-bardeen-4asv8m",
+   "subtree": "598ebcd8f0914040558f565809b90bdb22bb8221",
+   "caseset_sha256": "159b4ac64a5e653df2625a025f5f8cf13bcb90fed9a11905a1733f7a97167cd1",
+   "row": "4 (WP10.dup.rerun_crash)",
+   "row_cases": 207560,
+   "product_binding": "Digital-Tape PR #336",
+   "disposition": "Verification #128 PASS 207,584",
+   "kind": "expectation replaced (re-run plan and, in the V-R54-03 cells, outcome)",
+   "reason": "The representative's first-run state (torn last fallback zero, landed 1) is residue under DRAFT-10. DRAFT-9 planned its re-run as blank (no step 1) and counted 48 cells (oracle.PM_FINDING_CELLS) as V-R54-03 instead of failing them; DRAFT-10 zeroes the residue first, so the re-run trace, every durable image and the V-R54-03 outcomes all change.",
+   "representatives": [
+    {
+     "shape": "exhaustion_candidate",
+     "class": [
+      "TAPE_ERR_BAD_MAGIC",
+      null
+     ],
+     "first_mode": "flush_required",
+     "first_inject": [
+      "write",
+      1,
+      1
+     ],
+     "cases": 11302,
+     "index_ranges": [
+      [
+       131548,
+       142849
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_equal_divergent",
+     "class": [
+      "TAPE_ERR_BAD_MAGIC",
+      null
+     ],
+     "first_mode": "flush_required",
+     "first_inject": [
+      "write",
+      1,
+      1
+     ],
+     "cases": 11302,
+     "index_ranges": [
+      [
+       182924,
+       194225
+      ]
+     ]
+    }
+   ],
+   "cases": 22604,
+   "v_r54_03_cells": 48,
+   "replaced_by": {
+    "package": "tests/wp10_residue_d10",
+    "rows": "R1 (dup)",
+    "exact_counterparts": [
+     {
+      "group_index": 0,
+      "row": "R1",
+      "op": "dup",
+      "shape": "exhaustion_candidate",
+      "mode": "flush_required",
+      "l1": 1,
+      "scope": "all_writes"
+     },
+     {
+      "group_index": 511,
+      "row": "R1",
+      "op": "dup",
+      "shape": "exhaustion_candidate",
+      "mode": "write_through",
+      "l1": 1,
+      "scope": "all_writes"
+     },
+     {
+      "group_index": 1022,
+      "row": "R1",
+      "op": "dup",
+      "shape": "exhaustion_equal_divergent",
+      "mode": "flush_required",
+      "l1": 1,
+      "scope": "all_writes"
+     },
+     {
+      "group_index": 1533,
+      "row": "R1",
+      "op": "dup",
+      "shape": "exhaustion_equal_divergent",
+      "mode": "write_through",
+      "l1": 1,
+      "scope": "all_writes"
+     }
+    ],
+    "note": "Same destination shapes and first cut (fallback last zero torn after 1 byte), re-run injected at every write, landed length and flush in both modes; the remaining R1 groups extend it to L1 = 1…511 and to the two mirror-candidate shapes, and R1 (format) gives the §9.6 equivalents."
+   },
+   "unaffected": "the other 184,980 of 207,584 cases: rows 1-3 (24) and the other 14 row-4 representatives"
+  },
+  {
+   "id": "S2",
+   "package": "tests/wp10_backlog_r54",
+   "publication_commit": "dea9b521ccee76a69cfd0d517903eb27474d41fc",
+   "branch": "verification/issue-116-wp10-backlog",
+   "subtree": "d6e9a2427ed9b6c4b703c65dc44eb7e13224cabc",
+   "caseset_sha256": "6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3",
+   "row": "2 (WP10.dup.rerun_completes)",
+   "row_cases": 64734,
+   "product_binding": "Digital-Tape PR #330",
+   "disposition": "Verification #120 PASS 68,854",
+   "kind": "expectation replaced in place (re-run trace and re-run durable images; final media unchanged)",
+   "reason": "Each of these first-run crash states is residue under DRAFT-10 (a torn last fallback zero, or a torn fresh mirror over all-zero superblocks), so the expected re-run now begins mirror zero, flush, primary zero, flush.",
+   "groups": [
+    {
+     "shape": "blank",
+     "mode": "flush_required",
+     "inject": "write 9 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       8730,
+       9240
+      ]
+     ]
+    },
+    {
+     "shape": "blank",
+     "mode": "write_through",
+     "inject": "write 9 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       14381,
+       14891
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_candidate",
+     "mode": "flush_required",
+     "inject": "write 1 -> P",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       42644,
+       43154
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_candidate",
+     "mode": "flush_required",
+     "inject": "write 11 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       47774,
+       48284
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_candidate",
+     "mode": "write_through",
+     "inject": "write 1 -> P",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       49323,
+       49833
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_candidate",
+     "mode": "write_through",
+     "inject": "write 11 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       54453,
+       54963
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_equal_divergent",
+     "mode": "flush_required",
+     "inject": "write 1 -> P",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       56002,
+       56512
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_equal_divergent",
+     "mode": "flush_required",
+     "inject": "write 11 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       61132,
+       61642
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_equal_divergent",
+     "mode": "write_through",
+     "inject": "write 1 -> P",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       62681,
+       63191
+      ]
+     ]
+    },
+    {
+     "shape": "exhaustion_equal_divergent",
+     "mode": "write_through",
+     "inject": "write 11 -> M",
+     "landed": [
+      1,
+      511
+     ],
+     "cases": 511,
+     "index_ranges": [
+      [
+       67811,
+       68321
+      ]
+     ]
+    }
+   ],
+   "cases": 5110,
+   "replaced_by": {
+    "package": "tests/wp10_backlog_r54",
+    "rows": "row 2, same case indices and case set; DRAFT-10 re-run planner (this publication)",
+    "also": "tests/wp10_residue_d10 R1 (two-interruption closure of the torn last zero)"
+   },
+   "unaffected": "rows 1 and 3 and the other 59,624 row-2 cases"
+  },
+  {
+   "id": "S3",
+   "package": "tests/format_dup_identity_draft8",
+   "publication_commit": "7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7",
+   "branch": "main",
+   "subtree": "f76ab23d17beb9212f8ee1d17d3d1875b74abc7d",
+   "caseset_sha256": "c493e77dff948df48d9c67c51ef4b68f0a61d2e02615b2d08760a594e79dc4e3",
+   "row": "crash scope (R29-B), remount after the final mirror write",
+   "kind": "expectation relaxed (V10-003); no change for an engine that answers TAPE_ERR_BAD_MAGIC",
+   "reason": "Both copies are structurally invalid but the torn fresh mirror (landed 8-511) keeps the magic. tapefs §4.1 phase 1 and DRAFT-10 V10-003 permit TAPE_ERR_BAD_MAGIC or TAPE_ERR_CRC; media.select_superblock predicts TAPE_ERR_BAD_MAGIC alone and oracle.validate_case compares exactly. The package is not edited (its blobs are pinned by wp10_backlog_r54/deps.py).",
+   "groups": [
+    {
+     "operation": "format",
+     "shape": "exhaustion_candidate",
+     "mode": "flush_required",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       21594,
+       22097
+      ]
+     ]
+    },
+    {
+     "operation": "format",
+     "shape": "exhaustion_candidate",
+     "mode": "write_through",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       23650,
+       24153
+      ]
+     ]
+    },
+    {
+     "operation": "format",
+     "shape": "exhaustion_equal_divergent",
+     "mode": "flush_required",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       25706,
+       26209
+      ]
+     ]
+    },
+    {
+     "operation": "format",
+     "shape": "exhaustion_equal_divergent",
+     "mode": "write_through",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       27762,
+       28265
+      ]
+     ]
+    },
+    {
+     "operation": "dup",
+     "shape": "exhaustion_candidate",
+     "mode": "flush_required",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       50378,
+       50881
+      ]
+     ]
+    },
+    {
+     "operation": "dup",
+     "shape": "exhaustion_candidate",
+     "mode": "write_through",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       52434,
+       52937
+      ]
+     ]
+    },
+    {
+     "operation": "dup",
+     "shape": "exhaustion_equal_divergent",
+     "mode": "flush_required",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       54490,
+       54993
+      ]
+     ]
+    },
+    {
+     "operation": "dup",
+     "shape": "exhaustion_equal_divergent",
+     "mode": "write_through",
+     "injection": "torn_write write_ordinal 2 (final mirror)",
+     "landed": [
+      8,
+      511
+     ],
+     "cases": 504,
+     "index_ranges": [
+      [
+       56546,
+       57049
+      ]
+     ]
+    }
+   ],
+   "cases": 4032,
+   "replaced_by": {
+    "package": "tests/wp10_residue_d10",
+    "rows": "R1/R2 sb_mirror phase (dup and format, both modes), which assert the same superblock states with {TAPE_ERR_BAD_MAGIC, TAPE_ERR_CRC}"
+   }
+  }
+ ],
+ "draft9_rule_census": {
+  "file": "evidence/d9_census.json",
+  "resurrecting_injections": 1456,
+  "resurrecting_groups": 200,
+  "statement": "Under the DRAFT-9 rule (control skip_residue_zeroing) 1,456 of the 17,025,380 R1/R2 injections mount under the previous identity, at L1 <= 12, on all four exhaustion shapes and both (b) torn shapes, for dup and format; the 48 V-R54-03 cells are the dup, L1 = 1, primary-candidate subset. Under DRAFT-10 there are none (replay)."
+ }
+}

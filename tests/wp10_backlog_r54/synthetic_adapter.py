@@ -15,6 +15,7 @@ MUTANTS = {
     "repair_bumps_generation": 1,     # repair writes the partner at sb_generation + 1
     "rerun_noop_when_incomplete": 2,  # re-run returns OK without work on WRITE_IN_PROGRESS media
     "rerun_skips_barrier": 2,         # re-run skips step 1 on media with a valid superblock
+    "rerun_skips_residue_zeroing": 2, # DRAFT-9 behaviour: residue treated as blank (V10-001 regression)
     "label_not_copied": 3,
     "b0_written_side_a": 3,
     "high_water_floor": 3,
@@ -67,6 +68,8 @@ def row2(case, mutant):
     if mutant == "rerun_noop_when_incomplete" and incomplete:
         rerun_ops = []
     if mutant == "rerun_skips_barrier" and (M.sb_valid(img["P"]) or M.sb_valid(img["M"])):
+        rerun_ops = rerun_ops[4:]
+    if mutant == "rerun_skips_residue_zeroing" and M.is_residue(img):
         rerun_ops = rerun_ops[4:]
     final = M.apply(img, rerun_ops)
     rw_a, _ = _mount(final, "A", True)

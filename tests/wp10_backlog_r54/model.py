@@ -103,11 +103,18 @@ def rerun_destination(shape):
 
 # ------------------------------------------------------------ transactions
 
-def dup_ops(img, frames=128, label=b"", audio=SOURCE_AUDIO):
-    """tapefs §9.5 write order for a destination whose raw state is img (item 5 classification)."""
+def is_residue(img):
+    """DRAFT-10 tapefs §9.5 item 5 (V10-001): no structurally valid copy, but not both blocks all zero."""
+    return not (sb_valid(img["P"]) or sb_valid(img["M"])) and (any(img["P"]) or any(img["M"]))
+
+
+def step1_ops(img):
+    """tapefs §9.5 / §9.6 step 1 for a destination whose raw state is img (item 5 classification, DRAFT-10)."""
     p, m = img["P"], img["M"]
     vp, vm = sb_valid(p), sb_valid(m)
     ops = []
+    if is_residue(img):                                         # V10-001: mirror, flush, primary, flush
+        return [("w", "M", ZERO), ("f",), ("w", "P", ZERO), ("f",)]
     if vp or vm:
         gp, gm = (gen(p) if vp else -1), (gen(m) if vm else -1)
         top = max(gp, gm)
@@ -123,6 +130,12 @@ def dup_ops(img, frames=128, label=b"", audio=SOURCE_AUDIO):
         else:
             tmpl = B.wip_template(img[cand] if cand else None, existing_generation=top)
             ops += [("w", partner, tmpl), ("f",), ("w", "P" if partner == "M" else "M", tmpl), ("f",)]
+    return ops                                                  # all-zero blank: no step-1 write
+
+
+def dup_ops(img, frames=128, label=b"", audio=SOURCE_AUDIO):
+    """tapefs §9.5 write order for a destination whose raw state is img (item 5 classification, DRAFT-10)."""
+    ops = step1_ops(img)
     ops += [("w", n, ZERO) for n in ("A0h", "A1h", "B0h", "B1h")] + [("f",)]
     if frames:
         a_h, a_e = index_blocks(0, 1, [(0, 0, frames)])

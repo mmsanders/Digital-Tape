@@ -7,7 +7,7 @@ implementation PR or issue was opened.
 
 ```sh
 python3 audit.py      # backlog update vs the #110 six-row backlog and the planner census
-python3 selftest.py   # census, §9.5 interruption classes, 68,854 clean synthetic, 7 causal controls (~3 min)
+python3 selftest.py   # census, §9.5 interruption classes, 68,854 clean synthetic, 8 causal controls (~4 min)
 python3 synthetic_adapter.py > NEW.jsonl.gz
 python3 replay.py evidence/synthetic/observations.jsonl.gz --manifest evidence/synthetic/manifest.json \
   --adapter-kind synthetic --adapter-source-sha <sha256 of LF-normalised synthetic_adapter.py>

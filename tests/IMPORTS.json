@@ -323,15 +323,31 @@
     },
     {
       "path": "tests/wp10_backlog_r54",
-      "tree": "d6e9a2427ed9b6c4b703c65dc44eb7e13224cabc",
+      "tree": "05aae3f798fbb6d2e6eba72f3d2e38b0c722ca9d",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "dea9b521ccee76a69cfd0d517903eb27474d41fc",
+      "source_commit": "5ca24fb9c0773e715889c235c339ef035e87d63b",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "WP-10 backlog r54 verifier package (Verification #116, PR #117; row 1 mount phase-4 repair crash, 4 shapes, 4,112 injections; row 2 tape_dup re-run on the same destination after every interruption, 5 shapes, 64,734 injections; row 3 eight completed labelled copies; case set 6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3; oracle SHA-256 c3f469ed0716d509231ca1b7c343b96ffdaedc1e5b796c78a21941ca6e9a2b2a, model 57b72ab0, deps b0872c84, replay 437d63e5, audit 564966f7, self-test ff088325; seven causal controls; deps.py pins format_dup_identity_draft8 planner/oracle/media/fixture blobs, all equal to Product main 66c6abc6) published at commit dea9b521ccee76a69cfd0d517903eb27474d41fc (whole tree 482213a32cfb1edb1accf5783f62532ca8b76ae0, parent 0ac2f8ed) on branch verification/issue-116-wp10-backlog, not Verification main; issued by PM Product #325 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "attestation": "WP-10 backlog r54 verifier package, DRAFT-10 planner (Verification #138): rows and case set 6808330224da3129371f482e1828eab36b801d7caa13652dfc69a99e7493aaf3 unchanged from tree d6e9a242 (Verification #116); the row-2 re-run planner follows DRAFT-10 V10-001, so 5,110 row-2 cases change re-run trace and images, final media unchanged (supersession S2, SUPERSESSION.json 6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2); published at commit 5ca24fb9c0773e715889c235c339ef035e87d63b (whole tree e5c25b4fc41bbb02ee576707b5228e3a13e7bf54) on Verification main (merged as #139; Verification main d99044b55ab17c09d5413040f3f4dc5ff27fd757); accepted by PM on Product #305 pass 14, issued by Product #359 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "superseded_trees": [
+        "d6e9a2427ed9b6c4b703c65dc44eb7e13224cabc"
+      ],
       "selftest": [
         "python3",
         "-B",
         "tests/wp10_backlog_r54/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/wp10_residue_d10",
+      "tree": "e1b885301768d7b541a5704c526881a800d7116b",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "5ca24fb9c0773e715889c235c339ef035e87d63b",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-10 residue destinations verifier package (Verification #138, DRAFT-10 V10-001): rows R1-R3, 8,208 groups, 17,025,380 injections over tape_dup and tape_format residue destinations; supersedes wp10_final_r54 row 4 (22,604 cases, S1, including all 48 V-R54-03 cells) and wp10_backlog_r54 row 2 re-run traces (5,110 cases, S2), relaxes R29-B 4,032 BAD_MAGIC-only cases (S3, no action while the engine answers BAD_MAGIC); SUPERSESSION.json 6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2; published at commit 5ca24fb9c0773e715889c235c339ef035e87d63b (whole tree e5c25b4fc41bbb02ee576707b5228e3a13e7bf54) on Verification main (merged as #139; Verification main d99044b55ab17c09d5413040f3f4dc5ff27fd757); accepted by PM on Product #305 pass 14, issued by Product #359 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance, and no complete WP-10 claim",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_residue_d10/selftest.py"
       ]
     },
     {
