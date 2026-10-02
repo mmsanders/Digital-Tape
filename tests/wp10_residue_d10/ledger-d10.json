@@ -1,0 +1,89 @@
+{
+ "schema": "verification-ledger-delta-d10-v1",
+ "verification_issue": 138,
+ "spec": {
+  "product_main": "d8243c95c88f38ce8b7fd6ad0de4280dd735d7a1",
+  "tapefs_sha256": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba",
+  "engine_api_sha256": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
+  "acceptance_sha256": "50aa63bd751fdc6b4636de0eb48253887be19b7ec2841768449217b4e9b9e547"
+ },
+ "ledgers": {
+  "WP-06": {
+   "source": {"package": "tests/wp06_closure_r52", "branch": "verification/issue-108-wp06-floor",
+              "subtree": "b216baa2a9c160b2a14b3eac25567c5a260eed2f",
+              "ledger_blob": "f10ed7cabc19919e9d254ecf914988a1911df105",
+              "ledger_sha256": "93f9c89e41c3846a31830164b082ec76b43d15a984640ec4fc6f16a539d71bd6"},
+   "rows_total": 45,
+   "deltas": [
+    {"id": "WP06e.stage1.arm.index_full", "from": "missing Product observation", "to": "unreachable by spec",
+     "finding": "V10-002",
+     "citation": "DRAFT-10 acceptance WP-06e drops the case: every tapefs §9.3.3 RESUME row has exactly one live Side-B entry, so 4,095 of TAPE_MAX_ENTRIES = 4,096 remain free and TAPE_ERR_INDEX_FULL cannot arise on stage-1 media. The refusal stays asserted on stage-0 media under WP-09/WP-12."},
+    {"id": "WP06e.stage1.respool.empty", "from": "missing Product observation", "to": "unreachable by spec",
+     "finding": "V10-002",
+     "citation": "DRAFT-10 acceptance WP-06e drops the case: a zero-entry Side B matches no tapefs §9.3.3 RESUME row, so mount refuses with TAPE_ERR_INCONSISTENT before tape_respool is callable. The empty re-spool stays asserted on stage-0 media under WP-12."},
+    {"id": "WP06e.stage1.arm.side_a", "from": "missing Product observation", "to": "accepted exact evidence",
+     "basis": "Verification #121 PASS 7/7, Product PR #326 head c5ac824b8f96be1bc16851988f4bff686b153c17 (recorded here; status carried from #121)"},
+    {"id": "WP06e.stage1.respool.no_destination", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"},
+    {"id": "WP06e.stage1.record.then_promote", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"},
+    {"id": "WP06f.stage1.degraded_absent.reset", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"},
+    {"id": "WP06f.stage1.degraded_divergent.reset", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"},
+    {"id": "WP06f.sideA_liveB.promote_floor", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"},
+    {"id": "WP06f.sideA_liveB.respool_floor", "from": "missing Product observation", "to": "accepted exact evidence", "basis": "Verification #121"}
+   ],
+   "status_after": {"accepted exact evidence": 40, "unreachable by spec": 2, "outside WP-06": 3},
+   "closed": true,
+   "closure_statement": "Under DRAFT-10 every WP-06 row is either accepted on exact Product evidence (40) or unreachable by spec (2); the 3 'outside WP-06' rows are owned by WP-10/WP-11/WP-12. No WP-06 row is open.",
+   "oracle_check": {
+    "finding": "V10-004",
+    "result": "matches",
+    "statement": "The DRAFT-10 WP-06f re-spool wording ('never writes a chunk that is live on either side at the time of that write and never below a_high_water'; pass 2 may land on chunks pass 1 has just freed) is rule (b) of the #108-corrected oracle; the promote wording keeps rule (a) S = free_next and rule (c) phase 2 at [0, len) after step 4 (confirmed mechanically in #136 Ask 4). The dense-fixture precondition (live B densely fills [a_high_water, floor)) is kept. It is what makes 'pass 1 at or above the live-B floor' spec-forced: without it §9.4 permits pass 1 on any disjoint run at or above a_high_water, so the floor assertion would have to be dropped and the case would reduce to the per-write invariant-10 check (no write to a then-live chunk) that oracle.check_floor_row already makes on every trace. Relaxing it adds no coverage."
+   }
+  },
+  "WP-10": {
+   "source": {"package": "tests/wp10_final_r54", "branch": "claude/wizardly-bardeen-4asv8m",
+              "subtree": "598ebcd8f0914040558f565809b90bdb22bb8221",
+              "ledger_sha256": "4ab66f55a0689889a6f8fa5652b9bdee7a5f39fdf692cf38fd43927ef04ce80c"},
+   "rows_total_before": 62,
+   "carried": "48 'accepted exact evidence'; the 14 'published' rows are disposed PASS: R53-CLOSURE #119 (PR #318), R54-BACKLOG #120 (PR #330), R53-BACKLOG #127 (PR #335), R54-FINAL #128 (PR #336)",
+   "deltas": [
+    {"id": "WP10.residue.destinations", "from": null, "to": "published; Product binding pending",
+     "package": "tests/wp10_residue_d10", "finding": "V10-001",
+     "criterion": "acceptance WP-10 'Residue destinations' (DRAFT-10)"},
+    {"id": "WP10.dup.rerun_crash", "from": "published; Product binding disposed PASS", "to": "partially superseded; Product rebinding pending",
+     "supersession": "SUPERSESSION.json S1 (22,604 of 207,560 row-4 cases, incl. the 48 V-R54-03 cells)"},
+    {"id": "WP10.dup.rerun_completes", "from": "published; Product binding disposed PASS", "to": "republished (DRAFT-10 planner); Product rebinding pending",
+     "supersession": "SUPERSESSION.json S2 (5,110 of 64,734 row-2 cases, same case set)"},
+    {"id": "WP10.contract.blank_neither_valid_crc_vs_bad_magic", "from": "published; Product binding disposed PASS", "to": "published; Product binding disposed PASS",
+     "finding": "V10-003", "note": "The PM ruling carried since #109 is now normative DRAFT-10 text; the wp10_closure_r53 classifier already permits both."}
+   ],
+   "rows_total_after": 63,
+   "closed": false,
+   "closure_statement": "WP-10 is closed again when the Software tranche binds wp10_residue_d10 and rebinds the two superseded rows (S1, S2) and Verification disposes them.",
+   "oracle_check": {
+    "finding": "V10-003",
+    "surveyed": [
+     {"package": "tests/wp10_closure_r53", "classifier": "model.classify", "result": "permits {BAD_MAGIC, CRC} where a copy keeps the magic"},
+     {"package": "tests/wp10_backlog_r53", "classifier": "dupfrag.classify", "result": "permits {BAD_MAGIC, CRC}"},
+     {"package": "tests/wp10_backlog_r54", "classifier": "model.classify", "result": "permits {BAD_MAGIC, CRC}"},
+     {"package": "tests/wp10_final_r54", "classifier": "dupmodel.classify", "result": "permits {BAD_MAGIC, CRC}"},
+     {"package": "tests/wp10_residue_d10", "classifier": "pinned wp10_backlog_r54 model.classify", "result": "permits {BAD_MAGIC, CRC}"},
+     {"package": "tests/mount_draft8", "classifier": "cases.py M-no-magic / M-bad-crc", "result": "permits {BAD_MAGIC, CRC}"},
+     {"package": "tests/crash_core_draft8", "classifier": "media.select_superblock (single BAD_MAGIC)", "result": "matches: 0 of 28,760 planned states are unmountable with a magic-intact copy"},
+     {"package": "tests/promote_draft8", "classifier": "media.select_superblock (single BAD_MAGIC)", "result": "matches: 0 of 44,204 crash states are unmountable"},
+     {"package": "tests/format_dup_identity_draft8", "classifier": "media.select_superblock (single BAD_MAGIC), exact compare", "result": "stricter than §4.1 in 4,032 of 57,568 crash cases (torn final mirror, landed 8-511, both exhaustion shapes, both operations and modes); recorded as relaxation SUPERSESSION.json S3. Product's accepted answer (BAD_MAGIC) is unaffected."}
+    ]
+   }
+  },
+  "WP-12a": {
+   "source": {"package": "tests/wp12_closure_r53", "branch": "verification/issue-104-wp12-closure",
+              "subtree": "5641e39d5b72f367468e2a8d121f6a0e6106fc2f",
+              "ledger_sha256": "795c05fec6f6655499afbd13b2f329d35dde4d154619e7387530a96b246076d4"},
+   "deltas": [
+    {"id": "WP12a.in_progress.audio_continues.respool_promote", "from": "unreachable under DRAFT-9", "to": "unreachable by spec",
+     "finding": "V10-005",
+     "citation": "DRAFT-10 acceptance WP-12a: audio continuing while the source is Playing is 'reachable only for dup, since engine-api §10 forbids starting respool or promote from Playing and holds set_rate at B while any of the three is in progress'. The dup cell (WP12a.in_progress.render_service_allowed_audio_continues.dup) stays accepted."}
+   ],
+   "oracle_check": {"finding": "V10-005", "result": "matches", "statement": "DRAFT-10 scopes the clause to dup exactly as the wp12_closure_r53 ledger argued (COVERAGE 'Not gaps'); render/service-allowed stays asserted for all three operations, and the dup audio-continuity row stays accepted (R29-B). No other WP-12/WP-12a row changes."}
+  }
+ }
+}

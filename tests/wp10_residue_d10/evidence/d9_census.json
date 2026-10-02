@@ -1,0 +1,136 @@
+{
+  "by_group": {
+    "R1.dup.exhaustion_candidate.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_candidate.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_equal_divergent.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_equal_divergent.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_mirror_candidate.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_mirror_candidate.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_mirror_only.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.dup.exhaustion_mirror_only.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_candidate.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_candidate.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_equal_divergent.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_equal_divergent.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_mirror_candidate.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_mirror_candidate.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_mirror_only.flush_required": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R1.format.exhaustion_mirror_only.write_through": {
+      "groups": 12,
+      "injections": 85,
+      "l1_max": 12,
+      "l1_min": 1
+    },
+    "R2.dup.b_torn_mirror.flush_required": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.dup.b_torn_mirror.write_through": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.dup.b_torn_primary.flush_required": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.dup.b_torn_primary.write_through": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.format.b_torn_mirror.flush_required": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.format.b_torn_mirror.write_through": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.format.b_torn_primary.flush_required": {
+      "groups": 1,
+      "injections": 12
+    },
+    "R2.format.b_torn_primary.write_through": {
+      "groups": 1,
+      "injections": 12
+    }
+  },
+  "resurrecting_groups": 200,
+  "resurrecting_injections": 1456,
+  "rule": "DRAFT-9 (skip_residue_zeroing)",
+  "schema": "wp10-residue-d10-d9-census-v1"
+}

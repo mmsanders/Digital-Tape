@@ -90,3 +90,19 @@ requires the oracle to reject single-fact mutations of passing Product observati
 
 Complete WP-10 (which also needs #333's rebind disposed and the V-R54-03 spec decision), WP-12/12a,
 WP-11, hardware and release.
+
+## DRAFT-10 supersession S1 (#359)
+
+`tests/wp10_residue_d10/SUPERSESSION.json` (`6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2`,
+Verification #138) retires 22,604 row-4 cases. They are indices 131,548–142,849 and 182,924–194,225, and include
+all 48 V-R54-03 cells. Under DRAFT-10, those representatives' first-run state is residue, and the V10-001 engine
+zeroes it before re-running. `wp10_residue_d10` R1 replaces these cases.
+
+`p1-r55-product` is unchanged and still replays green with `--replay`. The canonical CI run passes `--superseded`,
+which compares the fresh stream case by case with the accepted one:
+
+- every case outside S1 must be byte-identical: 184,980 are, on engine `44dbf61`;
+- the S1 cases are retired, not compared: all 22,604 changed;
+- the fresh stream is not replayed, because the unchanged oracle still encodes the DRAFT-9 S1 expectations.
+
+The census and red controls now run on the accepted stream.

@@ -85,3 +85,32 @@ python3 -B tests/wp10_backlog_r54_adapter/negative_controls.py OUT/observations.
 4 per row. All 12 are killed. The CI job `wp10-backlog-r54-package` runs the package audit and
 self-test, the offline replay, the canonical regeneration against the committed SHA-256, and
 the controls.
+
+## DRAFT-10 rebind (#359)
+
+The package was re-imported at tree `05aae3f798fbb6d2e6eba72f3d2e38b0c722ca9d` from Verification #138's
+publication `5ca24fb9c0773e715889c235c339ef035e87d63b` (import commit `a34d409`), superseding
+`d6e9a242`. Its `model.py` now plans the §9.5 step-1 residue zeroing (V10-001). The rows, plan
+order and case set (`68083302…`) are unchanged. `run_product.py` changes only its four identity
+constants. The adapter is unchanged.
+
+**Supersession S2** (`tests/wp10_residue_d10/SUPERSESSION.json`
+`6cc313cf38652874e9b734d7719e678f07c7fada8b4b5480483920c2388d91f2`): 5,110 row-2 cases, 10
+groups of 511, whose interrupted first run leaves residue. On the V10-001 engine their re-run
+zeroes the residue first, so the re-run trace changes.
+
+The new bundle is `evidence/p1-r60-product`. Compared case by case with the accepted
+`p1-r54-product`:
+
+- the 5,110 S2 cases differ only in `rerun.trace_sha256`;
+- their re-run durable media and remounts are unchanged;
+- the other 63,744 cases are byte-identical.
+
+`p1-r54-product` stays in the tree unchanged, because Verification #120's disposition cites it.
+It no longer replays, because the package now expects the DRAFT-10 re-run trace for S2. CI
+replays and regenerates `p1-r60-product`.
+
+| File | SHA-256 |
+|---|---|
+| `observations.jsonl` (71,735,125 bytes, not retained) | `7491f304d85a78fb17d2668ce660de8ea3991c69a4320a1774c9c9ea55a3396f` |
+| `observations.jsonl.gz` (1,030,914 bytes) | `934c8c863a173cceec6bea08c4e74bfa7e117beaf21660eb1699b027c172a8a7` |

@@ -75,3 +75,28 @@ Three rows remain, in `backlog-update.json`:
 3. post-crash re-spool render
 
 Excluded: those rows, Product binding, WP-12/WP-12a, WP-11 and hardware. No complete WP-10 claim.
+
+## DRAFT-10 update (V10-001, Verification #138)
+
+`model.step1_ops` now follows issued DRAFT-10 tapefs §9.5 item 5. A destination with no structurally valid
+superblock is **blank** only if both 512-byte blocks are entirely zero. Otherwise it is **residue**, and step 1
+zeroes the mirror, flushes, zeroes the primary and flushes before step 2. All-zero blank still takes **no**
+step-1 write. The template and fallback paths are unchanged, and the planner still reproduces the accepted
+R29-B step-1 writes on all seven R29-B shapes.
+
+**What changes in this package.** Only row 2's re-run plan, and only from residue crash states:
+
+- the torn last fallback zero (`write 1`, landed 1..511, on the primary of both exhaustion shapes);
+- the torn fresh-mirror write over all-zero superblocks (`write 9` on blank, `write 11` on both exhaustion
+  shapes).
+
+That is **5,110** row-2 cases in both modes, listed by index range in
+`../wp10_residue_d10/SUPERSESSION.md`. Their re-run now begins mirror zero, flush, primary zero, flush. The case
+set, census, rows 1 and 3 and every other row-2 case are unchanged.
+
+**Class census and control.**
+- The class census distinguishes `(BAD_MAGIC, residue)` and requires it on both exhaustion shapes. Blank also
+  reaches it, through a torn fresh mirror.
+- New control `rerun_skips_residue_zeroing` (the DRAFT-9 behaviour) is trace-level. Like `rerun_skips_barrier`,
+  it ends in byte-identical completed media.
+- The outcome-level proof is the two-interruption closure in `wp10_residue_d10` row R1.

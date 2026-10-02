@@ -16,9 +16,11 @@ REQUIRED_CLASSES = {
     "healthy_pair": {("TAPE_OK", "old"), ("TAPE_ERR_INCOMPLETE", None), ("TAPE_OK", "new")},
     "equal_divergent": {("TAPE_ERR_INCONSISTENT", None), ("TAPE_OK", "old"), ("TAPE_ERR_INCOMPLETE", None),
                         ("TAPE_OK", "new")},
-    "exhaustion_candidate": {("TAPE_OK", "old"), ("TAPE_ERR_BAD_MAGIC", None), ("TAPE_OK", "new")},
+    "exhaustion_candidate": {("TAPE_OK", "old"), ("TAPE_ERR_BAD_MAGIC", None), ("TAPE_ERR_BAD_MAGIC", "residue"),
+                             ("TAPE_OK", "new")},
     "exhaustion_equal_divergent": {("TAPE_ERR_INCONSISTENT", None), ("TAPE_OK", "old"),
-                                   ("TAPE_ERR_BAD_MAGIC", None), ("TAPE_OK", "new")},
+                                   ("TAPE_ERR_BAD_MAGIC", None), ("TAPE_ERR_BAD_MAGIC", "residue"),
+                                   ("TAPE_OK", "new")},
 }
 
 
@@ -31,6 +33,9 @@ def interruption_classes():
             for img in M.possible_images(base, ops, inject, mode):
                 c = M.classify(img, "A", False)
                 kind = None if c["result"] != ("TAPE_OK",) else ("new" if c["uuid"] == NEW else "old")
+                if M.is_residue(img):          # DRAFT-10 V10-001: re-runs through residue zeroing
+                    kind = "residue"
+                    assert M.dup_ops(img)[:4] == [("w", "M", M.ZERO), ("f",), ("w", "P", M.ZERO), ("f",)]
                 key = (c["result"][0], kind)
                 seen[shape][key] = seen[shape].get(key, 0) + 1
                 # every class, including the torn-magic BAD_MAGIC/CRC one, must re-run to the same copy
@@ -50,7 +55,9 @@ def main():
     killed = {}
     # A re-run that skips step 1 ends in byte-identical completed media (step 4 rewrites both copies),
     # so only its write order, or a crash inside the re-run, can expose the missing barrier.
-    trace_only = {"rerun_skips_barrier"}
+    # Skipping residue zeroing likewise ends in byte-identical completed media; only the trace, or a second
+    # interruption inside the re-run (wp10_residue_d10 row R1), can expose it.
+    trace_only = {"rerun_skips_barrier", "rerun_skips_residue_zeroing"}
     for mutant, row in MUTANTS.items():
         for trust_trace in ((False, True) if row in (1, 2) and mutant not in trace_only else (False,)):
             reds, groups = 0, set()
