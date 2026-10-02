@@ -260,12 +260,12 @@
 
     const PHASE1 = {
       title: "Audio engine, on a laptop",
-      asOf: "P1-R60 verifier main restored at d99044b (ADR-157); Verification #138 V10-001 publication merged, awaiting PM disposition · 2 October 2026 UTC",
+      asOf: "P1-R60 WP-06 closed on Verification #138 DRAFT-10 ledger; V10-001 tests published at verifier 5ca24fb; Software #359 restores WP-13 gate then V10-001 · 2 October 2026 UTC",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
-        { id: "WP-06", name: "Block device, superblock, index commit", rung: 2,
-          note: "Exact 289/289 mount, 8/8 writability, 34/34 NOT_MOUNTED and #297's corrected 38/38 sequential evidence are integrated. Verification #121 accepted #326's 7/7 R53-corrected closure-gap rows, integrated at main 230e47e. DRAFT-10 V10-002 resolves the two WP-06e clauses as unreachable by spec; Verification #138 updates the ledger. WP-06 is not yet fully closed." },
+        { id: "WP-06", name: "Block device, superblock, index commit", rung: 4,
+          note: "Complete WP-06 is independently accepted. Verification #138 closed the DRAFT-10 ledger: 40 rows accepted and integrated (289/289 mount, 8/8 writability, 34/34 NOT_MOUNTED, #297 38/38 sequential, #326 7/7 closure gaps), 2 WP-06e rows unreachable by spec under V10-002, none open." },
         { id: "WP-07", name: "Chunk allocator, copy-on-write Side B", rung: 4,
           note: "Complete frozen WP-07 is independently accepted. Verification PR #67 accepted the 10,000-sequence allocator/COW package; product PR #215 carried the exact accepted evidence onto post-WP13 main and integrated it." },
         { id: "WP-08", name: "Playback, seek, variable-rate scrub", rung: 2,
@@ -279,7 +279,7 @@
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 1,
           note: "Exact 8/8 re-spool evidence is integrated. Verification #81 accepted PR #236's bounded 4,209,696-case R29-C evidence; Verification #87 accepted exact combined PR #272's three long-operation rows, callback and FAULTED behavior. Software #276 integrated unchanged identities at main 788cb76. Complete WP-12 and WP-12a remain open. Verification #104's DRAFT-9 ledger finds 28 of 36 WP-12/WP-12a rows already accepted and publishes 3 genuine gap rows, accepted 7/7 on #328 (Verification #123) and integrated at main e4e15a0." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
-          note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung." },
+          note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung. The real-product gate has been red since DRAFT-10 because its collector hard-codes DRAFT-9; the WP-13 criteria are byte-identical, so acceptance carries over and Software #359 restores the gate." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
           note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]

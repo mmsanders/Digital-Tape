@@ -33,7 +33,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | Earlier mount/writability/NOT_MOUNTED evidence plus Verification #98's corrected 38/38 sequential tranche are independently accepted and integrated through Product #297. Verification #101 owns a complete criterion ledger and only genuine missing closure cases |
+| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **COMPLETE.** Verification #138's DRAFT-10 ledger closes WP-06: 40 rows independently accepted and integrated (mount, writability, NOT_MOUNTED, #297 sequential, #326 closure gaps), 2 WP-06e rows unreachable by spec (V10-002), none open |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package. Product PR #215 mechanically carried the accepted bytes onto post-WP13 main and integrated them unchanged |
 | WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Earlier corrected-cadence and set-side/warm-start evidence plus Verification #95's bounded 33/33 cross-run tranche are independently accepted and integrated through Product #287. Verification #100 owns exact two-toolchain arithmetic portability; listening/goldens remain separate |
 | WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Earlier 26/26 record evidence plus Verification #96's bounded 10,000-edit/25-checkpoint history are independently accepted and integrated through Product #288. Verification #99 is authoring the positive capacity short-accept tranche; crash/golden and complete-package coverage remain open |
