@@ -83,9 +83,9 @@ not restore the expired combined product-lead mandate.
    The implementer still cannot tune an assertion: the tree it imported is fixed by a
    hash Verification published first, and `tests/IMPORTS.json` is Michael-owned in
    CODEOWNERS, so declaring a different tree is not a lead's to do quietly.
-   A cross-repository check against `digital-tape-verification` would be stronger still
-   and needs a token that does not exist yet; until it does, the declared hash rests on
-   that review.
+   `.github/workflows/verifier-publication.yml` adds the cross-repository half (ADR-157):
+   every cited `source_commit` must be on `digital-tape-verification/main` with its
+   declared tree. A PR head is not a publication; Verification merges its own.
 2. Integration is mechanical only if it cannot change whether correct code passes:
    include/link paths and equivalent symbol/type plumbing. Assertions, values,
    tolerances, ordering, ranges, skips and case deletion are not mechanical.

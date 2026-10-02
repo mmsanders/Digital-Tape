@@ -85,6 +85,12 @@ reason to doubt, a check the workflow does not cover, a disputed identity. When 
 use it, record it in the disposition as a deliberate exception and say why. What is
 no longer required is the routine third execution of every tranche.
 
+**Cite only merged publications (ADR-157).** Before you route a verifier commit to
+Software or record it as a disposition input, it must be on verification main. A PR head
+is a candidate. Express a hold by not importing, never by asking that a PR stay open.
+`verifier-publication.yml` enforces this on Product PRs. If Verification is unavailable,
+PM may merge a ready publication PR unchanged as a backstop.
+
 A green gate authenticates; it does not accept. Authorship, harness checks, engine
 execution, independent disposition, merge and package acceptance stay separate facts.
 
