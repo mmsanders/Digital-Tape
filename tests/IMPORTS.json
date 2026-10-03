@@ -453,6 +453,45 @@
         "-B",
         "tests/wp09_gaps_r56/selftest.py"
       ]
+    },
+    {
+      "path": "tests/golden",
+      "tree": "999cd1be3c86960bf607eed6da71d918c8e503de",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-11 R63 independent golden references: ten references, four exact source excerpts (public-domain Grieg, CC0 voice), tapectl-only MANIFEST per docs/WP11-CLI-CONTRACT.md, SOURCES.json provenance, model.py with eight causal controls; published by Verification #143 (Stage 1, PM #365 / ADR-158) and merged to Verification main as #144 at cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4 (content commits 3c0cdfd8dc43e8e486c6ebc694a14244d3aa9d19 and dad10ed3e1e7de454ce4be5ad9fb617a96310d2b); imported byte-identically by Product #366 Stage 2. Synthetic verifier evidence, not Product acceptance or listened goldens (Michael #367)",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/golden/model.py"
+      ]
+    },
+    {
+      "path": "tests/wp11_portability_r63",
+      "tree": "8cdd5a13e7384fff9617a75cc6768a55d589b742",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-11 R63 finite interpolation differential: 1,572,852 boundary pairs + 10,000,000 xorshift32 pairs (seed 0x63d10a5e) + 24 extremes = 11,572,876 comparisons against tape_test_interp; five synthetic arithmetic controls; published by Verification #143 (Stage 1, PM #365 / ADR-158) and merged to Verification main as #144 at cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4 (content commits 3c0cdfd8dc43e8e486c6ebc694a14244d3aa9d19 and dad10ed3e1e7de454ce4be5ad9fb617a96310d2b); imported byte-identically by Product #366 Stage 2. Synthetic verifier evidence, not Product acceptance or listened goldens (Michael #367)",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp11_portability_r63/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/wp11_ledgers_r63",
+      "tree": "bad836c8324a49b9d1bdcc46ab3e45071435c13a",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-11 R63 paper ledger closure: 63-row delta; WP-12/12a 36 rows (31 covered, 2 unreachable, 3 vacuous, 0 open); WP08-L01/L14 and WP09-L01 listening-held. audit.py checks verifier-repository findings and runs only there, so the Product self-test is a well-formedness parse of ledger.json (byte identity is the tree hash); published by Verification #143 (Stage 1, PM #365 / ADR-158) and merged to Verification main as #144 at cdf89f5f0ab0aa8cc94c13fbf0f98fea484975a4 (content commits 3c0cdfd8dc43e8e486c6ebc694a14244d3aa9d19 and dad10ed3e1e7de454ce4be5ad9fb617a96310d2b); imported byte-identically by Product #366 Stage 2. Synthetic verifier evidence, not Product acceptance or listened goldens (Michael #367)",
+      "selftest": [
+        "python3",
+        "-c",
+        "import json; json.load(open('tests/wp11_ledgers_r63/ledger.json'))"
+      ]
     }
   ],
   "evidence_bundles": [

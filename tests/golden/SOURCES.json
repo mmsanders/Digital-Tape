@@ -1,0 +1,74 @@
+{
+  "schema": "wp11-r63-sources-v1",
+  "authorization": "PM #365 / Verification #143 / ADR-158 initial generation",
+  "ffmpeg_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "python_version": "3.12.14",
+  "conversion_command": "python3 tests/golden/canonicalize.py DESTINATION --download (exact ffmpeg argument vector and canonical WAV packing are committed in canonicalize.py and model.py)",
+  "sources": [
+    {
+      "role": "music",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Grieg_-_Peer_Gynt_Suite_No._1%2C_Op._46_-_IV._In_the_Hall_of_the_Mountain_King_%28Musopen_Symphony%29.flac",
+      "source_page_permanent_url": "https://commons.wikimedia.org/w/index.php?oldid=963508981",
+      "original_name": "music-original.flac",
+      "original_bytes": 25778747,
+      "original_sha256": "1c1be6b3e0042ee031cee42a8d151b04c78bfccf3126c4de6271e7b2fdcb6937",
+      "licence": "Public domain worldwide",
+      "licence_text": "This work has been released into the public domain by its copyright holder, Musopen. This applies worldwide. In some countries this may not be legally possible; if so: Musopen grants anyone the right to use this work for any purpose, without any conditions, unless such conditions are required by law.",
+      "licence_url": "https://commons.wikimedia.org/w/index.php?oldid=963508981",
+      "canonical_name": "music-canonical.wav",
+      "canonical_frames": 6795415,
+      "canonical_sha256": "5587b8271b4e47159a56d0b45b531f24aeeeeddb9bc57bcd4d6fb8463f468805",
+      "canonical_bytes": 27181704,
+      "release_url": "https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1/music-canonical.wav",
+      "original_release_url": "https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1/music-original.flac"
+    },
+    {
+      "role": "voice",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Twinkle_Twinkle_Little_Star_-_sung_with_full_lyrics.ogg",
+      "source_page_permanent_url": "https://commons.wikimedia.org/w/index.php?oldid=1160115586",
+      "original_name": "voice-original.ogg",
+      "original_bytes": 2884672,
+      "original_sha256": "0a9b05a0929699e30cf5f6f124c6e05251ed1505e2a5eb954746e7cd6a6c2f40",
+      "licence": "CC0 1.0 Universal",
+      "licence_text": "The person who associated a work with this deed has dedicated the work to the public domain by waiving all of their rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law. You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.",
+      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "canonical_name": "voice-canonical.wav",
+      "canonical_frames": 5542573,
+      "canonical_sha256": "b8aded0b9a406b637f53dc71cdbc61d030e37b37bec39fc5b6ac966428b899f9",
+      "canonical_bytes": 22170336,
+      "release_url": "https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1/voice-canonical.wav",
+      "original_release_url": "https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1/voice-original.ogg"
+    }
+  ],
+  "excerpts": [
+    {
+      "name": "quiet.wav",
+      "source": "music-canonical.wav",
+      "start_frame": 0,
+      "frames": 198450,
+      "gain": "unity"
+    },
+    {
+      "name": "ending.wav",
+      "source": "music-canonical.wav",
+      "start_frame": 6438600,
+      "frames": 198450,
+      "gain": "unity"
+    },
+    {
+      "name": "loudest.wav",
+      "source": "music-canonical.wav",
+      "start_frame": 4498200,
+      "frames": 198450,
+      "gain": "unity"
+    },
+    {
+      "name": "voice.wav",
+      "source": "voice-canonical.wav",
+      "start_frame": 617400,
+      "frames": 44100,
+      "gain": "unity"
+    }
+  ],
+  "download_user_agent": "Digital-Tape-Verification/1.0 (https://github.com/mmsanders/Digital-Tape-Verification; verifier fixture acquisition)"
+}
