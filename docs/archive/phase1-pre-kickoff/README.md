@@ -3,7 +3,7 @@
 # Current round brief
 
 **Product assignments issued 8 September; operating format updated 11 September 2026.** This is the current assignment surface. Read main
-and [Michael’s questions](../FOR-MICHAEL.md) first. Archived reports are not instructions.
+and [Michael’s questions](../../FOR-MICHAEL.md) first. Archived reports are not instructions.
 
 | Role | Next bounded task | Stop/return boundary |
 |---|---|---|
@@ -19,7 +19,7 @@ Each lead returns: input commit/spec hashes; work/evidence produced; what actual
 remaining holds; next owner. PM commits dispositions and updates this brief directly.
 Use one bounded chat round and stop on its return condition. Leads do the assigned work
 directly; PM maintains these briefs, and Michael resumes each chat when needed.
-The [Phase 1 plan](../PHASE1-DEVELOPMENT.md) and [role instructions](../ROLES/README.md)
+The [Phase 1 plan](../../PHASE1-DEVELOPMENT.md) and [role instructions](../../ROLES/README.md)
 replace the earlier automation trial. No subworkers are assigned.
 
-Earlier lead/surge packets are in [the historical archive](../archive/pre-phase0/README.md).
+Earlier lead/surge packets are in [the historical archive](../pre-phase0/README.md).

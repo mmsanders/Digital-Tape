@@ -1,5 +1,10 @@
 # hardware/measurements — audit-ready records
 
+> **Dated snapshot, 12 September 2026; hardware parked through Phase 2.** "PM Decisions 00N"
+> citations point at documents outside this repo; the matching ADRs are in
+> [docs/DECISIONS.md](../../docs/DECISIONS.md). ADR-121/124/125 supersede ADR-116's solenoid
+> working point. Nothing here is a measurement or an acceptance.
+
 **Why this exists.** PM Decisions 006 §5 changed what "done" means for the safety measurements:
 the SPL cap and the thermal limits are **witnessed by Michael and independently audited by the
 Verification Lead** — from the method and the raw data, not from being in the room.

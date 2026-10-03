@@ -24,5 +24,5 @@ The reset call is surrounded by a hard one-second process watchdog and is measur
 \`CLOCK_MONOTONIC\`. A watchdog firing kills the worker and therefore fails the
 verifier session closed.
 
-A green Software run is product evidence only. PR integration remains held for
-independent Verification disposition.
+A green Software run is product evidence only. This package was independently
+accepted (Verification PR #67) and integrated by product PR #215.

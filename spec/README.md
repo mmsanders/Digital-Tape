@@ -4,7 +4,7 @@
 Exact revisions and SHA-256 values are in [VERSION.md](VERSION.md), enforced by
 tools/ci/verify-spec-bundle.sh. Do not duplicate revision labels in onboarding headers.
 
-The exact DRAFT-8 bundle has passed independent paper review and is published.
+The current bundle (revision in VERSION.md) has passed independent paper review and is published.
 **Michael signed Phase 0 on 8 September 2026**; see the exact scope in
 [the freeze record](../docs/PHASE0-FREEZE.md).
 The signed record supersedes historical NOT FROZEN banners for that scope only;
@@ -15,7 +15,7 @@ the authenticated spec bytes remain unchanged.
 | TapeFS §§1–8 | Phase 0 byte-level freeze |
 | Engine API §§2–8 and §12 | Phase 0 candidate contract freeze |
 | Acceptance criteria | Freeze with the format; not a declaration of passing tests |
-| Operations and state matrix | First actual complete green WP-10 run |
+| Operations and state matrix | First complete green WP-10 run. **Condition met** (WP-10 complete, #141); PM declares the freeze at Phase 2 kickoff |
 | spec/hw/ | Hardware-owned, separately versioned; not part of this format freeze |
 
 Code conforms to the spec. PM changes the contract first; independent tests follow;

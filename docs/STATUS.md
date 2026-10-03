@@ -1,6 +1,6 @@
 # Project status
 
-**3 October 2026 UTC · input main `d93ca4e` · Owner: PM #371 ·**
+**3 October 2026 UTC · input main `320d729` · Owner: PM (#371; close-out cleanup ADR-160) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -14,7 +14,8 @@ Product #369 head `b61a9e9`:
 
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
-**Opening Phase 2 needs Michael:** a go, the hardware park (#309, scoped to Phase 1) and intake #341.
+**Opening Phase 2 needs Michael's go.** The hardware park now extends through Phase 2 and #341 is
+candidate WP-38 (ADR-160). The kickoff checklist is in [the roadmap](PACKAGES/README.md#phase-2-kickoff-prep).
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -77,10 +78,10 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | — | Unblocked: WP-10 and WP-12/12a are complete. Not yet declared | PM, at Phase 2 kickoff |
-| Hardware | 2026-09-18 | **PARKED by Michael 29 Sep ([#309](https://github.com/mmsanders/Digital-Tape/issues/309)).** PR #87 repair `e294d51` unaudited; Verification #20 (A1MINI-01, PR #120) closed without a finding; PR #92 held. Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Park was scoped to Phase 1: **Michael decides** at Phase 2 kickoff |
+| Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
-| WP-04 / WP-05 | 2026-09-18 | PARKED with Hardware (#309). PR #87 not re-audited; A1MINI-01 unaudited; identity, attribution, atomicity and qualification remain open | None PM-issued; resume with Hardware |
+| WP-04 / WP-05 | 2026-09-18 | PARKED with Hardware. #87's method rejected (`P1-R23-V01`) and closed; latch root cause recorded in the roadmap; identity, attribution, atomicity and qualification remain open | None PM-issued; resume with Hardware |
 
 **Held since** is the date the hold became visible: the day the held PR was opened,
 where the hold is a PR (#20 on 3 September, #96 on 19 September, #87 on 18 September),
@@ -92,7 +93,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 
 1. **Card atomicity is unqualified.** No media is qualified to WP-05 A-2; PR #87's method is independently rejected on `P1-R23-V01` and no new acquisition may run.
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
-3. **Mechanism and creep trials are unprinted.** A1MINI-01 rev 1 is an unprinted, unaudited method candidate; CAD checks are not measurements.
+3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
 5. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
@@ -103,7 +104,7 @@ WP-08/09/11/12 (#143 plus Michael #367), WP-10 (#141), WP-13 (#83, carried by #3
 Each holds within its exact recorded boundary.
 Main ruleset 22084355 remains active and strict. The golden suite is green and gates every PR.
 
-Phase 1 operating format, role charters and the issue workflow are in
+The lead operating format, role charters and the issue workflow are in
 [CLAUDE.md §7](../CLAUDE.md), [role charters](ROLES/README.md) and
 [the issue workflow](ISSUE-WORKFLOW.md). Hardware detail is in
 [hardware status](STATUS-HARDWARE.md); the integration boundary is in

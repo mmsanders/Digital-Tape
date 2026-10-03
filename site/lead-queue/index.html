@@ -279,7 +279,7 @@
         { id: "WP-12", name: "Re-spool / defragment pass", rung: 4,
           note: "Complete WP-12/WP-12a is independently accepted. The wp11_ledgers_r63 reconciliation gives 36 rows (31 covered, 2 unreachable by spec, 3 vacuous), zero open, with #123/#328 and V10-005 closing the earlier gaps." },
         { id: "WP-13", name: "Embedded-readiness audit", rung: 4,
-          note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung. The real-product gate has been red since DRAFT-10 because its collector hard-codes DRAFT-9; the WP-13 criteria are byte-identical, so acceptance carries over and Software #359 restores the gate." },
+          note: "Verification #83 independently accepted all six DRAFT-9 gates at exact PR #241 head 74f1173: 16/16 sources, 388 calls, exactly four permitted funnels, and zero forbidden, ambiguous or unresolved calls. Software #255 integrated the accepted candidate at main 867fd4a. This renewed evidence does not add a fifth rung. Acceptance carried to DRAFT-10 through #361 (the WP-13 criteria are byte-identical); the real-product gate is green on main." },
         { id: "WP-36", name: "Slot capability model", rung: 4,
           note: "Complete frozen WP-36 is independently accepted. Verification PR #57 authenticated the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign, and product PR #200 integrated the exact accepted tree unchanged." }
       ]

@@ -34,9 +34,10 @@ Independent review was Verification #133 on r1 (finding `645d4de`: 528 DRAFT-9
 resurrections, 0 under DRAFT-10, over 16.9M two-interruption images on 14 shapes) and
 Verification #136 on r2 (finding `cc3ba4a`: an exact crash table over 12.8M states,
 READY). r3 applied #136's one non-blocking wording note in its own proposed text, with no
-change to any permitted set. Issuance is not implementation or acceptance: V10-001 needs
-republished verifier rows, an engine change under Structural Rule 1, and independent
-disposition. Under `tapefs` §14, §9 freezes at the first fully green WP-10 run.
+change to any permitted set. Issuance was not implementation or acceptance; V10-001 was
+later implemented under Structural Rule 1 and independently disposed (Verification #141,
+Product #362). Under `tapefs` §14, §9 freezes at the first fully green WP-10 run; that
+condition is met, and the operations freeze is PM's to declare at Phase 2 kickoff.
 
 ## Previous amendment: DRAFT-9
 
@@ -120,39 +121,32 @@ integrity manifest.
 
 ## Evidence and residual holds
 
-- Verification #86 independently accepted exact product PR #263 head
-  `8a4d2a17138fd89e91f970a2c69c9f8fa0a8d920`: 44,307/44,307 canonical and
-  diagnostic cases, 25/25 B6 crafted cases and all six red controls. This is bounded
-  R29-A evidence, not complete WP-10/WP-12a acceptance. Software #267 integrated the
-  accepted identities unchanged at main `215204b`; this is not a general release claim.
-- #27 lands verifier tests before implementation. Ten package checks pass; 289 engine
-  observations on the held branch pass after two DRAFT-8 fixes. At signing the
-  independent disposition was pending; the 11 September Verification return now
-  confirms those 289 assertions only. See [integration](VERIFICATION-INTEGRATION.md).
-  This later evidence does not expand the signed scope or accept the full package.
-- Hardware #18 landed after all hardware CI jobs passed. IR-018-18’s Make fix and
-  ADR-128’s date-drift fix are implemented. Independent safety acceptances remain open.
-- WP-11 golden CI is still red. No full WP-10, hardware measurement or card-atomicity
-  acceptance is claimed. Raw destructive operation outcomes retain their exact spec
-  boundaries; a paper freeze does not establish physical media atomicity.
-- Verification #83 independently accepted exact product PR #241 head `74f1173` for
-  bounded R29-B (57,611/57,611) and DRAFT-9 WP-13 (all six gates); Software #255
-  integrated it at main `867fd4a`. Verification #86 accepted final R29-A PR #263 and
-  Software #267 integrated its corrected package tree `197d2f2a` unchanged at main
-  `215204b`. This does not grant complete WP-10 or WP-12a acceptance.
+Phase and package state now live in [STATUS](STATUS.md), which supersedes the
+point-in-time holds this section once carried. At Phase 1 close-out (3 October 2026):
+
+- Every Phase 1 package (WP-06…WP-13, WP-36) is independently accepted for laptop scope,
+  including complete WP-10 (#141) and WP-12/12a (#143). The golden suite is green.
+  The 289 mount observations and bounded R29-A/R29-B tranches recorded in earlier
+  revisions of this file are carried within those acceptances.
+- Hardware #18 landed after all hardware CI jobs passed. Independent safety acceptances
+  remain open; hardware is parked through Phase 2 (ADR-160).
+- No hardware measurement or card-atomicity acceptance is claimed. Raw destructive
+  operation outcomes retain their exact spec boundaries; a paper freeze does not
+  establish physical media atomicity.
 - The original program’s Phase 0 spike/buying tasks are not all accepted. This is
   the narrower format/API freeze gate, not a claim that WP-04/05/34 are complete.
 
 ## Signatures
 
-- Independent paper threshold: DRAFT-8 third-cut review and DRAFT-9 Verification PR
-  #82, authenticated above.
-- PM: issued exact DRAFT-9 V9-001 at product main `7910ae3...`.
-- Michael: **signed 8 September 2026** and approved V9-001 on **25 September 2026
-  Pacific time**, with both explicit approvals quoted above.
-- Operations/state and hardware acceptance: **not granted**.
+- Independent paper threshold: DRAFT-8 third-cut review, DRAFT-9 Verification PR
+  #82, and DRAFT-10 Verification #133/#136, authenticated above.
+- PM: issued exact DRAFT-9 V9-001 at product main `7910ae3...` and DRAFT-10
+  V10-001…V10-005 through product PR #352.
+- Michael: **signed 8 September 2026**, approved V9-001 on **25 September 2026
+  Pacific time**, and authorized V10-001…V10-005 on **1 October 2026**, with each
+  explicit approval quoted above.
+- Operations/state and hardware acceptance: **not granted** by this record.
 
 The temporary combined-lead freeze mandate has ended; normal roles in
 [CLAUDE.md](../CLAUDE.md) resume. Later infrastructure experiments do not extend
-product or verification authority. The current operating format is recorded in
-[the Phase 1 plan](PHASE1-DEVELOPMENT.md); the signed scope above is unchanged.
+product or verification authority. The signed scope above is unchanged.

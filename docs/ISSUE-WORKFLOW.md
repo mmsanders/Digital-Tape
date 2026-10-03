@@ -1,6 +1,6 @@
 # Work directions through GitHub issues
 
-**Michael-directed workflow · 12 September 2026 UTC.**
+**Michael-directed workflow · adopted 12 September 2026, current through ADR-160 (3 October 2026).**
 Issues are the single source for active work assignments. Main stores enduring role
 charters, normative specifications, decisions, evidence, package definitions and
 factual status. Do not keep a second current task list or per-round brief on main.
@@ -60,7 +60,7 @@ GitHub author identity do not expand the role's product authority.
    when his work changes or becomes blocking. Do not publish or maintain branch KEEP
    lists; branch cleanup is no longer a PM round deliverable.
 
-## Tranche size and ordering (Phase 1)
+## Tranche size and ordering
 
 These two rules exist because the fixed overhead of a tranche — PM read, PM
 disposition, status rewrite, dashboard refresh, and the independent round itself —
@@ -135,7 +135,7 @@ signs only its documented scope. Michael closes his own resolved or superseded i
 
 ## Activation and independence
 
-Michael configures external listeners and will notify leads for this migration.
+Michael configures external listeners; the 12 September migration to issue routing is complete.
 This repository change does not install listeners, guarantee delivery or claim a
 chat has awakened. The read-only Pages lead queue reports open issues only. No
 automatic approval, delegation, old signaling bus, activity dashboard, controller

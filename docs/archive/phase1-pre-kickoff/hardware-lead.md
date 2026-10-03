@@ -2,7 +2,7 @@
 
 # Hardware Lead — current handoff
 
-Phase 1 role: read [the role instructions](../ROLES/hardware.md).
+Phase 1 role: read [the role instructions](../../ROLES/hardware.md).
 Work directly in your lead chat; the current coverage and safety holds remain binding.
 
 **8 September 2026.**

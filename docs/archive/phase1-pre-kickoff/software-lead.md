@@ -2,7 +2,7 @@
 
 # Software Lead — current handoff
 
-Phase 1 role: read [the role instructions](../ROLES/software.md).
+Phase 1 role: read [the role instructions](../../ROLES/software.md).
 Work directly in your lead chat; the current coverage and safety holds remain binding.
 
 **8 September 2026.**

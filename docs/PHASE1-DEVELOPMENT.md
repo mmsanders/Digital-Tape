@@ -34,8 +34,10 @@ Main remains authoritative for product spec, charters, decisions and evidence.
 [freeze record](PHASE0-FREEZE.md) describe facts and gates; they do not assign work.
 Closed issues, Git history and historical reviews must not revive old directions.
 
-PR #20 remains held across uncovered behavior; narrow mount evidence accepts no
-allocator, running-sequence, warm/state or operation package. WP-10 completion,
-WP-11 fixtures, independent hardware acceptance and card qualification remain open.
+**Phase 1 closed on 3 October 2026** (ADR-159): every Phase 1 package is independently
+accepted for laptop scope and the golden suite is green. This file now records how
+Phase 1 was organised; current state is in [STATUS](STATUS.md) and Phase 2 kickoff
+items are in [the roadmap](PACKAGES/README.md#phase-2-kickoff-prep). Independent
+hardware acceptance and card qualification remain open and are parked with hardware.
 Fabrication and cell charging stay CLOSED. Only Michael approves purchases and
 reserved physical/signature decisions. Issue closure is not independent acceptance.

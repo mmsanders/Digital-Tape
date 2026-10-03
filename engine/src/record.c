@@ -27,20 +27,11 @@
  * unbuilt modes and TAPE_ERR_BUSY on stage-1 media were coverage boundaries,
  * and the coverage landed; both are gone.
  *
- * What is still NOT here:
- *
- *   - tape_reset_side_b's stage clearing. §8 states the rule on tape_arm AND on
- *     tape_reset_side_b, and only tape_arm's is independently covered. ops.c
- *     keeps its documented TAPE_ERR_BUSY refusal until reset-B's lands.
- *   - a positive SHORT accept (0 < accepted < requested) followed by service and
- *     commit. WP-09's cartridge-full row starts already full and proves only the
- *     zero-accept boundary; its own COVERAGE.md names the short accept as a
- *     later tranche.
- *   - product PCM identity for any mode. The verifier's VO08 envelope carries
- *     superblocks and index slots and no chunk data at all, so nothing in this
- *     tranche observes a recorded or overdubbed sample. The overdub mix below is
- *     written from §9.1 and engine-api §8 and is UNOBSERVED by these tests;
- *     WP-11 listening remains the gate.
+ * The three gaps this boundary once named have since closed: tape_reset_side_b's
+ * stage clearing is in ops.c; the positive SHORT accept is covered by
+ * Verification #107 (capacity_wp09_r52); and product PCM identity for every
+ * mode is fixed by the WP-11 goldens, approved by ear (#367). WP-09 is
+ * independently accepted; see docs/STATUS.md.
  */
 
 #include <string.h>

@@ -33,22 +33,18 @@ Playback is read-only, so `write` and `flush` callbacks are recorded and then
 something to absorb silently. `tape_service` is driven at the oracle's required
 budget of 1024 under a finite guard; nontermination fails rather than hangs.
 
-## Current status: no engine implements playback
+## Status
 
-| Target | Compile | Link |
-|---|---|---|
-| Current product main | **fails** — main's public header predates the frozen DRAFT-8 API (`tape_mount` still takes `const void*, size_t` instead of `const tape_warm_start*`) | not reached |
-| Held PR #20 `2e0e8a4b` | **clean** | **fails** — `tape_seek`, `tape_set_rate`, `tape_render`, `tape_service` are declared but defined nowhere |
+**Current (3 October 2026):** the engine on main implements playback, and WP-08 is
+independently accepted (Verification #95, #122, #143; goldens approved #367). See
+[STATUS](../../docs/STATUS.md).
 
-Neither archive defines a single playback operation, so **no product playback
-evidence can exist yet**, and none is claimed. Raw log:
+**History, 12 September 2026:** product main's header predated DRAFT-8, and held PR #20
+`2e0e8a4b` compiled but left `tape_seek`, `tape_set_rate`, `tape_render` and `tape_service`
+undefined, so no product playback evidence existed then. Raw log:
 [`docs/verification/runs/2026-09-12-r5/adapter-diagnostic.log`](../../docs/verification/runs/2026-09-12-r5/adapter-diagnostic.log).
 
-Because no run is possible, this adapter's observation schema has **never been
-exercised against a real engine**. It is written against the imported `ADAPTER.md`
-and `oracle.py` by reading; the first product run is where it is actually tested.
-
-## Usage once an engine implements playback
+## Usage
 
 ```sh
 make ENGINE_INC=<engine>/include ENGINE_LIB=<build>/libtape.a

@@ -4,9 +4,12 @@ A screenless music player for children. Each cartridge holds one continuous stre
 of 44.1 kHz, 16-bit stereo PCM. Side A is the original; Side B is the editable copy.
 There are no tracks, titles or browsing. Scrub changes playback rate without filtering.
 
-**Phase 0: DRAFT-8 format/API scope frozen by Michael on 8 September 2026.**
-The repo contains provisional engine code, independent tests, and hardware design
-and print packets. It is not a finished player or a safety-qualified hardware design.
+**Phase 1 (audio engine, on a laptop) is complete as of 3 October 2026.** All nine
+Phase 1 engine packages are independently accepted for laptop scope, and the golden
+suite is green. Phase 2 (desktop tooling) awaits Michael's go. The current spec revision
+is recorded in [spec/VERSION.md](spec/VERSION.md); phase state is in [STATUS](docs/STATUS.md).
+The repo is not a finished player or a safety-qualified hardware design; hardware is
+parked through Phase 2 (see [the roadmap](docs/PACKAGES/README.md)).
 
 ## Start or resume a lead
 
@@ -17,15 +20,17 @@ and print packets. It is not a finished player or a safety-qualified hardware de
 
 | Surface | Authority |
 |---|---|
-| [Freeze record](docs/PHASE0-FREEZE.md) | Scope, signatures and remaining holds |
+| [Status](docs/STATUS.md) | Current phase state, accepted packages, holds and risks |
+| [Work packages / roadmap](docs/PACKAGES/README.md) | Scope, dependencies, parked work and Phase 2 kickoff items |
 | [Product specification](spec/README.md) | PM; revisions/hashes in spec/VERSION.md |
 | [Hardware specification](spec/hw/README.md) | Hardware Lead; separately versioned |
-| [Work packages](docs/PACKAGES/README.md) | Scope and dependencies |
+| [Freeze record](docs/PHASE0-FREEZE.md) | Phase 0 scoped freeze and its signatures |
 | [Verification integration](docs/VERIFICATION-INTEGRATION.md) | Provenance, coverage and observed results |
 | [Decision log](docs/DECISIONS.md) | Append-only history; later dispositions supersede earlier ones |
 
-One portable C99 engine serves the CLI, GUI and firmware. Hardware source is in
-hardware/; the independent mount-test package is in tests/mount_draft8/.
+One portable C99 engine serves the CLI (`tapectl`), GUI and firmware. Hardware source is
+in hardware/. Independent verifier packages are imported under tests/ and declared in
+[tests/IMPORTS.json](tests/IMPORTS.json).
 
-Phase 1 uses individual lead chats with no subworkers. Start with the
-[development plan](docs/PHASE1-DEVELOPMENT.md) and [copyable role bootstraps](docs/ROLES/README.md).
+Leads work in individual chats with no subworkers, routed by role-labeled issues. See
+[the role bootstraps](docs/ROLES/README.md) and [the issue workflow](docs/ISSUE-WORKFLOW.md).
