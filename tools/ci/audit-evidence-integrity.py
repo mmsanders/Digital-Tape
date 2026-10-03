@@ -300,16 +300,46 @@ def check_adapter_identity(m):
 
 
 # --- 6. Structural Rule 1, mechanised ------------------------------------------
-# Verifier-owned packages use the top-level tests/*_draft8 convention. Keep this
-# rule convention-based rather than enumerating today's imports: a newly published
-# verifier package is protected on its first product-side import commit, before
-# tests/IMPORTS.json is even used to authenticate its exact tree.
+# A path is verifier-owned if it is under a package declared in tests/IMPORTS.json
+# at the base OR at HEAD, or under the historical tests/*_draft8 convention.
+# Reading HEAD's manifest protects a new package on its own import commit (that
+# commit declares it); reading the base's protects a declared package even if a
+# later commit tries to drop its entry. Until 3 Oct 2026 only the *_draft8
+# convention was recognised, so every R44-and-later package (wp10_*, golden,
+# wp11_*) went unchecked here; Verification #143 found it (ADR-159).
 VERIFIER_PACKAGE_RE = re.compile(r"^tests/[^/]+_draft8(?:/|$)")
 IMPL_PREFIXES = ("engine/", "firmware/")
+# ADR-158: engine/test/ holds host/test-only instrumentation (the WP-11
+# tape_test_interp hook). It is never in the library or firmware objects and is
+# not engine implementation, so it may land before an import.
+IMPL_EXEMPT = ("engine/test/",)
 
 
-def is_verifier_package_path(path):
-    return bool(VERIFIER_PACKAGE_RE.match(path))
+def is_impl_path(path):
+    return path.startswith(IMPL_PREFIXES) and not path.startswith(IMPL_EXEMPT)
+
+
+def declared_package_paths(base):
+    paths = set()
+    for p in load_manifest().get("packages", []):
+        if p.get("path"):
+            paths.add(p["path"].rstrip("/"))
+    if base and not os.environ.get("EVIDENCE_MANIFEST"):
+        r = run(["git", "show", f"{base}:tests/IMPORTS.json"])
+        if r.returncode == 0:
+            try:
+                for p in json.loads(r.stdout).get("packages", []):
+                    if p.get("path"):
+                        paths.add(p["path"].rstrip("/"))
+            except ValueError:
+                pass
+    return paths
+
+
+def is_verifier_package_path(path, declared=()):
+    if VERIFIER_PACKAGE_RE.match(path):
+        return True
+    return any(path == d or path.startswith(d + "/") for d in declared)
 
 
 def check_structural_rule_1(base):
@@ -338,12 +368,13 @@ def check_structural_rule_1(base):
         print("  skip  [rule-1] no commits against base")
         return
 
+    declared = declared_package_paths(base)
     first_impl = None
     last_pkg = None
     for i, c in enumerate(commits):
         files = run(["git", "show", "--pretty=", "--name-only", c]).stdout.split("\n")
-        pkg = any(is_verifier_package_path(f) for f in files if f)
-        impl = any(f.startswith(IMPL_PREFIXES) for f in files if f)
+        pkg = any(is_verifier_package_path(f, declared) for f in files if f)
+        impl = any(is_impl_path(f) for f in files if f)
         if pkg and impl:
             fail("rule-1", f"commit {c[:12]} changes a verifier package tree AND "
                            f"implementation in the same commit; the import must be "

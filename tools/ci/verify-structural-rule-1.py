@@ -109,7 +109,7 @@ def expect(want, name, repo, base):
 
 
 def main():
-    print("== Structural Rule 1 ordering check can go red for any *_draft8 package ==")
+    print("== Structural Rule 1 ordering check can go red for *_draft8 and IMPORTS-declared packages ==")
     with tempfile.TemporaryDirectory() as tmp:
         # correct order: the import lands, then the implementation
         repo = build_repo(tmp)
@@ -137,6 +137,67 @@ def main():
         git(repo, "-c", "user.email=c@local", "-c", "user.name=control",
             "commit", "-q", "-m", "import and implement together")
         expect("red", "import and implementation in one commit", repo, base)
+
+        # ADR-159: a package that is not *_draft8 but is declared in IMPORTS.json
+        def declare(repo, path):
+            m = json.loads((repo / "tests/IMPORTS.json").read_text(encoding="utf-8"))
+            m["packages"].append({"path": path, "tree": "", "attested_in": "control",
+                                  "selftest": ["true"]})
+            (repo / "tests/IMPORTS.json").write_text(json.dumps(m), encoding="utf-8")
+
+        def settle(repo):
+            # Declare each package at the tree HEAD actually carries (working
+            # file only), so the subtree check passes and only [rule-1] speaks.
+            m = json.loads((repo / "tests/IMPORTS.json").read_text(encoding="utf-8"))
+            for p in m["packages"]:
+                p["tree"] = git(repo, "rev-parse", f"HEAD:{p['path']}").stdout.strip()
+            (repo / "tests/IMPORTS.json").write_text(json.dumps(m), encoding="utf-8")
+
+        repo = build_repo(pathlib.Path(tmp) / "d")
+        base = git(repo, "rev-parse", "HEAD").stdout.strip()
+        declare(repo, "tests/golden")
+        commit(repo, "tests/golden/MANIFEST", "case ref cmd\n", "import, declared")
+        commit(repo, "engine/src/play.c", "/* impl */\n", "implement")
+        settle(repo)
+        expect("green", "declared non-draft8 import precedes implementation", repo, base)
+
+        repo = build_repo(pathlib.Path(tmp) / "e")
+        base = git(repo, "rev-parse", "HEAD").stdout.strip()
+        declare(repo, "tests/wp11_portability_r63")
+        commit(repo, "tests/wp11_portability_r63/harness.c", "/* v1 */\n", "import, declared")
+        commit(repo, "engine/src/play.c", "/* impl */\n", "implement")
+        commit(repo, "tests/wp11_portability_r63/harness.c", "/* tuned */\n", "adjust tests")
+        settle(repo)
+        expect("red", "declared non-draft8 package changed after implementation", repo, base)
+
+        repo = build_repo(pathlib.Path(tmp) / "f")
+        declare(repo, "tests/golden")
+        git(repo, "add", "-A")
+        git(repo, "-c", "user.email=c@local", "-c", "user.name=control",
+            "commit", "-q", "-m", "declared at base")
+        base = git(repo, "rev-parse", "HEAD").stdout.strip()
+        commit(repo, "engine/src/play.c", "/* impl */\n", "implement")
+        commit(repo, "tests/golden/ref.wav", "tuned\n", "adjust golden")
+        settle(repo)
+        expect("red", "package declared at base changed after implementation", repo, base)
+
+        # ADR-158 exemption: engine/test/ instrumentation before the import is lawful...
+        repo = build_repo(pathlib.Path(tmp) / "g")
+        base = git(repo, "rev-parse", "HEAD").stdout.strip()
+        commit(repo, "engine/test/tape_test_hooks.c", "/* hook */\n", "test hook")
+        declare(repo, "tests/golden")
+        commit(repo, "tests/golden/MANIFEST", "case ref cmd\n", "import, declared")
+        settle(repo)
+        expect("green", "engine/test/ hook may precede the import (ADR-158)", repo, base)
+
+        # ...but engine/src before the import is still red.
+        repo = build_repo(pathlib.Path(tmp) / "h")
+        base = git(repo, "rev-parse", "HEAD").stdout.strip()
+        commit(repo, "engine/src/play.c", "/* impl */\n", "implement")
+        declare(repo, "tests/golden")
+        commit(repo, "tests/golden/MANIFEST", "case ref cmd\n", "import, declared")
+        settle(repo)
+        expect("red", "engine/src before a declared import", repo, base)
 
     print(f"  {passed} passed, {failed} broken")
     return 1 if failed else 0
