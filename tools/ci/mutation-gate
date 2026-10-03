@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""WP-11 mutation gate (acceptance WP-11, "Mutation testing before each phase gate").
+
+Applies each mutation patch in tools/ci/mutations/ to engine/, one at a time, and
+runs the verifier suites listed in tools/ci/mutation-suites.txt against the
+mutated engine. EVERY mutation must turn some suite red. A mutation no suite
+catches is a coverage gap, "a finding of equal weight to an engine bug", and
+fails the gate.
+
+Each mutation runs in a throwaway git worktree at HEAD with the patch committed
+locally (never pushed), so the product runners see a real HEAD and their
+provenance checks behave exactly as in CI. The working tree is never modified.
+
+A suite is a job id in .github/workflows/ci.yml; the gate runs that job's own
+`run:` steps (honouring `working-directory` and step `env`), so the suites cannot
+drift from what CI runs. Suites run cheapest first and the gate stops at the
+first red suite for each mutation.
+
+  tools/ci/mutation-gate                      every patch in tools/ci/mutations/
+  tools/ci/mutation-gate --patches DIR        patches from DIR instead
+  tools/ci/mutation-gate --only 03            mutations whose name contains 03
+  tools/ci/mutation-gate --control            negative control: a benign patch
+                                              (tools/ci/mutations/control/) must
+                                              SURVIVE, and the gate must report it
+
+Exit 0 only when every mutation was caught (or, with --control, when the gate
+correctly failed on the surviving benign patch).
+"""
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[2]
+PATCHES = ROOT / "tools/ci/mutations"
+CONTROL = PATCHES / "control"
+SUITES = ROOT / "tools/ci/mutation-suites.txt"
+WORKFLOW = ROOT / ".github/workflows/ci.yml"
+
+
+def git(*args, cwd=ROOT, check=True):
+    return subprocess.run(["git", *args], cwd=cwd, check=check, capture_output=True, text=True)
+
+
+def suites() -> list[str]:
+    names = [l.strip() for l in SUITES.read_text().splitlines() if l.strip() and not l.startswith("#")]
+    jobs = yaml.safe_load(WORKFLOW.read_text())["jobs"]
+    missing = [n for n in names if n not in jobs]
+    if missing:
+        raise SystemExit(f"mutation-suites.txt names jobs not in ci.yml: {missing}")
+    return names
+
+
+def run_suite(job: str, tree: Path, log) -> bool:
+    """True when the job's steps all pass in `tree`."""
+    steps = yaml.safe_load((tree / ".github/workflows/ci.yml").read_text())["jobs"][job]["steps"]
+    head = git("rev-parse", "HEAD", cwd=tree).stdout.strip()
+    for st in steps:
+        if "run" not in st:
+            continue
+        env = dict(os.environ)
+        env.update({k: str(v) for k, v in (st.get("env") or {}).items()})
+        env["PRODUCT_COMMIT"] = head        # the ${{ ... }} expression in CI
+        cwd = tree / st.get("working-directory", ".")
+        r = subprocess.run(["bash", "-eo", "pipefail", "-c", st["run"]], cwd=cwd, env=env,
+                           capture_output=True, text=True)
+        log.write(f"$ [{job}] {st['run'].strip()}\n{r.stdout}{r.stderr}\nexit {r.returncode}\n")
+        if r.returncode:
+            return False
+    return True
+
+
+def run_mutation(patch: Path, names: list[str], logdir: Path) -> tuple[bool, str]:
+    """(caught, suite that caught it or why not)."""
+    with tempfile.TemporaryDirectory(prefix="mutation-") as t:
+        tree = Path(t) / "tree"
+        git("worktree", "add", "--detach", str(tree), "HEAD")
+        try:
+            r = subprocess.run(["git", "apply", str(patch)], cwd=tree, capture_output=True, text=True)
+            if r.returncode:
+                return False, f"patch does not apply: {r.stderr.strip()}"
+            git("-c", "user.name=mutation-gate", "-c", "user.email=mutation-gate@localhost",
+                "commit", "-qam", f"mutation {patch.name} (local only)", cwd=tree)
+            subprocess.run(["tools/fetch-evidence.sh"], cwd=tree, capture_output=True)
+            with open(logdir / f"{patch.stem}.log", "w") as log:
+                for job in names:
+                    t0 = time.time()
+                    ok = run_suite(job, tree, log)
+                    print(f"        {job}: {'green' if ok else 'RED'} ({time.time() - t0:.0f}s)", flush=True)
+                    if not ok:
+                        return True, job
+            return False, "every suite stayed green"
+        finally:
+            git("worktree", "remove", "--force", str(tree), check=False)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--patches", type=Path, default=PATCHES)
+    ap.add_argument("--only", default="")
+    ap.add_argument("--control", action="store_true")
+    ap.add_argument("--logs", type=Path, default=ROOT / "build/mutation-gate")
+    a = ap.parse_args()
+
+    if a.control:
+        print("== mutation gate negative control: a benign patch must survive, and the gate must fail ==")
+        r = subprocess.run([sys.executable, "-B", str(Path(__file__)), "--patches", str(CONTROL),
+                            "--logs", str(a.logs / "control")])
+        if r.returncode == 0:
+            print("FAIL  the gate passed with a surviving mutation: it cannot detect a coverage gap")
+            return 1
+        print("PASS  the gate went red on the surviving benign patch")
+        return 0
+
+    patches = sorted(p for p in a.patches.glob("*.patch") if a.only in p.name)
+    if not patches:
+        print(f"FAIL  no mutation patches in {a.patches}")
+        return 1
+    names = suites()
+    if a.logs.exists():
+        shutil.rmtree(a.logs)
+    a.logs.mkdir(parents=True)
+    print(f"== WP-11 mutation gate: {len(patches)} mutation(s) x up to {len(names)} suite(s) ==")
+    survived = []
+    for p in patches:
+        print(f"  {p.stem}", flush=True)
+        caught, why = run_mutation(p, names, a.logs)
+        print(f"  {'caught' if caught else 'SURVIVED'}  {p.stem}: {why}", flush=True)
+        if not caught:
+            survived.append(p.stem)
+    if survived:
+        print(f"FAIL  {len(survived)} mutation(s) survived every suite: {survived}")
+        print("      A surviving mutation is a coverage gap of equal weight to an engine bug.")
+        return 1
+    print(f"PASS  all {len(patches)} mutations caught")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

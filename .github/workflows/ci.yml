@@ -1307,6 +1307,71 @@ jobs:
       - run: make -C engine all
       - run: ./tools/ci/unit.sh
 
+  tapectl:
+    # docs/WP11-CLI-CONTRACT.md (#366): tapectl builds, its WAV reader/writer pass
+    # their unit tests (48 kHz, mono, 24-bit rejected), and a format -> load ->
+    # dump round trip on the real engine gives the source back byte for byte.
+    name: tapectl — build, WAV unit tests, format/load/dump smoke
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: make -C host test
+
+  wp11-portability:
+    # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
+    # target, arm-none-eabi-gcc Cortex-M3 under qemu-arm; (c) the static-assert
+    # alternative, because the engine cannot be built for a 16-bit target.
+    # RED until Stage 2 imports Verification #143's differential harness: a
+    # green placeholder would claim a result nobody has measured.
+    name: WP-11 portability (${{ matrix.config }})
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [host-gcc, arm-m3, narrow-int]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Embedded toolchain and emulator
+        if: matrix.config == 'arm-m3'
+        run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi qemu-user
+      - run: clang --version | head -1
+      - run: tools/ci/wp11-portability.sh ${{ matrix.config }}
+
+  wp11-mutation-gate:
+    # acceptance WP-11 mutation testing (#366): each of the seven mutations, as a
+    # patch to engine/, must turn a verifier suite red. The negative control runs
+    # first and proves the gate fails when a (benign) mutation survives.
+    name: WP-11 mutation gate — seven mutations, each caught
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # the product runners check declared imports against history.
+          fetch-depth: 0
+      - name: PyYAML (the gate reads each suite's steps from this workflow)
+        run: python3 -c "import yaml" 2>/dev/null || (sudo apt-get update -q && sudo apt-get install -y --no-install-recommends python3-yaml)
+      - run: tools/ci/verify-fetch-evidence-wp11.sh
+      - run: tools/ci/mutation-gate --control
+      - run: tools/ci/mutation-gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp11-mutation-gate-logs
+          path: build/mutation-gate
+          if-no-files-found: ignore
+
   golden:
     name: golden suite (awaiting WP-11 fixtures)
     needs: build

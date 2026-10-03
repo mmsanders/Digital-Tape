@@ -1,0 +1,36 @@
+# Suites the WP-11 mutation gate runs against each mutated engine (#366).
+#
+# Each line is a job id in .github/workflows/ci.yml. The gate runs that job's own
+# `run:` steps, so a suite here is exactly what CI runs: verifier packages bound to
+# the real engine, most of them regenerating accepted evidence byte-identically.
+# Cheapest first; the gate stops at the first suite that goes red.
+#
+# Stage 2 (#143) adds the golden suite and the imported WP-11 suites.
+record-package
+transport-package
+format-dup-package
+writability-package
+notmounted-package
+slot-package
+respool-package
+crossrun-wp08-package
+history-wp09-package
+sequential-wp06-package
+wp06-closure-package
+portability-wp08-package
+wp08-mapping-r56-package
+wp12-closure-package
+capacity-wp09-package
+wp09-gaps-r56-package
+strengthen-r55-package
+# Heavier campaigns, reached only when every cheaper suite stayed green.
+unit
+verifier-package
+playback-package
+playback-complete-package
+allocator-cow-package
+format-dup-identity-package
+wp36-fuzz-package
+respool-full-functional
+promote-package
+crash-core-package

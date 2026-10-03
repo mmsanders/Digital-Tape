@@ -1,0 +1,12 @@
+diff --git a/engine/src/chunks.c b/engine/src/chunks.c
+index fd8683a..16b2401 100644
+--- a/engine/src/chunks.c
++++ b/engine/src/chunks.c
+@@ -24,6 +24,7 @@
+ 
+ uint32_t tape_chunks_for_frames(uint64_t frames)
+ {
++    /* mutation-gate negative control: a comment changes no behaviour. */
+     if (frames == 0u) {
+         return 0u;
+     }
