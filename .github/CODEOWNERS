@@ -16,10 +16,46 @@
 /tests/IMPORTS.json    @mmsanders
 
 # Verifier-owned package trees. Imported verbatim; never edited in this repo.
-/tests/mount_draft8/               @mmsanders
-/tests/ops_draft8/                 @mmsanders
-/tests/playback_draft8/            @mmsanders
-/tests/playback_complete_draft8/   @mmsanders
+# One line per package declared in tests/IMPORTS.json (ADR-159 generalised
+# Structural Rule 1 to all of them; ownership follows). Add a line here in the
+# same PR that adds a package to IMPORTS.json.
+/tests/mount_draft8/                  @mmsanders
+/tests/ops_draft8/                    @mmsanders
+/tests/playback_draft8/               @mmsanders
+/tests/playback_complete_draft8/      @mmsanders
+/tests/record_draft8/                 @mmsanders
+/tests/respool_draft8/                @mmsanders
+/tests/slot_draft8/                   @mmsanders
+/tests/format_dup_draft8/             @mmsanders
+/tests/transport_draft8/              @mmsanders
+/tests/writability_draft8/            @mmsanders
+/tests/notmounted_draft8/             @mmsanders
+/tests/promote_draft8/                @mmsanders
+/tests/wp36_fuzz_draft8/              @mmsanders
+/tests/embedded_readiness_draft8/     @mmsanders
+/tests/allocator_cow_draft8/          @mmsanders
+/tests/crash_core_draft8/             @mmsanders
+/tests/format_dup_identity_draft8/    @mmsanders
+/tests/embedded_readiness_draft9/     @mmsanders
+/tests/respool_full_draft8/           @mmsanders
+/tests/crossrun_wp08_r44/             @mmsanders
+/tests/history_wp09_r44/              @mmsanders
+/tests/sequential_wp06_r44/           @mmsanders
+/tests/capacity_wp09_r52/             @mmsanders
+/tests/wp10_closure_r53/              @mmsanders
+/tests/wp10_backlog_r54/              @mmsanders
+/tests/wp10_residue_d10/              @mmsanders
+/tests/wp06_closure_r52/              @mmsanders
+/tests/portability_wp08_r52/          @mmsanders
+/tests/wp12_closure_r53/              @mmsanders
+/tests/wp10_backlog_r53/              @mmsanders
+/tests/wp10_final_r54/                @mmsanders
+/tests/strengthen_r55/                @mmsanders
+/tests/wp08_mapping_r56/              @mmsanders
+/tests/wp09_gaps_r56/                 @mmsanders
+/tests/golden/                        @mmsanders
+/tests/wp11_portability_r63/          @mmsanders
+/tests/wp11_ledgers_r63/              @mmsanders
 
 # The frozen spec bundle and its manifest.
 /spec/tapefs-v1.md     @mmsanders
