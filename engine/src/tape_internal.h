@@ -1,6 +1,6 @@
 /*
  * tape_internal.h — the engine's private state and on-media parsers.
- * Normative: spec/tapefs-v1.md DRAFT-7 §4, §5 and §5.5.
+ * Normative: spec/tapefs-v1.md §4, §5 and §5.5 (revision in spec/VERSION.md).
  */
 
 #ifndef TAPE_INTERNAL_H

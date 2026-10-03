@@ -10,7 +10,8 @@
  * That is not decidable by inspecting disassembly — an optimiser can turn a
  * callback into a jump, and a jump table into something that looks like one.
  * So it is made decidable by construction instead: every indirect call goes
- * through one of the three wrappers below, and a source-level gate
+ * through one of the funnels below (three device wrappers, plus dev_progress
+ * since DRAFT-9), and a source-level gate
  * (tools/ci/audit-indirect.sh) asserts that nothing else in the engine
  * dereferences a tape_dev member.
  *
