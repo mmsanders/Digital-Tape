@@ -127,6 +127,7 @@ main handoffs work, go back to product work.
 | R6 | Thin end-to-end path first | PM scoping | input audio → cartridge image → verify/export → listen, on the landed `tapectl`/engine; add GUI and ingest in slices against that path |
 | R7 | Site test before merge | Software | `site/**` is docs-only, so the dashboard test runs only after merge in Pages; run it on site PRs |
 | R8 | One current-state record | PM | STATUS is the state table; other docs link to it rather than keep their own current tables |
+| R9 | CODEOWNERS ↔ IMPORTS consistency check | Software, with a negative control | CODEOWNERS and `.gitattributes` now list every IMPORTS-declared tree, by hand; a gate would stop the next import drifting out of ownership |
 
 Pilot targets, not acceptance requirements: docs/site PRs finish in about two minutes; ordinary
 code feedback in about five; summed job-minutes for unchanged-code work at least halved.

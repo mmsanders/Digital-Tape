@@ -2807,7 +2807,7 @@ decision; nothing else depends on it. #370 is a revert of two `tools/ci` files.
    Closing accepts and rejects nothing.
 3. **Phone/web-app testing (#341) becomes candidate WP-38** in Phase 2, decided at kickoff next to
    WP-15.
-4. **The retrospective's proposals (#372) are Phase 2 kickoff candidates R1–R8** in
+4. **The retrospective's proposals (#372) are Phase 2 kickoff candidates R1–R9 (R9 from the #374 ownership gap)** in
    `docs/PACKAGES/README.md`, alongside the go decision and the operations freeze declaration.
    The required-check ruleset change (R2) is Michael's setting.
 5. **The #374 audit is actioned** in the close-out PRs. Where a fix would edit a generated,
