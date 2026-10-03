@@ -32,9 +32,9 @@ assert.match(roadmap(), new RegExp('aria-valuenow="' + expected + '"'));
 // Segment fills, in order, are exactly the stage rungs -- no stage borrows another's.
 assert.equal([...roadmap().matchAll(/width:(\d+)%/g)].map(m => m[1]).join(),
   Array.from(rungs).map(rung => Math.round(rung / top * 100)).join());
-// A package is only green once it is independently accepted. WP-06, WP-07, WP-10, WP-13 and WP-36 are complete.
+// A package is only green once it is independently accepted. All nine Phase 1 packages are complete (P1-R64).
 const acceptedNow = Array.from(rungs).filter(rung => rung === top).length;
-assert.equal(acceptedNow, 5);
+assert.equal(acceptedNow, 9);
 assert.equal((roadmap().match(/class="seg done"/g)||[]).length, acceptedNow);
 assert.match(roadmap(), new RegExp('<b>' + acceptedNow + '<\\/b> accepted'));
 

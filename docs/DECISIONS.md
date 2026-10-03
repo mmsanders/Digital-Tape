@@ -2747,3 +2747,42 @@ a tranche's activations without moving any acceptance boundary.
 
 **Cost to reverse.** Low. Issue future rounds single-stage. The contract doc and test hook are
 removable; nothing accepted depends on the round structure.
+
+---
+
+## ADR-159 — Golden acceptance recorded; Phase 1 exit criteria met; Rule 1 covers every import
+
+**Date:** 2026-10-03 UTC · **Owner:** PM, Product #371 · **Input:** product `d93ca4e`, verification main
+`cdf89f5`
+
+**Decision.**
+1. **WP-11 golden acceptance.** Michael's #367 reply ("Listened to all, all approved!", 3 Oct) is
+   the human listening acceptance of the ten references at verifier `cdf89f5`
+   (`tests/golden` subtree `999cd1be`). Together with Verification #143's PASS on exact Product #369
+   head `b61a9e9`, WP-11 is complete:
+   - golden 10/10 bit-identical;
+   - the §8 differential 11,572,876 comparisons on host GCC, `arm-none-eabi` under qemu, and the
+     static-assert configuration;
+   - mutation 7/7.
+
+   Regenerating any reference needs a logged PM decision and a new listen.
+2. **WP-08, WP-09 and WP-12/12a are complete.** Their only open rows were listening-held (WP-08
+   L01/L14, WP-09 L01), and the #143 ledger gives WP-12/12a 36 rows with zero open. With WP-06, 07,
+   10, 13 and 36 already accepted, **every Phase 1 package is independently accepted** and the
+   milestone is met. Phase 1 exit criteria are satisfied. Opening Phase 2 waits on Michael's go and
+   his decisions on the hardware park (#309) and intake #341.
+3. **Structural Rule 1 ordering covers every IMPORTS-declared package** (#370).
+   - The check had recognised only `tests/*_draft8`, so every package imported since R44 went
+     unchecked by CI. Verification #143 found it.
+   - Verification authenticated the order by hand in each disposition, and a retro scan finds no
+     non-root commit on main mixing an imported tree with `engine/` or `firmware/`. #362 and #369
+     pass under the new rule.
+   - `engine/test/` is exempt as ADR-158 test-only instrumentation.
+4. **Process notes, no action:**
+   - Michael merged #362 and #369 himself, #362 before its disposition. The rule stays "merge after
+     PASS".
+   - Verification closed #143 after Stage 1 and reopened it for Stage 2. Under ADR-158 the issue
+     stays open between stages.
+
+**Cost to reverse.** Revoking golden acceptance means a REJECT on #367 and a PM regeneration
+decision; nothing else depends on it. #370 is a revert of two `tools/ci` files.
