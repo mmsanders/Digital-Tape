@@ -15,7 +15,7 @@
 #   tools/fetch-evidence.sh wp11      # only the WP-11 assets (below)
 #
 # WP-11 (#366): release assets the golden suite needs are declared one per line
-# in tests/golden/RELEASE-ASSETS:
+# in tests/golden_adapter/RELEASE-ASSETS:
 #
 #   <sha256>  <destination path from the repo root>  <release tag>  <asset name>
 #
@@ -27,7 +27,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 RELEASES=${FETCH_EVIDENCE_RELEASES:-https://github.com/mmsanders/Digital-Tape/releases/download}
-WP11_ASSETS=${WP11_ASSETS:-tests/golden/RELEASE-ASSETS}
+WP11_ASSETS=${WP11_ASSETS:-tests/golden_adapter/RELEASE-ASSETS}
 
 fetch_wp11() {
   [ -f "$WP11_ASSETS" ] || { echo "ok    no WP-11 release assets declared ($WP11_ASSETS absent)"; return 0; }

@@ -8,7 +8,7 @@
 # so there is no tolerance to configure and none will be added.
 #
 # MANIFEST format: one case per line, tab- or whitespace-separated, # for
-# comments. See tests/golden/MANIFEST.md for the full contract.
+# comments. See tests/harness/GOLDEN-MANIFEST.md for the full contract.
 #
 #   <case-name>  <reference.wav>  <command...>
 #
@@ -30,7 +30,7 @@ if [ ! -f "$MANIFEST" ]; then
   echo "FAIL  no $MANIFEST"
   echo "      The golden fixtures and their manifest are the Verification Lead's"
   echo "      (WP-10/WP-11). The runner, the comparison and the audible diff are"
-  echo "      built and waiting; see tests/golden/MANIFEST.md for the contract."
+  echo "      built and waiting; see tests/harness/GOLDEN-MANIFEST.md for the contract."
   exit 1
 fi
 
