@@ -1,5 +1,9 @@
 # Shopping list — cards for WP-05
 
+> **Superseded (historical, 12 September 2026).** Michael bought three PNY 64 GB V30 cards
+> instead of this two-arm plan (CLAUDE.md §5). Kept as the record of the decision; not a list to
+> order from.
+
 **Owner:** Hardware Lead drafts · **Michael approves and orders** · **Updated:** 12 September 2026
 **Source of prices:** DigiKey catalogue, 12 September 2026. See `2026-09-12-parts.md` for the
 search that produced them.

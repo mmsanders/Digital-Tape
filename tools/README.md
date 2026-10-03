@@ -1,6 +1,6 @@
 # tools/
 
-Repository tooling. See `docs/DECISIONS.md` ADR-005 for why it lives outside the Charter §03 tree.
+Repository tooling. See `docs/DECISIONS.md` ADR-005 for why it lives outside the engine and test trees.
 
 ## `tools/ci/`
 
@@ -22,6 +22,26 @@ Every gate is a standalone script that runs locally exactly as it runs in CI.
 | `unit.sh` | Software Lead scaffolding self-tests plus the Verification Lead's crash infrastructure. **Not acceptance** |
 | `run-golden.sh` | Contract 3 — the golden suite. Delegates to `tests/harness/run-golden.sh`: manifest-driven, byte-exact comparison, audible diff on failure. Fixtures and manifest are the Verification Lead's |
 
+The table above is the original guardrail set. The gates added during Phase 1:
+
+| Gate | Enforces |
+|---|---|
+| `audit-evidence-integrity.py` | Imported verifier trees match `tests/IMPORTS.json`; Structural Rule 1 ordering for every declared package (ADR-155, ADR-159) |
+| `audit-verifier-publications.py` | Every cited verifier commit is on verification main with its declared tree (ADR-157) |
+| `audit-product-evidence-pins.py` | Accepted product evidence bundles still match their pinned hashes (#337) |
+| `audit-docs-hygiene.sh` | STATUS / VERIFICATION-INTEGRATION line budgets and the 1 MiB docs file limit (CLAUDE.md §4) |
+| `audit-hardware.sh` | KiCad ERC/DRC. No schematic or board exists yet, so a green run checks no design |
+| `classify-changes.py` | Docs-only vs full classification for PR CI (#347) |
+| `mutation-gate`, `mutation-suites.txt`, `mutations/` | WP-11 mutation testing: each planted engine mutation must be caught |
+| `wp11-portability.sh`, `wp11-narrow-int-check.py` | WP-11 §8 differential across host GCC, `arm-none-eabi` and the static-assert configuration |
+| `stream-age.py` | Daily escalation of streams held more than three days (CLAUDE.md §4) |
+
+Each has a negative control proving it can go red: `verify-evidence-integrity-gate.py`,
+`verify-structural-rule-1.py`, `verify-verifier-publications-gate.py`,
+`verify-product-evidence-pins-gate.py`, `verify-docs-hygiene-gate.sh`,
+`verify-change-classifier.py`, `verify-engine-regression-gate.py`,
+`verify-wp13-carryover-gate.py` and `verify-fetch-evidence-wp11.sh`.
+
 ### Two archives, and why the gates scope to one
 
 `libtape.a` is `engine/src` — the engine proper, subject to every gate.
@@ -34,12 +54,12 @@ runs over the port archive it will fail, and the fix is the gate, not the port.
 ### Why these gates and not the previous ones
 
 Issues #11 and #12 retired the old allocation/recursion audits, which parsed disassembly with
-regular expressions. Two things were wrong with that, and both were found by reviewing my own
-scaffold rather than by it failing:
+regular expressions. Two things were wrong with that, and both were found by the Software
+Lead reviewing its own scaffold rather than by it failing:
 
 - **The invariant was not the one written down.** "At most two indirect call sites" is not
   guardrail 09. *Every indirect call targets a `tape_dev` callback* is — and no regex over
-  disassembly can decide it. It is now decidable by construction: three wrappers, one file, a
+  disassembly can decide it. It is now decidable by construction: named funnels in one file (four since DRAFT-9 added `dev_progress`), a
   source-level gate that fails with a filename and a line number.
 - **"No recursion" was a proxy.** The requirement is a bounded stack. Measuring depth directly
   gives a number worth reading in review, and recursion falls out for free.
@@ -87,5 +107,4 @@ gets added when Stream 4 links.
 
 The RAM gate links a probe, prints `tape_instance_size()`, and includes it in
 `.data + .bss + instance`. The earlier claim that it omitted the instance was stale;
-the script already measured the required sum. Main and held branches have different
-implementations, so attach each resource result to the measured commit.
+the script already measured the required sum. Attach each resource result to the commit it measured.

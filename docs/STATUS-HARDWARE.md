@@ -1,6 +1,21 @@
 # Hardware status
 
-**Updated: 20 September 2026 · Owner: PM disposition of submitted Hardware evidence;
+> **PARKED through Phase 2 (ADR-160).** Michael parked PM-issued hardware work on 29 Sep
+> (#309) and extended the park through Phase 2 at the Phase 1 close-out (3 Oct). No
+> `hardware-lead` work and no Verification hardware audit is issued until Phase 3 opens or
+> Michael requests it. The held hardware PRs (#87, #92, #120, #197, #198, #296) were closed
+> unmerged on 3 Oct; each one's head, content and restore command is recorded in its work
+> package entry in [the roadmap](PACKAGES/README.md#parked-hardware-pr-record).
+> Physical and safety holds are unchanged: fabrication and charging stay CLOSED with five
+> blockers, card atomicity is unqualified and solenoid timing is PROVISIONAL.
+>
+> Everything below is the **20 September 2026 snapshot**, kept as the restart point for
+> Hardware. Where it names an open PR, read "closed, restorable from the PR ref".
+> Since then: Michael owns an A1 Mini (the default printer; the library route is
+> retired), reports filament on hand, and reports that clasps from his own sizing prints
+> appear to work. None of that is qualification.
+
+**Snapshot: 20 September 2026 · Owner: PM disposition of submitted Hardware evidence;
 Hardware retains engineering control.**
 
 PR #18 is merged. PR #47 is merged at
@@ -51,10 +66,8 @@ using the scale, and must keep torque, displacement, force, sharp-test, audio an
 reference-standard gaps explicit. No purchase request or owner action is blocking the
 current source/tool/packet work.
 
-Michael reports an A1 Mini test print in progress and expects the library to be
-available Monday. Do not reconfigure the existing library test for the A1 Mini.
-Default new prints to the A1 Mini and retain the library for oversized PLA. Current
-owned filament is one spool of white Bambu PLA Basic. The safe current decision from
+(20 Sep snapshot, superseded on printing: the library route is retired and the A1 Mini is
+the default printer.) At the time, the owned filament was one spool of white Bambu PLA Basic. The safe current decision from
 PR #120 is **buy nothing**: existing justified geometry work uses that PLA; PETG waits
 for a specific source-supported test and TPU waits for a real TPU part. The proposed
 Bambu PETG HF/TPU 95A choices and categorical material exclusions remain provisional

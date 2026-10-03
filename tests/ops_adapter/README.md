@@ -48,24 +48,19 @@ and `replay.py` recomputes every verdict offline from that bundle. The external
 `preserve.sh` wrapper this directory used to carry was for the older runner, which
 deleted its temporary media; it is obsolete and has been removed.
 
-## Current status: no engine can link this
+## Status
 
-Against held PR #20 (`2e0e8a4b7bff42797ac37901196e5ea348b2e392`) the adapter
-**compiles clean** and then fails to link on exactly six public symbols that the
-header declares but no translation unit defines: `tape_seek`, `tape_arm`,
-`tape_feed`, `tape_service`, `tape_commit`, `tape_reset_side_b`. That is the loud
-failure #20's own header documents as intended, and it is an integration finding,
-not something to patch here.
+**Current (3 October 2026):** the engine on main defines every operation this adapter
+binds, and the ops evidence it produces is independently accepted and integrated
+(WP-07 #67/#215; WP-10/WP-12 ledgers #141/#143; see [STATUS](../../docs/STATUS.md)).
 
-Against **current main** the adapter does not compile, because main's public header
-is older than the frozen DRAFT-8 API. Main is not a valid target for this adapter.
+**History, 12 September 2026:** against held PR #20 (`2e0e8a4b7bff42797ac37901196e5ea348b2e392`)
+the adapter compiled clean and failed to link on six declared-but-undefined symbols
+(`tape_seek`, `tape_arm`, `tape_feed`, `tape_service`, `tape_commit`, `tape_reset_side_b`),
+and main's header then predated DRAFT-8. The observation schema below was first exercised
+against a real engine after that.
 
-**Because no engine links, the observation schema below has never been exercised
-against a real engine.** It is written against `ADAPTER.md` and `hardened.py` by
-reading, and only the verifier's synthetic path currently exercises the oracle.
-The first product run is where that schema is actually tested.
-
-## Usage once an engine defines the operations
+## Usage
 
 ```sh
 make ENGINE_INC=<engine>/include ENGINE_LIB=<build>/libtape.a

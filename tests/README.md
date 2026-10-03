@@ -1,21 +1,22 @@
 # Tests — independent acceptance and software scaffolding
 
-Verification reports to PM and owns independent tests/oracles. Derive tests from the
+Verification reports to PM and owns independent tests and oracles. Derive tests from the
 spec before inspecting implementation for the behaviour. Do not relax assertions,
 delete cases or skip failures to fit code; disagreements return to Verification/PM.
 
 | Path | Provenance / boundary |
 |---|---|
-| mount_draft8/ | Verbatim independent package from verifier 4ee116fa040bb5ce040325e0076365abf8b0f8f9; 289 mount cases, exact coverage/adapter docs and source evidence |
+| `*_draft8/`, `*_r4x/`…`*_r6x/`, `wp10_*/`, `wp11_*/`, `golden/` | Verbatim independent verifier packages, **37 declared in [IMPORTS.json](IMPORTS.json)** with source commit, tree and attestation. Verification-owned; never edited here. The first was `mount_draft8/` (289 mount cases) |
+| `*_adapter/` | Software-owned product bindings and retained product evidence for those packages |
 | crash/ | Independent fault-device and crash-harness infrastructure; sample self-test is not a full product WP-10 run |
-| golden/ | Independent audio fixture contract; fixtures/manifest still absent, golden CI remains red |
+| golden/ | Independent WP-11 golden references (10) and `MANIFEST`, approved by ear by Michael (#367); green in CI. Regeneration needs a logged PM decision and a new listen |
 | harness/ | Software-owned build/assertion scaffolding and implementation self-tests; never independent acceptance |
-| fuzz/ | Reserved for independent input/ownership trials; not a completed fuzz campaign |
+| fuzz/ | Empty placeholder. The accepted WP-36 fuzz campaign is the imported `wp36_fuzz_draft8/` package |
 
 Run make -C tests/mount_draft8 check for verifier package self-checks.
 Build the engine then run make -C tests run for existing scaffolding/infrastructure.
-The actual mount probe requires the real public header/archive and a conforming
-implementation; the older main API does not satisfy that integration yet.
+Each imported package's product run is wired in CI through its `*_adapter/`; see the
+package's COVERAGE/ADAPTER files and `.github/workflows/ci.yml`.
 
 See [verification integration](../docs/VERIFICATION-INTEGRATION.md). Product source
 and destination crash outcomes follow the per-operation spec oracles, not a generic

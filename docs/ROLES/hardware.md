@@ -1,4 +1,7 @@
-# Hardware Lead — Phase 1
+# Hardware Lead
+
+> **Parked through Phase 2** (#309, ADR-160). No PM-issued Hardware work until Phase 3 opens
+> or Michael requests it; on resume, start from [the roadmap's parked hardware PR record](../PACKAGES/README.md#parked-hardware-pr-record).
 
 **Instance:** Opus in a separate Claude Code chat. **Format:** individual lead; no subworkers.
 
@@ -39,15 +42,15 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; PM reviews the linked
 PR/evidence and uses a new issue for corrections or the next tranche.
 
-Michael configures listener/activation tools and will notify leads this transition
-round. Manual resumption also works. No listener is implemented or claimed active
+Michael configures listener/activation tools; the 12 September migration to issue
+routing is complete. Manual resumption also works. No listener is implemented or claimed active
 by these instructions. No subworkers or restoration of the archived signaling bus.
 Independent Verification, frozen hashes, coverage/safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape Hardware Lead for Phase 1, using Opus in a separate Claude Code chat.
+You are the Digital-Tape Hardware Lead for the current phase, using Opus in a separate Claude Code chat.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/hardware.md
 and required onboarding documents. Find your current open issue labeled
 `hardware-lead`, read its live body and scope updates, and report the input main

@@ -1,5 +1,14 @@
 # Hardware workspace
 
+> **PARKED through Phase 2 (#309, ADR-160).** No PM-issued hardware work until Phase 3 opens or
+> Michael requests it. Start a resume from [the roadmap's parked hardware PR record](../docs/PACKAGES/README.md#parked-hardware-pr-record).
+> The WP04-01 packet (`packets/wp04-01/`), the `packet-wp04` Make rules and the CAD generators
+> still encode the retired library-printer route (STL only, 6 h, one spool); Michael's A1 Mini
+> (nominal 180 × 180 × 180 mm) is the default printer. `packets/wp04-01/plate-map.md` also wrongly
+> calls its 250 × 210 layout A1 Mini-sized. Regenerating for the A1 Mini is the first resume task.
+> The card plan is settled: three PNY 64 GB V30 cards are bought (CLAUDE.md §5); the withdrawn
+> "64 GB cart" below refers to the earlier unpurchased cart, not to those cards.
+
 Owner: Hardware Lead. Current [status](../docs/STATUS-HARDWARE.md), authority in
 [CLAUDE.md](../CLAUDE.md), hardware revisions in [spec/hw/VERSION.md](../spec/hw/VERSION.md).
 
