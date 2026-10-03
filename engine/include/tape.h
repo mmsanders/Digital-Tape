@@ -1,39 +1,18 @@
 /*
  * tape.h — Digital Tape engine, public API.
  *
- * Normative: spec/engine-api.md DRAFT-7. Where this header and the spec differ,
- * the spec is right and this is a defect.
+ * Normative: spec/engine-api.md, at the revision recorded in spec/VERSION.md.
+ * Where this header and the spec differ, the spec is right and this is a defect.
  *
- * Implementation status. The engine is built against structural Rule 1: engine
- * implementation stays on unmerged branches until the Verification Lead's tests
- * for that behaviour have landed on main, so main carries spec, then tests, then
- * implementation, in that order.
+ * Implementation status (3 October 2026). Every function declared here is
+ * implemented, including §9's tape_promote, tape_respool, tape_dup, tape_format
+ * and tape_reset_side_b with its §8 stage clearing, and every Phase 1 engine
+ * package is independently accepted for laptop scope (docs/STATUS.md). Engine
+ * work still follows Structural Rule 1: the independent tests for a behaviour
+ * land in history before its implementation (CLAUDE.md §3, ADR-155).
  *
- *   Implemented   tape_instance_size, tape_init, tape_mount (all four phases,
- *                 both sides, both degraded-B causes, the stage oracle and
- *                 §5.5's cartridge_sequence), tape_unmount, tape_get_info,
- *                 tape_set_side, tape_tell, tape_seek, tape_set_rate,
- *                 tape_status, tape_service, tape_render, the WP-07 allocator,
- *                 §8's index commit, §7's tape_arm / tape_feed / tape_commit,
- *                 §9.2's tape_reset_side_b, §9.1's three record modes,
- *                 tape_abort, and §8's stage clearing on tape_arm through
- *                 §4.6's partner-first superblock update
- *   Partial       tape_reset_side_b still REFUSES on stage-1 media
- *                 (TAPE_ERR_BUSY, zero writes) instead of performing §8's stage
- *                 clearing. §8 states that rule on tape_arm and on
- *                 tape_reset_side_b; only tape_arm's is independently covered,
- *                 so only tape_arm's is built. That is a statement about THIS
- *                 ENGINE, not about the format — see engine/src/ops.c and treat
- *                 it as a coverage boundary awaiting PM disposition, not spec.
- *                 tape_promote implements the independently asserted §9.3.0
- *                 classification and uninterrupted FRESH adopt/allocate paths.
- *                 §9.3.3 RESUME/crash closure, progress callback/re-entry and
- *                 stored-position integration remain explicit coverage holds.
- *                 tape_format implements tapefs §9.6 in full, and tape_dup
- *                 §9.5 as a budgeted long operation with the §10
- *                 Dup-in-progress row, argument stability, destination
- *                 failure without source fault, and progress-callback
- *                 re-entry refusal (engine/src/raw_ops.c).
+ * The caller-owned position table and the harness-only operation token are PM
+ * rulings (ADR-156), not independently accepted engine behaviour.
  *
  * Guardrails this header exists to keep: no allocation ever (the caller owns all
  * storage, §4); no clock and no timeout anywhere (§9); nothing returns a pointer

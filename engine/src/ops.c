@@ -1,10 +1,9 @@
 /*
- * ops.c — §9 cartridge operations. This candidate implements exactly one:
- * tape_reset_side_b. Normative: spec/tapefs-v1.md §8, §9.2; engine-api §10.
+ * ops.c — §9.2 reset Side B, including §8's stage clearing on stage-1 media.
+ * Normative: spec/tapefs-v1.md §8, §9.2; engine-api §10.
  *
- * tape_promote, tape_respool, tape_dup and tape_format stay DECLARED AND NOT
- * DEFINED — calling one is a link error, which is the intended loud failure
- * rather than a stub that appears to work.
+ * The other §9 operations live in their own files: tape_promote in promote.c,
+ * tape_respool in respool.c, tape_dup and tape_format in raw_ops.c.
  */
 
 #include "tape_internal.h"

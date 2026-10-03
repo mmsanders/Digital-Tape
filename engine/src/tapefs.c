@@ -1,6 +1,6 @@
 /*
  * tapefs.c — on-media parsing and validation.
- * Normative: spec/tapefs-v1.md DRAFT-7 §2, §2.1, §4, §4.1, §5, §5.2, §5.5, §7.
+ * Normative: spec/tapefs-v1.md §2, §2.1, §4, §4.1, §5, §5.2, §5.5, §7 (revision in spec/VERSION.md).
  *
  * Everything here is pure: it takes bytes and produces structures or refusals.
  * No device access, so it is trivially testable against synthetic media.
