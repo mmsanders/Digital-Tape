@@ -1,0 +1,12 @@
+diff --git a/engine/src/record.c b/engine/src/record.c
+index 045d35b..b49a655 100644
+--- a/engine/src/record.c
++++ b/engine/src/record.c
+@@ -520,7 +520,6 @@ tape_result tape_record_service(struct tape *t, uint32_t budget, uint32_t *used,
+        per block would be correct and ruinous, and §7.1's bound assumes this
+        flush has already happened before tape_commit is callable. */
+     if (t->rec_unflushed && t->rec_written >= t->rec_frames) {
+-        if (dev_flush(&t->dev) != 0) { t->faulted = true; return TAPE_ERR_IO; }
+         t->rec_unflushed = false;
+     }
+ 

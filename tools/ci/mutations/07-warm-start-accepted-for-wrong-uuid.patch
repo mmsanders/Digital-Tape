@@ -1,0 +1,12 @@
+diff --git a/engine/src/mount.c b/engine/src/mount.c
+index 8d7b351..2e7d48d 100644
+--- a/engine/src/mount.c
++++ b/engine/src/mount.c
+@@ -532,7 +532,6 @@ static bool warm_start_ok(const struct tape *t, const tape_warm_start *warm,
+     if (end > TAPE_LIVE(t).total_frames)             { return false; }
+     if (resume_frame < (uint64_t)warm->start_frame)  { return false; }
+     if (resume_frame >= end)                         { return false; }
+-    if (memcmp(warm->uuid, t->sb.cartridge_uuid, 16) != 0) { return false; }
+     if (warm->side != t->side)                       { return false; }
+     return true;
+ }

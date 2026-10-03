@@ -1,0 +1,13 @@
+diff --git a/engine/src/tapefs.c b/engine/src/tapefs.c
+index 09b25d7..22cce09 100644
+--- a/engine/src/tapefs.c
++++ b/engine/src/tapefs.c
+@@ -160,7 +160,7 @@ tape_result tape_sb_parse(const unsigned char *blk, struct tape_sb *out)
+     if (memcmp(blk, SB_MAGIC, sizeof SB_MAGIC) != 0) {
+         return TAPE_ERR_BAD_MAGIC;
+     }
+-    if (tape_crc32(blk, 508u) != tape_rd32(blk + 508)) {
++    if (tape_crc32(blk, 504u) != tape_rd32(blk + 508)) {
+         return TAPE_ERR_CRC;
+     }
+ 

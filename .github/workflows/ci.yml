@@ -1307,15 +1307,103 @@ jobs:
       - run: make -C engine all
       - run: ./tools/ci/unit.sh
 
+  tapectl:
+    # docs/WP11-CLI-CONTRACT.md (#366): tapectl builds, its WAV reader/writer pass
+    # their unit tests (48 kHz, mono, 24-bit rejected), and a format -> load ->
+    # dump round trip on the real engine gives the source back byte for byte.
+    name: tapectl — build, WAV unit tests, format/load/dump smoke
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: make -C host test
+
+  wp11-portability:
+    # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
+    # target, arm-none-eabi-gcc Cortex-M3 under qemu-arm; (c) the static-assert
+    # alternative, because the engine cannot be built for a 16-bit target.
+    # Each runs Verification #143's differential (tests/wp11_portability_r63,
+    # 11,572,876 comparisons) against tape_test_interp.
+    name: WP-11 portability (${{ matrix.config }})
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [host-gcc, arm-m3, narrow-int]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Embedded toolchain and emulator
+        if: matrix.config == 'arm-m3'
+        run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi qemu-user
+      - run: clang --version | head -1
+      - run: tools/ci/wp11-portability.sh ${{ matrix.config }}
+
+  wp11-mutation-gate:
+    # acceptance WP-11 mutation testing (#366): each of the seven mutations, as a
+    # patch to engine/, must turn a verifier suite red. The negative control runs
+    # first and proves the gate fails when a (benign) mutation survives.
+    name: WP-11 mutation gate — seven mutations, each caught
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # the product runners check declared imports against history.
+          fetch-depth: 0
+      - name: PyYAML (the gate reads each suite's steps from this workflow)
+        run: python3 -c "import yaml" 2>/dev/null || (sudo apt-get update -q && sudo apt-get install -y --no-install-recommends python3-yaml)
+      - run: tools/ci/verify-fetch-evidence-wp11.sh
+      - run: tools/ci/mutation-gate --control
+      - run: tools/ci/mutation-gate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp11-mutation-gate-logs
+          path: build/mutation-gate
+          if-no-files-found: ignore
+
   golden:
-    name: golden suite (awaiting WP-11 fixtures)
+    # WP-11 (#366 Stage 2): Verification #143's ten independent references,
+    # run through tapectl by tests/golden/MANIFEST and compared byte for byte.
+    # A failure writes an audible-difference WAV; it is never fixed by touching
+    # a reference or fitting the engine. Do not "fix" this by relaxing a gate.
+    name: golden suite — WP-11 R63 references, byte-exact
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make -C engine all && make -C tests all
-      # Red until the Verification Lead's fixtures and manifest land. That is
-      # the only expected red in this pipeline; every other job above is green,
-      # so a new failure anywhere else is a real signal.
-      # Do not "fix" this by relaxing a gate.
+      - run: make -C engine all && make -C host && make -C tests all
+      - name: Reference package integrity (SHA256SUMS)
+        run: cd tests/golden && sha256sum -c SHA256SUMS
       - run: ./tools/ci/run-golden.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: golden-diff
+          path: build/tests/golden
+          if-no-files-found: ignore
+
+  wp11-release-assets:
+    # The archival source originals and canonical WAVs #143 publishes as release
+    # assets, fetched and refused unless they hash to SOURCES.json's values. Kept
+    # out of the golden job so the mutation gate's golden suite never touches the
+    # network.
+    name: WP-11 fixture release assets — fetched and sha256-verified
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: tools/fetch-evidence.sh wp11

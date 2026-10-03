@@ -1,0 +1,1 @@
+{"controls": {"chunk_wrap": true, "overdub_wraps": true, "overwrite_retains_tail": true, "promote_keeps_old_a": true, "reset_keeps_edit": true, "reverse_drops_frame_zero": true, "seek_advance_before_emit": true, "splice_omits_tail": true}, "negative_saturated_samples": 5, "positive_saturated_samples": 27, "references": 10}

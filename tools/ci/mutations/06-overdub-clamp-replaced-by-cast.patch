@@ -1,0 +1,13 @@
+diff --git a/engine/src/record.c b/engine/src/record.c
+index 045d35b..13f621f 100644
+--- a/engine/src/record.c
++++ b/engine/src/record.c
+@@ -193,8 +193,6 @@ static void overdub_saturate(unsigned char *dst, const unsigned char *src, uint3
+         memcpy(&a, dst + (size_t)i * 2u, sizeof a);
+         memcpy(&b, src + (size_t)i * 2u, sizeof b);
+         sum = (int32_t)a + (int32_t)b;
+-        if (sum >  32767) { sum =  32767; }
+-        if (sum < -32768) { sum = -32768; }
+         a = (int16_t)sum;
+         memcpy(dst + (size_t)i * 2u, &a, sizeof a);
+     }

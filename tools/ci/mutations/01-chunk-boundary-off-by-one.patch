@@ -1,0 +1,13 @@
+diff --git a/engine/src/chunks.c b/engine/src/chunks.c
+index fd8683a..36c2523 100644
+--- a/engine/src/chunks.c
++++ b/engine/src/chunks.c
+@@ -27,7 +27,7 @@ uint32_t tape_chunks_for_frames(uint64_t frames)
+     if (frames == 0u) {
+         return 0u;
+     }
+-    return (uint32_t)((frames + TAPE_CHUNK_FRAMES - 1u) / TAPE_CHUNK_FRAMES);
++    return (uint32_t)((frames + TAPE_CHUNK_FRAMES - 2u) / TAPE_CHUNK_FRAMES);
+ }
+ 
+ bool tape_may_allocate(const struct tape_sb *sb, tape_side side, uint32_t id)

@@ -1,0 +1,35 @@
+diff --git a/engine/src/chunks.c b/engine/src/chunks.c
+index fd8683a..34166ec 100644
+--- a/engine/src/chunks.c
++++ b/engine/src/chunks.c
+@@ -37,7 +37,7 @@ bool tape_may_allocate(const struct tape_sb *sb, tape_side side, uint32_t id)
+        sole exception is promote phase 2, which is not a general allocation and
+        does not come through here. */
+     if (side != TAPE_SIDE_B)    { return false; }
+-    return id >= sb->a_high_water;
++    return id + 1u >= sb->a_high_water;
+ }
+ 
+ tape_result tape_alloc_run(const struct tape_sb *sb, tape_side side,
+@@ -55,7 +55,7 @@ tape_result tape_alloc_run(const struct tape_sb *sb, tape_side side,
+     /* Permission before capacity: Side A is refused on a full cartridge and an
+        empty one alike, and the two refusals are different facts. */
+     if (side != TAPE_SIDE_B)                     { return TAPE_ERR_READ_ONLY; }
+-    if (first < (uint64_t)sb->a_high_water)      { return TAPE_ERR_READ_ONLY; }
++    if (first + 1u < (uint64_t)sb->a_high_water) { return TAPE_ERR_READ_ONLY; }
+     /* Widened: free_next + count cannot wrap into a run that looks like it fits. */
+     if (end > (uint64_t)sb->total_chunks)        { return TAPE_ERR_CARTRIDGE_FULL; }
+ 
+diff --git a/engine/src/tapefs.c b/engine/src/tapefs.c
+index 09b25d7..2648539 100644
+--- a/engine/src/tapefs.c
++++ b/engine/src/tapefs.c
+@@ -382,7 +382,7 @@ tape_result tape_index_validate(struct tape_index *idx, uint8_t side,
+ uint32_t tape_derive_free_next(const struct tape_index *idx, const struct tape_sb *sb,
+                                tape_side side)
+ {
+-    uint32_t next = sb->a_high_water;
++    uint32_t next = (sb->a_high_water > 0u) ? sb->a_high_water - 1u : 0u;
+     uint32_t i;
+ 
+     /* spec §7: only Side B allocations move free_next. Side A lives below the

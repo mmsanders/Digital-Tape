@@ -1,0 +1,26 @@
+{
+  "gcc/fraction_endpoint": {
+    "output": "FAIL pair=2 a=32767 b=-32768 f=1 expected=32766 actual=32767",
+    "returncode": 1
+  },
+  "gcc/late_narrow_subtraction": {
+    "output": "FAIL pair=2 a=32767 b=-32768 f=1 expected=32766 actual=32767",
+    "returncode": 1
+  },
+  "gcc/negative_truncates": {
+    "output": "FAIL pair=2 a=32767 b=-32768 f=1 expected=32766 actual=32767",
+    "returncode": 1
+  },
+  "gcc/round_nearest": {
+    "output": "FAIL pair=2 a=32767 b=-32768 f=1 expected=32766 actual=32767",
+    "returncode": 1
+  },
+  "gcc/swapped_operands": {
+    "output": "FAIL pair=2 a=32767 b=-32768 f=1 expected=32766 actual=32767",
+    "returncode": 1
+  },
+  "gcc/synthetic_conforming": {
+    "output": "PASS boundary=1572852 prng=10000000 extremes=24 total=11572876 seed=0x63d10a5e",
+    "returncode": 0
+  }
+}

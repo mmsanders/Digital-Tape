@@ -1,0 +1,8 @@
+# WP-11 R63 fixture release assets declared by Verification #143 (tests/golden/SOURCES.json).
+# Archival source originals and full canonical WAVs; the golden MANIFEST itself runs on the
+# in-tree excerpts and does not need them. Fetched and verified by: tools/fetch-evidence.sh wp11
+# sha256  destination  release  asset
+1c1be6b3e0042ee031cee42a8d151b04c78bfccf3126c4de6271e7b2fdcb6937  build/wp11-sources/music-original.flac  https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1  music-original.flac
+0a9b05a0929699e30cf5f6f124c6e05251ed1505e2a5eb954746e7cd6a6c2f40  build/wp11-sources/voice-original.ogg  https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1  voice-original.ogg
+5587b8271b4e47159a56d0b45b531f24aeeeeddb9bc57bcd4d6fb8463f468805  build/wp11-sources/music-canonical.wav  https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1  music-canonical.wav
+b8aded0b9a406b637f53dc71cdbc61d030e37b37bec39fc5b6ac966428b899f9  build/wp11-sources/voice-canonical.wav  https://github.com/mmsanders/Digital-Tape-Verification/releases/download/wp11-r63-canonical-v1  voice-canonical.wav

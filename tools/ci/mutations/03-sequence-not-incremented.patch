@@ -1,0 +1,13 @@
+diff --git a/engine/src/record.c b/engine/src/record.c
+index 045d35b..487fc5a 100644
+--- a/engine/src/record.c
++++ b/engine/src/record.c
+@@ -556,7 +556,7 @@ tape_result tape_commit(tape *t)
+     /* Armed implies the mounted side is B (§10), and §10 forbids tape_set_side
+        while armed, so the live index cannot have changed under us. */
+     idx = &t->idx[TAPE_SIDE_B];
+-    seq = t->cartridge_sequence + 1u;   /* §5.5; the headroom was reserved at arm */
++    seq = t->cartridge_sequence;   /* §5.5; the headroom was reserved at arm */
+ 
+     /*
+      * §9.1's one difference between the three modes: where the surviving tail

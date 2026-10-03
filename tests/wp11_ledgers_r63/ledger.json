@@ -1,0 +1,583 @@
+{
+  "schema": "wp11-r63-ledger-delta-v1",
+  "product_input": "41d546f4d799dbe8642135cc228ac50de2869b9c",
+  "verification_base": "ffaad65f2d5e6724e521545fbb9706dec145b163",
+  "pins": {
+    "tests/wp12_closure_r53/coverage-ledger.json": "795c05fec6f6655499afbd13b2f329d35dde4d154619e7387530a96b246076d4",
+    "tests/wp08_mapping_r56/wp08-ledger.json": "a6fb617214d861cbaebdd49938b3032ff424e84d7f819cc3cdb82d8f9064c9d5",
+    "tests/wp09_gaps_r56/wp09-ledger.json": "c33f4829f595b704299b70542e972916ab659b86315ed7872476e40b77d8c156",
+    "tests/wp10_residue_d10/ledger-d10.json": "3d54eccb2b305d7584a3b45a6b31320ee546eb61c0e17ba00d3597835f14f847",
+    "findings/P1-R54-WP12D-PR328-DISPOSITION-2026-09-30.md": "4f6466809d519b253acc016f8f8b74b2541d326701630f02435d2280b29d3fc2",
+    "findings/P1-R57-W89D-DISPOSITION-2026-10-01.md": "cf10c7721e28bbcc55f91d3390cab27518b3b7117431a4c70836a64841bda248"
+  },
+  "rows": [
+    {
+      "id": "WP12.completed_pass.exactly_one_entry",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.completed_pass.renders_bit_identical",
+      "previous_status": "uncovered: published here",
+      "status": "covered",
+      "evidence": "#123 PASS Product #328 c126515d631338b63798613025985f73c1a8d355, seven cases"
+    },
+    {
+      "id": "WP12.invariant10.every_write_both_sides",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.v3_003.pass1_to_12_14",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.v3_003.pass2_runs_reclaims_10_12",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.no_lower_run.declines_pass2_intact",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.destinations.floor_and_disjoint",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.empty_b.respool_ok_zero_writes_valid_index",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12.empty_b.promote_invalid_arg_same_test",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-A"
+      ]
+    },
+    {
+      "id": "WP12.insufficient_space.cartridge_full_changes_nothing",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R25",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12a.small_budget.repeated_same_fn_terminates.respool",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.small_budget.repeated_same_fn_terminates.promote",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.small_budget.repeated_same_fn_terminates.dup",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.in_progress.45_cells_33_busy",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "R29-A",
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.in_progress.render_service_allowed_audio_continues.dup",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.in_progress.audio_continues.respool_promote",
+      "previous_status": "unreachable under DRAFT-9",
+      "status": "unreachable by spec",
+      "evidence": "DRAFT-10 V10-005 explicitly limits audio-continuity reachability to dup. The dup row and render/service permissions remain accepted."
+    },
+    {
+      "id": "WP12a.changed_argument.dup",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.changed_argument.promote",
+      "previous_status": "vacuous under DRAFT-9 signature",
+      "status": "vacuous by signature",
+      "evidence": "engine-api \u00a79: tape_promote(t, block_budget, more_work, cb, user); \u00a79.1 lets exactly block_budget/more_work/cb/user vary, so no fixed continuation argument exists. R29-A allowed_mutables proves the four may vary."
+    },
+    {
+      "id": "WP12a.changed_argument.respool",
+      "previous_status": "vacuous under DRAFT-9 signature",
+      "status": "vacuous by signature",
+      "evidence": "engine-api \u00a79: tape_respool(t, block_budget, more_work) has no fixed continuation argument; PM confirmed N/A in R29-C (#72/#73)."
+    },
+    {
+      "id": "WP12a.zero_budget.initiation_and_continuation",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "R29-A",
+        "R29-B"
+      ]
+    },
+    {
+      "id": "WP12a.dup.destination_failure_from_playing",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.own_device_failure.respool.write_and_flush",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12a.own_device_failure.promote.write",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A"
+      ]
+    },
+    {
+      "id": "WP12a.promote.continuation_flush_failure_faults",
+      "previous_status": "uncovered: published here",
+      "status": "covered",
+      "evidence": "#123 PASS Product #328 c126515d631338b63798613025985f73c1a8d355, seven cases"
+    },
+    {
+      "id": "WP12a.own_device_failure.dup",
+      "previous_status": "unreachable under DRAFT-9",
+      "status": "unreachable by spec",
+      "evidence": "tapefs \u00a79.5 writes only the destination and engine-api \u00a77.2 excludes destination failure from FAULTED, so a tape_dup continuation never issues a write or flush against its own (source) device. Not a contract conflict: the WP-12a clause is conditional on such a failure. Complement accepted: R29-B already-FAULTED source (LONG-10)."
+    },
+    {
+      "id": "WP12a.faulted.eleven_f_cells_zero_ops_incl_service",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "R29-A"
+      ]
+    },
+    {
+      "id": "WP12a.faulted.four_allowed_calls",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "R29-A"
+      ]
+    },
+    {
+      "id": "WP12a.faulted.abort_clears_frames_owed_no_media",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12a.faulted.render_drains_then_underruns",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12a.faulted.overrides_armed",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-C"
+      ]
+    },
+    {
+      "id": "WP12a.faulted.row_on_continuation_faulted_instance",
+      "previous_status": "uncovered: published here",
+      "status": "covered",
+      "evidence": "#123 PASS Product #328 c126515d631338b63798613025985f73c1a8d355, seven cases"
+    },
+    {
+      "id": "WP12a.busy.leaves_operation_running",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-C",
+        "R29-A",
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.reentrancy.four_exempt_calls_succeed",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.reentrancy.others_busy_no_state_change_no_recursion",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.reentrancy.next_continuation_still_advances",
+      "previous_status": "accepted exact evidence",
+      "status": "covered",
+      "evidence": [
+        "R29-A",
+        "R29-B",
+        "C272"
+      ]
+    },
+    {
+      "id": "WP12a.reentrancy.respool",
+      "previous_status": "vacuous under DRAFT-9 signature",
+      "status": "vacuous by signature",
+      "evidence": "engine-api \u00a79: tape_respool takes no tape_progress_fn, so no callback can be on the stack during it; PM confirmed N/A in R29-C (#72/#73). Re-entry into respool from promote/dup callbacks is covered at C272."
+    },
+    {
+      "id": "WP08-L01",
+      "previous_status": "listening-held",
+      "status": "listening-held",
+      "evidence": [
+        "R15 side_playing/side_idle 1.0x PCM",
+        "V95 1.0x cross-run PCM",
+        "V122 +/-1.0x vectors",
+        "#143 Stage 1 tests/golden publication; Product byte equality remains Stage 2; human listening remains Michael #367"
+      ]
+    },
+    {
+      "id": "WP08-L02",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 scrub_forward and scrub_reverse: all 16 ramp rows, 698 renders per direction, each preceded by service to completion"
+      ]
+    },
+    {
+      "id": "WP08-L03",
+      "previous_status": "covered-partial+gap",
+      "status": "covered",
+      "evidence": [
+        "V95: 18 cases, 3 boundaries x {-1,0,+1} x both directions",
+        "V122: run-{3,7,9}{-1,0,+1}-{f,r}, 18 vectors",
+        "#132 PASS Product #346 7a64891e63427a79d9f6755fac4e87dd1d37c343: mapped WP08 62/62; WP09 gaps 8/8; record bundle c461e9e0 authenticated and replayed 26/26"
+      ]
+    },
+    {
+      "id": "WP08-L04",
+      "previous_status": "unreachable",
+      "status": "source claim outside blind behaviour proof",
+      "evidence": [
+        "V122 byte-identical GCC/Clang streams against the oracle",
+        "R15/V95 exact PCM",
+        "WP08-L04 behavioral equivalence is covered; sole-implementation source structure was never asserted by blind verification. WP11 finite differential is Stage 2."
+      ]
+    },
+    {
+      "id": "WP08-L05",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 one_intmax",
+        "V122 one-intmax-forward, beyond-intmax-forward, multirun-intmax-forward"
+      ]
+    },
+    {
+      "id": "WP08-L06",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 empty_zero, empty_nonzero",
+        "V122 empty-forward, empty-zero"
+      ]
+    },
+    {
+      "id": "WP08-L07",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 nonempty_zero",
+        "V122 one-zero, empty-zero"
+      ]
+    },
+    {
+      "id": "WP08-L08",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 reverse_zero",
+        "V122 start-reverse",
+        "V95 start-reverse"
+      ]
+    },
+    {
+      "id": "WP08-L09",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 intmin",
+        "V122 one-intmin-reverse-end, multirun-intmin-reverse",
+        "V95 huge-reverse (INT32_MIN)"
+      ]
+    },
+    {
+      "id": "WP08-L10",
+      "previous_status": "covered-partial+gap",
+      "status": "covered",
+      "evidence": [
+        "V122 reverse-end-acceptance-0-1000-2000 (the literal example) and end-reverse-grid",
+        "V95 end-reverse: a full 17-frame reverse traversal across four start_frame-0 runs",
+        "#132 PASS Product #346 7a64891e63427a79d9f6755fac4e87dd1d37c343: mapped WP08 62/62; WP09 gaps 8/8; record bundle c461e9e0 authenticated and replayed 26/26"
+      ]
+    },
+    {
+      "id": "WP08-L11",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 side_playing",
+        "R25 SS-A01..SS-A04"
+      ]
+    },
+    {
+      "id": "WP08-L12",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 side_idle",
+        "R25 SS-A05"
+      ]
+    },
+    {
+      "id": "WP08-L13",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "R15 raw callback traversal",
+        "V95 render block_events empty",
+        "V122 render callbacks empty"
+      ]
+    },
+    {
+      "id": "WP08-L14",
+      "previous_status": "listening-held",
+      "status": "listening-held",
+      "evidence": [
+        "#143 Stage 1 tests/golden publication; Product byte equality remains Stage 2; human listening remains Michael #367"
+      ]
+    },
+    {
+      "id": "WP09-L01",
+      "previous_status": "listening-held",
+      "status": "listening-held",
+      "evidence": [
+        "HI exact rendered PCM at 25 checkpoints",
+        "CAP exact remounted PCM, 27 cases",
+        "#143 Stage 1 tests/golden publication; Product byte equality remains Stage 2; human listening remains Michael #367"
+      ]
+    },
+    {
+      "id": "WP09-L02",
+      "previous_status": "covered-partial+gap",
+      "status": "covered",
+      "evidence": [
+        "HI: 45 (checkpoint, frame) observations of a saturated mix reach a checkpoint render; exactly one is full-scale against full-scale (-32768 + -32768, checkpoint 9200, frame 10), none positive",
+        "#132 PASS Product #346 7a64891e63427a79d9f6755fac4e87dd1d37c343: mapped WP08 62/62; WP09 gaps 8/8; record bundle c461e9e0 authenticated and replayed 26/26"
+      ]
+    },
+    {
+      "id": "WP09-L03",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD WP09-SP-T0 (A04)",
+        "CAP splice x start x 3 shapes",
+        "HI splices at 0"
+      ]
+    },
+    {
+      "id": "WP09-L04",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD WP09-SP-MID (A05)",
+        "CAP splice x middle",
+        "HI"
+      ]
+    },
+    {
+      "id": "WP09-L05",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD WP09-SP-BOUNDARY (A22)"
+      ]
+    },
+    {
+      "id": "WP09-L06",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD WP09-SP-END (A06), WP09-SP-EMPTY-B (A21)",
+        "CAP splice x end",
+        "HI splices at length"
+      ]
+    },
+    {
+      "id": "WP09-L07",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD WP09-ARMED-BUSY (A08)"
+      ]
+    },
+    {
+      "id": "WP09-L08",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD EMPTY 3x3 (A23) and EMPTY-OW-MID (A07): media byte-identical, zero writes/flushes, in-session tail render"
+      ]
+    },
+    {
+      "id": "WP09-L09",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "SEQ 4096-entry commit <= 97 writes",
+        "RD A10",
+        "CAP C08"
+      ]
+    },
+    {
+      "id": "WP09-L10",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD A10",
+        "CAP C08",
+        "SEQ",
+        "HI ordered commit callbacks"
+      ]
+    },
+    {
+      "id": "WP09-L11",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "RD EMPTY 3x3",
+        "SEQ zero-frame commit"
+      ]
+    },
+    {
+      "id": "WP09-L12",
+      "previous_status": "covered",
+      "status": "covered",
+      "evidence": [
+        "STR3 27/27 raw A0/A1 bytes"
+      ]
+    },
+    {
+      "id": "V-R55-01",
+      "previous_status": "gap",
+      "status": "covered",
+      "evidence": [
+        "#132 PASS Product #346 7a64891e63427a79d9f6755fac4e87dd1d37c343: mapped WP08 62/62; WP09 gaps 8/8; record bundle c461e9e0 authenticated and replayed 26/26"
+      ]
+    }
+  ],
+  "open_behaviour_gaps": 0,
+  "listening_held": [
+    "WP08-L01",
+    "WP08-L14",
+    "WP09-L01"
+  ],
+  "stage2_pending": [
+    "golden byte equality at exact Software #366 head",
+    "two toolchains including embedded + narrow-int gate",
+    "seven specified mutants independently caught"
+  ]
+}
