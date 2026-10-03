@@ -10,8 +10,42 @@
 observation.json binary
 
 # Verifier-owned package trees are Verification's. Marking them so a diff is
-# never silently normalised under someone else's line-ending settings.
-tests/mount_draft8/**             -text
-tests/ops_draft8/**               -text
-tests/playback_draft8/**          -text
-tests/playback_complete_draft8/** -text
+# never silently normalised under someone else's line-ending settings. One line
+# per package declared in tests/IMPORTS.json; keep in step with .github/CODEOWNERS.
+tests/mount_draft8/**                  -text
+tests/ops_draft8/**                    -text
+tests/playback_draft8/**               -text
+tests/playback_complete_draft8/**      -text
+tests/record_draft8/**                 -text
+tests/respool_draft8/**                -text
+tests/slot_draft8/**                   -text
+tests/format_dup_draft8/**             -text
+tests/transport_draft8/**              -text
+tests/writability_draft8/**            -text
+tests/notmounted_draft8/**             -text
+tests/promote_draft8/**                -text
+tests/wp36_fuzz_draft8/**              -text
+tests/embedded_readiness_draft8/**     -text
+tests/allocator_cow_draft8/**          -text
+tests/crash_core_draft8/**             -text
+tests/format_dup_identity_draft8/**    -text
+tests/embedded_readiness_draft9/**     -text
+tests/respool_full_draft8/**           -text
+tests/crossrun_wp08_r44/**             -text
+tests/history_wp09_r44/**              -text
+tests/sequential_wp06_r44/**           -text
+tests/capacity_wp09_r52/**             -text
+tests/wp10_closure_r53/**              -text
+tests/wp10_backlog_r54/**              -text
+tests/wp10_residue_d10/**              -text
+tests/wp06_closure_r52/**              -text
+tests/portability_wp08_r52/**          -text
+tests/wp12_closure_r53/**              -text
+tests/wp10_backlog_r53/**              -text
+tests/wp10_final_r54/**                -text
+tests/strengthen_r55/**                -text
+tests/wp08_mapping_r56/**              -text
+tests/wp09_gaps_r56/**                 -text
+tests/golden/**                        -text
+tests/wp11_portability_r63/**          -text
+tests/wp11_ledgers_r63/**              -text

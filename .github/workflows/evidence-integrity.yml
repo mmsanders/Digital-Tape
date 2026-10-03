@@ -10,7 +10,8 @@ name: evidence integrity
 # A green run here is NOT a disposition, NOT package acceptance and NOT
 # independent review. Those remain separate facts (CLAUDE.md §3.4).
 #
-# .github/CODEOWNERS makes this file and tests/*_draft8/** Michael-owned, so a
+# .github/CODEOWNERS makes this file and every package tree declared in
+# tests/IMPORTS.json Michael-owned, so a
 # lead cannot weaken the gate that checks its own work.
 
 on:
