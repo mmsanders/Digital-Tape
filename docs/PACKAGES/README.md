@@ -35,15 +35,15 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 |---|---|---|---|---|
 | WP-06 | Block device layer, superblock, index commit | Agent | 1 | **COMPLETE.** Verification #138's DRAFT-10 ledger closes WP-06: 40 rows independently accepted and integrated (mount, writability, NOT_MOUNTED, #297 sequential, #326 closure gaps), 2 WP-06e rows unreachable by spec (V10-002), none open |
 | WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package. Product PR #215 mechanically carried the accepted bytes onto post-WP13 main and integrated them unchanged |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | Earlier corrected-cadence and set-side/warm-start evidence plus Verification #95's bounded 33/33 cross-run tranche are independently accepted and integrated through Product #287. Verification #100 owns exact two-toolchain arithmetic portability; listening/goldens remain separate |
-| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | Earlier 26/26 record evidence plus Verification #96's bounded 10,000-edit/25-checkpoint history are independently accepted and integrated through Product #288. Verification #99 is authoring the positive capacity short-accept tranche; crash/golden and complete-package coverage remain open |
+| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | **COMPLETE.** Every behaviour row is covered. L01/L14 close on the WP-11 goldens approved by Michael (#367). Verification #143 PASS on exact #369 |
+| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | **COMPLETE.** Every behaviour row is covered (#346). L01 closes on the WP-11 goldens approved by Michael (#367). Verification #143 PASS on exact #369 |
 | WP-10 | Crash-injection harness | Verification | 2 | **COMPLETE.** Verification #141 passed exact Product #362 (V10-001) and closed the DRAFT-10 WP-10 ledger: 63 rows, zero open; earlier bounded tranches carried within their exact boundaries |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | Seven exact product PCM outputs independently match verifier candidates byte-for-byte, but remain unlistened and are not accepted goldens; golden CI remains red |
-| WP-12 | Re-spool / defragment pass | Agent | 1 | Exact 8/8 product evidence is independently accepted and integrated through the #180 chain. WP-12a continuation/BUSY/re-entry/FAULTED coverage and complete acceptance remain outstanding |
+| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **COMPLETE.** `tapectl` per `docs/WP11-CLI-CONTRACT.md`; ten golden references from public-domain Grieg plus a CC0 voice, approved by Michael (#367) and bit-identical in CI; the §8 differential on three configurations; mutation 7/7. Verification #143 PASS on exact #369, merged at `d93ca4e` |
+| WP-12 | Re-spool / defragment pass | Agent | 1 | **COMPLETE.** WP-12/12a ledger: 36 rows, zero open (`wp11_ledgers_r63`; Verification #143) |
 | WP-13 | Embedded-readiness audit | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #66 independently reproduced all six frozen gates from raw evidence and accepted exact product PR #206; integrated on main |
 | WP-36 | Slot capability model | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #57 accepted the frozen package after the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign. Product PR #200 integrated the exact accepted tree unchanged at main `e4a3565...` |
 
-**Milestone:** splice your own voice into the middle of a song on a laptop and hear it.
+**Milestone:** splice your own voice into the middle of a song on a laptop and hear it. **Met 3 Oct 2026** (WP-11 `splice` golden, approved by ear on #367; `tapectl record --mode splice` lets anyone repeat it with their own voice).
 
 ## Phase 2 — desktop tooling · 2–3 weeks
 

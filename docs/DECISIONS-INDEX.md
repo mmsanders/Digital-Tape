@@ -104,5 +104,6 @@ Newest is at the bottom, matching the log.
 | [ADR-156](DECISIONS.md#adr-156--hold-promote-until-valid-r29-a-coverage-model-device-positions-in-the-caller) | 2026-09-25 | Hold promote until valid R29-A coverage; model device positions in the caller | Defer three promote fixes to corrected verifier-first R29-A; caller owns stored positions, operation token is harness-only |
 | [ADR-157](DECISIONS.md#adr-157--a-verifier-publication-is-a-commit-on-verification-main) | 2026-10-02 | A verifier publication is a commit on verification main | Twelve imported packages cited commits only on open verification PR branches; Verification merges its own publications, CI gates every citation |
 | [ADR-158](DECISIONS.md#adr-158--pre-routed-two-stage-rounds-and-the-phase-1-closing-round) | 2026-10-02 | Pre-routed two-stage rounds, and the Phase 1 closing round | Verification disposes Software's head directly, no PM hop; PM-issued tapectl contract; test-only interp hook; WP-11 goldens from public-domain Grieg |
+| [ADR-159](DECISIONS.md#adr-159--golden-acceptance-recorded-phase-1-exit-criteria-met-rule-1-covers-every-import) | 2026-10-03 | Golden acceptance recorded; Phase 1 exit criteria met; Rule 1 covers every import | Michael approved the 10 WP-11 references; all nine Phase 1 packages accepted; ordering check generalised from IMPORTS.json |
 
-95 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+96 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
