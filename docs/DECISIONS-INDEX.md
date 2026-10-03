@@ -2,10 +2,15 @@
 
 One line per ADR. This is the **entry point**; the authority is the append-only
 [decision log](DECISIONS.md), which is unchanged and byte-identical. Read the two or
-three ADRs your tranche touches, not the whole 139 KB log.
+three ADRs your tranche touches, not the whole log (about 165 KB).
 
-`ADR-0xx` is the shared sequence; **`ADR-1xx` is the Hardware Lead range**.
-Newest is at the bottom, matching the log.
+`ADR-0xx` is the shared sequence. **ADR-101…128 were the Hardware Lead range**; from ADR-129 on,
+the 1xx numbers are shared by PM, Software and Verification decisions. Newest is at the bottom,
+matching the log.
+
+**Superseded or amended — read the later ADR first:** 105 → 117 · 106, 109 → 110 · 112 → 116 ·
+116 → 121 (amended by 124, 125) · 117 → 119 · 121 → 124 · 130 (card plan → PNY 64 GB V30
+purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 133, 134 → 135 (assignment delivery). The log itself stays append-only.
 
 | ADR | Date | Title | Disposition |
 |---|---|---|---|
@@ -105,5 +110,6 @@ Newest is at the bottom, matching the log.
 | [ADR-157](DECISIONS.md#adr-157--a-verifier-publication-is-a-commit-on-verification-main) | 2026-10-02 | A verifier publication is a commit on verification main | Twelve imported packages cited commits only on open verification PR branches; Verification merges its own publications, CI gates every citation |
 | [ADR-158](DECISIONS.md#adr-158--pre-routed-two-stage-rounds-and-the-phase-1-closing-round) | 2026-10-02 | Pre-routed two-stage rounds, and the Phase 1 closing round | Verification disposes Software's head directly, no PM hop; PM-issued tapectl contract; test-only interp hook; WP-11 goldens from public-domain Grieg |
 | [ADR-159](DECISIONS.md#adr-159--golden-acceptance-recorded-phase-1-exit-criteria-met-rule-1-covers-every-import) | 2026-10-03 | Golden acceptance recorded; Phase 1 exit criteria met; Rule 1 covers every import | Michael approved the 10 WP-11 references; all nine Phase 1 packages accepted; ordering check generalised from IMPORTS.json |
+| [ADR-160](DECISIONS.md#adr-160--phase-1-close-out-cleanup-parked-work-dispositioned-roadmap-is-the-record) | 2026-10-03 | Phase 1 close-out cleanup: parked work dispositioned, roadmap is the record | Hardware park through Phase 2; held hardware PRs closed with restore refs; #341 → WP-38; #372 → kickoff R1–R8; #374 actioned |
 
-96 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+97 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

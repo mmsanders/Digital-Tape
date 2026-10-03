@@ -1,4 +1,4 @@
-# Surge — Phase 1
+# Surge
 
 **Instance:** Grok in an individual chat. **Format:** individual lead; no subworkers.
 
@@ -39,15 +39,15 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; Michael/the responsible
 lead reviews the linked evidence and uses a new issue for later work.
 
-Michael configures listener/activation tools and will notify leads this transition
-round. Manual resumption also works. No listener is implemented or claimed active
+Michael configures listener/activation tools; the 12 September migration to issue
+routing is complete. Manual resumption also works. No listener is implemented or claimed active
 by these instructions. No subworkers or restoration of the archived signaling bus.
 Independent Verification, frozen hashes, coverage/safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape Surge for Phase 1, using Grok in an individual chat.
+You are the Digital-Tape Surge for the current phase, using Grok in an individual chat.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/surge.md
 and required onboarding documents. Find your current open issue labeled
 `surge`, read its live body and scope updates, and report the input main

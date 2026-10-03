@@ -4,7 +4,8 @@
 expects, so that test source you return lands and runs without anyone editing it.
 
 The runner, the byte-exact comparison and the audible diff are built and working
-(`tests/harness/`). What is missing is fixtures and a manifest. **Nothing here constrains what
+(`tests/harness/`). The fixtures and `tests/golden/MANIFEST` were delivered in P1-R63 and are
+green in CI (WP-11 complete, ADR-159); this file remains the shape contract for new cases. **Nothing here constrains what
 you test or what you assert** — only how a case is named and invoked.
 
 If this shape cannot express a case you need, that is a finding, not a reason to weaken the

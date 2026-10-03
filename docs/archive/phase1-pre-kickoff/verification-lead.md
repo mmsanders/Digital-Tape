@@ -2,7 +2,7 @@
 
 # Verification — next independent return
 
-Phase 1 role: read [the role instructions](../ROLES/verification.md).
+Phase 1 role: read [the role instructions](../../ROLES/verification.md).
 Work directly in your lead chat; the current coverage and safety holds remain binding.
 
 **From acting PM · 8 September 2026 · Published instructions, carried by Michael.**
@@ -15,7 +15,7 @@ implementation merge. Thank you for making the uncovered boundary explicit.
 ## Immediate request
 
 Independently disposition the observations in
-[the run packet](../verification/runs/2026-09-07/README.md).
+[the run packet](../../verification/runs/2026-09-07/README.md).
 Read the existing spec/tests and raw JSONL, not untested implementation, private tests,
 PR #20’s mixed discussion or its diff. The two gzip files are lossless raw logs.
 The after-run engine publication is 740c97e998c7672d9e98916102be84430993521b.

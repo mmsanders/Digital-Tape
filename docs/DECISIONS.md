@@ -2786,3 +2786,38 @@ removable; nothing accepted depends on the round structure.
 
 **Cost to reverse.** Revoking golden acceptance means a REJECT on #367 and a PM regeneration
 decision; nothing else depends on it. #370 is a revert of two `tools/ci` files.
+
+---
+
+## ADR-160 — Phase 1 close-out cleanup: parked work dispositioned, roadmap is the record
+
+**Date:** 2026-10-03 UTC · **Owner:** PM (Claude, cleanup round directed by Michael) · **Input:** product
+`320d729`; intakes #372 (retrospective) and #374 (stale-content audit)
+
+**Decision.**
+1. **Hardware park extends through Phase 2** (Michael, 3 Oct, resolving #309's Phase 1 scope).
+   PM issues no `hardware-lead` work and no Verification hardware audit until Phase 3 opens or
+   Michael requests it. Physical and safety holds are unchanged.
+2. **Held hardware PRs are closed unmerged** (Michael, 3 Oct): #87 (WP-05 schema-2 path) and #92
+   (WP-25 ruggedization method rev 0.3) to be revived with hardware and reviewed by Verification
+   then; #120, #197, #198 and #296 because little in them needs retaining. Michael reports he has
+   filament and that clasps from his own sizing prints appear to work; Hardware will write up the
+   sizing study later. Each PR's head, content and restore command is in the roadmap's
+   *Parked hardware PR record*, with the WP-04 latch root cause from Michael's 23 Sep print.
+   Closing accepts and rejects nothing.
+3. **Phone/web-app testing (#341) becomes candidate WP-38** in Phase 2, decided at kickoff next to
+   WP-15.
+4. **The retrospective's proposals (#372) are Phase 2 kickoff candidates R1–R8** in
+   `docs/PACKAGES/README.md`, alongside the go decision and the operations freeze declaration.
+   The required-check ruleset change (R2) is Michael's setting.
+5. **The #374 audit is actioned** in the close-out PRs. Where a fix would edit a generated,
+   hash-tracked, verifier-owned or cited-evidence file, the file is left byte-unchanged and flagged
+   from an index or README instead; the remaining debt is listed in the roadmap.
+   `docs/VERIFICATION-INTEGRATION.md`'s 25 September boundary is relocated verbatim to
+   `docs/archive/verification-integration-2026-09-25.md` (original SHA-256 `7f19b8a8…49373`)
+   and replaced by a state table.
+6. **The roadmap is where closed work lives.** An issue or PR closed in this round points to its
+   entry in `docs/PACKAGES/README.md`; nothing is tracked only in a closed issue.
+
+**Cost to reverse.** Any closed PR reopens from its PR ref (`git fetch origin pull/<N>/head`); the
+park ends on a one-line Michael request. Documentation changes are text.

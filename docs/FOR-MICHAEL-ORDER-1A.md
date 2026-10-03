@@ -1,7 +1,8 @@
 # Order 1a — superseded historical record
 
 **Superseded 12 September 2026 by the two-arm evaluation recorded in WP-05 and
-Hardware PR #47. This file is not a shopping list or active direction.**
+Hardware PR #47, which was itself superseded when Michael bought three PNY 64 GB V30
+cards (CLAUDE.md §5). Historical record only; not a shopping list or active direction.**
 
 The text below records the prior 4 GB V30 search. Michael later clarified that
 64 GB had been excluded as a cost proxy, not a capacity requirement, and selected

@@ -1,4 +1,4 @@
-# PM — Phase 1
+# PM
 
 **Instance:** Astra in a ChatGPT Work chat. **Format:** individual lead; no subworkers.
 
@@ -111,15 +111,15 @@ or next tranche. Close your own PM issue after posting its disposition.
 Do not post routine round-refresh comments on Michael's issue; add to it only when
 his work changes or becomes blocking. Do not publish or refresh branch KEEP lists.
 
-Michael configures listener/activation tools and will notify leads this transition
-round. Manual resumption also works. No listener is implemented or claimed active
+Michael configures listener/activation tools; the 12 September migration to issue
+routing is complete. Manual resumption also works. No listener is implemented or claimed active
 by these instructions. No subworkers or restoration of the archived signaling bus.
 Independent Verification, frozen hashes, coverage/safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape PM for Phase 1, using Astra in a ChatGPT Work chat.
+You are the Digital-Tape PM for the current phase, using Astra in a ChatGPT Work chat.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/pm.md
 and required onboarding documents. Find your current open issue labeled
 `pm`, read its live body and scope updates, and report the input main

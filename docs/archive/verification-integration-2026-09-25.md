@@ -1,0 +1,140 @@
+# Archived: verification integration boundary of 25 September 2026
+
+**Relocated at the Phase 1 close-out cleanup, 3 October 2026 UTC (ADR-160).** This is
+`docs/VERIFICATION-INTEGRATION.md` as it stood at main `320d729`, moved here verbatim
+and unedited. Its "current boundary" was a week stale and contradicted STATUS (intake #374).
+The **only** change is mechanical: 3 relative link targets were rebased so every citation
+still resolves from this directory (`../CLAUDE.md` → `../../CLAUDE.md`,
+`REVIEW/` → `../REVIEW/`, `archive/verification-integration-history.md` →
+`verification-integration-history.md`). Undo those and this file is byte-identical to the
+original, whose SHA-256 is
+`7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`.
+
+The live integration boundary is [docs/VERIFICATION-INTEGRATION.md](../VERIFICATION-INTEGRATION.md).
+
+---
+
+# Independent verification integration
+
+This file states the **current** integration boundary and what is independently
+accepted. It is not a chronicle. The per-round import narrative for P1-R1 through
+P1-R24, with every source publication, tree, blob and findings hash, is preserved
+verbatim in [the verification integration history](verification-integration-history.md).
+
+## Current verifier publication boundary — 25 September 2026
+
+Verification issue #76 / PR #77 is merged at verifier main
+`50c47c1b9087de52f66d831ef2fe00cc02273087`. Correction commit
+`7408f0aad4dff2284b2b3f56b39c3ea6e3da2dc7` republishes exact package trees:
+
+- R29-C `respool_full_draft8`: `7e98b40c6aceb0a5759bfb1499091a4c9f541927`;
+- R29-A `promote_draft8`: `e99ba0f2cf3f9e8cdd22199cbd9cc502cc5638a3`;
+- R29-B `format_dup_identity_draft8`: `f76ab23d17beb9212f8ee1d17d3d1875b74abc7d`.
+
+The corrected packages use truthful compact geometry, phase-0 capacity and ordered
+geometry admission, budget-1 campaigns and cumulative raw copy traces with repeated-
+copy red controls. Adapter operation labels are non-causal. Promote positions are a
+caller-owned model cleared after terminal success. Package self-test workflow
+`36107243960` passed.
+
+No corrected tree is integrated into the product yet. Product PRs #227/#229/#230 and
+their old evidence remain held. Verification narrowly authenticated #227's recorded
+public results but did not accept its continuity/no-restart or minimum-positive-budget
+claims. Fresh exact-tree product evidence and a later blind disposition are required.
+See [P1-R30](../REVIEW/P1-R30-PM-DISPOSITION.md).
+
+## Prior clean product integration boundary — 22 September 2026
+
+PR #77 is merged at product main
+`4e1d248b62866871613775a50ab931f4a4597a52` with history preserved. The exact
+ten corrected-cadence playback observations and exact 289 mount records are
+independently accepted. That disposition does not accept source/helper design,
+complete WP-06/WP-08, listening, WP-11 goldens or a package. Held PR #20/#64 are
+not ancestors, and uncovered allocator/recording/crash/warm/state/operation and
+performance behaviour was not imported.
+
+Product main `48cc23fdbe6273dfe73f17fbdddf8e9fcc5ab3d9` imports corrected
+complete verifier tree `3667a2830ba80dbcedad03b97870d1127001ab59` exactly and test-first.
+Held PR #96 evidence head `088226a3c324a97fe19d4a4285a80af037b097d5` contains two
+passing raw cases produced without an engine/adapter-tree change. Verification at
+`e77b61fe420e48444cf0791c74fc7e296ef0ccf6` independently accepts exactly those
+reset-side-B and recording/allocation observations. This does not accept source,
+allocator/all-slot behavior beyond the exact cases, PR #96, WP-07 or the package.
+
+PR #112 is then integrated at product main `be7f8f233c9eed5d70c6bc578d169b73e4f83c7c`,
+tree `5f7b1aa5463abc096fa4a6de6056ca00b6430857`, through synchronization merge
+`6e0de710c9ccc93bf90f9660a58fcdfc8adb1509`, which preserves pre-run code `20505f4...`
+and evidence `15fbcfa...` as ancestors. `engine/`, `tests/ops_adapter/`,
+`tests/ops_draft8/`, `spec/` and the exact run packet are unchanged across the
+candidate, synchronized and final-main trees. Held PR #20/#64/#96 heads remain outside
+ancestry. The integration changes no independent boundary: it re-confirms the same two
+exact observations already dispositioned at verifier `391d6a8...` and accepts nothing
+further.
+
+Current work directions live only in role-labeled issues.
+
+On 21–22 September, Verification published eight additional independent verifier
+packages and product main imported them mechanically, test-first. WP-09 `record_draft8`
+was corrected by verifier PR #39 and independently replayed **26/26 PASS**; clean
+verifier-first product PR #167 is merged at main `1db7135...`. WP-08
+`transport_draft8` then produced exact final-head product evidence at PR #171;
+Verification PR #41, merged at `334ab2a...`, audited the Software adapter/runner and
+independently replayed all **16/16 PASS** with zero writes/flushes and no behavior change
+requested. Product PR #171 is now merged at main `e598b82...` with the exact reviewed
+head `dbd5a232...` as its second parent. The remaining six imported
+verifier packages (`respool_draft8`, `slot_draft8`, `format_dup_draft8`,
+`writability_draft8`, `notmounted_draft8`, `promote_draft8`) still have no
+real-product independent disposition.
+
+## Integration rules that do not change
+
+- Verifier package trees declared in `tests/IMPORTS.json` (including every
+  `tests/*_draft8/` publication named above) are imported **verbatim with modes
+  preserved** and are Verification-owned. No assertion, fixture, expected
+  sequence, operation argument, ordering, range, tolerance or exclusion is ever changed
+  on import. Route a disagreement to Verification/PM.
+- The nested `spec/` inside a package tree is an **authenticated test baseline**, not a
+  second canonical publication point. Product authority is `spec/`; those copies are
+  held in place by tamper controls (`VT8-A13`, `PB8-A01`) and must not be deduplicated.
+- Product adapters (`tests/ops_adapter/`, `tests/playback_adapter/`) are Software-owned
+  and live **outside** the verifier trees.
+- Structural Rule 1 ordering is recorded per import; see
+  [CLAUDE.md §3](../../CLAUDE.md).
+- A green run is not acceptance. Authorship, harness checks, engine execution,
+  independent disposition, merge and package acceptance are separate facts.
+
+## Coverage
+
+| Package | Accepted units | Outstanding areas | Source publication hash |
+|---|---|---|---|
+| WP-06 mount — `tests/mount_draft8/` | Exact 289/289 mount case records, including row 3 | Source and helper design; complete WP-06; merge status | Import `4ee116fa040bb5ce040325e0076365abf8b0f8f9`; hardened tree `4a862fa69ccb2fc4c9afe59c9c9161c3470f9263`; disposition `392d6bb9c948a5924fe18728fab04202bc8e337e` |
+| WP-07 operations — `tests/ops_draft8/` | Two exact recorded observations: `VT8-001-RB-ALLSLOT` and `VT8-001-REC-ALLOCSEQ` | Splice-only arm and stage-1 BUSY refusal policies (invented, unreached); every unexercised branch; source; adapter design; atomicity; complete WP-07 | Hardened tree `4a862fa69ccb2fc4c9afe59c9c9161c3470f9263` from `dcc4d7cdb357cf0b082071390c762c25b650f617`; corrected complete subtree `3667a2830ba80dbcedad03b97870d1127001ab59` at verifier main `15dd16e...`; dispositions `e77b61fe420e48444cf0791c74fc7e296ef0ccf6` and `391d6a8308edfca46f639c3a6567c220d7a7b95d` |
+| WP-08 playback — `tests/playback_draft8/`, `tests/playback_complete_draft8/` | Exact ten corrected-cadence product observation families; 698/698 completed per-render service sequences in each direction | Source and helper design; complete WP-08; listening; goldens | Three-family publication `7a22cbb4447c40c51b7c8b2282a685ed30a46ba6` (subtree `ff810814dbc8079c6903e6f85ed7ee312abd3076`); complete ten-family `121f5f7ab03c9ce08c38329e518c49a1ca9b65a5`; corrected `62b18deb8b4fbe6e797b00d792ee9f46ac0a8059`; cadence correction `e3a25bf3b9eda6581b5de524e5bd5fa2c032e0da`; disposition `392d6bb9c948a5924fe18728fab04202bc8e337e` |
+| WP-11 goldens — `tests/golden/`, `tests/wp11_portability_r63/`, `tests/wp11_ledgers_r63/` | **COMPLETE.** Ten references bit-identical through `tapectl`, approved by ear by Michael (#367); the §8 differential on three configurations; mutation 7/7. Verification #143 PASS on exact #369 `b61a9e9`, merged at `d93ca4e` | None for Phase 1 | Publication `cdf89f5` (subtrees `999cd1be`, `8cdd5a13`, `bad836c8`); assets `wp11-r63-canonical-v1` |
+| WP-10 crash harness | Bounded 28,760-case record/reset/stage-clear tranche accepted and integrated; #227 retained raw public observations authenticated only at the R30 boundary | Corrected R29-A/B/C product evidence and later independent disposition; continuity/no-restart and budget-1 credit remain open | Core disposition Verification PR #69; corrected operation publications at verifier `7408f0a...` |
+| WP-06 extension — `writability_draft8`, `notmounted_draft8` | **Nothing newly accepted.** Independent verifier packages are on main | Exact real-product observations/disposition; source/helper design; complete WP-06 | Publications `d875730...`, `2f0fe95...` |
+| WP-08 extension — `transport_draft8` | Exact 16/16 set-side/warm-start product observations at PR #171 head `dbd5a232...`, independently replayed PASS with zero writes/flushes and integrated at main `e598b82...` | Complete WP-08; byte-exact/listened warm samples, broader playback/rate goldens, crash and long-operation continuation/state | Publication `5d97073...`; disposition verifier PR #41 merged `334ab2a...`; product integration #171 |
+| WP-09 record — `record_draft8` | Exact 26/26 product observations independently replayed PASS; corrected verifier-first product PR #167 merged at `1db7135...` | PCM/listening, WP-10 crash/durability, 10,000-edit history, short-accept, reset-B stage clearing and stated exclusions; complete WP-09 | Original `af15a8f...`; corrected verifier PR #39 merged `e9e6ec7...`; product integration #167 |
+| WP-12 re-spool — `respool_draft8`, `respool_full_draft8` | Exact prior 8/8 re-spool tranche accepted and integrated; no corrected R29-C acceptance | Fresh product binding/run against corrected tree; independent continuity/budget-1 disposition; complete WP-12 | Earlier publication `6519220...`; corrected full tree `7e98b40c...` |
+| WP-36 source-slot — `slot_draft8` | **Nothing accepted.** Deterministic independent verifier package is on main | Exact real-product observations/disposition; required 100,000-sequence run | Publication `6fc4014...` |
+| Format/duplicate and promote operations — `format_dup_identity_draft8`, `promote_draft8` | **Nothing accepted from R29-A/B.** Corrected independent verifier packages are published | Fresh exact-tree product bindings/runs, blind disposition and all documented exclusions | Corrected trees `f76ab23d...`, `e99ba0f2...` |
+
+Open independent findings: `P1-R23-V01` rejects Hardware PR #87's sustained-write audit
+method (card characterisation, not engine coverage). `P1-R29-V01` rejects #227's old
+continuity/no-restart and budget-1 evidence while preserving its bounded raw results;
+the corrected R29-C tree requires a new product run. WP-09's ARMED-BUSY verifier finding
+is resolved by PR #39. Transport Verification #40 / PR #41 found no material adapter
+defect and no engine behavior correction was requested.
+
+## Reproduce
+
+```
+tools/fetch-evidence.sh            # raw observations live in a release asset
+tools/ci/verify-spec-bundle.sh
+make -C tests/mount_draft8 check
+tools/ci/build.sh
+tools/ci/unit.sh
+```
+
+Missing WP-11 goldens remain a separate expected CI failure. A missing dependency is
+not a passing test.

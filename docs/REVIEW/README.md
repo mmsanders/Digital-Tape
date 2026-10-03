@@ -4,6 +4,16 @@ Current work directions live in [role-labeled GitHub issues](../ISSUE-WORKFLOW.m
 There are no active per-lead briefs in this directory. Query open issues and read
 their live body/scope updates before acting; do not execute a historical review.
 
+**Every file in this directory, including `returns/`, is a dated historical snapshot.**
+Present-tense statements ("currently green", "held", "being printed", "Monday") describe
+state on the file's own date and are not current. Current state is
+[STATUS](../STATUS.md); the roadmap is [PACKAGES/README](../PACKAGES/README.md). The files
+are left byte-unchanged because later dispositions cite them.
+
+This index covers the P1-R1…R30 PM records. Rounds P1-R31 onward were run through
+role-labeled issues and recorded as ADRs in [the decision log](../DECISIONS.md) via
+[its index](../DECISIONS-INDEX.md); no separate review file was written for them.
+
 ## Evidence records
 
 - [P1-R1 PM review](P1-R1-PM-REVIEW.md): exact inputs, reproduced checks and findings
@@ -62,6 +72,8 @@ their live body/scope updates before acting; do not execute a historical review.
   independent card-method blockers and A1 Mini packet/source disposition.
 - [P1-R21 PM disposition](P1-R21-PM-DISPOSITION.md): independent two-case VT8
   acceptance, repaired card-method re-audit and official source-input routing.
+- [P1-R21 CPSC primary-source note](P1-R21-CPSC-PRIMARY-SOURCE-NOTE.md): PM retrieval of the
+  16 CFR 1500.48/.49 sharp point/edge inputs used by WP-25; not method acceptance.
 - [P1-R22 PM disposition](P1-R22-PM-DISPOSITION.md): clean VT8 candidate routing,
   independent card-method rejection and held rugged-source-method return.
 - [P1-R23 PM disposition](P1-R23-PM-DISPOSITION.md): narrow clean VT8 observation

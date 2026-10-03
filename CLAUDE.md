@@ -1,7 +1,8 @@
 # Digital Tape — working agreement
 
-**Current agreement: 18 September 2026 UTC.** Applies to every lead, regardless of model
-or app. Revisions/hashes live in spec/VERSION.md; gate state in docs/PHASE0-FREEZE.md.
+**Current agreement: 3 October 2026 UTC** (Phase 1 close-out; ADR-153…160 folded in).
+Applies to every lead, regardless of model or app. Revisions/hashes live in
+spec/VERSION.md; phase and gate state in docs/STATUS.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
 charters and Michael’s latest PM instructions; historical rationale remains in
 docs/DECISIONS.md and Git history.
@@ -41,7 +42,7 @@ control: a gate that never goes red has not established what it detects.
 | PM | Product spec, roadmap, phase gates, scope, cross-stream decisions, risk, assignment issues | May commit PM docs/spec directly. Does not implement/review/merge product code in the normal role or supply independent acceptance. |
 | Software Lead | Repo integration, software implementation, CI, reviews/merges; streams 1/3/4/5 | Does not author product spec or accept its own work. Mechanically integrates issued spec and verifier tests. |
 | Hardware Lead | hardware/, spec/hw/, mechanics, sourcing, characterization, thermal design | Does not change engine/ or firmware/; cannot accept its own safety response or spend Michael’s money. |
-| Verification Lead | Stream 2, independent review, tests/oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
+| Verification Lead | Stream 2, independent review, tests and oracles, goldens, crash harness, package acceptance | Reports to PM, not Software. Does not inspect implementation before independently authoring tests for that behaviour. |
 | Surge (Grok) | Bounded miscellaneous tasks primarily assigned directly by Michael | No standing lead, normative issuance, acceptance or merge authority. Return results to Michael; the responsible lead reviews integration. |
 
 Model/app choice does not change authority. Preserve a separate independent
@@ -191,9 +192,13 @@ tag editor, library or player. Firmware must not fork seek, mixing or other engi
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
 a release blocker. These limits survive the documentation consolidation.
 
-## 7. Phase 1 individual leads and issue assignments
+## 7. Individual leads and issue assignments
 
-Use [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) and [role instructions](docs/ROLES/README.md).
+Phase 1 ran this way and closed on 3 October 2026; the same format carries into Phase 2
+unless Michael changes it at kickoff. Phase 2 kickoff items are listed in
+[the roadmap](docs/PACKAGES/README.md#phase-2-kickoff-prep). Use
+[role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
+historical record of how Phase 1 was organised.
 PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;
 Software and Hardware are Opus in separate Claude Code chats. Surge is Grok, primarily
 instructed directly by Michael for miscellaneous scoped tasks.
@@ -201,7 +206,7 @@ instructed directly by Michael for miscellaneous scoped tasks.
 Leads perform their own work within their normal authorities. Software implements and
 integrates; Hardware designs and characterizes; Verification independently authors and
 runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
-or automatic delegation are part of Phase 1. Do not make routine direct lead work an exception.
+or automatic delegation are part of the lead format. Do not make routine direct lead work an exception.
 
 Michael configures issue listeners and can also resume chats manually. PM maintains
 work directions solely in role-labeled GitHub issues. Each lead reads the live issue,

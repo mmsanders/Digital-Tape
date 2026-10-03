@@ -1,7 +1,7 @@
 # firmware/bench/ — Stream 4
 
-Teensy 4.1 with the audio shield. Audio graph, engine integration, wake-to-audio via the
-preroll cache, dual-card handling with hot-swap detection, line-in and mic capture with gain
+Teensy 4.1 with the audio shield. Audio graph, engine integration, wake-to-audio from the
+caller-owned warm-start buffer (the on-card preroll cache was removed, ADR-012 / guardrail 04), dual-card handling with hot-swap detection, line-in and mic capture with gain
 staging, the output cap, the LED banks, and the transport state machine driving the solenoid.
 
 **Packages:** WP-17, 18, 19, 20, 21

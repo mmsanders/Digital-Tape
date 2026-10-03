@@ -2,6 +2,11 @@
 
 Status: structure only. Normative field names and exact validators must be reconciled against DRAFT-3 before these become acceptance tests.
 
+> **Historical (3 October 2026).** This checklist was never reconciled into acceptance tests. WP-10 was
+> independently accepted through the imported verifier packages instead (Verification #141, DRAFT-10
+> ledger 63 rows, zero open). Use those packages and the current spec, not this file, as the WP-10
+> authority; the list stays as background for Phase 2+ invariant work.
+
 Generate arbitrary, parameterised cartridge geometries and arbitrary valid edit sequences. Do not assume a 90-minute cartridge.
 
 After each successful operation, and after remount at every injected write/flush boundary, assert:
