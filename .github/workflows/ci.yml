@@ -1325,8 +1325,8 @@ jobs:
     # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
     # target, arm-none-eabi-gcc Cortex-M3 under qemu-arm; (c) the static-assert
     # alternative, because the engine cannot be built for a 16-bit target.
-    # RED until Stage 2 imports Verification #143's differential harness: a
-    # green placeholder would claim a result nobody has measured.
+    # Each runs Verification #143's differential (tests/wp11_portability_r63,
+    # 11,572,876 comparisons) against tape_test_interp.
     name: WP-11 portability (${{ matrix.config }})
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
@@ -1373,14 +1373,37 @@ jobs:
           if-no-files-found: ignore
 
   golden:
-    name: golden suite (awaiting WP-11 fixtures)
+    # WP-11 (#366 Stage 2): Verification #143's ten independent references,
+    # run through tapectl by tests/golden/MANIFEST and compared byte for byte.
+    # A failure writes an audible-difference WAV; it is never fixed by touching
+    # a reference or fitting the engine. Do not "fix" this by relaxing a gate.
+    name: golden suite — WP-11 R63 references, byte-exact
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: make -C engine all && make -C tests all
-      # Red until the Verification Lead's fixtures and manifest land. That is
-      # the only expected red in this pipeline; every other job above is green,
-      # so a new failure anywhere else is a real signal.
-      # Do not "fix" this by relaxing a gate.
+      - run: make -C engine all && make -C host && make -C tests all
+      - name: Reference package integrity (SHA256SUMS)
+        run: cd tests/golden && sha256sum -c SHA256SUMS
       - run: ./tools/ci/run-golden.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: golden-diff
+          path: build/tests/golden
+          if-no-files-found: ignore
+
+  wp11-release-assets:
+    # The archival source originals and canonical WAVs #143 publishes as release
+    # assets, fetched and refused unless they hash to SOURCES.json's values. Kept
+    # out of the golden job so the mutation gate's golden suite never touches the
+    # network.
+    name: WP-11 fixture release assets — fetched and sha256-verified
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: tools/fetch-evidence.sh wp11

@@ -9,19 +9,19 @@
 #                   subtraction casts both operands first), then the harness on host
 #
 # Each configuration builds the engine archive and engine/test/tape_test_hooks.c
-# with its own toolchain, links the WP-11 differential harness ahead of the
-# archive, and runs it. The harness is Verification's (#143) and arrives in
-# Stage 2. Until then this FAILS on purpose: a green placeholder would claim a
-# portability result nobody has measured.
+# with its own toolchain, links Verification #143's differential harness
+# (tests/wp11_portability_r63/differential.c, imported unchanged) with the hook
+# ahead of the archive, and runs it. The harness is compiled with the flags its
+# own README gives. Without the harness this FAILS: a green placeholder would
+# claim a portability result nobody has measured.
 #
 # Usage: tools/ci/wp11-portability.sh host-gcc|arm-m3|narrow-int
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 2
 
 CONFIG=${1:-}
-# Stage 2 sets HARNESS to the imported harness sources (space-separated, from
-# the repository root) and RUN_ARGS to its arguments.
-HARNESS=${WP11_HARNESS:-}
+# WP11_HARNESS overrides the harness sources (space-separated, from the root).
+HARNESS=${WP11_HARNESS:-tests/wp11_portability_r63/differential.c}
 RUN_ARGS=${WP11_HARNESS_ARGS:-}
 OUT=build/wp11-portability/$CONFIG
 ENGINE_FLAGS="-std=c99 -Wall -Wextra -Werror -pedantic -Wshadow -Wconversion -Wstrict-prototypes \
@@ -34,6 +34,12 @@ case "$CONFIG" in
   arm-m3)
     CC=arm-none-eabi-gcc; AR=arm-none-eabi-ar
     TFLAGS="-mcpu=cortex-m3 -mthumb"; LDFLAGS="--specs=rdimon.specs"; RUN="qemu-arm -cpu cortex-m3"
+    # Ubuntu's arm-none-eabi-gcc is built --without-newlib, so its own
+    # freestanding <stdint.h> shadows newlib's and newlib's <inttypes.h> then
+    # omits the 64-bit PRI macros. Search the C library's headers first so the
+    # pair matches. Include-path plumbing only; the path comes from the toolchain.
+    NEWLIB_INC=$(echo '#include <stdio.h>' | "$CC" $TFLAGS -E -H - 2>&1 >/dev/null | awk '$2 ~ /stdio\.h$/ {print $2; exit}')
+    [ -n "$NEWLIB_INC" ] && TFLAGS="$TFLAGS -isystem $(dirname "$NEWLIB_INC")"
     ;;
   *) echo "usage: $0 host-gcc|arm-m3|narrow-int"; exit 2 ;;
 esac
@@ -58,14 +64,18 @@ echo "  ok    engine archive built with $CC"
   || { echo "FAIL  tape_test_hooks.c does not compile with $CC"; exit 1; }
 echo "  ok    tape_test_hooks.o built with $CC"
 
-if [ -z "$HARNESS" ]; then
-  echo "FAIL  WP-11 differential harness not imported yet (Verification #143, #366 Stage 2)."
-  echo "      This gate stays red until the harness runs green on this configuration."
-  exit 1
-fi
+for h in $HARNESS; do
+  if [ ! -f "$h" ]; then
+    echo "FAIL  WP-11 differential harness $h not present (Verification #143)."
+    echo "      This gate stays red until the harness runs green on this configuration."
+    exit 1
+  fi
+done
 
+# The harness's own build line (tests/wp11_portability_r63/README.md).
+HARNESS_FLAGS="-std=c99 -O2 -Wall -Wextra -Werror"
 # shellcheck disable=SC2086
-"$CC" $ENGINE_FLAGS $TFLAGS $LDFLAGS -Iengine/include -Iengine/test $HARNESS \
+"$CC" $HARNESS_FLAGS $TFLAGS $LDFLAGS -Iengine/include -Iengine/test $HARNESS \
   "$OUT/tape_test_hooks.o" "$OUT/engine/libtape.a" -o "$OUT/wp11_differential" \
   || { echo "FAIL  harness does not build with $CC"; exit 1; }
 echo "  ok    harness linked (hook ahead of libtape.a)"

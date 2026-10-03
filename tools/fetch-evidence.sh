@@ -17,9 +17,12 @@
 # WP-11 (#366): release assets the golden suite needs are declared one per line
 # in tests/golden_adapter/RELEASE-ASSETS:
 #
-#   <sha256>  <destination path from the repo root>  <release tag>  <asset name>
+#   <sha256>  <destination path from the repo root>  <release>  <asset name>
 #
-# Each is fetched from that tag, refused unless it hashes to the declared value,
+# <release> is a tag of this repository's releases, or a full release-download
+# base URL (https://github.com/OWNER/REPO/releases/download/TAG) for assets a
+# verifier publishes in its own repository. Each is fetched, refused unless it
+# hashes to the declared value,
 # and only then installed. A file already present and matching is left alone.
 # FETCH_EVIDENCE_RELEASES overrides the releases base URL (used by
 # tools/ci/verify-fetch-evidence-wp11.sh to prove the refusal path).
@@ -31,7 +34,7 @@ WP11_ASSETS=${WP11_ASSETS:-tests/golden_adapter/RELEASE-ASSETS}
 
 fetch_wp11() {
   [ -f "$WP11_ASSETS" ] || { echo "ok    no WP-11 release assets declared ($WP11_ASSETS absent)"; return 0; }
-  local want dest tag asset got tmp
+  local want dest tag asset got tmp url
   while read -r want dest tag asset; do
     case "$want" in ''|\#*) continue ;; esac
     if [ -z "${asset:-}" ] || ! [[ $want =~ ^[0-9a-f]{64}$ ]]; then
@@ -44,7 +47,8 @@ fetch_wp11() {
     fi
     echo "fetch $dest <- $tag/$asset"
     tmp=$(mktemp)
-    if ! curl -fsSL "$RELEASES/$tag/$asset" -o "$tmp"; then
+    case "$tag" in *://*) url="$tag/$asset" ;; *) url="$RELEASES/$tag/$asset" ;; esac
+    if ! curl -fsSL "$url" -o "$tmp"; then
       rm -f "$tmp"; echo "REFUSED $dest: download failed" >&2; return 1
     fi
     got=$(sha256sum "$tmp" | cut -d' ' -f1)
@@ -110,9 +114,6 @@ for run in "${runs[@]}"; do
   trap - EXIT
   echo "ok    $run verified against $sums and installed"
 done
-
-# With no arguments, everything: the retained runs above and the WP-11 assets.
-if [ $# -eq 0 ]; then fetch_wp11; fi
 
 echo
 echo "Fetched bytes are the cited evidence, not an acceptance of anything."

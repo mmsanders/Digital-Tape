@@ -5,7 +5,8 @@
 # the real engine, most of them regenerating accepted evidence byte-identically.
 # Cheapest first; the gate stops at the first suite that goes red.
 #
-# Stage 2 (#143) adds the golden suite and the imported WP-11 suites.
+# The golden suite (#143's ten references through tapectl) runs first.
+golden
 record-package
 transport-package
 format-dup-package
