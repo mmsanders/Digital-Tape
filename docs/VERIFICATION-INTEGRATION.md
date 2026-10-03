@@ -14,6 +14,11 @@ Every imported verifier package is declared in [tests/IMPORTS.json](../tests/IMP
 `d93ca4e`. Every Phase 1 package is independently accepted for laptop scope; see the table.
 Phase 1 acceptance makes no hardware, media, wake-latency, 85 dB-cap, copy-time or release claim.
 
+**Import attestations.** `tests/IMPORTS.json` names the document attesting each package
+tree. The `tests/ops_draft8` attestation (corrected complete tree `3667a2830ba8…`, imported
+test-first at product main `48cc23f…`) was recorded in this file's earlier text and is now in
+[the 25 September archive](archive/verification-integration-2026-09-25.md), verbatim.
+
 ## Integration rules that do not change
 
 - Verifier package trees declared in `tests/IMPORTS.json` are imported **verbatim with modes
