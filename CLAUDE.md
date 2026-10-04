@@ -195,8 +195,8 @@ a release blocker. These limits survive the documentation consolidation.
 ## 7. Individual leads and issue assignments
 
 Phase 1 ran this way and closed on 3 October 2026; the same format carries into Phase 2
-unless Michael changes it at kickoff. Phase 2 kickoff items are listed in
-[the roadmap](docs/PACKAGES/README.md#phase-2-kickoff-prep). Use
+unless Michael changes it at kickoff. Phase 2 scope, kickoff decisions, rounds and exit gate are in
+[the Phase 2 plan](docs/PHASE2-PLAN.md). Use
 [role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
 historical record of how Phase 1 was organised.
 PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;

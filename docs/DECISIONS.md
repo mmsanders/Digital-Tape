@@ -2821,3 +2821,36 @@ decision; nothing else depends on it. #370 is a revert of two `tools/ci` files.
 
 **Cost to reverse.** Any closed PR reopens from its PR ref (`git fetch origin pull/<N>/head`); the
 park ends on a one-line Michael request. Documentation changes are text.
+
+---
+
+## ADR-161 — Phase 2 plan issued; intake #379 dispositioned
+
+**Date:** 2026-10-04 UTC · **Owner:** PM (Claude, at Michael's direction) · **Input:** product `594aa59`;
+intake #379
+
+**Decision.**
+1. **The Phase 2 plan is [docs/PHASE2-PLAN.md](PHASE2-PLAN.md), status PROPOSED.** It sets the goal and
+   milestone, the exit gate, kickoff decisions D1–D9 with recommended defaults, the rounds P2-R0…R3 plus an
+   optional WP-38 lane, and Q-P2-1. Package interfaces and acceptance criteria are in
+   `docs/PACKAGES/WP-14.md`, `WP-15.md` and `WP-16.md`. The criteria are PM package definitions. Folding
+   them into `spec/acceptance.md` would be a spec revision, with independent paper review and Michael's
+   approval, and is not required to start. Nothing is scheduled until Michael gives the go (D1).
+2. **Two WP-14 defects in the current host port are recorded as requirements, not fixed here.**
+   - `dev_file`'s flush is `fflush`, which is not durable on a real card (guardrail 07).
+   - Its `long` offsets are 32 bits on Windows.
+   - Neither matters for the disk images Phase 1 used.
+3. **Intake #379, RECORDED — PARKED with hardware.**
+   - Michael's direction (4 Oct): SDR50 at 1.8 V becomes the primary card bus, High Speed 4-bit at 3.3 V
+     the fallback. It is recorded against WP-26, WP-28 and WP-05 in the roadmap, for Hardware's resume.
+     When Hardware revises `board-rev-a.md`, its ADR supersedes ADR-113's gate order. PM approval is needed
+     only if a guardrail moves; as filed, none does.
+   - #379's software finding enters Phase 2 as **Q-P2-1**: the engine moves chunk data one block per device
+     call, which puts guardrail 10 at risk on the device. Verification answers whether the WP-10 crash model
+     covers a port that persists any subset of unflushed writes. PM then rules on port-level batching versus
+     a spec change before Phase 3 firmware.
+   - The atomicity-test command, timing in the shipping bus mode, and the firmware-port work are recorded
+     under WP-05 and WP-28.
+
+**Cost to reverse.** Text. The plan is a proposal until D1; the #379 bus change is a Hardware revision that
+has not been made.

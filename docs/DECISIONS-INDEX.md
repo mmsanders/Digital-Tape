@@ -111,5 +111,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-158](DECISIONS.md#adr-158--pre-routed-two-stage-rounds-and-the-phase-1-closing-round) | 2026-10-02 | Pre-routed two-stage rounds, and the Phase 1 closing round | Verification disposes Software's head directly, no PM hop; PM-issued tapectl contract; test-only interp hook; WP-11 goldens from public-domain Grieg |
 | [ADR-159](DECISIONS.md#adr-159--golden-acceptance-recorded-phase-1-exit-criteria-met-rule-1-covers-every-import) | 2026-10-03 | Golden acceptance recorded; Phase 1 exit criteria met; Rule 1 covers every import | Michael approved the 10 WP-11 references; all nine Phase 1 packages accepted; ordering check generalised from IMPORTS.json |
 | [ADR-160](DECISIONS.md#adr-160--phase-1-close-out-cleanup-parked-work-dispositioned-roadmap-is-the-record) | 2026-10-03 | Phase 1 close-out cleanup: parked work dispositioned, roadmap is the record | Hardware park through Phase 2; held hardware PRs closed with restore refs; #341 → WP-38; #372 → kickoff R1–R9; #374 actioned |
+| [ADR-161](DECISIONS.md#adr-161--phase-2-plan-issued-intake-379-dispositioned) | 2026-10-04 | Phase 2 plan issued; intake #379 dispositioned | PHASE2-PLAN.md (PROPOSED) with D1–D9, rounds, WP-14/15/16 criteria; #379 SDR50 parked with hardware; Q-P2-1 copy call shape |
 
-97 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+98 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
