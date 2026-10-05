@@ -1,7 +1,7 @@
 # Phase 2 plan — desktop tooling
 
-**Issued by PM, 4 October 2026 (ADR-161). Status: PROPOSED — waiting on Michael's go and the
-kickoff decisions in §2.** Nothing in this file assigns work. Work is assigned in role-labeled
+**Issued by PM, 4 October 2026 (ADR-161). Status: ADOPTED 5 October 2026 (ADR-162).** Michael
+answered D1–D8 and PM declared D9; answers are in §2. Round-1 issues wait for Michael's go to assign. Nothing in this file assigns work. Work is assigned in role-labeled
 issues ([issue workflow](ISSUE-WORKFLOW.md)), each citing the section of this plan it carries out.
 Package detail and acceptance criteria are in [WP-14](PACKAGES/WP-14.md),
 [WP-15](PACKAGES/WP-15.md) and [WP-16](PACKAGES/WP-16.md). Current state is in [STATUS](STATUS.md).
@@ -17,7 +17,7 @@ in order, at a consistent level, with no clicks at the joins.
 | [WP-14](PACKAGES/WP-14.md) `tapectl` on real cards | Provision a real microSD (MBR, FAT32 README partition, TAPEFS partition), load, verify, dump, promote, all on removable media, safely and durably | Software builds · Verification accepts |
 | [WP-16](PACKAGES/WP-16.md) Ingest | A folder of mixed-source music becomes one 44.1 kHz / 16-bit stereo stream: decoded, resampled, gain-normalised, joined gaplessly | Software builds · Verification accepts |
 | [WP-15](PACKAGES/WP-15.md) Drag-and-drop app | One window over WP-14 and WP-16: drop a folder, type a label, pick the card, press one button | Software builds · Verification accepts · Michael runs the unaided test |
-| WP-38 (candidate, §2 D7) Phone test harness | The unchanged engine built to WebAssembly, playing and recording a test cartridge image in a phone browser | Software · Verification (golden identity) |
+| ~~WP-38~~ Phone test harness | **Not taken (D7).** No explicit development; Phase 2 design must not exclude a later WebAssembly build | — |
 
 **Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided.
 On a laptop the "playable" check is `tapectl verify` plus `tapectl dump`, because no device exists yet.
@@ -48,6 +48,17 @@ Each has a recommended default. "Go with the defaults" is a complete answer.
 | D7 | Take WP-38 (phone harness, from #341) in Phase 2 | Michael | Yes, after WP-14, as a separate lane that does not block the exit gate |
 | D8 | Required-check ruleset (R2) | Michael (repository setting) | Change it after R1 lands (§4), to the stable aggregate contexts R1 produces |
 | D9 | Declare the operations/state freeze | PM | Declare at kickoff. Its condition (complete green WP-10) is met |
+
+**Answers, 5 October 2026 (Michael's words verbatim on #381; ADR-162).**
+
+| # | Answer |
+|---|---|
+| D1 | Go |
+| D2 | **Windows 10** and **current macOS** (up to date; Software records the exact version tested), plus Linux in CI |
+| D3, D4, D5, D8 | Defaults |
+| D6 | Michael's wife, if she agrees. Fallback: the default (a family member who has not seen the app) |
+| D7 | **No WP-38 in Phase 2.** No explicit development, but Software keeps it possible: nothing in WP-14/15/16 may make a later WebAssembly build of the engine and ingest path impossible. Recorded under WP-38 in the roadmap |
+| D9 | Operations/state freeze **declared** (ADR-162) |
 
 ## 3. How the work is organised
 
@@ -124,6 +135,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
 - **Stop:** Verification PASS; unaided test passed; host scope frozen.
 
 ### WP-38 lane (if D7 is yes)
+**Not taken: D7 was no (ADR-162).** Kept as the record of what the lane would be if Michael takes it later.
 - Starts after P2-R1. It runs alongside R2/R3 and does not block the exit gate.
 - PM issues a short contract. Acceptance: the ten WP-11 goldens are bit-identical through the WASM build, and Michael plays and records a test cartridge image on his phone.
 - It makes no claim about the product codec, the 85 dB cap or wake latency.

@@ -1,6 +1,6 @@
 # PM
 
-**Instance:** Astra in a ChatGPT Work chat. **Format:** individual lead; no subworkers.
+**Instance:** no fixed model; Michael assigns the runtime (ADR-162). **Format:** individual lead; no subworkers.
 
 ## Authority
 
@@ -119,7 +119,7 @@ Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape PM for the current phase, using Astra in a ChatGPT Work chat.
+You are the Digital-Tape PM for the current phase, in whichever chat Michael has assigned.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/pm.md
 and required onboarding documents. Find your current open issue labeled
 `pm`, read its live body and scope updates, and report the input main

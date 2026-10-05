@@ -1,6 +1,6 @@
 # Project status
 
-**4 October 2026 UTC · input main `594aa59` · Owner: PM (ADR-160 close-out; ADR-161 Phase 2 plan) ·**
+**5 October 2026 UTC · input main `a20cc5b` · Owner: PM (ADR-162 Phase 2 opened) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -14,8 +14,8 @@ Product #369 head `b61a9e9`:
 
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
-**Opening Phase 2 needs Michael's go.** [The Phase 2 plan](PHASE2-PLAN.md) is issued as PROPOSED (ADR-161):
-kickoff decisions D1–D9 with defaults, rounds P2-R0…R3, and WP-14/15/16 criteria. Hardware stays parked.
+**Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 10 + current macOS;
+WP-38 not taken; operations freeze declared. **P2-R1 issues wait for Michael's go to assign.** Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -77,8 +77,8 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 
 | Work | Held since | State | Next owner |
 |---|---|---|---|
-| Operations freeze | — | Unblocked: WP-10 and WP-12/12a are complete. Not yet declared | PM, at Phase 2 kickoff |
-| Phase 2 | — | [Plan](PHASE2-PLAN.md) PROPOSED; awaiting D1–D8 | **Michael**, then PM issues P2-R1 |
+| Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
+| Phase 2 | — | Open; D1–D9 answered (ADR-162). Assignment held at Michael's instruction | **Michael** (go to assign), then PM issues P2-R1 |
 | Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. Paper question, [plan §5](PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379) | Verification (a) P2-R1, PM (b) P2-R2 |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |

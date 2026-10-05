@@ -37,7 +37,7 @@ READY). r3 applied #136's one non-blocking wording note in its own proposed text
 change to any permitted set. Issuance was not implementation or acceptance; V10-001 was
 later implemented under Structural Rule 1 and independently disposed (Verification #141,
 Product #362). Under `tapefs` §14, §9 freezes at the first fully green WP-10 run; that
-condition is met, and the operations freeze is PM's to declare at Phase 2 kickoff.
+condition is met, and PM declared the operations freeze at Phase 2 kickoff (ADR-162, 5 October 2026).
 
 ## Previous amendment: DRAFT-9
 

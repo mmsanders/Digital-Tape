@@ -113,4 +113,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-160](DECISIONS.md#adr-160--phase-1-close-out-cleanup-parked-work-dispositioned-roadmap-is-the-record) | 2026-10-03 | Phase 1 close-out cleanup: parked work dispositioned, roadmap is the record | Hardware park through Phase 2; held hardware PRs closed with restore refs; #341 → WP-38; #372 → kickoff R1–R9; #374 actioned |
 | [ADR-161](DECISIONS.md#adr-161--phase-2-plan-issued-intake-379-dispositioned) | 2026-10-04 | Phase 2 plan issued; intake #379 dispositioned | PHASE2-PLAN.md (PROPOSED) with D1–D9, rounds, WP-14/15/16 criteria; #379 SDR50 parked with hardware; Q-P2-1 copy call shape |
 
-98 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-162](DECISIONS.md#adr-162--phase-2-opened-kickoff-answers-operations-freeze-pm-runtime-unpinned) | 2026-10-05 | Phase 2 opened: kickoff answers, operations freeze, PM runtime unpinned | D1 go; Windows 10 + current macOS; D3–D5/D8 defaults; D6 Michael's wife; WP-38 not taken but not excluded; §9 frozen; no assignments until Michael's go |
+
+99 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

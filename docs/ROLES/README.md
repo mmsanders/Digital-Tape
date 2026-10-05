@@ -6,7 +6,7 @@ Michael assigns roles; opening this index or receiving a label event grants no r
 
 | Role | Chat/model | Charter | Issue label |
 |---|---|---|---|
-| PM | ChatGPT Work / Astra | [PM](pm.md) | pm |
+| PM | Any — Michael assigns (ADR-162) | [PM](pm.md) | pm |
 | Software | Claude Code / Opus | [Software](software.md) | software-lead |
 | Hardware | Separate Claude Code / Opus | [Hardware](hardware.md) | hardware-lead |
 | Verification | Separate Work / Sol | [Verification](verification.md) | verification-lead in `digital-tape-verification` |
