@@ -7,7 +7,14 @@ on:
   push:
     branches: [main]
   pull_request:
+    # `labeled` so adding the `qualification` label (phase gates) starts a
+    # run that includes the qualification lane.
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
+  # The qualification lane's standing run (R1, #385): full campaigns, the
+  # mutation gate and the WP-10 backlogs, daily on main.
+  schedule:
+    - cron: '17 9 * * *'
 
 # A newer push to the same PR cancels the superseded run. Every other run (main
 # pushes, dispatches) gets a group of its own run id, so main runs never cancel
@@ -21,37 +28,56 @@ concurrency:
 # permanently-red pipeline stops being read, and then the first real failure
 # arrives against a background of red.
 jobs:
-  # Docs-only PRs skip the engine suite (#347). Every heavy job needs this one
-  # and runs unless it positively said docs_only == 'true'; if it fails or is
-  # unsure, the output is not 'true' and the whole suite runs. Skipped jobs
-  # report "skipped", which satisfies the ruleset's required checks. main
-  # pushes and workflow_dispatch are always full.
+  # Three lanes (R1, #385; lane aggregates at the end of this file):
+  #   cheap          every change, docs included;
+  #   regression     every change that is not docs-only (#347);
+  #   qualification  daily schedule, workflow_dispatch, a PR labelled
+  #                  `qualification` (phase gates), any change that could move
+  #                  an engine result, and a job whose own test dirs changed.
+  # PRs and main pushes are classified the same way. The classifier fails toward
+  # running more: if it fails or is unsure, docs_only is not 'true', qualify is
+  # not 'false', and every lane runs. tools/ci/ci_lanes.py holds the rules and
+  # tools/ci/verify-change-classifier.py their negative controls.
   changes:
-    name: classify changes (docs-only PRs skip the engine suite)
+    name: classify changes into lanes
     runs-on: ubuntu-latest
     outputs:
       docs_only: ${{ steps.classify.outputs.docs_only }}
+      qualify: ${{ steps.classify.outputs.qualify }}
+      qualify_jobs: ${{ steps.classify.outputs.qualify_jobs }}
     steps:
       - uses: actions/checkout@v4
         with:
           # The pull_request merge commit and its first parent (the base).
           fetch-depth: 2
-      - name: Classifier negative controls
+      - name: Classifier and lane negative controls
         run: python3 -B tools/ci/verify-change-classifier.py
       - name: Classify
         id: classify
         env:
           EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
           set -euo pipefail
-          if [ "$EVENT" != "pull_request" ]; then
-            echo "full: $EVENT runs the whole suite"
-            echo "docs_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          # HEAD is the PR merge commit; diff it against the base it merges into.
-          test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 3
-          git diff -z --no-renames --name-only HEAD^1 HEAD | python3 -B tools/ci/classify-changes.py
+          paths="$RUNNER_TEMP/changed-paths"
+          : > "$paths"
+          case "$EVENT" in
+            pull_request)
+              # HEAD is the PR merge commit; diff it against the base it merges into.
+              test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 3
+              git diff -z --no-renames --name-only HEAD^1 HEAD > "$paths"
+              ;;
+            push)
+              # Everything the push brought to main. An unknown or unreachable
+              # base leaves the list empty, and an empty list runs every lane.
+              if [ -n "$BEFORE" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ] \
+                  && git fetch --no-tags --depth=1 origin "$BEFORE"; then
+                git diff -z --no-renames --name-only "$BEFORE" HEAD > "$paths"
+              fi
+              ;;
+          esac
+          python3 -B tools/ci/classify-changes.py < "$paths"
 
   verifier-package:
     name: independent DRAFT-8 mount package self-checks (not engine acceptance)
@@ -135,7 +161,7 @@ jobs:
   promote-package:
     name: independent promote package — synthetic self-checks, then product observations
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',promote-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -282,7 +308,7 @@ jobs:
   wp36-fuzz-package:
     name: independent WP-36 100k source-slot fuzz — debug real-product observations
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp36-fuzz-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -338,7 +364,7 @@ jobs:
   allocator-cow-package:
     name: independent WP-07 allocator/COW — fixed 10k real-product campaign
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',allocator-cow-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -364,7 +390,7 @@ jobs:
   crash-core-package:
     name: independent WP-10 core crash — bounded real-product campaign
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',crash-core-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -392,7 +418,7 @@ jobs:
   format-dup-identity-package:
     name: R29-B format/duplicate raw identity + dup long-op — exact canonical product campaign
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',format-dup-identity-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -421,7 +447,7 @@ jobs:
   respool-full-functional:
     name: independent full re-spool — clean/headroom + WP-12a product gate
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',respool-full-functional,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -562,7 +588,7 @@ jobs:
   wp10-final-package:
     name: independent WP-10 final backlog (#118) — product replay
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp10-final-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -610,7 +636,7 @@ jobs:
   wp10-backlog-package:
     name: independent WP-10 backlog rows 1-3 — product replay
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp10-backlog-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -954,7 +980,7 @@ jobs:
   wp10-backlog-r54-package:
     name: independent WP-10 backlog r54 (repair crash, dup re-run, dup shape) — product replay
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp10-backlog-r54-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -1000,7 +1026,7 @@ jobs:
     # DRAFT-10 V10-001 (#359): residue destinations, Verification #138.
     name: independent WP-10 residue destinations (V10-001) — product replay
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp10-residue-package,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -1104,8 +1130,6 @@ jobs:
 
   dashboard:
     name: lead-queue dashboard behaviour
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -1204,8 +1228,6 @@ jobs:
 
   build:
     name: build (-Werror)
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -1258,8 +1280,6 @@ jobs:
 
   spec:
     name: spec bundle matches VERSION.md
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -1351,7 +1371,7 @@ jobs:
     # first and proves the gate fails when a (benign) mutation survives.
     name: WP-11 mutation gate — seven mutations, each caught
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp11-mutation-gate,')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -1378,7 +1398,8 @@ jobs:
     # A failure writes an audible-difference WAV; it is never fixed by touching
     # a reference or fitting the engine. Do not "fix" this by relaxing a gate.
     name: golden suite — WP-11 R63 references, byte-exact
-    needs: build
+    needs: [changes, build]
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -1407,3 +1428,102 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - run: tools/fetch-evidence.sh wp11
+
+  # ---------------------------------------------------------------------------
+  # Lane aggregates (R1, #385). These three check names, plus the
+  # evidence-integrity and repo-hygiene contexts, are what ruleset 22084355
+  # requires. Each aggregate's `needs:` IS its lane: tools/ci/ci_lanes.py reads
+  # lane membership from here, and verify-change-classifier.py fails if any
+  # job is in no lane or in two. The verdict passes only when every selected
+  # member succeeded and every unselected member was skipped.
+  cheap:
+    name: cheap
+    needs:
+      - changes
+      - spec
+      - build
+      - gates
+      - meta
+      - unit
+      - dashboard
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/ci/lane-verdict.py
+        env:
+          LANE: cheap
+          NEEDS: ${{ toJSON(needs) }}
+
+  regression:
+    name: regression
+    needs:
+      - changes
+      - verifier-package
+      - ops-package
+      - record-package
+      - transport-package
+      - respool-package
+      - format-dup-package
+      - writability-package
+      - notmounted-package
+      - slot-package
+      - embedded-readiness-package
+      - sequential-wp06-package
+      - capacity-wp09-package
+      - wp12-closure-package
+      - portability-wp08-package
+      - wp06-closure-package
+      - strengthen-r55-package
+      - wp08-mapping-r56-package
+      - wp09-gaps-r56-package
+      - wp10-closure-package
+      - accepted-binding-regression-gate
+      - playback-package
+      - playback-complete-package
+      - crossrun-wp08-package
+      - history-wp09-package
+      - tapectl
+      - wp11-portability
+      - golden
+      - wp11-release-assets
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/ci/lane-verdict.py
+        env:
+          LANE: regression
+          NEEDS: ${{ toJSON(needs) }}
+          DOCS_ONLY: ${{ needs.changes.outputs.docs_only }}
+          QUALIFY: ${{ needs.changes.outputs.qualify }}
+          QUALIFY_JOBS: ${{ needs.changes.outputs.qualify_jobs }}
+
+  qualification:
+    name: qualification
+    needs:
+      - changes
+      - allocator-cow-package
+      - wp36-fuzz-package
+      - format-dup-identity-package
+      - promote-package
+      - crash-core-package
+      - wp10-final-package
+      - wp10-backlog-package
+      - wp10-backlog-r54-package
+      - wp10-residue-package
+      - respool-full-functional
+      - respool-full-crash
+      - respool-full-aggregate
+      - wp11-mutation-gate
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/ci/lane-verdict.py
+        env:
+          LANE: qualification
+          NEEDS: ${{ toJSON(needs) }}
+          DOCS_ONLY: ${{ needs.changes.outputs.docs_only }}
+          QUALIFY: ${{ needs.changes.outputs.qualify }}
+          QUALIFY_JOBS: ${{ needs.changes.outputs.qualify_jobs }}
