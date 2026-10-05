@@ -1331,7 +1331,10 @@ jobs:
     # docs/WP11-CLI-CONTRACT.md (#366): tapectl builds, its WAV reader/writer pass
     # their unit tests (48 kHz, mono, 24-bit rejected), and a format -> load ->
     # dump round trip on the real engine gives the source back byte for byte.
-    name: tapectl — build, WAV unit tests, format/load/dump smoke
+    # WP-14 (#385, docs/WP14-CLI-CONTRACT.md) adds the host-port unit tests, the
+    # provisioned-image smoke (fsck.fat and mtools read partition 1), every §5
+    # refusal through the TAPECTL_TEST seam, and the seam-absence check.
+    name: tapectl — build, unit tests, WP-11 and WP-14 image smoke (Linux)
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
@@ -1339,7 +1342,105 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: OS build and FAT checkers
+        run: |
+          uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
+          sudo apt-get update -q && sudo apt-get install -y --no-install-recommends dosfstools mtools
       - run: make -C host test
+
+  wp14-linux-device:
+    # WP-14 on a real Linux block device: a loop device over a 64 GiB sparse file
+    # (A6: the mirror superblock sits past 4 GiB). The shipped tapectl must refuse
+    # it (a loop device is not a §2 Linux form, #384 Q2); the round trip
+    # provision -> load -> detach/reattach -> verify -> dump runs through
+    # tapectl-test with injected facts. Then the real probe on the runner's own
+    # root disk must report holds_os.
+    name: WP-14 device round trip — Linux loop device
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: OS build
+        run: uname -a; . /etc/os-release && echo "$PRETTY_NAME"
+      - run: make -C host
+      - name: Loop-device round trip
+        run: |
+          truncate -s 64G "$RUNNER_TEMP/card.img"
+          sudo -E host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img"
+      - name: The real probe on this runner's root disk
+        run: |
+          root=$(lsblk -no PKNAME "$(findmnt -no SOURCE /)" | head -1)
+          sudo build/host/tapectl-test probe "/dev/$root" | tee probe.txt
+          grep -q '^holds_os=1' probe.txt
+          ! grep -q '^refusal=REFUSE_NONE' probe.txt
+          sudo build/host/tapectl verify "/dev/$root"; test $? -eq 3
+
+  wp14-macos:
+    # WP-14 on macOS (D2): build with the system clang (the engine archive with
+    # GCC, whose stack-analysis flags the engine Makefile uses), the full host
+    # test suite, then a round trip on a real /dev/diskN: a 64 GiB sparse raw
+    # image attached by hdiutil. Raw I/O goes through /dev/rdiskN and the
+    # durable flush is reported (#384 Q6). On reattach macOS mounts partition 1
+    # itself, so the probe's own-partition-1 exception and README.TXT are real.
+    name: WP-14 tapectl — macOS build, image smoke, disk-image round trip
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: OS build
+        run: sw_vers; uname -a; clang --version | head -1
+      - name: Engine archive (GCC)
+        run: |
+          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+          test -n "$GCC" && $GCC --version | head -1
+          make -C engine CC="$GCC" all
+      - run: make -C host CC=clang test
+      - name: Disk-image round trip
+        run: |
+          mkfile -n 64g "$RUNNER_TEMP/card.raw"
+          sudo -E host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
+          cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
+
+  wp14-windows:
+    # WP-14 on Windows (D2): MinGW-w64 build, the full host test suite in Git
+    # Bash, then a round trip on a real \\.\PhysicalDriveN: an 8 GiB expandable
+    # VHD attached by diskpart. On reattach Windows mounts partition 1 and gives
+    # it a drive letter, so README.TXT and the own-partition-1 exception are real.
+    name: WP-14 tapectl — Windows build, image smoke, VHD round trip
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: OS build and toolchain
+        run: |
+          cmd //c ver; powershell -NoProfile -Command "(Get-CimInstance Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).BuildNumber"
+          export PATH="/c/mingw64/bin:$PATH"
+          which -a gcc mingw32-make make 2>/dev/null || true; gcc --version | head -1
+      - name: Engine and tapectl
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc test
+      - name: VHD round trip
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          host/device_e2e.sh build/host/tapectl.exe build/host/tapectl-test.exe "$RUNNER_TEMP/e2e" host/vhd_windows.sh "$RUNNER_TEMP/card.vhd"
 
   wp11-portability:
     # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
@@ -1484,6 +1585,9 @@ jobs:
       - crossrun-wp08-package
       - history-wp09-package
       - tapectl
+      - wp14-linux-device
+      - wp14-macos
+      - wp14-windows
       - wp11-portability
       - golden
       - wp11-release-assets
