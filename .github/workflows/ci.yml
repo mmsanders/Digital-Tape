@@ -1346,7 +1346,7 @@ jobs:
         run: |
           uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
           sudo apt-get update -q && sudo apt-get install -y --no-install-recommends dosfstools mtools
-      - run: make -C host test
+      - run: tools/ci/annotate-tail.sh "Linux host tests" make -C host test
 
   wp14-linux-device:
     # WP-14 on a real Linux block device: a loop device over a 64 GiB sparse file
@@ -1370,14 +1370,15 @@ jobs:
       - name: Loop-device round trip
         run: |
           truncate -s 64G "$RUNNER_TEMP/card.img"
-          sudo -E host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img"
+          sudo -E tools/ci/annotate-tail.sh "loop round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img"
       - name: The real probe on this runner's root disk
         run: |
           root=$(lsblk -no PKNAME "$(findmnt -no SOURCE /)" | head -1)
           sudo build/host/tapectl-test probe "/dev/$root" | tee probe.txt
           grep -q '^holds_os=1' probe.txt
           ! grep -q '^refusal=REFUSE_NONE' probe.txt
-          sudo build/host/tapectl verify "/dev/$root"; test $? -eq 3
+          rc=0; sudo build/host/tapectl verify "/dev/$root" || rc=$?
+          test "$rc" -eq 3
 
   wp14-macos:
     # WP-14 on macOS (D2): build with the system clang (the engine archive with
@@ -1402,11 +1403,11 @@ jobs:
           GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
           test -n "$GCC" && $GCC --version | head -1
           make -C engine CC="$GCC" all
-      - run: make -C host CC=clang test
+      - run: tools/ci/annotate-tail.sh "macOS host tests" make -C host CC=clang test
       - name: Disk-image round trip
         run: |
           mkfile -n 64g "$RUNNER_TEMP/card.raw"
-          sudo -E host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
+          sudo -E tools/ci/annotate-tail.sh "macOS disk-image round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
           cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
 
   wp14-windows:
@@ -1435,12 +1436,12 @@ jobs:
         run: |
           export PATH="/c/mingw64/bin:$PATH"
           MAKE=$(command -v mingw32-make || command -v make)
-          "$MAKE" -C engine CC=gcc all
-          "$MAKE" -C host CC=gcc test
+          tools/ci/annotate-tail.sh "Windows engine build" "$MAKE" -C engine CC=gcc all
+          tools/ci/annotate-tail.sh "Windows host tests" "$MAKE" -C host CC=gcc test
       - name: VHD round trip
         run: |
           export PATH="/c/mingw64/bin:$PATH"
-          host/device_e2e.sh build/host/tapectl.exe build/host/tapectl-test.exe "$RUNNER_TEMP/e2e" host/vhd_windows.sh "$RUNNER_TEMP/card.vhd"
+          tools/ci/annotate-tail.sh "Windows VHD round trip" host/device_e2e.sh build/host/tapectl.exe build/host/tapectl-test.exe "$RUNNER_TEMP/e2e" host/vhd_windows.sh "$RUNNER_TEMP/card.vhd"
 
   wp11-portability:
     # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
