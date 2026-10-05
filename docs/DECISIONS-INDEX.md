@@ -114,5 +114,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-161](DECISIONS.md#adr-161--phase-2-plan-issued-intake-379-dispositioned) | 2026-10-04 | Phase 2 plan issued; intake #379 dispositioned | PHASE2-PLAN.md (PROPOSED) with D1–D9, rounds, WP-14/15/16 criteria; #379 SDR50 parked with hardware; Q-P2-1 copy call shape |
 
 | [ADR-162](DECISIONS.md#adr-162--phase-2-opened-kickoff-answers-operations-freeze-pm-runtime-unpinned) | 2026-10-05 | Phase 2 opened: kickoff answers, operations freeze, PM runtime unpinned | D1 go; Windows 10 + current macOS; D3–D5/D8 defaults; D6 Michael's wife; WP-38 not taken but not excluded; §9 frozen; no assignments until Michael's go |
+| [ADR-163](DECISIONS.md#adr-163--p2-r1-issued-wp-14-contract-erratum-e-1-proposed-round-assignments) | 2026-10-05 | P2-R1 issued: WP-14 contract, erratum E-1 proposed, round assignments | WP14-CLI-CONTRACT.md issued; verify uses engine judgments only; ports in host/port; FAT16 erratum for Michael; pre-routed Software/Verification round |
 
-99 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+100 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
