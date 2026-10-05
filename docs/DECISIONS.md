@@ -2854,3 +2854,33 @@ intake #379
 
 **Cost to reverse.** Text. The plan is a proposal until D1; the #379 bus change is a Hardware revision that
 has not been made.
+
+## ADR-162 — Phase 2 opened: kickoff answers, operations freeze, PM runtime unpinned
+
+**Date:** 2026-10-05 UTC · **Owner:** PM (Claude, at Michael's direction) · **Input:** product `a20cc5b`;
+PM issue #381 (Michael's answers verbatim); intake #379
+
+**Decision.**
+1. **Phase 2 is open (D1).** [The Phase 2 plan](PHASE2-PLAN.md) changes from PROPOSED to ADOPTED.
+   **No P2-R1 assignment issue is opened until Michael says go to assign** (his instruction at kickoff).
+2. **Platforms (D2): Windows 10 and current macOS**, plus Linux in CI. Michael gave no macOS version
+   ("basically up to date"); Software records the exact macOS and Windows builds tested, and WP-14 A1/A6
+   and WP-15 G5 are accepted on those two. Windows 10 is past Microsoft's mainstream support; it is in scope
+   because it is the family machine, and Software flags any toolchain or WebView dependency that would drop it.
+3. **D3, D4, D5 and D8 take the plan's defaults** unchanged.
+4. **Unaided tester (D6): Michael's wife, if she agrees.** If not, the default applies: a family member who
+   has not seen the app, with Michael watching and not helping.
+5. **WP-38 is not taken in Phase 2 (D7).** No explicit development. Michael asked that Software keep it
+   possible: Phase 2 host design must not make a later WebAssembly build of the engine and ingest path
+   impossible. This is a design consideration Software notes in its round returns, not a gate or a package
+   criterion. Resume: Michael's `REQUEST:`.
+6. **Operations/state freeze declared (D9).** Under `tapefs` §14, §9 freezes at the first fully green WP-10
+   run; Verification #141 met that. The DRAFT-10 bundle hashes in `spec/VERSION.md` are unchanged. Any
+   later change to operation behaviour is a spec revision under PHASE0-FREEZE rules and Structural Rule 1.
+7. **The PM seat has no fixed model.** Michael: "PM is whoever has credits left." CLAUDE.md §7 and the role
+   docs drop the PM model name. Verification stays ChatGPT (Sol), separate from Software (Opus); that is the
+   cross-model separation the agreement requires, and it is unchanged.
+8. **Intake #379 closed as filed** (5 Oct). Its closure condition, #380 merged with roadmap entries, was met.
+
+**Cost to reverse.** Text, until P2-R1 issues are opened. The operations freeze reverses only by a spec
+revision with Michael's approval.

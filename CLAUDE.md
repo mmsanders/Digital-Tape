@@ -199,7 +199,8 @@ unless Michael changes it at kickoff. Phase 2 scope, kickoff decisions, rounds a
 [the Phase 2 plan](docs/PHASE2-PLAN.md). Use
 [role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
 historical record of how Phase 1 was organised.
-PM is Astra in ChatGPT Work; independent Verification is Sol in a separate Work chat;
+PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). Independent
+Verification is Sol in a separate ChatGPT Work chat;
 Software and Hardware are Opus in separate Claude Code chats. Surge is Grok, primarily
 instructed directly by Michael for miscellaneous scoped tasks.
 
