@@ -23,7 +23,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | WP-02 | TAPEFS v1 specification | **PM** | spec | Scoped freeze signed by Michael 8 September 2026 (DRAFT-8, #25); amended through DRAFT-9 (#247) and DRAFT-10 (#352). Current revision in `spec/VERSION.md` |
 | WP-03 | Engine API specification | **PM** | spec | Scoped contract freeze signed (DRAFT-8, #25); amended through DRAFT-10 (#352). The operations/state freeze condition is met (WP-10 complete); PM declares it at Phase 2 kickoff |
 | WP-04 | Transport spike: Route A vs Route B | You | hardware | **Parked through Phase 2** (#309, ADR-160). Michael owns an A1 Mini (nominal 180 × 180 × 180 mm), the default printer for all new print work; the library-printer route is retired. Michael reports filament on hand (3 Oct) and that clasps from his own sizing prints appear to work; that is owner observation, not qualification. Held PRs #120 (A1 Mini filament advice + A1MINI-01 coupon method), #197 and #198 (latch test-frame fixes) were closed unmerged; see the [parked hardware PR record](#parked-hardware-pr-record), including the latch root cause the next revision must start from. Safe wallet default remains: no purchase without Michael's approval. Resume at Phase 3 or on an explicit request |
-| WP-05 | Parts order #1 | You | hardware | **Parked through Phase 2** (#309, ADR-160). Three PNY 64 GB V30 cards are bought. Five stored-rate vectors are independently arithmetically reproduced, but Verification rejected the measurement method (`P1-R23-V01`), so no card is characterised to A-2. PR #87 (schema-2 sustained-write path) was closed unmerged and is restorable; see the [parked hardware PR record](#parked-hardware-pr-record). A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open and are a Verification review on resume |
+| WP-05 | Parts order #1 | You | hardware | **Parked through Phase 2** (#309, ADR-160). Three PNY 64 GB V30 cards are bought. Five stored-rate vectors are independently arithmetically reproduced, but Verification rejected the measurement method (`P1-R23-V01`), so no card is characterised to A-2. PR #87 (schema-2 sustained-write path) was closed unmerged and is restorable; see the [parked hardware PR record](#parked-hardware-pr-record). A-2, exact identity, attribution, atomicity and end-to-end acceptance remain open and are a Verification review on resume. #379: the A-6 atomicity test must use the write command and bus mode the firmware will ship (likely multi-block CMD25 at SDR50); check whether a Teensy 4.1 built-in slot can run SDR50 before the rig depends on it |
 | WP-34 | Thermal and safety budget | Hardware | hardware | Current version in spec/hw/VERSION.md; estimates, open safety acceptances and HC221 qualification hold |
 | WP-35 | Repo access and agent push setup | You | — | Effectively satisfied — see note |
 
@@ -45,14 +45,16 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 **Milestone:** splice your own voice into the middle of a song on a laptop and hear it. **Met 3 Oct 2026** (WP-11 `splice` golden, approved by ear on #367; `tapectl record --mode splice` lets anyone repeat it with their own voice).
 
-## Phase 2 — desktop tooling · 2–3 weeks
+## Phase 2 — desktop tooling · 2–3 weeks · [plan](../PHASE2-PLAN.md)
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-14 | `tapectl`: format, load, dump, verify, promote | Agent | 3 | **Unblocked; awaits Michael's Phase 2 go.** Stream 1 is complete. WP-11 already shipped `tapectl` per `docs/WP11-CLI-CONTRACT.md` with `format`, `load`, `dump` and `promote`; WP-14 extends that binary (chiefly `verify`) rather than rebuilding it |
-| WP-15 | Drag-and-drop GUI (Tauri) | Agent | 3 | Unblocked; awaits Michael's Phase 2 go. Decide alongside WP-38 before committing to a desktop-only interaction design |
-| WP-16 | Ingest: gapless concat, loudness normalisation | Agent | 3 | Unblocked; awaits Michael's Phase 2 go |
-| WP-38 | Phone / web-app test harness (engine built to WebAssembly) | Agent | 3 | **Candidate, from intake #341** (Michael, 30 Sep: test how it works and sounds from a phone rather than a laptop). Decide at Phase 2 kickoff next to WP-15. Feasibility (PM, #341): the C99 engine compiles to WASM unchanged, keeping guardrail 12; `tape_render` maps to an AudioWorklet, the block device to browser storage, scrub to touch, record to the phone mic; a static page like the lead queue. Limits: phone audio is not the product codec (no 85 dB-cap or wake-latency evidence); browser storage favours short test cartridges over a full C-60; golden byte-exactness must be checked on the WASM build as a third consumer |
+| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **Planned, P2-R1** ([Phase 2 plan](../PHASE2-PLAN.md)). WP-11 shipped `tapectl` for disk images; WP-14 adds real microSD provisioning (MBR + FAT32 + TAPEFS), a durable flush, a disk-safety guard and read-only `verify`. Criteria A1–A9 in the package file |
+| WP-15 | [Drag-and-drop app (Tauri)](WP-15.md) | Agent | 3 | **Planned, P2-R3.** One window over WP-14 and WP-16; never writes the card itself; no lists (guardrail 03). Milestone test: someone who is not Michael makes a cartridge unaided |
+| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. Waits on kickoff decisions D3–D5 |
+| WP-38 | Phone / web-app test harness (engine built to WebAssembly) | Agent | 3 | **Candidate, kickoff decision D7** (from #341). If taken, a separate lane after P2-R1 that does not block the Phase 2 exit; see [the plan](../PHASE2-PLAN.md#wp-38-lane-if-d7-is-yes). Feasibility (PM, #341): the C99 engine compiles to WASM unchanged (guardrail 12); phone audio is not the product codec, so it gives no 85 dB-cap or wake-latency evidence, and golden identity must hold on the WASM build |
+
+**Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided. The detailed plan, rounds and kickoff decisions are in [docs/PHASE2-PLAN.md](../PHASE2-PLAN.md).
 
 ## Phase 3 — bench prototype · 3–4 weeks, gated on parts
 
@@ -83,9 +85,9 @@ Hardware is parked through Phase 2 (#309, ADR-160); Phase 3 is where it resumes.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-26 | Schematic capture and review | Agent | hardware | No schematic yet; codec architecture recorded in board-rev-a.md; fabrication/charging safety gate remains CLOSED |
+| WP-26 | Schematic capture and review | Agent | hardware | No schematic yet; codec architecture recorded in board-rev-a.md; fabrication/charging safety gate remains CLOSED. **#379 (Michael, 4 Oct): SDR50 at 1.8 V becomes the primary card bus, High Speed 4-bit at 3.3 V the fallback.** On resume, Hardware revises `board-rev-a.md` (fit the 1.8 V parts, whose footprints exist; SDR50 becomes the primary gate, superseding ADR-113's gate order), rechecks the thermal budget at SDR50, and sends Software a change list (CLAUDE.md §5). Parked with hardware |
 | WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not started — results format now fixed by ADR-118 |
-| WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked |
+| WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked. #379 firmware-port work: drive the 1.8 V rail and CMD11 voltage switch, power ordering (`+3V3` before `+1V8`), re-initialise signalling after a slot power cycle, and automatic fallback to High Speed if CMD11 or tuning fails; all in the port (`engine/port/dev_sd.c`), none in the engine. Copy throughput depends on Q-P2-1 ([plan §5](../PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379)). Measure cold instant-on and commit latency in the shipping bus mode |
 | WP-29 | Bring-up and rev B | Either | 5 | Blocked |
 | WP-30 | Power budget and runtime validation | Either | 5 | Blocked |
 | WP-37 | Thermal validation and abuse | Either | 5 | Blocked — results format now fixed by ADR-118 |
@@ -101,8 +103,9 @@ Hardware is parked through Phase 2 (#309, ADR-160); Phase 3 is where it resumes.
 ## Phase 2 kickoff prep
 
 Recorded at the Phase 1 close-out (3 October 2026, ADR-160). Phase 1 exit criteria are met
-(ADR-159). Nothing below is scheduled until Michael gives the Phase 2 go; this is the
-checklist that go opens.
+(ADR-159). Nothing below is scheduled until Michael gives the Phase 2 go. **The kickoff
+decisions (D1–D9), rounds and package criteria are now in [the Phase 2 plan](../PHASE2-PLAN.md)
+(ADR-161)**, which schedules the R-items below; this section keeps their rationale.
 
 **Decisions to make at kickoff**
 

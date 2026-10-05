@@ -9,7 +9,8 @@ archived round or the entire decision log.
    four documents plus your issue — see CLAUDE.md §4 and your charter. The table below
    is **read on demand**, for the sections your tranche touches, not a mandate.
 3. Read your [role instructions](ROLES/README.md) and [issue workflow](ISSUE-WORKFLOW.md).
-   Phase scope and parked work are in [the roadmap](PACKAGES/README.md).
+   Phase scope and parked work are in [the roadmap](PACKAGES/README.md); the current phase's
+   rounds and criteria are in [the Phase 2 plan](PHASE2-PLAN.md).
    Read your current open assignment issue and scope updates, then the inputs below.
    No eligible issue means unassigned; historical documents do not supply a task.
 

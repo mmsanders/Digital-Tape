@@ -1,6 +1,6 @@
 # Project status
 
-**3 October 2026 UTC · input main `320d729` · Owner: PM (#371; close-out cleanup ADR-160) ·**
+**4 October 2026 UTC · input main `594aa59` · Owner: PM (ADR-160 close-out; ADR-161 Phase 2 plan) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -14,8 +14,8 @@ Product #369 head `b61a9e9`:
 
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
-**Opening Phase 2 needs Michael's go.** The hardware park now extends through Phase 2 and #341 is
-candidate WP-38 (ADR-160). The kickoff checklist is in [the roadmap](PACKAGES/README.md#phase-2-kickoff-prep).
+**Opening Phase 2 needs Michael's go.** [The Phase 2 plan](PHASE2-PLAN.md) is issued as PROPOSED (ADR-161):
+kickoff decisions D1–D9 with defaults, rounds P2-R0…R3, and WP-14/15/16 criteria. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -78,6 +78,8 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | — | Unblocked: WP-10 and WP-12/12a are complete. Not yet declared | PM, at Phase 2 kickoff |
+| Phase 2 | — | [Plan](PHASE2-PLAN.md) PROPOSED; awaiting D1–D8 | **Michael**, then PM issues P2-R1 |
+| Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. Paper question, [plan §5](PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379) | Verification (a) P2-R1, PM (b) P2-R2 |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
@@ -95,7 +97,8 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
+5. **Copy time on the device (#379).** One-block device calls make the C-60 copy depend on port batching; Q-P2-1 settles it before firmware.
+6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
 

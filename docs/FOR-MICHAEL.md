@@ -7,9 +7,15 @@ The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digita
 
 ## Open for Michael (3 October 2026)
 
-- **Phase 2 go.** Phase 1 exit criteria are met (ADR-159). The kickoff checklist is in
-  [the roadmap](PACKAGES/README.md#phase-2-kickoff-prep), including the required-check
-  ruleset decision, which is a repository-settings change only Michael makes.
+- **Phase 2 go and kickoff decisions D1–D8**, listed in [the Phase 2 plan §2](PHASE2-PLAN.md#2-kickoff-decisions)
+  with recommended defaults ("go with the defaults" is a complete answer). They cover:
+  - which computers the tools must run on;
+  - which music file types ingest accepts;
+  - loudness;
+  - song order and gaps;
+  - who runs the unaided test;
+  - whether to take the phone harness;
+  - the required-check ruleset, a repository setting only Michael changes.
 
 Decided at the Phase 1 close-out (ADR-160): the hardware park extends through Phase 2
 (#309), and phone/web-app testing is a Phase 2 candidate package (#341).
