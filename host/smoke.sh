@@ -78,3 +78,5 @@ ok "usage errors exit 2"
 [ $rc5 -eq 1 ] && grep -q TAPE_ERR_GEOMETRY "$DIR/g.err" || fail "impossible geometry exited $rc5, want 1 with TAPE_ERR_GEOMETRY"
 ok "engine refusal exits 1 and names TAPE_ERR_GEOMETRY"
 echo "PASS  tapectl smoke"
+
+# probe: lane demonstration only, never merged (#385)
