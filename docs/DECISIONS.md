@@ -2884,3 +2884,38 @@ PM issue #381 (Michael's answers verbatim); intake #379
 
 **Cost to reverse.** Text, until P2-R1 issues are opened. The operations freeze reverses only by a spec
 revision with Michael's approval.
+
+## ADR-163 — P2-R1 issued: WP-14 contract, erratum E-1 proposed, round assignments
+
+**Date:** 2026-10-05 UTC · **Owner:** PM (Claude, at Michael's direction) · **Input:** product `407d842`
+(#382 merged); Michael's go to assign (5 Oct, PM chat: "Okay I merged. Please assign work!")
+
+**Decision.**
+1. **[`docs/WP14-CLI-CONTRACT.md`](WP14-CLI-CONTRACT.md) is issued** and is normative for P2-R1. Rulings in it:
+   - `tapectl` never parses TAPEFS. `verify` judges superblocks, indices and chunks only through engine calls
+     (read-only mount, `tape_get_info`, a full read of both sides) and owns only the MBR and partition 1. A
+     host-side TAPEFS checker would be a second implementation of format logic (guardrail 12), and standby
+     index slots are legitimately invalid after format and after a torn commit (`tapefs` §8.1), so judging
+     them would raise false findings.
+   - New port code goes in `host/port/`, so WP-14 A8 (`engine/` byte-identical) holds literally.
+     `engine/port/dev_file.c` keeps its `fflush` for the Phase 1 suites; `tapectl` moves to the durable port.
+   - The MBR is the card's identity and is written last; an interrupted `provision` reads as not provisioned.
+   - Disk safety: a 128 GiB size ceiling, exit code 3 for every refusal, and a facts-then-policy split whose
+     test seam is compiled only under `TAPECTL_TEST` and is proven absent from the shipped binary.
+   - UUID and epoch come from the OS when not given. That is the caller owning entropy; the engine is unchanged.
+   - No write coalescing in WP-14. Batching waits on Q-P2-1.
+2. **Erratum E-1 proposed.** `tapefs` §3's "FAT32, 16 MiB" partition 1 cannot be built conformingly: FAT32
+   needs at least 65,525 clusters, and 16 MiB holds at most 32,768. PM recommends FAT16 (type 0x0E), 16 MiB.
+   The device never reads partition 1, so no engine, firmware or byte-format behaviour moves. It is still
+   frozen §3 text, so it needs Verification's paper review (P2-R1) and Michael's approval. The alternative
+   keeps FAT32 at 64 MiB. Software builds to E-1; either outcome changes only two constants in the contract.
+3. **P2-R1 is issued as a pre-routed round (ADR-158)**:
+   - Software: R1 CI lanes as its own PR first; then the WP-14 build; then binding Verification's package
+     on the same branch. It also counts device calls per C-60 operation on `dev_sim` for Q-P2-1(b).
+   - Verification: E-1 paper review, R3 contract preflight, the WP-14 acceptance package, Michael's
+     real-card script and Q-P2-1(a). Then it disposes Software's exact head directly.
+   - Michael: E-1, the D8 ruleset switch on the day R1 lands, and the witnessed real-card run on macOS and
+     Windows 10.
+
+**Cost to reverse.** Text until Software and Verification build against the contract. After that, every
+contract change costs a correction on both issues. E-1 either way costs two constants.
