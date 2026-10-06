@@ -1473,6 +1473,203 @@ jobs:
             build/host/trace/traces
           if-no-files-found: ignore
 
+  wp14-package:
+    # Verification's WP-14 package (tests/wp14_r1, #146; imported byte-identically
+    # under tests/IMPORTS.json) run against this head on each named OS:
+    #   image   runner.py on the shipped tapectl: 79 image cases + 11 controls;
+    #   native  native.py through Software's transport (tests/wp14_adapter):
+    #           owned virtual devices only (Linux loop, macOS raw disk image,
+    #           Windows VHD), tapectl-test traces and iocap capture of the
+    #           shipped binary. No physical disk is touched.
+    # The package owns every expectation and verdict; this job only runs it and
+    # keeps the raw evidence. Files over 256 MiB are zstd-compressed in the
+    # artifact; their SHA-256 is in each capture's large-artifacts.json.
+    # Windows here is Server 2025: supplemental, never Windows 10 acceptance.
+    name: WP-14 package (${{ matrix.platform }})
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && (needs.changes.outputs.qualify != 'false' || contains(needs.changes.outputs.qualify_jobs, ',wp14-package,')) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            runner: ubuntu-latest
+          - platform: macos
+            runner: macos-latest
+          - platform: windows
+            runner: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build tapectl, tapectl-test and the capture shim
+        run: |
+          set -euo pipefail
+          case "$PLATFORM" in
+            linux)
+              uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
+              make -C host
+              cc -shared -fPIC -O2 -Wall -o build/host/iocap.so tests/wp14_adapter/iocap_posix.c -ldl
+              PY=python3 ;;
+            macos)
+              sw_vers; uname -a; clang --version | head -1
+              GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+              make -C engine CC="$GCC" all
+              make -C host CC=clang
+              clang -dynamiclib -O2 -Wall -o build/host/iocap.dylib tests/wp14_adapter/iocap_posix.c
+              PY=python3 ;;
+            windows)
+              export PATH="/c/mingw64/bin:$PATH"
+              cmd //c ver; gcc --version | head -1
+              MAKE=$(command -v mingw32-make || command -v make)
+              "$MAKE" -C engine CC=gcc all
+              "$MAKE" -C host CC=gcc test-bins
+              gcc -O2 -Wall -DIOCAP_DLL -shared -o build/host/iocap.dll tests/wp14_adapter/iocap_win.c
+              gcc -O2 -Wall -municode -o build/host/iocap.exe tests/wp14_adapter/iocap_win.c
+              echo "/c/mingw64/bin" >> "$GITHUB_PATH"
+              PY=python ;;
+          esac
+          echo "PY=$(command -v $PY)" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/wp14-out"
+          "$PY" - "$RUNNER_TEMP/wp14-out/build-info-$PLATFORM.json" <<'PYEOF'
+          import hashlib, json, os, platform, sys
+          b = 'build/host'
+          info = {'head_sha': os.environ['HEAD_SHA'], 'platform': os.environ['PLATFORM'],
+                  'run': f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}/attempts/{os.environ['GITHUB_RUN_ATTEMPT']}",
+                  'runner_os': os.environ.get('ImageOS', ''), 'runner_image': os.environ.get('ImageVersion', ''),
+                  'machine': platform.platform(), 'binaries': {}}
+          for f in sorted(os.listdir(b)):
+              p = os.path.join(b, f)
+              if os.path.isfile(p) and (f.startswith(('tapectl', 'iocap'))):
+                  info['binaries'][f] = hashlib.sha256(open(p, 'rb').read()).hexdigest()
+          open(sys.argv[1], 'w').write(json.dumps(info, indent=1) + '\n')
+          print(json.dumps(info, indent=1))
+          PYEOF
+      - name: Windows — no automatic drive letters for attached test VHDs
+        if: matrix.platform == 'windows'
+        run: powershell -NoProfile -Command "mountvol /N"
+      - name: Image cases (runner.py, shipped tapectl)
+        id: image
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          root=$(pwd); [ "$PLATFORM" = windows ] && root=$(cygpath -m "$root")
+          exe=; [ "$PLATFORM" = windows ] && exe=.exe
+          export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
+          "$PY" -B tests/wp14_r1/runner.py "$root/build/host/tapectl$exe" --head "$HEAD_SHA" \
+            > "$RUNNER_TEMP/wp14-out/image-$PLATFORM.json" 2> >(tee "$RUNNER_TEMP/wp14-out/image-$PLATFORM.stderr" >&2)
+      - name: Native cases (native.py through tests/wp14_adapter/transport.py)
+        id: native
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          root=$(pwd); ev="$RUNNER_TEMP/wp14-evidence"; out="$RUNNER_TEMP/wp14-out"
+          if [ "$PLATFORM" = windows ]; then
+            root=$(cygpath -m "$root"); ev=$(cygpath -m "$ev"); SUDO=
+          else
+            SUDO="sudo -E env PATH=$PATH"
+          fi
+          export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP" WP14_BUILD_INFO="$out/build-info-$PLATFORM.json"
+          $SUDO "$PY" -B tests/wp14_r1/native.py --platform "$PLATFORM" --head "$HEAD_SHA" --evidence-dir "$ev" \
+            -- "$PY" -B "$root/tests/wp14_adapter/transport.py" --build "$root/build/host" \
+            > "$out/native-$PLATFORM.json" 2> >(tee "$out/native-$PLATFORM.stderr" >&2)
+      - name: Compress raw files over 256 MiB (hashes stay in large-artifacts.json)
+        if: always()
+        run: |
+          set -uo pipefail
+          [ "$PLATFORM" = windows ] || sudo chown -R "$(id -u)" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
+          find "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" -type f -size +256M 2>/dev/null | while read -r f; do
+            echo "zstd $f"; zstd -q -T0 -3 --rm "$f" || true
+          done
+          find "$RUNNER_TEMP/wp14-evidence" -type d -name work -prune -exec rm -rf {} + 2>/dev/null || true
+          du -sh "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-package-${{ matrix.platform }}
+          path: ${{ runner.temp }}/wp14-out
+          compression-level: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-native-evidence-${{ matrix.platform }}
+          path: ${{ runner.temp }}/wp14-evidence
+          compression-level: 1
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-binaries-${{ matrix.platform }}
+          path: |
+            build/host/tapectl
+            build/host/tapectl.exe
+          if-no-files-found: ignore
+      - name: Verdict
+        run: |
+          echo "image: ${{ steps.image.outcome }}  native: ${{ steps.native.outcome }}"
+          test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
+
+  wp14-package-census:
+    # The package's own closed census over all six JSONs (qualification.py) and
+    # its Git-object identity audit (a8_identity.py) against the publication on
+    # Verification main. Neither is acceptance: Verification disposes.
+    name: WP-14 package — closed census and Git identity
+    needs: wp14-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: mmsanders/Digital-Tape-Verification
+          path: verification-repo
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-package-*
+          path: ${{ runner.temp }}/bundle
+          merge-multiple: true
+      - name: Closed census (tests/wp14_r1/qualification.py)
+        run: |
+          set -euo pipefail
+          b="$RUNNER_TEMP/bundle"
+          for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
+          ls -la "$b"
+          python3 -B tests/wp14_r1/qualification.py --head "$HEAD_SHA" "$b" | tee "$RUNNER_TEMP/census.json"
+      - name: Git identity (tests/wp14_r1/a8_identity.py)
+        run: |
+          set -euo pipefail
+          # The import commit is the last commit that touched the imported tree
+          # (binding commits never do); the publication is its declared source.
+          imp=$(git log --format=%H -1 -- tests/wp14_r1)
+          pub=$(python3 -c "import json;print(next(p['source_commit'] for p in json.load(open('tests/IMPORTS.json'))['packages'] if p['path']=='tests/wp14_r1'))")
+          echo "import commit $imp, publication $pub, candidate $HEAD_SHA"
+          python3 -B tests/wp14_r1/a8_identity.py --verification verification-repo --product . \
+            --publication "$pub" --candidate "$HEAD_SHA" --import-commit "$imp" \
+            --import-path tests/wp14_r1 --golden-path tests/golden | tee "$RUNNER_TEMP/a8-identity.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-census
+          path: |
+            ${{ runner.temp }}/census.json
+            ${{ runner.temp }}/a8-identity.json
+          if-no-files-found: ignore
+
   wp11-portability:
     # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded
     # target, arm-none-eabi-gcc Cortex-M3 under qemu-arm; (c) the static-assert
@@ -1651,6 +1848,8 @@ jobs:
       - respool-full-crash
       - respool-full-aggregate
       - wp11-mutation-gate
+      - wp14-package
+      - wp14-package-census
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
