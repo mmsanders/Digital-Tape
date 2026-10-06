@@ -1436,8 +1436,11 @@ jobs:
         run: |
           export PATH="/c/mingw64/bin:$PATH"
           MAKE=$(command -v mingw32-make || command -v make)
-          tools/ci/annotate-tail.sh "Windows engine build" "$MAKE" -C engine CC=gcc all
-          tools/ci/annotate-tail.sh "Windows host tests" "$MAKE" -C host CC=gcc test
+          # Without SHELL, mingw32-make runs recipes in cmd.exe, which cannot
+          # run ../build/... paths. Git Bash's sh is what the recipes are written for.
+          SH=$(cygpath -m "$(command -v sh)")
+          tools/ci/annotate-tail.sh "Windows engine build" "$MAKE" SHELL="$SH" -C engine CC=gcc all
+          tools/ci/annotate-tail.sh "Windows host tests" "$MAKE" SHELL="$SH" -C host CC=gcc test
       - name: VHD round trip
         run: |
           export PATH="/c/mingw64/bin:$PATH"
