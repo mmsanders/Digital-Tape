@@ -16,13 +16,15 @@ takes a bare image, a provisioned image or a whole removable device.
 | `port/layout.h`, `mbr.c`, `fat.c` | The §3.1 MBR and the §3.2 partition 1. **E-1's four constants live in `layout.h`** |
 | `port/safety.c`, `probe_*.c` | §5 as facts (a per-platform probe) and a pure policy |
 | `port/facts_test.c` | The `TAPECTL_TEST` facts seam, built only into `tapectl-test` |
+| `port/hport.c`, `tseam.h`, `trace_test.c` | The `TAPECTL_TEST` observation seam (`TAPECTL_TEST_TRACE=FILE`: opens, writes, native flush barriers and results, engine bindings, facts and policy, exit) and fault controls (`TAPECTL_TEST_FAULT=noop-flush`, `hidden-flush-error`, `nonnull-binding`, `read-error:LBA`), test build only |
 
 `make -C host` builds `build/host/tapectl` (shipped) and `build/host/tapectl-test` (the same program
 plus the facts seam and a `probe DEV` command). `make -C host test` runs:
 - the WAV and port unit tests;
 - the WP-11 smoke;
 - the WP-14 image smoke (`smoke_wp14.sh`);
-- the check that the shipped binary has no seam (`test_seam.sh`).
+- the check that the shipped binary has no seam (`test_seam.sh`);
+- the observation seam's transport self-check (`trace_selfcheck.sh`).
 
 `device_e2e.sh` is the round trip on a real device node. CI runs it on a Linux loop device, an
 `hdiutil` disk image on macOS and a VHD on Windows.

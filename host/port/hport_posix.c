@@ -51,7 +51,7 @@ static int device_bytes(int fd, uint64_t *out)
 #endif
 }
 
-int hport_open(struct hport *p, const char *path, int is_device, int writable)
+int hport_os_open(struct hport *p, const char *path, int is_device, int writable)
 {
     char raw[64];
     struct stat st;
@@ -88,7 +88,7 @@ int hport_open(struct hport *p, const char *path, int is_device, int writable)
     return 0;
 }
 
-int hport_create(struct hport *p, const char *path, uint64_t bytes)
+int hport_os_create(struct hport *p, const char *path, uint64_t bytes)
 {
     memset(p, 0, sizeof *p);
     p->fd = open(path, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
@@ -116,7 +116,7 @@ int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
     return 0;
 }
 
-int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
+int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 {
     const unsigned char *b = (const unsigned char *)buf;
     if (!p->writable) { return -1; }
@@ -129,16 +129,16 @@ int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
     return 0;
 }
 
-int hport_flush(struct hport *p)
+int hport_os_flush(struct hport *p)
 {
-    p->flushes++;
 #if defined(__APPLE__)
     if (fcntl(p->fd, F_FULLFSYNC) == 0) { p->flush_how = "F_FULLFSYNC"; return 0; }
     /* #384 Q6: F_FULLFSYNC asks a filesystem to flush the drive's cache. On a
        raw disk node there is no filesystem, and the kernel may report it
        unsupported; then make the same request of the disk directly. Any other
        failure fails the flush. */
-    if (p->is_device && (errno == ENOTTY || errno == ENOTSUP || errno == EINVAL)) {
+    /* ADR-164 §6: only an explicit unsupported-descriptor result permits it. */
+    if (p->is_device && (errno == ENOTTY || errno == ENOTSUP)) {
         if (ioctl(p->fd, DKIOCSYNCHRONIZECACHE) == 0) {
             p->flush_how = "DKIOCSYNCHRONIZECACHE";
             return 0;

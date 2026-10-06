@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # The TAPECTL_TEST facts seam must be absent from the shipped binary
-# (docs/WP14-CLI-CONTRACT.md §5). Two independent marks are checked:
-#   the symbol tapectl_test_facts_seam (nm), and
-#   the string TAPECTL_TEST_FACTS (the environment variable the seam reads).
+# (docs/WP14-CLI-CONTRACT.md §5), nor the observation and fault controls
+# (host/port/tseam.h). Every seam symbol (nm) and every configuration string
+# (the environment variables and fault names) is checked.
 # The same check is run on tapectl-test, which contains the seam, and must go
 # red there: a check that cannot fail would prove nothing about the shipped one.
 #
@@ -14,8 +14,13 @@ TEST=$2
 # Prints the marks found in binary $1; exit 0 when there are none.
 seam_free() {
   local found=0
-  if nm "$1" 2>/dev/null | grep -q tapectl_test_facts_seam; then echo "    symbol tapectl_test_facts_seam"; found=1; fi
-  if LC_ALL=C grep -a -q TAPECTL_TEST_FACTS "$1"; then echo "    string TAPECTL_TEST_FACTS"; found=1; fi
+  local s
+  for s in tapectl_test_facts_seam tseam_begin tseam_flush tseam_fault_noop_flush tseam_fault_read tseam_fault_nonnull_binding; do
+    if nm "$1" 2>/dev/null | grep -q "$s"; then echo "    symbol $s"; found=1; fi
+  done
+  for s in TAPECTL_TEST_FACTS TAPECTL_TEST_TRACE TAPECTL_TEST_FAULT noop-flush hidden-flush-error nonnull-binding read-error:; do
+    if LC_ALL=C grep -a -q -- "$s" "$1"; then echo "    string $s"; found=1; fi
+  done
   return $found
 }
 

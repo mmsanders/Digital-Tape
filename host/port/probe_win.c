@@ -111,6 +111,11 @@ int probe_device(const char *path, struct device_facts *f)
     if (DeviceIoControl(h, IOCTL_STORAGE_QUERY_PROPERTY, &q, sizeof q, &sdd, sizeof sdd, &got, NULL)) {
         f->removable = sdd.d.RemovableMedia ? 1 : 0;
         f->sd_bus = (sdd.d.BusType == BusTypeSd || sdd.d.BusType == BusTypeMmc);
+        /* ADR-164 §5: virtual media (a VHD, a file-backed disk) is never a card. */
+        if (sdd.d.BusType == BusTypeVirtual || sdd.d.BusType == BusTypeFileBackedVirtual) {
+            f->removable = 0;
+            f->sd_bus = 0;
+        }
     }
     f->bytes = DeviceIoControl(h, IOCTL_DISK_GET_LENGTH_INFO, NULL, 0, &li, sizeof li, &got, NULL)
                ? (uint64_t)li.Length.QuadPart : UINT64_MAX;

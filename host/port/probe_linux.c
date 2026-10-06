@@ -159,6 +159,12 @@ int probe_device(const char *path, struct device_facts *f)
 
     snprintf(sys, sizeof sys, "/sys/block/%s/removable", disk);
     f->removable = read_line(sys, line, sizeof line) == 0 && strcmp(line, "1") == 0;
+    /* ADR-164 §5: virtual media is never a card (a loop device is refused by
+       its path form already; this keeps the fact honest for `probe`). */
+    if (strncmp(disk, "loop", 4) == 0 || strncmp(disk, "nbd", 3) == 0 || strncmp(disk, "zram", 4) == 0
+        || strncmp(disk, "ram", 3) == 0 || strncmp(disk, "dm-", 3) == 0) {
+        f->removable = 0;
+    }
     snprintf(sys, sizeof sys, "/sys/block/%s", disk);
     {
         char real[PATH_MAX];

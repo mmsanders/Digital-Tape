@@ -66,13 +66,25 @@ static void test_mbr(void)
     x[0] = 0xEB; x[440] ^= 0xFF;
     check(mbr_is_layout(x, N), "bootstrap and disk signature are not part of recognition");
 
-    /* A bare TAPEFS superblock is never MBR-shaped: 446..507 are reserved zero. */
+    /* ADR-164 / P2V-001 candidate rule: signature 55 AA OR any nonzero byte in
+       446..507. A bare superblock (446..507 reserved zero) is not a candidate... */
     memset(x, 0, 512);
     memcpy(x, "TAPEFS", 6);
-    x[508] = 0x12; x[509] = 0x34; x[510] = 0x55; x[511] = 0xAA;
-    check(!mbr_is_mbr_shaped(x), "a superblock whose CRC happens to end 55 AA is not an MBR");
-    x[470] = 1;
-    check(mbr_is_mbr_shaped(x), "control: a non-zero partition table with 55 AA is MBR-shaped");
+    x[508] = 0x12; x[509] = 0x34; x[510] = 0x56; x[511] = 0x78;
+    check(!mbr_is_mbr_shaped(x), "a bare superblock is not a candidate MBR");
+    x[507] = 1;
+    check(mbr_is_mbr_shaped(x), "a nonzero byte at 507, no signature: candidate");
+    x[507] = 0; x[446] = 0x80;
+    check(mbr_is_mbr_shaped(x), "a nonzero byte at 446, no signature: candidate");
+    x[446] = 0; x[508] = 0xFF;
+    check(!mbr_is_mbr_shaped(x), "bytes 508..509 alone are not part of the rule");
+    /* ...unless its CRC-32 at 508..511 happens to end 55 AA (about 1 in 65 536):
+       the ruled signature test then makes it a candidate. Recorded, not hidden. */
+    x[510] = 0x55; x[511] = 0xAA;
+    check(mbr_is_mbr_shaped(x), "known consequence: a superblock CRC ending 55 AA is a candidate");
+    memcpy(x, m, 512); x[510] = 0x00; x[511] = 0x00;
+    check(mbr_is_mbr_shaped(x), "a real MBR with a damaged signature is still a candidate");
+    check(mbr_findings(x, N) == MBR_F_LAYOUT, "a damaged signature is MBR_LAYOUT");
 
     /* verify findings (#384 Q3) */
     check(mbr_findings(m, N) == 0, "no findings on the exact layout");

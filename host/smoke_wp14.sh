@@ -126,18 +126,30 @@ $2
 open(f, 'wb').write(d)
 EOF
 }
+# exactly LINES...: verify's whole stdout, in the ADR-164 §4.1 order.
+exactly() { local want got; want=$(printf '%s\n' "$@"); got=$(tr -d '\r' <"$DIR/out")
+  [ "$got" = "$want" ] && ok "  stdout exactly: $(echo $want)" || fail "stdout: got '$(echo $got)', want '$(echo $want)'"; }
 damage type 'd[450] = 0x0C'
-expect 1 "wrong partition 1 type" -- "$TAPECTL" verify "$DIR/type.img"
-has PARTITION_TYPE "$DIR/out" "PARTITION_TYPE"
+expect 1 "wrong partition 1 type (still safe to mount)" -- "$TAPECTL" verify "$DIR/type.img"
+exactly PARTITION_TYPE
 damage layout 'd[454:458] = (4096).to_bytes(4, "little")'
 expect 1 "partition 1 moved" -- "$TAPECTL" verify "$DIR/layout.img"
-has MBR_LAYOUT "$DIR/out" "MBR_LAYOUT"
+exactly MBR_LAYOUT
+damage sig 'd[510] = 0; d[511] = 0'
+expect 1 "damaged MBR signature is still a verify candidate (P2V-001)" -- "$TAPECTL" verify "$DIR/sig.img"
+exactly MBR_LAYOUT
+damage p2moved 'n = int.from_bytes(d[474:478], "little"); d[470:474] = (34817).to_bytes(4, "little"); d[474:478] = (n - 1).to_bytes(4, "little")'
+expect 1 "entry 2 not at 34816: layout finding, no mount" -- "$TAPECTL" verify "$DIR/p2moved.img"
+exactly MBR_LAYOUT
 damage trunc 'd = d[:len(d) - 1024 * 512]'
-expect 1 "truncated partition 2" -- "$TAPECTL" verify "$DIR/trunc.img"
-has PARTITION_TRUNCATED "$DIR/out" "PARTITION_TRUNCATED"
+expect 1 "truncated partition 2: no shrunken mount, no out-of-range read" -- "$TAPECTL" verify "$DIR/trunc.img"
+exactly PARTITION_TRUNCATED
 damage sb 'd[34816 * 512 + 40] ^= 0xFF'
 expect 1 "one superblock copy damaged" -- "$TAPECTL" verify "$DIR/sb.img"
-has NEEDS_REPAIR "$DIR/out" "NEEDS_REPAIR"
+exactly NEEDS_REPAIR
+damage typesb 'd[466] = 0x83; d[34816 * 512 + 40] ^= 0xFF'
+expect 1 "two independent defects" -- "$TAPECTL" verify "$DIR/typesb.img"
+exactly PARTITION_TYPE NEEDS_REPAIR
 before=$(hash "$DIR/sb.img"); "$TAPECTL" verify "$DIR/sb.img" >/dev/null 2>&1
 [ "$(hash "$DIR/sb.img")" = "$before" ] && ok "verify repaired nothing (read-only binding)" || fail "verify wrote to the card"
 expect 1 "other commands keep exact recognition: a near miss is a bare image, and fails to mount" -- "$TAPECTL" dump "$DIR/type.img" --side A -o "$DIR/t.wav"

@@ -18,6 +18,7 @@
 #include "target.h"
 #include "layout.h"
 #include "entropy.h"
+#include "tseam.h"
 #include "wav.h"
 
 #include <stdio.h>
@@ -242,11 +243,16 @@ static int finish(int rc)
         (void)tape_unmount(g_t, &pos);
         g_t = NULL;
     }
+    /* ADR-164 §6: log which durable barrier ran. Always for a device; in the
+       test build for images too. Images in the shipped build stay quiet, so
+       WP-11 output is unchanged. */
 #ifdef TAPECTL_TEST
     if (g_tgt.open && g_tgt.hp.flushes > 0) {
-        fprintf(stderr, "tapectl-test: %llu flushes via %s\n", g_tgt.hp.flushes, g_tgt.hp.flush_how);
-    }
+#else
+    if (g_tgt.open && g_tgt.is_device && g_tgt.hp.flushes > 0) {
 #endif
+        fprintf(stderr, "tapectl: %llu flushes via %s\n", g_tgt.hp.flushes, g_tgt.hp.flush_how);
+    }
     if (g_tgt.open && target_close(&g_tgt) != 0 && rc == 0) {
         fprintf(stderr, "tapectl: cannot close image\n");
         rc = EXIT_USAGE;
@@ -676,6 +682,9 @@ static int cmd_provision(int argc, char **argv)
         g_tgt.open = 1;
         g_tgt.is_device = 1;
         sectors = g_tgt.hp.bytes / 512u;
+#ifdef TAPECTL_TEST
+        tseam_target(path, 1, g_tgt.hp.bytes);
+#endif
     } else {
         sectors = image_bytes / 512u;
     }
@@ -700,6 +709,9 @@ static int cmd_provision(int argc, char **argv)
             return EXIT_USAGE;
         }
         g_tgt.open = 1;
+#ifdef TAPECTL_TEST
+        tseam_target(path, 0, image_bytes);
+#endif
     }
 
     /* 3. Zero LBA 0 if it is not already zero, so an interrupted provision is
@@ -734,28 +746,34 @@ static int cmd_provision(int argc, char **argv)
 
 /* ------------------------------------------------------------------- verify */
 
-static int verify_side(tape_side side, int *reported_state)
-{
+/* One side of verify: cold mount, then read every referenced block through the
+   engine (dump to nowhere). Results are collected, not printed, so cmd_verify
+   can emit findings in the contract's order. */
+struct side_result {
+    tape_result mount;          /* TAPE_OK, or the MOUNT finding */
+    int have_info;
     tape_info info;
-    tape_result r;
-    memset(&info, 0, sizeof info);
-    uint64_t done = 0;
-    int bad = 0;
+    int read_error;             /* READ_ERROR at frame `frame` */
+    uint64_t frame;
+};
 
+static void verify_side(tape_side side, struct side_result *s)
+{
+    tape_result r;
+    uint64_t done = 0;
+
+    memset(s, 0, sizeof *s);
     r = tape_init(g_mem.b, tape_instance_size(), &g_tgt.dev, g_play, sizeof g_play, g_rec, sizeof g_rec, &g_t);
     if (r == TAPE_OK) { r = tape_mount(g_t, side, 0u, NULL); }
-    if (r != TAPE_OK) { printf("MOUNT %s\n", rname(r)); g_t = NULL; return 1; }
-    if (tape_get_info(g_t, &info) != TAPE_OK) { memset(&info, 0, sizeof info); }
-    else if (!*reported_state) {
-        if (info.needs_repair) { printf("NEEDS_REPAIR\n"); bad++; }
-        if (!info.side_b_valid) { printf("SIDE_B_DEGRADED\n"); bad++; }
-        *reported_state = 1;
-    }
-    /* Read every referenced block through the engine: dump to nowhere. */
+    s->mount = r;
+    if (r != TAPE_OK) { g_t = NULL; return; }          /* a failing mount is not read */
+    s->have_info = tape_get_info(g_t, &s->info) == TAPE_OK;
+    if (!s->have_info) { memset(&s->info, 0, sizeof s->info); }
     r = tape_seek(g_t, 0u);
     if (r == TAPE_OK) { r = tape_set_rate(g_t, 65536); }
-    while (r == TAPE_OK && done < info.total_frames) {
-        uint32_t want = info.total_frames - done > RENDER_MAX ? RENDER_MAX : (uint32_t)(info.total_frames - done), got = 0;
+    while (r == TAPE_OK && done < s->info.total_frames) {
+        uint64_t left = s->info.total_frames - done;
+        uint32_t want = left > RENDER_MAX ? RENDER_MAX : (uint32_t)left, got = 0;
         bool more = true;
         while (r == TAPE_OK && more) { r = tape_service(g_t, BUDGET, &more); }
         if (r == TAPE_OK) { r = tape_render(g_t, g_pcm, want, &got); }
@@ -764,22 +782,26 @@ static int verify_side(tape_side side, int *reported_state)
     }
     if (r != TAPE_OK) {
         fprintf(stderr, "tapectl: verify: side %c read stopped: %s\n", side == TAPE_SIDE_A ? 'A' : 'B', rname(r));
-        printf("READ_ERROR SIDE %c FRAME %llu\n", side == TAPE_SIDE_A ? 'A' : 'B', (unsigned long long)done);
-        bad++;
+        s->read_error = 1;
+        s->frame = done;
     }
     {
         uint64_t pos;
         (void)tape_unmount(g_t, &pos);
         g_t = NULL;
     }
-    return bad;
 }
 
+/* Findings, in docs/WP14-CLI-CONTRACT.md §4.1 table order (ADR-164):
+   MBR_LAYOUT, PARTITION_TYPE, PARTITION_TRUNCATED; MOUNT for each failed side,
+   A before B; NEEDS_REPAIR; SIDE_B_DEGRADED; READ_ERROR by side, then frame. */
 static int cmd_verify(int argc, char **argv)
 {
     static const char *const flags[] = {NULL};
+    struct side_result sr[2];
+    const struct side_result *state = NULL;
     unsigned mf;
-    int have_view, n = 0, reported = 0, rc;
+    int have_view, n = 0, rc, i;
 
     if (check_args(argc, argv, flags, 1)) { return usage("verify: bad arguments"); }
     rc = target_open_verify(&g_tgt, positional(argc, argv, 0), &mf, &have_view);
@@ -788,8 +810,22 @@ static int cmd_verify(int argc, char **argv)
     if (mf & MBR_F_TYPE)      { printf("PARTITION_TYPE\n"); n++; }
     if (mf & MBR_F_TRUNCATED) { printf("PARTITION_TRUNCATED\n"); n++; }
     if (have_view) {
-        n += verify_side(TAPE_SIDE_A, &reported);
-        n += verify_side(TAPE_SIDE_B, &reported);
+        verify_side(TAPE_SIDE_A, &sr[0]);
+        verify_side(TAPE_SIDE_B, &sr[1]);
+        for (i = 0; i < 2; i++) {
+            if (sr[i].mount != TAPE_OK) { printf("MOUNT %s\n", rname(sr[i].mount)); n++; }
+        }
+        for (i = 0; i < 2 && state == NULL; i++) {
+            if (sr[i].mount == TAPE_OK && sr[i].have_info) { state = &sr[i]; }
+        }
+        if (state != NULL && state->info.needs_repair) { printf("NEEDS_REPAIR\n"); n++; }
+        if (state != NULL && !state->info.side_b_valid) { printf("SIDE_B_DEGRADED\n"); n++; }
+        for (i = 0; i < 2; i++) {
+            if (sr[i].read_error) {
+                printf("READ_ERROR SIDE %c FRAME %llu\n", i == 0 ? 'A' : 'B', (unsigned long long)sr[i].frame);
+                n++;
+            }
+        }
     }
     if (n == 0) { printf("OK\n"); return 0; }
     return EXIT_ENGINE;
@@ -848,14 +884,12 @@ static int utf8_argv(int *argc, char ***argv)
 }
 #endif
 
-int main(int argc, char **argv)
+static int tapectl_main(int argc, char **argv)
 {
     const char *cmd;
     int rc;
 
-#if defined(_WIN32)
-    if (utf8_argv(&argc, &argv) != 0) { return usage("cannot read the command line"); }
-#endif
+
     if (tape_instance_size() > sizeof g_mem.b) {
         fprintf(stderr, "tapectl: engine instance (%lu bytes) exceeds the static block\n",
                 (unsigned long)tape_instance_size());
@@ -880,4 +914,20 @@ int main(int argc, char **argv)
 #endif
     else { return usage("unknown command"); }
     return finish(rc);
+}
+
+int main(int argc, char **argv)
+{
+    int rc;
+#if defined(_WIN32)
+    if (utf8_argv(&argc, &argv) != 0) { return usage("cannot read the command line"); }
+#endif
+#ifdef TAPECTL_TEST
+    tseam_begin(argc, argv);
+    rc = tapectl_main(argc, argv);
+    return tseam_finish(rc);
+#else
+    rc = tapectl_main(argc, argv);
+    return rc;
+#endif
 }

@@ -1347,6 +1347,12 @@ jobs:
           uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
           sudo apt-get update -q && sudo apt-get install -y --no-install-recommends dosfstools mtools
       - run: tools/ci/annotate-tail.sh "Linux host tests" make -C host test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-traces-linux-image
+          path: build/host/trace/traces
+          if-no-files-found: ignore
 
   wp14-linux-device:
     # WP-14 on a real Linux block device: a loop device over a 64 GiB sparse file
@@ -1371,6 +1377,12 @@ jobs:
         run: |
           truncate -s 64G "$RUNNER_TEMP/card.img"
           sudo -E tools/ci/annotate-tail.sh "loop round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-traces-linux-loop
+          path: ${{ runner.temp }}/e2e/traces
+          if-no-files-found: ignore
       - name: The real probe on this runner's root disk
         run: |
           root=$(lsblk -no PKNAME "$(findmnt -no SOURCE /)" | head -1)
@@ -1409,6 +1421,14 @@ jobs:
           mkfile -n 64g "$RUNNER_TEMP/card.raw"
           sudo -E tools/ci/annotate-tail.sh "macOS disk-image round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
           cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-traces-macos
+          path: |
+            ${{ runner.temp }}/e2e/traces
+            build/host/trace/traces
+          if-no-files-found: ignore
 
   wp14-windows:
     # WP-14 on Windows (D2): MinGW-w64 build, the full host test suite in Git
@@ -1444,6 +1464,14 @@ jobs:
         run: |
           export PATH="/c/mingw64/bin:$PATH"
           tools/ci/annotate-tail.sh "Windows VHD round trip" host/device_e2e.sh build/host/tapectl.exe build/host/tapectl-test.exe "$RUNNER_TEMP/e2e" host/vhd_windows.sh "$RUNNER_TEMP/card.vhd"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-traces-windows
+          path: |
+            ${{ runner.temp }}/e2e/traces
+            build/host/trace/traces
+          if-no-files-found: ignore
 
   wp11-portability:
     # acceptance WP-11 portability gate (#366). (a) host GCC; (b) the embedded

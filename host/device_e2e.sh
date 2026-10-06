@@ -82,6 +82,22 @@ echo "        $(head -1 "$DIR/err")"
 expect 3 "shipped load refuses" -- "$TAPECTL" load "$DEV" "$DIR/src.wav"
 [ "$(edges "$DEV" "$SIZE")" = "$before" ] && ok "device bytes unchanged by the refusals" || fail "a refusal wrote to the device"
 
+echo "== a refusal, observed: facts as the real probe saw them, through tapectl-test =="
+"$TAPECTL_T" probe "$DEV" | grep -v '^refusal=\|^detail=' >"$DIR/facts.real"
+mkdir -p "$DIR/traces"
+TAPECTL_TEST_FACTS="$DIR/facts.real" TAPECTL_TEST_TRACE="$DIR/traces/refusal.json" \
+  "$TAPECTL_T" provision "$DEV" --label e2e --erase "$DEV" >"$DIR/out" 2>"$DIR/err"
+rc=$?
+"$PY" - "$DIR/traces/refusal.json" "$rc" <<'PYEOF'
+import json, sys
+t = json.load(open(sys.argv[1])); rc = int(sys.argv[2])
+ev = [e['kind'] for e in t['events']]
+ok = rc == 3 and t['exit'] == 3 and t['refusal'] and 'write_open' not in ev and 'write' not in ev
+print(('  ok    ' if ok else '  FAIL  ') + f"refusal trace: exit {t['exit']}, {t['refusal']}, events {ev}, facts from {t.get('facts', {}).get('source')}")
+sys.exit(0 if ok else 1)
+PYEOF
+[ $? -eq 0 ] || fail "refusal trace"
+
 printf '%s\n' whole=1 removable=1 sd_bus=0 "bytes=$SIZE" holds_os=0 layout_ok=0 >"$DIR/facts"
 export TAPECTL_TEST_FACTS="$DIR/facts"
 # The injected facts keep the real probe's mount list and layout, overriding
@@ -120,6 +136,13 @@ refresh_facts; expect 0 "dump Side A" -- "$TAPECTL_T" dump "$DEV" --side A -o "$
 refresh_facts; expect 0 "dump Side B" -- "$TAPECTL_T" dump "$DEV" --side B -o "$DIR/b.wav"
 cmp -s "$DIR/src.wav" "$DIR/a.wav" && ok "Side A byte-identical to the source" || fail "Side A differs"
 cmp -s "$DIR/src.wav" "$DIR/b.wav" && ok "Side B byte-identical to the source" || fail "Side B differs"
+echo "== native traces and fault controls on $DEV =="
+refresh_facts
+"$(dirname "$0")/trace_selfcheck.sh" "$TAPECTL_T" "$DIR/trace" "$DEV" >"$DIR/trace.log" 2>&1
+trc=$?
+grep -v '^  ok' "$DIR/trace.log" | sed 's/^/  /'
+[ "$trc" -eq 0 ] && ok "trace transport and fault controls on the device" || fail "trace transport on the device"
+cp "$DIR"/trace/traces/*.json "$DIR/traces/" 2>/dev/null || true
 unset TAPECTL_TEST_FACTS
 expect 3 "after all that, the shipped binary still refuses it" -- "$TAPECTL" verify "$DEV"
 "$HELPER" detach "$DEV" || fail "final detach"

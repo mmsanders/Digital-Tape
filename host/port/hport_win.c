@@ -48,7 +48,7 @@ static int open_handle(struct hport *p, const char *path, DWORD disposition, int
     return 0;
 }
 
-int hport_open(struct hport *p, const char *path, int is_device, int writable)
+int hport_os_open(struct hport *p, const char *path, int is_device, int writable)
 {
     if (open_handle(p, path, OPEN_EXISTING, writable, is_device)) { return -1; }
     if (is_device) {
@@ -67,7 +67,7 @@ int hport_open(struct hport *p, const char *path, int is_device, int writable)
     return 0;
 }
 
-int hport_create(struct hport *p, const char *path, uint64_t bytes)
+int hport_os_create(struct hport *p, const char *path, uint64_t bytes)
 {
     LARGE_INTEGER pos;
     DWORD got = 0;
@@ -103,7 +103,7 @@ int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
     return 0;
 }
 
-int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
+int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 {
     const unsigned char *b = (const unsigned char *)buf;
     if (!p->writable) { return -1; }
@@ -117,9 +117,8 @@ int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
     return 0;
 }
 
-int hport_flush(struct hport *p)
+int hport_os_flush(struct hport *p)
 {
-    p->flushes++;
     return FlushFileBuffers(p->h) ? 0 : -1;
 }
 

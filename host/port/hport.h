@@ -53,6 +53,13 @@ int hport_flush(struct hport *p);
 
 int hport_close(struct hport *p);
 
+/* The platform halves (hport_posix.c, hport_win.c). hport.c wraps them; in
+   the test build it adds the TAPECTL_TEST observation and fault seam. */
+int hport_os_open(struct hport *p, const char *path, int is_device, int writable);
+int hport_os_create(struct hport *p, const char *path, uint64_t bytes);
+int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len);
+int hport_os_flush(struct hport *p);    /* sets p->flush_how to the barrier it ran */
+
 /* The OS's reason for the last failed hport call, for messages. */
 const char *hport_error(void);
 

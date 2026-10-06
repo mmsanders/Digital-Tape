@@ -40,8 +40,9 @@ int mbr_build(uint8_t out[512], const uint8_t uuid[16], uint64_t total_sectors);
    signature are not part of the test. */
 int mbr_is_layout(const uint8_t lba0[512], uint64_t total_sectors);
 
-/* verify only (#384 Q3): LBA 0 has 55 AA and a non-zero byte in 446..507, so
-   it is an MBR and not a bare TAPEFS superblock (whose 446..507 are zero). */
+/* verify only (ADR-164, P2V-001): a candidate MBR is LBA 0 with signature
+   55 AA OR any nonzero byte in 446..507. Recognition only, never permission
+   to write; every other command keeps exact recognition. */
 int mbr_is_mbr_shaped(const uint8_t lba0[512]);
 
 /* verify findings against §3.1 for an MBR-shaped LBA 0. Bit flags. */

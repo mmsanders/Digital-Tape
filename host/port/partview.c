@@ -8,6 +8,7 @@
  */
 
 #include "hport.h"
+#include "tseam.h"
 
 static int in_range(const struct partview *v, uint32_t lba, uint32_t count)
 {
@@ -19,6 +20,9 @@ static int pv_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     struct partview *v = (struct partview *)ctx;
     v->reads++;
     if (!in_range(v, lba, count)) { return 2; }
+#ifdef TAPECTL_TEST
+    if (tseam_fault_read(lba, count)) { return 1; }     /* control: injected read failure */
+#endif
     return hport_read(v->p, (v->base + lba) * TAPE_BLOCK_SIZE, dst, (size_t)count * TAPE_BLOCK_SIZE) ? 1 : 0;
 }
 
@@ -47,6 +51,10 @@ void partview_bind(struct partview *v, tape_dev *dev, struct hport *p,
     dev->read = pv_read;
     /* Read-only is the absence of a function, not a flag (guardrail 06). */
     dev->write = (writable && p->writable) ? pv_write : NULL;
+#ifdef TAPECTL_TEST
+    if (dev->write == NULL && tseam_fault_nonnull_binding()) { dev->write = pv_write; }  /* control */
+    tseam_bind(base_lba, blocks, dev->write == NULL);
+#endif
     dev->flush = pv_flush;
     dev->ctx = v;
     dev->block_count = blocks;

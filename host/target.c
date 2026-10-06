@@ -9,6 +9,7 @@
 
 #include "target.h"
 #include "layout.h"
+#include "tseam.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -49,6 +50,10 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
     gather_facts(path, &f, &seam);
     (void)seam;
     r = safety_policy(&f, provision, erase != NULL && strcmp(erase, path) == 0);
+#ifdef TAPECTL_TEST
+    tseam_facts(&f, refusal_id(r), seam);
+    if (r != REFUSE_NONE) { tseam_refusal(refusal_id(r)); }
+#endif
     if (r != REFUSE_NONE) {
         fprintf(stderr, "tapectl: %s: %s\n", refusal_id(r), refusal_sentence(r));
         if (f.detail[0]) { fprintf(stderr, "tapectl:   %s\n", f.detail); }
@@ -68,6 +73,9 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
             /* Under the test seam too: a facts file may name a real mount. */
             int ok = probe_unmount_p1(path, &f, i);
             if (ok != 0) {
+#ifdef TAPECTL_TEST
+                tseam_refusal(refusal_id(REFUSE_FOREIGN_MOUNT));
+#endif
                 fprintf(stderr, "tapectl: %s: cannot unmount partition 1 (%s). Eject it in the operating system first.\n",
                         refusal_id(REFUSE_FOREIGN_MOUNT), f.mounted[i].where);
                 return EXIT_REFUSE;
@@ -113,6 +121,9 @@ static int open_common(struct target *t, const char *path, int writable)
 opened:
     t->open = 1;
     t->sectors = t->hp.bytes / 512u;
+#ifdef TAPECTL_TEST
+    tseam_target(path, t->is_device, t->hp.bytes);
+#endif
     return 0;
 }
 
@@ -123,8 +134,9 @@ int target_open(struct target *t, const char *path, int writable)
 
     if (rc) { return rc; }
     if (read_lba0(&t->hp, lba0) != 0) {
-        fprintf(stderr, "tapectl: cannot read %s\n", path);
-        return EXIT_USAGE;
+        /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
+        fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
+        return EXIT_ENGINE;
     }
     if (mbr_is_layout(lba0, t->sectors)) {
         uint32_t s2, n2;
@@ -155,17 +167,19 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
     *have_view = 0;
     if (rc) { return rc; }
     if (read_lba0(&t->hp, lba0) != 0) {
-        fprintf(stderr, "tapectl: cannot read %s\n", path);
-        return EXIT_USAGE;
+        /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
+        fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
+        return EXIT_ENGINE;
     }
     if (mbr_is_layout(lba0, t->sectors) || mbr_is_mbr_shaped(lba0)) {
         uint32_t s2, n2;
         *findings = mbr_is_layout(lba0, t->sectors) ? 0u : mbr_findings(lba0, t->sectors);
         mbr_entry2(lba0, &s2, &n2);
         t->provisioned = 1;
-        if (s2 > 0 && n2 > 0 && s2 < t->sectors) {
-            /* The engine is shown partition 2 as the card records it. A truncated
-               partition's missing tail then reads as failed I/O. */
+        /* ADR-164 §4.1: mount only when entry 2 starts at 34816 with a nonzero
+           count and its whole 64-bit extent is inside the target. Otherwise stop
+           after the layout findings; never shrink a truncated view. */
+        if (s2 == LAYOUT_P2_START && n2 > 0 && (uint64_t)s2 + n2 <= t->sectors) {
             partview_bind(&t->view, &t->dev, &t->hp, s2, n2, 0);
             *have_view = 1;
         }
