@@ -1613,9 +1613,17 @@ jobs:
             build/host/tapectl
             build/host/tapectl.exe
           if-no-files-found: ignore
-      - name: Verdict
+      - name: Verdict (a failing half is raised as an annotation with its stderr tail)
         run: |
+          set -uo pipefail
+          out="$RUNNER_TEMP/wp14-out"
           echo "image: ${{ steps.image.outcome }}  native: ${{ steps.native.outcome }}"
+          for half in image native; do
+            [ "$half" = image ] && o="${{ steps.image.outcome }}" || o="${{ steps.native.outcome }}"
+            [ "$o" = success ] && continue
+            msg=$(tail -n 45 "$out/$half-$PLATFORM.stderr" 2>/dev/null | tr -d '\r' | cut -c1-200 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=WP-14 $half cases on $PLATFORM ($o)::${msg}"
+          done
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
 
   wp14-package-census:
