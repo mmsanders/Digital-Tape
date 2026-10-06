@@ -54,11 +54,23 @@ EXE = '.exe' if PLATFORM == 'windows' else ''
 
 # ----------------------------------------------------------------- helpers
 
+_HASHED = {}   # (path, size, mtime_ns) -> sha256, for files hashed while written
+
+
+def _stamp(path):
+    st = os.stat(path)
+    return (str(Path(path).resolve()), st.st_size, st.st_mtime_ns)
+
+
 def sha256_file(path):
+    known = _HASHED.get(_stamp(path))
+    if known:
+        return known
     h = hashlib.sha256()
     with open(path, 'rb') as f:
         for block in iter(lambda: f.read(1 << 20), b''):
             h.update(block)
+    _HASHED[_stamp(path)] = h.hexdigest()
     return h.hexdigest()
 
 
@@ -376,13 +388,15 @@ class Device:
     def snapshot(self, out):
         """The device's bytes as a sparse file of exactly its size."""
         if PLATFORM == 'windows':
-            read_device_sparse(self.path, self.size, out)
+            offsets = read_device_sparse(self.path, self.size, out)
             how = 'read through the attached device'
         else:
             self.case.run(['sync'], label='sync')
-            copy_sparse(self.backing, out)
+            offsets = copy_sparse(self.backing, out)
             how = 'sparse copy of the device backing file'
-        self.case.log(kind='snapshot', path=str(out), bytes=self.size, how=how)
+        for p in write_extents(out, offsets):
+            self.case.keep(p)
+        self.case.log(kind='snapshot', path=str(out), bytes=self.size, how=how, nonzero_blocks=len(offsets))
         return out
 
 
@@ -398,6 +412,8 @@ def copy_sparse(src, dst):
     """Copy only nonzero 1 MiB blocks; the size is exact."""
     size = os.path.getsize(src)
     zero = bytes(1 << 20)
+    written = []
+    h = hashlib.sha256()
     with open(src, 'rb') as a, open(dst, 'wb') as b:
         if PLATFORM == 'windows':
             subprocess.run(['fsutil', 'sparse', 'setflag', str(dst)], capture_output=True)
@@ -407,10 +423,15 @@ def copy_sparse(src, dst):
             block = a.read(1 << 20)
             if not block:
                 break
+            h.update(block)
             if block != zero[:len(block)]:
                 b.seek(off)
                 b.write(block)
+                written.append(off)
             off += len(block)
+    if off == size:
+        _HASHED[_stamp(dst)] = h.hexdigest()
+    return written
 
 
 def write_nonzero(image, device, size):
@@ -437,6 +458,8 @@ def write_nonzero(image, device, size):
 def read_device_sparse(device, size, out):
     fd = os.open(device, os.O_RDONLY | getattr(os, 'O_BINARY', 0))
     zero = bytes(1 << 20)
+    written = []
+    h = hashlib.sha256()
     try:
         with open(out, 'wb') as b:
             if PLATFORM == 'windows':
@@ -448,12 +471,35 @@ def read_device_sparse(device, size, out):
                 block = os.read(fd, min(1 << 20, size - off))
                 if not block:
                     break
+                h.update(block)
                 if block != zero[:len(block)]:
                     b.seek(off)
                     b.write(block)
+                    written.append(off)
                 off += len(block)
     finally:
         os.close(fd)
+    if off == size:
+        _HASHED[_stamp(out)] = h.hexdigest()
+    return written
+
+
+def write_extents(image, offsets):
+    """Beside a sparse snapshot, its compact form: IMAGE.blocks holds the
+    nonzero 1 MiB blocks in order and IMAGE.extents.json their offsets, the
+    exact size and the whole image's SHA-256. tests/wp14_adapter/unsparse.py
+    rebuilds the image and checks that hash. The full image is used during
+    the run; the compact pair is what an artifact keeps."""
+    image = Path(image)
+    size = image.stat().st_size
+    with open(image, 'rb') as a, open(str(image) + '.blocks', 'wb') as out:
+        for off in offsets:
+            a.seek(off)
+            out.write(a.read(min(1 << 20, size - off)))
+    meta = {'image': image.name, 'bytes': size, 'block': 1 << 20, 'offsets': offsets,
+            'sha256': sha256_file(image), 'blocks_sha256': sha256_file(str(image) + '.blocks')}
+    Path(str(image) + '.extents.json').write_text(json.dumps(meta) + '\n')
+    return [Path(str(image) + '.blocks'), Path(str(image) + '.extents.json')]
 
 
 # ---------------------------------------------------------- environment

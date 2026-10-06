@@ -1596,8 +1596,12 @@ jobs:
           set -uo pipefail
           mkdir -p "$RUNNER_TEMP/wp14-out"
           [ "$PLATFORM" = windows ] || sudo chown -R "$(id -u)" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
+          # A sparse device snapshot is kept in its compact form beside it
+          # (IMAGE.blocks + IMAGE.extents.json; tests/wp14_adapter/unsparse.py
+          # rebuilds and hash-checks it), so the full image is not uploaded.
           find "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" -type f -size +256M 2>/dev/null | while read -r f; do
-            echo "zstd $f"; zstd -q -T0 -3 --rm "$f" || true
+            if [ -f "$f.extents.json" ]; then echo "compact form kept: $f"; rm -f "$f"
+            else echo "zstd $f"; zstd -q -T0 -3 --rm "$f" || true; fi
           done
           find "$RUNNER_TEMP/wp14-evidence" -type d -name work -prune -exec rm -rf {} + 2>/dev/null || true
           du -sh "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
