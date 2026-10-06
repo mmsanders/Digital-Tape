@@ -22,6 +22,17 @@ TAPECTL=$1; TAPECTL_T=$2; DIR=$3; HELPER=$4; BACKING=$5
 PY=$(command -v python3 || command -v python)
 FAILS=0
 mkdir -p "$DIR"
+# The exact OS build this ran on, as a notice the checks API returns (#385).
+os_build() {
+  case "$(uname -s)" in
+    Darwin) echo "macOS $(sw_vers -productVersion) build $(sw_vers -buildVersion), $(uname -m)" ;;
+    MINGW*|MSYS*|CYGWIN*) powershell -NoProfile -Command "\$o=Get-CimInstance Win32_OperatingSystem; \$o.Caption + ' ' + \$o.Version + ' build ' + \$o.BuildNumber" | tr -d '\r' ;;
+    *) . /etc/os-release; echo "$PRETTY_NAME, kernel $(uname -r), $(uname -m)" ;;
+  esac
+}
+OSB=$(os_build 2>/dev/null || uname -a)
+echo "== OS: $OSB =="
+[ -n "${GITHUB_ACTIONS:-}" ] && echo "::notice title=WP-14 device OS build::$OSB"
 FAILED=""
 fail() { echo "  FAIL  $*"; FAILS=$((FAILS + 1)); FAILED="$FAILED
   FAIL  $*"; }
