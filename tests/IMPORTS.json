@@ -601,6 +601,14 @@
       {
         "path": "tests/embedded_readiness_draft9/spec",
         "revision": "DRAFT-9"
+      },
+      {
+        "path": "tests/wp14_r1/spec",
+        "revision": "DRAFT-10",
+        "files": [
+          "tapefs-v1.md",
+          "engine-api.md"
+        ]
       }
     ]
   },
