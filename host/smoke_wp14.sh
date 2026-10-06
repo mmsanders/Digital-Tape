@@ -19,7 +19,9 @@ PY=$(command -v python3 || command -v python)
 UNAME=$(uname -s)
 FAILS=0
 
-fail() { echo "  FAIL  $*"; FAILS=$((FAILS + 1)); }
+FAILED=""
+fail() { echo "  FAIL  $*"; FAILS=$((FAILS + 1)); FAILED="$FAILED
+  FAIL  $*"; }
 ok()   { echo "  ok    $*"; }
 # expect CODE DESC -- CMD...: run CMD, require exit CODE; stderr kept in $DIR/err.
 expect() {
@@ -86,7 +88,10 @@ grep -Eq '^uuid [0-9a-f]{32}$' "$DIR/out" && grep -Eq '^epoch [0-9]+$' "$DIR/out
 expect 2 "--uuid without --epoch" -- "$TAPECTL" provision "$DIR/x.img" --label r --uuid $UUID --image-bytes $BYTES
 expect 2 "label of 33 bytes is refused, not truncated" -- "$TAPECTL" provision "$DIR/x.img" --label 123456789012345678901234567890123 --image-bytes $BYTES
 expect 0 "control: label of 32 bytes" -- "$TAPECTL" provision "$DIR/x.img" --label 12345678901234567890123456789012 --length-s 9 --image-bytes $BYTES
-expect 2 "invalid UTF-8 label" -- "$TAPECTL" provision "$DIR/x.img" --label $'\xff\xfe' --image-bytes $BYTES
+case "$UNAME" in
+  MINGW*|MSYS*|CYGWIN*) echo "  skip  invalid UTF-8 label: a Windows command line is UTF-16, so raw bytes cannot arrive" ;;
+  *) expect 2 "invalid UTF-8 label" -- "$TAPECTL" provision "$DIR/x.img" --label $'\xff\xfe' --image-bytes $BYTES ;;
+esac
 expect 0 "control: multi-byte UTF-8 label" -- "$TAPECTL" provision "$DIR/x.img" --label "Grieg – Åse" --length-s 9 --image-bytes $BYTES
 expect 2 "image without --image-bytes" -- "$TAPECTL" provision "$DIR/x.img" --label r
 expect 2 "--image-bytes not a multiple of 512" -- "$TAPECTL" provision "$DIR/x.img" --label r --image-bytes 22020097
@@ -180,4 +185,5 @@ expect 3 "a partition path $PART refused" -- "$TAPECTL" verify "$PART"
 has REFUSE_NOT_WHOLE_DEVICE "$DIR/err" "REFUSE_NOT_WHOLE_DEVICE for a partition"
 expect 2 "format refuses a device path" -- "$TAPECTL" format "$SYSDEV" --blocks 6145 --uuid $UUID --epoch 0 --label x --length-s 9
 
+[ -n "$FAILED" ] && printf "== failures ==%b\n" "$FAILED"
 [ "$FAILS" -eq 0 ] && echo "PASS  tapectl WP-14 smoke" || { echo "FAIL  tapectl WP-14 smoke: $FAILS"; exit 1; }

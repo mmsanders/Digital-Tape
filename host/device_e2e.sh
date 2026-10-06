@@ -22,7 +22,9 @@ TAPECTL=$1; TAPECTL_T=$2; DIR=$3; HELPER=$4; BACKING=$5
 PY=$(command -v python3 || command -v python)
 FAILS=0
 mkdir -p "$DIR"
-fail() { echo "  FAIL  $*"; FAILS=$((FAILS + 1)); }
+FAILED=""
+fail() { echo "  FAIL  $*"; FAILS=$((FAILS + 1)); FAILED="$FAILED
+  FAIL  $*"; }
 ok()   { echo "  ok    $*"; }
 expect() {
   local want=$1 desc=$2; shift 3
@@ -101,14 +103,15 @@ if grep -q '^mounted=1:' "$DIR/probe1"; then
   grep -q '^layout_ok=1' "$DIR/probe1" && ok "the OS mounted partition 1, and the probe sees our exact layout" || fail "partition 1 mounted but layout_ok=0"
 fi
 refresh_facts
-expect 0 "verify after reattach" -- "$TAPECTL_T" verify "$DEV"
+refresh_facts; expect 0 "verify after reattach" -- "$TAPECTL_T" verify "$DEV"
 [ "$(cat "$DIR/out")" = OK ] && ok "verify: OK" || fail "verify: $(cat "$DIR/out")"
-expect 0 "dump Side A" -- "$TAPECTL_T" dump "$DEV" --side A -o "$DIR/a.wav"
-expect 0 "dump Side B" -- "$TAPECTL_T" dump "$DEV" --side B -o "$DIR/b.wav"
+refresh_facts; expect 0 "dump Side A" -- "$TAPECTL_T" dump "$DEV" --side A -o "$DIR/a.wav"
+refresh_facts; expect 0 "dump Side B" -- "$TAPECTL_T" dump "$DEV" --side B -o "$DIR/b.wav"
 cmp -s "$DIR/src.wav" "$DIR/a.wav" && ok "Side A byte-identical to the source" || fail "Side A differs"
 cmp -s "$DIR/src.wav" "$DIR/b.wav" && ok "Side B byte-identical to the source" || fail "Side B differs"
 unset TAPECTL_TEST_FACTS
 expect 3 "after all that, the shipped binary still refuses it" -- "$TAPECTL" verify "$DEV"
 "$HELPER" detach "$DEV" || fail "final detach"
 
+[ -n "$FAILED" ] && printf "== failures ==%b\n" "$FAILED"
 [ "$FAILS" -eq 0 ] && echo "PASS  WP-14 device round trip on $DEV" || { echo "FAIL  WP-14 device round trip: $FAILS"; exit 1; }
