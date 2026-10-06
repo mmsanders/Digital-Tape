@@ -1,7 +1,7 @@
 # WP-14 `tapectl` on real cards — contract (PM-issued, P2-R1)
 
 **Status:** ISSUED 5 October 2026 (ADR-163); amended 6 October (ADR-164), resolving Q1–Q11 and
-P2V-001…004. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
+P2V-001…004; ADR-165 corrects the P2V-005 bare-image CRC/signature collision. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
 see the exact supplemental erratum and integrity manifest in [SPEC-ERRATA.md](SPEC-ERRATA.md). Changing this file after issue is a PM decision recorded here, in `docs/DECISIONS.md`
 and on both issues. Package criteria: [WP-14](PACKAGES/WP-14.md). This contract **extends**
 [the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule and command holds unless a line below
@@ -31,14 +31,35 @@ A **target** is one of:
 entries 1 and 2 match §3.1 field for field, and entries 3 and 4 are all zero. A bare image's LBA 0 is a
 TAPEFS superblock, whose bytes 446–507 are reserved zero, so it can never match.
 
-**Verify-only candidate recognition (P2V-001/Q3).** Before the exact layout test, `verify`
-recognises a candidate MBR if LBA 0 has either signature `55 AA` **or any nonzero byte in 446–507**.
-This includes damaged signatures, partition entries and truncated targets. A conforming bare
-TAPEFS superblock has zero bytes in that region and no MBR signature, so is still bare. This is
-recognition only, never permission to write. Other commands retain exact recognition.
-On a device, §5 still outranks all layout findings; after safety passes, a candidate goes to §4.1
-rather than `NOT_PROVISIONED`. A device with no candidate is `NOT_PROVISIONED`; a regular file
-with no candidate is processed as a bare image. Unreadable LBA 0 is an I/O failure, not bare fallback.
+**Verify-only candidate recognition (P2V-001/Q3; P2V-005/ADR-165).** Let
+`entries_nonzero` mean any nonzero byte in LBA 0 bytes 446–507, and
+`signature` mean bytes 510–511 equal `55 AA`. Use this target-kind table:
+
+| Target | Candidate MBR predicate | If false |
+|---|---|---|
+| Regular file (image) | `entries_nonzero` | Bare TAPEFS image, judged only by the engine |
+| Whole device | `entries_nonzero OR signature` | `NOT_PROVISIONED`, exit 2 |
+
+A bare superblock's CRC occupies 508–511 and **can** end in `55 AA`.
+A signature alone therefore does not classify a regular file as an MBR.
+Zero partition entries plus `55 AA` in a file take the bare path even if those
+bytes came from an empty/destroyed MBR: a failed engine mount reports the normal
+`MOUNT <TAPE_ERR_…>` finding, exit 1, rather than `MBR_LAYOUT`. This is the
+explicit ambiguity rule, not a new acceptance of a whole-card layout.
+The corresponding whole device still reaches `MBR_LAYOUT`, with no partition
+view/mount for zero entries; bare-device operation is not supported.
+
+Any nonzero partition-entry byte routes either target to §4.1 even with a
+damaged signature. This preserves required type, extent and signature findings
+on layouts with surviving entries. A regular file whose partition entries have
+all been destroyed cannot be distinguished from a bare image by the MBR signature
+alone; its engine findings remain visible. Host code does not parse TAPEFS magic,
+CRC, validity or engine structures to make this classification.
+
+Recognition is read-only, never permission to write. Other commands retain
+exact recognition. §5 safety still runs first on devices; after it passes, a
+candidate goes to §4.1 rather than `NOT_PROVISIONED`. Unreadable LBA 0 is an
+I/O failure, not bare fallback.
 
 **Device paths.** The user always names the device; `tapectl` never selects one.
 
