@@ -92,12 +92,17 @@ class Case:
     def log(self, **entry):
         entry['t'] = round(time.time(), 3)
         self.transcript.append(entry)
+        # Also appended as it happens, so a transport stopped from outside
+        # (a request timeout) still leaves the record of what it was doing.
+        with open(self.dir / 'transcript.jsonl', 'a') as f:
+            f.write(json.dumps(entry) + '\n')
 
     def run(self, argv, env=None, check=False, capture=True, timeout=7200, label=None):
         """Run a helper command (setup, attach, inspect), transcribed."""
         e = dict(os.environ)
         if env:
             e.update(env)
+        started = time.time()
         try:
             r = subprocess.run(argv, env=e, capture_output=capture, text=True, timeout=timeout)
         except FileNotFoundError:
@@ -108,6 +113,7 @@ class Case:
                 raise
             return subprocess.CompletedProcess(argv, 127, '', 'tool not installed')
         self.log(kind='command', label=label, argv=[str(a) for a in argv], exit=r.returncode,
+                 seconds=round(time.time() - started, 3),
                  stdout=(r.stdout or '')[-20000:], stderr=(r.stderr or '')[-20000:])
         if check and r.returncode != 0:
             raise RuntimeError(f'{label or argv[0]} failed ({r.returncode}): {r.stderr or r.stdout}')
@@ -572,9 +578,12 @@ def invoke_test(case, bins, args, label, facts=None, control=None, trace=True, p
     if payloads:
         env['TAPECTL_TEST_PAYLOADS'] = '1'
     argv = [str(bins.test)] + [str(a) for a in args]
+    case.log(kind='candidate-start', label=label, binary='test')
+    started = time.time()
     r = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=7200)
     case.log(kind='candidate', label=label, binary='test', argv=argv,
-             env={k: env[k] for k in env if k.startswith('TAPECTL_TEST')}, exit=r.returncode)
+             env={k: env[k] for k in env if k.startswith('TAPECTL_TEST')}, exit=r.returncode,
+             seconds=round(time.time() - started, 3))
     for stream, text in (('stdout', r.stdout), ('stderr', r.stderr)):
         p = case.dir / f'{label}.{stream}.txt'
         p.write_text(text)
@@ -582,7 +591,10 @@ def invoke_test(case, bins, args, label, facts=None, control=None, trace=True, p
     tr = None
     if trace:
         case.keep(raw)
+        started = time.time()
         tr = annotate_unopened(json.loads(raw.read_text()), device)
+        case.log(kind='trace-read', label=label, bytes=raw.stat().st_size, events=len(tr.get('events', [])),
+                 seconds=round(time.time() - started, 3))
     return r.returncode, r.stdout, r.stderr, tr
 
 

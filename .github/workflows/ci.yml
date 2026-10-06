@@ -1658,6 +1658,14 @@ jobs:
                   prev = m
               top = sorted(times, reverse=True)[:12]
               print('::warning title=WP-14 slowest native cases::' + '%0A'.join(f'{t:7.1f}s {n}' for t, n in top))
+          ts = sorted(pathlib.Path(sys.argv[1]).glob('capture-*/transcript.jsonl'), key=lambda p: p.stat().st_mtime)
+          if ts:
+              lines = []
+              for x in ts[-1].read_text().splitlines()[-25:]:
+                  e = json.loads(x)
+                  lines.append(f"{e.get('t')} {e.get('kind')} {e.get('label') or ''} exit={e.get('exit')} "
+                               f"seconds={e.get('seconds')} events={e.get('events')}")
+              print(f'::warning title=WP-14 transcript of {ts[-1].parent.name}::' + '%0A'.join(lines))
           PYEOF
           fi
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
