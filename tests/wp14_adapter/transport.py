@@ -189,7 +189,11 @@ class Device:
 
     def __init__(self, case, size):
         self.case, self.size = case, size
-        self.backing = case.work / ('backing.vhd' if PLATFORM == 'windows' else 'backing.img')
+        # WP14_BACKING_DIR may place the backing file on another owned volume
+        # (CI: a macOS RAM disk, so the disk image's cache flushes do not each
+        # wait for the runner's own disk). The device node is unchanged.
+        where = Path(os.environ['WP14_BACKING_DIR']) if os.environ.get('WP14_BACKING_DIR') else case.work
+        self.backing = where / (case.name + ('-backing.vhd' if PLATFORM == 'windows' else '-backing.img'))
         self.path = None
         self.number = None
         self.mounted_p1 = None
@@ -309,12 +313,22 @@ class Device:
             m = re.search(r'<key>MountPoint</key>\s*<string>([^<]+)</string>', r.stdout)
             where = m.group(1)
         else:
-            c.run(['powershell', '-NoProfile', '-Command',
-                   f'Add-PartitionAccessPath -DiskNumber {self.number} -PartitionNumber 1 -AssignDriveLetter'],
-                  label='mount-p1')
+            # Automount is off on the runner (mountvol /N), so the letter is
+            # given explicitly: the first free one, after Windows re-reads the
+            # partition table written since attach.
+            n = self.number
             r = c.run(['powershell', '-NoProfile', '-Command',
-                       f'(Get-Partition -DiskNumber {self.number} -PartitionNumber 1).DriveLetter'], check=True, label='p1-letter')
-            where = r.stdout.strip() + ':'
+                       f"$ErrorActionPreference='Stop'; Update-Disk -Number {n}; "
+                       f"$p = Get-Partition -DiskNumber {n} -PartitionNumber 1; "
+                       "if (-not [char]::IsLetter([char]$p.DriveLetter)) { "
+                       "$l = [char[]](68..90) | Where-Object { -not (Test-Path ($_ + ':\\')) } | Select-Object -First 1; "
+                       f"Set-Partition -DiskNumber {n} -PartitionNumber 1 -NewDriveLetter $l }}; "
+                       f"(Get-Partition -DiskNumber {n} -PartitionNumber 1).DriveLetter"],
+                      check=True, label='mount-p1')
+            letter = r.stdout.strip()
+            if not re.fullmatch(r'[A-Za-z]', letter):
+                raise RuntimeError(f'mount-p1: no drive letter for partition 1 ({r.stdout!r} {r.stderr!r})')
+            where = letter + ':'
         self.mounted_p1 = where
         c.log(kind='mounted-p1', where=where)
         return where

@@ -1567,6 +1567,14 @@ jobs:
           export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
           "$PY" -B tests/wp14_r1/runner.py "$root/build/host/tapectl$exe" --head "$HEAD_SHA" \
             > "$RUNNER_TEMP/wp14-out/image-$PLATFORM.json" 2> >(tee "$RUNNER_TEMP/wp14-out/image-$PLATFORM.stderr" >&2)
+      - name: macOS — a RAM-disk volume for the device backing files
+        if: matrix.platform == 'macos'
+        run: |
+          set -euo pipefail
+          dev=$(hdiutil attach -nomount ram://$((4 * 1024 * 1024 * 2)) | awk '{print $1}')
+          diskutil erasevolume APFS wp14ram "$dev"
+          echo "WP14_BACKING_DIR=/Volumes/wp14ram" >> "$GITHUB_ENV"
+          df -h /Volumes/wp14ram
       - name: Native cases (native.py through tests/wp14_adapter/transport.py)
         id: native
         continue-on-error: true
@@ -1637,6 +1645,15 @@ jobs:
               msg = (f"case {r.get('case')}: exit {r.get('exit')}, refusal {t.get('refusal')}\n"
                      f"stdout: {r.get('stdout', '')[-1500:]}\nstderr: {r.get('stderr', '')[-1500:]}")
               print('::error title=WP-14 last native response::' + msg.replace('%', '%25').replace('\r', '').replace('\n', '%0A'))
+              # Time spent per case: each response's mtime after the previous one.
+              times, prev = [], None
+              for p in rs:
+                  m = p.stat().st_mtime
+                  if prev is not None:
+                      times.append((m - prev, p.name.replace('-response.json', '')))
+                  prev = m
+              top = sorted(times, reverse=True)[:12]
+              print('::warning title=WP-14 slowest native cases::' + '%0A'.join(f'{t:7.1f}s {n}' for t, n in top))
           PYEOF
           fi
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
