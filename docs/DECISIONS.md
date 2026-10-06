@@ -2967,3 +2967,51 @@ contract change costs a correction on both issues. E-1 either way costs two cons
 **Cost to reverse.** A new host-contract amendment with paired lead updates. E-1 reversal needs
 Michael and Verification; old whole cards require explicit reprovision/reload. No existing engine
 or golden evidence is rewritten.
+
+## ADR-165 — P2V-005: distinguish bare files from whole devices without parsing TAPEFS
+
+**Date:** 2026-10-06 UTC (5 October Pacific) · **Owner:** PM #384; Michael resumption #395.
+**Inputs:** Product main `25b6439019396a54ce12e8298dd58f8a5d8a17e9`;
+Verification publication `ce60d348105d4851fa1f449d57e5f0e69a28e403`,
+`findings/P2-R1-WP14-DELTA-2026-10-06.md`; Software #392 information head
+`8e79710` and #384 comment 6008791571.
+
+**Finding.** Both leads are correct. ADR-164's claim that a conforming bare
+superblock cannot end in the MBR signature was wrong: its CRC32 is at 508–511.
+Verification's valid 9-second/4-chunk fixture (epoch 267838) has CRC
+`0xaa55ffc8`, zero bytes 446–507 and final bytes `55 AA`. The unconditional
+OR recognizer would turn a valid bare image into a false MBR finding.
+
+**Decision.**
+1. Amend only the host contract's verify recognizer. For a regular file, candidate
+   MBR means **any nonzero partition-entry byte 446–507**, regardless of signature.
+   Otherwise take the bare-image engine path, including any CRC/signature collision.
+   For a whole device, retain **nonzero entries OR 55 AA**. A device is not a
+   supported bare-image target; the target-kind distinction is intentional.
+2. An image with an empty/all-destroyed partition table and 55 AA follows the bare
+   path: normal engine mount finding/exit 1 if invalid, clean verification if it
+   is a valid bare cartridge. It is not an accepted whole-card layout.
+   Its device counterpart reports MBR_LAYOUT with no unsafe partition mount.
+   Damaged signatures with surviving entries, wrong types and truncated extents
+   remain reachable diagnostics on both target kinds. Device safety is still first.
+3. Do not use Software's proposed TAPEFS-magic exclusion or implement a host-side
+   CRC/validity parser. Nor add a speculative mount arbitration before MBR checks.
+   Nonzero MBR entries are enough to distinguish every conforming whole-card layout
+   from a conforming bare image; CRC bytes are no longer a file-format discriminator.
+   The contract states the unavoidable empty-table ambiguity rather than promising
+   diagnostics that also reject valid bare images.
+4. Continue the existing open Software #392 / Verification #146 stages. Software
+   applies the one recognizer correction and sends the final imported/bound head
+   directly to Verification. Verification carries its merged collision fixture,
+   adds both image/device empty-table and signature-survival cases plus a causal
+   control rejecting the former unconditional-OR classifier, updates only the
+   amended input hash/expectations, and completes the same package. No new issue,
+   standalone package, repeated E-1 review or PM pass-through round.
+5. All frozen bundle/engine/E-1 bytes and prior dispositions remain unchanged.
+   Native observation controls, final exact-head disposition and Windows 10/
+   physical-card evidence are still required. This closes only a contract blocker,
+   not WP-14 acceptance. No batching or hardware authorization.
+
+**Cost to reverse.** A host-contract/fixture/recognizer amendment in the existing
+round; no media migration or engine/spec-bundle revision. Explicit engine-mediated
+arbitration could later expand empty-table diagnostics, but is unnecessary for this gate.

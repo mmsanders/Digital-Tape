@@ -116,6 +116,8 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-162](DECISIONS.md#adr-162--phase-2-opened-kickoff-answers-operations-freeze-pm-runtime-unpinned) | 2026-10-05 | Phase 2 opened: kickoff answers, operations freeze, PM runtime unpinned | D1 go; Windows 10 + current macOS; D3–D5/D8 defaults; D6 Michael's wife; WP-38 not taken but not excluded; §9 frozen; no assignments until Michael's go |
 | [ADR-163](DECISIONS.md#adr-163--p2-r1-issued-wp-14-contract-erratum-e-1-proposed-round-assignments) | 2026-10-05 | P2-R1 issued: WP-14 contract, erratum E-1 proposed, round assignments | WP14-CLI-CONTRACT.md issued; verify uses engine judgments only; ports in host/port; FAT16 erratum for Michael; pre-routed Software/Verification round |
 
-100 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
 
 | [ADR-164](DECISIONS.md#adr-164--e-1-approval-recorded-wp-14-preflight-resolved-p2-r1-continuation-stays-pre-routed) | 2026-10-06 | E-1 approved; WP-14 preflight resolved | FAT16 overlay; Q1–Q11/P2V-001…004 settled; D8 complete; direct publication/binding/disposition continues |
+| [ADR-165](DECISIONS.md#adr-165--p2v-005-distinguish-bare-files-from-whole-devices-without-parsing-tapefs) | 2026-10-06 | P2V-005: bare-file CRC/signature collision | Files use nonzero MBR entries; whole devices retain OR signature; no host TAPEFS parser; existing #392/#146 stages continue |
+
+102 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
