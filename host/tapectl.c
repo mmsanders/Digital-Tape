@@ -218,6 +218,16 @@ static int open_image(const char *img)
     return target_open(&g_tgt, img, 1);
 }
 
+/* play, scrub and dump only read. On a device they open read-only, with a NULL
+   write callback: nothing is written to a card during playback, and the OS's
+   own mount of partition 1 can stay. A bare or provisioned image keeps the
+   WP-11 read-write open, so image behaviour is exactly as before. */
+static int open_for_reading(const char *img)
+{
+    if (img == NULL) { return usage("missing target"); }
+    return target_open(&g_tgt, img, target_names_device(img) ? 0 : 1);
+}
+
 static int mount(tape_side side)
 {
     CHECK(tape_init(g_mem.b, tape_instance_size(), &g_tgt.dev, g_play, sizeof g_play, g_rec, sizeof g_rec, &g_t));
@@ -465,7 +475,7 @@ static int play_common(int argc, char **argv, int scrub)
         }
     }
 
-    rc = open_image(positional(argc, argv, 0));
+    rc = open_for_reading(positional(argc, argv, 0));
     if (rc) { return rc; }
     rc = mount(side);
     if (rc) { return rc; }
@@ -555,7 +565,7 @@ static int cmd_dump(int argc, char **argv)
     if (parse_side(opt(argc, argv, "--side", &dup), &side) || path == NULL || dup) {
         return usage("dump: bad or missing option");
     }
-    rc = open_image(positional(argc, argv, 0));
+    rc = open_for_reading(positional(argc, argv, 0));
     if (!rc) { rc = mount(side); }
     if (rc) { return rc; }
     CHECK(tape_get_info(g_t, &info));

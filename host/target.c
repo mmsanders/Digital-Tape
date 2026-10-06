@@ -3,11 +3,28 @@
  * Normative: docs/WP14-CLI-CONTRACT.md §2, §4.1, §5, §6.
  */
 
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L   /* nanosleep under -std=c99 */
+#endif
+
 #include "target.h"
 #include "layout.h"
 
 #include <stdio.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <windows.h>
+static void sleep_ms(unsigned ms) { Sleep(ms); }
+#else
+#include <time.h>
+static void sleep_ms(unsigned ms)
+{
+    struct timespec ts;
+    ts.tv_sec = (time_t)(ms / 1000u);
+    ts.tv_nsec = (long)(ms % 1000u) * 1000000L;
+    (void)nanosleep(&ts, NULL);
+}
+#endif
 
 int target_names_device(const char *path)
 {
@@ -82,8 +99,11 @@ static int open_common(struct target *t, const char *path, int writable)
         /* The OS can remount our own partition 1 between the safety check and
            the open (macOS does). Re-run the safety rules, which unmount it
            again, a few times before giving up. Never more than the rules allow. */
-        for (tries = 0; t->is_device && writable && tries < 3; tries++) {
-            int rc = target_safety(path, 0, NULL, writable);
+        for (tries = 0; t->is_device && writable && tries < 10; tries++) {
+            int rc;
+            /* e.g. macOS checking the volume (fsck_msdos) as it remounts it */
+            sleep_ms(1000);
+            rc = target_safety(path, 0, NULL, writable);
             if (rc) { return rc; }
             if (hport_open(&t->hp, path, t->is_device, writable) == 0) { goto opened; }
         }
