@@ -31,7 +31,7 @@ The table above is the original guardrail set. The gates added during Phase 1:
 | `audit-product-evidence-pins.py` | Accepted product evidence bundles still match their pinned hashes (#337) |
 | `audit-docs-hygiene.sh` | STATUS / VERIFICATION-INTEGRATION line budgets and the 1 MiB docs file limit (CLAUDE.md §4) |
 | `audit-hardware.sh` | KiCad ERC/DRC. No schematic or board exists yet, so a green run checks no design |
-| `classify-changes.py` | Docs-only vs full classification for PR CI (#347) |
+| `classify-changes.py`, `ci_lanes.py`, `lane-verdict.py` | CI lanes (#347, R1 #385): `cheap` on every change, `regression` on non-docs changes, `qualification` on schedule, dispatch, the `qualification` PR label, engine-affecting changes and changed packages. Each lane's aggregate job is its required check |
 | `mutation-gate`, `mutation-suites.txt`, `mutations/` | WP-11 mutation testing: each planted engine mutation must be caught |
 | `wp11-portability.sh`, `wp11-narrow-int-check.py` | WP-11 §8 differential across host GCC, `arm-none-eabi` and the static-assert configuration |
 | `stream-age.py` | Daily escalation of streams held more than three days (CLAUDE.md §4) |
