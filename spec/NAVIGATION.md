@@ -75,3 +75,7 @@ first written):
 [CLAUDE.md §5](../CLAUDE.md). Test-package copies of spec bytes under `tests/*_draft8/`
 are authenticated historical inputs held by tamper controls — never deduplicate them
 against `spec/`. An API absent from the spec is a finding, not something to invent.
+
+E-1 host-layout override: [ERRATUM-E1.md](ERRATUM-E1.md), authenticated by
+[ERRATA.sha256](ERRATA.sha256). Read it with DRAFT-10 §3 for host provisioning;
+engine-visible bytes and historical evidence remain unchanged (ADR-164).

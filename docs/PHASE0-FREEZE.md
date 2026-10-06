@@ -150,3 +150,16 @@ point-in-time holds this section once carried. At Phase 1 close-out (3 October 2
 The temporary combined-lead freeze mandate has ended; normal roles in
 [CLAUDE.md](../CLAUDE.md) resume. Later infrastructure experiments do not extend
 product or verification authority. The signed scope above is unchanged.
+
+## E-1 approval — README partition only
+
+Michael, 5 October 2026 Pacific: “Re: Erratum E-1, I accept the default.”
+The independently paper-reviewed FAT16 recommendation is published at Verification
+main `6837102116ed94f80b8a6454713ffb1e7c076427` (Verification #146 / PR #147).
+PM records the additive [E-1 table](../spec/ERRATUM-E1.md) and
+[integrity manifest](../spec/ERRATA.sha256) under ADR-164: partition 1 becomes
+FAT16 0x0E, 16 MiB, 2 KiB clusters; partition 2 stays at LBA 34816. Impact/migration
+is in the erratum. The original DRAFT-10 hashes, all engine behavior and prior
+bounded evidence remain unchanged. Exact additive-text authentication belongs to
+#146's existing preflight; physical OS readability and media qualification are
+not granted by this approval.

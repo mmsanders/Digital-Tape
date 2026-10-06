@@ -14,6 +14,15 @@
 
 The three revisions must be identical. `spec/VERSION.md` is not itself hashed.
 
+## Additive host-layout erratum
+
+Michael approved E-1 on 5 October 2026 Pacific (ADR-164). The effective host media
+layout is this byte-identical DRAFT-10 bundle **plus** [ERRATUM-E1.md](ERRATUM-E1.md),
+authenticated by [ERRATA.sha256](ERRATA.sha256). Only partition 1 changes from
+0x0C FAT32 to 0x0E FAT16 at the same 16 MiB; engine-visible partition 2 is unchanged.
+Verification #146 authenticates the exact additive text in its existing preflight.
+Historical evidence retains its declared original bundle; no historical spec copy is rewritten.
+
 ## Why this file exists
 
 On **4 September 2026**, before this file existed, `main` published:

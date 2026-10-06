@@ -1,6 +1,6 @@
 # Project status
 
-**5 October 2026 UTC · input main `407d842` · Owner: PM (ADR-162 Phase 2 opened; ADR-163 P2-R1) ·**
+**6 October 2026 UTC · input main `47575af` · Owner: PM (ADR-164 P2-R1 contract rulings / completion routing) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 10 + current macOS;
-WP-38 not taken; operations freeze declared. **P2-R1 is issued** (ADR-163) with the [WP-14 contract](WP14-CLI-CONTRACT.md). Hardware stays parked.
+WP-38 not taken; operations freeze declared. **P2-R1 is in progress**: [WP-14 contract](WP14-CLI-CONTRACT.md) §9 resolves shared blockers (ADR-164). E-1 FAT16 approved; #387/D8 complete; #390 and Verification #146 are not accepted. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
 is preserved verbatim in [the September status history](archive/status-history/2026-09-status.md).
@@ -78,9 +78,9 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | Round issued (ADR-163): Software R1 CI lanes then WP-14; Verification E-1, preflight, WP-14 package, Q-P2-1(a) | Software, Verification in parallel; Michael E-1 and D8 |
-| Erratum E-1 | — | `tapefs` §3 partition 1 FAT32 at 16 MiB is not buildable; FAT16 proposed ([contract §3.2](WP14-CLI-CONTRACT.md)) | Verification paper review, then **Michael** |
-| Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. Paper question, [plan §5](PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379) | Verification (a) P2-R1, PM (b) P2-R2 |
+| Phase 2 / P2-R1 | — | #387 merged `47575af`; D8 seven contexts/strict confirmed. #390 `a12e130` green candidate, no full verifier import/disposition; #146 partial publication `6837102` (36 self-checks/15 controls, zero Product runs) | Software #392 / Verification #146 directly; Michael witnessed card/Windows 10 |
+| Erratum E-1 | — | **Approved** by Michael 5 Oct Pacific: FAT16 0x0E, 16 MiB, 2 KiB clusters; p2 LBA 34816 unchanged. Additive [erratum](../spec/ERRATUM-E1.md); original bundle bytes unchanged | Verification #146 exact-text preflight; native card readability still held |
+| Q-P2-1 copy call shape (#379) | — | (a) **Answered:** arbitrary-subset persistence is outside the two existing crash modes (`6837102` report); prior bounded acceptance stands. Software counts `b682331`: dup 1.24M one-block reads/writes, 8 destination flushes | PM (b) P2-R2; no batching until enlarged crash space independently qualified |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
 5. **Copy time on the device (#379).** One-block device calls make the C-60 copy depend on port batching; Q-P2-1 settles it before firmware.
-6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
+6. **Crash-model boundary:** arbitrary-subset unflushed persistence is unqualified; no batching authorization. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
 

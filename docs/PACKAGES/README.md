@@ -3,7 +3,7 @@
 One file per WP: interface, acceptance criteria, status. `WP-NN.md`.
 
 A package file is written when the package is picked up, not before. The index preserves all 37 packages from Plan Rev B (received 2026-08-31).
-Current status below is updated 3 October 2026 UTC (Phase 1 close-out, ADR-160). Historical phase durations are
+Current status below is updated 6 October 2026 UTC (P2-R1 completion routing, ADR-164). Historical phase durations are
 planning estimates, not fresh commitments. This repo is the restart authority; no
 external Plan or Charter is required. Read [STATUS](../STATUS.md) and the
 [scoped freeze record](../PHASE0-FREEZE.md) before treating a phase as complete.
@@ -49,9 +49,9 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **Planned, P2-R1** ([Phase 2 plan](../PHASE2-PLAN.md)). WP-11 shipped `tapectl` for disk images; WP-14 adds real microSD provisioning (MBR + FAT32 + TAPEFS), a durable flush, a disk-safety guard and read-only `verify`. Criteria A1–A9 in the package file |
+| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **P2-R1 in progress.** E-1 FAT16 approved; shared contract blockers settled (ADR-164); Software candidate #390 remains unaccepted and Verification's publication is partial. Complete package and real-card/Windows 10 witness remain pending. [STATUS](../STATUS.md) carries current evidence. Criteria A1–A9 in the package file |
 | WP-15 | [Drag-and-drop app (Tauri)](WP-15.md) | Agent | 3 | **Planned, P2-R3.** One window over WP-14 and WP-16; never writes the card itself; no lists (guardrail 03). Milestone test: someone who is not Michael makes a cartridge unaided |
-| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. Waits on kickoff decisions D3–D5 |
+| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. D3–D5 settled at kickoff; starts after the WP-14 software path is independently disposed |
 | WP-38 | Phone / web-app test harness (engine built to WebAssembly) | Agent | 3 | **Not taken in Phase 2 (D7, ADR-162).** Michael: no explicit development, but Software keeps the possibility open; Phase 2 host work must not make a later WASM build of the engine and ingest path impossible. Resume: Michael's `REQUEST:`. Lane outline kept in [the plan](../PHASE2-PLAN.md#wp-38-lane-if-d7-is-yes). Feasibility (PM, #341): the C99 engine compiles to WASM unchanged (guardrail 12); phone audio is not the product codec, so it gives no 85 dB-cap or wake-latency evidence, and golden identity must hold on the WASM build |
 
 **Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided. The detailed plan, rounds and kickoff decisions are in [docs/PHASE2-PLAN.md](../PHASE2-PLAN.md).
@@ -124,8 +124,8 @@ main handoffs work, go back to product work.
 
 | # | Candidate | Owner | Note |
 |---|---|---|---|
-| R1 | CI execution lanes: cheap checks / current regression / full qualification | PM ruling, Software builds | First make unchanged-code docs **main merges** cheap; today every main push runs the whole suite (~165 job-minutes for a docs merge). Inventory the 48 job definitions by purpose and cost before moving anything; fail toward a full run when unsure |
-| R2 | Required-check policy | **Michael** (ruleset 22084355 is a setting) | The ruleset requires 14 contexts that omit the golden suite, verifier publication, portability and mutation. Prefer a few stable aggregate contexts. Verification's ruleset has no required checks |
+| R1 | CI execution lanes: cheap checks / current regression / full qualification | PM ruling, Software builds | First make unchanged-code docs **main merges** cheap; today every main push runs the whole suite (~165 job-minutes for a docs merge). Inventory completed; #387 merged and D8 switched 6 Oct (ADR-164). Three stable aggregates; fail toward a full run when unsure |
+| R2 | Required-check policy | **Michael** (ruleset 22084355 is a setting) | D8 completed 6 Oct: seven aggregate/evidence/hygiene contexts, strict. Goldens/portability are in regression; full qualification is scheduled and phase-gated. Verifier-publication required status remains Michael's optional setting. Verification's ruleset has no required checks |
 | R3 | Contract preflight inside authoring assignments | Verification | Derive fixture geometry and branch reachability from the spec; settled-regression library (reverse frame zero, multi-block callbacks, real mount/service reads, budget 1); a deliberately different conforming trace |
 | R4 | Descriptor-driven package plumbing | Software (transport), Verification (expectations) | One package descriptor/runner interface built on `tests/IMPORTS.json`, for **new** Phase 2 work first; migrate old adapters only when touched |
 | R5 | Pre-routed rounds with conditional integration (ADR-158) | PM | One coherent scope runs publication → implementation → exact-head disposition → integration; no activation solely to merge an unchanged accepted head. Keep stage and next owner explicit, and close an issue only at its final stop |

@@ -2919,3 +2919,77 @@ revision with Michael's approval.
 
 **Cost to reverse.** Text until Software and Verification build against the contract. After that, every
 contract change costs a correction on both issues. E-1 either way costs two constants.
+
+
+## ADR-164 — E-1 approved; WP-14 shared blockers settled; completion routed directly
+
+**Date:** 2026-10-06 UTC (5 October Pacific) · **Owner:** PM at Michael's direction
+**Input:** Product `47575af1507097d89eb73888ff3cd2bcbf5e43f8`;
+Verification main `6837102116ed94f80b8a6454713ffb1e7c076427`;
+Software #385 / candidate #390 `a12e1301ac998123872411ee0aefac7e1683fa62`;
+Verification #146 / PR #147; PM #384.
+
+**Authority.** Michael: “Re: Erratum E-1, I accept the default.” He explicitly
+activated PM to review both leads, review the roadmap and assign next steps while
+minimizing communicative overhead and pass-through rounds.
+
+**Decision.**
+1. **E-1 approved:** FAT16 0x0E, 16 MiB, 2 KiB clusters, partition-2 LBA 34816
+   unchanged. The independent paper report establishes feasibility, not witnessed
+   OS readability. [The additive erratum](../spec/ERRATUM-E1.md) and
+   `spec/ERRATA.sha256` preserve original DRAFT-10 bundle bytes and historical
+   evidence. Verification authenticates exact additive text during the existing
+   #146 preflight. No full-bundle reissue or historical fixture rewrite.
+2. **Contract §9 settles P2V-001…004 and Q1…Q11 together.**
+   Verify-only candidate recognition uses nonzero partition-table bytes OR MBR
+   signature, so wrong types, truncated extents and damaged signatures are
+   reachable; exact recognition stays for other commands and safety runs first.
+   Test-only loop/facts routing never weakens the shipped probe. FAT timestamps
+   are UTC, pre-1980 clamped and two-second rounded; original engine epoch remains.
+   A2 compares exact source frames/PCM, with no invented tail tolerance.
+   Invalid image geometry precedes truncation. Provision crash outcomes are
+   phase-dependent (old / unprovisioned / complete new), superseding ADR-163's
+   blanket “not provisioned” statement. README/output/overage/mount ordering are
+   fixed. Raw macOS flush gets the unsupported-only device-cache fallback;
+   virtual devices are refused; device play/scrub/dump use read-only NULL bindings.
+   Keep WP-11 feed/service cadence; A9 remains measured only. Implementation
+   assertions/observations remain Software/Verification's work, not PM acceptance.
+3. **R1/D8 accepted as process delivery.** #387 merged at `47575af`;
+   ruleset 22084355 observed active/strict with exactly the seven issued contexts
+   on 6 Oct UTC. CI engine/evidence/hygiene/publication runs on that merge are green.
+   Software's paired probes report docs 51 s / 1.6 job-minutes and host 1m42s /
+   12.4 job-minutes, versus ~167 for a full run. Those meet the pilot targets for
+   these samples, not a weekly general guarantee. Host changes stay
+   qualification-inert with goldens/current regression per PR and daily full
+   qualification; label the final WP-14 candidate `qualification` at its gate.
+   Pin the existing Linux host runner in this correction, without a CI redesign.
+4. **WP-14 remains unaccepted.** Software candidate checks and native virtual-device
+   evidence support readiness, but its verifier package is not imported/bound.
+   Verification's 36 self-checks / 15 killed controls / zero Product runs are
+   truthful partial authorship evidence. Windows Server 2025 is not Windows 10
+   acceptance, and cached/native-call observations do not prove physical durability.
+5. **Direct completion:** Software #392 supersedes closed #385's unfinished
+   Part D and applies this delta; existing open Verification #146 completes
+   Stage 1 and proceeds directly to Stage 2 on the one final exact head.
+   No duplicate verifier issue, separate import-only merge or PM routing hop.
+   Michael receives the software/CI disposition and uses its tested head for the
+   real-card run on #386; he retains product merge/reserved approvals.
+   PM records final acceptance only after remaining gates. Physical witness may
+   be held separately from a software disposition; holds are never counted as PASS.
+6. **Q-P2-1(a) answered: insufficient model coverage.** The two existing modes
+   omit later-only/non-prefix unflushed persistence. Keep all prior bounded
+   dispositions and the no-batching hold. R2 PM option ruling uses the published
+   third-mode requirements and Software counts at `b682331`: one-block calls,
+   sequential copy streams, ~1.24M reads/writes and 8 destination flushes for dup;
+   C60 record cadence has 155,042 flushes. No hardware timing claim follows.
+   Enlarged crash-space qualification must precede relying on batching.
+7. **Roadmap order:** finish the real-card software path, then WP-16 ingest, then
+   WP-15 app/unaided test. R4 is carried by this new package's runner, not a new
+   infrastructure lane; old adapters are migrated only when touched. R9 ownership
+   checks are not made a WP-14 blocker. If the only remaining wait is Michael's
+   physical run after software disposition, the next activation can issue WP-16
+   image-only work without declaring WP-14 accepted. Hardware and WP-38 stay parked.
+
+**Cost to reverse.** Host contract/test corrections in this round. The additive
+E-1 row remains a frozen-scope approval; changing it needs the same authority and
+independent review. No engine change, media qualification or safety approval.
