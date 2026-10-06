@@ -262,7 +262,10 @@ int probe_unmount_p1(const char *path, const struct device_facts *f, int i)
 {
     (void)path;
     if (!safety_mount_is_own_p1(f, i)) { return -1; }
-    return umount2(f->mounted[i].where, 0) == 0 ? 0 : -1;
+    if (umount2(f->mounted[i].where, 0) == 0) { return 0; }
+    /* Already gone (ejected since the probe, or unmounted by an earlier
+       command): the goal, no mount, holds. EINVAL means "not a mount point". */
+    return (errno == EINVAL || errno == ENOENT) ? 0 : -1;
 }
 
 #endif /* __linux__ */
