@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const source = fs.readFileSync('index.html', 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const nodes = Object.fromEntries(['board','meta','warn','roadmap'].map(id => [id, {innerHTML:'',textContent:''}]));
+const nodes = Object.fromEntries(['board','meta','warn','roadmap','phase1'].map(id => [id, {innerHTML:'',textContent:''}]));
 let mode = 'ok';
 let requests = [];
 const ctx = vm.createContext({document:{hidden:false,getElementById:id=>nodes[id]},AbortSignal,Date,Set,Number,String,Math,
@@ -19,10 +19,10 @@ const ctx = vm.createContext({document:{hidden:false,getElementById:id=>nodes[id
   }});
 vm.runInContext(source,ctx);
 
-// The roadmap bar is a claim about how far Phase 1 has come, so it is worth the same
+// The roadmap bar is a claim about how far Phase 2 has come, so it is worth the same
 // scepticism as a gate: it must be computed from the stage table, must not round a
 // package up, and must not survive a stage whose rung is unstated.
-const rungs = vm.runInContext('PHASE1.stages.map(s => s.rung)', ctx);
+const rungs = vm.runInContext('PHASE2.stages.map(s => s.rung)', ctx);
 const top = vm.runInContext('RUNGS.length', ctx);
 const expected = Math.round(rungs.reduce((a,b)=>a+b,0) / (rungs.length * top) * 100);
 const roadmap = () => nodes.roadmap.innerHTML;
@@ -32,44 +32,58 @@ assert.match(roadmap(), new RegExp('aria-valuenow="' + expected + '"'));
 // Segment fills, in order, are exactly the stage rungs -- no stage borrows another's.
 assert.equal([...roadmap().matchAll(/width:(\d+)%/g)].map(m => m[1]).join(),
   Array.from(rungs).map(rung => Math.round(rung / top * 100)).join());
-// A package is only green once it is independently accepted. All nine Phase 1 packages are complete (P1-R64).
+// A package is only green once it is independently accepted. No Phase 2 package is independently accepted yet.
 const acceptedNow = Array.from(rungs).filter(rung => rung === top).length;
-assert.equal(acceptedNow, 9);
+assert.equal(acceptedNow, 0);
+assert.equal(Array.from(rungs).join(), '1,0,0');
+assert.match(roadmap(), /1 of 12 gate rungs/);
+assert.match(roadmap(), /Windows 10/);
+assert.match(roadmap(), /software-only PASS is not the final rung/);
+assert.match(roadmap(), /WP-38 is not taken/);
+assert.match(nodes.phase1.innerHTML, />100%</);
+assert.match(nodes.phase1.innerHTML, /36 of 36 gate rungs/);
+assert.equal((nodes.phase1.innerHTML.match(/class="seg done"/g)||[]).length, 9);
 assert.equal((roadmap().match(/class="seg done"/g)||[]).length, acceptedNow);
 assert.match(roadmap(), new RegExp('<b>' + acceptedNow + '<\\/b> accepted'));
 
-// The denominator has to be the real Phase 1 package set, or the bar is measuring a
+// The denominator has to be the real Phase 2 package set, or the bar is measuring a
 // list this file invented. Package IDs only -- status is PM's to write, not ours to read.
-const phase1 = fs.readFileSync('../../docs/PACKAGES/README.md', 'utf8')
-  .split(/^## /m).find(section => section.startsWith('Phase 1'));
-const packages = [...phase1.matchAll(/^\| (WP-\d+) \|/gm)].map(m => m[1]);
-assert.equal(Array.from(vm.runInContext('PHASE1.stages.map(s => s.id)', ctx)).sort().join(), packages.sort().join());
+const phase2 = fs.readFileSync('../../docs/PACKAGES/README.md', 'utf8')
+  .split(/^## /m).find(section => section.startsWith('Phase 2'));
+const packages = [...phase2.matchAll(/^\| (WP-\d+) \|/gm)].map(m => m[1]).filter(id => id !== 'WP-38');
+assert.equal(Array.from(vm.runInContext('PHASE2.stages.map(s => s.id)', ctx)).sort().join(), packages.sort().join());
 
 // Negative control: the bar is derived, not a hardcoded picture of today.
 const original = JSON.stringify(rungs);
-vm.runInContext('PHASE1.stages.forEach(s => { s.rung = RUNGS.length; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = RUNGS.length; }); renderRoadmap();', ctx);
 assert.match(roadmap(), />100%</);
 assert.equal((roadmap().match(/class="seg done"/g)||[]).length, rungs.length);
 assert.match(roadmap(), new RegExp('<b>' + rungs.length + '</b> accepted'));
-vm.runInContext('PHASE1.stages.forEach(s => { s.rung = 0; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); renderRoadmap();', ctx);
 assert.match(roadmap(), />0%</);
 assert.equal(roadmap().includes('width:0%'), true);
 
 // Negative control: a stage with no stated rung is unknown progress, not zero progress
 // and not the last good number. It must stop the render loudly.
-vm.runInContext('PHASE1.stages[0].rung = null;', ctx);
-assert.throws(() => vm.runInContext('renderRoadmap()', ctx), /WP-06 has no valid rung/);
-vm.runInContext('PHASE1.stages[0].rung = 5;', ctx);
+vm.runInContext('PHASE2.stages[0].rung = null;', ctx);
+assert.throws(() => vm.runInContext('renderRoadmap()', ctx), /WP-14 has no valid rung/);
+vm.runInContext('PHASE2.stages[0].rung = 5;', ctx);
 assert.throws(() => vm.runInContext('renderRoadmap()', ctx), /no valid rung/);
 
+// A complete coverage rung alone is neither merged implementation nor acceptance.
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); PHASE2.stages[0].rung = 2; renderRoadmap();', ctx);
+assert.equal(roadmap().includes('class="seg done"'), false);
+assert.match(roadmap(), /<b>0<\/b> accepted/);
+assert.match(roadmap(), /width:50%/);
+
 // Stage prose is escaped on the same path as issue titles.
-const name0 = vm.runInContext('PHASE1.stages[0].name', ctx);
-vm.runInContext('PHASE1.stages[0].rung = 1; PHASE1.stages[0].name = "<img src=x> & co"; renderRoadmap();', ctx);
+const name0 = vm.runInContext('PHASE2.stages[0].name', ctx);
+vm.runInContext('PHASE2.stages[0].rung = 1; PHASE2.stages[0].name = "<img src=x> & co"; renderRoadmap();', ctx);
 assert.match(roadmap(), /&lt;img src=x&gt; &amp; co/);
 assert(!roadmap().includes('<img'));
 
-vm.runInContext('PHASE1.stages[0].name = ' + JSON.stringify(name0) + ';', ctx);
-vm.runInContext('PHASE1.stages.forEach((s, i) => { s.rung = ' + original + '[i]; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages[0].name = ' + JSON.stringify(name0) + ';', ctx);
+vm.runInContext('PHASE2.stages.forEach((s, i) => { s.rung = ' + original + '[i]; }); renderRoadmap();', ctx);
 const settled = roadmap();
 assert.match(settled, new RegExp('>' + expected + '%<'));
 

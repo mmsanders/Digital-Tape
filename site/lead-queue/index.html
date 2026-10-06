@@ -231,6 +231,10 @@
       <div class="meta" id="meta"></div>
     </header>
     <section class="roadmap" id="roadmap"></section>
+    <details class="roadmap">
+      <summary>Phase 1 · complete · 36 of 36 rungs</summary>
+      <div id="phase1"></div>
+    </details>
     <div id="warn"></div>
     <div class="board" id="board">Loading open issues…</div>
     <footer>
@@ -241,7 +245,7 @@
     </footer>
   </div>
   <script>
-    // --- Phase 1 roadmap -------------------------------------------------
+    // --- Package roadmaps ------------------------------------------------
     // Hand-maintained from docs/PACKAGES/README.md and docs/STATUS.md. GitHub has no
     // field for package progression, so unlike the queue below this is a dated snapshot,
     // not a live read. `rung` counts rungs FULLY reached on the ladder the working
@@ -249,8 +253,8 @@
     // coverage is on main -> implementation merged and green against the real engine ->
     // independently accepted. A partial verifier tranche on main does not promote a
     // package stage, and a green run does not
-    // accept a package, so the bar is deliberately pessimistic: it can only reach full
-    // once Verification has accepted every Phase 1 package.
+    // accept a package. Each phase reaches full only after every included package is
+    // independently accepted, including required witnessed criteria.
     const RUNGS = [
       { short: "under contract", label: "Contract issued" },
       { short: "covered", label: "Required independent package coverage on main" },
@@ -259,8 +263,9 @@
     ];
 
     const PHASE1 = {
+      phase: 1,
       title: "Audio engine, on a laptop",
-      asOf: "P1-R64 Phase 1 exit criteria met: all nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e · 3 October 2026 UTC. Phase 2 opened 5 Oct (ADR-162); P2-R1 continued 6 Oct UTC (ADR-164): R1/D8 integrated; E-1 FAT16 approved; WP-14 partial evidence and native/physical witness held, no Phase 2 package acceptance. Phase 1 rungs remain final",
+      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -285,6 +290,24 @@
       ]
     };
 
+    const PHASE2 = {
+      phase: 2,
+      title: "A folder of music becomes a cartridge",
+      asOf: "P2-R1 · 6 October 2026 UTC · Product main 6f362f0 (ADR-165); Verification main ce60d34; live #392/#146 returns checked. No Phase 2 package accepted",
+      start: "Phase 2 opened · 5 Oct 2026",
+      goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
+      stages: [
+        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 1,
+          note: "Contract issued, including E-1 FAT16 and ADR-165 CRC/signature correction. Software #392 / PR #390 has a green transport candidate, not a final disposition head. Verification #146 has partial coverage on main; the complete package, native independent controls, exact-head PASS and integration remain open. Michael #386's macOS / Windows 10 real-card witness is held; Server 2025 CI does not substitute." },
+        { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 0,
+          note: "Planned after the real-card path. D3–D5 settled: WAV/AIFF/FLAC/MP3/AAC, gain-only −16 LUFS with −1 dBTP ceiling, natural filename order and defined folder gaps. Package contract not yet issued; kickoff choices are not a completed contract rung." },
+        { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 0,
+          note: "Planned over WP-14 and WP-16; package contract not yet issued. Drop a folder, type a label, pick a card, press one button. No music library or direct device writes. Acceptance includes Michael witnessing an unfamiliar family member's unaided run." }
+      ],
+      context: "Foundations complete: R1 CI lanes / D8 strict ruleset, operations freeze and E-1 approval. Hardware remains parked; WP-38 is not taken. Q-P2-1(a) is answered; (b) remains for P2-R2. No batching permission.",
+      exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
+    };
+
     function rungOf(stage) {
       if (!Number.isInteger(stage.rung) || stage.rung < 0 || stage.rung > RUNGS.length) {
         throw new Error("Roadmap stage " + stage.id + " has no valid rung; progress is unknown.");
@@ -299,8 +322,8 @@
       }).join("")}</span>`;
     }
 
-    function renderRoadmap() {
-      const stages = PHASE1.stages;
+    function renderRoadmap(phase = PHASE2, target = "roadmap") {
+      const stages = phase.stages;
       const top = RUNGS.length;
       const filled = stages.reduce((sum, stage) => sum + rungOf(stage), 0);
       const possible = stages.length * top;
@@ -330,31 +353,33 @@
           <p class="why">${escapeHtml(stage.note)}</p>
         </li>`).join("");
 
-      document.getElementById("roadmap").innerHTML = `
+      document.getElementById(target).innerHTML = `
         <div class="rmhead">
           <div>
-            <div class="kicker">Roadmap · through the end of Phase 1</div>
-            <h2>${escapeHtml(PHASE1.title)}</h2>
+            <div class="kicker">Roadmap · Phase ${phase.phase}</div>
+            <h2>${escapeHtml(phase.title)}</h2>
           </div>
-          <div class="pct${pct === 100 ? " full" : ""}">${pct}%<small>${filled} of ${possible} rungs</small></div>
+          <div class="pct${pct === 100 ? " full" : ""}">${pct}%<small>${filled} of ${possible} gate rungs · not elapsed time</small></div>
         </div>
-        <div class="track" role="progressbar" aria-label="Phase 1 progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}">${track}</div>
+        <div class="track" role="progressbar" aria-label="Phase ${phase.phase} package gates" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}">${track}</div>
         <div class="ends">
-          <span>${escapeHtml(PHASE1.start)}</span>
-          <span class="goal">${escapeHtml(PHASE1.goal)}</span>
+          <span>${escapeHtml(phase.start)}</span>
+          <span class="goal">${escapeHtml(phase.goal)}</span>
         </div>
         <div class="legend">${legend}</div>
-        <details>
+        <details${phase.phase === 2 ? " open" : ""}>
           <summary>${stages.length} packages · where each one stands</summary>
           <ul class="stages">${list}</ul>
         </details>
         <p class="rmnote">
-          Snapshot taken from main at ${escapeHtml(PHASE1.asOf)} — hand-maintained, not live.
+          Snapshot: ${escapeHtml(phase.asOf)} — hand-maintained, not live.
           Each package is one segment, each segment four rungs:
           ${escapeHtml(RUNGS.map((r) => r.label.toLowerCase()).join(" → "))}.
           A rung counts only when it is fully reached, so the bar fills last on acceptance
           and reaching full is Verification's call, not this page's.
-        </p>`;
+        </p>
+        ${phase.context ? `<p class="why">${escapeHtml(phase.context)}</p>` : ""}
+        ${phase.exit ? `<p class="why">${escapeHtml(phase.exit)} <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE2-PLAN.md">Phase 2 plan</a></p>` : ""}`;
     }
 
     const PRODUCT = { owner: "mmsanders", repo: "Digital-Tape" };
@@ -525,6 +550,7 @@
     }
 
     renderRoadmap();
+    renderRoadmap(PHASE1, "phase1");
     render();
     setInterval(() => { if (!document.hidden) render(); }, POLL_MS);
   </script>
