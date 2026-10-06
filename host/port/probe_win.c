@@ -184,6 +184,16 @@ int probe_device(const char *path, struct device_facts *f)
     return 0;
 }
 
+const char *probe_unmount_call(void) { return "FSCTL_LOCK_VOLUME+FSCTL_DISMOUNT_VOLUME"; }
+
+#ifdef TAPECTL_TEST
+int probe_unmount_invalid(void)
+{
+    DWORD got = 0;
+    return DeviceIoControl(INVALID_HANDLE_VALUE, FSCTL_DISMOUNT_VOLUME, NULL, 0, NULL, 0, &got, NULL) ? 0 : -1;
+}
+#endif
+
 int probe_unmount_p1(const char *path, const struct device_facts *f, int i)
 {
     wchar_t w[200];

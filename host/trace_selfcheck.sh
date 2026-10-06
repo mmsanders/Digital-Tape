@@ -85,13 +85,23 @@ for name in ('verify', 'dump') if device else ('verify',):
 fl = [e for e in T['noop_flush']['events'] if e['kind'] == 'flush']
 say(fl and all(e['os_call'] == 'none' and e['success'] for e in fl), 'control noop-flush: flush reported success with no OS barrier')
 fl = [e for e in T['hidden_flush']['events'] if e['kind'] == 'flush']
-say(fl and all(not e['os_success'] and e['success'] for e in fl), 'control hidden-flush-error: OS failure reported as success')
+say(fl and all(not e['os_success'] and e['os_error'] and e['success'] for e in fl), f'control hidden-flush-error: real OS failure ({fl[0]["os_error"] if fl else "?"}) reported as success')
 b = [e for e in T['nonnull']['events'] if e['kind'] == 'engine_bind']
 say(b and not all(e['write_is_null'] for e in b), 'control nonnull-binding: verify bound a write callback')
-rf = [e for e in T['read_error']['events'] if e['kind'] == 'read_fault']
+rf = [e for e in T['read_error']['events'] if e['kind'] == 'read' and not e['success']]
 out = (d / 'read_error.out').read_text()
-say(rf and 'READ_ERROR SIDE A FRAME' in out and T['read_error']['exit'] == 1,
-    f'control read-error:2058: injected at partition LBA {rf[0]["partition_lba"] if rf else "?"}; verify printed {out.strip().splitlines()}')
+say(rf and all(e['phase'] == 'service' and e.get('referenced_chunk') and e.get('os_error') for e in rf)
+    and [(e['side'], e['frame']) for e in rf] == [('A', 0), ('B', 0)] and T['read_error']['exit'] == 1,
+    f'control read-error:2058: real failed OS reads {[(e["side"], e["frame"], e["os_error"]) for e in rf]}; verify printed {out.strip().splitlines()}')
+v = T['verify']['events']
+mounts = [(e['side'], e['cold'], e['result']) for e in v if e['kind'] == 'engine_mount']
+say(mounts == [('A', True, 'TAPE_OK'), ('B', True, 'TAPE_OK')] and [e['side'] for e in v if e['kind'] == 'engine_info'] == ['A', 'B'],
+    f'verify: cold engine_mount A then B, engine_info for each ({mounts})')
+say(any(e['kind'] == 'read' and e['phase'] == 'service' and e.get('referenced_chunk') for e in v),
+    'verify: service reads of referenced chunks observed')
+pw = [e for e in T['provision']['events'] if e['kind'] == 'write']
+say(pw and all('data_hex' in e and len(e['data_hex']) == 2 * e['bytes'] for e in pw), f'provision: all {len(pw)} writes carry their payload')
+say(T['verify'].get('target_kind') in ('image', 'device') and T['verify'].get('engine_used') is True, 'verify: target_kind and engine_used recorded')
 sys.exit(1 if bad else 0)
 EOF
 [ $? -eq 0 ] || fail "trace checks (above)"

@@ -91,6 +91,12 @@ static void test_mbr(void)
 
     /* verify findings (#384 Q3) */
     check(mbr_findings(m, N) == 0, "no findings on the exact layout");
+    memcpy(x, m, 512); x[0] = 1;
+    check(mbr_is_layout(x, N) && mbr_findings(x, N) == MBR_F_LAYOUT, "bootstrap byte: still recognised, but MBR_LAYOUT under verify");
+    memcpy(x, m, 512); x[444] = 1;
+    check(mbr_findings(x, N) == MBR_F_LAYOUT, "byte 444 nonzero: MBR_LAYOUT");
+    memcpy(x, m, 512); x[441] ^= 0xFF;
+    check(mbr_findings(x, N) == 0, "a different disk signature is not judged");
     memcpy(x, m, 512); x[450] = 0x0C;
     check(mbr_findings(x, N) == MBR_F_TYPE, "entry 1 type -> PARTITION_TYPE only");
     memcpy(x, m, 512); x[466] = 0x83;

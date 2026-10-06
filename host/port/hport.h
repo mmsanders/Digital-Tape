@@ -30,6 +30,7 @@ struct hport {
     int writable;
     uint64_t bytes;           /* size of the file, or capacity of the device */
     const char *flush_how;    /* the OS call flush uses, for diagnostics */
+    const char *flush_note;   /* macOS raw: why F_FULLFSYNC was not used (ENOTTY/ENOTSUP) */
     unsigned long long flushes;
 };
 
@@ -58,7 +59,14 @@ int hport_close(struct hport *p);
 int hport_os_open(struct hport *p, const char *path, int is_device, int writable);
 int hport_os_create(struct hport *p, const char *path, uint64_t bytes);
 int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len);
+int hport_os_read(struct hport *p, uint64_t off, void *buf, size_t len);
 int hport_os_flush(struct hport *p);    /* sets p->flush_how to the barrier it ran */
+
+/* Test controls only: make `p` refer to no open file, so the next OS call on it
+   genuinely fails (EBADF / ERROR_INVALID_HANDLE). */
+void hport_os_invalidate(struct hport *p);
+/* The OS error name/number of the last failed OS call, e.g. "EBADF". */
+const char *hport_os_errname(void);
 
 /* The OS's reason for the last failed hport call, for messages. */
 const char *hport_error(void);

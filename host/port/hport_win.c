@@ -90,7 +90,7 @@ static void at(OVERLAPPED *ov, uint64_t off)
     ov->OffsetHigh = (DWORD)(off >> 32);
 }
 
-int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
+int hport_os_read(struct hport *p, uint64_t off, void *buf, size_t len)
 {
     unsigned char *b = (unsigned char *)buf;
     while (len > 0) {
@@ -120,6 +120,20 @@ int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 int hport_os_flush(struct hport *p)
 {
     return FlushFileBuffers(p->h) ? 0 : -1;
+}
+
+void hport_os_invalidate(struct hport *p)
+{
+    p->h = INVALID_HANDLE_VALUE;
+}
+
+const char *hport_os_errname(void)
+{
+    static char buf[48];
+    DWORD e = GetLastError();
+    if (e == ERROR_INVALID_HANDLE) { return "ERROR_INVALID_HANDLE"; }
+    snprintf(buf, sizeof buf, "Windows error %lu", (unsigned long)e);
+    return buf;
 }
 
 const char *hport_error(void)

@@ -254,6 +254,15 @@ int probe_device(const char *path, struct device_facts *f)
     return 0;
 }
 
+const char *probe_unmount_call(void) { return "DADiskUnmount"; }
+
+#ifdef TAPECTL_TEST
+int probe_unmount_invalid(void)
+{
+    return unmount("", 0) == 0 ? 0 : -1;      /* ENOENT from the kernel */
+}
+#endif
+
 struct da_wait { int done; int ok; };
 
 static void da_unmounted(DADiskRef disk, DADissenterRef dissenter, void *ctx)

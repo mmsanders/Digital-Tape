@@ -64,6 +64,15 @@ int probe_device(const char *path, struct device_facts *f);
 /* Unmount partition 1 (mounted[i]) before provision rewrites it. 0 on success. */
 int probe_unmount_p1(const char *path, const struct device_facts *f, int i);
 
+/* The OS call probe_unmount_p1 makes, for the trace (e.g. "umount2"). */
+const char *probe_unmount_call(void);
+
+#ifdef TAPECTL_TEST
+/* unmount-error control: the same OS unmount call, issued on an invalid
+   target so the OS itself fails it. Returns -1 and leaves errno/last error. */
+int probe_unmount_invalid(void);
+#endif
+
 /* §2 platform path forms. */
 int path_is_device_form(const char *path);   /* anything shaped like a device path */
 int path_is_whole_form(const char *path);    /* the accepted whole-disk form */

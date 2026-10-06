@@ -21,7 +21,9 @@ static int pv_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     v->reads++;
     if (!in_range(v, lba, count)) { return 2; }
 #ifdef TAPECTL_TEST
-    if (tseam_fault_read(lba, count)) { return 1; }     /* control: injected read failure */
+    if (tseam_fault_read(lba, count)) {                 /* control: a real failed OS read */
+        return hport_read_failing(v->p, (v->base + lba) * TAPE_BLOCK_SIZE, dst, (size_t)count * TAPE_BLOCK_SIZE) ? 1 : 0;
+    }
 #endif
     return hport_read(v->p, (v->base + lba) * TAPE_BLOCK_SIZE, dst, (size_t)count * TAPE_BLOCK_SIZE) ? 1 : 0;
 }

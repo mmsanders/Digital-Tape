@@ -15,6 +15,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -104,7 +105,7 @@ int hport_os_create(struct hport *p, const char *path, uint64_t bytes)
     return 0;
 }
 
-int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
+int hport_os_read(struct hport *p, uint64_t off, void *buf, size_t len)
 {
     unsigned char *b = (unsigned char *)buf;
     while (len > 0) {
@@ -132,17 +133,18 @@ int hport_os_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 int hport_os_flush(struct hport *p)
 {
 #if defined(__APPLE__)
+    p->flush_note = NULL;
     if (fcntl(p->fd, F_FULLFSYNC) == 0) { p->flush_how = "F_FULLFSYNC"; return 0; }
+    p->flush_how = "F_FULLFSYNC";
     /* #384 Q6: F_FULLFSYNC asks a filesystem to flush the drive's cache. On a
        raw disk node there is no filesystem, and the kernel may report it
        unsupported; then make the same request of the disk directly. Any other
        failure fails the flush. */
     /* ADR-164 §6: only an explicit unsupported-descriptor result permits it. */
     if (p->is_device && (errno == ENOTTY || errno == ENOTSUP)) {
-        if (ioctl(p->fd, DKIOCSYNCHRONIZECACHE) == 0) {
-            p->flush_how = "DKIOCSYNCHRONIZECACHE";
-            return 0;
-        }
+        p->flush_note = (errno == ENOTTY) ? "ENOTTY" : "ENOTSUP";
+        p->flush_how = "DKIOCSYNCHRONIZECACHE";
+        if (ioctl(p->fd, DKIOCSYNCHRONIZECACHE) == 0) { return 0; }
     }
     return -1;
 #else
@@ -153,6 +155,30 @@ int hport_os_flush(struct hport *p)
 const char *hport_error(void)
 {
     return strerror(errno);
+}
+
+void hport_os_invalidate(struct hport *p)
+{
+    p->fd = -1;
+}
+
+const char *hport_os_errname(void)
+{
+    static char buf[32];
+    switch (errno) {
+    case EBADF: return "EBADF";
+    case EIO: return "EIO";
+    case EINVAL: return "EINVAL";
+    case ENOENT: return "ENOENT";
+    case EBUSY: return "EBUSY";
+    case ENOTTY: return "ENOTTY";
+    case ENOTSUP: return "ENOTSUP";
+    case EPERM: return "EPERM";
+    case EACCES: return "EACCES";
+    default: break;
+    }
+    snprintf(buf, sizeof buf, "errno %d", errno);
+    return buf;
 }
 
 int hport_close(struct hport *p)

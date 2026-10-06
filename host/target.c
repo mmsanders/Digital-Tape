@@ -71,7 +71,19 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
     if (provision || need_write) {
         for (i = 0; i < f.n_mounted; i++) {
             /* Under the test seam too: a facts file may name a real mount. */
-            int ok = probe_unmount_p1(path, &f, i);
+            int ok;
+#ifdef TAPECTL_TEST
+            if (tseam_fault_unmount()) {          /* control: a real failed OS unmount */
+                ok = probe_unmount_invalid();
+                tseam_unmount(f.mounted[i].where, probe_unmount_call(), ok == 0, ok == 0 ? NULL : hport_os_errname(), "unmount-error");
+                ok = -1;
+            } else {
+                ok = probe_unmount_p1(path, &f, i);
+                tseam_unmount(f.mounted[i].where, probe_unmount_call(), ok == 0, ok == 0 ? NULL : hport_os_errname(), NULL);
+            }
+#else
+            ok = probe_unmount_p1(path, &f, i);
+#endif
             if (ok != 0) {
 #ifdef TAPECTL_TEST
                 tseam_refusal(refusal_id(REFUSE_FOREIGN_MOUNT));
@@ -87,8 +99,16 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
 
 static int read_lba0(struct hport *p, uint8_t lba0[512])
 {
+    int rc;
     if (p->bytes < 512u) { memset(lba0, 0, 512); return 0; }
-    return hport_read(p, 0, lba0, 512);
+#ifdef TAPECTL_TEST
+    tseam_phase("layout", 0, -1);
+#endif
+    rc = hport_read(p, 0, lba0, 512);
+#ifdef TAPECTL_TEST
+    tseam_phase("other", 0, -1);
+#endif
+    return rc;
 }
 
 static int open_common(struct target *t, const char *path, int writable)
@@ -173,7 +193,9 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
     }
     if (mbr_is_layout(lba0, t->sectors) || mbr_is_mbr_shaped(lba0, t->is_device)) {
         uint32_t s2, n2;
-        *findings = mbr_is_layout(lba0, t->sectors) ? 0u : mbr_findings(lba0, t->sectors);
+        /* The whole §3.1 table is validated, including what exact recognition
+           does not read (bootstrap, bytes 444..445). */
+        *findings = mbr_findings(lba0, t->sectors);
         mbr_entry2(lba0, &s2, &n2);
         t->provisioned = 1;
         /* ADR-164 §4.1: mount only when entry 2 starts at 34816 with a nonzero

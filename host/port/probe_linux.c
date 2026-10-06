@@ -258,6 +258,15 @@ int probe_device(const char *path, struct device_facts *f)
     return 0;
 }
 
+const char *probe_unmount_call(void) { return "umount2"; }
+
+#ifdef TAPECTL_TEST
+int probe_unmount_invalid(void)
+{
+    return umount2("", 0) == 0 ? 0 : -1;      /* ENOENT from the kernel */
+}
+#endif
+
 int probe_unmount_p1(const char *path, const struct device_facts *f, int i)
 {
     (void)path;

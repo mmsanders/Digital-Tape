@@ -88,7 +88,7 @@ unsigned mbr_findings(const uint8_t lba0[512], uint64_t total_sectors)
 {
     uint8_t norm[512];
     uint32_t s2, n2, want_n2;
-    unsigned f = 0;
+    unsigned f = 0, i;
 
     mbr_entry2(lba0, &s2, &n2);
     if ((uint64_t)s2 + n2 > total_sectors) { f |= MBR_F_TRUNCATED; }
@@ -104,5 +104,11 @@ unsigned mbr_findings(const uint8_t lba0[512], uint64_t total_sectors)
         put32(norm + PT_OFF + 16u + 12u, want_n2);
     }
     if (!mbr_is_layout(norm, total_sectors)) { f |= MBR_F_LAYOUT; }
+    /* verify validates the whole §3.1 table, not only what recognition reads:
+       the bootstrap (0..439) and bytes 444..445 must be zero. The disk
+       signature (440..443) comes from the cartridge UUID and is not judged. */
+    for (i = 0; i < 512u; i++) {
+        if ((i < 440u || i == 444u || i == 445u) && lba0[i] != 0) { f |= MBR_F_LAYOUT; break; }
+    }
     return f;
 }

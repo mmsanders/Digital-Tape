@@ -19,6 +19,19 @@
 #include "layout.h"
 #include "entropy.h"
 #include "tseam.h"
+
+/* Engine call-site observations (test build only; no-ops when shipped). */
+#ifdef TAPECTL_TEST
+#define OBS_ENGINE()               tseam_engine_used()
+#define OBS_PHASE(ph, sd, fr)      tseam_phase((ph), (sd), (fr))
+#define OBS_MOUNT(sd, r)           tseam_mount((sd), 1, rname(r))
+#define OBS_INFO(sd, i)            tseam_info((sd), (i).needs_repair, (i).side_b_valid)
+#else
+#define OBS_ENGINE()               ((void)0)
+#define OBS_PHASE(ph, sd, fr)      ((void)0)
+#define OBS_MOUNT(sd, r)           ((void)0)
+#define OBS_INFO(sd, i)            ((void)0)
+#endif
 #include "wav.h"
 
 #include <stdio.h>
@@ -229,10 +242,27 @@ static int open_for_reading(const char *img)
     return target_open(&g_tgt, img, target_names_device(img) ? 0 : 1);
 }
 
+static char g_side_letter;     /* the side last mounted or set, for observations */
+
+/* Cold mount (warm start is out of scope), then tape_get_info, as observed. */
 static int mount(tape_side side)
 {
+    tape_result r;
+    char s = side == TAPE_SIDE_A ? 'A' : 'B';
+    OBS_ENGINE();
     CHECK(tape_init(g_mem.b, tape_instance_size(), &g_tgt.dev, g_play, sizeof g_play, g_rec, sizeof g_rec, &g_t));
-    CHECK(tape_mount(g_t, side, 0u, NULL));
+    OBS_PHASE("mount", s, -1);
+    r = tape_mount(g_t, side, 0u, NULL);
+    OBS_MOUNT(s, r);
+    OBS_PHASE("other", 0, -1);
+    if (r != TAPE_OK) { return engine_fail("tape_mount(g_t, side, 0u, NULL)", r); }
+    g_side_letter = s;
+#ifdef TAPECTL_TEST
+    {
+        tape_info info;
+        if (tape_get_info(g_t, &info) == TAPE_OK) { OBS_INFO(s, info); }
+    }
+#endif
     return 0;
 }
 
@@ -264,7 +294,15 @@ static int finish(int rc)
 static int service(void)
 {
     bool more = true;
+#ifdef TAPECTL_TEST
+    {
+        uint64_t pos = 0;
+        (void)tape_tell(g_t, &pos);
+        OBS_PHASE("service", g_side_letter, (int64_t)pos);
+    }
+#endif
     while (more) { CHECK(tape_service(g_t, BUDGET, &more)); }
+    OBS_PHASE("other", 0, -1);
     return 0;
 }
 
@@ -306,11 +344,13 @@ static int feed_and_commit(struct wav_in *in)
             done += acc;
         }
     }
+    OBS_PHASE("service", g_side_letter, -1);
     do {
         bool more = true;
         CHECK(tape_service(g_t, BUDGET, &more));
         CHECK(tape_status(g_t, &st));
     } while (st.frames_owed);
+    OBS_PHASE("other", 0, -1);
     CHECK(tape_commit(g_t));
     return 0;
 }
@@ -361,9 +401,17 @@ static int capacity_check(uint32_t src_frames)
     uint32_t len;
 
     ro.write = NULL;
+    OBS_ENGINE();
     CHECK(tape_init(g_mem.b, tape_instance_size(), &ro, g_play, sizeof g_play, g_rec, sizeof g_rec, &g_t));
-    CHECK(tape_mount(g_t, TAPE_SIDE_A, 0u, NULL));
+    OBS_PHASE("mount", 'A', -1);
+    {
+        tape_result r = tape_mount(g_t, TAPE_SIDE_A, 0u, NULL);
+        OBS_MOUNT('A', r);
+        OBS_PHASE("other", 0, -1);
+        if (r != TAPE_OK) { return engine_fail("tape_mount(capacity)", r); }
+    }
     CHECK(tape_get_info(g_t, &info));
+    OBS_INFO('A', info);
     {
         uint64_t pos;
         (void)tape_unmount(g_t, &pos);
@@ -406,6 +454,7 @@ static int cmd_format(int argc, char **argv)
     }
     g_tgt.open = 1;
     partview_bind(&g_tgt.view, &g_tgt.dev, &g_tgt.hp, 0, blocks, 1);
+    OBS_ENGINE();
     CHECK(tape_format(&g_tgt.dev, uuid, epoch, label, length));
     return 0;
 }
@@ -424,6 +473,7 @@ static int cmd_load(int argc, char **argv)
     if (!rc) { rc = mount(TAPE_SIDE_A); }
     if (!rc) {
         tape_result r = tape_set_side(g_t, TAPE_SIDE_B);
+        g_side_letter = 'B';
         if (r == TAPE_OK) { r = tape_seek(g_t, 0u); }
         if (r == TAPE_OK) { r = tape_arm(g_t, TAPE_REC_OVERWRITE); }
         rc = (r == TAPE_OK) ? feed_and_commit(&in) : engine_fail("load", r);
@@ -537,6 +587,7 @@ static int cmd_record(int argc, char **argv)
     if (!rc) { rc = mount(TAPE_SIDE_A); }
     if (!rc) {
         tape_result r = tape_set_side(g_t, TAPE_SIDE_B);
+        g_side_letter = 'B';
         if (r == TAPE_OK) { r = tape_seek(g_t, at); }
         if (r == TAPE_OK) { r = tape_arm(g_t, mode); }
         rc = (r == TAPE_OK) ? feed_and_commit(&in) : engine_fail("record", r);
@@ -700,6 +751,7 @@ static int cmd_provision(int argc, char **argv)
 
     /* 2. GEOMETRY_OK for partition 2, asked of the engine itself: zero writes. */
     dry.read = dry_rw; dry.write = dry_w; dry.flush = dry_flush; dry.ctx = NULL; dry.block_count = p2;
+    OBS_ENGINE();
     r = tape_format(&dry, uuid, epoch, label, length);
     if (r != TAPE_ERR_IO) { return engine_fail("provision", r == TAPE_OK ? TAPE_ERR_IO : r); }
 
@@ -762,26 +814,35 @@ static void verify_side(tape_side side, struct side_result *s)
     tape_result r;
     uint64_t done = 0;
 
+    char letter = side == TAPE_SIDE_A ? 'A' : 'B';
+
+    (void)letter;
     memset(s, 0, sizeof *s);
+    OBS_ENGINE();
     r = tape_init(g_mem.b, tape_instance_size(), &g_tgt.dev, g_play, sizeof g_play, g_rec, sizeof g_rec, &g_t);
-    if (r == TAPE_OK) { r = tape_mount(g_t, side, 0u, NULL); }
+    OBS_PHASE("mount", letter, -1);
+    if (r == TAPE_OK) { r = tape_mount(g_t, side, 0u, NULL); OBS_MOUNT(letter, r); }
+    OBS_PHASE("other", 0, -1);
     s->mount = r;
     if (r != TAPE_OK) { g_t = NULL; return; }          /* a failing mount is not read */
     s->have_info = tape_get_info(g_t, &s->info) == TAPE_OK;
     if (!s->have_info) { memset(&s->info, 0, sizeof s->info); }
+    else { OBS_INFO(letter, s->info); }
     r = tape_seek(g_t, 0u);
     if (r == TAPE_OK) { r = tape_set_rate(g_t, 65536); }
     while (r == TAPE_OK && done < s->info.total_frames) {
         uint64_t left = s->info.total_frames - done;
         uint32_t want = left > RENDER_MAX ? RENDER_MAX : (uint32_t)left, got = 0;
         bool more = true;
+        OBS_PHASE("service", letter, (int64_t)done);
         while (r == TAPE_OK && more) { r = tape_service(g_t, BUDGET, &more); }
+        OBS_PHASE("other", 0, -1);
         if (r == TAPE_OK) { r = tape_render(g_t, g_pcm, want, &got); }
         if (r == TAPE_OK && got == 0u) { break; }
         done += got;
     }
     if (r != TAPE_OK) {
-        fprintf(stderr, "tapectl: verify: side %c read stopped: %s\n", side == TAPE_SIDE_A ? 'A' : 'B', rname(r));
+        /* Reported as READ_ERROR only: verify's output is exactly its findings. */
         s->read_error = 1;
         s->frame = done;
     }
@@ -815,11 +876,19 @@ static int cmd_verify(int argc, char **argv)
         for (i = 0; i < 2; i++) {
             if (sr[i].mount != TAPE_OK) { printf("MOUNT %s\n", rname(sr[i].mount)); n++; }
         }
-        for (i = 0; i < 2 && state == NULL; i++) {
-            if (sr[i].mount == TAPE_OK && sr[i].have_info) { state = &sr[i]; }
+        {
+            int repair = 0, degraded = 0;
+            for (i = 0; i < 2; i++) {
+                if (sr[i].mount == TAPE_OK && sr[i].have_info) {
+                    repair |= sr[i].info.needs_repair;
+                    degraded |= !sr[i].info.side_b_valid;
+                    state = &sr[i];
+                }
+            }
+            (void)state;
+            if (repair)   { printf("NEEDS_REPAIR\n"); n++; }
+            if (degraded) { printf("SIDE_B_DEGRADED\n"); n++; }
         }
-        if (state != NULL && state->info.needs_repair) { printf("NEEDS_REPAIR\n"); n++; }
-        if (state != NULL && !state->info.side_b_valid) { printf("SIDE_B_DEGRADED\n"); n++; }
         for (i = 0; i < 2; i++) {
             if (sr[i].read_error) {
                 printf("READ_ERROR SIDE %c FRAME %llu\n", i == 0 ? 'A' : 'B', (unsigned long long)sr[i].frame);
@@ -841,6 +910,8 @@ static int cmd_probe(int argc, char **argv)
     int i;
     if (argc != 1) { return usage("probe: expected exactly one DEV"); }
     (void)probe_device(argv[0], &f);
+    tseam_target(argv[0], 1, f.bytes);
+    tseam_facts(&f, refusal_id(safety_policy(&f, 0, 0)), 0);
     printf("whole=%d\nremovable=%d\nsd_bus=%d\nbytes=%llu\nholds_os=%d\nlayout_ok=%d\n",
            f.whole_device, f.removable, f.sd_bus, (unsigned long long)f.bytes, f.holds_os, f.layout_ok);
     for (i = 0; i < f.n_mounted && i < SAFETY_MAX_MOUNTS; i++) {
