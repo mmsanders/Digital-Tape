@@ -40,10 +40,11 @@ int mbr_build(uint8_t out[512], const uint8_t uuid[16], uint64_t total_sectors);
    signature are not part of the test. */
 int mbr_is_layout(const uint8_t lba0[512], uint64_t total_sectors);
 
-/* verify only (ADR-164, P2V-001): a candidate MBR is LBA 0 with signature
-   55 AA OR any nonzero byte in 446..507. Recognition only, never permission
-   to write; every other command keeps exact recognition. */
-int mbr_is_mbr_shaped(const uint8_t lba0[512]);
+/* verify only (ADR-164 P2V-001, ADR-165 P2V-005): a candidate MBR is LBA 0
+   with any nonzero byte in 446..507; for a whole device, signature 55 AA also
+   suffices. Recognition only, never permission to write; every other command
+   keeps exact recognition. */
+int mbr_is_mbr_shaped(const uint8_t lba0[512], int is_device);
 
 /* verify findings against §3.1 for an MBR-shaped LBA 0. Bit flags. */
 #define MBR_F_LAYOUT     1u    /* MBR_LAYOUT */

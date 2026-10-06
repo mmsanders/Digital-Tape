@@ -65,18 +65,17 @@ int mbr_is_layout(const uint8_t lba0[512], uint64_t total_sectors)
     return memcmp(lba0 + PT_OFF, want, sizeof want) == 0;
 }
 
-int mbr_is_mbr_shaped(const uint8_t lba0[512])
+int mbr_is_mbr_shaped(const uint8_t lba0[512], int is_device)
 {
     unsigned i;
-    /* ADR-164 / P2V-001: signature 55 AA, OR any nonzero byte in 446..507, so a
-       damaged signature is still a candidate. (Note for PM: a superblock's
-       CRC-32 occupies 508..511, so roughly 1 bare image in 65 536 also ends in
-       55 AA; verify then reports it against the MBR layout.) */
-    if (lba0[510] == 0x55 && lba0[511] == 0xAA) { return 1; }
+    /* ADR-165 (P2V-005) target-kind table. Any nonzero partition-entry byte
+       (446..507) makes either target a candidate, damaged signature or not.
+       The signature alone counts only for a whole device: in a regular file,
+       510..511 may be the low half of a bare superblock's CRC-32. */
     for (i = PT_OFF; i < 508u; i++) {
         if (lba0[i] != 0) { return 1; }
     }
-    return 0;
+    return is_device && lba0[510] == 0x55 && lba0[511] == 0xAA;
 }
 
 void mbr_entry2(const uint8_t lba0[512], uint32_t *start, uint32_t *sectors)

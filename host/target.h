@@ -42,9 +42,9 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
    writable = 0 binds a NULL write callback. Returns 0 or an exit code. */
 int target_open(struct target *t, const char *path, int writable);
 
-/* verify's open (#384 Q3): read-only, and an MBR-shaped near miss is reported
-   through *mbr_findings instead of being refused. *have_view says whether a
-   partition-2 view could be formed for the engine checks. */
+/* verify's open (ADR-164/165): read-only. A candidate MBR (the target-kind
+   rule in layout.h) is reported through *findings instead of being refused.
+   *have_view says whether a partition-2 view could be formed for the engine. */
 int target_open_verify(struct target *t, const char *path, unsigned *findings, int *have_view);
 
 int target_close(struct target *t);

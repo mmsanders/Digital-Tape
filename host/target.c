@@ -171,7 +171,7 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
         fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
         return EXIT_ENGINE;
     }
-    if (mbr_is_layout(lba0, t->sectors) || mbr_is_mbr_shaped(lba0)) {
+    if (mbr_is_layout(lba0, t->sectors) || mbr_is_mbr_shaped(lba0, t->is_device)) {
         uint32_t s2, n2;
         *findings = mbr_is_layout(lba0, t->sectors) ? 0u : mbr_findings(lba0, t->sectors);
         mbr_entry2(lba0, &s2, &n2);

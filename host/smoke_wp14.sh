@@ -138,6 +138,17 @@ exactly MBR_LAYOUT
 damage sig 'd[510] = 0; d[511] = 0'
 expect 1 "damaged MBR signature is still a verify candidate (P2V-001)" -- "$TAPECTL" verify "$DIR/sig.img"
 exactly MBR_LAYOUT
+# P2V-005: a valid bare image whose superblock CRC-32 ends 55 AA. Epoch 262334
+# with this label/geometry collides (found by formatting with the real engine).
+"$TAPECTL" format "$DIR/collide.img" --blocks 6145 --uuid 00112233445566778899aabbccddeeff --epoch 262334 \
+  --label col --length-s 9 >/dev/null 2>&1
+"$PY" -c 'import sys;d=open(sys.argv[1],"rb").read(512);sys.exit(not(d[510:512]==b"\x55\xaa" and not any(d[446:508])))' "$DIR/collide.img" \
+  && ok "fixture: a valid bare superblock that ends 55 AA, with 446..507 zero" || fail "collision fixture does not collide"
+expect 0 "P2V-005: that bare image verifies clean, not MBR_LAYOUT" -- "$TAPECTL" verify "$DIR/collide.img"
+exactly OK
+damage emptysig 'd[446:510] = bytes(64)'
+expect 1 "P2V-005: image with an emptied partition table + 55 AA takes the bare path" -- "$TAPECTL" verify "$DIR/emptysig.img"
+grep -q '^MBR_LAYOUT' "$DIR/out" && fail "an emptied table in a file reached MBR_LAYOUT" || ok "  no MBR_LAYOUT: the engine judges it ($(head -1 "$DIR/out"))"
 damage p2moved 'n = int.from_bytes(d[474:478], "little"); d[470:474] = (34817).to_bytes(4, "little"); d[474:478] = (n - 1).to_bytes(4, "little")'
 expect 1 "entry 2 not at 34816: layout finding, no mount" -- "$TAPECTL" verify "$DIR/p2moved.img"
 exactly MBR_LAYOUT
