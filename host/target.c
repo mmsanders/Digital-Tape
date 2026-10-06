@@ -78,9 +78,19 @@ static int open_common(struct target *t, const char *path, int writable)
         return EXIT_USAGE;
     }
     if (hport_open(&t->hp, path, t->is_device, writable) != 0) {
+        int tries;
+        /* The OS can remount our own partition 1 between the safety check and
+           the open (macOS does). Re-run the safety rules, which unmount it
+           again, a few times before giving up. Never more than the rules allow. */
+        for (tries = 0; t->is_device && writable && tries < 3; tries++) {
+            int rc = target_safety(path, 0, NULL, writable);
+            if (rc) { return rc; }
+            if (hport_open(&t->hp, path, t->is_device, writable) == 0) { goto opened; }
+        }
         fprintf(stderr, "tapectl: cannot open %s %s (%s)\n", t->is_device ? "device" : "image", path, hport_error());
         return EXIT_USAGE;
     }
+opened:
     t->open = 1;
     t->sectors = t->hp.bytes / 512u;
     return 0;

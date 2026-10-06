@@ -254,11 +254,45 @@ int probe_device(const char *path, struct device_facts *f)
     return 0;
 }
 
+struct da_wait { int done; int ok; };
+
+static void da_unmounted(DADiskRef disk, DADissenterRef dissenter, void *ctx)
+{
+    struct da_wait *w = (struct da_wait *)ctx;
+    (void)disk;
+    w->ok = dissenter == NULL;
+    w->done = 1;
+}
+
+/* Unmount through DiskArbitration, as Finder's Eject does. A raw unmount(2)
+   looks to DiskArbitration like a volume that vanished, and it mounts
+   partition 1 again moments later: on the CI runner, between two commands. */
 int probe_unmount_p1(const char *path, const struct device_facts *f, int i)
 {
+    struct statfs st;
+    struct da_wait w = {0, 0};
+    DASessionRef session;
+    DADiskRef disk;
+    int waited;
+
     (void)path;
     if (!safety_mount_is_own_p1(f, i)) { return -1; }
-    return unmount(f->mounted[i].where, 0) == 0 ? 0 : -1;
+    if (statfs(f->mounted[i].where, &st) != 0 || strncmp(st.f_mntfromname, "/dev/", 5) != 0) {
+        return 0;                                   /* already gone */
+    }
+    session = DASessionCreate(kCFAllocatorDefault);
+    if (session == NULL) { return -1; }
+    disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, st.f_mntfromname + 5);
+    if (disk == NULL) { CFRelease(session); return -1; }
+    DASessionScheduleWithRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+    DADiskUnmount(disk, kDADiskUnmountOptionDefault, da_unmounted, &w);
+    for (waited = 0; !w.done && waited < 300; waited++) {     /* up to 30 s */
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+    }
+    DASessionUnscheduleFromRunLoop(session, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+    CFRelease(disk);
+    CFRelease(session);
+    return (w.done && w.ok) ? 0 : -1;
 }
 
 #endif /* __APPLE__ */
