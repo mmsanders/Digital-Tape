@@ -23,7 +23,7 @@ static void gather_facts(const char *path, struct device_facts *f, int *seam)
     (void)probe_device(path, f);
 }
 
-int target_safety(const char *path, int provision, const char *erase)
+int target_safety(const char *path, int provision, const char *erase, int need_write)
 {
     struct device_facts f;
     enum refusal r;
@@ -41,10 +41,11 @@ int target_safety(const char *path, int provision, const char *erase)
         }
         return EXIT_REFUSE;
     }
-    /* provision rewrites partition 1, so its own volume comes off first (§5:
-       "tapectl may unmount that one, and only that one"). Other commands never
-       touch partition 1 and leave it mounted. */
-    if (provision) {
+    /* §5: "tapectl may unmount that one, and only that one, before raw access."
+       provision rewrites partition 1, and macOS will not open a disk with a
+       mounted volume for raw writing, so it comes off before any write-mode
+       open. Read-only commands (verify) leave it mounted. */
+    if (provision || need_write) {
         for (i = 0; i < f.n_mounted; i++) {
             int ok = seam ? 0 : probe_unmount_p1(path, &f, i);
             if (ok != 0) {
@@ -68,14 +69,14 @@ static int open_common(struct target *t, const char *path, int writable)
     memset(t, 0, sizeof *t);
     t->is_device = target_names_device(path);
     if (t->is_device) {
-        int rc = target_safety(path, 0, NULL);
+        int rc = target_safety(path, 0, NULL, writable);
         if (rc) { return rc; }
     } else if (hport_classify(path) != HPORT_REGULAR) {
         fprintf(stderr, "tapectl: cannot open image %s\n", path);
         return EXIT_USAGE;
     }
     if (hport_open(&t->hp, path, t->is_device, writable) != 0) {
-        fprintf(stderr, "tapectl: cannot open %s %s\n", t->is_device ? "device" : "image", path);
+        fprintf(stderr, "tapectl: cannot open %s %s (%s)\n", t->is_device ? "device" : "image", path, hport_error());
         return EXIT_USAGE;
     }
     t->open = 1;

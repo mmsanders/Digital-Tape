@@ -47,7 +47,7 @@ TEST_WAV  := $(BUILD)/test_wav$(EXE)
 TEST_PORT := $(BUILD)/test_port$(EXE)
 LIBS      := $(ENGINE)/libtape.a
 
-.PHONY: all test engine clean
+.PHONY: all test test-bins engine clean
 all: $(TAPECTL) $(TAPECTL_T)
 
 # The engine's own Makefile decides whether its archives are current.
@@ -72,12 +72,10 @@ $(TEST_WAV): test_wav.c wav.c wav.h | $(BUILD)
 $(TEST_PORT): test_port.c $(PORT_SRC) $(PORT_HDR) | $(BUILD)
 	$(CC) $(CPPFLAGS) $(ALL_CFLAGS) test_port.c $(PORT_SRC) $(SYSLIBS) -o $@
 
-test: $(TAPECTL) $(TAPECTL_T) $(TEST_WAV) $(TEST_PORT)
-	$(TEST_WAV) $(BUILD)/test_wav.d
-	$(TEST_PORT)
-	./smoke.sh $(TAPECTL) $(BUILD)/smoke
-	./smoke_wp14.sh $(TAPECTL) $(TAPECTL_T) $(BUILD)/smoke_wp14
-	./test_seam.sh $(TAPECTL) $(TAPECTL_T)
+test-bins: $(TAPECTL) $(TAPECTL_T) $(TEST_WAV) $(TEST_PORT)
+
+test: test-bins
+	./run_tests.sh $(BUILD) $(EXE)
 
 clean:
 	@rm -rf $(BUILD)

@@ -31,9 +31,11 @@ struct target {
 int target_names_device(const char *path);
 
 /* The §5 rules for a device path. provision != 0 also requires --erase to
-   match, and unmounts partition 1 if it is the only mounted volume. Prints the
-   refusal and returns EXIT_REFUSE, or returns 0. Nothing is written. */
-int target_safety(const char *path, int provision, const char *erase);
+   match. When the command will open the device for writing (need_write), our
+   own partition 1, the only volume §5 lets stay mounted, is unmounted first:
+   macOS refuses a read-write raw open of a disk with a mounted volume. Prints
+   the refusal and returns EXIT_REFUSE, or returns 0. Nothing is written. */
+int target_safety(const char *path, int provision, const char *erase, int need_write);
 
 /* Open for an engine command: safety for a device, then the §2 recognition.
    A device that is not an exact §3.1 layout is NOT_PROVISIONED (exit 2).

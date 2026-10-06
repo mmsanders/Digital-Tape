@@ -122,6 +122,28 @@ static int is_synthesized(const char *disk)
     return synth;
 }
 
+/* Is any service-plane ancestor a disk-image driver (hdiutil's IOHDIX* on
+   Intel, AppleDiskImage* on Apple silicon)? Then the "disk" is a file. */
+static int is_disk_image(const char *disk)
+{
+    io_service_t media = IOServiceGetMatchingService(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, disk));
+    io_iterator_t it;
+    io_registry_entry_t e;
+    io_name_t cls;
+    int img = 0;
+    if (media == IO_OBJECT_NULL) { return 1; }
+    if (IORegistryEntryCreateIterator(media, kIOServicePlane,
+                                      kIORegistryIterateRecursively | kIORegistryIterateParents, &it) == KERN_SUCCESS) {
+        while ((e = IOIteratorNext(it)) != IO_OBJECT_NULL) {
+            if (IOObjectGetClass(e, cls) == KERN_SUCCESS && (strstr(cls, "HDIX") || strstr(cls, "DiskImage"))) { img = 1; }
+            IOObjectRelease(e);
+        }
+        IOObjectRelease(it);
+    }
+    IOObjectRelease(media);
+    return img;
+}
+
 static int is_system_mount(const struct statfs *m)
 {
     return (m->f_flags & MNT_ROOTFS) != 0 || strcmp(m->f_mntonname, "/") == 0
@@ -157,7 +179,13 @@ int probe_device(const char *path, struct device_facts *f)
         return 0;
     }
     f->whole_device = cf_bool(desc, kDADiskDescriptionMediaWholeKey) && !is_synthesized(disk);
-    f->removable = cf_bool(desc, kDADiskDescriptionMediaRemovableKey);
+    /* A disk image (hdiutil, a mounted .dmg) reports itself as removable
+       media, but it is not a memory card: on the CI runner the shipped binary
+       provisioned one. Virtual devices are never removable here. */
+    f->removable = cf_bool(desc, kDADiskDescriptionMediaRemovableKey)
+                   && !cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Disk Image")
+                   && !cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Virtual Interface")
+                   && !is_disk_image(disk);
     f->sd_bus = cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Secure Digital");
     {
         CFTypeRef v = CFDictionaryGetValue(desc, kDADiskDescriptionMediaSizeKey);

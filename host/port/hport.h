@@ -53,6 +53,9 @@ int hport_flush(struct hport *p);
 
 int hport_close(struct hport *p);
 
+/* The OS's reason for the last failed hport call, for messages. */
+const char *hport_error(void);
+
 /* A partition view: blocks [base, base + blocks) of `p` as a tape_dev.
    `writable` = 0 binds a NULL write callback (the WP-36 pattern), whatever
    the underlying open allows. Out-of-range transfers fail without I/O. */

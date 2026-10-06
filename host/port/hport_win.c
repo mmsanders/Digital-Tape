@@ -13,6 +13,7 @@
 
 #include <windows.h>
 #include <winioctl.h>
+#include <stdio.h>
 #include <string.h>
 
 enum hport_path hport_classify(const char *path)
@@ -120,6 +121,13 @@ int hport_flush(struct hport *p)
 {
     p->flushes++;
     return FlushFileBuffers(p->h) ? 0 : -1;
+}
+
+const char *hport_error(void)
+{
+    static char msg[64];
+    snprintf(msg, sizeof msg, "Windows error %lu", (unsigned long)GetLastError());
+    return msg;
 }
 
 int hport_close(struct hport *p)

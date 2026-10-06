@@ -656,11 +656,11 @@ static int cmd_provision(int argc, char **argv)
 
     /* 1. Every §5 rule first: zero writes on refusal. */
     if (is_dev) {
-        rc = target_safety(path, 1, erase);
+        rc = target_safety(path, 1, erase, 1);
         if (rc) { return rc; }
         memset(&g_tgt, 0, sizeof g_tgt);
         if (hport_open(&g_tgt.hp, path, 1, 1) != 0) {
-            fprintf(stderr, "tapectl: cannot open device %s for writing\n", path);
+            fprintf(stderr, "tapectl: cannot open device %s for writing (%s)\n", path, hport_error());
             return EXIT_USAGE;
         }
         g_tgt.open = 1;

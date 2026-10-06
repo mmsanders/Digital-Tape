@@ -150,6 +150,11 @@ int hport_flush(struct hport *p)
 #endif
 }
 
+const char *hport_error(void)
+{
+    return strerror(errno);
+}
+
 int hport_close(struct hport *p)
 {
     int rc = 0;
