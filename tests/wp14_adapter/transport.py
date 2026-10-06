@@ -554,8 +554,11 @@ def invoke_shipped(case, bins, args, label, device_bytes):
         raise RuntimeError('external capture did not load (no iocap log)')
     case.keep(log)
     raw = [json.loads(x) for x in log.read_text().splitlines() if x.strip()]
-    if not raw or raw[0].get('call') != 'iocap_attach':
-        raise RuntimeError('external capture did not attach first')
+    # The attach marker proves the shim was loaded. dyld interposition is
+    # active from load, before the shim's constructor runs, so on macOS calls
+    # made by system initializers may be logged ahead of the marker.
+    if not any(e.get('call') == 'iocap_attach' for e in raw):
+        raise RuntimeError('external capture did not attach')
     return r.returncode, r.stdout, r.stderr, normalize_iocap(raw, args, r, device_bytes)
 
 

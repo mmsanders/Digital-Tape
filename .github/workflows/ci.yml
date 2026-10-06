@@ -1626,6 +1626,19 @@ jobs:
             msg=$(tail -n 45 "$out/$half-$PLATFORM.stderr" 2>/dev/null | tr -d '\r' | cut -c1-200 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=WP-14 $half cases on $PLATFORM ($o)::${msg}"
           done
+          if [ "${{ steps.native.outcome }}" != success ]; then
+            # The last response written names the case native.py stopped on.
+            "$PY" - "$RUNNER_TEMP/wp14-evidence" <<'PYEOF' || true
+          import json, pathlib, sys
+          rs = sorted(pathlib.Path(sys.argv[1]).glob('*-response.json'), key=lambda p: p.stat().st_mtime)
+          if rs:
+              r = json.loads(rs[-1].read_text())
+              t = r.get('trace') or {}
+              msg = (f"case {r.get('case')}: exit {r.get('exit')}, refusal {t.get('refusal')}\n"
+                     f"stdout: {r.get('stdout', '')[-1500:]}\nstderr: {r.get('stderr', '')[-1500:]}")
+              print('::error title=WP-14 last native response::' + msg.replace('%', '%25').replace('\r', '').replace('\n', '%0A'))
+          PYEOF
+          fi
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
 
   wp14-package-census:
