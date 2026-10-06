@@ -150,3 +150,14 @@ point-in-time holds this section once carried. At Phase 1 close-out (3 October 2
 The temporary combined-lead freeze mandate has ended; normal roles in
 [CLAUDE.md](../CLAUDE.md) resume. Later infrastructure experiments do not extend
 product or verification authority. The signed scope above is unchanged.
+
+## Supplemental E-1 approval — 5 October 2026 Pacific time
+
+Michael: “Re: Erratum E-1, I accept the default.” After Verification's paper review at
+`6837102`, this authorizes FAT16 0x0E, 16 MiB, 2 KiB clusters for partition 1.
+[The exact overlay](SPEC-ERRATA.md) and its supplemental integrity manifest preserve the
+DRAFT-10 bundle bytes and every prior evidence hash. Verification confirms the new overlay
+bytes and impact/migration statement within #146 Stage 1 before import/integration. No change
+to partition 2, engine operations or previous scoped acceptance; actual OS readability remains held.
+The operations/state freeze was declared at Phase 2 kickoff (ADR-162); historical signature
+statements above describe their earlier point in time.

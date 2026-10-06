@@ -1,8 +1,8 @@
 # WP-14 `tapectl` on real cards — contract (PM-issued, P2-R1)
 
-**Status:** ISSUED 5 October 2026 (ADR-163) for the P2-R1 Software and Verification issues. Normative
-for both. One item, **E-1** (§3.2), waits on Michael's approval of a `tapefs` §3 erratum; everything
-else is settled. Changing this file after issue is a PM decision recorded here, in `docs/DECISIONS.md`
+**Status:** ISSUED 5 October 2026 (ADR-163); amended 6 October (ADR-164), resolving Q1–Q11 and
+P2V-001…004. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
+see the exact supplemental erratum and integrity manifest in [SPEC-ERRATA.md](SPEC-ERRATA.md). Changing this file after issue is a PM decision recorded here, in `docs/DECISIONS.md`
 and on both issues. Package criteria: [WP-14](PACKAGES/WP-14.md). This contract **extends**
 [the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule and command holds unless a line below
 changes it.
@@ -31,6 +31,15 @@ A **target** is one of:
 entries 1 and 2 match §3.1 field for field, and entries 3 and 4 are all zero. A bare image's LBA 0 is a
 TAPEFS superblock, whose bytes 446–507 are reserved zero, so it can never match.
 
+**Verify-only candidate recognition (P2V-001/Q3).** Before the exact layout test, `verify`
+recognises a candidate MBR if LBA 0 has either signature `55 AA` **or any nonzero byte in 446–507**.
+This includes damaged signatures, partition entries and truncated targets. A conforming bare
+TAPEFS superblock has zero bytes in that region and no MBR signature, so is still bare. This is
+recognition only, never permission to write. Other commands retain exact recognition.
+On a device, §5 still outranks all layout findings; after safety passes, a candidate goes to §4.1
+rather than `NOT_PROVISIONED`. A device with no candidate is `NOT_PROVISIONED`; a regular file
+with no candidate is processed as a bare image. Unreadable LBA 0 is an I/O failure, not bare fallback.
+
 **Device paths.** The user always names the device; `tapectl` never selects one.
 
 | Platform | Accepted | Refused (exit 3, `REFUSE_NOT_WHOLE_DEVICE`) |
@@ -39,8 +48,8 @@ TAPEFS superblock, whose bytes 446–507 are reserved zero, so it can never matc
 | macOS | `/dev/diskN` or `/dev/rdiskN` (raw I/O always uses `rdiskN`) | `diskNsM` slices, APFS synthesized disks |
 | Windows 10 | `\\.\PhysicalDriveN` | drive letters, volume GUID paths |
 
-A device that is not a provisioned layout is refused by every command except `provision`
-(exit 2, `NOT_PROVISIONED`). `tapectl` never infers that a card should be provisioned.
+A device that is not a provisioned layout is refused by every command except `provision` and
+candidate-layout `verify` below (exit 2, `NOT_PROVISIONED`). `tapectl` never infers that a card should be provisioned.
 
 ## 3. `provision`
 
@@ -53,7 +62,9 @@ tapectl provision TARGET --label L [--length-s S] [--uuid HEX32 --epoch E] [--im
 - `--uuid` and `--epoch` are given together or not at all. Given, output is byte-deterministic (the
   WP-11 rule). Omitted, `tapectl` is the caller that owns entropy: UUID from the OS CSPRNG
   (`getrandom` / `SecRandomCopyBytes` / `BCryptGenRandom`), epoch from the wall clock as u32 seconds.
-  Both are printed on stdout. This is the only place WP-14 uses a clock or randomness.
+  Both are printed on stdout as exactly two lines: `uuid <32 lowercase hex>` and
+  `epoch <decimal>`, in that order. Neither line is printed when supplied. This is the only place
+  WP-14 uses a clock or randomness.
 - `--image-bytes N` creates or truncates an image file to N bytes; required for an image, refused for a
   device.
 - `--erase DEV` is **required for a device** and must repeat the device path exactly. A mismatch is
@@ -63,8 +74,18 @@ tapectl provision TARGET --label L [--length-s S] [--uuid HEX32 --epoch E] [--im
 partition-2 block count (exit 1, `TAPE_ERR_GEOMETRY`, zero writes); then zero LBA 0 if it is not
 already zero; then partition 2 via `tape_format`; then partition 1; then the MBR last, flushing after
 each. **The MBR is the identity of
-the card and is written last**, so an interrupted `provision` leaves a card that `tapectl` treats as not
-provisioned. A re-run completes it.
+the card and is written last**. Interrupted outcomes (P2V-004):
+
+| Cut | Permitted result |
+|---|---|
+| Before the zero-MBR invalidation is durable | Old card, or not provisioned if zero landed |
+| After durable invalidation, before final MBR lands | Not provisioned |
+| Final MBR landed, including before its flush returns | Complete new card: earlier barriers made both partitions durable |
+| Successful final flush | Complete new card |
+
+A failed OS write/flush never reports success; unknown durability is evaluated against the same
+outcomes. A re-run may complete an unprovisioned card. No old-card-preservation oracle applies
+after destructive provisioning begins.
 
 ### 3.1 MBR layout
 
@@ -81,21 +102,20 @@ provisioned. A re-run completes it.
 Both starts are 1 MiB aligned. Partition 2's block count must be at most 2³²−1; the §5 size ceiling
 already guarantees it.
 
-### 3.2 Partition 1 and erratum E-1 (pending Michael)
+### 3.2 Partition 1 and approved erratum E-1
 
-`tapefs` §3 says partition 1 is **FAT32 (0x0C), 16 MiB**. That cannot be built conformingly. The FAT
-type is decided by cluster count alone, and FAT32 needs at least 65 525 clusters; 16 MiB holds at most
-32 768 512-byte clusters. Every OS would read such a volume as FAT16 and see corruption.
-
-**E-1 (PM recommendation):** partition 1 is **FAT16, type 0x0E (FAT16 LBA), 16 MiB, 2 KiB clusters**.
-The device never reads partition 1, so nothing in the engine, firmware or byte format moves. Because
-§3 is frozen text, this is a spec erratum: Verification paper-reviews it in P2-R1 and Michael
-approves it. **Alternative**, if Michael prefers to keep FAT32: partition 1 grows to 64 MiB and
-partition 2 starts at LBA 133 120. Either way only §3.1/§3.2 constants change; build to E-1.
+Partition 1 is **FAT16, type 0x0E (FAT16 LBA), 16 MiB, 2 KiB clusters**. Verification's published
+paper review `6837102` confirms the geometry; Michael approved the default. Partition 2 remains at
+LBA 34816. No engine-visible offset, structure, CRC or API changes. FAT32 at 16 MiB cannot conform;
+paper compatibility is not witnessed OS readability. See [the erratum](SPEC-ERRATA.md) for the
+frozen-bundle overlay and exact-byte independent confirmation required before Product integration.
 
 Partition 1 contents:
-- Volume label `DIGITALTAPE`. FAT timestamps from `--epoch`.
-- One file, `README.TXT`, CRLF line endings, exactly:
+- Volume label `DIGITALTAPE`. FAT timestamps use `--epoch` interpreted as UTC. Clamp values below
+  1980-01-01 00:00:00 UTC to that instant; encode other u32 epochs as UTC calendar fields, flooring
+  seconds to the FAT 2-second resolution. Preserve the original u32 epoch in TAPEFS; no rejection
+  or host-timezone-dependent bytes (P2V-003).
+- One file, `README.TXT`, CRLF line endings, including after the fourth line, exactly:
 
 ```
 This is a Digital Tape cartridge.
@@ -110,16 +130,37 @@ Use the Digital Tape app to load music onto it.
 every target. On a provisioned target the engine sees partition 2 only. `format` stays bare-image only;
 on a device or provisioned image it is exit 2, use `provision`.
 
+**Read-only commands on devices (Q11).** `play`, `scrub` and `dump` open devices read-only
+and bind NULL write; bare and provisioned images retain their WP-11 access behavior. `verify` is
+read-only on every target. Our exact partition 1 may remain mounted for read-only access if the OS
+allows it. Any required unmount applies only to that partition; an unmount/dismount failure refuses
+with `REFUSE_FOREIGN_MOUNT`, exit 3. No command bypasses §5.
+
+**A2 round-trip bytes (P2V-003).** “WP-11 tail rule” means the accepted render semantics, not a
+new tolerance: canonical 44-byte WAV header, exact frame count and exact samples at 1×, including
+the last frame. No added silence, missing last frame or padding allowance. Use the ten unchanged
+WP-11 references and generated full C-60. Record cadence remains WP-11's 1024-frame feed with
+service-until-done before each feed (Q1); changing cadence is deferred to the Q-P2-1 decision.
+A9 measures the resulting time; it does not gate it.
+
 **`load` capacity (A7).** Before any write, if the source has more frames than
 `nominal_length_s × 44 100`, exit 2 with the overage in plain words, e.g.
-`Too long by 3 min 12 s for a 60-minute cartridge`.
+`Too long by 3 min 12 s for a 60-minute cartridge`. Round the excess up to whole seconds;
+omit zero minutes/seconds parts. Describe whole-minute lengths as `N-minute`, otherwise `N-second`.
 
 ### 4.1 `verify TARGET`
 
 Read-only. The engine binding has a **NULL write callback** (the WP-36 pattern), and `tapectl` opens the
 target read-only. It runs:
-1. Provisioned targets: §3.1 layout and partition 1 type, start and size. Partition 2 must extend to
+1. Candidate/provisioned targets: §3.1 layout and partition 1 type, start and size. Partition 2 must extend to
    the device's last sector.
+   Emit each applicable layout finding once, in table order: `MBR_LAYOUT`, `PARTITION_TYPE`,
+   `PARTITION_TRUNCATED`. Type-byte and past-end mismatches are excluded from `MBR_LAYOUT`;
+   all other §3.1 mismatches (including signature or ending short) raise it. Multiple independent
+   defects may raise multiple findings. Mount only if entry 2 starts at 34816, has a nonzero count,
+   and its entire 64-bit extent is in the target; otherwise stop after layout findings, exit 1.
+   Never shrink a truncated view or issue an out-of-range read. Wrong type alone does not prevent
+   a safe mount. No `NOT_PROVISIONED` replaces a reached candidate finding.
 2. `tape_mount` Side A and Side B, cold, then `tape_get_info`.
 3. `dump` both sides to nowhere, so every referenced block is read through the engine.
 
@@ -137,6 +178,9 @@ Exit 0 and `OK` if clean. Otherwise exit 1, one line per finding, from this clos
 
 `verify` reports only what the engine and the MBR can show. It does not judge standby index slots,
 which are legitimately invalid after format and after a torn commit (`tapefs` §8.1).
+Emit a `MOUNT` line for each failed side, A before B; a degraded B may also emit
+`SIDE_B_DEGRADED`. Remaining engine findings follow the table order; full-read errors are in
+side A/B and frame order. A failing mount is not subsequently read.
 
 ## 5. Disk safety (A4) — outranks everything else
 
@@ -146,7 +190,7 @@ Every command that opens a **device** evaluates these rules first, in this order
 | ID | Refuse when |
 |---|---|
 | `REFUSE_NOT_WHOLE_DEVICE` | The path is not a whole disk in §2's platform form |
-| `REFUSE_NOT_REMOVABLE` | The OS reports the disk as neither removable media nor an SD-class bus |
+| `REFUSE_NOT_REMOVABLE` | The OS reports the disk as neither removable media nor an SD-class bus, or it is virtual media (loop, VHD, disk-image/virtual-interface device) |
 | `REFUSE_TOO_LARGE` | Capacity exceeds **128 GiB** (2³⁷ bytes) |
 | `REFUSE_SYSTEM_DISK` | Any partition on the disk holds the running OS, a boot volume or swap |
 | `REFUSE_FOREIGN_MOUNT` | Any volume on the disk is mounted, unless it is a §3.2 partition 1 (exact layout match). `tapectl` may unmount that one, and only that one, before raw access |
@@ -155,14 +199,33 @@ Every command that opens a **device** evaluates these rules first, in this order
 **Facts, then policy.** The implementation splits into a probe that gathers a `device_facts` record
 (whole-device, removable, bus, size, holds-OS, mounted volumes) and a pure policy function over that
 record. **A test seam** may inject facts from a file, **compiled only when `TAPECTL_TEST` is defined**.
-The shipped binary must not contain it; Verification checks the symbol is absent, with a negative control.
+The shipped binary must not contain it; Verification checks symbol and configuration-string absence,
+with the test build as its negative control.
+
+**Test-only route (P2V-002/Q2).** `tapectl-test` accepts Linux `/dev/loopN` only through the
+facts seam. Shipped `tapectl` still refuses the same loop path as `REFUSE_NOT_WHOLE_DEVICE`.
+Test-only injected virtual media must be paired with a shipped-binary virtual refusal control.
+The symbol is `tapectl_test_facts_seam`; `TAPECTL_TEST_FACTS` names the file. One `key=value`
+per line: `whole`, `removable`, `sd_bus`, `bytes`, `holds_os`, `layout_ok`, plus repeatable
+`mounted=<partition 1..4, or 0 unknown>:<where>`. Missing facts are refusing: `holds_os=1`,
+others 0. The seam applies only to device paths, never ordinary images. `tapectl-test probe DEV`
+prints actual platform facts in this format plus `refusal=<ID>`. Binaries are
+`build/host/tapectl` and `build/host/tapectl-test` (Windows: `.exe`).
+Observation adapters must capture actual candidate policy, opens, binding, writes and native flush
+results. Synthetic traces only self-test the oracle; they do not dispose a candidate. Fault-injection
+controls (no-op flush, non-NULL binding, referenced-chunk read failure) remain test-only and absent
+from the shipped binary. Their expectations belong to Verification; transport belongs to Software.
 
 ## 6. Port requirements
 
 `host/port/` provides one port for images and devices:
 - **64-bit byte offsets** everywhere (`pread`/`pwrite`, or `ReadFile`/`WriteFile` with `OVERLAPPED`).
 - **Durable flush:** `fsync` (Linux), `fcntl(F_FULLFSYNC)` (macOS), `FlushFileBuffers` (Windows).
-  Flush returns success only after the OS call does.
+  On macOS image files require `F_FULLFSYNC`. On raw devices try `F_FULLFSYNC`; only an
+  explicit unsupported-descriptor result (`ENOTTY`/`ENOTSUP`) permits fallback to
+  `ioctl(DKIOCSYNCHRONIZECACHE)`. No plain `fsync`/cache-only fallback there. Flush returns
+  success only after the chosen OS barrier succeeds; log which barrier ran. Any other failure
+  propagates. Native calls and failure/no-op controls must be observed on each platform (Q6).
 - **A partition view** presenting partition 2 as the engine's `tape_dev`, `block_count` from entry 2.
 - **No write coalescing in WP-14.** Each engine write call is issued in order before it returns.
   Batching waits on Q-P2-1 (plan §5); this keeps A3's evidence clean.

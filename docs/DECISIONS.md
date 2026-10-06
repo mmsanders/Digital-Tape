@@ -2919,3 +2919,51 @@ revision with Michael's approval.
 
 **Cost to reverse.** Text until Software and Verification build against the contract. After that, every
 contract change costs a correction on both issues. E-1 either way costs two constants.
+
+## ADR-164 — E-1 approval recorded; WP-14 preflight resolved; P2-R1 continuation stays pre-routed
+
+**Date:** 2026-10-06 UTC (5 Oct Pacific) · **Owner:** PM, Product #384; Michael activation/intake #391.
+**Inputs:** Product main `47575af1507097d89eb73888ff3cd2bcbf5e43f8`; Software #390
+`a12e1301ac998123872411ee0aefac7e1683fa62`; Verification main publication `6837102116ed94f80b8a6454713ffb1e7c076427`.
+
+**Decision.**
+1. Michael: “Re: Erratum E-1, I accept the default.” FAT16 0x0E, 16 MiB, 2 KiB clusters is
+   approved. The [supplemental overlay](SPEC-ERRATA.md) and manifest preserve DRAFT-10 bytes;
+   Verification confirms exact overlay bytes within Stage 1, before import. Partition 2 and all
+   engine/API/CRC behavior stay unchanged. No OS-readable-card acceptance is inferred from paper.
+2. Resolve Software Q1–Q11 and Verification P2V-001…004 in one contract amendment:
+   - Q1: preserve WP-11 feed/service cadence; A9 records its cost. No batching/cadence change.
+   - Q2/P2V-002: test-only loop/facts route; production still refuses loops. Bind native evidence.
+   - Q3/P2V-001: verify-only candidate recognition is MBR signature OR nonzero table bytes 446–507,
+     including a damaged signature. Mutation recognition remains exact. Safety outranks findings;
+     unsafe partition extents never mount/read. The contract states finding order and reachability.
+   - Q4/Q5: README ends in CRLF; generated UUID/epoch stdout is fixed, absent when supplied.
+   - Q6: macOS raw-device unsupported F_FULLFSYNC may use DKIOCSYNCHRONIZECACHE; other failures
+     propagate, and image files retain F_FULLFSYNC. No cache-only success fallback.
+   - Q7/Q10/Q11: refuse virtual media in production; unmount only exact own partition 1, refuse on
+     failure; play/scrub/dump devices read-only with NULL write. Images retain WP-11 semantics.
+   - Q8/Q9: fixed ceil-seconds capacity wording, ordered mount findings with degraded B permitted.
+   - P2V-003: FAT UTC timestamps clamp pre-1980 and floor to 2 seconds; retain engine epoch.
+     A2 uses exact canonical WAV bytes and final frame, with no invented tail tolerance.
+   - P2V-004: interrupted provision can retain old identity before invalidation, be unprovisioned
+     after durable invalidation, or be fully new if final MBR landed before final flush.
+   These are host-contract rulings. No engine implementation review or independent acceptance by PM.
+3. R1/D8 is integrated: #387 merged `47575af`; live ruleset 22084355 has the seven posted contexts,
+   strict and no bypass. CI/probe evidence supports the pilot: docs 51 s / 1.6 job-minutes, host
+   1m42s / 12.4, full 167. Keep host qualification-inert with regression on each code PR and daily
+   full qualification; final WP-14 disposition uses the qualification label. No third replay by PM.
+4. #390 is a green candidate, not accepted. Verification's 36 self-checks/15 controls are partial
+   publication, zero Product executions. Full package/native controls, exact-head disposition and
+   Windows 10/physical evidence remain open. Server 2025 CI does not accept Windows 10.
+5. Continue #146 in place (still open); issue one fresh Software continuation because #385 closed
+   blocked. Software supplies transport facts to Verification, imports only the merged complete
+   publication and sends its final head directly to #146. No PM hop, rebase re-acceptance or
+   activation solely to merge. Michael's existing #386 carries the physical task and merge.
+6. Q-P2-1(a) is answered: the two crash modes miss later-only/non-prefix persistence. This adds a
+   future-model coverage requirement, not an engine defect or retroactive revocation. Q-P2-1(b)
+   uses the published counts in P2-R2; no batching permission. Hardware/WP-38 stay parked. WP-16
+   follows the planned real-card path gate; no new R4/R9 tooling lane or unrelated cleanup now.
+
+**Cost to reverse.** A new host-contract amendment with paired lead updates. E-1 reversal needs
+Michael and Verification; old whole cards require explicit reprovision/reload. No existing engine
+or golden evidence is rewritten.
