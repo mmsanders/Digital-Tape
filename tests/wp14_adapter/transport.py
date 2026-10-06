@@ -290,8 +290,9 @@ class Device:
             return self.path + 's1'
         return None
 
-    def mount_p1(self):
-        """Actually mount our partition 1 through the OS; return its path."""
+    def mount_p1(self, readonly=False):
+        """Actually mount our partition 1 through the OS; return its path.
+        readonly: for reading the volume only, so the OS writes nothing back."""
         c = self.case
         if PLATFORM == 'linux':
             # The kernel learns a partition table written after attach only
@@ -300,9 +301,10 @@ class Device:
             c.run(['udevadm', 'settle'], label='settle')
             where = str(c.work / 'p1-mount')
             os.makedirs(where, exist_ok=True)
-            c.run(['mount', '-t', 'vfat', self.p1_node(), where], check=True, label='mount-p1')
+            c.run(['mount', '-t', 'vfat'] + (['-o', 'ro'] if readonly else []) + [self.p1_node(), where],
+                  check=True, label='mount-p1')
         elif PLATFORM == 'macos':
-            c.run(['diskutil', 'mount', self.p1_node()], check=True, label='mount-p1')
+            c.run(['diskutil', 'mount'] + (['readOnly'] if readonly else []) + [self.p1_node()], check=True, label='mount-p1')
             r = c.run(['diskutil', 'info', '-plist', self.p1_node()], check=True, label='p1-info')
             m = re.search(r'<key>MountPoint</key>\s*<string>([^<]+)</string>', r.stdout)
             where = m.group(1)
@@ -333,7 +335,9 @@ class Device:
         self.mounted_p1 = None
 
     def facts_where_p1(self):
-        """The mount path as the platform probe reports it."""
+        """The mount path as the platform probe reports it (None: not mounted yet)."""
+        if self.mounted_p1 is None:
+            return None
         if PLATFORM == 'windows':
             return '\\\\.\\' + self.mounted_p1
         return self.mounted_p1
@@ -341,7 +345,7 @@ class Device:
     def os_volume(self):
         """Read README.TXT and the volume label through the OS's own FAT driver."""
         c = self.case
-        where = self.mount_p1()
+        where = self.mount_p1(readonly=True)
         readme = Path(where + ('\\' if PLATFORM == 'windows' else '/') + 'README.TXT').read_bytes()
         if PLATFORM == 'linux':
             label = c.run(['blkid', '-o', 'value', '-s', 'LABEL', self.p1_node()], check=True, label='label').stdout.strip()
@@ -469,7 +473,10 @@ def facts_file(case, request, device):
         for m in f.get('mounted', []):
             part, _, what = m.partition(':')
             if what == 'owned':
-                lines.append(f'mounted={part}:{device.facts_where_p1()}')
+                # Written only once the partition is really mounted; the
+                # facts file is rewritten after the mount.
+                if device.facts_where_p1() is not None:
+                    lines.append(f'mounted={part}:{device.facts_where_p1()}')
             else:
                 lines.append(f'mounted={m}')
         if f.get('foreign_mount'):
@@ -749,11 +756,13 @@ def handle(request, bins):
                 device.snapshot(final)
                 resp['final_snapshot'] = str(final)
             if request.get('required_os_readme') and rc == 0:
-                resp['os_readme'] = device.os_volume()
+                # The snapshot is the bytes provision left, taken before the OS
+                # reads the volume (an OS read may update a FAT access date).
                 snap = case.dir / 'snapshot.img'
                 device.snapshot(snap)
                 resp['snapshot'] = str(snap)
                 case.log(kind='snapshot-hash', sha256=sha256_file(snap))
+                resp['os_readme'] = device.os_volume()
                 vrc, vout, verr, vtr = invoke_test(case, bins, ['verify', device.path], 'post-provision-verify', facts=facts, device=device)
                 resp.update(verify_exit=vrc, verify_output=vout + verr, verify_trace=vtr)
             return finish(case, resp, device)

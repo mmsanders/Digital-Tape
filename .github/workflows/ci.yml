@@ -1516,30 +1516,31 @@ jobs:
           case "$PLATFORM" in
             linux)
               uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
-              make -C host
-              cc -shared -fPIC -O2 -Wall -o build/host/iocap.so tests/wp14_adapter/iocap_posix.c -ldl
+              tools/ci/annotate-tail.sh "Linux host build" make -C host
+              tools/ci/annotate-tail.sh "Linux iocap build" cc -shared -fPIC -O2 -Wall -o build/host/iocap.so tests/wp14_adapter/iocap_posix.c -ldl
               PY=python3 ;;
             macos)
               sw_vers; uname -a; clang --version | head -1
-              GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
-              make -C engine CC="$GCC" all
-              make -C host CC=clang
-              clang -dynamiclib -O2 -Wall -o build/host/iocap.dylib tests/wp14_adapter/iocap_posix.c
+              GCC=$( (ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null || true) | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+              test -n "$GCC" && $GCC --version | head -1
+              tools/ci/annotate-tail.sh "macOS engine build" make -C engine CC="$GCC" all
+              tools/ci/annotate-tail.sh "macOS host build" make -C host CC=clang
+              tools/ci/annotate-tail.sh "macOS iocap build" clang -dynamiclib -O2 -Wall -o build/host/iocap.dylib tests/wp14_adapter/iocap_posix.c
               PY=python3 ;;
             windows)
               export PATH="/c/mingw64/bin:$PATH"
               cmd //c ver; gcc --version | head -1
               MAKE=$(command -v mingw32-make || command -v make)
-              "$MAKE" -C engine CC=gcc all
-              "$MAKE" -C host CC=gcc test-bins
-              gcc -O2 -Wall -DIOCAP_DLL -shared -o build/host/iocap.dll tests/wp14_adapter/iocap_win.c
-              gcc -O2 -Wall -municode -o build/host/iocap.exe tests/wp14_adapter/iocap_win.c
+              tools/ci/annotate-tail.sh "Windows engine build" "$MAKE" -C engine CC=gcc all
+              tools/ci/annotate-tail.sh "Windows host build" "$MAKE" -C host CC=gcc test-bins
+              tools/ci/annotate-tail.sh "Windows iocap build" gcc -O2 -Wall -DIOCAP_DLL -shared -o build/host/iocap.dll tests/wp14_adapter/iocap_win.c
+              tools/ci/annotate-tail.sh "Windows iocap build" gcc -O2 -Wall -municode -o build/host/iocap.exe tests/wp14_adapter/iocap_win.c
               echo "/c/mingw64/bin" >> "$GITHUB_PATH"
               PY=python ;;
           esac
           echo "PY=$(command -v $PY)" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/wp14-out"
-          "$PY" - "$RUNNER_TEMP/wp14-out/build-info-$PLATFORM.json" <<'PYEOF'
+          tools/ci/annotate-tail.sh "build identity" "$PY" - "$RUNNER_TEMP/wp14-out/build-info-$PLATFORM.json" <<'PYEOF'
           import hashlib, json, os, platform, sys
           b = 'build/host'
           info = {'head_sha': os.environ['HEAD_SHA'], 'platform': os.environ['PLATFORM'],
@@ -1585,6 +1586,7 @@ jobs:
         if: always()
         run: |
           set -uo pipefail
+          mkdir -p "$RUNNER_TEMP/wp14-out"
           [ "$PLATFORM" = windows ] || sudo chown -R "$(id -u)" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
           find "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" -type f -size +256M 2>/dev/null | while read -r f; do
             echo "zstd $f"; zstd -q -T0 -3 --rm "$f" || true
