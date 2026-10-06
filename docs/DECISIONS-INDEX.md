@@ -117,3 +117,5 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-163](DECISIONS.md#adr-163--p2-r1-issued-wp-14-contract-erratum-e-1-proposed-round-assignments) | 2026-10-05 | P2-R1 issued: WP-14 contract, erratum E-1 proposed, round assignments | WP14-CLI-CONTRACT.md issued; verify uses engine judgments only; ports in host/port; FAT16 erratum for Michael; pre-routed Software/Verification round |
 
 100 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+
+| [ADR-164](DECISIONS.md#adr-164--e-1-approval-recorded-wp-14-preflight-resolved-p2-r1-continuation-stays-pre-routed) | 2026-10-06 | E-1 approved; WP-14 preflight resolved | FAT16 overlay; Q1–Q11/P2V-001…004 settled; D8 complete; direct publication/binding/disposition continues |
