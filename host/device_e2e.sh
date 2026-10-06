@@ -71,12 +71,22 @@ expect 3 "shipped load refuses" -- "$TAPECTL" load "$DEV" "$DIR/src.wav"
 
 printf '%s\n' whole=1 removable=1 sd_bus=0 "bytes=$SIZE" holds_os=0 layout_ok=0 >"$DIR/facts"
 export TAPECTL_TEST_FACTS="$DIR/facts"
+# The injected facts keep the real probe's mount list and layout, overriding
+# only "is this a memory card?" (whole, removable, size). The OS may mount
+# partition 1 on its own after provision, as it would with a real card.
+refresh_facts() {
+  "$TAPECTL_T" probe "$DEV" | grep -v '^refusal=\|^detail=' \
+    | sed -e 's/^whole=.*/whole=1/' -e 's/^removable=.*/removable=1/' -e "s/^bytes=.*/bytes=$SIZE/" >"$DIR/facts.new"
+  mv "$DIR/facts.new" "$DIR/facts"
+}
 
 echo "== round trip through tapectl-test (injected facts, real device) =="
 expect 3 "provision still needs --erase" -- "$TAPECTL_T" provision "$DEV" --label e2e
 expect 0 "provision" -- "$TAPECTL_T" provision "$DEV" --label e2e --erase "$DEV"
 grep -E '^uuid [0-9a-f]{32}$' "$DIR/out" >/dev/null && ok "generated uuid printed" || fail "uuid: $(cat "$DIR/out")"
 grep 'flushes via' "$DIR/err" | sed 's/^/        /'
+sleep 3; refresh_facts
+grep '^mounted=' "$DIR/facts" | sed 's/^/        after provision: /'
 expect 0 "load" -- "$TAPECTL_T" load "$DEV" "$DIR/src.wav"
 grep 'flushes via' "$DIR/err" | sed 's/^/        /'
 
@@ -89,10 +99,8 @@ sleep 3
 grep -q '^layout_ok=1' "$DIR/probe1" || grep -q '^mounted=' "$DIR/probe1" || echo "        (partition 1 not mounted by the OS; layout_ok is read only when it is)"
 if grep -q '^mounted=1:' "$DIR/probe1"; then
   grep -q '^layout_ok=1' "$DIR/probe1" && ok "the OS mounted partition 1, and the probe sees our exact layout" || fail "partition 1 mounted but layout_ok=0"
-  sed -e "s/^bytes=.*/bytes=$SIZE/" "$DIR/probe1" | grep -v '^refusal=\|^detail=' \
-    | sed -e 's/^whole=.*/whole=1/' -e 's/^removable=.*/removable=1/' >"$DIR/facts"
-  ok "facts now carry the real mount list (our partition 1)"
 fi
+refresh_facts
 expect 0 "verify after reattach" -- "$TAPECTL_T" verify "$DEV"
 [ "$(cat "$DIR/out")" = OK ] && ok "verify: OK" || fail "verify: $(cat "$DIR/out")"
 expect 0 "dump Side A" -- "$TAPECTL_T" dump "$DEV" --side A -o "$DIR/a.wav"

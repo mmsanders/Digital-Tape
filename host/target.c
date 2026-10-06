@@ -30,6 +30,7 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
     int seam, i;
 
     gather_facts(path, &f, &seam);
+    (void)seam;
     r = safety_policy(&f, provision, erase != NULL && strcmp(erase, path) == 0);
     if (r != REFUSE_NONE) {
         fprintf(stderr, "tapectl: %s: %s\n", refusal_id(r), refusal_sentence(r));
@@ -47,7 +48,8 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
        open. Read-only commands (verify) leave it mounted. */
     if (provision || need_write) {
         for (i = 0; i < f.n_mounted; i++) {
-            int ok = seam ? 0 : probe_unmount_p1(path, &f, i);
+            /* Under the test seam too: a facts file may name a real mount. */
+            int ok = probe_unmount_p1(path, &f, i);
             if (ok != 0) {
                 fprintf(stderr, "tapectl: %s: cannot unmount partition 1 (%s). Eject it in the operating system first.\n",
                         refusal_id(REFUSE_FOREIGN_MOUNT), f.mounted[i].where);
