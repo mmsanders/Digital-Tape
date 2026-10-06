@@ -14,7 +14,7 @@ in order, at a consistent level, with no clicks at the joins.
 
 | Package | Delivers | Owner |
 |---|---|---|
-| [WP-14](PACKAGES/WP-14.md) `tapectl` on real cards | Provision a real microSD (MBR, FAT32 README partition, TAPEFS partition), load, verify, dump, promote, all on removable media, safely and durably | Software builds · Verification accepts |
+| [WP-14](PACKAGES/WP-14.md) `tapectl` on real cards | Provision a real microSD (MBR, FAT16 README partition, TAPEFS partition), load, verify, dump, promote, all on removable media, safely and durably | Software builds · Verification accepts |
 | [WP-16](PACKAGES/WP-16.md) Ingest | A folder of mixed-source music becomes one 44.1 kHz / 16-bit stereo stream: decoded, resampled, gain-normalised, joined gaplessly | Software builds · Verification accepts |
 | [WP-15](PACKAGES/WP-15.md) Drag-and-drop app | One window over WP-14 and WP-16: drop a folder, type a label, pick the card, press one button | Software builds · Verification accepts · Michael runs the unaided test |
 | ~~WP-38~~ Phone test harness | **Not taken (D7).** No explicit development; Phase 2 design must not exclude a later WebAssembly build | — |
@@ -112,7 +112,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
   - a durable flush;
   - 64-bit offsets;
   - the disk-safety guard;
-  - MBR and FAT32 provisioning;
+  - MBR and FAT16 provisioning;
   - read-only `verify`.
 - **Verification, in parallel:**
   - the WP-14 acceptance package, built on disk images and loop devices, including negative controls for every refusal rule;
