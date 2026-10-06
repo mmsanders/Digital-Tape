@@ -1,0 +1,12 @@
+{
+  "product_commit": "25b6439019396a54ce12e8298dd58f8a5d8a17e9",
+  "verification_base": "6837102116ed94f80b8a6454713ffb1e7c076427",
+  "engine_tree": "b80a8e54775c5aabad7bc338a6e30db3596b657b",
+  "issue": 146,
+  "sha256": {
+    "spec/adr164/SPEC-ERRATA.manifest.json": "de3b455952974b90db19eb90c03564af02e942eb773139adeee233a5fec57f27",
+    "spec/adr164/SPEC-ERRATA.md": "0cd814527f1c2a2e2d54de0f7a34e7195cb918262632e07d0b194831bade02a1",
+    "spec/adr164/WP-14.md": "260e48cd369b18e6acc1505141616e47b983928dbe99a94f2f84e6a7b6c157ba",
+    "spec/adr164/WP14-CLI-CONTRACT.md": "17c725f38c801c8f5b041deae07a56e5a48f47c3ad8eac9c0cc9205a7c88d5d1"
+  }
+}
