@@ -263,4 +263,7 @@ from the shipped binary. Their expectations belong to Verification; transport be
 ## 8. Out of scope
 
 GUI (WP-15), ingest (WP-16), `dup` on the desktop, warm start, write batching (Q-P2-1), label art in
-partition 1, and any engine change. Adding a command or a finding is a PM change.
+partition 1, and any engine change within WP14. ADR-169 separately permits the read-only playback correction
+under [the addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md); WP14 must match its independently
+accepted/integrated engine-tree pin, initially PENDING, with all Phase 1 goldens/replays green.
+No WP14 A8 PASS until that pin is recorded. Adding a command or a finding is a PM change.
