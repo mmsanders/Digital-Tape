@@ -282,12 +282,14 @@ retained-ring movement, missing lookahead, budget overrun, early completion/buff
 dropped late error and barrier-before-drain. Verification owns their expectations.
 No private replacement oracle is supplied here. Keep the ten goldens unchanged.
 
-## Validation, blockers and stop
+## Firmware follow-through and validation
 
 This return used connector reads of the pinned source/contracts and arithmetic review;
 no engine run, benchmark, resource gate, independent disposition or physical test.
 Git cloning failed in this runtime. The docs PR's own required CI is the validation
 route; docs-only skipped engine jobs are not engine evidence.
+
+Target scheduling uses interrupt/event-driven DMA waits and bounded audio interrupts, then measured clock choices. At 176,400 bytes/s, 64 KiB is 371.5 ms at 1× and 31.0 ms at 12×; a half-ring refill trigger leaves only 15.5 ms at 12×. The illustrative desktop 32 KiB refill policy is not a demonstrated firmware watermark. WP17/18/28 must choose coverage and arbitration from worst card stalls while preserving scrub/audio behavior, and measure sustained per-card rates, actual overlap, wall time through durable success, joules/C60, playback energy/hour, CPU duty and underruns.
 
 Implementation blockers are precise PM issuance and independent publication; async
 work additionally needs the explicit ABI/funnel contract, buffer/resource accounting,
