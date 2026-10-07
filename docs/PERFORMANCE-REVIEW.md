@@ -3,6 +3,10 @@
 **7 October 2026 UTC · PM #384 · intake #402 · discussion #399**  
 **Status: design recommendation, not a normative issuance or implementation assignment.**
 
+**7 October follow-up (ADR-168): Michael rejected relaxing the <30 s copy requirement.**
+The copy-limit option below is withdrawn, not queued. The [software framework](PERFORMANCE-PLAN.md)
+now prioritizes urgent playback recovery, contiguous transfers and actual read/write overlap.
+
 This supersedes the remedy proposal in ADR-166 / #399, not its operational holds.
 Protecting committed recordings does not require the observed playback rereads.
 The stronger plan is to fix byte amplification, request amplification and CPU work
@@ -184,7 +188,7 @@ card qualification from this paper review.
 
 | Candidate | What changes | Benefit and cost |
 |---|---|---|
-| 30 s copy becomes a target; about 60 s becomes the candidate limit on qualified cards | Guardrail 10 / target-system acceptance; choose the actual bound from measurements | May avoid overlapping two transfers solely to hit 30 s. Slower completion can cost energy too; neither 60 s nor battery savings is guaranteed |
+| Copy-time relaxation — WITHDRAWN by Michael, ADR-168 | <30 s target-system acceptance remains mandatory | Improve transfer shape and overlap; measure before proposing any future requirement change |
 | Recording durability follows bounded checkpoints/finalization | Internal service/commit contract; a visible save delay only if separately chosen | Far fewer barriers while retaining saved-data recovery; finalization latency and late-error handling must be bounded |
 | Format/dup can invalidate the explicitly chosen destination immediately after refusal checks | Raw destructive crash outcomes and some diagnostics; ordinary recording protection unchanged | Removes much old-generation/WIP classification; interrupted destination can be unformatted and require retry |
 | Lower scrub maximum or pause playback during copy | Child-visible behavior and goldens/acceptance | Potential deadline/scheduling relief, but not recommended before efficient buffering and measurement |
