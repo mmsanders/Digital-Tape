@@ -120,4 +120,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-164](DECISIONS.md#adr-164--e-1-approval-recorded-wp-14-preflight-resolved-p2-r1-continuation-stays-pre-routed) | 2026-10-06 | E-1 approved; WP-14 preflight resolved | FAT16 overlay; Q1–Q11/P2V-001…004 settled; D8 complete; direct publication/binding/disposition continues |
 | [ADR-165](DECISIONS.md#adr-165--p2v-005-distinguish-bare-files-from-whole-devices-without-parsing-tapefs) | 2026-10-06 | P2V-005: bare-file CRC/signature collision | Files use nonzero MBR entries; whole devices retain OR signature; no host TAPEFS parser; existing #392/#146 stages continue |
 
-102 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-166](DECISIONS.md#adr-166--wp14-throughput-triage-preserve-criteria-stop-unchanged-timeout-reruns-discuss-remedies) | 2026-10-07 | WP14 throughput triage | Preserve criteria; stop unchanged native-timeout reruns; playback/transfer/cadence remedies await discussion |
+
+103 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

@@ -293,18 +293,18 @@
     const PHASE2 = {
       phase: 2,
       title: "A folder of music becomes a cartridge",
-      asOf: "P2-R1 · 6 October 2026 UTC · Product main 6f362f0 (ADR-165); Verification main ce60d34; live #392/#146 returns checked. No Phase 2 package accepted",
+      asOf: "P2-R1 · 7 October 2026 UTC · input Product main 87f01bf; Verification main 56e25cc1; Software #390 dbe6283. ADR-166 throughput triage: no Phase 2 package accepted",
       start: "Phase 2 opened · 5 Oct 2026",
       goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
       stages: [
-        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 1,
-          note: "Contract issued, including E-1 FAT16 and ADR-165 CRC/signature correction. Software #392 / PR #390 has a green transport candidate, not a final disposition head. Verification #146 has partial coverage on main; the complete package, native independent controls, exact-head PASS and integration remain open. Michael #386's macOS / Windows 10 real-card witness is held; Server 2025 CI does not substitute." },
+        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 2,
+          note: "Contract and complete independently authored acceptance package are on main (Verification 56e25cc1, corrected/imported). This is the coverage-source rung, not execution or acceptance. #390 dbe6283 is unmerged and not disposed: image halves and native Linux pass in run 37560629496, while native Mac/Server2025 C60 times out from 128x playback rereads (#399). Exact-head PASS, integration and Michael #386's macOS / Windows 10 real-card witness remain held; Server 2025 CI does not substitute." },
         { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 0,
           note: "Planned after the real-card path. D3–D5 settled: WAV/AIFF/FLAC/MP3/AAC, gain-only −16 LUFS with −1 dBTP ceiling, natural filename order and defined folder gaps. Package contract not yet issued; kickoff choices are not a completed contract rung." },
         { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 0,
           note: "Planned over WP-14 and WP-16; package contract not yet issued. Drop a folder, type a label, pick a card, press one button. No music library or direct device writes. Acceptance includes Michael witnessing an unfamiliar family member's unaided run." }
       ],
-      context: "Foundations complete: R1 CI lanes / D8 strict ruleset, operations freeze and E-1 approval. Hardware remains parked; WP-38 is not taken. Q-P2-1(a) is answered; (b) remains for P2-R2. No batching permission.",
+      context: "Foundations complete: R1 CI lanes / D8 strict ruleset, operations freeze and E-1 approval. Hardware remains parked; WP-38 is not taken. Q-P2-1(a) is answered; playback reuse, transfer width and load cadence are under discussion now (#399), with no remedy issued. Unchanged known-timeout reruns stopped; no batching permission.",
       exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
     };
 
