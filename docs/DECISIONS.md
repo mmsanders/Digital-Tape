@@ -3180,3 +3180,42 @@ feasibility/conflict findings before implementation, never fitted thresholds.
 **Reversal cost.** Documentation and independently authored tests only until the
 implementation tranche. A true conflict with frozen behavior returns to PM for
 explicit amendment; this exception cannot silently revise the frozen contract.
+
+
+## ADR-170 — Resolve P2READ-001 with finite mapping and idle-work bounds
+
+**Date:** 2026-10-07 PDT · **Owner:** PM #384 / #399, Michael's Verification-review activation.
+**Input Product main:** `1f4285177876a048d761f40bd6d843fc9428512d`.
+**Independent publication:** Verification #151 merge `f02f9b625acf72f762dfde5d2838cb4805b75938`,
+read-only subtree `3845e84cbc9f1969c57e62295ff5733e1b2da423`; PR CI 37694235253 PASS.
+
+**Disposition.** P2READ-001 is valid. ADR-169's unspecified big-O constants cannot
+separate a performant traversal from repeated full-index scans on a capped domain.
+The five budget/request arithmetic rows are consistent. This is a partial paper
+preflight, zero executable acceptance cases/Product runs/controls, not complete
+READ-1 or Product acceptance. Preserve it; no import/implementation activation.
+
+**Decision.** Revise [the public addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md) with
+fixed mapping-visit ceilings: forward traversal 4E+4B+32; individual seek 2E+32;
+fixed-direction/rate episodes 4E+4B+4F+32 including initiating setup. Define resets,
+all actual inspections, empty/fragmented mappings and F as requested render frames.
+Already-done idle service has zero mapping visits/I/O/PCM work and at most eight
+actual internal loop-body iterations; test-only counter/causal controls plus
+post-authoring audit establish the declared boundary, not total CPU instructions.
+
+Coefficients allow bounded setup and endpoint/extent checks and are selected
+before implementation evidence. They do not mandate a data structure or new API.
+Verification's proposed actual-operation observations and stronger preprocessing/
+object/link absence checks are appropriate; retain independent preflight and
+large-E/short/long full-scan negative controls. Genuine frozen/resource conflicts
+return to PM, never candidate-fitted criteria.
+
+Resume existing #146 READ-1 to a complete merged publication, then #409 imports/
+implements and #146 READ-2 disposes directly. Keep all existing request/copy/output/
+resource limits and frozen bytes, WP14 evidence and A8 PENDING, physical/platform/
+write/async/hardware holds, <30 s copy and Michael's reserved #390 merge. No package
+rung advances. No new acknowledgement-only round or duplicate verification issue.
+
+**Reversal cost.** Public test-authoring criterion only before Product changes.
+A later change needs a precise ruling and provenance; paper checkpoint CI supplies
+no engine acceptance.
