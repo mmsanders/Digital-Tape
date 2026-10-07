@@ -3067,3 +3067,44 @@ flushes for a C60 load.
 Any adopted remedy needs its actual scoped contract/spec issuance, independent publication first
 where the engine changes, and final exact-head qualification/disposition. The proposal commits no
 code or media migration. #384 remains open for its original unmet round gate.
+
+## ADR-167 — Performance recommendation: burst reuse, transaction durability and firmware energy
+
+**Date:** 2026-10-07 UTC · **Owner:** PM #384 · **Michael intake:** #402.
+**Input:** Product main `d3f1e7bc20e87f7b3143b68a094459706f5930e9`;
+Software #390 `dbe6283dd6393e615e2bc18ef4a6c81673c7efc1`;
+Verification main `56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2`.
+**Publication:** [revised performance review](PERFORMANCE-REVIEW.md).
+**Supersedes:** ADR-166's remedy recommendation only; its operational holds stand.
+
+**Finding.** Reusing samples alone can leave millions of tiny reads or repeated
+whole-ring memory moves. Fresh uncommitted payload flushes do not make a recording
+recoverable without index publication. Sequential copy time adds read and write
+time: 635 MB at 25 MB/s each takes at least 50.8 s before overhead. Firmware DMA
+can still busy-poll, and 64 KiB at the specified 12× scrub holds only about 31 ms.
+These are design/contract deductions; no new execution, media or energy result is claimed.
+
+**Decision.**
+1. Publish one shared revised recommendation and link it from both live lead issues.
+   Recommend burst buffer reuse with CPU-work/read-volume bounds first, preserving
+   exact audio and existing small-render coverage. This read-only remedy does not
+   depend on the enlarged write-persistence campaign.
+2. Separately evaluate contiguous write transfers and transaction/checkpoint durability.
+   Preserve saved-data ordering and truthful barriers. Finalization must respect
+   the existing 200 ms synchronous-commit requirement unless deliberately amended;
+   fewer flushes must not conceal an unbounded Stop-button wait.
+3. Present optional product tradeoffs: 30-second copy as a target with a measured,
+   more forgiving limit; a separately chosen save-latency change; and simpler raw
+   destination invalidation after all zero-write refusals. No option is adopted.
+   No current finding justifies a cartridge-format migration or weaker ordinary COW.
+4. Record DMA/cache/clock, scrub headroom, copy-overlap arithmetic and thermal-mode
+   reconciliation in the existing firmware/hardware roadmap. Hardware stays parked.
+   Energy savings require target measurement; NXP capabilities are not device results.
+5. No engine/spec/CLI cadence change is issued by this review. Phase 2/A8 and any
+   frozen contract amendment must precede the affected work; independent tests
+   precede engine implementation. Existing acceptance and physical/platform holds
+   stand. No duplicate assignment, PM pass-through or repeated unchanged timeout run.
+
+**Cost to reverse.** A recommendation and roadmap update only. Adopting an option
+requires its precise contract delta, independent coverage and final qualification.
+No code, on-media bytes, accepted evidence or guardrail changes in this publication.
