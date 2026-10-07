@@ -55,13 +55,72 @@ For contiguous and monotone forward runs, refill/adoption PCM-copy bytes must no
 exceed requested payload bytes plus the accepted warm descriptor byte count (zero
 for cold). Retained-range movement must be zero during ordinary monotone advancement;
 one-time warm adoption is counted separately. Output stores are excluded (4 bytes/frame).
-Repeated idle service has constant bounded bookkeeping. A monotone pass must visit
-O(E + requested blocks) mapping entries; arbitrary seek may perform bounded O(E) lookup.
-A source-independent test-only observation seam counts refill/adoption copy bytes,
+Finite mapping and idle limits are issued by ADR-170 below; asymptotic notation
+alone is not an acceptance gate. A source-independent test-only observation seam counts refill/adoption copy bytes,
 retained-range move bytes and mapping-entry visits at their actual operations. It is
 absent from shipping builds, never supplies invented values, and has causal controls.
 Verification defines observation schema/controls before implementation; instrumentation
 cannot change outputs or production state. Host elapsed time is diagnostic.
+
+
+## Finite mapping and idle acceptance — ADR-170 / P2READ-001
+
+**Revision 2, 7 October 2026.** Supersedes only the unspecified asymptotic mapping,
+seek and idle-bookkeeping criteria. Requested-byte/callback, PCM-copy/movement,
+exact-output/resource limits and the pending engine pin are unchanged.
+
+V counts every actual playback entry inspection, including lookup, prefix/search
+construction and mapping maintenance, repeated inspections included. Include work
+in API calls and service/render, not only device callbacks. Count after the stated
+reset; never deduct setup because it occurred outside service. E is the number of
+nonempty fixture mapping runs; B is requested payload blocks (not useful blocks).
+If entry inspections exceed physical mapping-run count, use the larger number of
+nonempty selected-side index entries as E. Empty mappings use E=0. Arithmetic uses
+wide counters; no multiplication/accumulation wrap is permitted.
+
+| Scope / reset boundary | Finite entry-visit ceiling |
+|---|---|
+| Issued cold forward 1x traversal, all budgets and fragmented workload; reset after mount before first service, through final render/service | V <= 4E + 4B + 32 |
+| One arbitrary tape_seek API call, including lookup/setup performed in that call | V <= 2E + 32 |
+| Fixed-direction/rate episode after seek/side/rate/content/warm discontinuity, including its initiating API call and all refill/render until the next discontinuity | V <= 4E + 4B + 4F + 32 |
+| Each repeated idle service after done, unchanged covered playhead, no recording or long-operation obligation | V = 0 |
+
+F is the sum of requested render frames in the episode, including short/underrun
+requests. This is an upper bound on attempted sample lookups, not an assertion
+that every requested frame must render. Initial seek/setup counts in both its
+per-call limit and its episode total. Reset an episode immediately before its
+initiating API call. A rate-direction change starts a new episode; no global
+forward traversal ceiling is imposed across arbitrary jumps. Mount selection
+validation remains outside the after-mount traversal reset; later playback mapping
+setup belongs inside it. A failed-read episode reports V/B/F but does not claim
+the no-error traversal bound; frozen error/extent/budget semantics still govern.
+
+The coefficients admit a bounded setup pass and repeated endpoint/extent checks
+per block or attempted sample, with 32 visits for fixed edge overhead. A monotone
+walker is an algorithm-independent feasibility witness, not an implementation
+mandate. They are chosen before Product implementation/observations. Unlike an
+unspecified constant of 4096, they reject full-index rescans on large-E workloads.
+Preflight must include short and long traversals with substantial E (including
+the maximum conforming fixture), budget 1 and fragmented mappings; a forced
+full-scan control must exceed the issued bound on at least one declared fixture.
+
+For the idle-service row, additionally require zero payload I/O, zero playback
+PCM copy/movement, and **at most 8 executed internal loop-body iterations per call**.
+Count every iteration in playback-related engine helper loops reached by that
+idle service, including mapping/refill helpers; never count only loops with a
+particular name or only iterations doing I/O. This does not claim a total CPU
+instruction count or hardware deadline. Audit the idle path after independent
+tests are authored for absence of uncounted data-dependent loops/recursion or
+blocking I/O; fixed scalar checks are allowed. A test-only idle_loop_iterations
+counter, causal nonzero/zero controls and shipping absence evidence supplement
+the entry/copy counters. No new callback/funnel or production state is authorized.
+
+Verification owns the final source-independent schema/cases and independently
+preflights these finite inequalities; no candidate-fitted constants or elapsed-time
+substitute. Its published OBSERVATION.md counter definitions are suitable, including
+all intermediate copy/inspection sites, real causal increments and preprocessing/
+object/link shipping absence (symbol absence alone is insufficient). A genuine
+frozen-semantic/resource conflict returns to PM; do not tune expectations to code.
 
 ## Correctness and independent preflight
 
