@@ -25,11 +25,11 @@ On a laptop the "playable" check is `tapectl verify` plus `tapectl dump`, becaus
 **Phase 2 exit gate**, all of:
 1. WP-14, WP-15 and WP-16 independently accepted against their package criteria.
 2. The unaided test (WP-15 G2) passed and witnessed by Michael.
-3. Phase 1 goldens and every Phase 1 replay still green on main. Nothing in Phase 2 changes the engine.
+3. Phase 1 goldens and every Phase 1 replay still green on main. Only the [ADR-169 read-only playback exception](PLAYBACK-PERFORMANCE-ADDENDUM.md) may change the engine; all other engine holds stand.
 4. Copy-throughput question Q-P2-1 (§5) decided and recorded before Phase 3 firmware starts.
 5. Host scope frozen: *it loads cartridges*. It is not a music manager, tag editor, library or player.
 
-**Not in Phase 2:** hardware (parked through Phase 2, ADR-160), firmware, engine behaviour changes,
+**Not in Phase 2:** hardware (parked through Phase 2, ADR-160), firmware, engine changes beyond the ADR-169 read-only playback exception,
 card-to-card `dup` on the desktop (the device copies cartridges), warm start, metadata of any kind
 on the cartridge beyond the superblock `label`, and printed label art.
 
@@ -80,8 +80,8 @@ Phase 2 adopts these from the retrospective (#372, [roadmap R1–R9](PACKAGES/RE
   class Phase 1 kept rediscovering.
 - **Independence for host tools.** Structural Rule 1 governs engine code. Host tools follow the
   WP-11 pattern instead: tests are authored from the contract in parallel and disposed blind
-  against an exact head. Phase 2 makes no engine change. If one turns out to be needed, it goes
-  back to PM and Structural Rule 1 applies in full.
+  against an exact head. ADR-169 permits the named read-only playback correction only. Structural Rule 1 applies in full;
+  no other engine change is issued by the host-tool parallel-authoring rule.
 - **Where the code lives.** Recommended, for Software to confirm in its round-1 return:
   - `tapectl` stays C over the engine and its ports.
   - Ingest is a separate command-line tool that writes a canonical WAV, which `tapectl load`

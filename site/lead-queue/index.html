@@ -265,7 +265,7 @@
     const PHASE1 = {
       phase: 1,
       title: "Audio engine, on a laptop",
-      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final",
+      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final; snapshot refreshed P2-R1 / 7 October 2026 for ADR-169 (no acceptance change)",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -293,7 +293,7 @@
     const PHASE2 = {
       phase: 2,
       title: "A folder of music becomes a cartridge",
-      asOf: "P2-R1 · 7 October 2026 UTC · input Product main 9b300a8; Verification main 56e25cc1; Software #390 dbe6283. ADR-168 Software framework queued: no Phase 2 package accepted",
+      asOf: "P2-R1 · 7 October 2026 UTC · input Product main 9e902cf; Verification main 56e25cc1; Software #390 dbe6283. ADR-169 read-only playback scope issued, engine pin pending: no Phase 2 package accepted",
       start: "Phase 2 opened · 5 Oct 2026",
       goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
       stages: [
@@ -304,7 +304,7 @@
         { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 0,
           note: "Planned over WP-14 and WP-16; package contract not yet issued. Drop a folder, type a label, pick a card, press one button. No music library or direct device writes. Acceptance includes Michael witnessing an unfamiliar family member's unaided run." }
       ],
-      context: "Foundations complete: R1 CI lanes / D8 strict ruleset, operations freeze and E-1 approval. Hardware remains parked; WP-38 is not taken. Q-P2-1(a) is answered; ADR-168 queues urgent Software #405 design: burst playback recovery first, then multi-block transfers and real read/write overlap; <30 s copy stays mandatory. #392 resumes its final gate after the read fix. Target energy work stays parked; no implementation issued. Unchanged known-timeout reruns stopped; no batching permission.",
+      context: "Foundations complete: R1 CI lanes / D8 strict ruleset, operations freeze and E-1 approval. Hardware remains parked; WP-38 is not taken. Q-P2-1(a) is answered; Software #405 design reviewed and published (#407). ADR-169 issues only read-only playback recovery with independent tests first; the accepted engine pin is pending. #392 resumes its final gate after integration. Copy/async/recording remain separate unissued follow-ons; <30 s copy stays mandatory. Target energy work stays parked. Unchanged known-timeout reruns stopped; no batching permission.",
       exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
     };
 
