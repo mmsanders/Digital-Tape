@@ -1567,14 +1567,6 @@ jobs:
           export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
           "$PY" -B tests/wp14_r1/runner.py "$root/build/host/tapectl$exe" --head "$HEAD_SHA" \
             > "$RUNNER_TEMP/wp14-out/image-$PLATFORM.json" 2> >(tee "$RUNNER_TEMP/wp14-out/image-$PLATFORM.stderr" >&2)
-      - name: macOS — a RAM-disk volume for the device backing files
-        if: matrix.platform == 'macos'
-        run: |
-          set -euo pipefail
-          dev=$(hdiutil attach -nomount ram://$((4 * 1024 * 1024 * 2)) | awk '{print $1}')
-          diskutil erasevolume APFS wp14ram "$dev"
-          echo "WP14_BACKING_DIR=/Volumes/wp14ram" >> "$GITHUB_ENV"
-          df -h /Volumes/wp14ram
       - name: Native cases (native.py through tests/wp14_adapter/transport.py)
         id: native
         continue-on-error: true

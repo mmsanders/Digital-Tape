@@ -591,11 +591,54 @@ def invoke_test(case, bins, args, label, facts=None, control=None, trace=True, p
     tr = None
     if trace:
         case.keep(raw)
-        started = time.time()
-        tr = annotate_unopened(json.loads(raw.read_text()), device)
-        case.log(kind='trace-read', label=label, bytes=raw.stat().st_size, events=len(tr.get('events', [])),
-                 seconds=round(time.time() - started, 3))
+        if raw.stat().st_size > RAW_TRACE_BYTES:
+            # A large trace (the C-60 load and dumps: over a million events)
+            # is passed through byte for byte, never parsed here, so the
+            # transport does not hold gigabytes while the next command runs.
+            # A trace this large comes from an opened target, which needs no
+            # annotate_unopened join.
+            tr = RawTrace(raw)
+            case.log(kind='trace-passthrough', label=label, bytes=raw.stat().st_size)
+        else:
+            started = time.time()
+            tr = annotate_unopened(json.loads(raw.read_text()), device)
+            case.log(kind='trace-read', label=label, bytes=raw.stat().st_size, events=len(tr.get('events', [])),
+                     seconds=round(time.time() - started, 3))
     return r.returncode, r.stdout, r.stderr, tr
+
+
+RAW_TRACE_BYTES = 32 * 1024 * 1024
+
+
+class RawTrace:
+    """tapectl-test's own trace file, embedded verbatim in the response."""
+    def __init__(self, path):
+        self.path = Path(path)
+
+
+def write_response(resp, out):
+    """json.dumps(resp), except that each RawTrace is streamed in from its
+    file at its place, unchanged."""
+    raws = []
+
+    def sub(v):
+        if isinstance(v, RawTrace):
+            raws.append(v.path)
+            return f'@@WP14-RAW-TRACE-{len(raws) - 1}@@'
+        if isinstance(v, dict):
+            return {k: sub(x) for k, x in v.items()}
+        if isinstance(v, list):
+            return [sub(x) for x in v]
+        return v
+    text = json.dumps(sub(resp))
+    with open(out, 'w') as f:
+        pos = 0
+        for m in re.finditer(r'"@@WP14-RAW-TRACE-(\d+)@@"', text):
+            f.write(text[pos:m.start()])
+            with open(raws[int(m.group(1))]) as src:
+                shutil.copyfileobj(src, f, 1 << 20)   # trailing newline is JSON whitespace
+            pos = m.end()
+        f.write(text[pos:] + '\n')
 
 
 def invoke_shipped(case, bins, args, label, device_bytes):
@@ -912,7 +955,7 @@ def main():
     a = ap.parse_args()
     request = json.loads(a.request.read_text())
     resp = handle(request, Binaries(a.build.resolve()))
-    a.response.write_text(json.dumps(resp) + '\n')
+    write_response(resp, a.response)
 
 
 if __name__ == '__main__':
