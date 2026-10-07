@@ -129,4 +129,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-169](DECISIONS.md#adr-169--issue-the-read-only-playback-exception-and-preserve-separate-write-gates) | 2026-10-07 | Read-only playback scope issued | Source-independent bounds, tests first, WP14 accepted-engine pin pending; writes/async separate |
 
-106 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-170](DECISIONS.md#adr-170--resolve-p2read-001-with-finite-mapping-and-idle-work-bounds) | 2026-10-07 | P2READ-001 resolved | Finite setup/traversal/seek/episode and idle criteria; partial preflight preserved, resume READ-1 |
+
+107 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
