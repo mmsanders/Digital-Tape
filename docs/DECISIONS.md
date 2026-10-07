@@ -3015,3 +3015,55 @@ OR recognizer would turn a valid bare image into a false MBR finding.
 **Cost to reverse.** A host-contract/fixture/recognizer amendment in the existing
 round; no media migration or engine/spec-bundle revision. Explicit engine-mediated
 arbitration could later expand empty-table diagnostics, but is unnecessary for this gate.
+
+## ADR-166 — WP14 throughput triage: preserve criteria, stop unchanged timeout reruns, discuss remedies
+
+**Date:** 2026-10-07 UTC (6 Oct Pacific) · **Owner:** PM #384; Michael activation/intake #400.
+**Inputs:** Product main `87f01bfeb05aff153668bafdaa1e4abbf28797c7`; Software #390
+`dbe6283dd6393e615e2bc18ef4a6c81673c7efc1`; Verification main
+`56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2`, subtree
+`e1ef171ffdd7464314b4b838a7d904b1a94f5409`.
+**Evidence:** [corrected observations](https://github.com/mmsanders/digital-tape-verification/issues/146#issuecomment-6031550598);
+[Product CI 37560629496](https://github.com/mmsanders/Digital-Tape/actions/runs/37560629496);
+[call counts](https://github.com/mmsanders/Digital-Tape/issues/385#issuecomment-6003622851);
+[PM proposal/disposition](https://github.com/mmsanders/Digital-Tape/issues/399#issuecomment-6031806453).
+
+**Finding.** Playback services reload overlapping 64 KiB windows after 512 bytes rendered:
+about 158.75M reads / 81.3 GB for 635 MB of audio per C60 side. This is a read-path defect,
+separate from crash-safe media writes. Image halves pass on Linux/macOS/Server2025 and native Linux
+passes; native Mac/Server2025 C60 exceeds even 7200 s and its aggregate census is skipped.
+The current head is not independently disposed. Linux cache masks physical I/O cost.
+Firmware impact is an inference from the call pattern, not a hardware measurement.
+Separate simulator counts show about 1.24M single-block reads/writes for dup and 155048
+flushes for a C60 load.
+
+**Decision (operational, not a normative revision).**
+1. Stop repeated unchanged full qualification runs whose only purpose is to reproduce the known
+   native timeout. Let the current finite run finish; retain/audit its outputs. Material changes
+   still receive the required final qualification gate. No timeout/coverage waiver, caching
+   substitution or PASS from incomplete execution. Verification retains independent disposition.
+2. Complete authored package `56e25cc1` supersedes the partial-authoring status; import
+   `7fed08a` carries it. Authorship, candidate execution, acceptance and integration remain
+   separate. Carry unaffected evidence; direct #392 → #146 remains, with no duplicate assignment
+   or PM pass-through. #390, tested release/checklist and physical Windows10/macOS witness stay held.
+3. Michael asked to discuss potential spec/assumption changes. The concrete proposal is on #399:
+   narrow Phase2 exception for playback-buffer reuse, then resolve transfer shape/Q-P2-1 now,
+   qualify fuller record-ring scheduling, and enlarge the crash model before relying on batching.
+   These are **proposals**, not issued engine/cadence/batching work. The current WP11/WP14
+   contract, A8 engine identity and frozen DRAFT10 bytes remain authoritative until amended.
+4. A playback reuse fix appears compatible with engine-api §6 (render uses RAM only; service
+   performs bounded I/O). It still changes engine implementation, so Structural Rule1 applies.
+   If approved, amend the Phase2 absolute no-engine rule and A8 narrowly; pin the disposed engine,
+   preserve exact goldens/API/format/memory limits and add independent read-volume criteria.
+   No finding presently requires weakening saved-data protection or changing cartridge bytes.
+5. Q-P2-1(a)'s any-subset/reordered-persistence gap remains. None/all/prefix runs do not license
+   batching. Preserve original outcome oracles and later media qualification in the shipping
+   command/bus mode. Hardware remains parked; no purchases or physical qualification authorized.
+6. STATUS/WP14/dashboard record the actual blocker. WP14's coverage-source rung advances to 2
+   because the complete authored package is on Verification main; implementation/acceptance
+   rungs remain unreached. Phase1's 36/36 stays final.
+
+**Cost to reverse.** Operational rerun policy only; existing acceptance criteria are unchanged.
+Any adopted remedy needs its actual scoped contract/spec issuance, independent publication first
+where the engine changes, and final exact-head qualification/disposition. The proposal commits no
+code or media migration. #384 remains open for its original unmet round gate.
