@@ -20,6 +20,12 @@ from catalog import image_cases, IMAGE_CONTROLS
 
 HERE = Path(__file__).resolve().parent
 GOLDEN = HERE.parent/'golden'
+DEFAULT_TIMEOUT = 1800
+C60_TIMEOUT = 7200
+
+def roundtrip_image_name(source,kind):
+    assert kind in ('bare','whole')
+    return kind+'-'+Path(source).stem+'.img'
 
 def sha(path):
     h=hashlib.sha256()
@@ -82,8 +88,8 @@ def fat_controls(path,label,epoch):
 def run(binary,head_sha):
     assert re.fullmatch('[0-9a-f]{40}',head_sha)
     evidence=[]; cases=[]; controls=[]
-    def invoke(*args, code=0, token=None):
-        result=subprocess.run([str(binary),*map(str,args)],capture_output=True,text=True,timeout=1800)
+    def invoke(*args, code=0, token=None, timeout=DEFAULT_TIMEOUT):
+        result=subprocess.run([str(binary),*map(str,args)],capture_output=True,text=True,timeout=timeout)
         evidence.append({'argv':list(map(str,args)),'exit':result.returncode,
                          'stdout':result.stdout,'stderr':result.stderr})
         assert result.returncode==code, evidence[-1]
@@ -109,20 +115,22 @@ def run(binary,head_sha):
         for source,kind in ((s,k) for s in sources for k in ('bare','whole')):
             seconds=3600 if source.name=='c60.wav' else 60
             blocks=max(minimum_blocks(seconds),65537)
-            image=work/'bare.img'
+            image=work/roundtrip_image_name(source,kind)
+            timeout=C60_TIMEOUT if source.name=='c60.wav' else DEFAULT_TIMEOUT
             if kind=='bare':
                 invoke('format',image,'--blocks',blocks,'--uuid',UUID.hex(),'--epoch',315532800,
-                       '--label','WP14','--length-s',seconds)
+                       '--label','WP14','--length-s',seconds,timeout=timeout)
             else:
                 invoke('provision',image,'--image-bytes',(blocks+P2_START)*512,
-                       '--uuid',UUID.hex(),'--epoch',315532800,'--label','WP14','--length-s',seconds)
-            invoke('load',image,source)
+                       '--uuid',UUID.hex(),'--epoch',315532800,'--label','WP14','--length-s',seconds,
+                       timeout=timeout)
+            invoke('load',image,source,timeout=timeout)
             before=sha(image)
-            invoke('verify',image,token='OK')
+            invoke('verify',image,token='OK',timeout=timeout)
             assert before==sha(image), 'verify changed bare image'
             for side in ('A','B'):
                 out=work/'dump.wav'
-                invoke('dump',image,'--side',side,'-o',out)
+                invoke('dump',image,'--side',side,'-o',out,timeout=timeout)
                 compare_wav(source,out)
                 if source==sources[0] and kind=='whole' and side=='A':
                     good=out.read_bytes()

@@ -9,7 +9,7 @@ from pathlib import Path
 from oracle import *
 from fixtures import build,BLOCKS,crc,synthetic_fat
 from native import audit_response,capture_identity,requests,prepare,symbol_absent,SEAM_SYMBOLS,SEAM_STRINGS
-from runner import fat_controls
+from runner import fat_controls,roundtrip_image_name,DEFAULT_TIMEOUT,C60_TIMEOUT
 from catalog import image_cases,IMAGE_CONTROLS
 from provision_replay import replay_cuts
 from qualification import census
@@ -31,6 +31,12 @@ def response(request,trace,code=0,text='OK\n'):
 
 def main():
     checks=[]; controls=[]
+    names=[roundtrip_image_name(Path(name),kind) for name in ('one.wav','two.wav') for kind in ('bare','whole')]
+    assert len(names)==len(set(names))==4 and DEFAULT_TIMEOUT < C60_TIMEOUT
+    checks.append('roundtrip-image-isolation-and-c60-budget')
+    def old_reuse(_source,_kind): return 'bare.img'
+    assert len({old_reuse(Path(name),kind) for name in ('one.wav','two.wav') for kind in ('bare','whole')})==1
+    controls.append('roundtrip-constant-image-reuse')
     signed=bytearray(512);signed[510:512]=b'\x55\xaa'
     entered=bytearray(512);entered[446]=1
     for kind in ('image','device'):

@@ -36,9 +36,14 @@ No inapplicable Linux path test is a Windows/macOS skipped case.
 
 All ten unchanged WP11 reference WAVs and mandatory full C60 run on bare and
 whole images, and native virtual targets; exact bytes/final frame, no tolerance.
-Only temporary regular files/owned virtual devices are used. Full C60 needs
-several GiB scratch; the 64 GB target is sparse, and can consume its full apparent
-size on a filesystem without holes. Capture payload/replay assets can exceed
+Only temporary regular files/owned virtual devices are used. Every bare/whole
+round-trip gets a fresh image so prior provision state cannot contaminate a later
+case. Full C60 needs several GiB scratch; the 64 GB target is sparse, and can consume
+its full apparent size on a filesystem without holes. Ordinary candidate/native
+requests retain a 30-minute execution budget; the mandatory C60 round-trip alone
+gets 2 hours because raw macOS/Windows virtual-device dumps are intentionally
+unbuffered. This is an orchestration allowance only: it does not permit batching,
+caching, fewer reads, changed cadence, skipped dumps, or relaxed byte equality. Capture payload/replay assets can exceed
 1 MiB: retain in CI/release assets with hashes, never commit them to the repo.
 
 Transport owns capture only; expectations/verdicts stay here. Actual no-op,

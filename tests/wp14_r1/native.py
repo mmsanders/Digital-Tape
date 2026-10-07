@@ -18,6 +18,9 @@ from catalog import MBR_FIELDS, COMMANDS
 
 def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
+DEFAULT_TRANSPORT_TIMEOUT = 1800
+C60_TRANSPORT_TIMEOUT = 7200
+
 def symbol_absent(binary, symbols):
     data=Path(binary).read_bytes()
     for name in SEAM_STRINGS: assert name.encode() not in data, name
@@ -286,7 +289,8 @@ def execute(transport,request,head_sha,evidence_dir):
     request['request_sha256']=hashlib.sha256(json.dumps(request,sort_keys=True).encode()).hexdigest()
     req.write_text(json.dumps(request,indent=2)+'\n')
     if out.exists(): out.unlink()
-    subprocess.run([*transport,str(req),str(out)],check=True,timeout=1800)
+    timeout=C60_TRANSPORT_TIMEOUT if request['case']=='native-roundtrip-c60.wav' else DEFAULT_TRANSPORT_TIMEOUT
+    subprocess.run([*transport,str(req),str(out)],check=True,timeout=timeout)
     response=json.loads(out.read_text()); capture_identity(request,response)
     assert response['head_sha']==head_sha
     assert response['binary_sha256']==digest(response['binary_path'])
