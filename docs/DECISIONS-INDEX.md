@@ -127,4 +127,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-168](DECISIONS.md#adr-168--retain-thirty-second-copy-and-queue-the-software-performance-framework) | 2026-10-07 | Retain <30 s copy; Software framework queued | Urgent read recovery first, real overlap design, WP14 reuse, bounded #405 planning; no code/spec issuance |
 
-105 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-169](DECISIONS.md#adr-169--issue-the-read-only-playback-exception-and-preserve-separate-write-gates) | 2026-10-07 | Read-only playback scope issued | Source-independent bounds, tests first, WP14 accepted-engine pin pending; writes/async separate |
+
+106 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
