@@ -122,4 +122,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-166](DECISIONS.md#adr-166--wp14-throughput-triage-preserve-criteria-stop-unchanged-timeout-reruns-discuss-remedies) | 2026-10-07 | WP14 throughput triage | Preserve criteria; stop unchanged native-timeout reruns; playback/transfer/cadence remedies await discussion |
 
-103 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-167](DECISIONS.md#adr-167--performance-recommendation-burst-reuse-transaction-durability-and-firmware-energy) | 2026-10-07 | Revised performance recommendation | Burst reuse plus CPU bounds; transaction durability; optional copy/raw-destination simplification; firmware energy; no normative change |
+
+104 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

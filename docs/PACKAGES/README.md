@@ -60,8 +60,8 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-17 | Teensy firmware skeleton, engine integration | Agent | 4 | Blocked |
-| WP-18 | Dual card, hot-swap detect, copy with LED row | Either | 4 | Blocked |
+| WP-17 | Teensy firmware skeleton, engine integration | Agent | 4 | Blocked. ADR-167 [energy review](../PERFORMANCE-REVIEW.md): on resume, measure burst service / I²S DMA scheduling, CPU idle waits and clock choices; preserve warm wake and exact audio. Scrub at 12× gives only ~31 ms in 64 KiB. Record energy and worst latency; no current-phase activation |
+| WP-18 | Dual card, hot-swap detect, copy with LED row | Either | 4 | Blocked. ADR-167: copy-time planning must add read and write time unless transfers truly overlap; 635 MB at 25 MB/s each is at least 50.8 s sequential. Compare measured sequential/overlap designs before adopting a relaxed copy limit; current <30 s guardrail stands |
 | WP-19 | Line-in, mic, gain staging, output limit | Either | 4 | Blocked |
 | WP-20 | Button matrix, solenoid driver, interlock | You | 4 | Blocked on WP-04 |
 | WP-21 | Bench acceptance demo | Either | 4 | Blocked |
@@ -85,9 +85,9 @@ Hardware is parked through Phase 2 (#309, ADR-160); Phase 3 is where it resumes.
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-26 | Schematic capture and review | Agent | hardware | No schematic yet; codec architecture recorded in board-rev-a.md; fabrication/charging safety gate remains CLOSED. **#379 (Michael, 4 Oct): SDR50 at 1.8 V becomes the primary card bus, High Speed 4-bit at 3.3 V the fallback.** On resume, Hardware revises `board-rev-a.md` (fit the 1.8 V parts, whose footprints exist; SDR50 becomes the primary gate, superseding ADR-113's gate order), rechecks the thermal budget at SDR50, and sends Software a change list (CLAUDE.md §5). Parked with hardware |
+| WP-26 | Schematic capture and review | Agent | hardware | No schematic yet; codec architecture recorded in board-rev-a.md; fabrication/charging safety gate remains CLOSED. **#379 (Michael, 4 Oct): SDR50 at 1.8 V becomes the primary card bus, High Speed 4-bit at 3.3 V the fallback.** On resume, Hardware revises `board-rev-a.md` (fit the 1.8 V parts, whose footprints exist; SDR50 becomes the primary gate, superseding ADR-113's gate order), rechecks the thermal budget at SDR50 (including playback during copy, which the current thermal model excludes but engine-api §10 supports), and sends Software a change list (CLAUDE.md §5). Parked with hardware |
 | WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not started — results format now fixed by ADR-118 |
-| WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked. #379 firmware-port work: drive the 1.8 V rail and CMD11 voltage switch, power ordering (`+3V3` before `+1V8`), re-initialise signalling after a slot power cycle, and automatic fallback to High Speed if CMD11 or tuning fails; all in the port (`engine/port/dev_sd.c`), none in the engine. Copy throughput depends on Q-P2-1 ([plan §5](../PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379)). Measure cold instant-on and commit latency in the shipping bus mode |
+| WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Blocked. #379 firmware-port work: drive the 1.8 V rail and CMD11 voltage switch, power ordering (`+3V3` before `+1V8`), re-initialise signalling after a slot power cycle, and automatic fallback to High Speed if CMD11 or tuning fails; all in the port (`engine/port/dev_sd.c`), none in the engine. Copy throughput depends on Q-P2-1 ([plan §5](../PHASE2-PLAN.md#5-q-p2-1--copy-throughput-and-the-one-block-call-shape-from-379)). Measure cold instant-on and commit latency in the shipping bus mode. ADR-167: audit USDHC DMA completion/CPU idle waits, DMA-accessible memory/cache ownership, rate-aware refill deadlines and checkpoint flash wear; measure playback energy/hour and copy energy/C60. Preserve <200 ms commit unless formally revised; details in the [performance review](../PERFORMANCE-REVIEW.md) |
 | WP-29 | Bring-up and rev B | Either | 5 | Blocked |
 | WP-30 | Power budget and runtime validation | Either | 5 | Blocked |
 | WP-37 | Thermal validation and abuse | Either | 5 | Blocked — results format now fixed by ADR-118 |
