@@ -3143,3 +3143,40 @@ prioritized with existing work; he explicitly rejects relaxing the copy limit.
 **Cost to reverse.** Queue/design-doc change only. No cartridge migration or
 frozen byte changes. A future contrary copy-time proposal needs new evidence
 and Michael's decision; the withdrawn option is not an implied fallback.
+
+
+## ADR-169 — Issue the read-only playback exception and preserve separate write gates
+
+**Date:** 2026-10-07 · **Owner:** PM #384, Michael's #405 return-review activation.
+**Inputs:** Product main `4ec0b3c81c9ada0b327112bc16b9d9faf4ee835a`;
+Software design `76d4eeee33daea429f91f7dadc57516d2de265a9`, published by #407.
+**Authority:** [playback performance addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md).
+
+**Disposition.** #405 supplies the requested design deliverables. Accept the design
+direction, not implementation, ABI issuance or independent acceptance. The read-only
+fix is ready for verifier-first work; no write-model dependency holds it. Correct
+the proposed small-budget callback edge allowance in the issued envelope so it
+subdivides consistently with the allowed edge blocks. Verification preflight owns
+feasibility/conflict findings before implementation, never fitted thresholds.
+
+**Decision.**
+1. Issue only read buffering/refill/mapping and necessary content invalidation.
+   Preserve frozen DRAFT-10 bytes, signatures, exact render arithmetic, resources,
+   recording writes/barriers and all goldens/replays. This is a supplementary
+   performance requirement and Phase2 scope exception, not a frozen spec revision.
+2. Amend Phase2 exclusions and WP14 A8 to the separately accepted/integrated
+   playback engine-tree pin. Pin remains PENDING until exact-head disposition;
+   WP14 adds no engine change of its own.
+3. Route public contract/preflight/test publication in existing Verification #146,
+   before implementation, then direct exact-head disposition and authorized
+   integration. Preserve #392/#390's evidence and direct WP14 handoff.
+4. Serial contiguous copy is the next baseline design; opt-in async completion is
+   the preferred overlap direction only. Its exact ABI/funnels and write model
+   are unissued. Recording cadence/checkpoint work remains separate; target
+   controller/energy/SDR50 proof remains parked in WP17/18/28.
+5. No package rung advances, no timeout/caching substitution, no write batching,
+   no physical/card qualification or Windows 10 waiver. <30 s target copy remains.
+
+**Reversal cost.** Documentation and independently authored tests only until the
+implementation tranche. A true conflict with frozen behavior returns to PM for
+explicit amendment; this exception cannot silently revise the frozen contract.
