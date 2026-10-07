@@ -3108,3 +3108,38 @@ These are design/contract deductions; no new execution, media or energy result i
 **Cost to reverse.** A recommendation and roadmap update only. Adopting an option
 requires its precise contract delta, independent coverage and final qualification.
 No code, on-media bytes, accepted evidence or guardrail changes in this publication.
+
+## ADR-168 — Retain thirty-second copy and queue the Software performance framework
+
+**Date:** 2026-10-07 · **Owner:** PM #384 · **Intake:** #404.
+**Input main:** `9b300a8c4ef9b05bdcacceec7bb27a09254891d5`.
+**Authority:** Michael requests a Software framework including read/write overlap,
+prioritized with existing work; he explicitly rejects relaxing the copy limit.
+**Framework:** [software performance plan](PERFORMANCE-PLAN.md).
+**Supersedes:** ADR-167's optional copy-limit relaxation, not its safety holds.
+
+**Decision.**
+1. Keep guardrail 10: whole-C60 copy <30 s on target. A serial 25 MB/s lower bound
+   is not evidence that the requirement is infeasible. Plan real read/write
+   overlap on the two-controller architecture; no achieved speed is claimed.
+2. Software #405 is the active bounded design-preparation task, ahead of unchanged
+   blocked WP14 reruns. Its first deliverable is the smallest read-only recovery
+   boundary; wider architecture questions cannot hold that section hostage.
+3. Sequence urgent playback reuse/burst refills, then WP14 completion, with
+   transfer/overlap and recording-finalization follow-ons separately gated.
+   Do not wait for the expanded write model to fix the read-only defect.
+4. Preserve #392/#390's existing port/binding work and #146's independent
+   disposition ownership. No duplicate WP14 assignment. Relevant contract
+   preflight/coverage planning belongs in the existing Verification queue;
+   it must not inspect uncovered engine implementation.
+5. The framework mandates neither an asynchronous ABI nor an internal data
+   structure. Software identifies ownership, bounded concurrency, completion,
+   error and fallback semantics; PM issues actual contract deltas before code.
+   Test-first ordering and frozen-signature authority remain.
+6. Firmware/energy and shipping-card proof remain WP17/18/28 roadmap items.
+   Hardware stays parked. No raw device test, purchase, product-code change,
+   golden regeneration, acceptance waiver or implementation authorization here.
+
+**Cost to reverse.** Queue/design-doc change only. No cartridge migration or
+frozen byte changes. A future contrary copy-time proposal needs new evidence
+and Michael's decision; the withdrawn option is not an implied fallback.

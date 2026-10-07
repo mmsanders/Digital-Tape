@@ -61,7 +61,7 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
 | WP-17 | Teensy firmware skeleton, engine integration | Agent | 4 | Blocked. ADR-167 [energy review](../PERFORMANCE-REVIEW.md): on resume, measure burst service / I²S DMA scheduling, CPU idle waits and clock choices; preserve warm wake and exact audio. Scrub at 12× gives only ~31 ms in 64 KiB. Record energy and worst latency; no current-phase activation |
-| WP-18 | Dual card, hot-swap detect, copy with LED row | Either | 4 | Blocked. ADR-167: copy-time planning must add read and write time unless transfers truly overlap; 635 MB at 25 MB/s each is at least 50.8 s sequential. Compare measured sequential/overlap designs before adopting a relaxed copy limit; current <30 s guardrail stands |
+| WP-18 | Dual card, hot-swap detect, copy with LED row | Either | 4 | Blocked. ADR-167: copy-time planning must add read and write time unless transfers truly overlap; 635 MB at 25 MB/s each is at least 50.8 s sequential. ADR-168 rejects relaxing <30 s; [framework](../PERFORMANCE-PLAN.md) plans bounded read/write overlap with two owned buffers, completion/error handling and safe fallback. Target implementation/measurement remains parked |
 | WP-19 | Line-in, mic, gain staging, output limit | Either | 4 | Blocked |
 | WP-20 | Button matrix, solenoid driver, interlock | You | 4 | Blocked on WP-04 |
 | WP-21 | Bench acceptance demo | Either | 4 | Blocked |

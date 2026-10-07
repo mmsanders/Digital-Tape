@@ -124,4 +124,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-167](DECISIONS.md#adr-167--performance-recommendation-burst-reuse-transaction-durability-and-firmware-energy) | 2026-10-07 | Revised performance recommendation | Burst reuse plus CPU bounds; transaction durability; optional copy/raw-destination simplification; firmware energy; no normative change |
 
-104 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+
+| [ADR-168](DECISIONS.md#adr-168--retain-thirty-second-copy-and-queue-the-software-performance-framework) | 2026-10-07 | Retain <30 s copy; Software framework queued | Urgent read recovery first, real overlap design, WP14 reuse, bounded #405 planning; no code/spec issuance |
+
+105 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
