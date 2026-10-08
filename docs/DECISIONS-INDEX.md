@@ -135,4 +135,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-172](DECISIONS.md#adr-172--resolve-p2read-002-with-a-preserved-read-optimized-transcript-binding) | 2026-10-08 | P2READ-002 binding issued | Six audited suites, exact-engine epoch; historical bytes/replay preserved; restore causal gates; no acceptance |
 
-109 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-173](DECISIONS.md#adr-173--resolve-p2read-003-with-one-final-required-pr-qualification-run) | 2026-10-08 | P2READ-003 final execution issued | Independent binding/mutations pass; one final existing PR qualification ALL run authorized, READ-1 carriage preserved |
+
+110 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.

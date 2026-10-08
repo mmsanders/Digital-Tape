@@ -66,6 +66,18 @@ Other suites retain their existing bindings.
    emitted evidence. A later engine or substantive adapter change needs a precise
    disposition; this is no general license to regenerate accepted baselines.
 
+## Final PR execution clarification — ADR-173
+
+P2READ-003 is resolved by explicit authority for one normal final replacement-PR
+qualification ALL run, including the twelve unchanged finite member blocks and the
+changed mutation member listed in ADR-173. Existing named checks, classifier, complete
+matrices and lane verdicts remain required; no general qualification carriage or skip
+is issued. This supersedes earlier no-repeat directions only for that final required
+PR run. Selected cheap/regression and binding checks execute normally. READ-1's
+already approved identity/canonical carriage and existing full-campaign guard remain;
+no duplicate full READ-1 C60 or unchanged WP14 native-timeout campaign is requested.
+No local duplicate campaign; retry only failed/missing necessary jobs with a reason.
+
 ## Acceptance and unchanged holds
 
 All verifier changes precede engine changes in a clean replacement's import history.
