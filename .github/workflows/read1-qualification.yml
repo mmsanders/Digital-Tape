@@ -109,7 +109,7 @@ jobs:
           head=$(git rev-parse HEAD)
           tar -czf "$RUNNER_TEMP/readopt-final.tar.gz" -C "$RUNNER_TEMP" readopt-final
           sha256sum "$RUNNER_TEMP/readopt-final.tar.gz" > "$RUNNER_TEMP/readopt-final.SHA256SUMS"
-          gh release create "evidence-readopt-415-$head" --target "$head" --title "READOPT-D10-1 binding evidence $head" --notes "Actual replacement-head bindings, historical replay and causal mutation observations. Independent final READ-2 and all required CI remain necessary." "$RUNNER_TEMP/readopt-final.tar.gz" "$RUNNER_TEMP/readopt-final.SHA256SUMS"
+          gh release create "evidence-readopt-415-$head-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --target "$head" --title "READOPT-D10-1 binding evidence $head" --notes "Actual replacement-head bindings, historical replay and causal mutation observations. Independent final READ-2 and all required CI remain necessary." "$RUNNER_TEMP/readopt-final.tar.gz" "$RUNNER_TEMP/readopt-final.SHA256SUMS"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
