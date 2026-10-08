@@ -1,0 +1,6 @@
+{
+  "mutations": 7,
+  "baseline": "green",
+  "benign": "survived",
+  "note": "actual logs and unchanged oracle execution require independent final audit"
+}

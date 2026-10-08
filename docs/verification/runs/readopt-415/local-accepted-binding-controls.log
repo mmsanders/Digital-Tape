@@ -1,0 +1,39 @@
+baseline ok  crossrun_wp08_adapter
+killed       crossrun_wp08_adapter observation: differs from the committed retained evidence
+killed       crossrun_wp08_adapter provenance: retained provenance names engine
+PASS {'edits': 10000, 'checkpoints': 25, 'modes': {'overwrite': 3334, 'overdub': 3333, 'splice': 3333}, 'plan_sha256': 'c41c8159862c40b759e059c3ed57b43ee94fd40ef7cb89f060fa5044d67be19c', 'final_pcm_sha256': '833b2acefd768533e85c57c495ad55907014e1e9faea832aa29df9ec308f7e3a'}
+current engine/ tree d96b4245e04d74078f8938744b1394c3018516f7
+replayed retained evidence 699876471e1fa95ad63b3f36f2a33c191ab3fbd975b5cc60f8aaadad42afb1b4
+make: Entering directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/engine'
+make: Nothing to be done for 'all'.
+make: Leaving directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/engine'
+make: Entering directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/tests/history_wp09_adapter'
+make: Nothing to be done for 'all'.
+make: Leaving directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/tests/history_wp09_adapter'
+PASS {'edits': 10000, 'checkpoints': 25, 'modes': {'overwrite': 3334, 'overdub': 3333, 'splice': 3333}, 'plan_sha256': 'c41c8159862c40b759e059c3ed57b43ee94fd40ef7cb89f060fa5044d67be19c', 'final_pcm_sha256': '833b2acefd768533e85c57c495ad55907014e1e9faea832aa29df9ec308f7e3a'}
+current engine/ tree d96b4245e04d74078f8938744b1394c3018516f7
+adapter emitted 10000 edit records; plan has 10000
+
+baseline ok  history_wp09_adapter
+killed history_wp09_adapter observation: exact regenerated raw stream
+killed history_wp09_adapter provenance: old archive/file identity build-identity.json
+baseline ok  sequential_wp06_adapter
+killed       sequential_wp06_adapter observation: differs from the committed retained evidence
+killed       sequential_wp06_adapter provenance: retained provenance names engine
+PASS {"adapter_kind": "product", "adapter_source_sha256": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120", "case_count": 27, "evidence_file": "observations.jsonl", "evidence_file_sha256": "30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58", "observations_sha256": "30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58", "oracle_sha256": "e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b", "plan_sha256": "620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278", "product_commit": "af109ed54bf2d410fef39f0d412e35dea8707d3b", "product_tree": "ae22b689e79b1dde8bfc39a2fc93dc8667e18b71", "replay_sha256": "da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6", "schema": "wp09-capacity-r52-manifest-v1", "scope": "offline observation replay; not Product acceptance unless adapter_kind=product", "spec_sha256": {"spec/acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d", "spec/engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6", "spec/tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d"}, "verdict": "PASS"}
+current engine/ tree d96b4245e04d74078f8938744b1394c3018516f7
+replayed retained evidence 30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58
+make: Entering directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/engine'
+make: Nothing to be done for 'all'.
+make: Leaving directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/engine'
+make: Entering directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/tests/capacity_wp09_adapter'
+make: Nothing to be done for 'all'.
+make: Leaving directory '/workspace/scratch/505d3b717d90/Digital-Tape-415/tests/capacity_wp09_adapter'
+PASS {"adapter_kind": "product", "adapter_source_sha256": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120", "case_count": 27, "evidence_file": "observations.jsonl", "evidence_file_sha256": "35435c591a40dbfe8bdbe261c5c2760e86280780b1c07069869ec5aa3cfaac9e", "observations_sha256": "35435c591a40dbfe8bdbe261c5c2760e86280780b1c07069869ec5aa3cfaac9e", "oracle_sha256": "e1cd2f715b3d7aca8a210f8ae00052ef5c7ea04d3c46d8d2aef5cac591ada56b", "plan_sha256": "620b89127250357738fd3f29fce75e99db464f38ddce797b74b9106d1f4ab278", "product_commit": "af109ed54bf2d410fef39f0d412e35dea8707d3b", "product_tree": "ae22b689e79b1dde8bfc39a2fc93dc8667e18b71", "replay_sha256": "da91b577917b9e7ae6bfdae44cb968495b831af68c931c53e99312a21efec3b6", "schema": "wp09-capacity-r52-manifest-v1", "scope": "offline observation replay; not Product acceptance unless adapter_kind=product", "spec_sha256": {"spec/acceptance.md": "ae77d13c868fd39a882b5bd3ebf459557792432ce895bc7bf58be7fc2c33825d", "spec/engine-api.md": "383817326705d98bda6a96480f8185e911113927d35c53c02d1458adb72baea6", "spec/tapefs-v1.md": "3f08ec6d11070c1e10edcf7cacbcd93ff694257f042b71b53200e158621fa19d"}, "verdict": "PASS"}
+current engine/ tree d96b4245e04d74078f8938744b1394c3018516f7
+adapter emitted 27 case records
+
+baseline ok  capacity_wp09_adapter
+killed capacity_wp09_adapter observation: exact regenerated raw stream
+killed capacity_wp09_adapter provenance: old archive/file identity build-identity.json
+8/8 regression-gate controls killed

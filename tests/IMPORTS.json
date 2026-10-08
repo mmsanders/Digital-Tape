@@ -882,6 +882,48 @@
         "manifest.json": "ddc48bc993059901b055a3616d51065b7de87af7e80c347ed7bb2f27203592c6"
       },
       "reason": "#359 binding of wp10_residue_d10 (17,025,380 injections) on the V10-001 engine; stream 7df707f197d9d944880af2b95932accc6ea8daca61a950f7161d34eda6a753ea, gzip is release asset evidence-p1-r60-wp10-residue/wp10-residue-d10-product-observations.jsonl.gz 473e5a1311ee1125923c03a3293acdb7e753508c01e974fa322edf2c8726cd7d. Awaiting Verification disposition."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/wp06-closure-package",
+      "files": {
+        "binding.json": "3f6c5dd449775c8154130e56f02b5c00ea8098ca59a8c72c8657004917de1cc5"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/wp08-mapping-r56-package",
+      "files": {
+        "binding.json": "73f04e35fcc6c65d8b6d256290f41b4f2072c5cf64355f5c2538cd1d34c76f65"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/strengthen-r55-package",
+      "files": {
+        "binding.json": "014273972259e8fd6deec36d08649a33d821650ac146daa24fa652d331c3e512"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/capacity-wp09-package",
+      "files": {
+        "binding.json": "788d2ae91092707af681e3b7f5b1866e577eaad0697530c3914494d8f92de36f"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/history-wp09-package",
+      "files": {
+        "binding.json": "7f1c867f318666c679066905cde25a43f18f79a902ec1e39a2b40b73035b0836"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/record-package",
+      "files": {
+        "binding.json": "7ce7904f56f05f569b6fdd0942ff010f9e4a8f0e4d0f1ba1abca9d83f2172a16"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
     }
   ]
 }

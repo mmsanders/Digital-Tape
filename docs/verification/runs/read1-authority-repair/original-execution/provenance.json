@@ -1,0 +1,43 @@
+{
+  "product_commit": "dfe426d4569a53c64558ca84e24cb41881521821",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "import_tree": "f8b67c549499bea8d05ade53f7f49fcf3a356131",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+  "flags": [
+    "-std=c99",
+    "-Os",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fno-common",
+    "-g",
+    "-fPIC"
+  ],
+  "observed_define": "TAPE_READ1_OBSERVE",
+  "sources": {
+    "engine/src/chunks.c": "bd98663bdc0e327c9609416684528c49622a68a4b81039a67f1aed1bfd09d48b",
+    "engine/src/commit.c": "e4e553317ca37d76f98e9c7260d7d4b12bc018a6db74bb239ec8f8c7a3a797b9",
+    "engine/src/crc32.c": "8446f189143beceaa2e3601e44b6cc8db8d33a15e602fb5c76bde9f9ef62ea68",
+    "engine/src/mount.c": "dbd21e114b2ef7ba9cc911f340329ca3cddc242ea56498adf7bb865ed6789806",
+    "engine/src/ops.c": "14982331204831e3c93ab0987fe9c3bbba02c24ecc568ca1cc124342de6aaf7f",
+    "engine/src/play.c": "f3c2ea1f3f0feb45afd00870e8c0186c9c515afccc94510af7745619a10395cc",
+    "engine/src/promote.c": "b63d624dcc90feb4a8676d3167a531294542e2bda3592f4da13ece87cde12534",
+    "engine/src/raw_ops.c": "5d13321231e5f72287f1e33b75eea86f5c2a6090762068cca70b22a2fbd596e6",
+    "engine/src/record.c": "8c64603f6020745a5f20f1d2cacd6edaa4578dccb27787a7b55c9a135c8c2680",
+    "engine/src/respool.c": "b6d44f1d5abe173dd9ca3a44937003e2cb5b6164acb569b280758fa719773ac5",
+    "engine/src/tapefs.c": "04b7c00a5622e751daa85438d09f62e36e27012d091b0aa4a23d19944a85f584",
+    "tests/playback_readonly_adapter/bridge.c": "08766bf2c3cf3c9838f62f48a514b88a7acf44ad367c3a051140031430a336b6",
+    "tests/playback_readonly_adapter/launcher.c": "39aa8fc2c4e52802b03369793613515db7b23328533c7194efbdca703e827392",
+    "tests/playback_readonly_adapter/adapter.py": "d68668c6e5ea163dd3ce3dcae052b0cdf41e1a378d9eba1735dbea2c2ee67e46",
+    "tests/playback_readonly_adapter/qualify.py": "888d41d64764bda0002831b1cf3a9398b89a995305bd08de4686828a2b370b32",
+    "engine/src/read1_observe.h": "4b1654cf120444e9179c015c236709b74d8d8c6b3fa2a45475fb448e67290763"
+  },
+  "instrumented_library_sha256": "82fb54b9b3597b51b22b2e842fec5c0ddc11edae1e9814b6b236e30d19d3bd0d",
+  "shipping_library_sha256": "dcc4680ba69591183f66aa8a4a8355e4a4b2504548ac6e69301d4bf7bf1d6175",
+  "baseline_library_sha256": "e875efdeb0ff0c36b755ad2de1874f615b0a2ad325e66f1d590e60aedbc4cd5f",
+  "baseline_commit": "9e902cf04b6d0c02363870fb9bc201e40239b509",
+  "baseline_engine_tree": "b80a8e54775c5aabad7bc338a6e30db3596b657b",
+  "adapter_sha256": "c8804df3b068ed1d20ff98f27daefb3891b554c7e8bd5486d6613334c50413ca",
+  "shipping_adapter_sha256": "e8848450a58679e5f6140328dcb51c9767587fdfc28a22518d2111f893192171",
+  "baseline_adapter_sha256": "d48de388fd11b94fafb417cd00c71ab2560dde0e424d9deb6bf67eb352937d29"
+}
