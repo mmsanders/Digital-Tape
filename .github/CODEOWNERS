@@ -62,3 +62,4 @@
 /spec/engine-api.md    @mmsanders
 /spec/acceptance.md    @mmsanders
 /spec/VERSION.md       @mmsanders
+/tests/playback_readonly_r1/          @mmsanders

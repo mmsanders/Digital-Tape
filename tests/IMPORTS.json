@@ -447,7 +447,7 @@
       "source_repo": "mmsanders/digital-tape-verification",
       "source_commit": "508ada857a5badf376da4428e87791333f1f0657",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "#130 verifier package (Verification #130, DRAFT-9): WP09.overdub.full_scale_saturation (3 cases: start, middle, straddle-end; every rail pair on both channels, engine-api §8 clamp and §11 append pass-through) and WP10.respool_render.trace_floor (V-R55-01, 5 fixtures over the accepted #118 row-3 observations: tapefs §8 per-commit floor and §9.4 commit count); case set 5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0; oracle SHA-256 f8909a5c886074cd2e9c6ab48b0635b56059a47f5efd78904439d0ade6180c3b, rows SHA-256 0396cbc6093eed61639bacb2a8cd3ee0baa2324fa9e488d56fb3a9c6cfb5936b, replay SHA-256 fa0b77b7eb2f2521c70e7c94b18ac6f7647a69124e3d054a9bff97c40578a81c, self-test SHA-256 0fe70eb4e53d9b0314a953391c8c1a6acb575c50ff1d635f82db57ffbc9f5582, pins SHA-256 689757c37bde14f78ff2bc9b484c48addccaf6d379d5e3147816eb9854cb5faf; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed, oracle.py db7509a9 and its synthetic evidence faf6d486) published at commit 508ada857a5badf376da4428e87791333f1f0657 (whole tree 42901094c14516fbfa90a7df46e94bd390b34378, parent ad9b6c23464f417be91fcf7e2baf477f5df703f3), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "attestation": "#130 verifier package (Verification #130, DRAFT-9): WP09.overdub.full_scale_saturation (3 cases: start, middle, straddle-end; every rail pair on both channels, engine-api \u00a78 clamp and \u00a711 append pass-through) and WP10.respool_render.trace_floor (V-R55-01, 5 fixtures over the accepted #118 row-3 observations: tapefs \u00a78 per-commit floor and \u00a79.4 commit count); case set 5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0; oracle SHA-256 f8909a5c886074cd2e9c6ab48b0635b56059a47f5efd78904439d0ade6180c3b, rows SHA-256 0396cbc6093eed61639bacb2a8cd3ee0baa2324fa9e488d56fb3a9c6cfb5936b, replay SHA-256 fa0b77b7eb2f2521c70e7c94b18ac6f7647a69124e3d054a9bff97c40578a81c, self-test SHA-256 0fe70eb4e53d9b0314a953391c8c1a6acb575c50ff1d635f82db57ffbc9f5582, pins SHA-256 689757c37bde14f78ff2bc9b484c48addccaf6d379d5e3147816eb9854cb5faf; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed, oracle.py db7509a9 and its synthetic evidence faf6d486) published at commit 508ada857a5badf376da4428e87791333f1f0657 (whole tree 42901094c14516fbfa90a7df46e94bd390b34378, parent ad9b6c23464f417be91fcf7e2baf477f5df703f3), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
       "selftest": [
         "python3",
         "-B",
@@ -491,6 +491,19 @@
         "python3",
         "-c",
         "import json; json.load(open('tests/wp11_ledgers_r63/ledger.json'))"
+      ]
+    },
+    {
+      "path": "tests/playback_readonly_r1",
+      "tree": "63098ee78ab67a0e12e9f414d2ad467276a77a8d",
+      "source_repo": "mmsanders/Digital-Tape-Verification",
+      "source_commit": "00f846cd9f3cdf43a0c51802b256b6ccc7f0bf2b",
+      "attested_in": "Digital-Tape-Verification PR #153; Product #412",
+      "attestation": "ADR-171 complete authority repair; executable package unchanged from #152; imported byte-identically before implementation",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/playback_readonly_r1/selftest.py"
       ]
     }
   ],
@@ -588,6 +601,10 @@
       {
         "path": "tests/embedded_readiness_draft9/spec",
         "revision": "DRAFT-9"
+      },
+      {
+        "path": "tests/playback_readonly_r1/authority",
+        "revision": "DRAFT-10"
       }
     ]
   },
