@@ -1,0 +1,516 @@
+{
+  "schema": "read1-census-v1",
+  "cases": [
+    {
+      "id": "cold-1-b1",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-1",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "cold-8193-b1",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-8193",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "cold-40001-b1",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-40001",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "cold-1-b2",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-1",
+      "mode": "traverse",
+      "budget": 2,
+      "side": "A"
+    },
+    {
+      "id": "cold-8193-b2",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-8193",
+      "mode": "traverse",
+      "budget": 2,
+      "side": "A"
+    },
+    {
+      "id": "cold-40001-b2",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-40001",
+      "mode": "traverse",
+      "budget": 2,
+      "side": "A"
+    },
+    {
+      "id": "cold-1-b7",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-1",
+      "mode": "traverse",
+      "budget": 7,
+      "side": "A"
+    },
+    {
+      "id": "cold-8193-b7",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-8193",
+      "mode": "traverse",
+      "budget": 7,
+      "side": "A"
+    },
+    {
+      "id": "cold-40001-b7",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-40001",
+      "mode": "traverse",
+      "budget": 7,
+      "side": "A"
+    },
+    {
+      "id": "cold-1-b64",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-1",
+      "mode": "traverse",
+      "budget": 64,
+      "side": "A"
+    },
+    {
+      "id": "cold-8193-b64",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-8193",
+      "mode": "traverse",
+      "budget": 64,
+      "side": "A"
+    },
+    {
+      "id": "cold-40001-b64",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-40001",
+      "mode": "traverse",
+      "budget": 64,
+      "side": "A"
+    },
+    {
+      "id": "cold-1-b1024",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-1",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "cold-8193-b1024",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-8193",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "cold-40001-b1024",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-40001",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "full-C60-b1024",
+      "row": "R1-volume-work",
+      "fixture": "contiguous-158760000",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "fragment-3-long-b1",
+      "row": "R1-volume-work",
+      "fixture": "fragment-3-long",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "fragment-3-long-b1024",
+      "row": "R1-volume-work",
+      "fixture": "fragment-3-long",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "fragment-128-short-b1",
+      "row": "R1-volume-work",
+      "fixture": "fragment-128-short",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "fragment-128-short-b1024",
+      "row": "R1-volume-work",
+      "fixture": "fragment-128-short",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "fragment-4096-short-b1",
+      "row": "R1-volume-work",
+      "fixture": "fragment-4096-short",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "fragment-4096-short-b1024",
+      "row": "R1-volume-work",
+      "fixture": "fragment-4096-short",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "fragment-4096-long-b1",
+      "row": "R1-volume-work",
+      "fixture": "fragment-4096-long",
+      "mode": "traverse",
+      "budget": 1,
+      "side": "A"
+    },
+    {
+      "id": "fragment-4096-long-b1024",
+      "row": "R1-volume-work",
+      "fixture": "fragment-4096-long",
+      "mode": "traverse",
+      "budget": 1024,
+      "side": "A"
+    },
+    {
+      "id": "rate-65536",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": 65536,
+      "side": "B"
+    },
+    {
+      "id": "rate--65536",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": -65536,
+      "side": "B"
+    },
+    {
+      "id": "rate-32768",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": 32768,
+      "side": "B"
+    },
+    {
+      "id": "rate--32768",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": -32768,
+      "side": "B"
+    },
+    {
+      "id": "rate-786432",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": 786432,
+      "side": "B"
+    },
+    {
+      "id": "rate--786432",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": -786432,
+      "side": "B"
+    },
+    {
+      "id": "rate-2147483647",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": 2147483647,
+      "side": "B"
+    },
+    {
+      "id": "rate--2147483648",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": -2147483648,
+      "side": "B"
+    },
+    {
+      "id": "rate-0",
+      "row": "R2-PCM-invalidation",
+      "fixture": "edges",
+      "mode": "rate",
+      "budget": 7,
+      "rate": 0,
+      "side": "B"
+    },
+    {
+      "id": "seek-covered",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "seek-covered",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "seek-uncovered",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "seek-uncovered",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "same-side",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "same-side",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "other-side",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "other-side",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "remount-changed",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "remount-changed",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "overwrite",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "overwrite",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "splice",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "splice",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "read-fail",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "read-fail",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "partial-read-fail",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "partial-read-fail",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "faulted-drain",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "faulted-drain",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "empty",
+      "row": "R2-PCM-invalidation",
+      "fixture": "empty",
+      "mode": "empty",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "budget-zero",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "budget-zero",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "lookahead",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "lookahead",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "wrap",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "wrap",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "beyond-end",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "beyond-end",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "idle-playing",
+      "row": "R3-idle-seam",
+      "fixture": "behavior",
+      "mode": "idle-playing",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "idle-stopped",
+      "row": "R3-idle-seam",
+      "fixture": "behavior",
+      "mode": "idle-stopped",
+      "budget": 1,
+      "side": "B"
+    },
+    {
+      "id": "warm-valid",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "valid",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-null-data",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "null-data",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-zero-frames",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "zero-frames",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-short-bytes",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "short-bytes",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-past-end",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "past-end",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-overflow",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "overflow",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-outside",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "outside",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-uuid",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "uuid",
+      "budget": 2,
+      "side": "B"
+    },
+    {
+      "id": "warm-side",
+      "row": "R2-PCM-invalidation",
+      "fixture": "behavior",
+      "mode": "warm",
+      "warm": "side",
+      "budget": 2,
+      "side": "B"
+    }
+  ],
+  "case_count": 59,
+  "rows": [
+    "R1-volume-work",
+    "R2-PCM-invalidation",
+    "R3-idle-seam"
+  ],
+  "required_product_controls": {
+    "whole-window-reread": "R1-volume-work",
+    "tiny-transfer": "R1-volume-work",
+    "full-index-rescan": "R1-volume-work",
+    "retained-movement": "R1-volume-work",
+    "stale-side": "R2-PCM-invalidation",
+    "stale-content": "R2-PCM-invalidation",
+    "stale-warm": "R2-PCM-invalidation",
+    "missing-lookahead": "R2-PCM-invalidation",
+    "budget-overrun": "R1-volume-work",
+    "idle-nine-loops": "R3-idle-seam",
+    "idle-mapping": "R3-idle-seam",
+    "invented-zero-seam": "R3-idle-seam"
+  },
+  "product_runs": 0
+}

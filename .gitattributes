@@ -49,3 +49,6 @@ tests/wp09_gaps_r56/**                 -text
 tests/golden/**                        -text
 tests/wp11_portability_r63/**          -text
 tests/wp11_ledgers_r63/**              -text
+
+tests/playback_readonly_r1/**          -text
+tests/playback_regression_epoch/**          -text
