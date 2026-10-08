@@ -133,4 +133,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-171](DECISIONS.md#adr-171--repair-read-1-authority-provenance-and-preserve-the-blocked-playback-candidate) | 2026-10-08 | READ-1 authority provenance repair | Missing frozen acceptance copy/pin; clean #412 import before implementation; preserve evidence; independent READ-2 pending |
 
-108 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-172](DECISIONS.md#adr-172--resolve-p2read-002-with-a-preserved-read-optimized-transcript-binding) | 2026-10-08 | P2READ-002 binding issued | Six audited suites, exact-engine epoch; historical bytes/replay preserved; restore causal gates; no acceptance |
+
+109 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
