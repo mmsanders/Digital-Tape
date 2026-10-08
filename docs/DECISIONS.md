@@ -3266,3 +3266,58 @@ or independent PASS. #409 closed at its blocker; #411 remains held.
 **Reversal cost.** Provenance-only publication and ordered replacement history.
 No accepted engine evidence is revoked; no oracle, frozen contract or acceptance
 waiver changes. Unexpected substantive deltas return for a precise disposition.
+
+
+## ADR-172 — Resolve P2READ-002 with a preserved read-optimized transcript binding
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's paired-return review.
+**Input main:** `30a74442741fa02d221d283ec0c601ab0c1cc646`.
+**Candidate:** Product #414 `a1b362268a53320e676359976593b2f01202ef13`;
+engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Independent review:** Verification #154 merged `a273355e8aa87b967ce66cf9f40e6a71e3ee9513`,
+findings/P2-R1-WP14-READ2-414-2026-10-08.md; publication CI 37824631013 PASS.
+**Authority:** [issued regression binding](PLAYBACK-REGRESSION-BINDING.md).
+
+**Disposition.** Uphold P2READ-002 and Verification's overall HELD result.
+Corrected authority import/order and original evidence carriage are independently
+admissible; full 59-case READ-1 replay, shipping equivalence, twelve actual controls,
+absence, resources and ten exact goldens pass within that boundary. No Product PASS,
+accepted-engine pin or physical throughput is established.
+
+All 10,162 observations across six retained suites (140 changed) preserve non-event
+fields and ordered write/flush facts; only read arrays/grouping/ordinals differ.
+The unchanged behavior oracles pass, including 10,000 history edits/25 checkpoints.
+No new PCM/media/write/flush regression is demonstrated. For C60 budget1024 the
+review confirms 1,240,313 payload blocks / 19,380 callbacks; target speed is unmeasured.
+Final engine CI 37804916698 remains red: six old raw baselines, accepted-binding
+regeneration and the benign mutation baseline, plus two aggregators. Those gates
+correctly prevent acceptance; Software and Verification did not silently amend them.
+
+**Decision.** Issue epoch READOPT-D10-1 for the exact engine above and only WP06
+closure, WP08 mapping, strengthening, WP09 capacity/history/record. The binding
+document fixes the six independently audited raw hashes/censuses. Preserve every
+historical accepted byte/hash/pin/disposition and required offline replay; add
+distinct truthful new paths/pins. Keep full raw exact regeneration against fixed
+new hashes, old/new transition identity, unchanged behavior/write/persistence/PCM
+oracles, goldens, causal controls and READ-1 volume/work/budget gates. No global event
+stripping/read ignoring, current-output baseline or moving-main selection.
+
+Verification #146 independently publishes the declaration/checker and binding
+controls before import; fresh Software #415 then owns a clean ordered replacement,
+mechanical evidence/CI plumbing and restored green baseline/causal mutation checks.
+Deliberate mutation selection retains actual mutant identity; identity failure or
+an already-red baseline cannot count as a behavior catch. No engine code change is
+licensed by this correction. Preserve #414 and carried execution identities.
+Direct #415 → #146 final exact-head disposition avoids a PM pass-through. Carry
+unchanged READ-1 evidence; no metadata-only full C60 duplicate.
+
+Only independent final-head PASS and all required green checks license Software's
+scoped integration; PM records A8 afterward, then original WP14 gate resumes.
+#399 remains unresolved; #390 merge is Michael-reserved. Frozen bytes, <30 s copy,
+write/async/recording and physical/Windows10/release/card/hardware holds survive.
+Phase1 36/36 and Phase2 2/12 unchanged.
+
+**Reversal cost.** Separate binding declaration and CI routing; old evidence remains
+available. Unsupported identities fail closed and broader behavioral deltas return
+for ruling. This remedies algorithm-specific transcript coupling without relaxing
+product behavior or accepting a failing mutation gate.

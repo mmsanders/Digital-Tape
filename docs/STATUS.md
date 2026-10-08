@@ -1,6 +1,6 @@
 # Project status
 
-**8 October 2026 UTC · input main `5e6d5fd` · Owner: PM (ADR-171; Software #409 blocked return reviewed) ·**
+**8 October 2026 UTC · input main `30a7444` · Owner: PM (ADR-172; Verification #154 / Software #414 reviewed) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 10 + current macOS;
-WP-38 not taken; operations freeze declared. **P2-R1 blocked** (#399): [WP-14 contract](WP14-CLI-CONTRACT.md) unchanged; 128× playback rereads block native C60; #390 not accepted.
+WP-38 not taken; operations freeze declared. **P2-R1 blocked** (#399): [WP-14 contract](WP14-CLI-CONTRACT.md) unchanged; read-only remedy independently reviewed but held on retained binding; #390 not accepted.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | WP-14 #390 `dbe6283` not disposed; complete authored verifier package `56e25cc1` imported. Run `37560629496`: images all CI platforms/native Linux pass; native Mac/Server2025 C60 times out, census skipped. Physical/Windows10 holds | READ-1 #152 `e5ee160` complete authored; #411 `dfe426d` held on authority provenance. #146 repairs missing frozen acceptance copy/pin → #412 clean import/implementation → independent READ-2; WP14 after accepted pin |
+| Phase 2 / P2-R1 | — | WP-14 #390 `dbe6283` not disposed; complete authored verifier package `56e25cc1` imported. Run `37560629496`: images all CI platforms/native Linux pass; native Mac/Server2025 C60 times out, census skipped. Physical/Windows10 holds | Authority repair complete. #154 `a273355` independently confirms #414 `a1b3622` READ-1 carriage/59 cases; READ-2 HELD on P2READ-002. #146 epoch publication → #415 clean binding/causal gates → final READ-2; WP14 after accepted pin |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; produced-card OS readability still held | Verification #146; Michael #386 |
 | Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | [ADR-168 framework](PERFORMANCE-PLAN.md); retain <30 s; design #405 reviewed; async ABI unissued; model before write changes |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **I/O performance (#399/#379).** C60 side: ~81.3 GB read for 635 MB audio (128×); firmware impact inferred. Dup: ~1.24M reads/writes; load: 155048 flushes. [ADR-168 plan](PERFORMANCE-PLAN.md): urgent burst reuse; contiguous transfers and true overlap; <30 s retained. ADR-170 finite bounds issued. ADR-171 repairs READ-1 authority provenance; #411 unaccepted, finite qualification pending; engine pin pending.
+5. **I/O performance (#399/#379).** Old C60 side: ~81.3 GB read for 635 MB audio (128×). #154 independently confirms candidate budget1024: 1,240,313 payload blocks / 19,380 callbacks; no target-speed proof. Dup: ~1.24M reads/writes; load: 155048 flushes. [ADR-168 plan](PERFORMANCE-PLAN.md): urgent burst reuse; contiguous transfers and true overlap; <30 s retained. ADR-170 finite bounds issued. ADR-172 issues six-suite exact transcript epoch with historical evidence preserved; #414 HELD on required binding/mutation gates; engine pin pending.
 6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
