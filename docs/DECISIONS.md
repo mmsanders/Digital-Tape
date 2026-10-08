@@ -3219,3 +3219,50 @@ rung advances. No new acknowledgement-only round or duplicate verification issue
 **Reversal cost.** Public test-authoring criterion only before Product changes.
 A later change needs a precise ruling and provenance; paper checkpoint CI supplies
 no engine acceptance.
+
+
+## ADR-171 — Repair READ-1 authority provenance and preserve the blocked playback candidate
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's latest Software-review activation.
+**Input main:** `5e6d5fd6cfce64031ba12b37fc367145b5fe18dd`.
+**Independent authored publication:** Verification #152 merge
+`e5ee1608faa4ad0c15774e8155ddf32164355f1a`, subtree
+`f8b67c549499bea8d05ade53f7f49fcf3a356131`; publication CI 37703126775 PASS.
+**Blocked candidate:** Software #409 / held #411 head
+`dfe426d4569a53c64558ca84e24cb41881521821`, engine tree
+`d96b4245e04d74078f8938744b1394c3018516f7`; import-only `98ba8f54a7c55678312470520988eb2f307b8dad`.
+
+**Disposition.** READ-1 supplies 59 cases across three meaningful rows and twelve
+actual Product defect controls. Its author self-checks are not Product acceptance.
+Software's local regression/equivalence/control results are lead-owned observations.
+Evidence-integrity run 37799314255 authenticates import identity/order but rejects
+the undeclared authority spec-copy root; declaring it alone still lacks frozen
+acceptance.md. The existing complete-triple gate correctly detects this provenance
+defect. Neither this failure nor the pending finite run establishes playback failure
+or independent PASS. #409 closed at its blocker; #411 remains held.
+
+**Decision.**
+1. Existing Verification #146 publishes the missing exact frozen acceptance.md and
+   input pin only, preserving the complete authored oracle/schema/cases/controls.
+   Merge to verification main with green publication CI and route directly to
+   fresh Software #412. No gate weakening or criterion amendment.
+2. #412 starts from current main with corrected import-only commit before the
+   preserved implementation/binding; declare its spec-copy root. Preserve #411's
+   original head and observations. A concrete replacement may supersede it.
+3. Let finite qualification 37799314742 and retained engine CI 37799314356 finish;
+   retain outputs. No cancellation, duplicate campaign or routine full-C60 rerun
+   for provenance metadata. Carry observations only if canonical rules and exact
+   engine/adapter/build/observation identities permit, retaining their executed head.
+   Otherwise identify the precise necessary final coverage; never relabel old runs.
+4. #146 READ-2 independently disposes #412's final exact head, actual observations,
+   causal controls and required regression/resource/golden/seam gates. Only that
+   PASS and green checks license #412's scoped integration; PM records the accepted
+   engine pin afterward. No code review or product merge by PM.
+5. WP14 #392/#390 remains held; A8 pin PENDING. Preserve frozen DRAFT-10, <30 s
+   target copy, physical/Windows10/release/card holds and Michael-reserved #390 merge.
+   Write/async/recording contracts remain unissued; hardware stays parked.
+   Phase1 36/36 and Phase2 2/12 remain unchanged.
+
+**Reversal cost.** Provenance-only publication and ordered replacement history.
+No accepted engine evidence is revoked; no oracle, frozen contract or acceptance
+waiver changes. Unexpected substantive deltas return for a precise disposition.
