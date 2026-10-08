@@ -1,0 +1,384 @@
+{
+  "shipping": {
+    "layers": 3,
+    "translation_units": 11,
+    "marker_hits": []
+  },
+  "causal_leak_control": {
+    "layers": 3,
+    "translation_units": 11,
+    "marker_hits": [
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 443
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 444
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 445
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 758
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 759
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/mount.i",
+        "line": 819
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 467
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 468
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 469
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 618
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 622
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 643
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 644
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 662
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 664
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 665
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 666
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 692
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 693
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 694
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 696
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 697
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 698
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 700
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 729
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 745
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 746
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 747
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 748
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 749
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 750
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 751
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 752
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 753
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 803
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/play.i",
+        "line": 814
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/record.i",
+        "line": 443
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/record.i",
+        "line": 444
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/record.i",
+        "line": 445
+      },
+      {
+        "layer": "preprocess",
+        "file": "build/instrumented/record.i",
+        "line": 766
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 33
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 34
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 1368
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 1440
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 2336
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 2339
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/mount.object.txt",
+        "line": 2505
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 25
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 26
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 1611
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 1722
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 1819
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2075
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2109
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2233
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2251
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2307
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2335
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2353
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2385
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2436
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2502
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2507
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2585
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2684
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/play.object.txt",
+        "line": 2693
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/record.object.txt",
+        "line": 29
+      },
+      {
+        "layer": "object",
+        "file": "build/instrumented/record.object.txt",
+        "line": 2177
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/engine.map",
+        "line": 293
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/engine.map",
+        "line": 523
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/engine.map",
+        "line": 524
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/link-symbols.txt",
+        "line": 128
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/link-symbols.txt",
+        "line": 129
+      },
+      {
+        "layer": "link",
+        "file": "build/instrumented/link-symbols.txt",
+        "line": 130
+      }
+    ]
+  },
+  "disposition": "READ2 covered-site/build audit also required"
+}
