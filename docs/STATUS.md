@@ -1,6 +1,6 @@
 # Project status
 
-**7 October 2026 UTC · input main `1f42851` · Owner: PM (ADR-170 P2READ-001; Verification #151 reviewed) ·**
+**8 October 2026 UTC · input main `5e6d5fd` · Owner: PM (ADR-171; Software #409 blocked return reviewed) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | WP-14 #390 `dbe6283` not disposed; complete authored verifier package `56e25cc1` imported. Run `37560629496`: images all CI platforms/native Linux pass; native Mac/Server2025 C60 times out, census skipped. Physical/Windows10 holds | Verification #146 READ-1 complete publication (partial #151 f02f9b6 preserved; ADR-170 finite bounds); then #409; WP14 after accepted pin |
+| Phase 2 / P2-R1 | — | WP-14 #390 `dbe6283` not disposed; complete authored verifier package `56e25cc1` imported. Run `37560629496`: images all CI platforms/native Linux pass; native Mac/Server2025 C60 times out, census skipped. Physical/Windows10 holds | READ-1 #152 `e5ee160` complete authored; #411 `dfe426d` held on authority provenance. #146 repairs missing frozen acceptance copy/pin → #412 clean import/implementation → independent READ-2; WP14 after accepted pin |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; produced-card OS readability still held | Verification #146; Michael #386 |
 | Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | [ADR-168 framework](PERFORMANCE-PLAN.md); retain <30 s; design #405 reviewed; async ABI unissued; model before write changes |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **I/O performance (#399/#379).** C60 side: ~81.3 GB read for 635 MB audio (128×); firmware impact inferred. Dup: ~1.24M reads/writes; load: 155048 flushes. [ADR-168 plan](PERFORMANCE-PLAN.md): urgent burst reuse; contiguous transfers and true overlap; <30 s retained. ADR-170 finite mapping/idle criteria resolve #151 preflight finding; tests first; engine pin pending.
+5. **I/O performance (#399/#379).** C60 side: ~81.3 GB read for 635 MB audio (128×); firmware impact inferred. Dup: ~1.24M reads/writes; load: 155048 flushes. [ADR-168 plan](PERFORMANCE-PLAN.md): urgent burst reuse; contiguous transfers and true overlap; <30 s retained. ADR-170 finite bounds issued. ADR-171 repairs READ-1 authority provenance; #411 unaccepted, finite qualification pending; engine pin pending.
 6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
