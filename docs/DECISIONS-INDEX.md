@@ -131,4 +131,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-170](DECISIONS.md#adr-170--resolve-p2read-001-with-finite-mapping-and-idle-work-bounds) | 2026-10-07 | P2READ-001 resolved | Finite setup/traversal/seek/episode and idle criteria; partial preflight preserved, resume READ-1 |
 
-107 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-171](DECISIONS.md#adr-171--repair-read-1-authority-provenance-and-preserve-the-blocked-playback-candidate) | 2026-10-08 | READ-1 authority provenance repair | Missing frozen acceptance copy/pin; clean #412 import before implementation; preserve evidence; independent READ-2 pending |
+
+108 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
