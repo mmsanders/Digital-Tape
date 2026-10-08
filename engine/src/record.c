@@ -37,6 +37,7 @@
 #include <string.h>
 
 #include "tape_internal.h"
+#include "read1_observe.h"
 #include "dev.h"
 
 /* Frames per 512-byte block; physical frames are contiguous within a chunk. */
@@ -582,8 +583,14 @@ tape_result tape_commit(tape *t)
 
     /* The timeline moved under the play ring, so what it holds no longer maps
        to the window it claims. tape_render owes the caller a tape_service. */
+#ifdef TAPE_READ1_OBSERVE
+    if (!TAPE_READ1_CONTROL("stale-content")) {
+#endif
     t->play_ring_valid = false;
     t->play_frames     = 0u;
+#ifdef TAPE_READ1_OBSERVE
+    }
+#endif
     if ((t->position_frame >> 32) > idx->total_frames) {
         t->position_frame = idx->total_frames << 32;
     }
