@@ -3321,3 +3321,67 @@ Phase1 36/36 and Phase2 2/12 unchanged.
 available. Unsupported identities fail closed and broader behavioral deltas return
 for ruling. This remedies algorithm-specific transcript coupling without relaxing
 product behavior or accepting a failing mutation gate.
+
+
+## ADR-173 — Resolve P2READ-003 with one final required PR qualification run
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's “You're up!” activation.
+**Input main:** `3da384bda1eb0c82e51a7adcd7c47156e6c3d494`.
+**Concrete candidate:** `557728ac548ddc13bf745ff1df9002d3f390f498`,
+root `4f3bb3e7d5dd3b865755ef3e51f248d2e685de8b`,
+engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Independent review:** Verification #156 merged `3781f123c3120f60462c5726d8392556963e9e83`,
+findings/P2-R1-WP14-READ2-415-2026-10-08.md; publication CI 37847118545 PASS.
+
+**Disposition.** Uphold the binding repair's independent PASS boundary and overall
+READ-2 HELD. Six baseline/six benign raw streams, preserved historical replay,
+all seven actual causal behavior mutation catches, eight accepted-binding controls,
+admissible READ-1 carriage and resources/goldens pass. Lossless actual final-head
+release authenticates to `e5e8e2c9c8ca92498e2783406f5dae7fc3071b270a06e9fa2609a4b7b271064c`.
+No replacement PR/all-required-PR green or Product acceptance exists.
+
+P2READ-003 is valid and is a PM instruction conflict: #415 prohibited unchanged
+qualification repetition while demanding every required final check green, without
+issuing a general carriage method. The unchanged classifier correctly selects ALL.
+Twelve of thirteen qualification member blocks are unchanged; the changed mutation
+campaign actually ran green. Old #414's whole run remains red, never a carried PASS.
+
+**Decision.** Choose Verification's explicit-rerun alternative. Authorize exactly
+one normal final replacement-PR qualification ALL run, including unchanged finite
+campaigns. This narrowly supersedes #415/ADR-172's no-repeat direction for required
+final PR validation. Retain current classifier, job names, matrices, lane verdicts
+and criteria; no new qualification-carriage protocol/checker or waiver is issued.
+
+The exhaustive members are allocator-cow-package, wp36-fuzz-package,
+format-dup-identity-package, promote-package, crash-core-package, wp10-final-package,
+wp10-backlog-package, wp10-backlog-r54-package, wp10-residue-package,
+respool-full-functional, respool-full-crash (all existing matrix members),
+respool-full-aggregate and wp11-mutation-gate. Ordinary selected cheap/regression,
+integrity/publication and READOPT gates execute freshly. READ-1's already issued
+identity/canonical carriage and full-campaign guard remain; no duplicate full
+READ-1 C60 or unchanged WP14 native-timeout campaign is requested.
+
+**Rationale.** Existing gates supply direct final-head evidence. The prior successful
+WP10 residue job took about nineteen execution minutes; individual crash-matrix jobs
+took roughly zero to three minutes, with runner queue time separate. One final
+finite run has a known execution cost and avoids another independent carriage-tool
+authoring/import/disposition round. Preserve its complete output. No local duplicate
+campaign or rehearsal; retry only failed/missing necessary jobs for a stated reason,
+not a blanket repeat of successful unchanged campaigns.
+
+Fresh Software #417 opens the concrete replacement from preserved #415 ancestry
+after this ruling merges, satisfying latest-main with docs-only synchronization.
+No engine/adapter/oracle/fixture change or redundant verifier reimport is issued.
+Existing #146 reuses #156 for byte-identical parts and disposes final identity plus
+complete required PR CI directly. No repeated authorship/audit or PM relay solely
+for the base change. Independent exact-head PASS and all green required checks alone
+license Software's scoped integration; PM then records A8 and WP14 resumes.
+
+Phase1 36/36 and Phase2 2/12 unchanged. #414 remains held/preserved until a concrete
+replacement; #415 remains closed; #399 unresolved and A8 PENDING. Frozen DRAFT-10,
+<30 s target copy, write/async/recording and physical/Windows10/release/card/hardware
+holds and Michael-reserved #390 merge survive.
+
+**Reversal cost.** A scoped execution instruction only; no CI/test/product change.
+A demonstrated execution failure returns to its owner. A future general reuse
+protocol is not implied and needs independent authentication before issuance.
