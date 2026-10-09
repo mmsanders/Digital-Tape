@@ -3385,3 +3385,52 @@ holds and Michael-reserved #390 merge survive.
 **Reversal cost.** A scoped execution instruction only; no CI/test/product change.
 A demonstrated execution failure returns to its owner. A future general reuse
 protocol is not implied and needs independent authentication before issuance.
+
+
+## ADR-174 — Complete the pin-control fixture and authorize normal correction CI
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's Software-review activation.
+**Input main:** `0569cadc1e16d3a1e2df385c57fd68bbda516460`.
+**Held #419:** `9c8de4259db8a6337140df4504d9b22fa37acea0`, root
+`4a3d0da47cc4b8a05aa2b588347ad2042b6112b6`, engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Prepared fixture correction:** `3bead64c18b157f5f1eba069a72bafcc368a6360`,
+root `831e86ad82ee1a50154043e525007b5233ebed32`, parent the executed head.
+
+**Disposition.** Engine PR CI 37854213510 independently retrieved: 100/100 jobs
+successful, including qualification/matrices/aggregates. READOPT/carry run
+37854213506, hygiene and publication pass. Required evidence control 113574382530
+fails: its temporary baseline omits six declared pending bundles outside the
+historical adapter glob. Actual evidence audit passes; the eighteen other evidence
+controls and three pin-corruption controls pass. This is a genuine CI-fixture
+integration defect, not a demonstrated Product-engine/data failure or acceptance.
+
+The prepared tooling delta imports JSON and copies declared pending directories
+into the temporary fixture; audit/assertions and Product/verifier/evidence bytes
+remain unchanged. Software reports its existing four controls passing locally.
+That fix is not the executed PR head and still needs final CI/independent disposition.
+
+**Decision.** Fresh Software #420 applies the copy-only fix to existing #419 and
+synchronizes current PM docs before a complete push. Authorize normal selected PR
+CI, including qualification ALL, after this necessary correction. Supersede ADR-173's
+one-run/failed-job-only restriction for necessary in-scope integration/CI-fixture
+fixes: subsequent genuine fixes preserving scope/criteria may receive their normal
+required CI without another PM execution-method ruling. Preserve classifier, named
+checks, matrices, aggregates and all causal assertions; no copied status, skip,
+qualification carriage protocol or oracle change is issued.
+
+No local duplicate campaign or unnecessary successful unchanged rerun. READ-1's
+already approved identity/canonical carriage and full-campaign guard remain;
+no extra full READ-1 C60 or unchanged native WP14 timeout campaign is requested.
+Old 100/100 results retain their actual head; final corrected checks are separate.
+
+Existing #146 reviews the corrected tooling/final identity and complete required
+CI, reusing #156 for byte-identical facts. Only its explicit final READ-2 PASS plus
+all strict required checks green license Software's scoped integration. PM records
+A8 afterward; WP14 follows. No redundant verifier package, new PR or PM relay.
+
+Phase1 36/36 and Phase2 2/12 unchanged. #417 stays closed, #419 held, #399 unresolved,
+A8 PENDING. Frozen bytes, <30 s copy, physical/Windows10/release/card/media,
+write/async/recording/hardware and Michael-reserved #390 merge holds survive.
+
+**Reversal cost.** Small CI-fixture repair and execution clarification only.
+A genuine behavior/oracle/scope conflict still returns before amendment.
