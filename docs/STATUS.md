@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 10 + current macOS;
-WP-38 not taken; operations freeze declared. **P2-R1 blocked** (#399): [WP-14 contract](WP14-CLI-CONTRACT.md) unchanged; engine final CI 100/100 PASS; pin-control fixture correction/final disposition pending; #390 not accepted.
+WP-38 not taken; operations freeze declared. **P2-R1 resumed:** playback #419 independently accepted/integrated `d5c2d5e`; immutable A8 engine `d96b4245` recorded. Existing #392/#146 final WP14 qualification next; #390 not accepted.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
