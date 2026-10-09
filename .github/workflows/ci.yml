@@ -1711,7 +1711,9 @@ jobs:
           imp=$(git log --format=%H -1 -- tests/wp14_r1)
           pub=$(python3 -c "import json;print(next(p['source_commit'] for p in json.load(open('tests/IMPORTS.json'))['packages'] if p['path']=='tests/wp14_r1'))")
           echo "import commit $imp, publication $pub, candidate $HEAD_SHA"
-          python3 -B tests/wp14_r1/a8_identity.py --verification verification-repo --product . \
+          # ADR-175 changes only the mechanical pin operand; the immutable
+          # imported audit and all its assertions still run unchanged.
+          python3 -B tests/wp14_adapter/a8_identity.py --verification verification-repo --product . \
             --publication "$pub" --candidate "$HEAD_SHA" --import-commit "$imp" \
             --import-path tests/wp14_r1 --golden-path tests/golden | tee "$RUNNER_TEMP/a8-identity.json"
       - uses: actions/upload-artifact@v4
