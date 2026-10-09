@@ -3434,3 +3434,58 @@ write/async/recording/hardware and Michael-reserved #390 merge holds survive.
 
 **Reversal cost.** Small CI-fixture repair and execution clarification only.
 A genuine behavior/oracle/scope conflict still returns before amendment.
+
+
+## ADR-175 — Record accepted playback A8 pin and resume existing WP14 work
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's next-round activation.
+**Input main/integration:** `d5c2d5ef2912662ca34d32619f6b7310169e496e` (Software #420 / Product #419).
+**Independent final READ-2 PASS:** Verification PR157 merged
+`f5fc69c15291dbc40f43690866d186d106459b43`,
+[report](https://github.com/mmsanders/Digital-Tape-Verification/blob/f5fc69c15291dbc40f43690866d186d106459b43/findings/P2-R1-WP14-READ2-419-2026-10-09.md).
+**Reviewed head:** `7d0f67629214cc5a41d24725d6c28cffdc59f031`;
+reviewed/integrated root `57c7df2159ebc80a7295a21245404186725436c8`;
+accepted engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+
+**Disposition.** Accept the issued read-only playback tranche on that independent
+PASS and unchanged integration identity. PM fetched the actual merge object: parents
+ADR-174 main and reviewed head, root identical to the disposed root. Complete engine
+CI 37867835017 has 100/100 successful jobs; independent inventory authenticates all
+109 PR jobs (108 PASS, one authorized READ-1 full-campaign skip), 81 artifacts and
+all seven strict required contexts. Inventory SHA
+`5d501258c08d7f8eb9eba6a840c57e5165af085a751fcb4f3fde66884d78492f`;
+lossless evidence SHA
+`2afe1b50afade7055fd751c48a325b03616aa0dc54145bfacf84f49ea0315a3e`.
+No manual duplicate Product campaign or PM Product-code review supplied acceptance.
+
+**Decision.** Record the immutable A8 engine pin in the addendum and WP14 documents;
+close #399 as the independently accepted/integrated playback amplification remedy.
+This closes the engine defect, not the still-unexecuted final WP14 native C60 gate,
+target-throughput requirement or broader write/copy risks.
+
+Resume existing open Software #392 and Verification #146, no duplicate assignment.
+Software cleanly carries existing WP14 work onto current main with exactly this
+engine tree, updates only mechanical A8 comparison/binding, preserves all old
+evidence with honest execution identity, and performs required final WP14 qualification.
+This is a materially changed engine, so native C60 execution is necessary now;
+the old unchanged-timeout prohibition does not forbid this meaningful final run.
+No timeout enlargement, cache substitution, skipped native dump or oracle relaxation.
+Normal required CI after necessary in-scope corrections remains authorized.
+
+Software routes the exact final head, binary/profile/evidence identities and complete
+qualification results directly to #146. Verification reuses unchanged authored
+coverage/prior admissible facts, independently disposes the new WP14 execution and
+all remaining criteria, and returns PASS or concrete findings directly. No repeated
+READ-1 authoring/full campaign or engine acceptance merely for base carriage.
+#390's merge remains Michael-reserved even after Software/Verification return.
+Physical macOS/Windows10, OS-readable README, eject/reinsert, ten mid-load pulls,
+tested release and all unmet A1–A7/A9 evidence remain visible. Server2025 is not Windows10.
+
+Phase1 remains 36/36, Phase2 2/12: playback acceptance is a dependency, not WP14
+acceptance. WP16 contract/ingest is next after the real-card path; WP15 follows.
+Q-P2-1(b), write batching/async/recording and firmware/target energy remain separate
+unissued follow-ons; hardware parked and <30 s target copy unchanged.
+
+**Reversal cost.** Documentation pin and existing-issue resumption only. Future
+engine changes require their own issued tests/scope/disposition, never moving-main
+equality; actual WP14 failures return to their responsible lead/PM.
