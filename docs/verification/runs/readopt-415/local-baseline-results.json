@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "suite": "history-wp09-package",
+    "selection_pass": true,
+    "build_pass": true,
+    "behavior_pass": true,
+    "raw_pass": true,
+    "old_replay_pass": true,
+    "epoch": "READOPT-D10-1",
+    "mode": "ordinary",
+    "comparison_engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+    "actual_engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+    "mutation": null,
+    "actual_commit": "af109ed54bf2d410fef39f0d412e35dea8707d3b",
+    "actual_root_tree": "ae22b689e79b1dde8bfc39a2fc93dc8667e18b71",
+    "oracle": "/workspace/scratch/505d3b717d90/Digital-Tape-415/tests/history_wp09_adapter/run_product.py",
+    "behavior_exit": 0,
+    "regeneration": {
+      "raw_sha256": "03ccf6174084c73af6cf681a9b8338257c85f4bd8044f9e980dc912923c1113d",
+      "cases": 10000
+    }
+  }
+}

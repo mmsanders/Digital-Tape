@@ -138,13 +138,24 @@ struct tape {
     bool      play_ring_valid;   /* §5: invalidated by tape_set_side */
     /*
      * §6.3's play ring, as a window over TIMELINE frames: play_ring holds
-     * play_frames consecutive frames starting at timeline frame play_base.
+     * play_frames consecutive frames starting at timeline frame play_base,
+     * with its first frame at play_slot and wrap at the caller capacity.
      * tape_service fills it and is the only thing that touches the device;
      * tape_render reads nothing else, which is what makes "service to
      * completion then render" and "interleave them" produce identical bytes.
      */
     uint32_t  play_base;
     uint32_t  play_frames;
+    /* Circular coverage and a private read batch. Failed reads never publish. */
+    uint32_t play_slot;
+    uint64_t play_total_frames;
+    uint32_t play_goal_first, play_goal_end, play_fill_next;
+    uint32_t play_map_entry;
+    uint64_t play_map_base;
+    bool play_map_valid;
+    bool play_cache_valid;
+    uint32_t play_cache_lba, play_cache_offset;
+    unsigned char play_read[32768];
     /* The clamped resume position in WHOLE frames, kept for §5's warm-start
        comparison, which is specified over frames rather than 32.32 units. */
     uint64_t  resume_whole_frame;

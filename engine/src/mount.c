@@ -30,6 +30,7 @@
 
 #include <string.h>
 #include "tape_internal.h"
+#include "read1_observe.h"
 #include "dev.h"
 
 size_t tape_instance_size(void)
@@ -615,7 +616,34 @@ tape_result tape_mount(tape *t, tape_side side, uint64_t resume_frame,
 
     t->mounted = true;
     t->warm_start_used = warm_start_ok(t, warm, t->resume_whole_frame);
-    if (t->warm_start_used) { t->play_ring_valid = true; }
+    t->play_frames = 0u;
+    t->play_total_frames = TAPE_LIVE(t).total_frames;
+    t->play_slot = 0u;
+    t->play_map_valid = false;
+    t->play_cache_valid = false;
+    if (t->warm_start_used) {
+        size_t capacity = t->play_ring_len / TAPE_FRAME_BYTES;
+        uint32_t cap = capacity > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)capacity;
+        uint32_t start = warm->start_frame;
+        uint32_t frames = warm->valid_frames;
+        const unsigned char *data = warm->data;
+        if (frames > cap) {
+            uint32_t skip = (uint32_t)t->resume_whole_frame - start;
+            if (skip > frames - cap) { skip = frames - cap; }
+            start += skip; data += (size_t)skip * TAPE_FRAME_BYTES; frames = cap;
+        }
+#ifdef TAPE_READ1_OBSERVE
+        TAPE_READ1_ADOPT(t->play_ring, data, (size_t)frames * TAPE_FRAME_BYTES);
+        if (TAPE_READ1_CONTROL("stale-warm")) { ((unsigned char *)t->play_ring)[4] ^= 1u; }
+#else
+        memmove(t->play_ring, data, (size_t)frames * TAPE_FRAME_BYTES);
+#endif
+        t->play_base = start;
+        t->play_frames = frames;
+        t->play_goal_first = start;
+        t->play_goal_end = start + frames;
+        t->play_ring_valid = true;
+    }
     return TAPE_OK;
 }
 
@@ -724,10 +752,16 @@ tape_result tape_set_side(tape *t, tape_side side)
     t->position_frame  = 0;
     t->at_end          = false;
     t->at_start        = false;
+#ifdef TAPE_READ1_OBSERVE
+    if (!TAPE_READ1_CONTROL("stale-side")) {
+#endif
     t->play_ring_valid = false;
     t->play_frames     = 0u;   /* §5: no frame from the previous side is ever */
     t->play_base       = 0u;   /* rendered after a side switch (invariant 31) */
     t->warm_start_used = false;
+#ifdef TAPE_READ1_OBSERVE
+    }
+#endif
     return TAPE_OK;
 }
 

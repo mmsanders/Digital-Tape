@@ -1,0 +1,618 @@
+{
+  "schema": "readopt-epoch-v1",
+  "epoch": "READOPT-D10-1",
+  "status": "issued expected binding; not Product acceptance",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "audited_execution_commit": "a1b362268a53320e676359976593b2f01202ef13",
+  "audited_execution_root": "137b69a43e8df86f921f5c4614971123c29362d1",
+  "verification_review": "a273355e8aa87b967ce66cf9f40e6a71e3ee9513",
+  "authority": {
+    "product_merge": "3da384bda1eb0c82e51a7adcd7c47156e6c3d494",
+    "source_commit": "8f45c718cf6b8e25a937b742e06a20f2c37480a7",
+    "path": "docs/PLAYBACK-REGRESSION-BINDING.md",
+    "sha256": "e340f6bed1aacf3b0dce8392da17ee62f20b423b3b35e32d2b2af407cdb7cf96",
+    "blob": "5152382b0e34c60e5156d34fede496b048ba61e4"
+  },
+  "suites": {
+    "wp06-closure-package": {
+      "cases": 7,
+      "adapter_root": "tests/wp06_closure_adapter",
+      "source_build_profile": {
+        "tests/wp06_closure_adapter/Makefile": "5d09e0988578a66cb335a8da65e866279340c9af0b2c5829df119a5ca575cb74",
+        "tests/wp06_closure_adapter/negative_controls.py": "8d567bc769a097e8985993fb97c9ef21fa59d56139989ab5a16809541f1ad020",
+        "tests/wp06_closure_adapter/run_product.py": "0d20547632d0f68020e482a30d68b3b8cc83b840341a47ea651ef469097d08b4",
+        "tests/wp06_closure_adapter/wp06c_adapter.c": "0af5652252d7b51d74dc87523bb439a7232c0a0028d0027e54ae91cbacf96fc9",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/wp06_closure_adapter/evidence/p1-r54-product",
+        "raw_sha256": "c494589ec12d2648a57b8b062e7a49986eef8d21a3b5996400db0b6114d75b07",
+        "files": {
+          "observations.jsonl.gz": "389d7340acf57800685757ec4d1aba3252b8a1d45718d682690b2514b1c45b83",
+          "build-identity.json": "a74a70c082f70bc9341784c303b604009e3866909a28a394a6592f9455b759e1",
+          "case-census.json": "6ad4daa8b4cc288c6c1bc6127a80fd4583346b3d6844da24eb3658a52b4efd61",
+          "SHA256SUMS": "abf60a91d5acd75e3a89172897cdfe80c8516f8ca6d113dff48434eb07ef5190"
+        },
+        "accepted_import": {
+          "path": "tests/wp06_closure_adapter/evidence/p1-r54-product",
+          "files": {
+            "SHA256SUMS": "abf60a91d5acd75e3a89172897cdfe80c8516f8ca6d113dff48434eb07ef5190",
+            "build-identity.json": "a74a70c082f70bc9341784c303b604009e3866909a28a394a6592f9455b759e1",
+            "case-census.json": "6ad4daa8b4cc288c6c1bc6127a80fd4583346b3d6844da24eb3658a52b4efd61",
+            "observations.jsonl.gz": "389d7340acf57800685757ec4d1aba3252b8a1d45718d682690b2514b1c45b83"
+          },
+          "observations_sha256": "c494589ec12d2648a57b8b062e7a49986eef8d21a3b5996400db0b6114d75b07",
+          "product_pr": 326,
+          "accepted_head": "c5ac824b8f96be1bc16851988f4bff686b153c17",
+          "verification": "Verification #121",
+          "disposition": "verification commit a4c9230 findings/P1-R54-WP06D-PR326-DISPOSITION-2026-09-30.md",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+        "build_identity": {
+          "adapter_source_sha256": "0af5652252d7b51d74dc87523bb439a7232c0a0028d0027e54ae91cbacf96fc9",
+          "build_command": "make -C engine clean all && make -C tests/wp06_closure_adapter clean all",
+          "case_count": 7,
+          "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+          "fixtures": "raw media per gap_plan fixture on a fresh flat device per case; every superblock field per tapefs \u00a74, uuid ASCII WP06-R52-closure, sb_generation 10; see README.md for each fixture's indices",
+          "import_commit": "051d292c3646b7a31a43fe5462ef3dbec022c2f0",
+          "makefile_sha256": "5d09e0988578a66cb335a8da65e866279340c9af0b2c5829df119a5ca575cb74",
+          "plan_sha256": "db9f826a3af4e3c7a2b01780ace2baa9bb5257aead873e484d25173b0c1b8119",
+          "product_base": "66c6abc69d83cff10da32a6b446690fcd0b927fb",
+          "run_product_sha256": "0d20547632d0f68020e482a30d68b3b8cc83b840341a47ea651ef469097d08b4",
+          "schema": "wp06-r52-product-build-identity-1",
+          "verifier_source_commit": "6b92e5f43de89efa71069084028376cdbc636bf4",
+          "verifier_tree": "b216baa2a9c160b2a14b3eac25567c5a260eed2f"
+        }
+      },
+      "new": {
+        "raw_sha256": "a20201b1c4f07b1816dbadefa9a1d98a5271838d6e7a0e060a9364882209b048",
+        "files": {
+          "observations.jsonl.gz": "e3524b19c367060d285a23a166f75828fa9d97126c18486039e659eff66b3b4a",
+          "host.json": "4ba32d431e2d53f2579fe60d785625bca69a33e2fd9795b5acb06da59170c569",
+          "build-identity.json": "1ca8b7c297bea86737c1002b29a25ee286c2feb785882ae137298dd8a674efa1",
+          "SHA256SUMS": "b3f6150e43c5573c0465267a71af481ffbf82d4ca92c931667b5ff7a4b95c537"
+        },
+        "build_identity": {
+          "adapter_source_sha256": "0af5652252d7b51d74dc87523bb439a7232c0a0028d0027e54ae91cbacf96fc9",
+          "build_command": "make -C engine clean all && make -C tests/wp06_closure_adapter clean all",
+          "case_count": 7,
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "fixtures": "raw media per gap_plan fixture on a fresh flat device per case; every superblock field per tapefs \u00a74, uuid ASCII WP06-R52-closure, sb_generation 10; see README.md for each fixture's indices",
+          "import_commit": "051d292c3646b7a31a43fe5462ef3dbec022c2f0",
+          "makefile_sha256": "5d09e0988578a66cb335a8da65e866279340c9af0b2c5829df119a5ca575cb74",
+          "plan_sha256": "db9f826a3af4e3c7a2b01780ace2baa9bb5257aead873e484d25173b0c1b8119",
+          "product_base": "66c6abc69d83cff10da32a6b446690fcd0b927fb",
+          "run_product_sha256": "0d20547632d0f68020e482a30d68b3b8cc83b840341a47ea651ef469097d08b4",
+          "schema": "wp06-r52-product-build-identity-1",
+          "verifier_source_commit": "6b92e5f43de89efa71069084028376cdbc636bf4",
+          "verifier_tree": "b216baa2a9c160b2a14b3eac25567c5a260eed2f"
+        },
+        "original_artifact_id": 11563130457,
+        "original_zip_sha256": "ff0ae663bf0f179e6dc0744639fc0f89b2932322b9e0cea237100c20a5931311",
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7"
+      }
+    },
+    "wp08-mapping-r56-package": {
+      "cases": 62,
+      "adapter_root": "tests/wp08_mapping_adapter",
+      "source_build_profile": {
+        "tests/wp08_mapping_adapter/Makefile": "67349d065397a42991ed0fd46873e7baaf98c80df7a54b351fd0ee6229f0c09f",
+        "tests/wp08_mapping_adapter/negative_controls.py": "0c3c9b5a6d5badf11e62feac7e16c872b916e58bb664ff7489d7541c6a5b6bf9",
+        "tests/wp08_mapping_adapter/run_product.py": "528185a1cbf3f88c81ac32637d4b03d2549cf25ba0486bf82d1ad7f4afb343b3",
+        "tests/wp08_mapping_adapter/wp08m_adapter.c": "4868944216f8c3d70452e27c26b268913af70148537ebdfe8f9802b8b509ce03",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/wp08_mapping_adapter/evidence/p1-r57-product",
+        "raw_sha256": "6098222435464a3861643e2d90e1ae9f7d3dc213bfe2445c8fa7065e1a26c003",
+        "files": {
+          "observations.jsonl.gz": "136c77ed0c9f299ebb11e991e37fc7cef2005b9865bb6c09ca9e13ef620b82a2",
+          "build-identity.json": "864dd874de069d4dda45a73916181497d59366be61097f49010a90ab1f012de4",
+          "SHA256SUMS": "f2fd1d9456a73f1c5ea08e1fbe046af07a9e6d3dafdd0489249ec047e879b636"
+        },
+        "accepted_import": {
+          "path": "tests/wp08_mapping_adapter/evidence/p1-r57-product",
+          "files": {
+            "SHA256SUMS": "f2fd1d9456a73f1c5ea08e1fbe046af07a9e6d3dafdd0489249ec047e879b636",
+            "build-identity.json": "864dd874de069d4dda45a73916181497d59366be61097f49010a90ab1f012de4",
+            "observations.jsonl.gz": "136c77ed0c9f299ebb11e991e37fc7cef2005b9865bb6c09ca9e13ef620b82a2"
+          },
+          "observations_sha256": "6098222435464a3861643e2d90e1ae9f7d3dc213bfe2445c8fa7065e1a26c003",
+          "product_pr": 346,
+          "accepted_head": "7a64891e63427a79d9f6755fac4e87dd1d37c343",
+          "verification": "Verification #132",
+          "disposition": "verification commit f170fd9 (Verification PR #134) findings/P1-R57-W89D-DISPOSITION-2026-10-01.md",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+        "build_identity": {
+          "adapter_source_sha256": "ba4565b31db9a2cf800286b743aa0d2ac38f20222e10b221b58061d743d18793",
+          "build_command": "make -C engine clean all && make -C tests/wp08_mapping_adapter clean all",
+          "caseset_sha256": "9eca914a4f2ed87db31bb5cd1212b89dec52731e37cdd76e1fb8aa2af8424e30",
+          "census": {
+            "cases": 62,
+            "read_blocks": 1138,
+            "row1": 60,
+            "row2": 2,
+            "service_calls": 96
+          },
+          "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+          "import_commit": "acdf00438ede16b7280e590134c767527cccf781",
+          "makefile_sha256": "67349d065397a42991ed0fd46873e7baaf98c80df7a54b351fd0ee6229f0c09f",
+          "product_base": "480121099e33b6caf2a9f3169f39538135d0f6c6",
+          "run_product_sha256": "528185a1cbf3f88c81ac32637d4b03d2549cf25ba0486bf82d1ad7f4afb343b3",
+          "schema": "wp08-mapping-r56-product-build-identity-1",
+          "sources_sha256": {
+            "wp08m_adapter.c": "4868944216f8c3d70452e27c26b268913af70148537ebdfe8f9802b8b509ce03"
+          },
+          "verifier_source_commit": "5b7c3641e972bdbf080885ac01142927434487fa",
+          "verifier_tree": "466bf8193e53a39a4e5a51710ede9cd2b2458858"
+        }
+      },
+      "new": {
+        "raw_sha256": "b5fd5ea0c60ac816eeb133813716a80e9ffb30681cd3177b65f37131db0f7daa",
+        "files": {
+          "observations.jsonl.gz": "cd5c97dd9e34411e31d76945d82a122937017d1a022012451d6d3d20325cb7e9",
+          "host.json": "6ffa6d3a4f75f6f967bcacdc0363fe378e8a6c996054301ef5b0f00740e5bfee",
+          "build-identity.json": "df65b7cbf11e0b42c9fc5180232e8223bdab86eaa5865aad6e3ba1e7a0edcb00",
+          "SHA256SUMS": "f81eede401f77ccfae85f3400e8f568f7c8c5fa87bcef3248bf9c44cb9d2ba3f"
+        },
+        "build_identity": {
+          "adapter_source_sha256": "ba4565b31db9a2cf800286b743aa0d2ac38f20222e10b221b58061d743d18793",
+          "build_command": "make -C engine clean all && make -C tests/wp08_mapping_adapter clean all",
+          "caseset_sha256": "9eca914a4f2ed87db31bb5cd1212b89dec52731e37cdd76e1fb8aa2af8424e30",
+          "census": {
+            "cases": 62,
+            "read_blocks": 1138,
+            "row1": 60,
+            "row2": 2,
+            "service_calls": 96
+          },
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "import_commit": "acdf00438ede16b7280e590134c767527cccf781",
+          "makefile_sha256": "67349d065397a42991ed0fd46873e7baaf98c80df7a54b351fd0ee6229f0c09f",
+          "product_base": "480121099e33b6caf2a9f3169f39538135d0f6c6",
+          "run_product_sha256": "528185a1cbf3f88c81ac32637d4b03d2549cf25ba0486bf82d1ad7f4afb343b3",
+          "schema": "wp08-mapping-r56-product-build-identity-1",
+          "sources_sha256": {
+            "wp08m_adapter.c": "4868944216f8c3d70452e27c26b268913af70148537ebdfe8f9802b8b509ce03"
+          },
+          "verifier_source_commit": "5b7c3641e972bdbf080885ac01142927434487fa",
+          "verifier_tree": "466bf8193e53a39a4e5a51710ede9cd2b2458858"
+        },
+        "original_artifact_id": 11562421491,
+        "original_zip_sha256": "14a557f8f1c88544d5dfb9bdb9884970fd7adadd53908f3e183cd937d66f98e2",
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7"
+      }
+    },
+    "strengthen-r55-package": {
+      "cases": 40,
+      "adapter_root": "tests/strengthen_r55_adapter",
+      "source_build_profile": {
+        "tests/strengthen_r55_adapter/Makefile": "0f84151ce973fff11171167c6ab59969aa0c33c96f6ae4992e31469b290bd087",
+        "tests/strengthen_r55_adapter/negative_controls.py": "c7fe6435ca75a95af92f1302cc3eaf6b6109fca746e3bbcce69f84ed01567695",
+        "tests/strengthen_r55_adapter/run_product.py": "262d42e78cf8b96fb952e30ae67c8a4e13d2e15962b9095a702f7e31e88f75c2",
+        "tests/strengthen_r55_adapter/str55_adapter.c": "825c4376a7bceade34853ff94a43895b0b61705d0a04210b3e7e1fb1bc51dd98",
+        "tests/strengthen_r55_adapter/str55_capacity.c": "9b726452d68cc08a7e2b289e1f8d1bca2d893d8f1669690748af150870563adb",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/strengthen_r55_adapter/evidence/p1-r56-product",
+        "raw_sha256": "877a5dc7aa8f9ae5687202138eee6e1c84c0b7a7bc6935cac12f7e9464672aa8",
+        "files": {
+          "observations.jsonl.gz": "f6c975daec0293736c15dd5cbe03d78d30315d09568cd7208ab2ce76a16f63b2",
+          "build-identity.json": "27871c5da7bdfc861dbfddecc176b676b41347191f5c083969a5078d53fd929d",
+          "SHA256SUMS": "d2185814d416845ffef8b6733b43d9facae02773b422d7ee0a53e04050133d6f"
+        },
+        "accepted_import": {
+          "path": "tests/strengthen_r55_adapter/evidence/p1-r56-product",
+          "files": {
+            "SHA256SUMS": "d2185814d416845ffef8b6733b43d9facae02773b422d7ee0a53e04050133d6f",
+            "build-identity.json": "27871c5da7bdfc861dbfddecc176b676b41347191f5c083969a5078d53fd929d",
+            "observations.jsonl.gz": "f6c975daec0293736c15dd5cbe03d78d30315d09568cd7208ab2ce76a16f63b2"
+          },
+          "observations_sha256": "877a5dc7aa8f9ae5687202138eee6e1c84c0b7a7bc6935cac12f7e9464672aa8",
+          "product_pr": 343,
+          "accepted_head": "f2bff1f93a089e0f46ae3817efc410e1e81564d3",
+          "verification": "Verification #131",
+          "disposition": "verification commit 3120a1d findings/P1-R56-STRD-PR343-DISPOSITION-2026-10-01.md",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+        "build_identity": {
+          "adapter_origin": "str55_adapter.c: device and render shapes from tests/wp10_final_adapter/wp10f_adapter.c (#334), row 1-2 drivers new; str55_capacity.c: tests/capacity_wp09_adapter/capacity_adapter.c (#311) with A0/A1 added to raw_before",
+          "adapter_source_sha256": "18ed238934df525909d886c8d4d6f2c15a05f351a47601b72e67c837ef123558",
+          "build_command": "make -C engine clean all && make -C tests/strengthen_r55_adapter clean all",
+          "capacity_verifier_tree": "4c754247d2769a9033d7b921cbd248e3e943b62a",
+          "caseset_sha256": "9ee1c5d6083dda0e9fd3f331a56dbc4903d659a157daa91615ff30212101ebea",
+          "census": {
+            "cases": 40,
+            "row1": 12,
+            "row2": 1,
+            "row2_metadata_writes": 4,
+            "row2_respool_calls": 1,
+            "row3": 27
+          },
+          "engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+          "import_commit": "6feb6fe3fff9f14a794421015fad791a33a2619d",
+          "makefile_sha256": "0f84151ce973fff11171167c6ab59969aa0c33c96f6ae4992e31469b290bd087",
+          "product_base": "00c69783143bbb736e9c53598799baaa67ee0d39",
+          "run_product_sha256": "262d42e78cf8b96fb952e30ae67c8a4e13d2e15962b9095a702f7e31e88f75c2",
+          "schema": "strengthen-r55-product-build-identity-1",
+          "sources_sha256": {
+            "str55_adapter.c": "825c4376a7bceade34853ff94a43895b0b61705d0a04210b3e7e1fb1bc51dd98",
+            "str55_capacity.c": "9b726452d68cc08a7e2b289e1f8d1bca2d893d8f1669690748af150870563adb"
+          },
+          "verifier_source_commit": "7a914cd7c76bcc933e896a26fa0b3b7349c11b2d",
+          "verifier_tree": "72d24675fc40432c29d7f225bac3169124e5d12f"
+        }
+      },
+      "new": {
+        "raw_sha256": "1def72c5e5b49400524c42d38a3b4d530fdf91f20b10c84528680109832a810a",
+        "files": {
+          "observations.jsonl.gz": "72a1d59ca539ab7d3a1a18808c638846e70dcdc9051f782a00364856283bcbb8",
+          "host.json": "6ffa6d3a4f75f6f967bcacdc0363fe378e8a6c996054301ef5b0f00740e5bfee",
+          "build-identity.json": "01caf693ae1d393b9d14308e698ff4a8ab11ac5f7340b500a7b1d96a29166565",
+          "SHA256SUMS": "ba1099b7ac9b89ea532b77cb8e1fd0bb8b68a08bbb88f1a94bfe6819d668f24a"
+        },
+        "build_identity": {
+          "adapter_origin": "str55_adapter.c: device and render shapes from tests/wp10_final_adapter/wp10f_adapter.c (#334), row 1-2 drivers new; str55_capacity.c: tests/capacity_wp09_adapter/capacity_adapter.c (#311) with A0/A1 added to raw_before",
+          "adapter_source_sha256": "18ed238934df525909d886c8d4d6f2c15a05f351a47601b72e67c837ef123558",
+          "build_command": "make -C engine clean all && make -C tests/strengthen_r55_adapter clean all",
+          "capacity_verifier_tree": "4c754247d2769a9033d7b921cbd248e3e943b62a",
+          "caseset_sha256": "9ee1c5d6083dda0e9fd3f331a56dbc4903d659a157daa91615ff30212101ebea",
+          "census": {
+            "cases": 40,
+            "row1": 12,
+            "row2": 1,
+            "row2_metadata_writes": 4,
+            "row2_respool_calls": 1,
+            "row3": 27
+          },
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "import_commit": "6feb6fe3fff9f14a794421015fad791a33a2619d",
+          "makefile_sha256": "0f84151ce973fff11171167c6ab59969aa0c33c96f6ae4992e31469b290bd087",
+          "product_base": "00c69783143bbb736e9c53598799baaa67ee0d39",
+          "run_product_sha256": "262d42e78cf8b96fb952e30ae67c8a4e13d2e15962b9095a702f7e31e88f75c2",
+          "schema": "strengthen-r55-product-build-identity-1",
+          "sources_sha256": {
+            "str55_adapter.c": "825c4376a7bceade34853ff94a43895b0b61705d0a04210b3e7e1fb1bc51dd98",
+            "str55_capacity.c": "9b726452d68cc08a7e2b289e1f8d1bca2d893d8f1669690748af150870563adb"
+          },
+          "verifier_source_commit": "7a914cd7c76bcc933e896a26fa0b3b7349c11b2d",
+          "verifier_tree": "72d24675fc40432c29d7f225bac3169124e5d12f"
+        },
+        "original_artifact_id": 11562142385,
+        "original_zip_sha256": "8a4fb6a9e1d625d8206b0e33f1917ca10aa2da5b69fc8107d7c6165cba61a9e0",
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7"
+      }
+    },
+    "capacity-wp09-package": {
+      "cases": 27,
+      "adapter_root": "tests/capacity_wp09_adapter",
+      "source_build_profile": {
+        "tests/capacity_wp09_adapter/Makefile": "81e6c4b41d7034bc2324ec09c5b1e0def23b38ccc4aef7db9b2d7c19d9ee2b10",
+        "tests/capacity_wp09_adapter/capacity_adapter.c": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120",
+        "tests/capacity_wp09_adapter/negative_controls.py": "51bccbc85da6252a00d09925c342362e2dc79767521bf77ab856772a589bdb47",
+        "tests/capacity_wp09_adapter/run_product.py": "cdd41f6172643b3563a9b3ef9a46c5d8d71bcebb4cf86cdfbd4b6a32998b5139",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/capacity_wp09_adapter/evidence/p1-r53-product",
+        "raw_sha256": "30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58",
+        "files": {
+          "observations.jsonl.gz": "a43dbfa7caf49023fda09c902b3509ab28b8c7946cb569d927435e7f6bc07bf9",
+          "build-identity.json": "d59b7e3af6c092fa347ae4b584cb83fc88e13743aab61a994af4b8b00b16a586",
+          "case-census.json": "53b6b19f8ccc8cb7244d68416e6736635594f8bc188286e84808227f0360958a",
+          "SHA256SUMS": "5cc9df8b3225065cfafa42daa405156684d3c073d5e2f9f65149d8394f5fa4e2"
+        },
+        "accepted_import": {
+          "path": "tests/capacity_wp09_adapter/evidence/p1-r53-product",
+          "files": {
+            "SHA256SUMS": "5cc9df8b3225065cfafa42daa405156684d3c073d5e2f9f65149d8394f5fa4e2",
+            "build-identity.json": "d59b7e3af6c092fa347ae4b584cb83fc88e13743aab61a994af4b8b00b16a586",
+            "case-census.json": "53b6b19f8ccc8cb7244d68416e6736635594f8bc188286e84808227f0360958a",
+            "observations.jsonl.gz": "a43dbfa7caf49023fda09c902b3509ab28b8c7946cb569d927435e7f6bc07bf9"
+          },
+          "observations_sha256": "30cef46bd2777f6e4fb8dd5cea255aed8071c6fc53f2e21c1eb09408ba71bc58",
+          "product_pr": 311,
+          "accepted_head": "92f9280cf99232627d4117385ba67de50ed30f49",
+          "verification": "Verification #107",
+          "disposition": "verification commit 91b24c3cb711a5151a86d3893902cfd82ea5019b (PR #112) findings/P1-R53-WP09D-CAPACITY-DISPOSITION-2026-09-30.md",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+        "build_identity": {
+          "adapter_source_sha256": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120",
+          "build_command": "make -C engine clean all && make -C tests/capacity_wp09_adapter clean all",
+          "case_count": 27,
+          "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+          "fixture": "raw stage-0 media per ADAPTER.md on a fresh flat device per row (block_count 2048 + 1024 x total_chunks + 1; nominal_length_s 9/12/15 s for 4/5/6 chunks; uuid ASCII WP09-R52-capshrt; sb_generation 7; empty Side-A index A0 at sequence 1; live B0 sequence 3 [(2,0,12)]; B1 zero; seed frames (100+i,-200-i) in chunk 2)",
+          "import_commit": "aba7735e388e219f4804658c5be3f8cc43258a1f",
+          "makefile_sha256": "81e6c4b41d7034bc2324ec09c5b1e0def23b38ccc4aef7db9b2d7c19d9ee2b10",
+          "plan_file_sha256": "ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501",
+          "product_base": "39d2076fa204991ec9c0d43f00b502942556bf9a",
+          "run_product_sha256": "009bea2f161a2ccb207b17d8aa6d1d15450ff1ddb5b5085418e0f8c0f14270e6",
+          "schema": "wp09-capacity-r52-product-build-identity-1",
+          "verifier_source_commit": "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5",
+          "verifier_tree": "85043f530c95257721347a6d991a0d205b299e4f"
+        }
+      },
+      "new": {
+        "raw_sha256": "35435c591a40dbfe8bdbe261c5c2760e86280780b1c07069869ec5aa3cfaac9e",
+        "files": {
+          "observations.jsonl.gz": "27772348fa18b7d827691caa26fd82f036d0c07668940194dfa474607adf4223",
+          "host.json": "04c3d3a26c26314a25f846c8d24732371aa05296f11d2f23746bab27af4d58af",
+          "build-identity.json": "1b4434f17ae4534cae52ac85f646acf8fbac81848f5c0d52d001de511c195078",
+          "SHA256SUMS": "72330472329d6b37ead9c88b61f5100e7756097ebfc51eb64a78783413ac5479"
+        },
+        "build_identity": {
+          "adapter_source_sha256": "0e40300cbb657f389744853b088fb8952172a4fc4f2f9eee577725c4a4795120",
+          "build_command": "make -C engine clean all && make -C tests/capacity_wp09_adapter clean all",
+          "case_count": 27,
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "fixture": "raw stage-0 media per ADAPTER.md on a fresh flat device per row (block_count 2048 + 1024 x total_chunks + 1; nominal_length_s 9/12/15 s for 4/5/6 chunks; uuid ASCII WP09-R52-capshrt; sb_generation 7; empty Side-A index A0 at sequence 1; live B0 sequence 3 [(2,0,12)]; B1 zero; seed frames (100+i,-200-i) in chunk 2)",
+          "import_commit": "aba7735e388e219f4804658c5be3f8cc43258a1f",
+          "makefile_sha256": "81e6c4b41d7034bc2324ec09c5b1e0def23b38ccc4aef7db9b2d7c19d9ee2b10",
+          "plan_file_sha256": "ceacb2e064ef3550774064e94580397f213614fa834d7b82b0fdcb2a91b44501",
+          "product_base": "39d2076fa204991ec9c0d43f00b502942556bf9a",
+          "run_product_sha256": "cdd41f6172643b3563a9b3ef9a46c5d8d71bcebb4cf86cdfbd4b6a32998b5139",
+          "schema": "wp09-capacity-r52-product-build-identity-1",
+          "verifier_source_commit": "87ae5746f6892a41d2660d5ef05c4a97b2ea8cf5",
+          "verifier_tree": "85043f530c95257721347a6d991a0d205b299e4f"
+        },
+        "original_artifact_id": 11562107836,
+        "original_zip_sha256": "04bd8b78931691f2cf8c24390ff77630407d2fad0e62e88f81ecfc15da5e4f87",
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7"
+      }
+    },
+    "history-wp09-package": {
+      "cases": 10000,
+      "adapter_root": "tests/history_wp09_adapter",
+      "source_build_profile": {
+        "tests/history_wp09_adapter/Makefile": "2a588e8b26a9b357cb237a57ba60e55352b8d378128bb98728fc466516ce0b5f",
+        "tests/history_wp09_adapter/negative_controls.py": "87ec5dd7eb57ed46fc8fb3f528e969cce0ea82c1a7088f71af4bd062076c8031",
+        "tests/history_wp09_adapter/run_product.py": "e3f0dea1212ce1db255b48c04d461e0150b397b83f518b827f8180585362ead2",
+        "tests/history_wp09_adapter/wp09_adapter.c": "5daad8de9ee13b119c7f4fefc44de7059896ab7366ba1a5a546aade198d9298c",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/history_wp09_adapter/evidence/p1-r46-product",
+        "raw_sha256": "699876471e1fa95ad63b3f36f2a33c191ab3fbd975b5cc60f8aaadad42afb1b4",
+        "files": {
+          "observations.jsonl.gz": "81396a71dcbd0115a2d3732c5ff3f7f99e47d016dcb3e9da82f2ad0ea1b91f45",
+          "build-identity.json": "6ccb8423e2d734b6e6e3fe821d977e352ebd3780763740be9cf6435b5726eb5b",
+          "SHA256SUMS": "bf495f121766010d3d8355ea5c440b7a08c6feee88868b8c1b235c5f6c717351"
+        },
+        "accepted_import": {
+          "path": "tests/history_wp09_adapter/evidence/p1-r46-product",
+          "files": {
+            "SHA256SUMS": "bf495f121766010d3d8355ea5c440b7a08c6feee88868b8c1b235c5f6c717351",
+            "build-identity.json": "6ccb8423e2d734b6e6e3fe821d977e352ebd3780763740be9cf6435b5726eb5b",
+            "observations.jsonl.gz": "81396a71dcbd0115a2d3732c5ff3f7f99e47d016dcb3e9da82f2ad0ea1b91f45"
+          },
+          "observations_sha256": "699876471e1fa95ad63b3f36f2a33c191ab3fbd975b5cc60f8aaadad42afb1b4",
+          "product_pr": 288,
+          "accepted_head": "08ec1c4ad1a60ded6a1429323a1c7bf495f81842",
+          "verification": "Verification #96",
+          "disposition": "https://github.com/mmsanders/digital-tape-verification/issues/96 (closing disposition comment)",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+        "build_identity": {
+          "adapter_source_sha256": "5daad8de9ee13b119c7f4fefc44de7059896ab7366ba1a5a546aade198d9298c",
+          "build_command": "make -C engine clean all && make -C tests/history_wp09_adapter clean all",
+          "edit_count": 10000,
+          "engine_tree": "054d27ab6e3e72f61118ff7d99e19e48741d05b2",
+          "fixture": "tape_format of a blank sparse device sized for 12,000 chunks (nominal_length_s 35,666), uuid WP09-R44-history, then tape_mount(B); one continuous history, no restart",
+          "import_commit": "d48e66b2fe83fd6e3d102ee5a7f1ecc4c07393f6",
+          "makefile_sha256": "2a588e8b26a9b357cb237a57ba60e55352b8d378128bb98728fc466516ce0b5f",
+          "plan_sha256": "c41c8159862c40b759e059c3ed57b43ee94fd40ef7cb89f060fa5044d67be19c",
+          "product_base": "2890ea1eeaa94d53630cf64ca49e5f86afef2965",
+          "run_command": "tests/history_wp09_adapter/build/wp09_adapter > observations.jsonl",
+          "run_product_sha256": "df0f7b39117390c39945e2c7f9a0222fad7ab4fde04da7cd0152279aa2d2f609",
+          "schema": "wp09-r44-product-build-identity-1",
+          "verifier_source_commit": "5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a",
+          "verifier_tree": "fa4e2d1686914f9dfe9aa8c6c7705bdbfce0266f"
+        }
+      },
+      "new": {
+        "raw_sha256": "03ccf6174084c73af6cf681a9b8338257c85f4bd8044f9e980dc912923c1113d",
+        "files": {
+          "observations.jsonl.gz": "d75b58082286b83fc665ad19649b8a9b0621b709750a4ed713b5e50eadedfac0",
+          "host.json": "6302b6179f0b1293ed12117920a6610db4df85ed8db7075d0452f80d422b2faf",
+          "build-identity.json": "3cd900d2eb1e0f0d57e47da1c7ca0a23edd1dc949a2e202e4ac38d02a7eca879",
+          "SHA256SUMS": "f73af9fffc8c86bc4d01950dce7f131fa50536600753b274792d82073efb1709"
+        },
+        "build_identity": {
+          "adapter_source_sha256": "5daad8de9ee13b119c7f4fefc44de7059896ab7366ba1a5a546aade198d9298c",
+          "build_command": "make -C engine clean all && make -C tests/history_wp09_adapter clean all",
+          "edit_count": 10000,
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "fixture": "tape_format of a blank sparse device sized for 12,000 chunks (nominal_length_s 35,666), uuid WP09-R44-history, then tape_mount(B); one continuous history, no restart",
+          "import_commit": "d48e66b2fe83fd6e3d102ee5a7f1ecc4c07393f6",
+          "makefile_sha256": "2a588e8b26a9b357cb237a57ba60e55352b8d378128bb98728fc466516ce0b5f",
+          "plan_sha256": "c41c8159862c40b759e059c3ed57b43ee94fd40ef7cb89f060fa5044d67be19c",
+          "product_base": "2890ea1eeaa94d53630cf64ca49e5f86afef2965",
+          "run_command": "tests/history_wp09_adapter/build/wp09_adapter > observations.jsonl",
+          "run_product_sha256": "e3f0dea1212ce1db255b48c04d461e0150b397b83f518b827f8180585362ead2",
+          "schema": "wp09-r44-product-build-identity-1",
+          "verifier_source_commit": "5c7121872e0fa4b9a4570b018fccd8eb6ddd0d5a",
+          "verifier_tree": "fa4e2d1686914f9dfe9aa8c6c7705bdbfce0266f"
+        },
+        "original_artifact_id": 11562028078,
+        "original_zip_sha256": "d387f99ae6411e46aaeda33ece234b033fe9df049aad6b72fc01c06f2975f1c4",
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7"
+      }
+    },
+    "record-package": {
+      "cases": 26,
+      "adapter_root": "tests/record_adapter",
+      "source_build_profile": {
+        "tests/record_adapter/Makefile": "5b954f0121be6554317e3c60e44b21e237a3fe71c2ab0ea9c29021ac220770cc",
+        "tests/record_adapter/run_product.py": "04563bb0537111c6d7ad3fbe58e952bf2d3ea80519876c7394f34895395edb46",
+        "tests/record_adapter/wp09_rec_probe.c": "634b98de9742a46c2ffc0e28cff045d13c4ee254f36ecd5dac5486d02335d159",
+        "engine/Makefile": "1b0742ef6d704740aa3f143bf19e20ca8c1426690125bfff33c213453966dadc"
+      },
+      "old": {
+        "path": "tests/record_adapter/evidence/p1-r25-product",
+        "raw_sha256": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f",
+        "files": {
+          "observations.jsonl": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f"
+        },
+        "accepted_import": {
+          "path": "tests/record_adapter/evidence/p1-r25-product",
+          "files": {
+            "observations.jsonl": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f"
+          },
+          "observations_sha256": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f",
+          "product_pr": 346,
+          "accepted_head": "7a64891e63427a79d9f6755fac4e87dd1d37c343",
+          "verification": "Verification #132",
+          "disposition": "verification commit f170fd9 (Verification PR #134) findings/P1-R57-W89D-DISPOSITION-2026-10-01.md (record bundle ACCEPT; regenerated byte-identically by #346's --retained gate)",
+          "source": "per-file SHA-256 of the accepted head's committed blobs; equal to the bundle's SHA256SUMS and to every hash the disposition states"
+        },
+        "accepted_engine_tree": "81ad8ec2a35506042a44cb031726291f4bcd19be",
+        "build_identity": null
+      },
+      "new": {
+        "raw_sha256": "691345b23620ef83f91754f3b9a7d876cedc5547514bfcd823864d2d0a723b3c",
+        "files": {
+          "observations.jsonl": "691345b23620ef83f91754f3b9a7d876cedc5547514bfcd823864d2d0a723b3c",
+          "build-identity.json": "f9f7423936138e4cae6bb22187e042f398e48d3e8d8af6b0106f488a589fdb69"
+        },
+        "build_identity": {
+          "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+          "source": "Verification local reproduction of #414; exact raw SHA also equals the final-head CI record report",
+          "build_command": "make -C engine all && make -C tests/record_adapter all"
+        },
+        "original_artifact_id": null,
+        "original_zip_sha256": null,
+        "executed_commit": "a1b362268a53320e676359976593b2f01202ef13",
+        "executed_root_tree": "137b69a43e8df86f921f5c4614971123c29362d1",
+        "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+        "seed": {
+          "file": "record-source.jsonl.gz",
+          "sha256": "e79c0f4d818f3836d2e65dbea3c7cada068feb1192bb94612eef822b10f7dc9f"
+        }
+      }
+    }
+  },
+  "mutation_patches": {
+    "01-chunk-boundary-off-by-one": {
+      "path": "tools/ci/mutations/01-chunk-boundary-off-by-one.patch",
+      "sha256": "9f107c4e039c3e5bd1a42295840c1283a9c04da533e031abf723b3ed79dd07f0"
+    },
+    "02-index-commit-before-chunk-flush": {
+      "path": "tools/ci/mutations/02-index-commit-before-chunk-flush.patch",
+      "sha256": "11899fcd5d40bc9347f07b1455d3d2bbd7d12bd55289f990f40ff32e1ac4b8ab"
+    },
+    "03-sequence-not-incremented": {
+      "path": "tools/ci/mutations/03-sequence-not-incremented.patch",
+      "sha256": "a19bbe37ab9475e172fa45ed8bd19e5405fc90c3a265b5f3a44b88d7895071d5"
+    },
+    "04-crc-wrong-byte-range": {
+      "path": "tools/ci/mutations/04-crc-wrong-byte-range.patch",
+      "sha256": "dfb670b556bd3e5163b30340ec82d5fd4b6b4c88b9c28961e93c986ed797e532"
+    },
+    "05-side-b-allocation-below-a-high-water": {
+      "path": "tools/ci/mutations/05-side-b-allocation-below-a-high-water.patch",
+      "sha256": "4b36b0442dae6ee5b0159137555f9a413a7c9edbe5d6b1afc2fde4ec23a0e4d1"
+    },
+    "06-overdub-clamp-replaced-by-cast": {
+      "path": "tools/ci/mutations/06-overdub-clamp-replaced-by-cast.patch",
+      "sha256": "876bc3cf28068a473c3576e35e5662b1a5e67ecba5881909ed0881f65ba120da"
+    },
+    "07-warm-start-accepted-for-wrong-uuid": {
+      "path": "tools/ci/mutations/07-warm-start-accepted-for-wrong-uuid.patch",
+      "sha256": "cc1b7412fc19b78318a2e41768ab6846f9825fba44db28aa1c14dfc1fbf567e2"
+    },
+    "00-benign-comment": {
+      "path": "tools/ci/mutations/control/00-benign-comment.patch",
+      "sha256": "5d469ae0094488a975957f60f44155bc0181766d9efedd54289592312f8af367"
+    }
+  },
+  "asset": {
+    "repository": "mmsanders/Digital-Tape-Verification",
+    "tag": "evidence-readopt-d10-1",
+    "file": "READOPT-D10-1.tar",
+    "sha256": "81fadd9a69adde06cf83c0774facdb987d1413c23231b6ba5b1dbe01ed275610",
+    "bytes": 9041920,
+    "files": {
+      "capacity-wp09-package/new/SHA256SUMS": "72330472329d6b37ead9c88b61f5100e7756097ebfc51eb64a78783413ac5479",
+      "capacity-wp09-package/new/build-identity.json": "1b4434f17ae4534cae52ac85f646acf8fbac81848f5c0d52d001de511c195078",
+      "capacity-wp09-package/new/host.json": "04c3d3a26c26314a25f846c8d24732371aa05296f11d2f23746bab27af4d58af",
+      "capacity-wp09-package/new/observations.jsonl.gz": "27772348fa18b7d827691caa26fd82f036d0c07668940194dfa474607adf4223",
+      "capacity-wp09-package/old/SHA256SUMS": "5cc9df8b3225065cfafa42daa405156684d3c073d5e2f9f65149d8394f5fa4e2",
+      "capacity-wp09-package/old/build-identity.json": "d59b7e3af6c092fa347ae4b584cb83fc88e13743aab61a994af4b8b00b16a586",
+      "capacity-wp09-package/old/case-census.json": "53b6b19f8ccc8cb7244d68416e6736635594f8bc188286e84808227f0360958a",
+      "capacity-wp09-package/old/observations.jsonl.gz": "a43dbfa7caf49023fda09c902b3509ab28b8c7946cb569d927435e7f6bc07bf9",
+      "history-wp09-package/new/SHA256SUMS": "f73af9fffc8c86bc4d01950dce7f131fa50536600753b274792d82073efb1709",
+      "history-wp09-package/new/build-identity.json": "3cd900d2eb1e0f0d57e47da1c7ca0a23edd1dc949a2e202e4ac38d02a7eca879",
+      "history-wp09-package/new/host.json": "6302b6179f0b1293ed12117920a6610db4df85ed8db7075d0452f80d422b2faf",
+      "history-wp09-package/new/observations.jsonl.gz": "d75b58082286b83fc665ad19649b8a9b0621b709750a4ed713b5e50eadedfac0",
+      "history-wp09-package/old/SHA256SUMS": "bf495f121766010d3d8355ea5c440b7a08c6feee88868b8c1b235c5f6c717351",
+      "history-wp09-package/old/build-identity.json": "6ccb8423e2d734b6e6e3fe821d977e352ebd3780763740be9cf6435b5726eb5b",
+      "history-wp09-package/old/observations.jsonl.gz": "81396a71dcbd0115a2d3732c5ff3f7f99e47d016dcb3e9da82f2ad0ea1b91f45",
+      "mutation-patches/00-benign-comment.patch": "5d469ae0094488a975957f60f44155bc0181766d9efedd54289592312f8af367",
+      "mutation-patches/01-chunk-boundary-off-by-one.patch": "9f107c4e039c3e5bd1a42295840c1283a9c04da533e031abf723b3ed79dd07f0",
+      "mutation-patches/02-index-commit-before-chunk-flush.patch": "11899fcd5d40bc9347f07b1455d3d2bbd7d12bd55289f990f40ff32e1ac4b8ab",
+      "mutation-patches/03-sequence-not-incremented.patch": "a19bbe37ab9475e172fa45ed8bd19e5405fc90c3a265b5f3a44b88d7895071d5",
+      "mutation-patches/04-crc-wrong-byte-range.patch": "dfb670b556bd3e5163b30340ec82d5fd4b6b4c88b9c28961e93c986ed797e532",
+      "mutation-patches/05-side-b-allocation-below-a-high-water.patch": "4b36b0442dae6ee5b0159137555f9a413a7c9edbe5d6b1afc2fde4ec23a0e4d1",
+      "mutation-patches/06-overdub-clamp-replaced-by-cast.patch": "876bc3cf28068a473c3576e35e5662b1a5e67ecba5881909ed0881f65ba120da",
+      "mutation-patches/07-warm-start-accepted-for-wrong-uuid.patch": "cc1b7412fc19b78318a2e41768ab6846f9825fba44db28aa1c14dfc1fbf567e2",
+      "original-artifacts/11562028078.zip": "d387f99ae6411e46aaeda33ece234b033fe9df049aad6b72fc01c06f2975f1c4",
+      "original-artifacts/11562107836.zip": "04bd8b78931691f2cf8c24390ff77630407d2fad0e62e88f81ecfc15da5e4f87",
+      "original-artifacts/11562142385.zip": "8a4fb6a9e1d625d8206b0e33f1917ca10aa2da5b69fc8107d7c6165cba61a9e0",
+      "original-artifacts/11562421491.zip": "14a557f8f1c88544d5dfb9bdb9884970fd7adadd53908f3e183cd937d66f98e2",
+      "original-artifacts/11563130457.zip": "ff0ae663bf0f179e6dc0744639fc0f89b2932322b9e0cea237100c20a5931311",
+      "record-package/new/build-identity.json": "f9f7423936138e4cae6bb22187e042f398e48d3e8d8af6b0106f488a589fdb69",
+      "record-package/new/observations.jsonl": "691345b23620ef83f91754f3b9a7d876cedc5547514bfcd823864d2d0a723b3c",
+      "record-package/old/observations.jsonl": "c461e9e00d47e6ae9c47827fbba68a2a796aed9b418f3aad94c6b34e3591db8f",
+      "strengthen-r55-package/new/SHA256SUMS": "ba1099b7ac9b89ea532b77cb8e1fd0bb8b68a08bbb88f1a94bfe6819d668f24a",
+      "strengthen-r55-package/new/build-identity.json": "01caf693ae1d393b9d14308e698ff4a8ab11ac5f7340b500a7b1d96a29166565",
+      "strengthen-r55-package/new/host.json": "6ffa6d3a4f75f6f967bcacdc0363fe378e8a6c996054301ef5b0f00740e5bfee",
+      "strengthen-r55-package/new/observations.jsonl.gz": "72a1d59ca539ab7d3a1a18808c638846e70dcdc9051f782a00364856283bcbb8",
+      "strengthen-r55-package/old/SHA256SUMS": "d2185814d416845ffef8b6733b43d9facae02773b422d7ee0a53e04050133d6f",
+      "strengthen-r55-package/old/build-identity.json": "27871c5da7bdfc861dbfddecc176b676b41347191f5c083969a5078d53fd929d",
+      "strengthen-r55-package/old/observations.jsonl.gz": "f6c975daec0293736c15dd5cbe03d78d30315d09568cd7208ab2ce76a16f63b2",
+      "wp06-closure-package/new/SHA256SUMS": "b3f6150e43c5573c0465267a71af481ffbf82d4ca92c931667b5ff7a4b95c537",
+      "wp06-closure-package/new/build-identity.json": "1ca8b7c297bea86737c1002b29a25ee286c2feb785882ae137298dd8a674efa1",
+      "wp06-closure-package/new/host.json": "4ba32d431e2d53f2579fe60d785625bca69a33e2fd9795b5acb06da59170c569",
+      "wp06-closure-package/new/observations.jsonl.gz": "e3524b19c367060d285a23a166f75828fa9d97126c18486039e659eff66b3b4a",
+      "wp06-closure-package/old/SHA256SUMS": "abf60a91d5acd75e3a89172897cdfe80c8516f8ca6d113dff48434eb07ef5190",
+      "wp06-closure-package/old/build-identity.json": "a74a70c082f70bc9341784c303b604009e3866909a28a394a6592f9455b759e1",
+      "wp06-closure-package/old/case-census.json": "6ad4daa8b4cc288c6c1bc6127a80fd4583346b3d6844da24eb3658a52b4efd61",
+      "wp06-closure-package/old/observations.jsonl.gz": "389d7340acf57800685757ec4d1aba3252b8a1d45718d682690b2514b1c45b83",
+      "wp08-mapping-r56-package/new/SHA256SUMS": "f81eede401f77ccfae85f3400e8f568f7c8c5fa87bcef3248bf9c44cb9d2ba3f",
+      "wp08-mapping-r56-package/new/build-identity.json": "df65b7cbf11e0b42c9fc5180232e8223bdab86eaa5865aad6e3ba1e7a0edcb00",
+      "wp08-mapping-r56-package/new/host.json": "6ffa6d3a4f75f6f967bcacdc0363fe378e8a6c996054301ef5b0f00740e5bfee",
+      "wp08-mapping-r56-package/new/observations.jsonl.gz": "cd5c97dd9e34411e31d76945d82a122937017d1a022012451d6d3d20325cb7e9",
+      "wp08-mapping-r56-package/old/SHA256SUMS": "f2fd1d9456a73f1c5ea08e1fbe046af07a9e6d3dafdd0489249ec047e879b636",
+      "wp08-mapping-r56-package/old/build-identity.json": "864dd874de069d4dda45a73916181497d59366be61097f49010a90ab1f012de4",
+      "wp08-mapping-r56-package/old/observations.jsonl.gz": "136c77ed0c9f299ebb11e991e37fc7cef2005b9865bb6c09ca9e13ef620b82a2"
+    }
+  },
+  "frozen_spec_sha256": {
+    "authority/PHASE2-PLAN.md": "d8cc0d60477024e461f4b46639dd59419b610845f9146550d9c7564386e35bbb",
+    "authority/PLAYBACK-PERFORMANCE-ADDENDUM.md": "04940ef48fe75745d82fd0eb6a96a3029e4f19a944ebb02c6b45273e68b9d241",
+    "authority/WP-14.md": "f7b8d186b2ada39232de0c800a667f4c7dc15b471a3bf071da10a0518d069102",
+    "authority/ADR170-PLAYBACK-PERFORMANCE-ADDENDUM.md": "85e9ea3aaff047de9118e0e1e0e7918de38263ed79641bd7a535f59e22fda496",
+    "authority/engine-api.md": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
+    "authority/tapefs-v1.md": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba",
+    "authority/VERSION.md": "57483eb1ea873ec3c1ac07914172d2a927e5a425a2e34feb034c5d086c63b8c9",
+    "authority/acceptance.md": "50aa63bd751fdc6b4636de0eb48253887be19b7ec2841768449217b4e9b9e547"
+  }
+}

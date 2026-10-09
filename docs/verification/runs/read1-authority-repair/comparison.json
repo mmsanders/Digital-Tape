@@ -1,0 +1,29 @@
+{
+  "kind": "metadata-repair-source-identity-comparison",
+  "executed_head": "dfe426d4569a53c64558ca84e24cb41881521821",
+  "candidate_base": "30a74442741fa02d221d283ec0c601ab0c1cc646",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "adapter_tree": "0f7a87518a33a1181eab8840e67eb50b38d19949",
+  "original_publication": "e5ee1608faa4ad0c15774e8155ddf32164355f1a",
+  "corrected_publication": "00f846cd9f3cdf43a0c51802b256b6ccc7f0bf2b",
+  "corrected_verifier_tree": "63098ee78ab67a0e12e9f414d2ad467276a77a8d",
+  "verifier_delta": [
+    "INPUTS.json authenticated authority hash/provenance only",
+    "authority/acceptance.md exact frozen DRAFT-10 addition"
+  ],
+  "all_original_engine_build_sources_match_original_provenance": true,
+  "engine_and_adapter_git_trees_unchanged": true,
+  "all_original_case_oracle_schema_backend_control_bytes_unchanged": true,
+  "evidence_archive_sha256": "4a626ca4605780287d03aca211de9a45250700bae857143800113bc715179add",
+  "manifest_artifact_id": 11561118339,
+  "manifest_artifact_zip_sha256": "b553fe8ee3f846b3676e43c9e80b1cacf5fd33c9082d8d2eb521a9d5ad2fdde4",
+  "original_manifests_sha256": {
+    "original-execution/SHA256SUMS": "92de438ae24efc0d07ec5d251209f1d0e31df419866b961d31d1156087e58712",
+    "original-execution/absence-result.json": "809d018ab8da9ed1fe9f9d5bddf5bbf5f65e668833be06c9d8a29f20b3f47d09",
+    "original-execution/control-manifest.json": "2c56795802f9872282cbeb479820529c9f275ef1ad2683027e344f3f7ab83793",
+    "original-execution/provenance.json": "c6cd6d05a0519e1ea1911508deb0fa79e1fbbb44a9e3b48e1f8bc7700be94bf9",
+    "original-execution/run-manifest.json": "f5d70445631c453e689248944e114c1648ee6d0518a84fced33f68ac52fb203f"
+  },
+  "new_full_campaign_executed": false,
+  "independent_disposition": "still required; no retained-regression waiver"
+}

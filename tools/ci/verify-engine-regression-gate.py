@@ -22,6 +22,7 @@ built. Exits non-zero if any control survives or any baseline fails.
 from __future__ import annotations
 
 import gzip
+import importlib.util
 import hashlib
 import json
 from pathlib import Path
@@ -93,11 +94,45 @@ def run(binding: str, retained: Path, scratch: Path) -> tuple[int, str]:
     return r.returncode, r.stdout + r.stderr
 
 
+def epoch_controls(binding, scratch):
+    spec = importlib.util.spec_from_file_location("epoch", ROOT / "tests/playback_regression_epoch/check.py")
+    epoch = importlib.util.module_from_spec(spec); spec.loader.exec_module(epoch)
+    suite = {"history_wp09_adapter":"history-wp09-package", "capacity_wp09_adapter":"capacity-wp09-package"}[binding]
+    out = scratch / binding / "epoch-baseline"
+    r = subprocess.run([sys.executable,"-B",ROOT/"tools/readopt-binding.py","--suite",suite,"--out",out],capture_output=True,text=True)
+    print(r.stdout+r.stderr)
+    if r.returncode:return [binding+": baseline did not pass"]
+    print("baseline ok ",binding)
+    selection = epoch.select(ROOT,suite)
+    data = (out/"fresh/observations.jsonl").read_bytes()
+    altered = out/"altered.jsonl";altered.write_bytes(flip(data))
+    bad=[]
+    try:
+        epoch.regenerate(altered,suite,selection)
+        bad.append(binding+" observation");print("SURVIVED",binding,"observation")
+    except AssertionError as e:
+        if str(e)!="exact regenerated raw stream":raise
+        print("killed",binding,"observation:",e)
+    retained = scratch / binding / "altered-old-provenance"
+    src = ROOT / epoch.load()["suites"][suite]["old"]["path"]
+    shutil.copytree(src,retained);mutate_provenance(retained)
+    try:
+        epoch.authenticate(suite,retained,"old")
+        bad.append(binding+" provenance");print("SURVIVED",binding,"provenance")
+    except AssertionError as e:
+        if "old archive/file identity" not in str(e):raise
+        print("killed",binding,"provenance:",e)
+    return bad
+
+
 def main() -> int:
     bad = []
     with tempfile.TemporaryDirectory() as tmp:
         scratch = Path(tmp)
         for binding, ev in BINDINGS.items():
+            if binding in ("history_wp09_adapter", "capacity_wp09_adapter"):
+                bad.extend(epoch_controls(binding, scratch))
+                continue
             src = ROOT / "tests" / binding / "evidence" / ev
             rc, log = run(binding, src, scratch / binding / "baseline")
             if rc != 0 or "byte-identical" not in log:

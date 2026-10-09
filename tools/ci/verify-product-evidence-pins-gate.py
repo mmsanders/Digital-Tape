@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -40,6 +41,13 @@ def fresh_copy(tmp: Path) -> Path:
     for d in ROOT.glob(PATTERN):
         rel = d.relative_to(ROOT)
         shutil.copytree(d, root / rel)
+    # Pending bindings may live outside the historical adapter evidence glob.
+    # The unmodified fixture must include every directory the audit authenticates.
+    imports = json.loads((ROOT / "tests/IMPORTS.json").read_text())
+    for entry in imports.get("retained_unaccepted_bundles", []):
+        rel = Path(entry["path"])
+        if not (root / rel).exists():
+            shutil.copytree(ROOT / rel, root / rel)
     return root
 
 
