@@ -7,6 +7,21 @@
 
 #include <string.h>
 
+#if defined(_WIN32)
+#include <windows.h>
+/* Paths are UTF-8 (tapectl converts the Windows command line); the C library's
+   fopen would read them in the ANSI code page. */
+static FILE *wav_fopen(const char *path, const char *mode)
+{
+    wchar_t wp[1024], wm[8];
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, wp, 1024) <= 0
+        || MultiByteToWideChar(CP_UTF8, 0, mode, -1, wm, 8) <= 0) { return NULL; }
+    return _wfopen(wp, wm);
+}
+#else
+#define wav_fopen fopen
+#endif
+
 static uint32_t rd32(const unsigned char *p)
 {
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
@@ -42,7 +57,7 @@ int wav_open_read(struct wav_in *w, const char *path, char *err, size_t errlen)
     FILE *fp;
 
     memset(w, 0, sizeof *w);
-    fp = fopen(path, "rb");
+    fp = wav_fopen(path, "rb");
     if (fp == NULL) { return fail(NULL, err, errlen, "cannot open WAV"); }
     if (fread(h, 1, 12, fp) != 12 || memcmp(h, "RIFF", 4) != 0 || memcmp(h + 8, "WAVE", 4) != 0) {
         return fail(fp, err, errlen, "not a RIFF/WAVE file");
@@ -118,7 +133,7 @@ int wav_open_write(struct wav_out *w, const char *path, char *err, size_t errlen
     unsigned char h[44];
 
     w->frames = 0;
-    w->fp = fopen(path, "wb");
+    w->fp = wav_fopen(path, "wb");
     if (w->fp == NULL) { return fail(NULL, err, errlen, "cannot create output WAV"); }
     header(h, 0);
     if (fwrite(h, 1, 44, w->fp) != 44) {

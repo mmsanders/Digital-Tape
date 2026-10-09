@@ -11,9 +11,17 @@
 
 #include "wav.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <direct.h>
+#define make_dir(p) _mkdir(p)
+#else
+#include <sys/stat.h>
+#define make_dir(p) mkdir((p), 0777)
+#endif
 
 static int failures;
 static char g_dir[512];
@@ -88,11 +96,9 @@ int main(int argc, char **argv)
 
     if (argc != 2) { fprintf(stderr, "usage: test_wav SCRATCH_DIR\n"); return 2; }
     (void)snprintf(g_dir, sizeof g_dir, "%s", argv[1]);
-    {
-        char cmd[600];
-        (void)snprintf(cmd, sizeof cmd, "mkdir -p '%s'", g_dir);
-        if (system(cmd) != 0) { return 2; }
-    }
+    /* One level, parent already present (make's BUILD dir). No shell: on
+       Windows system() would hand "mkdir -p" to cmd.exe. */
+    if (make_dir(g_dir) != 0 && errno != EEXIST) { perror(g_dir); return 2; }
 
     printf("== WAV reader rejects, never converts ==\n");
     make("48k.wav", 1, 2, 48000, 16, 0, 16, 16);

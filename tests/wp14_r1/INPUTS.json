@@ -1,0 +1,14 @@
+{
+  "product_commit": "437283291c944d24a3d574dee0e3f44ba97e1896",
+  "verification_input": "6ace9bfc135f3b9b44eabd978ccf925870bc5d48",
+  "issue": 146,
+  "issue_updated_at": "2026-10-05T20:36:07Z",
+  "sha256": {
+    "spec/VERSION.md": "57483eb1ea873ec3c1ac07914172d2a927e5a425a2e34feb034c5d086c63b8c9",
+    "spec/WP-14.md": "a3b4616a0fdaa27c974724d9dcbc33dcdd04f11db83b278624ea7ec9e287e7ec",
+    "spec/WP11-CLI-CONTRACT.md": "f03269c9c37c58e35b9b69cd7bcb47dae4de5c5c201ca83292e966543813f48b",
+    "spec/WP14-CLI-CONTRACT.md": "81975d6587b6e0b50a2a3ffc407164e908162a170e6a5e4a43dee0976fc8ea18",
+    "spec/engine-api.md": "aa042e41e35b02bf2bb6b3896e59340a947720c27dc5fc52a24d657ccd66b33a",
+    "spec/tapefs-v1.md": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba"
+  }
+}

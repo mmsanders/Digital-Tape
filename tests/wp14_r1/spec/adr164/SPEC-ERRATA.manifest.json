@@ -1,0 +1,11 @@
+{
+  "erratum": "E-1",
+  "base_bundle": "DRAFT-10",
+  "base_file": "spec/tapefs-v1.md",
+  "base_sha256": "2a6a9f7b6fe1e5f9e3fe068b3c6460a81256276082bb7e336c01dbf1e9c17eba",
+  "overlay_file": "docs/SPEC-ERRATA.md",
+  "overlay_sha256": "0cd814527f1c2a2e2d54de0f7a34e7195cb918262632e07d0b194831bade02a1",
+  "approval": "Michael; Product #391; 2026-10-05 America/Los_Angeles",
+  "independent_paper_commit": "6837102116ed94f80b8a6454713ffb1e7c076427",
+  "exact_byte_confirmation": "Verification #146 Stage 1; required before import"
+}

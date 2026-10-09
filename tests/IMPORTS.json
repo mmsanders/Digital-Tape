@@ -518,6 +518,19 @@
         "-B",
         "tests/playback_regression_epoch/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp14_r1",
+      "tree": "e1ef171ffdd7464314b4b838a7d904b1a94f5409",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-14 P2-R1 complete independent package against ADR-165 (Product 6f362f093435ab1a1501055b3bb1cdbe37a5b04c; contract SHA-256 01305d9cc412a2e518fd7884e5ff99d97ae3498f63c22a5c7b418ec547e0eecd): 79 image cases and 11 causal output controls; native census Linux 97, macOS/Windows 96 static requests plus generated provision-replay cases; closed-census qualification gate and A8 Git-identity audit. Published by Verification #146 Stage 1 and merged to Verification main as #149 at 0cad3634cff2023101d47750e9cc5684dbd91e94 (source cef47cf6e4afa7d3c4d8e03713d747255c68644d); corrected by Verification #150 (runner round-trip target isolation; C60-only 7200 s execution ceiling, no expectation changed) at 56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2 (source 12faeacbff01a1ef7787ca545ee2a2811e814b2e); imported byte-identically by Product #392 Stage 2. The self-tests are synthetic verifier tests with zero Product runs; not Product acceptance, physical witness or Windows 10 evidence",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp14_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
@@ -618,6 +631,14 @@
       {
         "path": "tests/playback_readonly_r1/authority",
         "revision": "DRAFT-10"
+      },
+      {
+        "path": "tests/wp14_r1/spec",
+        "revision": "DRAFT-10",
+        "files": [
+          "tapefs-v1.md",
+          "engine-api.md"
+        ]
       }
     ]
   },
