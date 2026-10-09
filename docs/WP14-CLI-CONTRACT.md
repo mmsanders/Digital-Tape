@@ -11,7 +11,7 @@ changes it.
 
 - `tapectl` stays one C99 binary in `host/`. It composes the public engine API and reimplements no
   engine behaviour (guardrail 12).
-- **`engine/` is byte-identical to main** (WP-14 A8). New port code lives in `host/port/`, not
+- **`engine/` is byte-identical to the immutable accepted playback pin** (WP-14 A8, ADR-175): `d96b4245e04d74078f8938744b1394c3018516f7`. New port code lives in `host/port/`, not
   `engine/port/`. `engine/port/dev_file.c` stays as it is for the Phase 1 suites.
 - **`tapectl` never parses TAPEFS structures.** Superblock, index and chunk judgments come from engine
   calls only. `tapectl` owns, and parses, only what the engine never sees: the MBR and partition 1.
@@ -265,5 +265,5 @@ from the shipped binary. Their expectations belong to Verification; transport be
 GUI (WP-15), ingest (WP-16), `dup` on the desktop, warm start, write batching (Q-P2-1), label art in
 partition 1, and any engine change within WP14. ADR-169 separately permits the read-only playback correction
 under [the addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md); WP14 must match its independently
-accepted/integrated engine-tree pin, initially PENDING, with all Phase 1 goldens/replays green.
-No WP14 A8 PASS until that pin is recorded. Adding a command or a finding is a PM change.
+accepted/integrated engine-tree pin `d96b4245e04d74078f8938744b1394c3018516f7` (ADR-175), with all Phase 1 goldens/replays green.
+Pin recorded after independent READ-2 PASS and unchanged #419 integration; WP14 A8 still requires exact comparison/execution. Adding a command or a finding is a PM change.
