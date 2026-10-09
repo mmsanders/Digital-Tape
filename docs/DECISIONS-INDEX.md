@@ -137,4 +137,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-173](DECISIONS.md#adr-173--resolve-p2read-003-with-one-final-required-pr-qualification-run) | 2026-10-08 | P2READ-003 final execution issued | Independent binding/mutations pass; one final existing PR qualification ALL run authorized, READ-1 carriage preserved |
 
-110 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-174](DECISIONS.md#adr-174--complete-the-pin-control-fixture-and-authorize-normal-correction-ci) | 2026-10-08 | Pin-control fixture correction | Engine 100/100 PASS; include pending dirs in control baseline; necessary in-scope fixes may run normal required CI |
+
+111 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
