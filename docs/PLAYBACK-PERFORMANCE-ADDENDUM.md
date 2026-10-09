@@ -144,14 +144,19 @@ overrun; synthetic positives only test the harness.
 
 ## WP14 A8 and acceptance pin
 
-WP14 may use only the separately independently accepted and integrated playback
-engine tree authorized by this addendum. Until disposition, the engine pin is
-**PENDING**: WP14 cannot claim A8 against a candidate engine. After acceptance,
-Software reports the exact integrated engine tree and Verification's disposition;
-PM records the pin here before #392's final WP14 gate. WP14 must be byte-identical
-to that engine tree, add no engine edits, and pass all Phase 1 goldens/replays.
-No moving-main equality or port write coalescing substitutes for this pin.
-All A1–A7/A9, native C60, Windows 10, real-card and release holds survive.
+**ACCEPTED / INTEGRATED — ADR-175, 8 October PDT.** Immutable WP14 A8 engine-tree
+pin: `d96b4245e04d74078f8938744b1394c3018516f7`. Independent final READ-2 PASS
+[Verification PR157](https://github.com/mmsanders/Digital-Tape-Verification/pull/157)
+published at `f5fc69c15291dbc40f43690866d186d106459b43` for Product #419
+head `7d0f67629214cc5a41d24725d6c28cffdc59f031`; integrated by Software
+at `d5c2d5ef2912662ca34d32619f6b7310169e496e`, identical reviewed root
+`57c7df2159ebc80a7295a21245404186725436c8`. Complete required checks pass.
+
+WP14 must be byte-identical to that engine tree, add no engine edits, and pass all
+Phase 1 goldens/replays. No moving-main equality or port write coalescing substitutes.
+This pin satisfies the playback dependency, not WP14 A8 execution or package acceptance.
+Existing #392/#146 now resume meaningful final WP14 qualification against it.
+All A1–A7/A9, native C60, Windows10, real-card and release holds survive.
 
 ## Separate follow-ons
 
