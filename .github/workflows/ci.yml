@@ -1696,13 +1696,19 @@ jobs:
           pattern: wp14-package-*
           path: ${{ runner.temp }}/bundle
           merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-native-evidence-*
+          path: ${{ runner.temp }}/native-captures
       - name: Closed census (tests/wp14_r1/qualification.py)
         run: |
           set -euo pipefail
           b="$RUNNER_TEMP/bundle"
           for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
           ls -la "$b"
-          python3 -B tests/wp14_r1/qualification.py --head "$HEAD_SHA" "$b" | tee "$RUNNER_TEMP/census.json"
+          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" \
+            --captures "$RUNNER_TEMP/native-captures" --relocations "$RUNNER_TEMP/relocations.json" \
+            "$b" | tee "$RUNNER_TEMP/census.json"
       - name: Git identity (tests/wp14_r1/a8_identity.py)
         run: |
           set -euo pipefail
@@ -1723,6 +1729,7 @@ jobs:
           path: |
             ${{ runner.temp }}/census.json
             ${{ runner.temp }}/a8-identity.json
+            ${{ runner.temp }}/relocations.json
           if-no-files-found: ignore
 
   wp11-portability:
