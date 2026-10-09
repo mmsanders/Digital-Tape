@@ -111,6 +111,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       # Two separable facts, in order, in one job.
       #
       # 1. The verifier's own negative controls over its record oracles, run
@@ -133,10 +136,16 @@ jobs:
       #    directory and require byte-identity with the in-tree p1-r25-product
       #    bytes, which are never rewritten here.
       - run: >
-          python3 tests/record_adapter/run_product.py
-          --evidence tests/record_adapter/evidence/product
-          --retained tests/record_adapter/evidence/p1-r25-product
+          python3 -B tools/readopt-binding.py
+          --suite record-package
+          --out tests/record_adapter/evidence/READOPT-D10-1-live
 
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: readopt-record-exact-evidence
+          path: tests/record_adapter/evidence/READOPT-D10-1-live
 
   transport-package:
     name: independent transport/warm package — synthetic self-checks, then product observations
@@ -701,23 +710,23 @@ jobs:
           --out tests/capacity_wp09_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed evidence
+      - name: Canonical run; full raw stream must equal issued READOPT-D10-1
         if: always()
         run: >
-          python3 tests/capacity_wp09_adapter/run_product.py
-          --evidence tests/capacity_wp09_adapter/evidence/product
-          --retained tests/capacity_wp09_adapter/evidence/p1-r53-product
+          python3 -B tools/readopt-binding.py
+          --suite capacity-wp09-package
+          --out tests/capacity_wp09_adapter/evidence/READOPT-D10-1-live
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: The oracle rejects mutated Product evidence
         if: always()
-        run: python3 -B tests/capacity_wp09_adapter/negative_controls.py tests/capacity_wp09_adapter/evidence/product/observations.jsonl
+        run: python3 -B tests/capacity_wp09_adapter/negative_controls.py tests/capacity_wp09_adapter/evidence/READOPT-D10-1-live/fresh/observations.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p1-r53-wp09-capacity-product-evidence
           path: |
-            tests/capacity_wp09_adapter/evidence/product
+            tests/capacity_wp09_adapter/evidence/READOPT-D10-1-live
             tests/capacity_wp09_adapter/evidence/replay
           if-no-files-found: error
 
@@ -825,23 +834,23 @@ jobs:
           --out tests/wp06_closure_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed evidence
+      - name: Canonical run; full raw stream must equal issued READOPT-D10-1
         if: always()
         run: >
-          python3 tests/wp06_closure_adapter/run_product.py
-          --evidence tests/wp06_closure_adapter/evidence/product
-          --retained tests/wp06_closure_adapter/evidence/p1-r54-product
+          python3 -B tools/readopt-binding.py
+          --suite wp06-closure-package
+          --out tests/wp06_closure_adapter/evidence/READOPT-D10-1-live
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Per-case oracle outcomes; the oracle rejects mutated Product evidence
         if: always()
-        run: python3 -B tests/wp06_closure_adapter/negative_controls.py tests/wp06_closure_adapter/evidence/product/observations.jsonl
+        run: python3 -B tests/wp06_closure_adapter/negative_controls.py tests/wp06_closure_adapter/evidence/READOPT-D10-1-live/fresh/observations.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p1-r54-wp06-closure-product-evidence
           path: |
-            tests/wp06_closure_adapter/evidence/product
+            tests/wp06_closure_adapter/evidence/READOPT-D10-1-live
             tests/wp06_closure_adapter/evidence/replay
           if-no-files-found: error
 
@@ -869,23 +878,23 @@ jobs:
           --out tests/strengthen_r55_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+      - name: Canonical run; full raw stream must equal issued READOPT-D10-1
         if: always()
         run: >
-          python3 tests/strengthen_r55_adapter/run_product.py
-          --evidence tests/strengthen_r55_adapter/evidence/product
-          --retained tests/strengthen_r55_adapter/evidence/p1-r56-product
+          python3 -B tools/readopt-binding.py
+          --suite strengthen-r55-package
+          --out tests/strengthen_r55_adapter/evidence/READOPT-D10-1-live
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Per-row census; the oracle rejects mutated Product evidence
         if: always()
-        run: python3 -B tests/strengthen_r55_adapter/negative_controls.py tests/strengthen_r55_adapter/evidence/product/observations.jsonl.gz
+        run: python3 -B tests/strengthen_r55_adapter/negative_controls.py tests/strengthen_r55_adapter/evidence/READOPT-D10-1-live/fresh/observations.jsonl.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p1-r56-strengthen-r55-product-evidence
           path: |
-            tests/strengthen_r55_adapter/evidence/product
+            tests/strengthen_r55_adapter/evidence/READOPT-D10-1-live
             tests/strengthen_r55_adapter/evidence/replay
           if-no-files-found: error
 
@@ -913,23 +922,23 @@ jobs:
           --out tests/wp08_mapping_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed SHA-256
+      - name: Canonical run; full raw stream must equal issued READOPT-D10-1
         if: always()
         run: >
-          python3 tests/wp08_mapping_adapter/run_product.py
-          --evidence tests/wp08_mapping_adapter/evidence/product
-          --retained tests/wp08_mapping_adapter/evidence/p1-r57-product
+          python3 -B tools/readopt-binding.py
+          --suite wp08-mapping-r56-package
+          --out tests/wp08_mapping_adapter/evidence/READOPT-D10-1-live
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Per-row census; the oracle rejects mutated Product evidence
         if: always()
-        run: python3 -B tests/wp08_mapping_adapter/negative_controls.py tests/wp08_mapping_adapter/evidence/product/observations.jsonl.gz
+        run: python3 -B tests/wp08_mapping_adapter/negative_controls.py tests/wp08_mapping_adapter/evidence/READOPT-D10-1-live/fresh/observations.jsonl.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p1-r57-wp08-mapping-product-evidence
           path: |
-            tests/wp08_mapping_adapter/evidence/product
+            tests/wp08_mapping_adapter/evidence/READOPT-D10-1-live
             tests/wp08_mapping_adapter/evidence/replay
           if-no-files-found: error
 
@@ -1258,23 +1267,23 @@ jobs:
           --out tests/history_wp09_adapter/evidence/replay
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Canonical run; the fresh JSONL must equal the committed evidence
+      - name: Canonical run; full raw stream must equal issued READOPT-D10-1
         if: always()
         run: >
-          python3 tests/history_wp09_adapter/run_product.py
-          --evidence tests/history_wp09_adapter/evidence/product
-          --retained tests/history_wp09_adapter/evidence/p1-r46-product
+          python3 -B tools/readopt-binding.py
+          --suite history-wp09-package
+          --out tests/history_wp09_adapter/evidence/READOPT-D10-1-live
         env:
           PRODUCT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: The oracle rejects mutated Product evidence
         if: always()
-        run: python3 -B tests/history_wp09_adapter/negative_controls.py tests/history_wp09_adapter/evidence/product/observations.jsonl
+        run: python3 -B tests/history_wp09_adapter/negative_controls.py tests/history_wp09_adapter/evidence/READOPT-D10-1-live/fresh/observations.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p1-r46-wp09-history-product-evidence
           path: |
-            tests/history_wp09_adapter/evidence/product
+            tests/history_wp09_adapter/evidence/READOPT-D10-1-live
             tests/history_wp09_adapter/evidence/replay
           if-no-files-found: error
 
@@ -1756,13 +1765,12 @@ jobs:
       - name: PyYAML (the gate reads each suite's steps from this workflow)
         run: python3 -c "import yaml" 2>/dev/null || (sudo apt-get update -q && sudo apt-get install -y --no-install-recommends python3-yaml)
       - run: tools/ci/verify-fetch-evidence-wp11.sh
-      - run: tools/ci/mutation-gate --control
-      - run: tools/ci/mutation-gate
+      - run: python3 -B tools/ci/readopt-mutations.py --out build/readopt-mutations
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: wp11-mutation-gate-logs
-          path: build/mutation-gate
+          path: build/readopt-mutations
           if-no-files-found: ignore
 
   golden:

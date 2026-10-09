@@ -1,6 +1,6 @@
 # Project status
 
-**6 October 2026 UTC · input main `25b6439` · Owner: PM (ADR-165 P2V-005 CRC/signature ruling) ·**
+**9 October 2026 UTC · input main `d5c2d5e` · Owner: PM (ADR-175; #420 integrated, Verification #157 PASS) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 10 + current macOS;
-WP-38 not taken; operations freeze declared. **P2-R1 continues** (ADR-165): [WP-14 contract](WP14-CLI-CONTRACT.md) P2V-005 resolved by target-kind recognition; #390 not accepted.
+WP-38 not taken; operations freeze declared. **P2-R1 resumed:** playback #419 independently accepted/integrated `d5c2d5e`; immutable A8 engine `d96b4245` recorded. Existing #392/#146 final WP14 qualification next; #390 not accepted.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,9 +79,9 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | WP-14 #390 `8e79710` transport/corrections green candidate; verifier `ce60d34` partial (52 amendment checks/31 controls, zero Product runs). ADR-165 resolves CRC collision; complete binding/disposition and physical/Windows 10 evidence held | Software continuation; Verification #146; Michael #386 |
+| Phase 2 / P2-R1 | — | Playback #419 accepted: Verification #157 `f5fc69c1` PASS; integrated `d5c2d5e`, identical root. Engine `d96b4245` pinned; final engine CI 100/100; 109 jobs/108 PASS/one authorized READ1 skip | Existing #392 clean WP14 binding/final native C60 and required CI → #146 exact-head disposition; Michael-reserved #390 merge, physical/Windows10/release holds |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; produced-card OS readability still held | Verification #146; Michael #386 |
-| Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | PM (b) P2-R2; enlarged-model qualification before batching |
+| Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | [ADR-168 framework](PERFORMANCE-PLAN.md); retain <30 s; design #405 reviewed; async ABI unissued; model before write changes |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **Copy time on the device (#379).** One-block device calls make the C-60 copy depend on port batching; Q-P2-1 settles it before firmware.
+5. **I/O performance (#399/#379).** #399 resolved: independently accepted read-only playback integrated at `d5c2d5e`, engine `d96b4245` (ADR-175). C60 budget1024: 1,240,313 payload blocks / 19,380 callbacks; no target-speed claim. Final WP14 native C60 remains. Dup ~1.24M reads/writes and load 155048 flushes remain separate unissued write/async/recording risks; <30 s target copy mandatory.
 6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
@@ -107,8 +107,8 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 **Complete independent package acceptance exists for every Phase 1 package**: WP-06 (#138), WP-07 (#67),
 WP-08/09/11/12 (#143 plus Michael #367), WP-10 (#141), WP-13 (#83, carried by #361) and WP-36 (#57).
 Each holds within its exact recorded boundary.
-Pilot CI evidence: docs 51 s/1.6 job-minutes; host 1m42s/12.4; full 167. Two WP-14 contract corrections (ADR-164, CRC discriminator ADR-165);
- no completed WP-14 acceptance yet. Main ruleset 22084355 remains active and strict. The golden suite is green and gates every PR.
+Pilot CI evidence: docs 51 s/1.6 job-minutes; host 1m42s/12.4; full 167. ADR-166 preserves criteria and stops unchanged timeout reruns.
+ADR-169 issues read-only playback scope, tests first; #405 design published #407. <30 s retained; write/async/target work unissued. No WP-14 acceptance; strict ruleset 22084355 and golden gates remain.
 
 The lead operating format, role charters and the issue workflow are in
 [CLAUDE.md §7](../CLAUDE.md), [role charters](ROLES/README.md) and

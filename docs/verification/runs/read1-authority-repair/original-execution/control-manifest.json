@@ -1,0 +1,71 @@
+{
+  "schema": "read1-controls-v1",
+  "kind": "actual-Product-control-run",
+  "product_commit": "dfe426d4569a53c64558ca84e24cb41881521821",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "adapter_sha256": "c8804df3b068ed1d20ff98f27daefb3891b554c7e8bd5486d6613334c50413ca",
+  "seam_nonzero_and_zero_executed": true,
+  "controls": [
+    {
+      "control": "whole-window-reread",
+      "case": "cold-40001-b1024",
+      "detected_by": "payload reread ceiling"
+    },
+    {
+      "control": "tiny-transfer",
+      "case": "cold-40001-b1024",
+      "detected_by": "tiny-transfer callback ceiling"
+    },
+    {
+      "control": "full-index-rescan",
+      "case": "fragment-4096-long-b1024",
+      "detected_by": "mapping visit ceiling"
+    },
+    {
+      "control": "retained-movement",
+      "case": "cold-40001-b1024",
+      "detected_by": "retained monotone movement"
+    },
+    {
+      "control": "stale-side",
+      "case": "other-side",
+      "detected_by": "invalidated ring returned stale samples"
+    },
+    {
+      "control": "stale-content",
+      "case": "overwrite",
+      "detected_by": "exact PCM / interpolation / stale coverage"
+    },
+    {
+      "control": "stale-warm",
+      "case": "warm-valid",
+      "detected_by": "exact PCM / interpolation / stale coverage"
+    },
+    {
+      "control": "missing-lookahead",
+      "case": "lookahead",
+      "detected_by": "exact PCM / interpolation / stale coverage"
+    },
+    {
+      "control": "budget-overrun",
+      "case": "cold-8193-b1",
+      "detected_by": "sum-of-counts service budget"
+    },
+    {
+      "control": "idle-nine-loops",
+      "case": "idle-playing",
+      "detected_by": "idle loop ceiling"
+    },
+    {
+      "control": "idle-mapping",
+      "case": "idle-playing",
+      "detected_by": "idle PCM/mapping work"
+    },
+    {
+      "control": "invented-zero-seam",
+      "case": "idle-playing",
+      "detected_by": "seam causal nonzero work"
+    }
+  ],
+  "observations_sha256": "17989e39da4526ef8540115c65c36aef74c088a37452bbff56ff1eb210e825a5"
+}

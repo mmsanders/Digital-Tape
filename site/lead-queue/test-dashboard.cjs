@@ -35,8 +35,8 @@ assert.equal([...roadmap().matchAll(/width:(\d+)%/g)].map(m => m[1]).join(),
 // A package is only green once it is independently accepted. No Phase 2 package is independently accepted yet.
 const acceptedNow = Array.from(rungs).filter(rung => rung === top).length;
 assert.equal(acceptedNow, 0);
-assert.equal(Array.from(rungs).join(), '1,0,0');
-assert.match(roadmap(), /1 of 12 gate rungs/);
+assert.equal(Array.from(rungs).join(), '2,0,0');
+assert.match(roadmap(), /2 of 12 gate rungs/);
 assert.match(roadmap(), /Windows 10/);
 assert.match(roadmap(), /software-only PASS is not the final rung/);
 assert.match(roadmap(), /WP-38 is not taken/);

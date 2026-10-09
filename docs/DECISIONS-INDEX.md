@@ -120,4 +120,25 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-164](DECISIONS.md#adr-164--e-1-approval-recorded-wp-14-preflight-resolved-p2-r1-continuation-stays-pre-routed) | 2026-10-06 | E-1 approved; WP-14 preflight resolved | FAT16 overlay; Q1–Q11/P2V-001…004 settled; D8 complete; direct publication/binding/disposition continues |
 | [ADR-165](DECISIONS.md#adr-165--p2v-005-distinguish-bare-files-from-whole-devices-without-parsing-tapefs) | 2026-10-06 | P2V-005: bare-file CRC/signature collision | Files use nonzero MBR entries; whole devices retain OR signature; no host TAPEFS parser; existing #392/#146 stages continue |
 
-102 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+| [ADR-166](DECISIONS.md#adr-166--wp14-throughput-triage-preserve-criteria-stop-unchanged-timeout-reruns-discuss-remedies) | 2026-10-07 | WP14 throughput triage | Preserve criteria; stop unchanged native-timeout reruns; playback/transfer/cadence remedies await discussion |
+
+| [ADR-167](DECISIONS.md#adr-167--performance-recommendation-burst-reuse-transaction-durability-and-firmware-energy) | 2026-10-07 | Revised performance recommendation | Burst reuse plus CPU bounds; transaction durability; optional copy/raw-destination simplification; firmware energy; no normative change |
+
+
+| [ADR-168](DECISIONS.md#adr-168--retain-thirty-second-copy-and-queue-the-software-performance-framework) | 2026-10-07 | Retain <30 s copy; Software framework queued | Urgent read recovery first, real overlap design, WP14 reuse, bounded #405 planning; no code/spec issuance |
+
+| [ADR-169](DECISIONS.md#adr-169--issue-the-read-only-playback-exception-and-preserve-separate-write-gates) | 2026-10-07 | Read-only playback scope issued | Source-independent bounds, tests first, WP14 accepted-engine pin pending; writes/async separate |
+
+| [ADR-170](DECISIONS.md#adr-170--resolve-p2read-001-with-finite-mapping-and-idle-work-bounds) | 2026-10-07 | P2READ-001 resolved | Finite setup/traversal/seek/episode and idle criteria; partial preflight preserved, resume READ-1 |
+
+| [ADR-171](DECISIONS.md#adr-171--repair-read-1-authority-provenance-and-preserve-the-blocked-playback-candidate) | 2026-10-08 | READ-1 authority provenance repair | Missing frozen acceptance copy/pin; clean #412 import before implementation; preserve evidence; independent READ-2 pending |
+
+| [ADR-172](DECISIONS.md#adr-172--resolve-p2read-002-with-a-preserved-read-optimized-transcript-binding) | 2026-10-08 | P2READ-002 binding issued | Six audited suites, exact-engine epoch; historical bytes/replay preserved; restore causal gates; no acceptance |
+
+| [ADR-173](DECISIONS.md#adr-173--resolve-p2read-003-with-one-final-required-pr-qualification-run) | 2026-10-08 | P2READ-003 final execution issued | Independent binding/mutations pass; one final existing PR qualification ALL run authorized, READ-1 carriage preserved |
+
+| [ADR-174](DECISIONS.md#adr-174--complete-the-pin-control-fixture-and-authorize-normal-correction-ci) | 2026-10-08 | Pin-control fixture correction | Engine 100/100 PASS; include pending dirs in control baseline; necessary in-scope fixes may run normal required CI |
+
+111 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
+
+| [ADR-175](DECISIONS.md#adr-175--record-accepted-playback-a8-pin-and-resume-existing-wp14-work) | 2026-10-08 PDT | Accepted playback pin / WP14 resumption | READ-2 PASS integrated; A8 d96b4245; #399 resolved; existing #392/#146 final gate, physical/platform holds |

@@ -23,6 +23,7 @@
 
 #include "tape_internal.h"
 #include "dev.h"
+#include "read1_observe.h"
 
 /* Frames per 512-byte block. Physical frames are contiguous within a chunk. */
 #define FRAMES_PER_BLOCK (TAPE_BLOCK_SIZE / TAPE_FRAME_BYTES)   /* 128 */
@@ -33,7 +34,7 @@
    validated at mount, so this cannot overflow. */
 static uint64_t play_max_pos(const tape *t)
 {
-    return TAPE_LIVE(t).total_frames << 32;
+    return (t->faulted ? t->play_total_frames : TAPE_LIVE(t).total_frames) << 32;
 }
 
 /* §6.1: step = rate_q16_16 * 65536, widening 16.16 to 32.32. |step| <= 2^47,
@@ -124,7 +125,7 @@ static const int16_t *play_frame(const tape *t, uint32_t n)
     if (n - t->play_base >= t->play_frames) { return NULL; }
 
     base = t->play_ring;
-    return (const int16_t *)(const void *)(base + (size_t)(n - t->play_base) * TAPE_FRAME_BYTES);
+    return (const int16_t *)(const void *)(base + (size_t)(((uint64_t)t->play_slot + n - t->play_base) % play_capacity(t)) * TAPE_FRAME_BYTES);
 }
 
 /*
@@ -253,6 +254,52 @@ tape_result tape_status(const tape *t, tape_status_t *out)
     return TAPE_OK;
 }
 
+/* Cursor walks in timeline order, independent of physical entry ordering. */
+static bool play_map(tape *t, uint32_t n, uint64_t *phys, uint32_t *run)
+{
+    const struct tape_index *idx = &TAPE_LIVE(t);
+    if (!t->play_map_valid) { t->play_map_entry = 0u; t->play_map_base = 0u; t->play_map_valid = true; }
+    while (t->play_map_entry < idx->entry_count) {
+        const struct tape_entry *x = &idx->entries[t->play_map_entry];
+#ifdef TAPE_READ1_OBSERVE
+        TAPE_READ1_LOOP(); TAPE_READ1_VISIT();
+#endif
+        if (n < t->play_map_base) {
+            if (t->play_map_entry == 0u) { return false; }
+            --t->play_map_entry;
+#ifdef TAPE_READ1_OBSERVE
+            TAPE_READ1_VISIT();
+#endif
+            t->play_map_base -= idx->entries[t->play_map_entry].frame_count;
+        } else if ((uint64_t)n - t->play_map_base >= x->frame_count) {
+            t->play_map_base += x->frame_count;
+            ++t->play_map_entry;
+        } else {
+            uint32_t off = (uint32_t)((uint64_t)n - t->play_map_base);
+            *phys = (uint64_t)x->first_chunk_id * TAPE_CHUNK_FRAMES + x->start_frame + off;
+            *run = x->frame_count - off;
+            return true;
+        }
+    }
+    return false;
+}
+
+static void play_copy(tape *t, uint32_t n, const unsigned char *src, uint32_t frames)
+{
+    uint32_t cap = play_capacity(t);
+    uint32_t dest = (uint32_t)(((uint64_t)t->play_slot + cap + n - t->play_base) % cap);
+    uint32_t part = cap - dest;
+    unsigned char *ring = t->play_ring;
+    if (part > frames) { part = frames; }
+#ifdef TAPE_READ1_OBSERVE
+    TAPE_READ1_COPY(ring + (size_t)dest * TAPE_FRAME_BYTES, src, (size_t)part * TAPE_FRAME_BYTES, refill);
+    TAPE_READ1_COPY(ring, src + (size_t)part * TAPE_FRAME_BYTES, (size_t)(frames-part) * TAPE_FRAME_BYTES, refill);
+#else
+    memcpy(ring + (size_t)dest * TAPE_FRAME_BYTES, src, (size_t)part * TAPE_FRAME_BYTES);
+    memcpy(ring, src + (size_t)part * TAPE_FRAME_BYTES, (size_t)(frames-part) * TAPE_FRAME_BYTES);
+#endif
+}
+
 /*
  * §6.3: tape_service does ALL card I/O, at most block_budget blocks per call,
  * and sets *more_work while its window is not yet filled.
@@ -286,59 +333,144 @@ tape_result tape_service(tape *t, uint32_t block_budget, bool *more_work)
     }
 
     idx = &TAPE_LIVE(t);
+    t->play_total_frames = idx->total_frames;
+#ifdef TAPE_READ1_OBSERVE
+    if (TAPE_READ1_CONTROL("retained-movement") && t->play_ring_valid &&
+        t->play_frames >= 64u && (t->position_frame >> 32) > t->play_base) {
+        unsigned char tape_read1_saved[256];
+        TAPE_READ1_COPY(tape_read1_saved, play_frame(t, t->play_base), sizeof tape_read1_saved, move);
+        TAPE_READ1_COPY((unsigned char *)t->play_ring + (size_t)t->play_slot * TAPE_FRAME_BYTES,
+                        tape_read1_saved, sizeof tape_read1_saved, move);
+    }
+#endif
     play_target(t, &first, &end);
-
-    if (end <= first) {                 /* empty timeline, or no ring capacity */
+    if (!t->play_ring_valid) {
         t->play_frames = 0u;
+        t->play_slot = 0u;
         t->play_base = first;
-        t->play_ring_valid = true;
-        *more_work = rec_more;
-        return TAPE_OK;
-    }
-
-    /* The window moved: restart it. Keeping a partial window that no longer
-       contains the playhead would let tape_render emit from the wrong region. */
-    if (!t->play_ring_valid || t->play_base != first) {
-        t->play_base = first;
-        t->play_frames = 0u;
+        t->play_goal_first = first;
+        t->play_goal_end = end;
+        t->play_fill_next = first;
+        t->play_map_valid = false;
+        t->play_cache_valid = false;
         t->play_ring_valid = true;
     }
-
-    while ((uint32_t)(t->play_base + t->play_frames) < end) {
-        uint64_t n = (uint64_t)t->play_base + (uint64_t)t->play_frames;
-        uint64_t phys;
-        uint32_t lba, off, take, run, room;
-        unsigned char *dst;
-
-        if (used >= block_budget) { break; }
-
-        if (!tape_timeline_physical(idx, n, &phys)) { break; }   /* past the timeline */
-
-        lba = t->sb.lba_chunk_base + (uint32_t)(phys / FRAMES_PER_BLOCK);
-        if (dev_read(&t->dev, lba, 1u, t->block) != 0) {
-            /* A read failure is not §7.2 quarantine: that is for writes and
-               flushes with indeterminate durability. Report and leave the
-               window short so the caller can retry. */
-            return TAPE_ERR_IO;
+    /* A completed covered window remains untouched until half its capacity is
+       consumed. A refill retains overlapping samples in their original slots. */
+    if (t->play_frames != 0u && t->play_base == t->play_goal_first &&
+        t->play_base + t->play_frames == t->play_goal_end) {
+        uint32_t i = (uint32_t)(t->position_frame >> 32);
+        uint32_t limit = t->play_base + t->play_frames;
+        bool covered = i >= t->play_base && i < limit;
+        if ((uint64_t)i >= idx->total_frames && play_step(t) < 0 && limit == idx->total_frames) {
+            i = limit - 1u;
+            covered = true;
         }
-        used++;
-
-        off  = (uint32_t)(phys % FRAMES_PER_BLOCK);
-        take = FRAMES_PER_BLOCK - off;                      /* rest of this block */
-        run  = tape_timeline_run(idx, n);                        /* rest of this entry */
-        if (run < take) { take = run; }
-        room = end - (uint32_t)n;                           /* rest of the window */
-        if (room < take) { take = room; }
-        if (take == 0u) { break; }
-
-        dst = t->play_ring;
-        dst += (size_t)t->play_frames * TAPE_FRAME_BYTES;
-        memcpy(dst, t->block + (size_t)off * TAPE_FRAME_BYTES,
-                    (size_t)take * TAPE_FRAME_BYTES);
-        t->play_frames += take;
+        if (covered && ((play_step(t) < 0)
+            ? (t->play_base == 0u || i - t->play_base >= play_capacity(t)/2u)
+            : (limit == idx->total_frames || limit - i > play_capacity(t)/2u))) {
+#ifdef TAPE_READ1_OBSERVE
+            if (TAPE_READ1_CONTROL("idle-nine-loops")) {
+                uint32_t tape_read1_j;
+                for (tape_read1_j=0u; tape_read1_j<9u; ++tape_read1_j) { TAPE_READ1_LOOP(); }
+            }
+            if (TAPE_READ1_CONTROL("idle-mapping") && idx->entry_count) {
+                volatile uint32_t tape_read1_sink = idx->entries[0].frame_count;
+                (void)tape_read1_sink; TAPE_READ1_VISIT();
+            }
+            if (!TAPE_READ1_CONTROL("whole-window-reread")) {
+#endif
+                *more_work = rec_more;
+                return TAPE_OK;
+#ifdef TAPE_READ1_OBSERVE
+            }
+            t->play_frames = 0u;
+#endif
+        }
+        t->play_goal_first = first;
+        t->play_goal_end = end;
+        t->play_fill_next = first;
     }
-
-    *more_work = rec_more || ((uint32_t)(t->play_base + t->play_frames) < end);
+    /* Discontinuous seek, or a fresh half-window refill. */
+    if (first != t->play_goal_first || end != t->play_goal_end) {
+        t->play_goal_first = first;
+        t->play_goal_end = end;
+        t->play_fill_next = first;
+    }
+    if (t->play_frames != 0u) {
+        uint32_t old_end = t->play_base + t->play_frames;
+        uint32_t keep_first = first > t->play_base ? first : t->play_base;
+        uint32_t keep_end = end < old_end ? end : old_end;
+        if (keep_end > keep_first) {
+            t->play_slot = (uint32_t)(((uint64_t)t->play_slot + keep_first - t->play_base) % play_capacity(t));
+            t->play_base = keep_first;
+            t->play_frames = keep_end - keep_first;
+        } else { t->play_frames = 0u; t->play_base = first; t->play_slot = 0u; }
+    } else { t->play_base = first; }
+    while (t->play_base > first || t->play_base + t->play_frames < end) {
+        uint64_t phys;
+        uint32_t n, stop, run, off, count, take, lba, source;
+        bool prepend = t->play_base > first;
+#ifdef TAPE_READ1_OBSERVE
+        TAPE_READ1_LOOP();
+#endif
+        if (used >= block_budget) { break; }
+        n = prepend ? t->play_fill_next : t->play_base + t->play_frames;
+        stop = prepend ? t->play_base : end;
+        if (!play_map(t, n, &phys, &run)) { break; }
+        lba = t->sb.lba_chunk_base + (uint32_t)(phys / FRAMES_PER_BLOCK);
+        off = (uint32_t)(phys % FRAMES_PER_BLOCK);
+        take = stop - n;
+        if (take > run) { take = run; }
+        if (t->play_cache_valid && t->play_cache_lba == lba) {
+            source = t->play_cache_offset + off * TAPE_FRAME_BYTES;
+            if (take > FRAMES_PER_BLOCK - off) { take = FRAMES_PER_BLOCK - off; }
+        } else {
+            count = (uint32_t)(((uint64_t)take + off + FRAMES_PER_BLOCK - 1u) / FRAMES_PER_BLOCK);
+            if (count > 64u) { count = 64u; }
+            if (count > block_budget - used) { count = block_budget - used; }
+#ifdef TAPE_READ1_OBSERVE
+            if (TAPE_READ1_CONTROL("tiny-transfer")) { count = 1u; }
+            if (TAPE_READ1_CONTROL("budget-overrun")) { count = block_budget - used + 1u; }
+            if (TAPE_READ1_CONTROL("full-index-rescan")) {
+                uint32_t tape_read1_b, tape_read1_e;
+                for (tape_read1_b=0u; tape_read1_b<count; ++tape_read1_b) {
+                    TAPE_READ1_LOOP();
+                    for (tape_read1_e=0u; tape_read1_e<idx->entry_count; ++tape_read1_e) {
+                        volatile uint32_t tape_read1_sink = idx->entries[tape_read1_e].frame_count;
+                        (void)tape_read1_sink; TAPE_READ1_VISIT(); TAPE_READ1_LOOP();
+                    }
+                }
+            }
+#endif
+            t->play_cache_valid = false;
+            if (dev_read(&t->dev, lba, count, t->play_read) != 0) { return TAPE_ERR_IO; }
+            used += count;
+            source = off * TAPE_FRAME_BYTES;
+            if (take > count * FRAMES_PER_BLOCK - off) { take = count * FRAMES_PER_BLOCK - off; }
+            t->play_cache_lba = lba + count - 1u;
+            t->play_cache_offset = (count - 1u) * TAPE_BLOCK_SIZE;
+            t->play_cache_valid = true;
+        }
+        if (prepend) {
+            /* Publish the left gap only once complete; ascending batches use
+               their final circular slots without moving retained PCM. */
+            play_copy(t, n, t->play_read + source, take);
+            t->play_fill_next += take;
+            if (t->play_fill_next == t->play_base) {
+                uint32_t added = t->play_base - t->play_goal_first;
+                t->play_slot = (uint32_t)(((uint64_t)t->play_slot + play_capacity(t) - added) % play_capacity(t));
+                t->play_base = t->play_goal_first;
+                t->play_frames += added;
+                first = t->play_goal_first;
+            }
+        } else {
+            play_copy(t, n, t->play_read + source, take);
+            t->play_frames += take;
+        }
+    }
+    *more_work = rec_more || t->play_base > t->play_goal_first ||
+                 t->play_base + t->play_frames < t->play_goal_end;
     return TAPE_OK;
 }
 
@@ -368,7 +500,7 @@ tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *render
      * ring-short path reports UNDERRUN.
      */
     *rendered = 0u;
-    total = TAPE_LIVE(t).total_frames;
+    total = t->faulted ? t->play_total_frames : TAPE_LIVE(t).total_frames;
     mx    = play_max_pos(t);
     step  = play_step(t);
 
@@ -383,6 +515,9 @@ tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *render
     }
 
     for (n = 0u; n < frames; n++) {
+#ifdef TAPE_READ1_OBSERVE
+        TAPE_READ1_LOOP();
+#endif
         uint32_t i, f;
         const int16_t *a, *b;
 
@@ -396,6 +531,9 @@ tape_result tape_render(tape *t, int16_t *out, uint32_t frames, uint32_t *render
         if (a == NULL) { ring_short = true; break; }
         if ((uint64_t)i + 1u < total) {
             b = play_frame(t, i + 1u);
+#ifdef TAPE_READ1_OBSERVE
+            if (TAPE_READ1_CONTROL("missing-lookahead")) { b = a; }
+#endif
             if (b == NULL) { ring_short = true; break; }
         } else {
             b = a;                                  /* past the last frame: b = a */

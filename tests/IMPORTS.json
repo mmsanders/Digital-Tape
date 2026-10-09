@@ -447,7 +447,7 @@
       "source_repo": "mmsanders/digital-tape-verification",
       "source_commit": "508ada857a5badf376da4428e87791333f1f0657",
       "attested_in": "tests/IMPORTS.json",
-      "attestation": "#130 verifier package (Verification #130, DRAFT-9): WP09.overdub.full_scale_saturation (3 cases: start, middle, straddle-end; every rail pair on both channels, engine-api §8 clamp and §11 append pass-through) and WP10.respool_render.trace_floor (V-R55-01, 5 fixtures over the accepted #118 row-3 observations: tapefs §8 per-commit floor and §9.4 commit count); case set 5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0; oracle SHA-256 f8909a5c886074cd2e9c6ab48b0635b56059a47f5efd78904439d0ade6180c3b, rows SHA-256 0396cbc6093eed61639bacb2a8cd3ee0baa2324fa9e488d56fb3a9c6cfb5936b, replay SHA-256 fa0b77b7eb2f2521c70e7c94b18ac6f7647a69124e3d054a9bff97c40578a81c, self-test SHA-256 0fe70eb4e53d9b0314a953391c8c1a6acb575c50ff1d635f82db57ffbc9f5582, pins SHA-256 689757c37bde14f78ff2bc9b484c48addccaf6d379d5e3147816eb9854cb5faf; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed, oracle.py db7509a9 and its synthetic evidence faf6d486) published at commit 508ada857a5badf376da4428e87791333f1f0657 (whole tree 42901094c14516fbfa90a7df46e94bd390b34378, parent ad9b6c23464f417be91fcf7e2baf477f5df703f3), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
+      "attestation": "#130 verifier package (Verification #130, DRAFT-9): WP09.overdub.full_scale_saturation (3 cases: start, middle, straddle-end; every rail pair on both channels, engine-api \u00a78 clamp and \u00a711 append pass-through) and WP10.respool_render.trace_floor (V-R55-01, 5 fixtures over the accepted #118 row-3 observations: tapefs \u00a78 per-commit floor and \u00a79.4 commit count); case set 5b14062694cfc1ef219612d8086bac56e0a1536680c129537548b687cfbc5fe0; oracle SHA-256 f8909a5c886074cd2e9c6ab48b0635b56059a47f5efd78904439d0ade6180c3b, rows SHA-256 0396cbc6093eed61639bacb2a8cd3ee0baa2324fa9e488d56fb3a9c6cfb5936b, replay SHA-256 fa0b77b7eb2f2521c70e7c94b18ac6f7647a69124e3d054a9bff97c40578a81c, self-test SHA-256 0fe70eb4e53d9b0314a953391c8c1a6acb575c50ff1d635f82db57ffbc9f5582, pins SHA-256 689757c37bde14f78ff2bc9b484c48addccaf6d379d5e3147816eb9854cb5faf; pins.py binds wp10_final_r54 model.py 2b1c8c8d, dupmodel.py 53d0b75e, deps.py 41d1e5ed, oracle.py db7509a9 and its synthetic evidence faf6d486) published at commit 508ada857a5badf376da4428e87791333f1f0657 (whole tree 42901094c14516fbfa90a7df46e94bd390b34378, parent ad9b6c23464f417be91fcf7e2baf477f5df703f3), reachable from Verification PR #125; issued by PM Product #345 and imported byte-identically by exact commit. Synthetic verifier evidence, not Product acceptance",
       "selftest": [
         "python3",
         "-B",
@@ -491,6 +491,32 @@
         "python3",
         "-c",
         "import json; json.load(open('tests/wp11_ledgers_r63/ledger.json'))"
+      ]
+    },
+    {
+      "path": "tests/playback_readonly_r1",
+      "tree": "63098ee78ab67a0e12e9f414d2ad467276a77a8d",
+      "source_repo": "mmsanders/Digital-Tape-Verification",
+      "source_commit": "00f846cd9f3cdf43a0c51802b256b6ccc7f0bf2b",
+      "attested_in": "Digital-Tape-Verification PR #153; Product #412",
+      "attestation": "ADR-171 complete authority repair; executable package unchanged from #152; imported byte-identically before implementation",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/playback_readonly_r1/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/playback_regression_epoch",
+      "tree": "084c4eb78e626f136282893416069dad60f58c7d",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "df929f28056a9b949e9d2bf52a82d10177d61439",
+      "attested_in": "Verification #155 / Product #415 / ADR-172",
+      "attestation": "READOPT-D10-1 independent immutable declaration/checker; not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/playback_regression_epoch/selftest.py"
       ]
     },
     {
@@ -601,6 +627,10 @@
       {
         "path": "tests/embedded_readiness_draft9/spec",
         "revision": "DRAFT-9"
+      },
+      {
+        "path": "tests/playback_readonly_r1/authority",
+        "revision": "DRAFT-10"
       },
       {
         "path": "tests/wp14_r1/spec",
@@ -873,6 +903,48 @@
         "manifest.json": "ddc48bc993059901b055a3616d51065b7de87af7e80c347ed7bb2f27203592c6"
       },
       "reason": "#359 binding of wp10_residue_d10 (17,025,380 injections) on the V10-001 engine; stream 7df707f197d9d944880af2b95932accc6ea8daca61a950f7161d34eda6a753ea, gzip is release asset evidence-p1-r60-wp10-residue/wp10-residue-d10-product-observations.jsonl.gz 473e5a1311ee1125923c03a3293acdb7e753508c01e974fa322edf2c8726cd7d. Awaiting Verification disposition."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/wp06-closure-package",
+      "files": {
+        "binding.json": "3f6c5dd449775c8154130e56f02b5c00ea8098ca59a8c72c8657004917de1cc5"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/wp08-mapping-r56-package",
+      "files": {
+        "binding.json": "73f04e35fcc6c65d8b6d256290f41b4f2072c5cf64355f5c2538cd1d34c76f65"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/strengthen-r55-package",
+      "files": {
+        "binding.json": "014273972259e8fd6deec36d08649a33d821650ac146daa24fa652d331c3e512"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/capacity-wp09-package",
+      "files": {
+        "binding.json": "788d2ae91092707af681e3b7f5b1866e577eaad0697530c3914494d8f92de36f"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/history-wp09-package",
+      "files": {
+        "binding.json": "7f1c867f318666c679066905cde25a43f18f79a902ec1e39a2b40b73035b0836"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
+    },
+    {
+      "path": "tests/readopt_evidence/READOPT-D10-1/record-package",
+      "files": {
+        "binding.json": "7ce7904f56f05f569b6fdd0942ff010f9e4a8f0e4d0f1ba1abca9d83f2172a16"
+      },
+      "reason": "ADR-172 expected READOPT-D10-1 binding; actual original #414 execution preserved, not accepted Product execution at the replacement head. Full raw files stay in independently hashed Verification release evidence-readopt-d10-1."
     }
   ]
 }

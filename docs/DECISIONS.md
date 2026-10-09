@@ -3015,3 +3015,477 @@ OR recognizer would turn a valid bare image into a false MBR finding.
 **Cost to reverse.** A host-contract/fixture/recognizer amendment in the existing
 round; no media migration or engine/spec-bundle revision. Explicit engine-mediated
 arbitration could later expand empty-table diagnostics, but is unnecessary for this gate.
+
+## ADR-166 — WP14 throughput triage: preserve criteria, stop unchanged timeout reruns, discuss remedies
+
+**Date:** 2026-10-07 UTC (6 Oct Pacific) · **Owner:** PM #384; Michael activation/intake #400.
+**Inputs:** Product main `87f01bfeb05aff153668bafdaa1e4abbf28797c7`; Software #390
+`dbe6283dd6393e615e2bc18ef4a6c81673c7efc1`; Verification main
+`56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2`, subtree
+`e1ef171ffdd7464314b4b838a7d904b1a94f5409`.
+**Evidence:** [corrected observations](https://github.com/mmsanders/digital-tape-verification/issues/146#issuecomment-6031550598);
+[Product CI 37560629496](https://github.com/mmsanders/Digital-Tape/actions/runs/37560629496);
+[call counts](https://github.com/mmsanders/Digital-Tape/issues/385#issuecomment-6003622851);
+[PM proposal/disposition](https://github.com/mmsanders/Digital-Tape/issues/399#issuecomment-6031806453).
+
+**Finding.** Playback services reload overlapping 64 KiB windows after 512 bytes rendered:
+about 158.75M reads / 81.3 GB for 635 MB of audio per C60 side. This is a read-path defect,
+separate from crash-safe media writes. Image halves pass on Linux/macOS/Server2025 and native Linux
+passes; native Mac/Server2025 C60 exceeds even 7200 s and its aggregate census is skipped.
+The current head is not independently disposed. Linux cache masks physical I/O cost.
+Firmware impact is an inference from the call pattern, not a hardware measurement.
+Separate simulator counts show about 1.24M single-block reads/writes for dup and 155048
+flushes for a C60 load.
+
+**Decision (operational, not a normative revision).**
+1. Stop repeated unchanged full qualification runs whose only purpose is to reproduce the known
+   native timeout. Let the current finite run finish; retain/audit its outputs. Material changes
+   still receive the required final qualification gate. No timeout/coverage waiver, caching
+   substitution or PASS from incomplete execution. Verification retains independent disposition.
+2. Complete authored package `56e25cc1` supersedes the partial-authoring status; import
+   `7fed08a` carries it. Authorship, candidate execution, acceptance and integration remain
+   separate. Carry unaffected evidence; direct #392 → #146 remains, with no duplicate assignment
+   or PM pass-through. #390, tested release/checklist and physical Windows10/macOS witness stay held.
+3. Michael asked to discuss potential spec/assumption changes. The concrete proposal is on #399:
+   narrow Phase2 exception for playback-buffer reuse, then resolve transfer shape/Q-P2-1 now,
+   qualify fuller record-ring scheduling, and enlarge the crash model before relying on batching.
+   These are **proposals**, not issued engine/cadence/batching work. The current WP11/WP14
+   contract, A8 engine identity and frozen DRAFT10 bytes remain authoritative until amended.
+4. A playback reuse fix appears compatible with engine-api §6 (render uses RAM only; service
+   performs bounded I/O). It still changes engine implementation, so Structural Rule1 applies.
+   If approved, amend the Phase2 absolute no-engine rule and A8 narrowly; pin the disposed engine,
+   preserve exact goldens/API/format/memory limits and add independent read-volume criteria.
+   No finding presently requires weakening saved-data protection or changing cartridge bytes.
+5. Q-P2-1(a)'s any-subset/reordered-persistence gap remains. None/all/prefix runs do not license
+   batching. Preserve original outcome oracles and later media qualification in the shipping
+   command/bus mode. Hardware remains parked; no purchases or physical qualification authorized.
+6. STATUS/WP14/dashboard record the actual blocker. WP14's coverage-source rung advances to 2
+   because the complete authored package is on Verification main; implementation/acceptance
+   rungs remain unreached. Phase1's 36/36 stays final.
+
+**Cost to reverse.** Operational rerun policy only; existing acceptance criteria are unchanged.
+Any adopted remedy needs its actual scoped contract/spec issuance, independent publication first
+where the engine changes, and final exact-head qualification/disposition. The proposal commits no
+code or media migration. #384 remains open for its original unmet round gate.
+
+## ADR-167 — Performance recommendation: burst reuse, transaction durability and firmware energy
+
+**Date:** 2026-10-07 UTC · **Owner:** PM #384 · **Michael intake:** #402.
+**Input:** Product main `d3f1e7bc20e87f7b3143b68a094459706f5930e9`;
+Software #390 `dbe6283dd6393e615e2bc18ef4a6c81673c7efc1`;
+Verification main `56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2`.
+**Publication:** [revised performance review](PERFORMANCE-REVIEW.md).
+**Supersedes:** ADR-166's remedy recommendation only; its operational holds stand.
+
+**Finding.** Reusing samples alone can leave millions of tiny reads or repeated
+whole-ring memory moves. Fresh uncommitted payload flushes do not make a recording
+recoverable without index publication. Sequential copy time adds read and write
+time: 635 MB at 25 MB/s each takes at least 50.8 s before overhead. Firmware DMA
+can still busy-poll, and 64 KiB at the specified 12× scrub holds only about 31 ms.
+These are design/contract deductions; no new execution, media or energy result is claimed.
+
+**Decision.**
+1. Publish one shared revised recommendation and link it from both live lead issues.
+   Recommend burst buffer reuse with CPU-work/read-volume bounds first, preserving
+   exact audio and existing small-render coverage. This read-only remedy does not
+   depend on the enlarged write-persistence campaign.
+2. Separately evaluate contiguous write transfers and transaction/checkpoint durability.
+   Preserve saved-data ordering and truthful barriers. Finalization must respect
+   the existing 200 ms synchronous-commit requirement unless deliberately amended;
+   fewer flushes must not conceal an unbounded Stop-button wait.
+3. Present optional product tradeoffs: 30-second copy as a target with a measured,
+   more forgiving limit; a separately chosen save-latency change; and simpler raw
+   destination invalidation after all zero-write refusals. No option is adopted.
+   No current finding justifies a cartridge-format migration or weaker ordinary COW.
+4. Record DMA/cache/clock, scrub headroom, copy-overlap arithmetic and thermal-mode
+   reconciliation in the existing firmware/hardware roadmap. Hardware stays parked.
+   Energy savings require target measurement; NXP capabilities are not device results.
+5. No engine/spec/CLI cadence change is issued by this review. Phase 2/A8 and any
+   frozen contract amendment must precede the affected work; independent tests
+   precede engine implementation. Existing acceptance and physical/platform holds
+   stand. No duplicate assignment, PM pass-through or repeated unchanged timeout run.
+
+**Cost to reverse.** A recommendation and roadmap update only. Adopting an option
+requires its precise contract delta, independent coverage and final qualification.
+No code, on-media bytes, accepted evidence or guardrail changes in this publication.
+
+## ADR-168 — Retain thirty-second copy and queue the Software performance framework
+
+**Date:** 2026-10-07 · **Owner:** PM #384 · **Intake:** #404.
+**Input main:** `9b300a8c4ef9b05bdcacceec7bb27a09254891d5`.
+**Authority:** Michael requests a Software framework including read/write overlap,
+prioritized with existing work; he explicitly rejects relaxing the copy limit.
+**Framework:** [software performance plan](PERFORMANCE-PLAN.md).
+**Supersedes:** ADR-167's optional copy-limit relaxation, not its safety holds.
+
+**Decision.**
+1. Keep guardrail 10: whole-C60 copy <30 s on target. A serial 25 MB/s lower bound
+   is not evidence that the requirement is infeasible. Plan real read/write
+   overlap on the two-controller architecture; no achieved speed is claimed.
+2. Software #405 is the active bounded design-preparation task, ahead of unchanged
+   blocked WP14 reruns. Its first deliverable is the smallest read-only recovery
+   boundary; wider architecture questions cannot hold that section hostage.
+3. Sequence urgent playback reuse/burst refills, then WP14 completion, with
+   transfer/overlap and recording-finalization follow-ons separately gated.
+   Do not wait for the expanded write model to fix the read-only defect.
+4. Preserve #392/#390's existing port/binding work and #146's independent
+   disposition ownership. No duplicate WP14 assignment. Relevant contract
+   preflight/coverage planning belongs in the existing Verification queue;
+   it must not inspect uncovered engine implementation.
+5. The framework mandates neither an asynchronous ABI nor an internal data
+   structure. Software identifies ownership, bounded concurrency, completion,
+   error and fallback semantics; PM issues actual contract deltas before code.
+   Test-first ordering and frozen-signature authority remain.
+6. Firmware/energy and shipping-card proof remain WP17/18/28 roadmap items.
+   Hardware stays parked. No raw device test, purchase, product-code change,
+   golden regeneration, acceptance waiver or implementation authorization here.
+
+**Cost to reverse.** Queue/design-doc change only. No cartridge migration or
+frozen byte changes. A future contrary copy-time proposal needs new evidence
+and Michael's decision; the withdrawn option is not an implied fallback.
+
+
+## ADR-169 — Issue the read-only playback exception and preserve separate write gates
+
+**Date:** 2026-10-07 · **Owner:** PM #384, Michael's #405 return-review activation.
+**Inputs:** Product main `4ec0b3c81c9ada0b327112bc16b9d9faf4ee835a`;
+Software design `76d4eeee33daea429f91f7dadc57516d2de265a9`, published by #407.
+**Authority:** [playback performance addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md).
+
+**Disposition.** #405 supplies the requested design deliverables. Accept the design
+direction, not implementation, ABI issuance or independent acceptance. The read-only
+fix is ready for verifier-first work; no write-model dependency holds it. Correct
+the proposed small-budget callback edge allowance in the issued envelope so it
+subdivides consistently with the allowed edge blocks. Verification preflight owns
+feasibility/conflict findings before implementation, never fitted thresholds.
+
+**Decision.**
+1. Issue only read buffering/refill/mapping and necessary content invalidation.
+   Preserve frozen DRAFT-10 bytes, signatures, exact render arithmetic, resources,
+   recording writes/barriers and all goldens/replays. This is a supplementary
+   performance requirement and Phase2 scope exception, not a frozen spec revision.
+2. Amend Phase2 exclusions and WP14 A8 to the separately accepted/integrated
+   playback engine-tree pin. Pin remains PENDING until exact-head disposition;
+   WP14 adds no engine change of its own.
+3. Route public contract/preflight/test publication in existing Verification #146,
+   before implementation, then direct exact-head disposition and authorized
+   integration. Preserve #392/#390's evidence and direct WP14 handoff.
+4. Serial contiguous copy is the next baseline design; opt-in async completion is
+   the preferred overlap direction only. Its exact ABI/funnels and write model
+   are unissued. Recording cadence/checkpoint work remains separate; target
+   controller/energy/SDR50 proof remains parked in WP17/18/28.
+5. No package rung advances, no timeout/caching substitution, no write batching,
+   no physical/card qualification or Windows 10 waiver. <30 s target copy remains.
+
+**Reversal cost.** Documentation and independently authored tests only until the
+implementation tranche. A true conflict with frozen behavior returns to PM for
+explicit amendment; this exception cannot silently revise the frozen contract.
+
+
+## ADR-170 — Resolve P2READ-001 with finite mapping and idle-work bounds
+
+**Date:** 2026-10-07 PDT · **Owner:** PM #384 / #399, Michael's Verification-review activation.
+**Input Product main:** `1f4285177876a048d761f40bd6d843fc9428512d`.
+**Independent publication:** Verification #151 merge `f02f9b625acf72f762dfde5d2838cb4805b75938`,
+read-only subtree `3845e84cbc9f1969c57e62295ff5733e1b2da423`; PR CI 37694235253 PASS.
+
+**Disposition.** P2READ-001 is valid. ADR-169's unspecified big-O constants cannot
+separate a performant traversal from repeated full-index scans on a capped domain.
+The five budget/request arithmetic rows are consistent. This is a partial paper
+preflight, zero executable acceptance cases/Product runs/controls, not complete
+READ-1 or Product acceptance. Preserve it; no import/implementation activation.
+
+**Decision.** Revise [the public addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md) with
+fixed mapping-visit ceilings: forward traversal 4E+4B+32; individual seek 2E+32;
+fixed-direction/rate episodes 4E+4B+4F+32 including initiating setup. Define resets,
+all actual inspections, empty/fragmented mappings and F as requested render frames.
+Already-done idle service has zero mapping visits/I/O/PCM work and at most eight
+actual internal loop-body iterations; test-only counter/causal controls plus
+post-authoring audit establish the declared boundary, not total CPU instructions.
+
+Coefficients allow bounded setup and endpoint/extent checks and are selected
+before implementation evidence. They do not mandate a data structure or new API.
+Verification's proposed actual-operation observations and stronger preprocessing/
+object/link absence checks are appropriate; retain independent preflight and
+large-E/short/long full-scan negative controls. Genuine frozen/resource conflicts
+return to PM, never candidate-fitted criteria.
+
+Resume existing #146 READ-1 to a complete merged publication, then #409 imports/
+implements and #146 READ-2 disposes directly. Keep all existing request/copy/output/
+resource limits and frozen bytes, WP14 evidence and A8 PENDING, physical/platform/
+write/async/hardware holds, <30 s copy and Michael's reserved #390 merge. No package
+rung advances. No new acknowledgement-only round or duplicate verification issue.
+
+**Reversal cost.** Public test-authoring criterion only before Product changes.
+A later change needs a precise ruling and provenance; paper checkpoint CI supplies
+no engine acceptance.
+
+
+## ADR-171 — Repair READ-1 authority provenance and preserve the blocked playback candidate
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's latest Software-review activation.
+**Input main:** `5e6d5fd6cfce64031ba12b37fc367145b5fe18dd`.
+**Independent authored publication:** Verification #152 merge
+`e5ee1608faa4ad0c15774e8155ddf32164355f1a`, subtree
+`f8b67c549499bea8d05ade53f7f49fcf3a356131`; publication CI 37703126775 PASS.
+**Blocked candidate:** Software #409 / held #411 head
+`dfe426d4569a53c64558ca84e24cb41881521821`, engine tree
+`d96b4245e04d74078f8938744b1394c3018516f7`; import-only `98ba8f54a7c55678312470520988eb2f307b8dad`.
+
+**Disposition.** READ-1 supplies 59 cases across three meaningful rows and twelve
+actual Product defect controls. Its author self-checks are not Product acceptance.
+Software's local regression/equivalence/control results are lead-owned observations.
+Evidence-integrity run 37799314255 authenticates import identity/order but rejects
+the undeclared authority spec-copy root; declaring it alone still lacks frozen
+acceptance.md. The existing complete-triple gate correctly detects this provenance
+defect. Neither this failure nor the pending finite run establishes playback failure
+or independent PASS. #409 closed at its blocker; #411 remains held.
+
+**Decision.**
+1. Existing Verification #146 publishes the missing exact frozen acceptance.md and
+   input pin only, preserving the complete authored oracle/schema/cases/controls.
+   Merge to verification main with green publication CI and route directly to
+   fresh Software #412. No gate weakening or criterion amendment.
+2. #412 starts from current main with corrected import-only commit before the
+   preserved implementation/binding; declare its spec-copy root. Preserve #411's
+   original head and observations. A concrete replacement may supersede it.
+3. Let finite qualification 37799314742 and retained engine CI 37799314356 finish;
+   retain outputs. No cancellation, duplicate campaign or routine full-C60 rerun
+   for provenance metadata. Carry observations only if canonical rules and exact
+   engine/adapter/build/observation identities permit, retaining their executed head.
+   Otherwise identify the precise necessary final coverage; never relabel old runs.
+4. #146 READ-2 independently disposes #412's final exact head, actual observations,
+   causal controls and required regression/resource/golden/seam gates. Only that
+   PASS and green checks license #412's scoped integration; PM records the accepted
+   engine pin afterward. No code review or product merge by PM.
+5. WP14 #392/#390 remains held; A8 pin PENDING. Preserve frozen DRAFT-10, <30 s
+   target copy, physical/Windows10/release/card holds and Michael-reserved #390 merge.
+   Write/async/recording contracts remain unissued; hardware stays parked.
+   Phase1 36/36 and Phase2 2/12 remain unchanged.
+
+**Reversal cost.** Provenance-only publication and ordered replacement history.
+No accepted engine evidence is revoked; no oracle, frozen contract or acceptance
+waiver changes. Unexpected substantive deltas return for a precise disposition.
+
+
+## ADR-172 — Resolve P2READ-002 with a preserved read-optimized transcript binding
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's paired-return review.
+**Input main:** `30a74442741fa02d221d283ec0c601ab0c1cc646`.
+**Candidate:** Product #414 `a1b362268a53320e676359976593b2f01202ef13`;
+engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Independent review:** Verification #154 merged `a273355e8aa87b967ce66cf9f40e6a71e3ee9513`,
+findings/P2-R1-WP14-READ2-414-2026-10-08.md; publication CI 37824631013 PASS.
+**Authority:** [issued regression binding](PLAYBACK-REGRESSION-BINDING.md).
+
+**Disposition.** Uphold P2READ-002 and Verification's overall HELD result.
+Corrected authority import/order and original evidence carriage are independently
+admissible; full 59-case READ-1 replay, shipping equivalence, twelve actual controls,
+absence, resources and ten exact goldens pass within that boundary. No Product PASS,
+accepted-engine pin or physical throughput is established.
+
+All 10,162 observations across six retained suites (140 changed) preserve non-event
+fields and ordered write/flush facts; only read arrays/grouping/ordinals differ.
+The unchanged behavior oracles pass, including 10,000 history edits/25 checkpoints.
+No new PCM/media/write/flush regression is demonstrated. For C60 budget1024 the
+review confirms 1,240,313 payload blocks / 19,380 callbacks; target speed is unmeasured.
+Final engine CI 37804916698 remains red: six old raw baselines, accepted-binding
+regeneration and the benign mutation baseline, plus two aggregators. Those gates
+correctly prevent acceptance; Software and Verification did not silently amend them.
+
+**Decision.** Issue epoch READOPT-D10-1 for the exact engine above and only WP06
+closure, WP08 mapping, strengthening, WP09 capacity/history/record. The binding
+document fixes the six independently audited raw hashes/censuses. Preserve every
+historical accepted byte/hash/pin/disposition and required offline replay; add
+distinct truthful new paths/pins. Keep full raw exact regeneration against fixed
+new hashes, old/new transition identity, unchanged behavior/write/persistence/PCM
+oracles, goldens, causal controls and READ-1 volume/work/budget gates. No global event
+stripping/read ignoring, current-output baseline or moving-main selection.
+
+Verification #146 independently publishes the declaration/checker and binding
+controls before import; fresh Software #415 then owns a clean ordered replacement,
+mechanical evidence/CI plumbing and restored green baseline/causal mutation checks.
+Deliberate mutation selection retains actual mutant identity; identity failure or
+an already-red baseline cannot count as a behavior catch. No engine code change is
+licensed by this correction. Preserve #414 and carried execution identities.
+Direct #415 → #146 final exact-head disposition avoids a PM pass-through. Carry
+unchanged READ-1 evidence; no metadata-only full C60 duplicate.
+
+Only independent final-head PASS and all required green checks license Software's
+scoped integration; PM records A8 afterward, then original WP14 gate resumes.
+#399 remains unresolved; #390 merge is Michael-reserved. Frozen bytes, <30 s copy,
+write/async/recording and physical/Windows10/release/card/hardware holds survive.
+Phase1 36/36 and Phase2 2/12 unchanged.
+
+**Reversal cost.** Separate binding declaration and CI routing; old evidence remains
+available. Unsupported identities fail closed and broader behavioral deltas return
+for ruling. This remedies algorithm-specific transcript coupling without relaxing
+product behavior or accepting a failing mutation gate.
+
+
+## ADR-173 — Resolve P2READ-003 with one final required PR qualification run
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's “You're up!” activation.
+**Input main:** `3da384bda1eb0c82e51a7adcd7c47156e6c3d494`.
+**Concrete candidate:** `557728ac548ddc13bf745ff1df9002d3f390f498`,
+root `4f3bb3e7d5dd3b865755ef3e51f248d2e685de8b`,
+engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Independent review:** Verification #156 merged `3781f123c3120f60462c5726d8392556963e9e83`,
+findings/P2-R1-WP14-READ2-415-2026-10-08.md; publication CI 37847118545 PASS.
+
+**Disposition.** Uphold the binding repair's independent PASS boundary and overall
+READ-2 HELD. Six baseline/six benign raw streams, preserved historical replay,
+all seven actual causal behavior mutation catches, eight accepted-binding controls,
+admissible READ-1 carriage and resources/goldens pass. Lossless actual final-head
+release authenticates to `e5e8e2c9c8ca92498e2783406f5dae7fc3071b270a06e9fa2609a4b7b271064c`.
+No replacement PR/all-required-PR green or Product acceptance exists.
+
+P2READ-003 is valid and is a PM instruction conflict: #415 prohibited unchanged
+qualification repetition while demanding every required final check green, without
+issuing a general carriage method. The unchanged classifier correctly selects ALL.
+Twelve of thirteen qualification member blocks are unchanged; the changed mutation
+campaign actually ran green. Old #414's whole run remains red, never a carried PASS.
+
+**Decision.** Choose Verification's explicit-rerun alternative. Authorize exactly
+one normal final replacement-PR qualification ALL run, including unchanged finite
+campaigns. This narrowly supersedes #415/ADR-172's no-repeat direction for required
+final PR validation. Retain current classifier, job names, matrices, lane verdicts
+and criteria; no new qualification-carriage protocol/checker or waiver is issued.
+
+The exhaustive members are allocator-cow-package, wp36-fuzz-package,
+format-dup-identity-package, promote-package, crash-core-package, wp10-final-package,
+wp10-backlog-package, wp10-backlog-r54-package, wp10-residue-package,
+respool-full-functional, respool-full-crash (all existing matrix members),
+respool-full-aggregate and wp11-mutation-gate. Ordinary selected cheap/regression,
+integrity/publication and READOPT gates execute freshly. READ-1's already issued
+identity/canonical carriage and full-campaign guard remain; no duplicate full
+READ-1 C60 or unchanged WP14 native-timeout campaign is requested.
+
+**Rationale.** Existing gates supply direct final-head evidence. The prior successful
+WP10 residue job took about nineteen execution minutes; individual crash-matrix jobs
+took roughly zero to three minutes, with runner queue time separate. One final
+finite run has a known execution cost and avoids another independent carriage-tool
+authoring/import/disposition round. Preserve its complete output. No local duplicate
+campaign or rehearsal; retry only failed/missing necessary jobs for a stated reason,
+not a blanket repeat of successful unchanged campaigns.
+
+Fresh Software #417 opens the concrete replacement from preserved #415 ancestry
+after this ruling merges, satisfying latest-main with docs-only synchronization.
+No engine/adapter/oracle/fixture change or redundant verifier reimport is issued.
+Existing #146 reuses #156 for byte-identical parts and disposes final identity plus
+complete required PR CI directly. No repeated authorship/audit or PM relay solely
+for the base change. Independent exact-head PASS and all green required checks alone
+license Software's scoped integration; PM then records A8 and WP14 resumes.
+
+Phase1 36/36 and Phase2 2/12 unchanged. #414 remains held/preserved until a concrete
+replacement; #415 remains closed; #399 unresolved and A8 PENDING. Frozen DRAFT-10,
+<30 s target copy, write/async/recording and physical/Windows10/release/card/hardware
+holds and Michael-reserved #390 merge survive.
+
+**Reversal cost.** A scoped execution instruction only; no CI/test/product change.
+A demonstrated execution failure returns to its owner. A future general reuse
+protocol is not implied and needs independent authentication before issuance.
+
+
+## ADR-174 — Complete the pin-control fixture and authorize normal correction CI
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's Software-review activation.
+**Input main:** `0569cadc1e16d3a1e2df385c57fd68bbda516460`.
+**Held #419:** `9c8de4259db8a6337140df4504d9b22fa37acea0`, root
+`4a3d0da47cc4b8a05aa2b588347ad2042b6112b6`, engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+**Prepared fixture correction:** `3bead64c18b157f5f1eba069a72bafcc368a6360`,
+root `831e86ad82ee1a50154043e525007b5233ebed32`, parent the executed head.
+
+**Disposition.** Engine PR CI 37854213510 independently retrieved: 100/100 jobs
+successful, including qualification/matrices/aggregates. READOPT/carry run
+37854213506, hygiene and publication pass. Required evidence control 113574382530
+fails: its temporary baseline omits six declared pending bundles outside the
+historical adapter glob. Actual evidence audit passes; the eighteen other evidence
+controls and three pin-corruption controls pass. This is a genuine CI-fixture
+integration defect, not a demonstrated Product-engine/data failure or acceptance.
+
+The prepared tooling delta imports JSON and copies declared pending directories
+into the temporary fixture; audit/assertions and Product/verifier/evidence bytes
+remain unchanged. Software reports its existing four controls passing locally.
+That fix is not the executed PR head and still needs final CI/independent disposition.
+
+**Decision.** Fresh Software #420 applies the copy-only fix to existing #419 and
+synchronizes current PM docs before a complete push. Authorize normal selected PR
+CI, including qualification ALL, after this necessary correction. Supersede ADR-173's
+one-run/failed-job-only restriction for necessary in-scope integration/CI-fixture
+fixes: subsequent genuine fixes preserving scope/criteria may receive their normal
+required CI without another PM execution-method ruling. Preserve classifier, named
+checks, matrices, aggregates and all causal assertions; no copied status, skip,
+qualification carriage protocol or oracle change is issued.
+
+No local duplicate campaign or unnecessary successful unchanged rerun. READ-1's
+already approved identity/canonical carriage and full-campaign guard remain;
+no extra full READ-1 C60 or unchanged native WP14 timeout campaign is requested.
+Old 100/100 results retain their actual head; final corrected checks are separate.
+
+Existing #146 reviews the corrected tooling/final identity and complete required
+CI, reusing #156 for byte-identical facts. Only its explicit final READ-2 PASS plus
+all strict required checks green license Software's scoped integration. PM records
+A8 afterward; WP14 follows. No redundant verifier package, new PR or PM relay.
+
+Phase1 36/36 and Phase2 2/12 unchanged. #417 stays closed, #419 held, #399 unresolved,
+A8 PENDING. Frozen bytes, <30 s copy, physical/Windows10/release/card/media,
+write/async/recording/hardware and Michael-reserved #390 merge holds survive.
+
+**Reversal cost.** Small CI-fixture repair and execution clarification only.
+A genuine behavior/oracle/scope conflict still returns before amendment.
+
+
+## ADR-175 — Record accepted playback A8 pin and resume existing WP14 work
+
+**Date:** 2026-10-08 PDT · **Owner:** PM #384, Michael's next-round activation.
+**Input main/integration:** `d5c2d5ef2912662ca34d32619f6b7310169e496e` (Software #420 / Product #419).
+**Independent final READ-2 PASS:** Verification PR157 merged
+`f5fc69c15291dbc40f43690866d186d106459b43`,
+[report](https://github.com/mmsanders/Digital-Tape-Verification/blob/f5fc69c15291dbc40f43690866d186d106459b43/findings/P2-R1-WP14-READ2-419-2026-10-09.md).
+**Reviewed head:** `7d0f67629214cc5a41d24725d6c28cffdc59f031`;
+reviewed/integrated root `57c7df2159ebc80a7295a21245404186725436c8`;
+accepted engine `d96b4245e04d74078f8938744b1394c3018516f7`.
+
+**Disposition.** Accept the issued read-only playback tranche on that independent
+PASS and unchanged integration identity. PM fetched the actual merge object: parents
+ADR-174 main and reviewed head, root identical to the disposed root. Complete engine
+CI 37867835017 has 100/100 successful jobs; independent inventory authenticates all
+109 PR jobs (108 PASS, one authorized READ-1 full-campaign skip), 81 artifacts and
+all seven strict required contexts. Inventory SHA
+`5d501258c08d7f8eb9eba6a840c57e5165af085a751fcb4f3fde66884d78492f`;
+lossless evidence SHA
+`2afe1b50afade7055fd751c48a325b03616aa0dc54145bfacf84f49ea0315a3e`.
+No manual duplicate Product campaign or PM Product-code review supplied acceptance.
+
+**Decision.** Record the immutable A8 engine pin in the addendum and WP14 documents;
+close #399 as the independently accepted/integrated playback amplification remedy.
+This closes the engine defect, not the still-unexecuted final WP14 native C60 gate,
+target-throughput requirement or broader write/copy risks.
+
+Resume existing open Software #392 and Verification #146, no duplicate assignment.
+Software cleanly carries existing WP14 work onto current main with exactly this
+engine tree, updates only mechanical A8 comparison/binding, preserves all old
+evidence with honest execution identity, and performs required final WP14 qualification.
+This is a materially changed engine, so native C60 execution is necessary now;
+the old unchanged-timeout prohibition does not forbid this meaningful final run.
+No timeout enlargement, cache substitution, skipped native dump or oracle relaxation.
+Normal required CI after necessary in-scope corrections remains authorized.
+
+Software routes the exact final head, binary/profile/evidence identities and complete
+qualification results directly to #146. Verification reuses unchanged authored
+coverage/prior admissible facts, independently disposes the new WP14 execution and
+all remaining criteria, and returns PASS or concrete findings directly. No repeated
+READ-1 authoring/full campaign or engine acceptance merely for base carriage.
+#390's merge remains Michael-reserved even after Software/Verification return.
+Physical macOS/Windows10, OS-readable README, eject/reinsert, ten mid-load pulls,
+tested release and all unmet A1–A7/A9 evidence remain visible. Server2025 is not Windows10.
+
+Phase1 remains 36/36, Phase2 2/12: playback acceptance is a dependency, not WP14
+acceptance. WP16 contract/ingest is next after the real-card path; WP15 follows.
+Q-P2-1(b), write batching/async/recording and firmware/target energy remain separate
+unissued follow-ons; hardware parked and <30 s target copy unchanged.
+
+**Reversal cost.** Documentation pin and existing-issue resumption only. Future
+engine changes require their own issued tests/scope/disposition, never moving-main
+equality; actual WP14 failures return to their responsible lead/PM.

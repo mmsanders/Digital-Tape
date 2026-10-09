@@ -1,0 +1,87 @@
+{
+  "mutations": [
+    {
+      "mutation": "01-chunk-boundary-off-by-one",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/strengthen_r55_adapter/run_product.py",
+      "assertion": "replay.py FAIL (exit 1): AssertionError: copy does not mount on Side A",
+      "actual_commit": "a6931d9b1f6bce8d22aa99bfa507ae7d4726aaa4",
+      "actual_engine": "fc1d8de4684d6d470dbfd94eb13bf85b0e22ece2",
+      "actual_root_tree": "444f51f8f82fda9a222dc547ac189d71974bae6d"
+    },
+    {
+      "mutation": "02-index-commit-before-chunk-flush",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/strengthen_r55_adapter/run_product.py",
+      "assertion": "replay.py FAIL (exit 1): AssertionError: accepted prefix not durably flushed",
+      "actual_commit": "18c7a10085dde5153cac21548fbfab08ecb7040c",
+      "actual_engine": "7de4baa62377da2331d68f83fb5c374c74d3320d",
+      "actual_root_tree": "a4fbdd928e2c9f510556dea854f13090be885c7f"
+    },
+    {
+      "mutation": "03-sequence-not-incremented",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/golden/MANIFEST",
+      "assertion": "  FAIL  splice \u2014 case command exited non-zero",
+      "actual_commit": "f4a79b0134a169b67ebd536d24773ccf231ed571",
+      "actual_engine": "52594db1582e6654d1408f348ee7fb52c2d094c3",
+      "actual_root_tree": "ee87ecbe74a37673bd45b087b76c1be81f96de24"
+    },
+    {
+      "mutation": "04-crc-wrong-byte-range",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/golden/MANIFEST",
+      "assertion": "  FAIL  play-1x-quiet \u2014 case command exited non-zero",
+      "actual_commit": "467c76f91e41e708caa6e8a013c2a44d781791b6",
+      "actual_engine": "22753a2b3d37115fd98f9d6a37856c0affda67f1",
+      "actual_root_tree": "2c55a27d4fbc6d70c76837781344350c3a09ba14"
+    },
+    {
+      "mutation": "05-side-b-allocation-below-a-high-water",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/record_adapter/run_product.py",
+      "assertion": "FAIL WP09-OW-MID",
+      "actual_commit": "c3e4bf52268fc4bfb504d34c6142c6d869a7669f",
+      "actual_engine": "feaa5e5361e0c46ef3a2424741e916f33b1c5b75",
+      "actual_root_tree": "89fe0da0b4ff39f70dbe2041adf5ab220ecc6a08"
+    },
+    {
+      "mutation": "06-overdub-clamp-replaced-by-cast",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/golden/MANIFEST",
+      "assertion": "  FAIL  overdub",
+      "actual_commit": "ccce94a983c60bf62a184a4d4311fb12883fc66c",
+      "actual_engine": "24f9f20879a2695492cd9f9de92df94e0c164df2",
+      "actual_root_tree": "31bc6f59ade654fb92dba7a71fa2aada8af130f4"
+    },
+    {
+      "mutation": "07-warm-start-accepted-for-wrong-uuid",
+      "selection_pass": true,
+      "build_pass": true,
+      "failure_kind": "behavior",
+      "oracle": "tests/transport_adapter/run_product.py",
+      "assertion": "FAIL WARM-UUID",
+      "actual_commit": "e1ec1df1b044c7e1f0dd66a25b0368ef5a2acbdb",
+      "actual_engine": "3511e0932e31476ccafbd00d3a262cc04378ff9d",
+      "actual_root_tree": "4cd3df470ab1590cbd11fb9c2a89b10842280734"
+    }
+  ],
+  "baseline_behavior_pass": true,
+  "baseline_raw_pass": true,
+  "baseline_selection_pass": true,
+  "benign_behavior_pass": true,
+  "benign_raw_pass": true,
+  "benign_selection_pass": true
+}
