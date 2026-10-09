@@ -78,6 +78,17 @@ already approved identity/canonical carriage and existing full-campaign guard re
 no duplicate full READ-1 C60 or unchanged WP14 native-timeout campaign is requested.
 No local duplicate campaign; retry only failed/missing necessary jobs with a reason.
 
+## Necessary correction CI — ADR-174
+
+Normal selected PR validation, including qualification ALL, is authorized after
+necessary in-scope integration or CI-fixture corrections preserving contract and
+assertions. This supersedes ADR-173's one-run/failed-job-only restriction for those
+corrections; another PM routing ruling is unnecessary. Preserve every named required
+check/matrix/lane verdict, no copied statuses or skips. Avoid local duplicate campaigns
+and successful unchanged reruns without a necessary correction. READ-1's approved
+carriage/full-campaign guard remains. Behavior/oracle/scope changes still require
+precise prior disposition; final independent PASS and required green checks remain.
+
 ## Acceptance and unchanged holds
 
 All verifier changes precede engine changes in a clean replacement's import history.
