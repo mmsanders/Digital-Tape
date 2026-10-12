@@ -1,0 +1,228 @@
+/*
+ * target.c — target recognition, disk safety and the partition view.
+ * Normative: docs/WP14-CLI-CONTRACT.md §2, §4.1, §5, §6.
+ */
+
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L   /* nanosleep under -std=c99 */
+#endif
+
+#include "target.h"
+#include "layout.h"
+#include "tseam.h"
+
+#include <stdio.h>
+#include <string.h>
+#if defined(_WIN32)
+#include <windows.h>
+static void sleep_ms(unsigned ms) { Sleep(ms); }
+#else
+#include <time.h>
+static void sleep_ms(unsigned ms)
+{
+    struct timespec ts;
+    ts.tv_sec = (time_t)(ms / 1000u);
+    ts.tv_nsec = (long)(ms % 1000u) * 1000000L;
+    (void)nanosleep(&ts, NULL);
+}
+#endif
+
+int target_names_device(const char *path)
+{
+    return path_is_device_form(path) || hport_classify(path) == HPORT_DEVICE;
+}
+
+static void gather_facts(const char *path, struct device_facts *f, int *seam)
+{
+    *seam = 0;
+#ifdef TAPECTL_TEST
+    if (tapectl_test_facts_seam(path, f)) { *seam = 1; return; }
+#endif
+    (void)probe_device(path, f);
+}
+
+int target_safety(const char *path, int provision, const char *erase, int need_write)
+{
+    struct device_facts f;
+    enum refusal r;
+    int seam, i;
+
+    gather_facts(path, &f, &seam);
+    (void)seam;
+    r = safety_policy(&f, provision, erase != NULL && strcmp(erase, path) == 0);
+#ifdef TAPECTL_TEST
+    tseam_facts(&f, refusal_id(r), seam);
+    if (r != REFUSE_NONE) { tseam_refusal(refusal_id(r)); }
+#endif
+    if (r != REFUSE_NONE) {
+        fprintf(stderr, "tapectl: %s: %s\n", refusal_id(r), refusal_sentence(r));
+        if (f.detail[0]) { fprintf(stderr, "tapectl:   %s\n", f.detail); }
+        if (r == REFUSE_FOREIGN_MOUNT) {
+            for (i = 0; i < f.n_mounted && i < SAFETY_MAX_MOUNTS; i++) {
+                if (!safety_mount_is_own_p1(&f, i)) { fprintf(stderr, "tapectl:   mounted: %s\n", f.mounted[i].where); }
+            }
+        }
+        return EXIT_REFUSE;
+    }
+    /* §5: "tapectl may unmount that one, and only that one, before raw access."
+       provision rewrites partition 1, and macOS will not open a disk with a
+       mounted volume for raw writing, so it comes off before any write-mode
+       open. Read-only commands (verify) leave it mounted. */
+    if (provision || need_write) {
+        for (i = 0; i < f.n_mounted; i++) {
+            /* Under the test seam too: a facts file may name a real mount. */
+            int ok;
+#ifdef TAPECTL_TEST
+            if (tseam_fault_unmount()) {          /* control: a real failed OS unmount */
+                ok = probe_unmount_invalid();
+                tseam_unmount(f.mounted[i].where, probe_unmount_call(), ok == 0, ok == 0 ? NULL : hport_os_errname(), "unmount-error");
+                ok = -1;
+            } else {
+                ok = probe_unmount_p1(path, &f, i);
+                tseam_unmount(f.mounted[i].where, probe_unmount_call(), ok == 0, ok == 0 ? NULL : hport_os_errname(), NULL);
+            }
+#else
+            ok = probe_unmount_p1(path, &f, i);
+#endif
+            if (ok != 0) {
+#ifdef TAPECTL_TEST
+                tseam_refusal(refusal_id(REFUSE_FOREIGN_MOUNT));
+#endif
+                fprintf(stderr, "tapectl: %s: cannot unmount partition 1 (%s). Eject it in the operating system first.\n",
+                        refusal_id(REFUSE_FOREIGN_MOUNT), f.mounted[i].where);
+                return EXIT_REFUSE;
+            }
+        }
+    }
+    return 0;
+}
+
+static int read_lba0(struct hport *p, uint8_t lba0[512])
+{
+    int rc;
+    if (p->bytes < 512u) { memset(lba0, 0, 512); return 0; }
+#ifdef TAPECTL_TEST
+    tseam_phase("layout", 0, -1);
+#endif
+    rc = hport_read(p, 0, lba0, 512);
+#ifdef TAPECTL_TEST
+    tseam_phase("other", 0, -1);
+#endif
+    return rc;
+}
+
+static int open_common(struct target *t, const char *path, int writable)
+{
+    memset(t, 0, sizeof *t);
+    t->is_device = target_names_device(path);
+    if (t->is_device) {
+        int rc = target_safety(path, 0, NULL, writable);
+        if (rc) { return rc; }
+    } else if (hport_classify(path) != HPORT_REGULAR) {
+        fprintf(stderr, "tapectl: cannot open image %s\n", path);
+        return EXIT_USAGE;
+    }
+    if (hport_open(&t->hp, path, t->is_device, writable) != 0) {
+        int tries;
+        /* The OS can remount our own partition 1 between the safety check and
+           the open (macOS does). Re-run the safety rules, which unmount it
+           again, a few times before giving up. Never more than the rules allow. */
+        for (tries = 0; t->is_device && writable && tries < 10; tries++) {
+            int rc;
+            /* e.g. macOS checking the volume (fsck_msdos) as it remounts it */
+            sleep_ms(1000);
+            rc = target_safety(path, 0, NULL, writable);
+            if (rc) { return rc; }
+            if (hport_open(&t->hp, path, t->is_device, writable) == 0) { goto opened; }
+        }
+        fprintf(stderr, "tapectl: cannot open %s %s (%s)\n", t->is_device ? "device" : "image", path, hport_error());
+        return EXIT_USAGE;
+    }
+opened:
+    t->open = 1;
+    t->sectors = t->hp.bytes / 512u;
+#ifdef TAPECTL_TEST
+    tseam_target(path, t->is_device, t->hp.bytes);
+#endif
+    return 0;
+}
+
+int target_open(struct target *t, const char *path, int writable)
+{
+    uint8_t lba0[512];
+    int rc = open_common(t, path, writable);
+
+    if (rc) { return rc; }
+    if (read_lba0(&t->hp, lba0) != 0) {
+        /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
+        fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
+        return EXIT_ENGINE;
+    }
+    if (mbr_is_layout(lba0, t->sectors)) {
+        uint32_t s2, n2;
+        mbr_entry2(lba0, &s2, &n2);
+        t->provisioned = 1;
+        partview_bind(&t->view, &t->dev, &t->hp, s2, n2, writable);
+        return 0;
+    }
+    if (t->is_device) {
+        fprintf(stderr, "tapectl: NOT_PROVISIONED: %s is not a Digital Tape card. Use provision.\n", path);
+        return EXIT_USAGE;
+    }
+    /* A bare WP-11 image is the TAPEFS partition itself. */
+    if (t->sectors > 0xFFFFFFFFull) {
+        fprintf(stderr, "tapectl: image %s is too large for a bare TAPEFS partition\n", path);
+        return EXIT_USAGE;
+    }
+    partview_bind(&t->view, &t->dev, &t->hp, 0, (uint32_t)t->sectors, writable);
+    return 0;
+}
+
+int target_open_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
+{
+    uint8_t lba0[512];
+    int rc = open_common(t, path, 0);
+
+    *findings = 0;
+    *have_view = 0;
+    if (rc) { return rc; }
+    if (read_lba0(&t->hp, lba0) != 0) {
+        /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
+        fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
+        return EXIT_ENGINE;
+    }
+    if (mbr_is_layout(lba0, t->sectors) || mbr_is_mbr_shaped(lba0, t->is_device)) {
+        uint32_t s2, n2;
+        /* The whole §3.1 table is validated, including what exact recognition
+           does not read (bootstrap, bytes 444..445). */
+        *findings = mbr_findings(lba0, t->sectors);
+        mbr_entry2(lba0, &s2, &n2);
+        t->provisioned = 1;
+        /* ADR-164 §4.1: mount only when entry 2 starts at 34816 with a nonzero
+           count and its whole 64-bit extent is inside the target. Otherwise stop
+           after the layout findings; never shrink a truncated view. */
+        if (s2 == LAYOUT_P2_START && n2 > 0 && (uint64_t)s2 + n2 <= t->sectors) {
+            partview_bind(&t->view, &t->dev, &t->hp, s2, n2, 0);
+            *have_view = 1;
+        }
+        return 0;
+    }
+    if (t->is_device) {
+        fprintf(stderr, "tapectl: NOT_PROVISIONED: %s is not a Digital Tape card. Use provision.\n", path);
+        return EXIT_USAGE;
+    }
+    if (t->sectors > 0xFFFFFFFFull) {
+        fprintf(stderr, "tapectl: image %s is too large for a bare TAPEFS partition\n", path);
+        return EXIT_USAGE;
+    }
+    partview_bind(&t->view, &t->dev, &t->hp, 0, (uint32_t)t->sectors, 0);
+    *have_view = 1;
+    return 0;
+}
+
+int target_close(struct target *t)
+{
+    int rc = 0;
+    if (t->open) { rc = hport_close(&t->hp); t->open = 0; }
+    return rc;
+}

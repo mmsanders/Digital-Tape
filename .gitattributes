@@ -52,3 +52,4 @@ tests/wp11_ledgers_r63/**              -text
 
 tests/playback_readonly_r1/**          -text
 tests/playback_regression_epoch/**          -text
+tests/wp14_r1/**                       -text

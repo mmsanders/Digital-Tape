@@ -250,7 +250,23 @@ def check_spec_copies(m):
         if triple is None:
             fail("spec-copies", f"{path} declares {rev}, whose hash triple is incomplete")
             continue
-        missing = [n for n in SPEC_FILES if not (key / n).is_file()]
+        # A root normally holds the whole triple. A root may instead declare
+        # an explicit subset ("files"): every listed file must be present, and
+        # no unlisted spec file may be. Every copy present is still checked
+        # against its revision below; nothing is accepted by default.
+        want = SPEC_FILES
+        for r in roots:
+            if _abs(r["path"]) == key and "files" in r:
+                listed = r["files"]
+                if (not isinstance(listed, list) or not listed
+                        or any(n not in SPEC_FILES for n in listed) or len(set(listed)) != len(listed)):
+                    fail("spec-copies", f"{path} declares a malformed file subset {listed}")
+                    listed = SPEC_FILES
+                want = tuple(listed)
+                extra = [n for n in SPEC_FILES if n not in want and (key / n).is_file()]
+                if extra:
+                    fail("spec-copies", f"{path} holds {', '.join(extra)}, outside its declared files")
+        missing = [n for n in want if not (key / n).is_file()]
         if missing:
             fail("spec-copies", f"{path} is an incomplete triple: missing {', '.join(missing)}")
         for n in SPEC_FILES:

@@ -1,0 +1,10 @@
+{
+  "product_commit": "6f362f093435ab1a1501055b3bb1cdbe37a5b04c",
+  "verification_base": "ce60d348105d4851fa1f449d57e5f0e69a28e403",
+  "issue": 146,
+  "issue_updated_at": "2026-10-06T04:09:37Z",
+  "carried_inputs": ["INPUTS.json", "ADR164-INPUTS.json"],
+  "sha256": {
+    "spec/adr165/WP14-CLI-CONTRACT.md": "01305d9cc412a2e518fd7884e5ff99d97ae3498f63c22a5c7b418ec547e0eecd"
+  }
+}

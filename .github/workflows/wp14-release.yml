@@ -1,0 +1,71 @@
+name: wp14 tested release
+
+# Publishes the exact shipped tapectl binaries a WP-14 package run tested, as
+# an immutable prerelease for Michael's real-card checklist
+# (tests/wp14_r1/REAL-CARD.md). Nothing is rebuilt: the assets are the
+# wp14-binaries-* artifacts of the named engine run, refused unless each one
+# hashes to the value that run's build identity recorded, and unless all
+# three platforms tested the same head. A release is not acceptance: run it
+# only for a head Verification has disposed under #146.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: engine workflow run id whose WP-14 package jobs tested the head
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-binaries-*
+          path: bin
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-package-*
+          path: pkg
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Authenticate the binaries against the run's build identity
+        id: auth
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          python3 - <<'PYEOF'
+          import hashlib, json, pathlib, shutil, sys
+          heads, sums = set(), []
+          for plat, exe, name in (('linux', 'tapectl', 'tapectl-linux'), ('macos', 'tapectl', 'tapectl-macos'),
+                                  ('windows', 'tapectl.exe', 'tapectl-windows.exe')):
+              info = json.loads(next(pathlib.Path('pkg').rglob(f'build-info-{plat}.json')).read_text())
+              b = pathlib.Path('bin') / f'wp14-binaries-{plat}' / exe
+              h = hashlib.sha256(b.read_bytes()).hexdigest()
+              if h != info['binaries'][exe]:
+                  sys.exit(f'{plat}: {exe} hashes {h}, the run recorded {info["binaries"][exe]}')
+              heads.add(info['head_sha'])
+              shutil.copy(b, f'out/{name}')
+              shutil.copy(next(pathlib.Path('pkg').rglob(f'build-info-{plat}.json')), f'out/build-info-{plat}.json')
+              sums.append(f'{h}  {name}')
+          if len(heads) != 1:
+              sys.exit(f'platforms tested different heads: {sorted(heads)}')
+          pathlib.Path('out/SHA256SUMS').write_text('\n'.join(sums) + '\n')
+          open(pathlib.Path(__import__('os').environ['GITHUB_OUTPUT']), 'a').write(f'head={heads.pop()}\n')
+          PYEOF
+          cat out/SHA256SUMS
+      - name: Publish the prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.auth.outputs.head }}
+        run: |
+          set -euo pipefail
+          tag="wp14-tapectl-${HEAD_SHA:0:12}"
+          gh release create "$tag" out/* --repo "$GITHUB_REPOSITORY" --target "$HEAD_SHA" --prerelease \
+            --title "tapectl WP-14 tested binaries ${HEAD_SHA:0:12}" \
+            --notes "Shipped tapectl exactly as tested by engine run ${{ inputs.run_id }} on head ${HEAD_SHA}. SHA-256 in SHA256SUMS. For tests/wp14_r1/REAL-CARD.md. Not acceptance."

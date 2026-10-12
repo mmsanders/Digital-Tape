@@ -1,0 +1,7 @@
+{
+  "kind": "verifier-pin-control",
+  "control": "changed-issued-overlay-byte",
+  "killed": true,
+  "exit": 1,
+  "native_product_runs": 0
+}

@@ -172,6 +172,31 @@ def spec_probes(tmp):
     expect("red", "a declared root is an incomplete triple",
            with_roots(extra=[{"path": part, "revision": cur}]), tmp, "spec-copies", contains='is an incomplete triple: missing acceptance.md')
 
+    # An explicitly declared subset (a package carrying only some spec files):
+    # green when exactly those files are present and match; red when a listed
+    # file is absent, an unlisted one is present, a listed one drifts, or the
+    # subset is malformed.
+    sub = _temp_root(tmp, "subset", "spec", files=SPEC_FILES[:2])
+    expect("green", "a root declaring an explicit subset holds exactly that subset",
+           with_roots(extra=[{"path": sub, "revision": cur, "files": list(SPEC_FILES[:2])}]), tmp)
+    expect("red", "a declared subset file is absent",
+           with_roots(extra=[{"path": sub, "revision": cur, "files": list(SPEC_FILES)}]), tmp,
+           "spec-copies", contains='is an incomplete triple: missing acceptance.md')
+    subx = _temp_root(tmp, "subset-extra", "spec")
+    expect("red", "a spec file outside the declared subset is present",
+           with_roots(extra=[{"path": subx, "revision": cur, "files": list(SPEC_FILES[:2])}]), tmp,
+           "spec-copies", contains='outside its declared files')
+    subd = _temp_root(tmp, "subset-drift", "spec", files=SPEC_FILES[:2], tamper=SPEC_FILES[0])
+    expect("red", "a file in a declared subset drifts",
+           with_roots(extra=[{"path": subd, "revision": cur, "files": list(SPEC_FILES[:2])}]), tmp,
+           "spec-copies", contains='(hash drift)')
+    expect("red", "a malformed subset (unknown file name)",
+           with_roots(extra=[{"path": sub, "revision": cur, "files": ["README.md"]}]), tmp,
+           "spec-copies", contains='malformed file subset')
+    expect("red", "a malformed subset (empty)",
+           with_roots(extra=[{"path": sub, "revision": cur, "files": []}]), tmp,
+           "spec-copies", contains='malformed file subset')
+
     drift = _temp_root(tmp, "drift", "spec", tamper="tapefs-v1.md")
     expect("red", "a copy drifts from its declared revision's hash",
            with_roots(extra=[{"path": drift, "revision": cur}]), tmp, "spec-copies", contains='(hash drift)')
