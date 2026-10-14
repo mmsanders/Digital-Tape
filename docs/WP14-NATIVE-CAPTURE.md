@@ -1,10 +1,11 @@
 # WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425/#428
 
-**Status:** corrected Software method (#428, second correction after Verification #171), 14 October 2026 UTC. **Not normative, not acceptance,
+**Status:** corrected Software method (#428, third correction after Verification #172), 14 October 2026 UTC. **Not normative, not acceptance,
 not ready for a card until Verification #146 passes the corrected method.** Verification #167
 (`df637f7`) found four false passes in #426's first head `1fbe762`. Verification #171 (`112557e`)
 then found three more in `f5b4f1c`: an ended process, a closed and reused FileObject, and a
-duplicate tracer step. §3 shows all seven now rejected.
+duplicate tracer step. Verification #172 (`ad3dae7`) found one more in `0dd869a`: a read and an
+OpEnd that both lacked `IrpPtr` were joined through an empty key. §3 shows all eight now rejected.
 Final Windows provision/load/reinsert/verify/A+B/A9 and README are **complete** (#167, #168);
 nothing here asks for another load, dump, pull or README. WP-14 is held only on physical native A6.
 Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; tested release
@@ -29,6 +30,7 @@ every reason, and is PASS only when all of the following hold for the bound proc
 |---|---|---|---|
 | Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
 | Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs | — | FAIL |
+| Result join (ETW) | a FileIo read gets a native result only from the OpEnd with the **same valid, nonzero `IrpPtr`**, only if it was the sole request pending on that `IrpPtr`, and only if the OpEnd carries both `NtStatus` and `ExtraInfo`. Missing, empty, zero or non-numeric identities never join. A second request of any type on a still-pending `IrpPtr` poisons it. Reuse after a completion is legitimate | HELD | — |
 | Object (ETW) | a FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
 | Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
 | Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
@@ -150,7 +152,7 @@ keep the ETL beside the XML.
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (77 cases; 71 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (89 cases; 83 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |
@@ -160,7 +162,8 @@ been seen. The synthetic fixtures check the parser's logic only.
 | `fixtures/linux-shipped-verify.strace` (#425's 62.5 GB capture, no `execve` traced) | Real, kept unchanged | Now **HELD**: the image cannot be bound |
 | Verification #167's six files, byte-identical with their published SHA-256 (`fixtures/verification-167/`) | Verification's controls | one-byte → FAIL (coverage); nonzero-exit → FAIL (traced exit 1); tracer-error → FAIL (drops); etw-lost → FAIL (EventsLost 17); both good shapes → HELD (no end marker; no loss counters / DiskIo-only) |
 | Verification #171's files, byte-identical with their own side files (`fixtures/verification-171/`) | Verification's controls | their baseline → PASS; process-ended → FAIL (outside observed life); foreign FileObject reuse → FAIL (object names `C:\helper.img`); `wpr-start 1` then `0` → FAIL (occurrence 1 of 2) |
-| `fixtures/dtrace-good`, `fixtures/etw-good`: 61 cases (6 positives, 55 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, process image, device, geometry, writes and timestamp order |
+| Verification #172's files, byte-identical with their own side files (`fixtures/verification-172/`) | Verification's controls | their baseline → PASS; `IrpPtr` removed from Read and OpEnd → HELD (no valid `IrpPtr` on the request) |
+| `fixtures/dtrace-good`, `fixtures/etw-good`: 71 cases (7 positives, 64 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, IRP correlation (missing, empty, zero, invalid, orphan, competing, sequential reuse), process image, device, geometry, writes and timestamp order |
 
 ## 4. #423 bounded diagnosis
 

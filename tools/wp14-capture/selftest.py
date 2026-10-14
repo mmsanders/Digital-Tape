@@ -290,6 +290,50 @@ def main():
         c.check('a step failed after an earlier success', 'FAIL', "'tracerpt' exited 2 (occurrence 2 of 2)",
                 etw_set(c, exits='wpr-start 0\nwpr-stop 0\ntracerpt 0\ntracerpt 2\n'))
 
+        print('== Verification #172 published files, byte-identical, with their own side files')
+        v2 = FX / 'verification-172'
+
+        def base172(n):
+            return ['--format', 'etw-xml', '--trace', str(v2 / ('%s-xml' % n)), '--pid', '4242',
+                    '--capacity', str(CAP), '--target', '\\\\.\\PhysicalDrive1', '--disk', '1',
+                    '--geometry', str(v2 / ('%s-geo' % n)), '--exe', str(v2 / 'stand-in-exe.bin'),
+                    '--sha256', '525f1d08f6b6f356ce6a48a2a74a828aa3dc1d41fbea6771df9400de191f8732',
+                    '--stdout', str(v2 / ('%s-out' % n)), '--diagnostics', str(v2 / ('%s-diag' % n)),
+                    '--tracer-log', str(v2 / ('%s-exits' % n)), '--exit-code', '0']
+        c.check('001-xml (their positive baseline)', 'PASS', None, base172('001'))
+        c.check('002-xml (IrpPtr removed from Read and OpEnd)', 'HELD', 'no valid IrpPtr on the request', base172('002'))
+
+        print('== ETW request/completion correlation (synthetic)')
+        nores = 'carry no native result'
+        rd_irp = '<Data Name="IrpPtr">0xB2</Data><Data Name="FileObject">0xF1</Data>'
+        end_irp = '<Data Name="IrpPtr">0xB2</Data><Data Name="ExtraInfo">512</Data>'
+        assert rd_irp in gx and end_irp in gx
+        c.check('IrpPtr missing on the read only', 'HELD', 'no valid IrpPtr on the request',
+                etw_set(c, xml=gx.replace(rd_irp, '<Data Name="FileObject">0xF1</Data>')))
+        c.check('IrpPtr missing on the OpEnd only (orphan completion)', 'HELD', nores,
+                etw_set(c, xml=gx.replace(end_irp, '<Data Name="ExtraInfo">512</Data>')))
+        c.check('IrpPtr empty on both', 'HELD', 'no valid IrpPtr on the request',
+                etw_set(c, xml=gx.replace('<Data Name="IrpPtr">0xB2</Data>', '<Data Name="IrpPtr"></Data>')))
+        c.check('IrpPtr zero on both', 'HELD', 'no valid IrpPtr on the request',
+                etw_set(c, xml=gx.replace('<Data Name="IrpPtr">0xB2</Data>', '<Data Name="IrpPtr">0x0</Data>')))
+        c.check('IrpPtr not a number on both', 'HELD', 'no valid IrpPtr on the request',
+                etw_set(c, xml=gx.replace('<Data Name="IrpPtr">0xB2</Data>', '<Data Name="IrpPtr">junk</Data>')))
+        c.check('OpEnd matches but lacks ExtraInfo', 'HELD', 'lacks a valid NtStatus or ExtraInfo',
+                etw_set(c, xml=gx.replace('<Data Name="ExtraInfo">512</Data>', '')))
+        c.check('OpEnd matches but lacks NtStatus', 'HELD', 'lacks a valid NtStatus or ExtraInfo',
+                etw_set(c, xml=gx.replace('<Data Name="NtStatus">0x0</Data>', '')))
+        competing = ev_(FIO, 66, '0002500', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF9')])
+        c.check('competing Close on the same IrpPtr while the read is pending', 'HELD', 'reused while still pending',
+                etw_set(c, xml=gx.replace(read_line, read_line + '\n' + competing)))
+        second = read_line.replace('18:00:01.0002000Z', '18:00:01.0002500Z')
+        c.check('second read on the same IrpPtr while the first is pending', 'HELD', 'reused while still pending',
+                etw_set(c, xml=gx.replace(read_line, read_line + '\n' + second)))
+        early = ev_(FIO, 64, '0001800', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF8'),
+                                          ('OpenPath', '\\Device\\HarddiskVolume3\\other.txt')])
+        early_end = ev_(FIO, 76, '0001900', [('IrpPtr', '0xB2'), ('ExtraInfo', '0'), ('NtStatus', '0x0')])
+        c.check('IrpPtr reused only after its earlier request completed', 'PASS', None,
+                etw_set(c, xml=before_read(early, early_end)))
+
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')
         if not exe:

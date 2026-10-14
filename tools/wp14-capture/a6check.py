@@ -56,7 +56,7 @@ class Verdict:
 
 def ev(**kw):
     base = dict(pid=None, op=None, fd=None, path=None, mode=None, off=None, len=None,
-                ret=None, err=None, status_src=None, exe=None, stale=None)
+                ret=None, err=None, status_src=None, exe=None, stale=None, why=None)
     base.update(kw)
     return base
 
@@ -211,6 +211,15 @@ def _int(s):
     return int(s, 16) if s.lower().startswith('0x') else int(s)
 
 
+def _irp(text):
+    """A request/completion correlation identity: present, numeric and nonzero, else None."""
+    try:
+        n = _int(text)
+    except (TypeError, ValueError):
+        return None
+    return n if n > 0 else None
+
+
 def parse_etw_xml(text, v):
     try:
         root = ET.fromstring(text)
@@ -256,7 +265,30 @@ def parse_etw_xml(text, v):
     # A FileObject names a path only from its Create until its Cleanup/Close; a read's
     # path is whatever its object names at that moment, never an older mapping.
     out, threads, live_procs, ended = [], {}, {}, {}
-    files, reads = {}, {}
+    # IRP lifecycle: every FileIo request that carries an IrpPtr occupies it until an
+    # OpEnd with the same IrpPtr. A result joins a read only when the read had a valid
+    # IrpPtr, was the ONLY request pending on it, and the OpEnd carries both NtStatus and
+    # ExtraInfo. A second request on a still-pending IrpPtr (any operation type) poisons
+    # that IrpPtr: neither request receives a result. Missing or invalid identities never
+    # join. Sequential reuse after a completion is legitimate.
+    files, pending = {}, {}
+
+    def occupy(irp_text, e2):
+        irp = _irp(irp_text)
+        if irp is None:
+            if e2 is not None:
+                e2['why'] = 'no valid IrpPtr on the request'
+            return
+        if irp in pending:
+            for other in pending[irp]:
+                if other is not None and other['why'] is None:
+                    other['why'] = 'IrpPtr 0x%x reused while still pending' % irp
+            if e2 is not None:
+                e2['why'] = 'IrpPtr 0x%x reused while still pending' % irp
+            pending[irp].append(e2)
+        else:
+            pending[irp] = [e2]
+
 
     def owner(tid_text):
         if tid_text in (None, ''):
@@ -292,26 +324,35 @@ def parse_etw_xml(text, v):
                           off=_int(d['ByteOffset']), len=n, ret=None, status_src=None))
         elif g == G_FILEIO and op == 64:
             pid, stale = owner(d.get('TTID'))
+            occupy(d.get('IrpPtr'), None)
             files[d.get('FileObject')] = d.get('OpenPath', '')
             out.append(ev(pid=pid, stale=stale, op='open', fd=d.get('FileObject'),
                           path=d.get('OpenPath', ''), mode=None, ret=0))
         elif g == G_FILEIO and op in (65, 66):
             pid, stale = owner(d.get('TTID'))
+            occupy(d.get('IrpPtr'), None)
             files.pop(d.get('FileObject'), None)
             out.append(ev(pid=pid, stale=stale, op='close', fd=d.get('FileObject')))
         elif g == G_FILEIO and op in (67, 68):
             pid, stale = owner(d.get('TTID'))
             e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=d.get('FileObject'),
                     path=files.get(d.get('FileObject')), off=_int(d['Offset']), len=_int(d['IoSize']))
-            reads[d.get('IrpPtr')] = e2
+            occupy(d.get('IrpPtr'), e2)
             out.append(e2)
         elif g == G_FILEIO and op == 76:
-            e2 = reads.pop(d.get('IrpPtr'), None)
-            if e2 is not None:
-                st = _int(d.get('NtStatus', ''))
-                e2['ret'] = _int(d.get('ExtraInfo', '0')) if st == 0 else -1
-                e2['err'] = None if st == 0 else 'NTSTATUS 0x%08x' % (st & 0xFFFFFFFF)
-                e2['status_src'] = 'FileIo OpEnd NtStatus/ExtraInfo'
+            irp = _irp(d.get('IrpPtr'))
+            waiting = pending.pop(irp, None) if irp is not None else None
+            if not waiting or len(waiting) != 1 or waiting[0] is None:
+                continue                      # orphan, ambiguous or non-read completion
+            e2 = waiting[0]
+            try:
+                st, got = _int(d.get('NtStatus')), _int(d.get('ExtraInfo'))
+            except (TypeError, ValueError):
+                e2['why'] = 'its OpEnd lacks a valid NtStatus or ExtraInfo'
+                continue
+            e2['ret'] = got if st == 0 else -1
+            e2['err'] = None if st == 0 else 'NTSTATUS 0x%08x' % (st & 0xFFFFFFFF)
+            e2['status_src'] = 'FileIo OpEnd NtStatus/ExtraInfo'
     return out
 
 
@@ -547,7 +588,8 @@ def judge(a):
             v.held.append('reads of the last sector were seen (%s) but carry no native result; '
                           'completion plus verify OK is only an indirect argument for independent '
                           'review, not a captured call result' % ', '.join(
-                              'off=%d len=%d' % (c['off'], c['len']) for c in statusless[:3]))
+                              'off=%d len=%d%s' % (c['off'], c['len'], ' [%s]' % c['why'] if c['why'] else '')
+                              for c in statusless[:3]))
         else:
             v.fail.append('successful returned bytes above 4294967295 do not cover all 512 bytes of '
                           '[%d, %d) (covered up to %d)' % (mirror, a.capacity, pos))
@@ -577,7 +619,7 @@ def judge(a):
         'pid': a.pid,
         'capacity': a.capacity,
         'last_sector': [mirror, a.capacity],
-        'last_sector_reads': [{k: c[k] for k in ('off', 'len', 'ret', 'err', 'status_src')} for c in reads],
+        'last_sector_reads': [{k: c[k] for k in ('off', 'len', 'ret', 'err', 'status_src', 'why')} for c in reads],
         'open_claim': open_claim,
         'target_calls': {op: sum(1 for c in calls if c['op'] == op) for op in ('read', 'write', 'flush')},
         'exit': {'traced': traced[0] if traced else None, 'recorded': a.exit_code},
