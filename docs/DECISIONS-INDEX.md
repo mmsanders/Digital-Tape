@@ -1,8 +1,8 @@
 # Decisions index
 
 One line per ADR. This is the **entry point**; the authority is the append-only
-[decision log](DECISIONS.md), which is unchanged and byte-identical. Read the two or
-three ADRs your tranche touches, not the whole log (about 165 KB).
+[decision log](DECISIONS.md), whose existing entries remain unchanged as new decisions are appended. Read the two or
+three ADRs your tranche touches, not the whole log.
 
 `ADR-0xx` is the shared sequence. **ADR-101…128 were the Hardware Lead range**; from ADR-129 on,
 the 1xx numbers are shared by PM, Software and Verification decisions. Newest is at the bottom,
@@ -149,4 +149,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-178](DECISIONS.md#adr-178--resolve-p2v16-001-with-source-level-zero-output-refusal) | 2026-10-14 PDT | P2V16-001 zero-output rule | Each zero-output source refuses pre-output/exit2; exact rounding/positive neighbours unchanged; existing169/429 resume and428 A6 corrections continue |
 
-115 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-179](DECISIONS.md#adr-179--file-owner-latch-prototypes-and-clean-current-navigation) | 2026-10-14 PDT | Intake431 filing / navigation cleanup | Owner latch results primaryWP04, parked/no new round; current entrypoints refreshed; historical/pinned bytes retained |
+
+116 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

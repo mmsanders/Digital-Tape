@@ -1,7 +1,7 @@
 # Phase 2 plan — desktop tooling
 
 **Issued by PM, 4 October 2026 (ADR-161). Status: ADOPTED 5 October 2026 (ADR-162).** Michael
-answered D1–D8 and PM declared D9; answers are in §2. Round-1 issues wait for Michael's go to assign. Nothing in this file assigns work. Work is assigned in role-labeled
+answered D1–D8 and PM declared D9; answers are in §2. Phase2 was activated on5October; live role issues carry current assignments. Nothing in this file assigns work. Work is assigned in role-labeled
 issues ([issue workflow](ISSUE-WORKFLOW.md)), each citing the section of this plan it carries out.
 Package detail and acceptance criteria are in [WP-14](PACKAGES/WP-14.md),
 [WP-15](PACKAGES/WP-15.md) and [WP-16](PACKAGES/WP-16.md). Current state is in [STATUS](STATUS.md).

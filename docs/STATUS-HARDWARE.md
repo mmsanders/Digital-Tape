@@ -15,6 +15,10 @@
 > retired), reports filament on hand, and reports that clasps from his own sizing prints
 > appear to work. None of that is qualification.
 
+## Owner evidence filed14October2026
+
+[WP04 prototype record / intake431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) preserves FIT/LADDER preferences, Stop force/slot sensitivity, fractures/alignment and informal drop-release observations. Source/print packet is absent from this repo; owner ZIP preservation remains important. RECORDED—PARKED through Phase2, no new hardware round. P is a prototype preference, not a production/safety choice. Guardrail13 unchanged; dates/material/fit from this series do not qualify earlier packets.
+
 **Snapshot: 20 September 2026 · Owner: PM disposition of submitted Hardware evidence;
 Hardware retains engineering control.**
 

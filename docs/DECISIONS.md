@@ -3665,3 +3665,50 @@ PM relies on independent published findings/CI, without another Product campaign
 WP16 real-card/full acceptance, WP15 and frozen/write/batching/async/recording/
 firmware/hardware/media/atomicity/<30s/purchase holds survive. Reversal is a host
 input-contract amendment and its independent expectations, not on-card changes.
+
+## ADR-179 — file owner latch prototypes and clean current navigation
+
+**Date:** 14 October2026 PDT. **Owner:** PM, Michael's explicit cleanup/intake request.
+Input Product c4eb211cfbf67722abd439b6d16414ccb6ec9040; Verification publication
+ba8b95cf46d964d4f02630d0dcabe751b1670324 (#176). Active leads keep their assigned work.
+
+**Intake431 disposition: RECORDED—PARKED.** Primary WP04 RouteA; downstream WP22,
+WP20,WP23,WP25 and printed-material contextWP24. Durable source and filing are
+[owner prototype record](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) and its linked
+unaltered issue-text snapshot. Snapshot SHA256 (UTF8 with terminal newline)
+d075f2f8aad2683ee39bec7ce92494da0e1019538fb774e82d83f8765c722f26.
+Michael's explicit no-further-round-now preference is retained. This is owner-run
+work consistent with309, not a new PM-issued hardware development/Verification round.
+Phase3 or explicit WP04 resumption is the named trigger; WP25 retains its own
+phase/final-enclosure guardrail gate. File the facts then close431 as filed, not accepted.
+
+P=1.2mm is an exploratory preference, not production latch selection. Slot sensitivity,
+Stop force, broken stem/bar-tab/lid pegs and cap alignment remain concrete observations.
+Allowing a latch to release into its ordinary raised/Stop state after impact is an
+owner taste input; it does not authorize detached/ejected controls or hazardous/functional
+failure. Guardrail13 stays unchanged. Material/fit, spring/friction/load explanations,
+CAD gates and informal drops are not independent process/mechanism/safety acceptance.
+No new print, purchase, qualification or geometry change is issued by this filing.
+
+Original rig.py/kinematics.py/build.py/test_rig.py/STL/3MF/cards/manifests/results are
+not present in this repository. The report is preserved, absent files are not invented.
+Keep the owner's latch-rig.zip. Future archival delivery belongs under
+hardware/prototypes/slide-lock-2026-10 with provenance/hash inventory and durable
+hash-bound assets for bulky packets; don't overwrite historical WP04-01. No new
+Hardware assignment is created merely to obtain those unavailable files.
+
+**Cleanup review.** [Dated audit](REVIEW/2026-10-14-REPO-CLEANUP.md) distinguishes
+stale navigation from active provenance. Correct Product README/plan/package headings
+and obsolete pending A6-method summaries; Verification176 conditionally accepts exact
+72e4e7c method, integrated c4eb211, not native/physical A6. Root Verification README
+receives a navigation-only correction separately. Historical reports/pinned packages,
+old spec copies/capture controls are retained. Larger evidence relocation, count/comments
+in owner source/tests/workflows and generator-first hardware cleanup stay recorded for
+normal owner touches/resume; no deletion or new CI programme is justified by age alone.
+
+No Product code/test/workflow/spec hash changes or independent acceptance by PM.
+Front-door local Markdown targets checked with no missing targets in that sample;
+dashboard test required before publication. Source counts/size are an inventory,
+not a whole-repo correctness proof. Current status/index links own the live view;
+dated records retain exact identity. Phase1 36/36, Phase2 4/12, all frozen/<30s/write/
+async/recording/firmware/hardware/media/atomicity/purchase holds remain unchanged.

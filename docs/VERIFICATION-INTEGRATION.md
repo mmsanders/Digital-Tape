@@ -6,15 +6,13 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
-## Latest Phase 2 disposition — 14 October 2026 PDT (ADR-177)
+## Phase 2 disposition — current navigation refreshed14October2026 (ADR-179)
 
 Verification #167 `df637f7fb962a98b8698d16a531ceb0e8365c2a6` independently accepts
 final Windows C60 success/reinsert/verify, recorded exact A/B SHA256+length and automatic
 A9 `1677.7328603s`; no local comparison of unavailable output blobs claimed. #168
 `c1269b4e7777b7536cef4a37324154bb8420bf60` accepts actual156-byte README/CRLF.
-Full WP14 now held only on physical A6. #426 method at `1fbe762` is unaccepted:
-full-sector/exit/drop/loss corrections required before a physical handoff; CI green
-is not method acceptance. #166 `c690be9a5f3188333f04ef52a552fcf4c82a0030` is accepted
+Full WP14 remains held on native/physical A6. Earlier #426 defects were superseded by Verification176 (`ba8b95cf46d964d4f02630d0dcabe751b1670324`): conditional method PASS for exact72e4e7c; integrated c4eb211. Only bounded off-card collection is issued; no physical/native qualification follows. Historical findings retain their original candidate identities. #166 `c690be9a5f3188333f04ef52a552fcf4c82a0030` is accepted
 planning evidence; PM issues [INGEST-1](WP16-INGEST-CONTRACT.md), not audio acceptance.
 All three merged publications have successful existing publication CI; no PM replay.
 
@@ -30,7 +28,7 @@ This earlier boundary is superseded by the latest section for Windows success/A9
 historical observation/platform identities stay unchanged. No reacceptance of identical
 #390 bytes, repeat ten-pull campaign or media/hardware qualification follows.
 
-## Current boundary — Phase 1 close-out, 3 October 2026
+## Historical Phase 1 boundary — close-out, 3 October 2026
 
 Every imported verifier package is declared in [tests/IMPORTS.json](../tests/IMPORTS.json)
 (37 packages at main `320d729`). The last integrated publication is verifier `cdf89f5`

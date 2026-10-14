@@ -6,7 +6,7 @@ There are no tracks, titles or browsing. Scrub changes playback rate without fil
 
 **Phase 1 (audio engine, on a laptop) is complete as of 3 October 2026.** All nine
 Phase 1 engine packages are independently accepted for laptop scope, and the golden
-suite is green. Phase 2 (desktop tooling) awaits Michael's go; see [the Phase 2 plan](docs/PHASE2-PLAN.md). The current spec revision
+suite is green. Phase 2 (desktop tooling) is active under [the adopted plan](docs/PHASE2-PLAN.md); current acceptance/holds are in [STATUS](docs/STATUS.md). The current spec revision
 is recorded in [spec/VERSION.md](spec/VERSION.md); phase state is in [STATUS](docs/STATUS.md).
 The repo is not a finished player or a safety-qualified hardware design; hardware is
 parked through Phase 2 (see [the roadmap](docs/PACKAGES/README.md)).
