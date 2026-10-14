@@ -3548,3 +3548,73 @@ implementation risk and exact evidence. <30s target-system copy remains mandator
 PM supplies no product-code review/merge or independent acceptance. Write cadence,
 batching, async, recording, target timing, firmware, hardware/media qualification,
 purchases and signed format-freeze approvals retain their existing boundaries.
+
+## ADR-177 — dispose final Windows witness, correct A6 capture and issue INGEST-1
+
+**Date:** 14 October 2026 PDT. **Owner:** PM, Michael's explicit latest-return review.
+Input Product `b0d0847b85cee6eac4b2624f9835052a950b902e`; Software #425 closed,
+#426 exact candidate `1fbe762e3374be83a7bf23e94b9ccd6f145543dc` (draft, all four CI
+workflows green). Verification merged publications #166 `c690be9a5f3188333f04ef52a552fcf4c82a0030`,
+#167 `df637f7fb962a98b8698d16a531ceb0e8365c2a6`, #168 `c1269b4e7777b7536cef4a37324154bb8420bf60`.
+
+**Witness disposition.** Uphold independent final Windows success/reinsert/verify,
+recorded canonical both-side full SHA256/635040044-byte lengths and A9 PASS in #167.
+No local sample comparison of unprovided WAV blobs is claimed. Load1677.7328603s,
+155048FlushFileBuffers; provision0.2672488s. #168 actual156-byte README has exact
+four CRLF lines and hash7d34a16b57371e7b7ba4025d2ea3ccbc74781b709da4125a0f016636d4d57770.
+Existing publication runs38504991207/38594294859/38601140168 SUCCESS; PM read CI,
+not another local Product/evidence campaign. No repeat Windows/Mac load, dumps,
+pulls or README upload. Full WP14 now HELD solely on physical native A6 evidence.
+WP14 stays3/4; Michael's remaining task is only reviewed short read-only capture.
+
+**Capture method disposition.** Read-only verify is a useful route; #426 is not ready
+for physical handoff or integration based on its CI alone. Uphold #167's independent
+single-property controls: one-byte mirror, failed traced exit, ignored DTrace drops,
+ignored ETW loss falsely pass. Correct full512-byte coverage/success, consistent
+OK/exit, diagnostics and demonstrable zero-loss metadata; missing evidence stays held.
+Windows DiskIO completion is not API status; FileIO creation options are not open
+access rights. No invented read-only flag, disk/PID bypass, unconditional inferred
+result, unproved real native export shape or assumed62.5GB image sparseness.
+A fresh Software correction issue continues existing #426; Verification #146
+receives exact corrected method directly, audits changed claims/new controls and
+retains old positive mechanics facts. Necessary normal selected correction CI is
+allowed; no repeated unchanged engine/C60 qualification for a PM acknowledgement.
+Software integrates only its independently disposed method with required CI green;
+no Michael relay, new permanent gate, engine/port change, injected fallback or OS
+security-policy change is authorized. Native-platform access limits return honestly;
+synthetic fixtures are not physical/native validation.
+
+**Performance/UX disposition.** #425's counts and Mac CPU fraction identify excessive
+I/O call overhead, not the write-versus-barrier split. Source/host-image/provision
+model estimates do not establish real card latency. Final Windows A9 agrees roughly
+with the earlier cycle-rate estimate; this does not prove causation or target<30s.
+The optional profiling window can no longer ride an already-completed load: no new
+full load just to obtain it. Preserve diagnostics, hold both cadence and multi-block
+write proposals until actual bounded measurements/model coverage and test-first
+scope exist. Reload UX proposal retained, not issued: do not promise blanket old-data
+preservation on every mid-feed failure or infer allocation feasibility from a simple
+count without contract/oracle review. No automatic erase or new refusal implemented.
+
+**Ingest preflight disposition.** #166 establishes genuine infeasible/ambiguous
+literal I3/I4 readings, not Product acceptance. Issue [INGEST-1](WP16-INGEST-CONTRACT.md)
+in one coherent contract, adopting C1–C12 with explicit matrix/trim families and
+arithmetic-profile boundaries. D3 remains the named format families, now qualified
+by codec/container profiles. C4 no boost for undefined loudness; C6 missing trim
+metadata admitted untrimmed/gapless_unknown, contradictory/unsupported explicit trim
+refused; C8 audio-only flat folders, no silent skips; C10 same-profile bit identity
+on all three named platforms; C12 unsafe joined true peak refuses rather than changes
+neighbour-dependent gains. Silence/gaps exactzero; constant gain only, exact reset
+TPDF quantizer/frame rounding, fixed selection/order and transactional output pair.
+BS1770-5 and Tech3341 V4 checked against primary publications; numeric Product bounds
+are issued requirements, not claims that a library already achieves them.
+Independent authoring publishes legal fixtures, calibration/alternate-path positives
+and causal controls before blind candidate disposition; Software builds host ingest
+under the existing host parallel-authoring rule after finishing the A6 correction.
+Contract conflict returns before oracle relaxation. No WP16 real-card/full acceptance
+or WP15 acceptance before WP14 A6; Phase2 now4/12 from WP16 contract rung only.
+
+**Reversal cost/holds.** PM docs/contract/queue changes only; no Product implementation
+review/merge or independent acceptance by PM. Frozen engine/format, hardware/media/
+atomicity, purchases, <30s target copy, write/batching/async/recording/firmware and
+Michael's reserved physical approvals survive. Existing accepted bytes/evidence stay
+unchanged; active instructions live only in role issues.

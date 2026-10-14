@@ -143,4 +143,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-176](DECISIONS.md#adr-176--record-windows-11-and-ten-pull-completion-finish-wp14-residuals-and-preflight-ingest) | 2026-10-13 PDT | Windows11 / WP14 witness reconciliation | #390 integrated; ten pulls PASS; final success/A9 and native >4GiB held; WP16 contract preflight overlaps |
 
-113 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-177](DECISIONS.md#adr-177--dispose-final-windows-witness-correct-a6-capture-and-issue-ingest-1) | 2026-10-14 PDT | Final witness / A6 correction / INGEST-1 | Windows success/A9/README PASS; A6 method HELD on four false passes; ingest contract issued after independent preflight |
+
+114 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
