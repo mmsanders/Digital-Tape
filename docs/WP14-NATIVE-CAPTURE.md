@@ -1,8 +1,10 @@
 # WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425/#428
 
-**Status:** corrected Software method (#428), 14 October 2026 UTC. **Not normative, not acceptance,
+**Status:** corrected Software method (#428, second correction after Verification #171), 14 October 2026 UTC. **Not normative, not acceptance,
 not ready for a card until Verification #146 passes the corrected method.** Verification #167
-(`df637f7`) found four false passes in #426's first head `1fbe762`; §3 shows each now rejected.
+(`df637f7`) found four false passes in #426's first head `1fbe762`. Verification #171 (`112557e`)
+then found three more in `f5b4f1c`: an ended process, a closed and reused FileObject, and a
+duplicate tracer step. §3 shows all seven now rejected.
 Final Windows provision/load/reinsert/verify/A+B/A9 and README are **complete** (#167, #168);
 nothing here asks for another load, dump, pull or README. WP-14 is held only on physical native A6.
 Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; tested release
@@ -26,12 +28,13 @@ every reason, and is PASS only when all of the following hold for the bound proc
 | Property | How it is bound | Missing → | Contradicted → |
 |---|---|---|---|
 | Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
-| Process | every record is for `--pid`; DTrace `-c` target equals it; ETW reads are attributed only through `IssuingThreadId`/`TTID` to a thread *alive* in that process | — | FAIL |
+| Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs | — | FAIL |
+| Object (ETW) | a FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
 | Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
 | Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
 | No writes | no write of any kind by the process reaches the target | — | FAIL |
 | Result | saved stdout exactly `OK`; exit 0 wherever recorded (`--exit-code`, traced exit), and consistent | HELD | FAIL; disagreement → INPUT-ERROR |
-| Tracer complete | every tracer step exit 0; DTrace stderr has no drop/error and the trace ends `A6 end`; ETW header `EventsLost` = `BuffersLost` = 0; strace ends `+++ exited with` | HELD | FAIL |
+| Tracer complete | every occurrence of every tracer step exits 0 (a failed attempt is never hidden by a later success; a step recorded twice is HELD as ambiguous); DTrace stderr has no drop/error and the trace ends `A6 end`; ETW header `EventsLost` = `BuffersLost` = 0; strace ends `+++ exited with` | HELD | FAIL |
 
 **Honest limits.**
 - **Opening.** DTrace and strace record the open flags, so a read-only open is shown. Kernel
@@ -147,7 +150,7 @@ keep the ETL beside the XML.
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (67 cases) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (77 cases; 71 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |
@@ -156,7 +159,8 @@ been seen. The synthetic fixtures check the parser's logic only.
 | Same script at 62,537,072,640 bytes | Space guard | **Refused before provisioning**: 30.7 GB free < 62 GB worst case (`fixtures/linux-62g/space.txt`) |
 | `fixtures/linux-shipped-verify.strace` (#425's 62.5 GB capture, no `execve` traced) | Real, kept unchanged | Now **HELD**: the image cannot be bound |
 | Verification #167's six files, byte-identical with their published SHA-256 (`fixtures/verification-167/`) | Verification's controls | one-byte → FAIL (coverage); nonzero-exit → FAIL (traced exit 1); tracer-error → FAIL (drops); etw-lost → FAIL (EventsLost 17); both good shapes → HELD (no end marker; no loss counters / DiskIo-only) |
-| `fixtures/dtrace-good`, `fixtures/etw-good` and 59 single-property variants | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer, loss, PID, thread lifetime, process image, device, geometry, writes and timestamp order |
+| Verification #171's files, byte-identical with their own side files (`fixtures/verification-171/`) | Verification's controls | their baseline → PASS; process-ended → FAIL (outside observed life); foreign FileObject reuse → FAIL (object names `C:\helper.img`); `wpr-start 1` then `0` → FAIL (occurrence 1 of 2) |
+| `fixtures/dtrace-good`, `fixtures/etw-good`: 61 cases (6 positives, 55 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, process image, device, geometry, writes and timestamp order |
 
 ## 4. #423 bounded diagnosis
 

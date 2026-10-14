@@ -1,0 +1,4 @@
+wpr-start 1
+wpr-start 0
+wpr-stop 0
+tracerpt 0

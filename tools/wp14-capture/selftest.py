@@ -208,7 +208,7 @@ def main():
                 etw_set(c, xml=gx.replace('"NtStatus">0x0', '"NtStatus">0xC0000185')))
         c.check('OpEnd returned 1 byte', 'FAIL', cover,
                 etw_set(c, xml=gx.replace('"ExtraInfo">512', '"ExtraInfo">1')))
-        c.check('FileIo status record is for another file', 'HELD', 'carry no native result',
+        c.check('FileIo status record is for another file', 'FAIL', 'not the target (closed, reused or foreign object)',
                 etw_set(c, xml=gx.replace('\\Device\\Harddisk1\\DR1', '\\Device\\HarddiskVolume3\\helper.img')))
         lines = gx.split('\n')
         tend = [l for l in lines if '3d6fa8d1' in l and '<Opcode>2<' in l][0]
@@ -222,7 +222,7 @@ def main():
                 etw_set(c, xml=gx.replace('>tapectl.exe<', '>powershell.exe<')))
         c.check('process image is tapectl-test.exe', 'FAIL', 'not the shipped tapectl',
                 etw_set(c, xml=gx.replace('>tapectl.exe<', '>tapectl-test.exe<')))
-        c.check('no process-start record', 'HELD', 'no process-start record',
+        c.check('no process-start record (its thread cannot be attributed)', 'FAIL', 'outside the observed life',
                 etw_set(c, xml='\n'.join(l for l in lines if '3d6fa8d0' not in l)))
         c.check('command line names another drive', 'FAIL', 'does not name',
                 etw_set(c, xml=gx.replace('verify \\\\.\\PhysicalDrive1', 'verify \\\\.\\PhysicalDrive2')))
@@ -244,6 +244,51 @@ def main():
         c.check('saved process exit 1', 'FAIL', 'recorded exit code 1', etw_set(c, code='1'))
         c.check('geometry not 512-byte sectors', 'HELD', '512-byte sectors', etw_set(
             c, geo=(FX / 'etw-good' / 'card-info.txt').read_text().replace('LogicalSectorSize  : 512', 'LogicalSectorSize  : 4096')))
+
+        print('== Verification #171 published files, byte-identical, with their own side files')
+        v1 = FX / 'verification-171'
+        base171 = ['--pid', '4242', '--capacity', str(CAP), '--exe', str(v1 / 'stand-in.bin'),
+                   '--sha256', '525f1d08f6b6f356ce6a48a2a74a828aa3dc1d41fbea6771df9400de191f8732',
+                   '--stdout', str(v1 / 'out.txt'), '--diagnostics', str(v1 / 'diag.txt'), '--format', 'etw-xml',
+                   '--geometry', str(v1 / 'win-geometry.txt'), '--target', '\\\\.\\PhysicalDrive1', '--disk', '1',
+                   '--exit-code', '0']
+        c.check('good-etw.xml (their positive baseline)', 'PASS', None,
+                base171 + ['--trace', str(v1 / 'good-etw.xml'), '--tracer-log', str(v1 / 'etw-exits.txt')])
+        c.check('process-ended.xml', 'FAIL', 'outside the observed life',
+                base171 + ['--trace', str(v1 / 'process-ended.xml'), '--tracer-log', str(v1 / 'etw-exits.txt')])
+        c.check('foreign-fileobject-reuse.xml', 'FAIL', "which names 'C:\\helper.img' at that point",
+                base171 + ['--trace', str(v1 / 'foreign-fileobject-reuse.xml'), '--tracer-log', str(v1 / 'etw-exits.txt')])
+        c.check('duplicate-exit-log.txt (wpr-start 1 then 0)', 'FAIL', "'wpr-start' exited 1 (occurrence 1 of 2)",
+                base171 + ['--trace', str(v1 / 'good-etw.xml'), '--tracer-log', str(v1 / 'duplicate-exit-log.txt')])
+
+        print('== ETW lifetime and object binding (synthetic)')
+        ev_ = lambda guid, opc, t, data: (
+            '<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event"><System><Provider Guid="{%s}"/>'
+            '<Opcode>%d</Opcode><TimeCreated SystemTime="2026-10-14T18:00:01.%sZ"/></System><EventData>%s</EventData></Event>'
+            % (guid, opc, t, ''.join('<Data Name="%s">%s</Data>' % kv for kv in data)))
+        FIO, PRC, THR = '90cbdc39-4a3e-11d1-84f4-0000f80464e3', '3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c', '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c'
+        read_line = [l for l in gx.split('\n') if '<Opcode>67<' in l][0]
+
+        def before_read(*evs):
+            return gx.replace(read_line, '\n'.join(evs) + '\n' + read_line)
+        close66 = ev_(FIO, 66, '0001500', [('TTID', '0x1388'), ('FileObject', '0xF1')])
+        clean65 = ev_(FIO, 65, '0001500', [('TTID', '0x1388'), ('FileObject', '0xF1')])
+        reopen = ev_(FIO, 64, '0001600', [('IrpPtr', '0xA3'), ('TTID', '0x1388'), ('FileObject', '0xF2'),
+                                           ('OpenPath', '\\Device\\Harddisk1\\DR1')])
+        c.check('target reopened on a new FileObject before the read', 'PASS', None,
+                etw_set(c, xml=before_read(close66, reopen).replace(
+                    '<Data Name="FileObject">0xF1</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">',
+                    '<Data Name="FileObject">0xF2</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">')))
+        c.check('FileObject closed, then read through it', 'FAIL', 'closed, reused or foreign object',
+                etw_set(c, xml=before_read(close66)))
+        c.check('FileObject cleaned up, then read through it', 'FAIL', 'closed, reused or foreign object',
+                etw_set(c, xml=before_read(clean65)))
+        c.check('process ended (no thread end) before the read', 'FAIL', 'outside the observed life',
+                etw_set(c, xml=before_read(ev_(PRC, 2, '0001500', [('ProcessId', '0x1092')]))))
+        c.check('a step recorded twice, both 0', 'HELD', 'ambiguous',
+                etw_set(c, exits='wpr-start 0\nwpr-start 0\nwpr-stop 0\ntracerpt 0\n'))
+        c.check('a step failed after an earlier success', 'FAIL', "'tracerpt' exited 2 (occurrence 2 of 2)",
+                etw_set(c, exits='wpr-start 0\nwpr-stop 0\ntracerpt 0\ntracerpt 2\n'))
 
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')

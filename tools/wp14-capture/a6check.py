@@ -56,7 +56,7 @@ class Verdict:
 
 def ev(**kw):
     base = dict(pid=None, op=None, fd=None, path=None, mode=None, off=None, len=None,
-                ret=None, err=None, status_src=None, exe=None)
+                ret=None, err=None, status_src=None, exe=None, stale=None)
     base.update(kw)
     return base
 
@@ -200,7 +200,7 @@ def parse_dtrace(text, v):
 # ------------------------------------------------------------------ ETW (Windows)
 
 G_DISKIO = '3d6fa8d4-fe05-11d0-9dda-00c04fd7ba7c'   # 10 Read, 11 Write
-G_FILEIO = '90cbdc39-4a3e-11d1-84f4-0000f80464e3'   # 64 Create, 67 Read, 68 Write, 76 OpEnd
+G_FILEIO = '90cbdc39-4a3e-11d1-84f4-0000f80464e3'   # 64 Create, 65 Cleanup, 66 Close, 67 Read, 68 Write, 76 OpEnd
 G_THREAD = '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c'   # 1 Start, 2 End, 3 DCStart, 4 DCEnd
 G_PROC = '3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c'     # 1 Start, 2 End, 3 DCStart, 4 DCEnd
 G_HEADER = '68fdd900-4a3e-11d1-84f4-0000f80464e3'   # 0 EventTrace_Header
@@ -250,33 +250,58 @@ def parse_etw_xml(text, v):
     elif len(times) < len(events):
         v.held.append('ETW: %d events have no timestamp' % (len(events) - len(times)))
 
-    out, threads, live_procs = [], {}, {}
+    # Lifetimes are replayed in time order. A record is attributed to a process only while
+    # its thread is alive AND that process is alive; a record from a thread whose process
+    # has ended (or was never seen starting) is unattributed and remembers the stale owner.
+    # A FileObject names a path only from its Create until its Cleanup/Close; a read's
+    # path is whatever its object names at that moment, never an older mapping.
+    out, threads, live_procs, ended = [], {}, {}, {}
     files, reads = {}, {}
+
+    def owner(tid_text):
+        if tid_text in (None, ''):
+            return None, None
+        tid = _int(tid_text)
+        pid = threads.get(tid)
+        if pid is not None and pid in live_procs:
+            return pid, None
+        return None, pid if pid is not None else ended.get(tid)
+
     for g, op, t, d in events:
         if g == G_PROC and op in (1, 3):
             live_procs[_int(d['ProcessId'])] = d.get('ImageFileName', '')
             out.append(ev(pid=_int(d['ProcessId']), op='exec', exe=d.get('ImageFileName', ''),
                           path=d.get('CommandLine', ''), ret=0))
         elif g == G_PROC and op in (2, 4):
-            live_procs.pop(_int(d['ProcessId']), None)
+            gone = _int(d['ProcessId'])
+            live_procs.pop(gone, None)
+            for tid in [k for k, p in threads.items() if p == gone]:
+                ended[tid] = threads.pop(tid)
         elif g == G_THREAD and op in (1, 3):
             threads[_int(d['TThreadId'])] = _int(d['ProcessId'])
+            ended.pop(_int(d['TThreadId']), None)
         elif g == G_THREAD and op in (2, 4):
-            threads.pop(_int(d['TThreadId']), None)
+            tid = _int(d['TThreadId'])
+            if tid in threads:
+                ended[tid] = threads.pop(tid)
         elif g == G_DISKIO and op in (10, 11):
-            tid = d.get('IssuingThreadId')
-            pid = threads.get(_int(tid)) if tid not in (None, '') else None
+            pid, stale = owner(d.get('IssuingThreadId'))
             n = _int(d['TransferSize'])
-            out.append(ev(pid=pid, op='read' if op == 10 else 'write', fd='disk%d' % _int(d['DiskNumber']),
+            out.append(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
+                          fd='disk%d' % _int(d['DiskNumber']),
                           off=_int(d['ByteOffset']), len=n, ret=None, status_src=None))
         elif g == G_FILEIO and op == 64:
-            pid = threads.get(_int(d.get('TTID', '-1')))
+            pid, stale = owner(d.get('TTID'))
             files[d.get('FileObject')] = d.get('OpenPath', '')
-            out.append(ev(pid=pid, op='open', fd=d.get('FileObject'), path=d.get('OpenPath', ''),
-                          mode=None, ret=0))
+            out.append(ev(pid=pid, stale=stale, op='open', fd=d.get('FileObject'),
+                          path=d.get('OpenPath', ''), mode=None, ret=0))
+        elif g == G_FILEIO and op in (65, 66):
+            pid, stale = owner(d.get('TTID'))
+            files.pop(d.get('FileObject'), None)
+            out.append(ev(pid=pid, stale=stale, op='close', fd=d.get('FileObject')))
         elif g == G_FILEIO and op in (67, 68):
-            pid = threads.get(_int(d.get('TTID', '-1')))
-            e2 = ev(pid=pid, op='read' if op == 67 else 'write', fd=d.get('FileObject'),
+            pid, stale = owner(d.get('TTID'))
+            e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=d.get('FileObject'),
                     path=files.get(d.get('FileObject')), off=_int(d['Offset']), len=_int(d['IoSize']))
             reads[d.get('IrpPtr')] = e2
             out.append(e2)
@@ -341,15 +366,15 @@ def parse_geometry(text):
 
 
 def parse_tracer_log(text):
-    """Lines "<step> <exit code>", e.g. "dtrace 0", "wpr-start 0"."""
-    steps = {}
+    """Lines "<step> <exit code>", e.g. "dtrace 0", "wpr-start 0". Every occurrence is kept."""
+    steps = []
     for line in text.splitlines():
         if not line.strip():
             continue
         m = re.fullmatch(r'\s*([A-Za-z][\w-]*)\s+(-?\d+)\s*', line)
         if not m:
             raise InputError('tracer log line is not "<step> <exit code>": %r' % line[:60])
-        steps[m.group(1)] = int(m.group(2))
+        steps.append([m.group(1), int(m.group(2))])
     return steps
 
 
@@ -404,10 +429,15 @@ def judge(a):
     # --- tracer completeness
     steps = parse_tracer_log(read_text(a.tracer_log))
     for s in REQUIRED_STEPS[a.format]:
-        if s not in steps:
+        codes = [c for name, c in steps if name == s]
+        if not codes:
             v.held.append('tracer log has no exit code for step %r' % s)
-        elif steps[s] != 0:
-            v.fail.append('tracer step %r exited %d' % (s, steps[s]))
+        for i, c in enumerate(codes):
+            if c != 0:
+                v.fail.append('tracer step %r exited %d (occurrence %d of %d)' % (s, c, i + 1, len(codes)))
+        if len(codes) > 1 and not any(codes):
+            v.held.append('tracer step %r is recorded %d times; which attempt produced this trace '
+                          'is ambiguous' % (s, len(codes)))
     for p in a.diagnostics:
         txt = read_text(p)
         if a.format == 'dtrace':
@@ -427,6 +457,10 @@ def judge(a):
     if tgt and tgt[0] != a.pid:
         v.fail.append('dtrace -c target is PID %s, not --pid %d' % (tgt[0], a.pid))
     mine = [e for e in events if e['pid'] == a.pid and e['op'] != 'target']
+    stale = [e for e in events if e.get('stale') == a.pid]
+    if stale:
+        v.fail.append('%d record(s) come from a thread of PID %d outside the observed life of that '
+                      'thread and process; they are not attributed' % (len(stale), a.pid))
     if not mine:
         v.fail.append('no captured record belongs to PID %d' % a.pid)
     execs = [e for e in mine if e['op'] == 'exec']
@@ -458,8 +492,17 @@ def judge(a):
         elif e['op'] == 'close':
             fdmap.pop(e['fd'], None)
         elif e['op'] in ('read', 'write', 'flush'):
-            if a.format == 'etw-xml' and e['fd'] == 'disk%d' % a.disk:
-                calls.append(e)
+            if a.format == 'etw-xml':
+                # DiskIo by disk number; FileIo by the path its object names AT THIS READ.
+                if e['fd'] == 'disk%d' % a.disk:
+                    calls.append(e)
+                elif not str(e['fd']).startswith('disk') and target_matches(e['path'], a):
+                    calls.append(e)
+                elif (not str(e['fd']).startswith('disk') and e['off'] is not None
+                      and e['off'] < a.capacity and e['off'] + (e['len'] or 0) > mirror):
+                    v.fail.append("a read by PID %d of the last sector is on FileObject %s, which names '%s' "
+                                  'at that point, not the target (closed, reused or foreign object)'
+                                  % (a.pid, e['fd'], e['path']))
             elif fdmap.get(e['fd']):
                 calls.append(e)
     if a.format != 'etw-xml':
