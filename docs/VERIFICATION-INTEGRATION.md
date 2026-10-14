@@ -6,6 +6,19 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
+## Phase 2 boundary — 13 October 2026 PDT (ADR-176)
+
+WP14 imported publication `56e25cc1`, subtree `e1ef171f`, remains unchanged.
+Verification #158 software/CI PASS disposes Product head `5e2df5a`, root `7b820408`;
+Michael's #390 merge `46b48edd` has that exact root. All 113 final PR jobs PASS.
+Verification #159 (`956d02ec`) authenticates served tested release bytes; #160
+(`7f19fc20`) disposes Mac C60 success; [#164 ten Windows 11 pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md)
+(`6899cf7b`) PASS. Physical reports stay in Verification; they are not new imported oracles.
+Full WP14 remains held for final Windows post-pull success/A9 and shipped-binary
+physical >4 GiB capture on both named OSes. Windows 11 supersedes Windows 10;
+historical observation/platform identities stay unchanged. No reacceptance of identical
+#390 bytes, repeat ten-pull campaign or media/hardware qualification follows.
+
 ## Current boundary — Phase 1 close-out, 3 October 2026
 
 Every imported verifier package is declared in [tests/IMPORTS.json](../tests/IMPORTS.json)

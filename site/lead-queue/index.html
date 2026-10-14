@@ -265,7 +265,7 @@
     const PHASE1 = {
       phase: 1,
       title: "Audio engine, on a laptop",
-      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final; snapshot refreshed P2-R1 / 8 October 2026 PDT for ADR-175 (playback dependency accepted; Phase 1 rungs unchanged)",
+      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final; snapshot refreshed P2-R1 / 13 October 2026 PDT for ADR-176 (WP14 software integrated and ten pulls accepted; Phase 1 rungs unchanged)",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -293,18 +293,18 @@
     const PHASE2 = {
       phase: 2,
       title: "A folder of music becomes a cartridge",
-      asOf: "P2-R1 · 8 October 2026 PDT · input main d5c2d5e; Verification #157 final READ-2 PASS, #419 integrated unchanged; accepted A8 engine d96b4245. Existing #392/#146 final WP14 gate resumes; no Phase 2 package accepted",
+      asOf: "P2-R1 · 13 October 2026 PDT · input main 46b48edd; WP14 software/CI PASS integrated, tested release authenticated; Mac C60 and ten Windows 11 pulls PASS. Full WP14 remains held; ADR-176",
       start: "Phase 2 opened · 5 Oct 2026",
       goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
       stages: [
-        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 2,
-          note: "Contract and complete authored package are published/imported (Verification 56e25cc1). Playback dependency now independently accepted and integrated (#419 / #157, ADR-175); immutable A8 engine d96b4245 recorded. Existing Software #392 carries WP14 onto this pin and executes final native C60/required qualification → Verification #146 exact-head review. WP14 #390 is not accepted; Michael-reserved merge and macOS/Windows 10 physical witness, readable README and tested release remain. Server2025 does not substitute for Windows 10." },
+        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 3,
+          note: "Verification #158 software/CI PASS (113/113 jobs); #390 merged at 46b48edd with the disposed root unchanged. Tested release authenticated (#159). Mac C60 round trip/README PASS (#160); ten Windows 11 physical pulls PASS (#164). Full package held for final Windows post-pull C60/readback/A9 and native shipped-binary physical >4 GiB captures on Mac and Windows. Windows 11 supersedes the mistaken Windows 10 target; no repeated pull campaign. A8 engine d96b4245 remains pinned." },
         { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 0,
-          note: "Planned after the real-card path. D3–D5 settled: WAV/AIFF/FLAC/MP3/AAC, gain-only −16 LUFS with −1 dBTP ceiling, natural filename order and defined folder gaps. Package contract not yet issued; kickoff choices are not a completed contract rung." },
+          note: "Planned after the real-card path. D3–D5 settled: WAV/AIFF/FLAC/MP3/AAC, gain-only −16 LUFS with −1 dBTP ceiling, natural filename order and defined folder gaps. Contract feasibility preflight may overlap WP14 physical closure (ADR-176); exact contract not yet issued, so no rung advance." },
         { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 0,
           note: "Planned over WP-14 and WP-16; package contract not yet issued. Drop a folder, type a label, pick a card, press one button. No music library or direct device writes. Acceptance includes Michael witnessing an unfamiliar family member's unaided run." }
       ],
-      context: "Foundations complete: R1/D8, operations freeze and E-1. Verification #157 final READ-2 PASS accepts read-only playback; #419 integrated unchanged at d5c2d5e. Engine CI 100/100; full inventory 109 jobs, 108 PASS and one authorized READ1 skip. #399 resolved and immutable A8 engine d96b4245 recorded. Existing #392/#146 resumes meaningful final WP14 qualification without duplicate lead issues or repeated engine acceptance. Physical/platform/release gates remain; package rungs unchanged. After WP14 real-card path, WP16 ingest then WP15 app. Q-P2-1 write/copy, async and recording remain separately unissued; <30 s target copy retained; hardware parked; WP-38 is not taken.",
+      context: "Foundations complete: R1/D8, operations freeze and E-1. WP14 implementation integrated and green; software, tested-release and physical ten-pull dispositions are separate from full acceptance. Final Windows success/A9 and physical large-offset captures remain. WP16 contract preflight can proceed during those residuals; WP15 follows accepted dependencies. Q-P2-1 write/copy, async and recording remain separately unissued; <30 s target copy retained; hardware parked; WP-38 is not taken.",
       exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
     };
 

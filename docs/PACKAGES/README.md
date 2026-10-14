@@ -49,9 +49,9 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **P2-R1; not accepted.** Playback #419 independently accepted/integrated (ADR-175), immutable A8 engine `d96b4245` recorded. Existing #392/#146 final WP14 qualification resumes with complete authored verifier package `56e25cc1`. Native C60/exact-head disposition, physical macOS/Windows 10 and release evidence remain; #390 merge Michael-reserved. Criteria A1–A9 in package file |
+| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **P2-R1; full package held.** #390 integrated `46b48edd`; Verification #158 software/CI PASS, #159 tested release authenticated, #160 Mac C60 and #164 ten Windows 11 pulls PASS. Final Windows post-pull C60/A9 and shipped-binary physical >4 GiB captures remain; Windows 11 replaces Windows 10 (ADR-176). Criteria A1–A9 in package file |
 | WP-15 | [Drag-and-drop app (Tauri)](WP-15.md) | Agent | 3 | **Planned, P2-R3.** One window over WP-14 and WP-16; never writes the card itself; no lists (guardrail 03). Milestone test: someone who is not Michael makes a cartridge unaided |
-| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. D3–D5 settled (ADR-162); follows the WP-14 real-card path |
+| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. D3–D5 settled (ADR-162); source-independent contract preflight may overlap WP-14 residual physical closure (ADR-176); implementation contract not yet issued |
 | WP-38 | Phone / web-app test harness (engine built to WebAssembly) | Agent | 3 | **Not taken in Phase 2 (D7, ADR-162).** Michael: no explicit development, but Software keeps the possibility open; Phase 2 host work must not make a later WASM build of the engine and ingest path impossible. Resume: Michael's `REQUEST:`. Lane outline kept in [the plan](../PHASE2-PLAN.md#wp-38-lane-if-d7-is-yes). Feasibility (PM, #341): the C99 engine compiles to WASM unchanged (guardrail 12); phone audio is not the product codec, so it gives no 85 dB-cap or wake-latency evidence, and golden identity must hold on the WASM build |
 
 **Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided. The detailed plan, rounds and kickoff decisions are in [docs/PHASE2-PLAN.md](../PHASE2-PLAN.md).
@@ -106,7 +106,7 @@ Recorded at the Phase 1 close-out (3 October 2026, ADR-160). Phase 1 exit criter
 (ADR-159). Nothing below is scheduled until Michael gives the Phase 2 go. **The kickoff
 decisions (D1–D9), rounds and package criteria are now in [the Phase 2 plan](../PHASE2-PLAN.md)
 (ADR-161)**, which schedules the R-items below; this section keeps their rationale.
-**Answered 5 October 2026 (ADR-162):** go; Windows 10 + current macOS; defaults for D3–D5/D8;
+**Answered 5 October 2026 (ADR-162), D2 corrected 13 October PDT (ADR-176):** go; Windows 11 + current macOS; defaults for D3–D5/D8;
 D6 Michael's wife; WP-38 not taken; operations freeze declared. The list below is historical.
 
 **Decisions to make at kickoff**

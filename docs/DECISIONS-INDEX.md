@@ -139,6 +139,8 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-174](DECISIONS.md#adr-174--complete-the-pin-control-fixture-and-authorize-normal-correction-ci) | 2026-10-08 | Pin-control fixture correction | Engine 100/100 PASS; include pending dirs in control baseline; necessary in-scope fixes may run normal required CI |
 
-111 entries. Regenerate after appending an ADR; never edit `DECISIONS.md`.
-
 | [ADR-175](DECISIONS.md#adr-175--record-accepted-playback-a8-pin-and-resume-existing-wp14-work) | 2026-10-08 PDT | Accepted playback pin / WP14 resumption | READ-2 PASS integrated; A8 d96b4245; #399 resolved; existing #392/#146 final gate, physical/platform holds |
+
+| [ADR-176](DECISIONS.md#adr-176--record-windows-11-and-ten-pull-completion-finish-wp14-residuals-and-preflight-ingest) | 2026-10-13 PDT | Windows11 / WP14 witness reconciliation | #390 integrated; ten pulls PASS; final success/A9 and native >4GiB held; WP16 contract preflight overlaps |
+
+113 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

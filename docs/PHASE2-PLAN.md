@@ -54,7 +54,7 @@ Each has a recommended default. "Go with the defaults" is a complete answer.
 | # | Answer |
 |---|---|
 | D1 | Go |
-| D2 | **Windows 10** and **current macOS** (up to date; Software records the exact version tested), plus Linux in CI |
+| D2 | **Windows 11** and **current macOS** (up to date; Software records the exact version tested), plus Linux in CI. Michael corrected his mistaken Windows 10 answer on 13 October PDT (ADR-176); the original 5 October answer is superseded |
 | D3, D4, D5, D8 | Defaults |
 | D6 | Michael's wife, if she agrees. Fallback: the default (a family member who has not seen the app) |
 | D7 | **No WP-38 in Phase 2.** No explicit development, but Software keeps it possible: nothing in WP-14/15/16 may make a later WebAssembly build of the engine and ingest path impossible. Recorded under WP-38 in the roadmap |
@@ -123,6 +123,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
 - **Stop:** Verification PASS on an exact WP-14 head, integrated; the real-card run recorded.
 
 ### P2-R2 — ingest
+Contract feasibility preflight may proceed while WP14 residual physical evidence is collected (ADR-176). This does not advance the WP14 stop or authorize ingest implementation before its contract; the real-card half and dependent acceptance remain held.
 - PM issues the WP-16 contract, using D3–D5.
 - Software builds the tool. Verification builds the fixtures and acceptance tests in parallel. Fixtures are generated tones and public-domain or CC0 recordings only, like the WP-11 goldens.
 - PM rules on Q-P2-1(b), §5.

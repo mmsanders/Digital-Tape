@@ -1,7 +1,7 @@
 # WP-14 `tapectl` on real cards — contract (PM-issued, P2-R1)
 
 **Status:** ISSUED 5 October 2026 (ADR-163); amended 6 October (ADR-164), resolving Q1–Q11 and
-P2V-001…004; ADR-165 corrects the P2V-005 bare-image CRC/signature collision. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
+P2V-001…004; ADR-176 replaces the mistaken Windows 10 target with Windows 11 on Michael's 13 October PDT direction. Historical verifier copies and observations remain unchanged. ADR-165 corrects the P2V-005 bare-image CRC/signature collision. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
 see the exact supplemental erratum and integrity manifest in [SPEC-ERRATA.md](SPEC-ERRATA.md). Changing this file after issue is a PM decision recorded here, in `docs/DECISIONS.md`
 and on both issues. Package criteria: [WP-14](PACKAGES/WP-14.md). This contract **extends**
 [the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule and command holds unless a line below
@@ -67,7 +67,7 @@ I/O failure, not bare fallback.
 |---|---|---|
 | Linux (CI only) | `/dev/sdX`, `/dev/mmcblkN` | partitions (`/dev/sdX1`, `/dev/mmcblkNp1`), anything else |
 | macOS | `/dev/diskN` or `/dev/rdiskN` (raw I/O always uses `rdiskN`) | `diskNsM` slices, APFS synthesized disks |
-| Windows 10 | `\\.\PhysicalDriveN` | drive letters, volume GUID paths |
+| Windows 11 | `\\.\PhysicalDriveN` | drive letters, volume GUID paths |
 
 A device that is not a provisioned layout is refused by every command except `provision` and
 candidate-layout `verify` below (exit 2, `NOT_PROVISIONED`). `tapectl` never infers that a card should be provisioned.
