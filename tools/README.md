@@ -108,3 +108,11 @@ gets added when Stream 4 links.
 The RAM gate links a probe, prints `tape_instance_size()`, and includes it in
 `.data + .bss + instance`. The earlier claim that it omitted the instance was stale;
 the script already measured the required sum. Attach each resource result to the commit it measured.
+
+## `tools/wp14-capture/`
+
+Software #425 capture tooling for the physical WP-14 A6 witness; method and limits in
+[docs/WP14-NATIVE-CAPTURE.md](../docs/WP14-NATIVE-CAPTURE.md). Not a CI gate and not acceptance.
+`a6check.py` judges one strace/DTrace/iocap/tracerpt capture of the shipped `tapectl`;
+`a6-macos.d` and `load-profile-macos.d` are the macOS DTrace scripts; `selftest.sh` proves every
+control fails (add `TAPECTL=` for a live Linux image rehearsal).

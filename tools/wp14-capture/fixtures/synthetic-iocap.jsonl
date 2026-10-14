@@ -1,0 +1,5 @@
+{"call":"iocap_attach","pid":4242}
+{"call":"open","path":"/dev/rdisk4","flags":16777216,"write":false,"fd":3,"errno":0}
+{"call":"pread","fd":3,"offset":0,"bytes":512,"ret":512,"errno":0}
+{"call":"pread","fd":3,"offset":17825792,"bytes":512,"ret":512,"errno":0}
+{"call":"pread","fd":3,"offset":62537072128,"bytes":512,"ret":512,"errno":0}
