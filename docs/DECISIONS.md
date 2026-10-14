@@ -3618,3 +3618,50 @@ review/merge or independent acceptance by PM. Frozen engine/format, hardware/med
 atomicity, purchases, <30s target copy, write/batching/async/recording/firmware and
 Michael's reserved physical approvals survive. Existing accepted bytes/evidence stay
 unchanged; active instructions live only in role issues.
+
+## ADR-178 — resolve P2V16-001 with source-level zero-output refusal
+
+**Date:** 14 October 2026 PDT. **Owner:** PM, Michael's ruling activation.
+Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; INGEST-1 blob
+`a2bb69147ec60f3e81e5e761ffaaa24a75e84e18`; merged Verification #170
+`388804c1bb8a614a167074af8d8896dccbace5a2`, publication CI38608478026 SUCCESS.
+
+**Finding upheld.** A valid positive-frame silent192k source with N=1/2 rounds to
+zero output frames under the issued nearest/half-up arithmetic. Digital-silence
+rules admit it, but a lone source yields a44-byte empty WAV that the authenticated
+shipping loader rejects. The N=3→one-frame neighbour loads/verifies successfully,
+so this is a real contract gap, not a failed baseline. No ingest implementation
+was inspected and no engine defect or change is inferred. Other high-rate tiny
+sources share the boundary; rate88200/N=1 rounds up and remains valid.
+
+**Decision.** After valid decode/trim and the unchanged exact count calculation,
+refuse EACH source with output_frames=0, including digital silence. Name the source,
+exit2, explain too short to produce one44.1kHz frame, before any output or staging
+file. Refuse the whole request: no skip, clamping/extra frame, altered rounding or
+gap-based rescue. This is source-level even if other sources/gaps make total positive.
+All positive short/silent/unmeasurable sources with at least one output frame retain
+existing admission/peak/silence rules. Preserve loader compatibility rather than
+weaken its promise. No engine/CLI/format changes, blanket short-source refusal or
+new minimum-duration policy. This amends INGEST-1 §4 and WP16 I7 only as stated.
+
+**Direct continuation.** Existing Verification169 resumes affected assertions and
+unaffected authoring from its preserved partial checkpoint, which is NOT an
+importable main publication or full Stage1 package. Include causal zero-output
+refusal and positive neighbouring/count-boundary cases, including source-level
+refusal inside otherwise positive multi-source/folder output. Existing Software429
+uses the amended rule within its issued implementation scope after Software428's
+higher-priority return. No duplicate lead issue, full preflight repeat or PM relay.
+
+**A6 return.** Also reviewed merged Verification171
+`112557e2d2ae22a14137315fca5996a7adb08175`, CI38610365344 SUCCESS.
+The original four false-pass fixes and67/67 mechanics are retained; three remaining
+process/thread lifetime, FileObject close/reuse and duplicate tracer-step failures
+require correction. These are inside open428/426; no new assignment or execution
+approval is necessary. Native export/status limits remain unknown. No corrected-
+method/integration/physical PASS or A6 limitation waiver. No new Michael action.
+PM relies on independent published findings/CI, without another Product campaign.
+
+**Gate/reversal cost.** Phase1 36/36, Phase2 4/12 unchanged. WP14 physicalA6,
+WP16 real-card/full acceptance, WP15 and frozen/write/batching/async/recording/
+firmware/hardware/media/atomicity/<30s/purchase holds survive. Reversal is a host
+input-contract amendment and its independent expectations, not on-card changes.
