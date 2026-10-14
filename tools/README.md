@@ -111,8 +111,10 @@ the script already measured the required sum. Attach each resource result to the
 
 ## `tools/wp14-capture/`
 
-Software #425 capture tooling for the physical WP-14 A6 witness; method and limits in
-[docs/WP14-NATIVE-CAPTURE.md](../docs/WP14-NATIVE-CAPTURE.md). Not a CI gate and not acceptance.
-`a6check.py` judges one strace/DTrace/iocap/tracerpt capture of the shipped `tapectl`;
-`a6-macos.d` and `load-profile-macos.d` are the macOS DTrace scripts; `selftest.sh` proves every
-control fails (add `TAPECTL=` for a live Linux image rehearsal).
+Software #425/#428 capture tooling for the physical WP-14 A6 witness. Method, limits and the
+Verification #167 corrections are in [docs/WP14-NATIVE-CAPTURE.md](../docs/WP14-NATIVE-CAPTURE.md).
+Not a CI gate, not an oracle and not acceptance. `a6check.py` judges one strace, DTrace or
+tracerpt capture of the shipped `tapectl verify`, returning PASS/FAIL/INPUT-ERROR/HELD.
+`a6-macos.d` is the macOS DTrace script, not yet run on a Mac. `rehearse-linux.sh` is the
+off-card Linux image rehearsal. `selftest.py` proves each control gives its stated verdict for
+its stated reason; add `TAPECTL=` to include the real Linux captures.

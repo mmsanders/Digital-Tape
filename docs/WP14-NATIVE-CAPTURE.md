@@ -1,13 +1,14 @@
-# WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425
+# WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425/#428
 
-**Status:** Software method and proposal, 14 October 2026 UTC. **Not normative, not acceptance.**
-Verification #146 decides whether the capture method is adequate and owns every
-physical disposition; PM #384 decides the diagnosis follow-ups. Input main
-`b0d0847b85cee6eac4b2624f9835052a950b902e`; tested release
-[`wp14-tapectl-5e2df5aaf23e`](https://github.com/mmsanders/Digital-Tape/releases/tag/wp14-tapectl-5e2df5aaf23e)
-(Product `5e2df5aaf23e9ed0e230c444a40650da9459ddb2`, engine `d96b4245…`). Tooling:
-[`tools/wp14-capture/`](../tools/wp14-capture/). Nothing here changes `engine/`, `host/`, a
-verifier tree, a workflow or the contract.
+**Status:** corrected Software method (#428), 14 October 2026 UTC. **Not normative, not acceptance,
+not ready for a card until Verification #146 passes the corrected method.** Verification #167
+(`df637f7`) found four false passes in #426's first head `1fbe762`; §3 shows each now rejected.
+Final Windows provision/load/reinsert/verify/A+B/A9 and README are **complete** (#167, #168);
+nothing here asks for another load, dump, pull or README. WP-14 is held only on physical native A6.
+Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; tested release
+[`wp14-tapectl-5e2df5aaf23e`](https://github.com/mmsanders/Digital-Tape/releases/tag/wp14-tapectl-5e2df5aaf23e).
+Tooling: [`tools/wp14-capture/`](../tools/wp14-capture/). No `engine/`, `host/`, port, verifier
+tree, oracle, workflow, ruleset or gate change.
 
 | Shipped binary (unchanged, from the release) | SHA-256 |
 |---|---|
@@ -15,150 +16,147 @@ verifier tree, a workflow or the contract.
 | `tapectl-windows.exe` (x64) | `82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9` |
 | `tapectl-linux` (rehearsal only) | `4d8c97a44f163bcd513c98c0903db6a01418001f169cfd6aa126823f6f7a785c` |
 
-## 1. What the A6 capture shows, and what it does not
+## 1. What a capture can show
 
-`verify` mounts both sides. Mounting reads the TAPEFS mirror superblock, the last block
-of partition 2, which §3.1 ends at the card's last sector: absolute byte offset
-**capacity − 512**. On the owned card (62,537,072,640 bytes on both machines,
-`card-info.txt` in the [Mac bundle](https://github.com/mmsanders/digital-tape-verification/tree/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-MAC-2026-10-12-evidence)
-and PULL01 `disks-before.txt`) that is **62,537,072,128**, above 4,294,967,295.
+`verify` mounts both sides, and mounting reads the TAPEFS mirror superblock in the card's
+last sector: bytes **[capacity − 512, capacity)**, i.e. [62,537,072,128, 62,537,072,640) on
+the owned card. `a6check.py` returns PASS 0, FAIL 1, INPUT-ERROR 2 or HELD 3, reports
+every reason, and is PASS only when all of the following hold for the bound process:
 
-A capture PASSes `a6check.py verify` only if, **for tapectl's own PID**: the target is opened,
-never for writing; no write reaches it; and a read covering capacity − 512 at an offset
-above 4,294,967,295 completes with its full length. The record carries the
-offset/length/result, PID, executable SHA-256, OS build and device geometry.
+| Property | How it is bound | Missing → | Contradicted → |
+|---|---|---|---|
+| Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
+| Process | every record is for `--pid`; DTrace `-c` target equals it; ETW reads are attributed only through `IssuingThreadId`/`TTID` to a thread *alive* in that process | — | FAIL |
+| Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
+| Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
+| No writes | no write of any kind by the process reaches the target | — | FAIL |
+| Result | saved stdout exactly `OK`; exit 0 wherever recorded (`--exit-code`, traced exit), and consistent | HELD | FAIL; disagreement → INPUT-ERROR |
+| Tracer complete | every tracer step exit 0; DTrace stderr has no drop/error and the trace ends `A6 end`; ETW header `EventsLost` = `BuffersLost` = 0; strace ends `+++ exited with` | HELD | FAIL |
 
-It does **not** show the physical card's writes above 4 GiB. A read-only witness cannot
-observe them. Per-command software A6 coverage (Verification #158) stays as it is.
-CI virtual-device captures and PowerShell helper reads are not this evidence. A capture
-taken by tapectl-test, or with test facts, is invalid and must not be attempted on a card.
+**Honest limits.**
+- **Opening.** DTrace and strace record the open flags, so a read-only open is shown. Kernel
+  ETW `FileIo_Create` has no DesiredAccess. On Windows the claim is therefore limited to
+  *observed reads and no observed writes*; the open mode is not shown.
+- **Result on Windows.** `DiskIo` records carry offset, size, disk and issuing thread but no
+  status. A native result exists only if `FileIo` Read + OpEnd (`NtStatus`, `ExtraInfo`)
+  records appear for the device handle. Whether kernel FileIo covers a `\\.\PhysicalDriveN`
+  handle is **unknown until a real Windows trace is seen**. If only DiskIo appears, the
+  verdict is **HELD**. "Completion plus verify OK" is an indirect argument for independent
+  review, not a captured `ReadFile` result.
+- **Writes.** A read-only witness cannot show physical writes above 4 GiB. #158's per-command
+  software A6 coverage is unchanged.
+- **Not authorized.** An injected interposer (`iocap`) is not authorized and is no longer
+  supported. Test facts, `tapectl-test`, rebuilt binaries and OS-protection changes are
+  never used.
 
-## 2. Recipes
+## 2. Recipes: off-card rehearsal first, then one read-only card verify
 
-Run each recipe in two stages. The **rehearsal** checks the tracer on this exact machine
-against a sparse image file. It is mechanics only, never physical evidence. The **card**
-stage is one read-only `verify` of the card already provisioned for #386. Neither stage
-loads, provisions, erases or pulls the card. Never disable System Integrity Protection,
-Defender or any other OS protection, rebuild or replace the executable, or use test facts.
+Verification #146 decides whether and when Michael runs any of this and supplies the exact
+commands. Every stage keeps all raw files. **Clean stop:** if a tracer refuses, errors or
+reports loss, or `a6check.py` returns anything but PASS, stop, keep everything, send it to
+#146, and A6 stays held. Never retry on the card a different way.
 
-**Clean stop:** if the tracer refuses to start, prints an error, reports drops, or
-`a6check.py` returns `INPUT-ERROR`/`FAIL`, stop. Keep every file and the exact message
-and send them to #146. A6 stays held. Do not try another way on the card.
+**Image size and space.** The rehearsal image is **4,296,015,872 bytes** (4 GiB + 1 MiB).
+Its last sector, at 4,296,015,360, is already above 2³², and the worst case if it is not
+sparse is about 4.3 GB. Check free space first, then record apparent and allocated size.
+Do not assume a 62.5 GB file is sparse.
 
-### 2.1 macOS (arm64, macOS ≥ 26): DTrace, in-box
+### 2.1 macOS (arm64, macOS ≥ 26): in-box DTrace — not yet run on any Mac
 
-The tracer is the in-box `/usr/sbin/dtrace` syscall provider. It needs `sudo`. It watches
-from the kernel side and injects nothing into tapectl. `-c` makes dtrace start tapectl
-itself, so `$target` is exactly tapectl's PID and no call happens before tracing.
-`a6-macos.d` also records tapectl's own exit status. Use `-c` only for this read-only
-verify, because dtrace kills a process it started if dtrace is interrupted.
-
-From the folder holding the verified `tapectl` plus `a6-macos.d` and `a6check.py`
-(from this commit):
+From the folder with the verified `tapectl`, `a6-macos.d` and `a6check.py` from this commit:
 
 ```sh
 shasum -a 256 tapectl a6-macos.d a6check.py > a6-hashes.txt
-sw_vers > a6-macos-build.txt; uname -m >> a6-macos-build.txt
-# Rehearsal: a sparse 62,537,072,640-byte image on the internal disk (a few MB used).
+{ sw_vers; uname -a; csrutil status; } > a6-versions.txt 2>&1    # csrutil status only reads
+df -k . > a6-space.txt                                              # need > 4.3 GB free
 ./tapectl provision a6-rehearsal.img --label A6-REHEARSAL --uuid 00112233445566778899aabbccddeeff \
-    --epoch 1760000000 --image-bytes 62537072640
-sudo dtrace -q -s a6-macos.d -o a6-rehearsal.trace -c './tapectl verify a6-rehearsal.img' \
-    > a6-rehearsal-out.txt 2> a6-rehearsal-dtrace-err.txt
-head -1 a6-rehearsal.trace            # A6 trace tool=dtrace target=<PID>
-python3 a6check.py verify --format dtrace --trace a6-rehearsal.trace --pid <PID> \
-    --capacity 62537072640 --target a6-rehearsal.img --exe tapectl --sha256 e7550d8bedbb0c784fd528c387a87cca2bad8d1b411c39217d25377329bb0beb
+    --epoch 1760000000 --image-bytes 4296015872 > a6-rh-provision.txt 2>&1; echo "provision $?" >> a6-rh-provision.txt
+stat -f '%z' a6-rehearsal.img > a6-rh-geometry.txt
+{ ls -ls a6-rehearsal.img; du -k a6-rehearsal.img; } > a6-rh-allocation.txt
+sudo dtrace -q -s a6-macos.d -o a6-rh.trace -c './tapectl verify a6-rehearsal.img' \
+    > a6-rh-out.txt 2> a6-rh-dtrace-err.txt; echo "dtrace $?" > a6-rh-tracer-exits.txt
 rm a6-rehearsal.img
+python3 a6check.py --format dtrace --trace a6-rh.trace --pid <target= in line 1> \
+    --capacity 4296015872 --geometry a6-rh-geometry.txt --target a6-rehearsal.img \
+    --exe tapectl --sha256 e7550d8bedbb0c784fd528c387a87cca2bad8d1b411c39217d25377329bb0beb \
+    --stdout a6-rh-out.txt --diagnostics a6-rh-dtrace-err.txt --tracer-log a6-rh-tracer-exits.txt
 ```
 
-Continue only if that PASSes. Then insert the card and re-identify it as #386 does:
+Card stage, only after Verification accepts the rehearsal output. Identify the card as
+#386 does, then run:
 
 ```sh
-diskutil list external physical > a6-disks.txt
-diskutil info /dev/diskN > a6-card-info.txt     # Disk Size bytes, Device Block Size 512, Removable, USB
+diskutil info /dev/diskN > a6-card-info.txt
 sudo dtrace -q -s a6-macos.d -o a6-verify.trace -c './tapectl verify /dev/diskN' \
-    > a6-verify-out.txt 2> a6-verify-dtrace-err.txt
-python3 a6check.py verify --format dtrace --trace a6-verify.trace --pid <PID from line 1> \
-    --capacity <Disk Size bytes> --target /dev/rdiskN --exe tapectl --sha256 e7550d8bedbb0c784fd528c387a87cca2bad8d1b411c39217d25377329bb0beb > a6-verify-check.json
+    > a6-verify-out.txt 2> a6-verify-dtrace-err.txt; echo "dtrace $?" > a6-verify-tracer-exits.txt
+python3 a6check.py --format dtrace --trace a6-verify.trace --pid <target=> --capacity <Disk Size bytes> \
+    --geometry a6-card-info.txt --target /dev/rdiskN --exe tapectl --sha256 e7550d8b…(as above) \
+    --stdout a6-verify-out.txt --diagnostics a6-verify-dtrace-err.txt --tracer-log a6-verify-tracer-exits.txt
 ```
 
-tapectl opens `/dev/rdiskN` when given `/dev/diskN` (contract §2), so `--target` names the
-raw node. `a6-verify-out.txt` must read `OK`; the trace's `op=exit status=0` line is
-tapectl's exit. `python3` is only for convenience: Verification can run `a6check.py` on the
-returned files instead.
+Notes on these commands:
+- `-c` starts tapectl under dtrace, so the `target=` PID is tapectl's and no call precedes
+  tracing. Use it only for this read-only verify: dtrace kills a process it started if
+  dtrace itself is interrupted.
+- `dtrace $?` is dtrace's exit status. Tapectl's own exit comes from the traced `exit`
+  record, so the Mac has no separate `--exit-code`.
+- tapectl opens `/dev/rdiskN` for `/dev/diskN`.
+- If DTrace is unavailable under SIP, that is a clean stop: report it, and A6 on macOS stays
+  held.
 
-**If DTrace is unavailable** (for example `dtrace: failed to initialize` or syscall probes
-refused under SIP), that is a clean stop. One alternative exists for Verification to
-choose, not for the operator to improvise. The CI capture transport `iocap.dylib` was built
-in the same run as the shipped binary (SHA-256
-`eff62a9ec63359be7a42476a5842fdcf465738f7d06319d3bef4197b7d2fd503`, `build-info-macos.json`).
-It is an *injected* user-space interposer (`DYLD_INSERT_LIBRARIES`), not a kernel
-observation, and it is not a release asset. Running it would be
-`DYLD_INSERT_LIBRARIES=$PWD/iocap.dylib IOCAP_LOG=$PWD/a6-iocap.jsonl ./tapectl verify /dev/diskN`,
-checked with `--format iocap`. Whether an injected transport satisfies "bound to tapectl
-rather than a test shim" is #146's call.
+### 2.2 Windows 11 x64: in-box WPR + tracerpt — not yet run on any Windows host
 
-### 2.2 Windows 11 x64: WPR + tracerpt, in-box
-
-The tracer is in-box Windows Performance Recorder kernel tracing (`wpr.exe`), exported by the
-in-box `tracerpt.exe`, from the Administrator PowerShell the procedure already uses. Nothing
-is installed and no policy changes. The `DiskIo` records come from the disk stack below
-tapectl; `Process`/`Thread` rundown binds the issuing thread to tapectl's PID and image.
+Administrator PowerShell, in the folder with the verified `tapectl.exe` and `a6check.py`:
 
 ```powershell
 Get-FileHash .\tapectl.exe, .\a6check.py -Algorithm SHA256 | Format-List | Out-File a6-hashes.txt
-Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber | Out-File a6-windows-build.txt
-Get-Command wpr, tracerpt | Out-File a6-tools.txt
-# Rehearsal: sparse image on the internal disk.
-.\tapectl.exe provision a6-rehearsal.img --label A6-REHEARSAL --uuid 00112233445566778899aabbccddeeff --epoch 1760000000 --image-bytes 62537072640
-wpr -start FileIO -filemode
+Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber | Out-File a6-versions.txt
+(Get-Item C:\Windows\System32\wpr.exe, C:\Windows\System32\tracerpt.exe).VersionInfo | Format-List | Out-File -Append a6-versions.txt
+wpr -profiles | Out-File a6-wpr-profiles.txt
+Get-PSDrive -PSProvider FileSystem | Out-File a6-space.txt                 # need > 4.3 GB free
+.\tapectl.exe provision a6-rehearsal.img --label A6-REHEARSAL --uuid 00112233445566778899aabbccddeeff --epoch 1760000000 --image-bytes 4296015872
+(Get-Item a6-rehearsal.img).Length | Out-File -Encoding ascii a6-rh-geometry.txt
+fsutil sparse queryflag a6-rehearsal.img | Out-File a6-rh-allocation.txt
+wpr -start FileIO -start DiskIO -filemode;   "wpr-start $LASTEXITCODE" | Out-File -Encoding ascii a6-rh-tracer-exits.txt
 $p = Start-Process .\tapectl.exe -ArgumentList 'verify', 'a6-rehearsal.img' -NoNewWindow -Wait -PassThru `
-     -RedirectStandardOutput a6-rehearsal-out.txt -RedirectStandardError a6-rehearsal-err.txt
-wpr -stop a6-rehearsal.etl
-"pid $($p.Id) exit $($p.ExitCode)" | Out-File a6-rehearsal-pid.txt
-tracerpt a6-rehearsal.etl -o a6-rehearsal.xml -of XML -y
+     -RedirectStandardOutput a6-rh-out.txt -RedirectStandardError a6-rh-err.txt
+wpr -stop a6-rh.etl *> a6-rh-wpr-stop.txt;   "wpr-stop $LASTEXITCODE" | Out-File -Append -Encoding ascii a6-rh-tracer-exits.txt
+tracerpt a6-rh.etl -o a6-rh.xml -of XML -y *> a6-rh-tracerpt.txt; "tracerpt $LASTEXITCODE" | Out-File -Append -Encoding ascii a6-rh-tracer-exits.txt
+"pid $($p.Id) exit $($p.ExitCode)" | Out-File a6-rh-pid.txt
 Remove-Item a6-rehearsal.img
 ```
 
-Judge the rehearsal with `a6check.py verify --format etw-xml --trace a6-rehearsal.xml
---pid <pid> --capacity 62537072640 --target a6-rehearsal.img --stdout a6-rehearsal-out.txt
---exit-code <exit> --exe tapectl.exe --sha256 82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9`. Its FileIo records show file offsets. Then, with the card inserted and
-re-identified as #386 does:
+Check the rehearsal with `--format etw-xml --target a6-rehearsal.img --disk <the internal
+disk's number> --geometry a6-rh-geometry.txt --exit-code <exit>`. The other arguments are as
+on the Mac. Keep `a6-rh-wpr-stop.txt` and `a6-rh-tracerpt.txt` as diagnostics.
 
-```powershell
-Get-Disk -Number N | Format-List Number, FriendlyName, SerialNumber, BusType, Size, LogicalSectorSize, PhysicalSectorSize, PartitionStyle | Out-File a6-card-info.txt
-wpr -start DiskIO -start FileIO -filemode
-$p = Start-Process .\tapectl.exe -ArgumentList 'verify', '\\.\PhysicalDriveN' -NoNewWindow -Wait -PassThru `
-     -RedirectStandardOutput a6-verify-out.txt -RedirectStandardError a6-verify-err.txt
-wpr -stop a6-verify.etl
-"pid $($p.Id) exit $($p.ExitCode)" | Out-File a6-verify-pid.txt
-tracerpt a6-verify.etl -o a6-verify.xml -of XML -y
-```
+**What the rehearsal settles first:**
+1. Whether tracerpt XML has the field names the parser expects. A mismatch reads
+   INPUT-ERROR or HELD, never PASS.
+2. Whether the header loss counters are present.
+3. Whether FileIo reads are attributed to tapectl's thread.
 
-Check: `a6check.py verify --format etw-xml --trace a6-verify.xml --pid <pid> --capacity <Size>
---disk N --stdout a6-verify-out.txt --exit-code <exit> --exe tapectl.exe --sha256 82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9`. Kernel `DiskIo` read records carry
-`ByteOffset`, `TransferSize`, `DiskNumber` and the issuing thread, but **no status field**.
-The result is therefore the completion record plus `verify` printing exactly `OK` with exit 0.
-That is only possible if both superblock copies were read valid: a failed or wrong mirror
-read raises `NEEDS_REPAIR` or `MOUNT`. `a6check.py` requires those two inputs for a status-less record.
+The card stage repeats the same steps with `Get-Disk -Number N | Format-List Number,
+FriendlyName, SerialNumber, BusType, Size, LogicalSectorSize, PhysicalSectorSize,
+PartitionStyle` as geometry and `'verify', '\\.\PhysicalDriveN'`. The ETL holds every
+process's file and disk activity during the window: close other applications first, and
+keep the ETL beside the XML.
 
-The ETL holds every process's disk and file activity during the short window: close other
-applications first. Return the ETL as well as the XML.
+## 3. Validation actually performed: Linux x86_64 container only
 
-## 3. Validation actually performed (this container: Linux x86_64 only)
+No Mac and no Windows host was available, so this round validates **no native macOS or
+Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
+been seen. The synthetic fixtures check the parser's logic only.
+`python3 tools/wp14-capture/selftest.py` (67 cases) repeats everything below. Add
+`TAPECTL=<released tapectl-linux>` to include the real captures.
 
-| Check | Kind | Result |
+| Input | Kind | Result |
 |---|---|---|
-| Released `tapectl-linux`, hash-checked against `SHA256SUMS`, `verify` of a provisioned sparse 62,537,072,640-byte image under `strace -f -T` | Real capture of the exact shipped Linux binary; **image, not physical** | PASS. Two 512-byte reads at 62,537,072,128 (mount A, mount B), read-only open, zero writes. Kept as `fixtures/linux-shipped-verify.strace` (SHA-256 `c49765d0…ffe2`) |
-| `selftest.sh` controls on that capture: wrong PID, missing mirror read, offset truncated to 32 bits (2,397,498,880), failed call (`-1 EIO`), short read, write-mode open, read on another file, capacity ≤ 4 GiB, executable hash mismatch | Negative controls | each FAILs (exit 1) |
-| Same parser on `synthetic-*` fixtures in the DTrace, iocap and tracerpt-XML shapes, each with wrong-PID, failed-call, truncated-offset, wrong-disk, helper-process, foreign-thread, missing-`OK`, exit-status-disagreement and unreadable-input controls | **Synthetic format checks**, not captures | good cases PASS; controls FAIL (1) or INPUT-ERROR (2) |
-| `TAPECTL=… selftest.sh` live rehearsal: provision + strace + judge in one run | Image rehearsal | PASS |
-
-**Not validated here:** `a6-macos.d` has not been run, because no Mac is available. Its D
-syntax, probe names (covered with `zdefs`) and output have not been compiled or observed.
-`tracerpt`'s XML has not been seen either, because no Windows host is available. The
-parser targets the documented kernel MOF field names. The first real rehearsal on each
-machine is therefore the format check: a mismatch reads `INPUT-ERROR` or `FAIL`, never
-PASS. Run `tools/wp14-capture/selftest.sh` to repeat everything above.
+| `rehearse-linux.sh` with the released `tapectl-linux` (hash-checked first), 4,296,015,872-byte image | **Real** strace capture; image mechanics | PASS. 86,016 bytes allocated (`allocation.txt`); full raw set in `fixtures/linux-4g1m/` |
+| Same script at 62,537,072,640 bytes | Space guard | **Refused before provisioning**: 30.7 GB free < 62 GB worst case (`fixtures/linux-62g/space.txt`) |
+| `fixtures/linux-shipped-verify.strace` (#425's 62.5 GB capture, no `execve` traced) | Real, kept unchanged | Now **HELD**: the image cannot be bound |
+| Verification #167's six files, byte-identical with their published SHA-256 (`fixtures/verification-167/`) | Verification's controls | one-byte → FAIL (coverage); nonzero-exit → FAIL (traced exit 1); tracer-error → FAIL (drops); etw-lost → FAIL (EventsLost 17); both good shapes → HELD (no end marker; no loss counters / DiskIo-only) |
+| `fixtures/dtrace-good`, `fixtures/etw-good` and 59 single-property variants | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer, loss, PID, thread lifetime, process image, device, geometry, writes and timestamp order |
 
 ## 4. #423 bounded diagnosis
 
@@ -169,14 +167,15 @@ PASS. Run `tools/wp14-capture/selftest.sh` to repeat everything above.
 | Mac C60 load: `real 1619.06`, `user 1.25`, `sys 35.46`; `155048 flushes via DKIOCSYNCHRONIZECACHE`, exit 0 | Verification-preserved `load-time.txt`, SHA-256 `8eeb00bbfdd318792932c62395d54f26196af8c3bac64ca6bd075a914f051439` (Mac bundle INVENTORY) |
 | Mac provision: `real 0.14`, `9 flushes` | same bundle, `provision-time.txt` |
 | Card/reader: 62,537,072,640 B, 512-byte blocks, USB, "SD Transcend" (macOS); Windows PhysicalDrive1 behind a TS-RDF5 reader | Mac `card-info.txt`; Verification #164 |
+| Windows final uninterrupted C60 load: exit 0, **1677.7328603 s**, 155,048 `FlushFileBuffers`; reinsert, verify, A+B and README complete | Verification #167 [`P2-R1-WP14-FINAL-WIN-2026-10-14.md`](https://github.com/mmsanders/digital-tape-verification/blob/df637f7fb962a98b8698d16a531ceb0e8365c2a6/findings/P2-R1-WP14-FINAL-WIN-2026-10-14.md), #168 |
 | Windows interrupted pulls: 495 … 141,678 `FlushFileBuffers` in 5.94 … 1530.58 s (automatic Invoke-Tape timing). Provisions take 0.137–0.381 s for 9 flushes; quiet baselines take 1.81–3.18 s for 202 | `observations.json.gz` in [#164's bundle](https://github.com/mmsanders/digital-tape-verification/tree/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14-evidence), SHA-256 `eaed0732…b229` |
 
 The **corrected capacity method** is Verification's
 [P2V-006 method B](https://github.com/mmsanders/Digital-Tape-Verification/blob/7f19fc20247e87754dcb28c2d7b5e68b1bf9a2ed/findings/P2-R1-WP14-PULL-METHOD-2026-10-12.md).
 It provisions a fresh 5400 s label per trial: 1817 chunks against the 2 + 1212 needed. That
-removes the original 3600 s baseline + C60 infeasibility. The earlier Windows full-load
-figure (2352 s) was stopped by hand late and is not used. Interrupted pulls are used below
-only as a *rate per cycle*, never as a successful load time or A9.
+removes the original 3600 s baseline + C60 infeasibility. The earlier hand-stopped Windows
+figure (2352 s) is superseded by the final automatic 1677.73 s. Interrupted pulls are used
+below only as a *rate per cycle*, never as a successful load time or A9.
 
 ### 4.2 Call shape: deterministic, the same on every platform
 
@@ -195,42 +194,33 @@ barriers.
   For about 97.7 % of the wall time tapectl was off-CPU, waiting inside OS calls. Almost
   all of those are card writes and barriers; the 155k internal-SSD WAV reads were not
   timed separately.
-- **One write + barrier cycle costs ~10.5 ms, on both OSes, the whole way through.**
-  Mac: 1619.06 s / 155,048 = 10.44 ms. Windows: the ten pulls fit
-  `seconds = −0.71 + 10.74 ms × flushes`, 10.55–11.99 ms per cycle, from 495 to 141,678
-  cycles. There is no slowdown late in the card. Projected from the rate (an estimate, not
-  A9): a full Windows C60 load is about 155,048 × 10.74 ms ≈ 28 min.
+- **One write + barrier cycle averages ~10.5–10.8 ms on both OSes (observation).**
+  Mac: 1619.06 s / 155,048 = 10.44 ms. Windows final load: 1677.73 s / 155,048 = 10.82 ms.
+  The ten interrupted pulls fit `seconds = −0.71 + 10.74 ms × flushes` (10.55–11.99 ms per
+  cycle, 495–141,678 cycles), so there is no late-card slowdown. The pull-based projection
+  (≈28 min) matched the final 27.96 min.
 - **Host work is small.** Same binary, same C60 on images in this container: tmpfs 3.21 s
   real (0.29 user, 2.90 sys); disk-backed virtio 43.0 s real (0.37 user, 12.6 sys). These
   are host-image numbers. An image `fsync` says nothing about a card's cache-flush latency.
-- **Not yet known: how each ~10.5 ms cycle splits between the eight 512-byte writes and the
-  barrier.** The existing data cannot separate them, because every load cycle has the same
-  8:1 ratio. A two-point model from the provision (≈111 writes + 9 barriers in 0.14 s)
-  suggests ≈1.2 ms per synchronous 512-byte write and ≈1 ms per barrier, i.e. writes
-  dominate. **That is a model estimate only.** The provision's access pattern differs and
-  0.14 s has two significant figures. It matters, because it decides which change pays off.
+- **Not known: how each cycle splits between the eight 512-byte writes and the barrier.**
+  Every load cycle has the same 8:1 ratio, so no existing measurement separates them. A
+  two-point *model* from the provision (≈111 writes + 9 barriers in 0.14 s) would put
+  ≈1.2 ms on each write and ≈1 ms on each barrier. That is an estimate, not a measurement:
+  the provision's access pattern differs and 0.14 s has two significant figures. This round
+  claims no write/barrier split and no latency distribution.
 
-### 4.4 Optional capture alongside the required final Windows success load
+### 4.4 Measuring the split (not requested)
 
-These steps leave the required witness unchanged: same load command, Invoke-Tape timing
-and outputs. They need no extra load. If either step interferes, skip it.
-
-1. **CPU vs wall** (read-only, does not touch the card or the process). Start a second
-   PowerShell soon after the load begins. Run it once, wait 60 s, run it again:
-   `Get-Process tapectl | Select-Object Id, StartTime, TotalProcessorTime, @{n='t';e={Get-Date -Format o}} | Out-File -Append a6-load-cpu.txt`
-2. **A 60-second kernel latency window.** In that second window:
-   `wpr -start DiskIO -filemode`, wait about 60 s, then `wpr -stop a6-load-window.etl` and
-   `tracerpt a6-load-window.etl -o a6-load-window.xml -of XML -y`. Stopping WPR does not
-   affect tapectl. `a6check.py profile --format etw-xml --trace a6-load-window.xml --pid <Id>
-   --disk N` then gives the card-side service-time distribution for writes and flushes
-   across about 5,600 cycles. That is the write/barrier split §4.3 lacks.
-
-macOS needs no new load. If a load is required there in future anyway, `load-profile-macos.d`
-records the same split from a second Terminal (never with `-c`/`-p`). It has not been run in #425.
+The final Windows load is complete, so no capture can ride it now, and #428 requests no extra
+full-C60 profiling run. #426's `profile` mode and `load-profile-macos.d` are withdrawn. Their
+latency fields came from unvalidated ETW decoding and an unrun D script. If PM later wants
+the split, it needs its own scoped, independently reviewed measurement. A short partial load
+on a fresh provision would probably do, with a validated tracer.
 
 ### 4.5 Next optimization: recommendation
 
-Measure first (§4.4 item 2, optional, rides the required witness). Then:
+The split decides the order. Until a measurement is scoped (§4.4), both options stay
+proposals:
 
 - **If the barrier dominates:** make a **host-only record-cadence change**. tapectl keeps
   calling `tape_feed` until the caller-owned ring is full before it services, and gives the
@@ -247,10 +237,10 @@ Measure first (§4.4 item 2, optional, rides the required witness). Then:
   PERFORMANCE-PLAN lists) and independent tests first**. Port-level coalescing stays
   forbidden by contract §6.
 
-Neither change is licensed by #425, and neither is the target-system <30 s copy, which is
+Neither change is licensed by #425 or #428, and neither is the target-system <30 s copy, which is
 a separate duplicate path that remains mandatory.
 
-## 5. Reload refusal and recovery: proposed wording (design only)
+## 5. Reload refusal and recovery: proposed wording (proposal only; no allocation or wording change licensed)
 
 **Reproduced here** with the released Linux binary on an image. A full C60 on a 3600 s
 label occupies all 1212 chunks. A later `load` of `quiet.wav`, or of C60 again, exits 1:
