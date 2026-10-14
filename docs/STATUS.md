@@ -1,6 +1,6 @@
 # Project status
 
-**14 October 2026 UTC / 13 October PDT · input main `46b48edd` · Owner: PM (ADR-176; Verification #164) ·**
+**14 October 2026 PDT · input main `b0d0847b` · Owner: PM (ADR-177; Verification #166–168) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2-R1:** #390 software/CI PASS integrated `46b48edd`, tested release authenticated; Mac C60 and 10/10 Windows 11 pulls PASS. Final Windows success/A9 and physical >4 GiB captures held. WP14 3/4, Phase2 3/12; WP16 contract preflight may overlap.
+WP-38 not taken; operations freeze declared. **P2-R1:** #390 software/CI PASS integrated `46b48edd`, tested release authenticated; Mac C60 and 10/10 Windows 11 pulls PASS. Final Windows success/A9/README PASS (#167/#168); physical >4 GiB captures held. WP14 3/4, WP16 contract 1/4, Phase2 4/12; INGEST-1 issued.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,8 +79,8 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | WP14 #390 integrated `46b48edd`, root `7b820408` unchanged; #158 software/CI 113/113 PASS, #159 release authenticated, #160 Mac C60 and [#164 ten pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md) PASS. A8 `d96b4245` | #386 final Windows 11 success/A9; Software capture method → #146 physical >4 GiB review and full-package disposition; WP16 contract preflight |
-| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows README observations PASS within #160/#161 physical boundaries; full package still held | Verification #146; Michael #386 |
+| Phase 2 / P2-R1 | — | WP14 #390 integrated `46b48edd`, root `7b820408` unchanged; #158 software/CI 113/113 PASS, #159 release authenticated, #160 Mac C60 and [#164 ten pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md) PASS. A8 `d96b4245` | Windows final success/A9/README PASS (#167/#168). Software #426 method correction → #146 physical >4 GiB disposition; [INGEST-1](WP16-INGEST-CONTRACT.md) authoring/implementation |
+| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on physical A6 | Verification #146; Michael #386 |
 | Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | [ADR-168 framework](PERFORMANCE-PLAN.md); retain <30 s; design #405 reviewed; async ABI unissued; model before write changes |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; the WP-04 latch is not functional yet; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **I/O performance (#399/#379).** #399 resolved: independently accepted read-only playback integrated at `d5c2d5e`, engine `d96b4245` (ADR-175). C60 budget1024: 1,240,313 payload blocks / 19,380 callbacks; no target-speed claim. Final native C60 software qualification PASS (#158); physical gates remain. Mac load 1619.06s/155048 flush calls; Windows prior timer manually stopped late. #423 diagnostic follow-up; no causal latency/card-speed conclusion. Dup ~1.24M reads/writes and load 155048 flushes remain separate unissued write/async/recording risks; <30 s target copy mandatory.
+5. **I/O performance (#399/#379).** #399 resolved: independently accepted read-only playback integrated at `d5c2d5e`, engine `d96b4245` (ADR-175). C60 budget1024: 1,240,313 payload blocks / 19,380 callbacks; no target-speed claim. Final native C60 software qualification PASS (#158); physical gates remain. Mac load 1619.06s/155048 flush calls; Windows final 1677.7328603s/155048 flushes PASS; earlier manually stopped timer historical. #425 diagnostics useful, write/barrier split unmeasured; #426 capture checker has four independent false-PASS findings. Dup ~1.24M reads/writes and load 155048 flushes remain separate unissued write/async/recording risks; <30 s target copy mandatory.
 6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
