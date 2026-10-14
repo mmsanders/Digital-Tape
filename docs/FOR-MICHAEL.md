@@ -5,13 +5,13 @@ Active requests and decisions for Michael live only in
 Read that queue at each round; do not reconstruct a task list from this file.
 The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
 
-## Queue state (13 October 2026 PDT)
+## Queue state (14 October 2026 PDT)
 
 Kickoff D1–D9, E-1 and D8 are settled. Michael merged #390; that action is complete.
 Windows 11 replaces the mistaken Windows 10 target (ADR-176); ten pulls are accepted
-and need no Mac or Windows repetition. The remaining physical witness is tracked
+and need no Mac or Windows repetition. Final Windows success/A9/README is accepted (#167/#168); no further load/dump/README action. The remaining physical native A6 capture is tracked
 only in [#386](https://github.com/mmsanders/Digital-Tape/issues/386); its live body
-contains the final success/timing and capture handoffs. Read it for current commands.
+contains the capture handoff after method correction/review. Read it for current commands; do not run #426's held recipe.
 Hardware remains parked through Phase 2; WP-38 was not taken.
 
 ## Standing decisions

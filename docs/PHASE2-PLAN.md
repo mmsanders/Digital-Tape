@@ -123,7 +123,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
 - **Stop:** Verification PASS on an exact WP-14 head, integrated; the real-card run recorded.
 
 ### P2-R2 — ingest
-Contract feasibility preflight may proceed while WP14 residual physical evidence is collected (ADR-176). This does not advance the WP14 stop or authorize ingest implementation before its contract; the real-card half and dependent acceptance remain held.
+[INGEST-1](WP16-INGEST-CONTRACT.md) is issued after independent preflight #166 (ADR-177). Host fixture authoring/implementation may overlap WP14 physical A6 closure under the host-tool independence rule; real-card integration and dependent full acceptance remain held. This does not advance the WP14 stop.
 - PM issues the WP-16 contract, using D3–D5.
 - Software builds the tool. Verification builds the fixtures and acceptance tests in parallel. Fixtures are generated tones and public-domain or CC0 recordings only, like the WP-11 goldens.
 - PM rules on Q-P2-1(b), §5.
