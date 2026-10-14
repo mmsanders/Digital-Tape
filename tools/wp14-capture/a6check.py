@@ -265,13 +265,22 @@ def parse_etw_xml(text, v):
     # A FileObject names a path only from its Create until its Cleanup/Close; a read's
     # path is whatever its object names at that moment, never an older mapping.
     out, threads, live_procs, ended = [], {}, {}, {}
-    # IRP lifecycle: every FileIo request that carries an IrpPtr occupies it until an
-    # OpEnd with the same IrpPtr. A result joins a read only when the read had a valid
-    # IrpPtr, was the ONLY request pending on it, and the OpEnd carries both NtStatus and
-    # ExtraInfo. A second request on a still-pending IrpPtr (any operation type) poisons
-    # that IrpPtr: neither request receives a result. Missing or invalid identities never
-    # join. Sequential reuse after a completion is legitimate.
+    # IRP lifecycle. Each valid IrpPtr has one entry while ANY request on it is still
+    # outstanding: the requests seen, how many completions are still owed, and whether the
+    # lifecycle is ambiguous. A request arriving while another is outstanding (any FileIo
+    # operation type) makes the whole lifecycle ambiguous, and it STAYS ambiguous until
+    # every outstanding request has had its OpEnd: one completion of several never resets
+    # it, and requests added meanwhile are ambiguous too. Only a lifecycle that held exactly
+    # one request, a read, from start to completion can supply a result, and only from an
+    # OpEnd carrying both NtStatus and ExtraInfo. Missing or invalid identities never join.
+    # Reuse after a lifecycle fully resolves (zero outstanding) is legitimate.
     files, pending = {}, {}
+
+    def poison(entry, irp):
+        entry['ambiguous'] = True
+        for other in entry['reqs']:
+            if other is not None and other['status_src'] is None:
+                other['why'] = 'IrpPtr 0x%x had overlapping requests in one unresolved lifecycle' % irp
 
     def occupy(irp_text, e2):
         irp = _irp(irp_text)
@@ -279,15 +288,13 @@ def parse_etw_xml(text, v):
             if e2 is not None:
                 e2['why'] = 'no valid IrpPtr on the request'
             return
-        if irp in pending:
-            for other in pending[irp]:
-                if other is not None and other['why'] is None:
-                    other['why'] = 'IrpPtr 0x%x reused while still pending' % irp
-            if e2 is not None:
-                e2['why'] = 'IrpPtr 0x%x reused while still pending' % irp
-            pending[irp].append(e2)
-        else:
-            pending[irp] = [e2]
+        entry = pending.get(irp)
+        if entry is None:
+            pending[irp] = {'reqs': [e2], 'owed': 1, 'ambiguous': False}
+            return
+        entry['reqs'].append(e2)
+        entry['owed'] += 1
+        poison(entry, irp)
 
 
     def owner(tid_text):
@@ -341,10 +348,15 @@ def parse_etw_xml(text, v):
             out.append(e2)
         elif g == G_FILEIO and op == 76:
             irp = _irp(d.get('IrpPtr'))
-            waiting = pending.pop(irp, None) if irp is not None else None
-            if not waiting or len(waiting) != 1 or waiting[0] is None:
-                continue                      # orphan, ambiguous or non-read completion
-            e2 = waiting[0]
+            entry = pending.get(irp) if irp is not None else None
+            if entry is None:
+                continue                      # orphan completion: joins nothing
+            entry['owed'] -= 1
+            if entry['owed'] <= 0:
+                del pending[irp]              # lifecycle fully resolved; later reuse is fresh
+            if entry['ambiguous'] or len(entry['reqs']) != 1 or entry['reqs'][0] is None:
+                continue                      # ambiguous or non-read lifecycle: no result
+            e2 = entry['reqs'][0]
             try:
                 st, got = _int(d.get('NtStatus')), _int(d.get('ExtraInfo'))
             except (TypeError, ValueError):

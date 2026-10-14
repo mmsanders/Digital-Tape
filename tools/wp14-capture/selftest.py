@@ -323,16 +323,56 @@ def main():
         c.check('OpEnd matches but lacks NtStatus', 'HELD', 'lacks a valid NtStatus or ExtraInfo',
                 etw_set(c, xml=gx.replace('<Data Name="NtStatus">0x0</Data>', '')))
         competing = ev_(FIO, 66, '0002500', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF9')])
-        c.check('competing Close on the same IrpPtr while the read is pending', 'HELD', 'reused while still pending',
+        c.check('competing Close on the same IrpPtr while the read is pending', 'HELD', 'overlapping requests in one unresolved lifecycle',
                 etw_set(c, xml=gx.replace(read_line, read_line + '\n' + competing)))
         second = read_line.replace('18:00:01.0002000Z', '18:00:01.0002500Z')
-        c.check('second read on the same IrpPtr while the first is pending', 'HELD', 'reused while still pending',
+        c.check('second read on the same IrpPtr while the first is pending', 'HELD', 'overlapping requests in one unresolved lifecycle',
                 etw_set(c, xml=gx.replace(read_line, read_line + '\n' + second)))
         early = ev_(FIO, 64, '0001800', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF8'),
                                           ('OpenPath', '\\Device\\HarddiskVolume3\\other.txt')])
         early_end = ev_(FIO, 76, '0001900', [('IrpPtr', '0xB2'), ('ExtraInfo', '0'), ('NtStatus', '0x0')])
         c.check('IrpPtr reused only after its earlier request completed', 'PASS', None,
                 etw_set(c, xml=before_read(early, early_end)))
+
+        print('== Verification #173 published files, byte-identical, with their own side files')
+        v3 = FX / 'verification-173'
+
+        def base173(n):
+            return ['--format', 'etw-xml', '--trace', str(v3 / ('%s-xml' % n)), '--pid', '4242',
+                    '--capacity', str(CAP), '--target', '\\\\.\\PhysicalDrive1', '--disk', '1',
+                    '--geometry', str(v3 / ('%s-geo' % n)), '--exe', str(v3 / 'stand-in-exe.bin'),
+                    '--sha256', '525f1d08f6b6f356ce6a48a2a74a828aa3dc1d41fbea6771df9400de191f8732',
+                    '--stdout', str(v3 / ('%s-out' % n)), '--diagnostics', str(v3 / ('%s-diag' % n)),
+                    '--tracer-log', str(v3 / ('%s-exits' % n)), '--exit-code', '0']
+        c.check('001-xml (their positive baseline)', 'PASS', None, base173('001'))
+        c.check('002-xml (reuse after one of two completions)', 'HELD',
+                'overlapping requests in one unresolved lifecycle', base173('002'))
+        c.check('003-xml (missing IrpPtr, as #172)', 'HELD', 'no valid IrpPtr on the request', base173('003'))
+
+        print('== ETW IRP lifecycle across multiple requests and completions (synthetic)')
+        done = lambda t: ev_(FIO, 76, t, [('IrpPtr', '0xB2'), ('ExtraInfo', '512'), ('NtStatus', '0x0')])
+        rd0 = lambda t: read_line.replace('<Data Name="Offset">62537072128</Data>', '<Data Name="Offset">0</Data>').replace(
+            '18:00:01.0002000Z', '18:00:01.%sZ' % t)
+        end_line = [l for l in gx.split('\n') if '<Opcode>76<' in l][0]
+
+        def lifecycle(*evs):
+            return gx.replace(read_line, '\n'.join(evs) + '\n' + read_line)
+        c.check('two reads overlap, both complete, then the mirror read reuses the IrpPtr', 'PASS', None,
+                etw_set(c, xml=lifecycle(rd0('0001100'), rd0('0001200'), done('0001300'), done('0001400'))))
+        c.check('two reads overlap, one completes, mirror read reuses, two more completions', 'HELD',
+                'overlapping requests in one unresolved lifecycle',
+                etw_set(c, xml=lifecycle(rd0('0001100'), rd0('0001200'), done('0001300')).replace(
+                    end_line, done('0003500') + '\n' + end_line)))
+        cr = ev_(FIO, 64, '0001100', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF7'),
+                                       ('OpenPath', '\\Device\\HarddiskVolume3\\other.txt')])
+        cl = ev_(FIO, 65, '0001200', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF7')])
+        c.check('Create and Cleanup overlap, one completes, mirror read reuses', 'HELD',
+                'overlapping requests in one unresolved lifecycle',
+                etw_set(c, xml=lifecycle(cr, cl, done('0001300'))))
+        c.check('Create and Cleanup overlap, both complete, then mirror read reuses', 'PASS', None,
+                etw_set(c, xml=lifecycle(cr, cl, done('0001300'), done('0001400'))))
+        c.check('extra orphan completion before the mirror read is harmless', 'PASS', None,
+                etw_set(c, xml=lifecycle(done('0001300'))))
 
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')
