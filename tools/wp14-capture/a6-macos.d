@@ -1,0 +1,153 @@
+/*
+ * a6-macos.d — record every open/pread/pwrite/flush/close/exit the SHIPPED tapectl
+ * makes, from the kernel's syscall boundary. Software #425/#428; recipe in
+ * docs/WP14-NATIVE-CAPTURE.md §2.1. Injects nothing into tapectl and changes no call.
+ * NOT YET RUN ON macOS: the first off-card rehearsal is its format check.
+ *
+ *   sudo dtrace -q -s a6-macos.d -o a6-verify.trace -c './tapectl verify /dev/diskN' \
+ *       > a6-verify-out.txt 2> a6-verify-dtrace-err.txt; echo "dtrace $?" > a6-tracer-exits.txt
+ *
+ * -c makes dtrace start tapectl itself, so $target is exactly tapectl's PID and
+ * no call can happen before tracing starts. Use -c ONLY for read-only verify:
+ * dtrace kills a process it started if dtrace is stopped first.
+ *
+ * Output: one "A6 key=value ..." line per call, read by a6check.py --format dtrace,
+ * ending with "A6 end" when tracing finishes normally (a missing end is HELD).
+ * Drops and errors dtrace reports go to its stderr: a6check.py reads that file and
+ * any drop/error is FAIL.
+ */
+
+#pragma D option quiet
+#pragma D option zdefs
+#pragma D option bufsize=8m
+#pragma D option switchrate=50hz
+
+dtrace:::BEGIN
+{
+	printf("A6 trace tool=dtrace target=%d\n", $target);
+}
+
+syscall::open:entry, syscall::open_nocancel:entry
+/pid == $target/
+{
+	self->opath = copyinstr(arg0);
+	self->oflags = arg1;
+	self->opening = 1;
+}
+
+syscall::openat:entry, syscall::openat_nocancel:entry
+/pid == $target/
+{
+	self->opath = copyinstr(arg1);
+	self->oflags = arg2;
+	self->opening = 1;
+}
+
+syscall::open:return, syscall::open_nocancel:return,
+syscall::openat:return, syscall::openat_nocancel:return
+/pid == $target && self->opening/
+{
+	printf("A6 pid=%d op=open ret=%d errno=%d flags=0x%x exe=%s path=%s\n",
+	    pid, (int)arg0, errno, (int)self->oflags, execname, self->opath);
+	self->opening = 0;
+}
+
+syscall::pread:entry, syscall::pread_nocancel:entry,
+syscall::pwrite:entry, syscall::pwrite_nocancel:entry
+/pid == $target/
+{
+	self->fd = arg0;
+	self->len = arg2;
+	self->off = (int64_t)arg3;
+	self->t0 = timestamp;
+	self->io = 1;
+}
+
+syscall::pread:return, syscall::pread_nocancel:return
+/pid == $target && self->io/
+{
+	printf("A6 pid=%d op=read fd=%d off=%d len=%d ret=%d errno=%d ns=%d\n",
+	    pid, (int)self->fd, self->off, (int64_t)self->len, (int64_t)arg0, errno,
+	    timestamp - self->t0);
+	self->io = 0;
+}
+
+syscall::pwrite:return, syscall::pwrite_nocancel:return
+/pid == $target && self->io/
+{
+	printf("A6 pid=%d op=write fd=%d off=%d len=%d ret=%d errno=%d ns=%d\n",
+	    pid, (int)self->fd, self->off, (int64_t)self->len, (int64_t)arg0, errno,
+	    timestamp - self->t0);
+	self->io = 0;
+}
+
+/* Writes without an offset: no write of any kind may reach the target unobserved. */
+syscall::write:entry, syscall::write_nocancel:entry,
+syscall::writev:entry, syscall::writev_nocancel:entry
+/pid == $target/
+{
+	self->wfd = arg0;
+	self->wn = 1;
+}
+
+syscall::write:return, syscall::write_nocancel:return,
+syscall::writev:return, syscall::writev_nocancel:return
+/pid == $target && self->wn/
+{
+	printf("A6 pid=%d op=write fd=%d off=-1 len=-1 ret=%d errno=%d ns=0\n",
+	    pid, (int)self->wfd, (int64_t)arg0, errno);
+	self->wn = 0;
+}
+
+/* F_FULLFSYNC is fcntl command 51. */
+syscall::fcntl:entry, syscall::fcntl_nocancel:entry
+/pid == $target && arg1 == 51/
+{
+	self->fd = arg0;
+	self->t0 = timestamp;
+	self->fl = 1;
+}
+
+syscall::fcntl:return, syscall::fcntl_nocancel:return
+/pid == $target && self->fl/
+{
+	printf("A6 pid=%d op=flush how=F_FULLFSYNC fd=%d ret=%d errno=%d ns=%d\n",
+	    pid, (int)self->fd, (int)arg0, errno, timestamp - self->t0);
+	self->fl = 0;
+}
+
+/* DKIOCSYNCHRONIZECACHE is _IO('d', 22) = 0x20006416. */
+syscall::ioctl:entry
+/pid == $target && (uint32_t)arg1 == 0x20006416/
+{
+	self->fd = arg0;
+	self->t0 = timestamp;
+	self->sc = 1;
+}
+
+syscall::ioctl:return
+/pid == $target && self->sc/
+{
+	printf("A6 pid=%d op=flush how=DKIOCSYNCHRONIZECACHE fd=%d ret=%d errno=%d ns=%d\n",
+	    pid, (int)self->fd, (int)arg0, errno, timestamp - self->t0);
+	self->sc = 0;
+}
+
+syscall::close:entry, syscall::close_nocancel:entry
+/pid == $target/
+{
+	printf("A6 pid=%d op=close fd=%d\n", pid, (int)arg0);
+}
+
+/* tapectl's own exit status: dtrace -c reports dtrace's, not the child's. */
+syscall::exit:entry
+/pid == $target/
+{
+	printf("A6 pid=%d op=exit status=%d\n", pid, (int)arg0);
+}
+
+/* Completeness marker: END runs when the -c target has exited and tracing stops normally. */
+dtrace:::END
+{
+	printf("A6 end\n");
+}

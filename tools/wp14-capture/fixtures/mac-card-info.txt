@@ -1,0 +1,30 @@
+   Device Identifier:         disk4
+   Device Node:               /dev/disk4
+   Whole:                     Yes
+   Part of Whole:             disk4
+   Device / Media Name:       SD  Transcend
+
+   Volume Name:               Not applicable (no file system)
+   Mounted:                   Not applicable (no file system)
+   File System:               None
+
+   Content (IOContent):       FDisk_partition_scheme
+   OS Can Be Installed:       No
+   Media Type:                Generic
+   Protocol:                  USB
+   SMART Status:              Not Supported
+
+   Disk Size:                 62.5 GB (62537072640 Bytes) (exactly 122142720 512-Byte-Units)
+   Device Block Size:         512 Bytes
+
+   Media OS Use Only:         No
+   Media Read-Only:           No
+   Volume Read-Only:          Not applicable (no file system)
+
+   Device Location:           External
+   Removable Media:           Removable
+   Media Removal:             Software-Activated
+
+   Solid State:               Info not available
+   Virtual:                   No
+

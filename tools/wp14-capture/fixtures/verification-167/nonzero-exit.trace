@@ -1,0 +1,11 @@
+A6 trace tool=dtrace target=4242
+A6 pid=4242 op=open ret=3 errno=0 flags=0x1000000 path=/dev/rdisk4
+A6 pid=4242 op=read fd=3 off=0 len=512 ret=512 errno=0 ns=812000
+A6 pid=4242 op=close fd=3
+A6 pid=4242 op=open ret=3 errno=0 flags=0x1000000 path=/dev/rdisk4
+A6 pid=4242 op=read fd=3 off=0 len=512 ret=512 errno=0 ns=790000
+A6 pid=4242 op=read fd=3 off=17825792 len=512 ret=512 errno=0 ns=801000
+A6 pid=4242 op=read fd=3 off=62537072128 len=512 ret=512 errno=0 ns=1203000
+A6 pid=4242 op=read fd=3 off=17829888 len=512 ret=512 errno=0 ns=640000
+A6 pid=4242 op=close fd=3
+A6 pid=4242 op=exit status=1
