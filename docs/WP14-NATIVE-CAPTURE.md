@@ -1,6 +1,6 @@
 # WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425/#428
 
-**Status:** corrected Software method (#428, fifth correction after Verification #174), 14 October 2026 UTC. **Not normative, not acceptance,
+**Status:** corrected Software method (#428, sixth correction after Verification #175), 14 October 2026 UTC. **Not normative, not acceptance,
 not ready for a card until Verification #146 passes the corrected method.** Verification #167
 (`df637f7`) found four false passes in #426's first head `1fbe762`. Verification #171 (`112557e`)
 then found three more in `f5b4f1c`: an ended process, a closed and reused FileObject, and a
@@ -9,7 +9,8 @@ OpEnd that both lacked `IrpPtr` were joined through an empty key. Verification #
 one more in `418138e`: one completion of two overlapping requests reset the ambiguity, so a reused
 `IrpPtr` took the leftover completion. Verification #174 (`16e148a`) found two more families in
 `8f0014d`: FileIo request classes 69–75/77 were ignored in pending accounting, and missing/invalid
-FileObject keys still bound the target. §3 shows every one now rejected.
+FileObject keys still bound the target. Verification #175 (`2beb743`) found that a selected-process
+Cleanup, Close or Write with an invalid FileObject still passed. §3 shows every one now rejected.
 Final Windows provision/load/reinsert/verify/A+B/A9 and README are **complete** (#167, #168);
 nothing here asks for another load, dump, pull or README. WP-14 is held only on physical native A6.
 Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; tested release
@@ -35,7 +36,7 @@ every reason, and is PASS only when all of the following hold for the bound proc
 | Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
 | Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs | — | FAIL |
 | Result join (ETW) | a FileIo read gets a native result only from the OpEnd with the **same valid, nonzero `IrpPtr`**, only if it was the sole request pending on that `IrpPtr`, and only if the OpEnd carries both `NtStatus` and `ExtraInfo`. Missing, empty, zero or non-numeric identities never join. A request of any type that arrives while another is outstanding on the same `IrpPtr` makes that lifecycle ambiguous, and it stays ambiguous until **every** outstanding request has completed; requests added meanwhile are ambiguous too. Reuse only after the lifecycle fully resolves is legitimate. **Every** FileIo request class that carries an `IrpPtr` takes part: Create/Cleanup/Close/Read/Write (64–68), Info (69–71, 74, 75), Flush (73), DirEnum/DirNotify (72, 77), and any class not listed. Such a request can only add ambiguity; it never supplies a Read result | HELD | — |
-| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read (HELD). A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
+| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read. **Any** FileIo record of the selected process with such a key (Create, Cleanup, Close, Read, Write or any other class) is HELD: it may have closed or written the target, so object lifetimes and the no-write claim cannot be established. A Close or Write on a valid non-target object stays harmless. A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
 | Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
 | Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
 | No writes | no write of any kind by the process reaches the target | — | FAIL |
@@ -156,7 +157,7 @@ keep the ETL beside the XML.
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (114 cases; 108 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (130 cases; 124 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |
@@ -169,7 +170,8 @@ been seen. The synthetic fixtures check the parser's logic only.
 | Verification #172's files, byte-identical with their own side files (`fixtures/verification-172/`) | Verification's controls | their baseline → PASS; `IrpPtr` removed from Read and OpEnd → HELD (no valid `IrpPtr` on the request) |
 | Verification #173's files, byte-identical with their own side files (`fixtures/verification-173/`) | Verification's controls | their baseline → PASS; reuse after one of two completions → HELD (overlapping requests in one unresolved lifecycle); missing `IrpPtr` → HELD |
 | Verification #174's files, byte-identical with their own side files (`fixtures/verification-174/`) | Verification's controls | their baseline → PASS; competing request classes 69, 70, 71, 72, 73, 74, 75, 77 → HELD (overlapping lifecycle); FileObject missing/empty/zero/non-numeric → HELD (no valid FileObject). Their 70-case `lifecycle_controls.py` generator also passes 70/70 against this checker (run from a scratch copy, not committed) |
-| `fixtures/dtrace-good`, `fixtures/etw-good`: 80 cases (12 positives, 68 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, IRP correlation (missing, empty, zero, invalid, orphan, competing, overlapping lifecycles with partial and full completion, reuse before and after resolution, unlisted request classes, name records without `IrpPtr`, object identity on Create/Read/Close), process image, device, geometry, writes and timestamp order |
+| Verification #175's files, byte-identical (`fixtures/verification-175/`; all run with their published 001 side files) | Verification's controls | their baseline → PASS; Cleanup (65), Close (66) and Write (68) each with missing/empty/zero/non-numeric FileObject → HELD (12 cases) |
+| `fixtures/dtrace-good`, `fixtures/etw-good`: 83 cases (14 positives, 69 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, IRP correlation (missing, empty, zero, invalid, orphan, competing, overlapping lifecycles with partial and full completion, reuse before and after resolution, unlisted request classes, name records without `IrpPtr`, object identity on Create/Read/Close), process image, device, geometry, writes and timestamp order |
 
 ## 4. #423 bounded diagnosis
 

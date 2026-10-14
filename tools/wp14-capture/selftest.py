@@ -405,8 +405,37 @@ def main():
                 etw_set(c, xml=gx.replace('<Data Name="FileObject">0xF1</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">',
                                           '<Data Name="TTID">0x1388</Data><Data Name="IoSize">')))
         bad_close = ev_(FIO, 66, '0001500', [('TTID', '0x1388'), ('FileObject', '0x0')])
-        c.check('a Close with an invalid FileObject retires nothing', 'PASS', None,
-                etw_set(c, xml=before_read(bad_close)))
+        c.check('a Close with an invalid FileObject leaves object lifetime unknown', 'HELD',
+                'without a valid FileObject (opcode 66)', etw_set(c, xml=before_read(bad_close)))
+        other_close = ev_(FIO, 66, '0001500', [('TTID', '0x1388'), ('FileObject', '0xF6')])
+        c.check('a Close of a valid non-target FileObject is harmless', 'PASS', None,
+                etw_set(c, xml=before_read(other_close)))
+        other_cr = ev_(FIO, 64, '0001400', [('IrpPtr', '0xC1'), ('TTID', '0x1388'), ('FileObject', '0xF6'),
+                                             ('OpenPath', '\\Device\\HarddiskVolume3\\log.txt')])
+        other_wr = ev_(FIO, 68, '0001500', [('Offset', '0'), ('IrpPtr', '0xC2'), ('FileObject', '0xF6'),
+                                             ('TTID', '0x1388'), ('IoSize', '512'), ('IoFlags', '0x0')])
+        c.check('a Write to a valid non-target file is not a target write', 'PASS', None,
+                etw_set(c, xml=before_read(other_cr, other_wr)))
+        bad_wr = other_wr.replace('<Data Name="FileObject">0xF6</Data>', '<Data Name="FileObject">0x0</Data>')
+        c.check('a Write with an invalid FileObject may have reached the target', 'HELD',
+                'without a valid FileObject (opcode 68)', etw_set(c, xml=before_read(bad_wr)))
+
+        print('== Verification #175 published files, byte-identical (all run with their 001 side files)')
+        v5 = FX / 'verification-175'
+
+        def base175(n):
+            return ['--format', 'etw-xml', '--trace', str(v5 / ('%s-xml' % n)), '--pid', '4242',
+                    '--capacity', str(CAP), '--target', '\\\\.\\PhysicalDrive1', '--disk', '1',
+                    '--geometry', str(v5 / '001-geo'), '--exe', str(v5 / 'stand-in-exe.bin'),
+                    '--sha256', '525f1d08f6b6f356ce6a48a2a74a828aa3dc1d41fbea6771df9400de191f8732',
+                    '--stdout', str(v5 / '001-out'), '--diagnostics', str(v5 / '001-diag'),
+                    '--tracer-log', str(v5 / '001-exits'), '--exit-code', '0']
+        c.check('001-xml (their positive baseline)', 'PASS', None, base175('001'))
+        for n, opc, what in (('002', 65, 'missing'), ('003', 65, 'empty'), ('004', 65, 'zero'), ('005', 65, 'non-numeric'),
+                             ('006', 66, 'missing'), ('007', 66, 'empty'), ('008', 66, 'zero'), ('009', 66, 'non-numeric'),
+                             ('010', 68, 'missing'), ('011', 68, 'empty'), ('012', 68, 'zero'), ('013', 68, 'non-numeric')):
+            c.check('%s-xml (opcode %d with %s FileObject)' % (n, opc, what), 'HELD',
+                    'without a valid FileObject (opcode %d)' % opc, base175(n))
 
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')

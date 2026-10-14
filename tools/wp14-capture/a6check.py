@@ -329,7 +329,13 @@ def parse_etw_xml(text, v):
             out.append(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
                           fd='disk%d' % _int(d['DiskNumber']),
                           off=_int(d['ByteOffset']), len=n, ret=None, status_src=None))
-        elif g == G_FILEIO and op == 64:
+        if g == G_FILEIO and op != 76 and _irp(d.get('FileObject')) is None:
+            # Any FileIo record of a process whose FileObject is missing or invalid leaves that
+            # process's object lifetimes and write targets unknown: it may have closed or
+            # written the target. Recorded here, judged HELD for the selected process.
+            bpid, bstale = owner(d.get('TTID'))
+            out.append(ev(pid=bpid, stale=bstale, op='badobj', exe=str(op)))
+        if g == G_FILEIO and op == 64:
             pid, stale = owner(d.get('TTID'))
             occupy(d.get('IrpPtr'), None)
             fo = _irp(d.get('FileObject'))    # a FileObject must be a valid nonzero identity too
@@ -530,6 +536,10 @@ def judge(a):
                       'thread and process; they are not attributed' % (len(stale), a.pid))
     if not mine:
         v.fail.append('no captured record belongs to PID %d' % a.pid)
+    bad = [e['exe'] for e in mine if e['op'] == 'badobj']
+    if bad:
+        v.held.append('PID %d has %d FileIo record(s) without a valid FileObject (opcode %s); its object '
+                      'lifetimes and write targets cannot be established' % (a.pid, len(bad), ', '.join(sorted(set(bad)))))
     execs = [e for e in mine if e['op'] == 'exec']
     if a.format in ('strace', 'etw-xml'):
         if not execs:
