@@ -1,6 +1,6 @@
 # Project status
 
-**14 October 2026 PDT · input main `b0d0847b` · Owner: PM (ADR-177; Verification #166–168) ·**
+**14 October 2026 PDT · input main `b0d0847b` · Owner: PM (ADR-178; Verification #170/#171) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2-R1:** #390 software/CI PASS integrated `46b48edd`, tested release authenticated; Mac C60 and 10/10 Windows 11 pulls PASS. Final Windows success/A9/README PASS (#167/#168); physical >4 GiB captures held. WP14 3/4, WP16 contract 1/4, Phase2 4/12; INGEST-1 issued.
+WP-38 not taken; operations freeze declared. **P2-R1:** #390 software/CI PASS integrated `46b48edd`, tested release authenticated; Mac C60 and 10/10 Windows 11 pulls PASS. Final Windows success/A9/README PASS (#167/#168); physical >4 GiB captures held. WP14 3/4, WP16 contract 1/4, Phase2 4/12; INGEST-1 amended: zero-output source refuses (P2V16-001).
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / P2-R1 | — | WP14 #390 integrated `46b48edd`, root `7b820408` unchanged; #158 software/CI 113/113 PASS, #159 release authenticated, #160 Mac C60 and [#164 ten pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md) PASS. A8 `d96b4245` | Windows final success/A9/README PASS (#167/#168). Software #426 method correction → #146 physical >4 GiB disposition; [INGEST-1](WP16-INGEST-CONTRACT.md) authoring/implementation |
+| Phase 2 / P2-R1 | — | WP14 #390 integrated `46b48edd`, root `7b820408` unchanged; #158 software/CI 113/113 PASS, #159 release authenticated, #160 Mac C60 and [#164 ten pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md) PASS. A8 `d96b4245` | Windows final success/A9/README PASS (#167/#168). Software #428/#426 retains three lifetime/tracer-log corrections (#171) → #146 physical A6; #169/#429 resume [INGEST-1](WP16-INGEST-CONTRACT.md) with zero-output refusal (#170/ADR-178) |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on physical A6 | Verification #146; Michael #386 |
 | Q-P2-1 copy call shape (#379) | — | Engine moves chunk data one block per device call; guardrail 10 risk on the device. (a) answered at `6837102`: existing modes miss any-subset/reordered persistence. Software counts: C-60 load 155048 flushes, dup 1.24M reads/writes. No batching permission | [ADR-168 framework](PERFORMANCE-PLAN.md); retain <30 s; design #405 reviewed; async ABI unissued; model before write changes |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Resumes at Phase 3 or on Michael's request, starting with Verification review of #87/#92 |
