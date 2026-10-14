@@ -5,20 +5,14 @@ Active requests and decisions for Michael live only in
 Read that queue at each round; do not reconstruct a task list from this file.
 The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
 
-## Open for Michael (3 October 2026)
+## Queue state (13 October 2026 PDT)
 
-- **Phase 2 go and kickoff decisions D1–D8**, listed in [the Phase 2 plan §2](PHASE2-PLAN.md#2-kickoff-decisions)
-  with recommended defaults ("go with the defaults" is a complete answer). They cover:
-  - which computers the tools must run on;
-  - which music file types ingest accepts;
-  - loudness;
-  - song order and gaps;
-  - who runs the unaided test;
-  - whether to take the phone harness;
-  - the required-check ruleset, a repository setting only Michael changes.
-
-Decided at the Phase 1 close-out (ADR-160): the hardware park extends through Phase 2
-(#309), and phone/web-app testing is a Phase 2 candidate package (#341).
+Kickoff D1–D9, E-1 and D8 are settled. Michael merged #390; that action is complete.
+Windows 11 replaces the mistaken Windows 10 target (ADR-176); ten pulls are accepted
+and need no Mac or Windows repetition. The remaining physical witness is tracked
+only in [#386](https://github.com/mmsanders/Digital-Tape/issues/386); its live body
+contains the final success/timing and capture handoffs. Read it for current commands.
+Hardware remains parked through Phase 2; WP-38 was not taken.
 
 ## Standing decisions
 

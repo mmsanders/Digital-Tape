@@ -3489,3 +3489,62 @@ unissued follow-ons; hardware parked and <30 s target copy unchanged.
 **Reversal cost.** Documentation pin and existing-issue resumption only. Future
 engine changes require their own issued tests/scope/disposition, never moving-main
 equality; actual WP14 failures return to their responsible lead/PM.
+
+## ADR-176 — record Windows 11 and ten-pull completion; finish WP14 residuals and preflight ingest
+
+**Date:** 13 October 2026 PDT / 14 October UTC. **Owner:** PM, explicit Michael activation.
+**Inputs:** Product main `46b48edd6210e541adf3d3e64ec5fd691c2a75f9`;
+Verification main `6899cf7b56decfbb9bf8fef6c5f2825513697c37` (#164).
+
+**Decision.** Michael says: “windows 10 req is obsolete, I forgot what OS I have.
+WIndows 11 is the new windows 10. You can tell PM.” D2 is now Windows 11 plus
+current macOS and Linux CI. This is his authoritative correction, not another
+approval question. No repeat Mac or Windows ten-pull campaign is required.
+The normative plan/host contract change; frozen DRAFT-10 bytes, immutable verifier
+packages and historical Windows10/Server2025 reports are preserved. Server2025
+remains supplemental rather than named desktop Windows11 qualification.
+
+**Disposition facts.** Verification #158 (`cb81a5ed`) accepts exact #390 software/CI
+head `5e2df5aaf23e9ed0e230c444a40650da9459ddb2`; all 113 final jobs PASS.
+Michael merged #390 at the input main, root `7b8204085582bf5422cc902d82c4c02a6998fd98`
+identical to that disposed head. A8 engine `d96b4245e04d74078f8938744b1394c3018516f7`
+is unchanged. Verification #159 `956d02ec` independently authenticates the served
+tested release; #160 `7f19fc20` accepts the observed Mac C60 round trip/README.
+Verification #164 independently accepts 10/10 distinct Windows11 physical pulls,
+40/40 exact quiet WAVs and permitted old/old outcomes. Publication CI
+38488504957/job115607865658 succeeds; PM read the actual result, not a duplicate campaign.
+[Independent report](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md).
+
+**Remaining gate.** Full WP14 remains HELD. #386 retains one final uninterrupted
+Windows11 post-pull C60 load, automatic A9 timing, safe removal/reinsert and exact
+readback/README. Software prepares bounded native shipped-binary >4GiB capture
+methods for both Mac and Windows, preferably read-only verify on the existing card.
+Verification #146 independently checks method adequacy and actual captures, including
+mirror byte offset capacity minus512. A helper's high-address read is not tapectl I/O.
+Preserve per-command A6 software coverage; a single physical read does not establish
+unobserved writes or qualify media. Missing capture stays held, never substituted.
+Collect missing physical/card provenance with the required witness rather than
+repeating accepted loads. Existing photos/reports and unavailable CID are reported honestly.
+
+**Phase2 scheduling.** WP14 rung 3/4 is reached: implementation merged and green;
+full independent package rung 4 is not. Phase2 is 3/12, Phase1 stays 36/36.
+Source-independent WP16 contract feasibility preflight may proceed while physical
+WP14 residuals finish. D3–D5 and I1–I8 are inputs; independently identify exact
+loudness/peak exceptions, deterministic dither and isolated-conversion/gapless
+semantics before PM issues the contract. No ingest implementation or new acceptance
+assertions are issued by this planning permission. Its real-card half/dependent
+acceptance waits for WP14; WP15 remains downstream. Assignments live only in issues.
+
+**Performance triage.** #423's Mac 1619.06s and 155048 actual flush calls are
+independently retained; Windows prior stopwatch was stopped late. The cause and
+individual barrier latency are unmeasured. Assign bounded diagnostic/capture design,
+not another half-hour unchanged run, speculative optimization or relaxed durability.
+Capacity-feasible 5400s baseline+C60 method is already corrected (P2V-006); it changes
+neither A3 nor format. Reload UX risk remains recorded pending a concrete proposal.
+Close intake only after its diagnosis/next-owner handoff is established; preserve
+implementation risk and exact evidence. <30s target-system copy remains mandatory.
+
+**Reversal cost / holds.** Documentation/platform scope and queue changes only.
+PM supplies no product-code review/merge or independent acceptance. Write cadence,
+batching, async, recording, target timing, firmware, hardware/media qualification,
+purchases and signed format-freeze approvals retain their existing boundaries.
