@@ -332,18 +332,27 @@ def parse_etw_xml(text, v):
         elif g == G_FILEIO and op == 64:
             pid, stale = owner(d.get('TTID'))
             occupy(d.get('IrpPtr'), None)
-            files[d.get('FileObject')] = d.get('OpenPath', '')
-            out.append(ev(pid=pid, stale=stale, op='open', fd=d.get('FileObject'),
+            fo = _irp(d.get('FileObject'))    # a FileObject must be a valid nonzero identity too
+            if fo is not None:
+                files[fo] = d.get('OpenPath', '')
+            out.append(ev(pid=pid, stale=stale, op='open', fd=fo,
                           path=d.get('OpenPath', ''), mode=None, ret=0))
         elif g == G_FILEIO and op in (65, 66):
             pid, stale = owner(d.get('TTID'))
             occupy(d.get('IrpPtr'), None)
-            files.pop(d.get('FileObject'), None)
-            out.append(ev(pid=pid, stale=stale, op='close', fd=d.get('FileObject')))
+            fo = _irp(d.get('FileObject'))
+            if fo is not None:
+                files.pop(fo, None)
+            out.append(ev(pid=pid, stale=stale, op='close', fd=fo))
         elif g == G_FILEIO and op in (67, 68):
             pid, stale = owner(d.get('TTID'))
-            e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=d.get('FileObject'),
-                    path=files.get(d.get('FileObject')), off=_int(d['Offset']), len=_int(d['IoSize']))
+            fo = _irp(d.get('FileObject'))
+            e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=fo,
+                    path=files.get(fo) if fo is not None else None,
+                    off=_int(d['Offset']), len=_int(d['IoSize']))
+            e2['fileio'] = True
+            if fo is None:
+                e2['why'] = 'no valid FileObject on the request'
             occupy(d.get('IrpPtr'), e2)
             out.append(e2)
         elif g == G_FILEIO and op == 76:
@@ -365,6 +374,11 @@ def parse_etw_xml(text, v):
             e2['ret'] = got if st == 0 else -1
             e2['err'] = None if st == 0 else 'NTSTATUS 0x%08x' % (st & 0xFFFFFFFF)
             e2['status_src'] = 'FileIo OpEnd NtStatus/ExtraInfo'
+        elif g == G_FILEIO and d.get('IrpPtr') is not None:
+            # Every other FileIo request class that names an IrpPtr (Info 69-71/74/75,
+            # Flush 73, DirEnum 72, DirNotify 77, and any class not listed here) occupies
+            # it like any request: it can only add ambiguity, never supply a Read result.
+            occupy(d.get('IrpPtr'), None)
     return out
 
 
@@ -549,6 +563,10 @@ def judge(a):
                 # DiskIo by disk number; FileIo by the path its object names AT THIS READ.
                 if e['fd'] == 'disk%d' % a.disk:
                     calls.append(e)
+                elif e.get('fileio') and e['fd'] is None:
+                    if e['off'] is not None and e['off'] < a.capacity and e['off'] + (e['len'] or 0) > mirror:
+                        v.held.append('a FileIo read by PID %d of the last sector has no valid FileObject; '
+                                      'it cannot be bound to the target' % a.pid)
                 elif not str(e['fd']).startswith('disk') and target_matches(e['path'], a):
                     calls.append(e)
                 elif (not str(e['fd']).startswith('disk') and e['off'] is not None

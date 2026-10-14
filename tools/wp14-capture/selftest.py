@@ -374,6 +374,40 @@ def main():
         c.check('extra orphan completion before the mirror read is harmless', 'PASS', None,
                 etw_set(c, xml=lifecycle(done('0001300'))))
 
+        print('== Verification #174 published files, byte-identical, with their own side files')
+        v4 = FX / 'verification-174'
+
+        def base174(n):
+            side = '005' if n == '013' else n   # their 013 control reuses 005's side files
+            return ['--format', 'etw-xml', '--trace', str(v4 / ('%s-xml' % n)), '--pid', '4242',
+                    '--capacity', str(CAP), '--target', '\\\\.\\PhysicalDrive1', '--disk', '1',
+                    '--geometry', str(v4 / ('%s-geo' % side)), '--exe', str(v4 / 'stand-in-exe.bin'),
+                    '--sha256', '525f1d08f6b6f356ce6a48a2a74a828aa3dc1d41fbea6771df9400de191f8732',
+                    '--stdout', str(v4 / ('%s-out' % side)), '--diagnostics', str(v4 / ('%s-diag' % side)),
+                    '--tracer-log', str(v4 / ('%s-exits' % side)), '--exit-code', '0']
+        c.check('001-xml (their positive baseline)', 'PASS', None, base174('001'))
+        for n, opc in (('002', 69), ('003', 70), ('004', 71), ('005', 72), ('006', 73), ('007', 74),
+                       ('008', 75), ('013', 77)):
+            c.check('%s-xml (competing FileIo request class %d on the IrpPtr)' % (n, opc), 'HELD',
+                    'overlapping requests in one unresolved lifecycle', base174(n))
+        for n, what in (('009', 'missing'), ('010', 'empty'), ('011', 'zero'), ('012', 'non-numeric')):
+            c.check('%s-xml (FileObject %s on Create and Read)' % (n, what), 'HELD',
+                    'has no valid FileObject', base174(n))
+
+        print('== ETW request-class census and object identity (synthetic)')
+        unknown = ev_(FIO, 80, '0001500', [('IrpPtr', '0xB2'), ('TTID', '0x1388'), ('FileObject', '0xF9')])
+        c.check('an unlisted FileIo class carrying the same IrpPtr', 'HELD',
+                'overlapping requests in one unresolved lifecycle', etw_set(c, xml=before_read(unknown)))
+        name_ev = ev_(FIO, 0, '0001500', [('FileObject', '0xF1'), ('FileName', '\\Device\\Harddisk1\\DR1')])
+        c.check('a FileIo name record without an IrpPtr adds no ambiguity', 'PASS', None,
+                etw_set(c, xml=before_read(name_ev)))
+        c.check('valid FileObject on Create, missing on the Read', 'HELD', 'has no valid FileObject',
+                etw_set(c, xml=gx.replace('<Data Name="FileObject">0xF1</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">',
+                                          '<Data Name="TTID">0x1388</Data><Data Name="IoSize">')))
+        bad_close = ev_(FIO, 66, '0001500', [('TTID', '0x1388'), ('FileObject', '0x0')])
+        c.check('a Close with an invalid FileObject retires nothing', 'PASS', None,
+                etw_set(c, xml=before_read(bad_close)))
+
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')
         if not exe:

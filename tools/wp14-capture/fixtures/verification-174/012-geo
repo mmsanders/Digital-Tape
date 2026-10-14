@@ -1,0 +1,10 @@
+
+
+Number             : 1
+FriendlyName       : TS-RDF5 SD  Transcend
+SerialNumber       : 000000000037
+BusType            : USB
+Size               : 62537072640
+LogicalSectorSize  : 512
+PhysicalSectorSize : 512
+PartitionStyle     : MBR
