@@ -146,4 +146,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-177](DECISIONS.md#adr-177--dispose-final-windows-witness-correct-a6-capture-and-issue-ingest-1) | 2026-10-14 PDT | Final witness / A6 correction / INGEST-1 | Windows success/A9/README PASS; A6 method HELD on four false passes; ingest contract issued after independent preflight |
 
-114 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-178](DECISIONS.md#adr-178--resolve-p2v16-001-with-source-level-zero-output-refusal) | 2026-10-14 PDT | P2V16-001 zero-output rule | Each zero-output source refuses pre-output/exit2; exact rounding/positive neighbours unchanged; existing169/429 resume and428 A6 corrections continue |
+
+115 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
