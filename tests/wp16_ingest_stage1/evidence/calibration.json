@@ -1,0 +1,1644 @@
+[
+  {
+    "kind": "EBU-stereo1kHz",
+    "expected": -18,
+    "observed": -17.992707806412444,
+    "error_lu": 0.007292193587556284
+  },
+  {
+    "kind": "EBU-stereo1kHz",
+    "expected": -23,
+    "observed": -22.992707806412444,
+    "error_lu": 0.007292193587556284
+  },
+  {
+    "kind": "EBU-stereo1kHz",
+    "expected": -33,
+    "observed": -32.99270780641245,
+    "error_lu": 0.007292193587552731
+  },
+  {
+    "kind": "EBU-stereo1kHz",
+    "expected": -60,
+    "observed": -59.99270780641245,
+    "error_lu": 0.007292193587552731
+  },
+  {
+    "kind": "EBU-gate-relative",
+    "expected": -23,
+    "observed": -23.013279372089254,
+    "error_lu": -0.013279372089254338
+  },
+  {
+    "kind": "EBU-gate-absolute",
+    "expected": -23,
+    "observed": -23.013279372089254,
+    "error_lu": -0.013279372089254338
+  },
+  {
+    "kind": "EBU-gate-transition",
+    "expected": -23,
+    "observed": -22.97806814444755,
+    "error_lu": 0.02193185555244881
+  },
+  {
+    "kind": "EBU-truepeak-sine",
+    "divisor": 4,
+    "phase": 0.0,
+    "observed": -6.02059986072647,
+    "expected": -6.020599913279624,
+    "underread_db": -5.255315382868275e-08
+  },
+  {
+    "kind": "EBU-truepeak-sine",
+    "divisor": 4,
+    "phase": 0.7853981633974483,
+    "observed": -6.019127661707984,
+    "expected": -6.020599913279624,
+    "underread_db": -0.0014722515716405482
+  },
+  {
+    "kind": "EBU-truepeak-sine",
+    "divisor": 6,
+    "phase": 1.0471975511965976,
+    "observed": -6.01929575172834,
+    "expected": -6.020599913279624,
+    "underread_db": -0.001304161551284544
+  },
+  {
+    "kind": "EBU-truepeak-sine",
+    "divisor": 8,
+    "phase": 1.1780972450961724,
+    "observed": -6.020120083305205,
+    "expected": -6.020599913279624,
+    "underread_db": -0.0004798299744193102
+  },
+  {
+    "kind": "EBU-truepeak-sine",
+    "divisor": 4,
+    "phase": 0.7853981633974483,
+    "observed": 2.985854504679242,
+    "expected": 2.9843822531075976,
+    "underread_db": -0.001472251571644545
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.356940397901411,
+    "observed": -4.357022711122353,
+    "underread_db": 8.231322094154336e-05
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.317735533987323,
+    "observed": -4.3223821910558655,
+    "underread_db": 0.0046466570685428366
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.255389126288825,
+    "observed": -4.258960389768211,
+    "underread_db": 0.0035712634793858555
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -3.6052253698490553,
+    "observed": -3.6075497852653804,
+    "underread_db": 0.0023244154163251096
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -3.754835178300912,
+    "observed": -3.741870211580321,
+    "underread_db": -0.012964966720591331
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.088197345279296,
+    "observed": -4.08363173263207,
+    "underread_db": -0.00456561264722577
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -3.440536631733174,
+    "observed": -3.5169981385526548,
+    "underread_db": 0.07646150681948072
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -2.564204362564409,
+    "observed": -2.5519091566448875,
+    "underread_db": -0.01229520591952138
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.362124556086265,
+    "observed": -4.387656706523549,
+    "underread_db": 0.025532150437284074
+  },
+  {
+    "kind": "finite-sine",
+    "expected": -4.3889147482847175,
+    "observed": -4.403905225219419,
+    "underread_db": 0.014990476934701569
+  },
+  {
+    "kind": "endpoint-impulse",
+    "expected": -1.938200260161128,
+    "observed": -1.9382002076079752,
+    "underread_db": -5.255315271845973e-08
+  },
+  {
+    "kind": "endpoint-impulse",
+    "expected": -1.938200260161128,
+    "observed": -1.9382002076079752,
+    "underread_db": -5.255315271845973e-08
+  },
+  {
+    "kind": "endpoint-impulse",
+    "expected": -1.938200260161128,
+    "observed": -1.9382002076079752,
+    "underread_db": -5.255315271845973e-08
+  },
+  {
+    "kind": "endpoint-impulse",
+    "expected": -1.938200260161128,
+    "observed": -1.9382002076079752,
+    "underread_db": -5.255315271845973e-08
+  },
+  {
+    "kind": "finite-random",
+    "expected": -3.7772770858496645,
+    "observed": -3.7892686897117587,
+    "underread_db": 0.011991603862094191
+  },
+  {
+    "kind": "finite-random",
+    "expected": -2.9574426078451124,
+    "observed": -2.975641626149325,
+    "underread_db": 0.018199018304212444
+  },
+  {
+    "kind": "finite-random",
+    "expected": -2.8367995326892532,
+    "observed": -2.87741073881258,
+    "underread_db": 0.04061120612332658
+  },
+  {
+    "kind": "finite-random",
+    "expected": -2.0382949687142373,
+    "observed": -2.0642934187054083,
+    "underread_db": 0.025998449991170958
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 7350,
+    "frequency": 20,
+    "response_db": 3.6094267216840727e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 7350,
+    "frequency": 997,
+    "response_db": 2.4389602063688102e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 7350,
+    "frequency": 2940.0,
+    "response_db": -6.163982295546309e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 7350,
+    "frequency": 3454.5,
+    "response_db": -67.41562314113796,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 8000,
+    "frequency": 20,
+    "response_db": 3.731420166057632e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 8000,
+    "frequency": 997,
+    "response_db": -1.400112154821081e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 8000,
+    "frequency": 3200.0,
+    "response_db": -5.977548748959908e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 8000,
+    "frequency": 3760.0,
+    "response_db": -67.41051600910298,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 11025,
+    "frequency": 20,
+    "response_db": 1.4623838336863774e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 11025,
+    "frequency": 997,
+    "response_db": 1.585453205225183e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 11025,
+    "frequency": 4410.0,
+    "response_db": -6.275758568985537e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 11025,
+    "frequency": 5181.75,
+    "response_db": -67.41829629543146,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 12000,
+    "frequency": 20,
+    "response_db": 1.6950356731906182e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 12000,
+    "frequency": 997,
+    "response_db": -5.884478040731774e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 12000,
+    "frequency": 4800.0,
+    "response_db": -5.9911121948215404e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 12000,
+    "frequency": 5640.0,
+    "response_db": -67.41065481382336,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 16000,
+    "frequency": 20,
+    "response_db": 9.667767331549016e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 16000,
+    "frequency": 997,
+    "response_db": -3.2506055194096166e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 16000,
+    "frequency": 6400.0,
+    "response_db": -5.977548747995574e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 16000,
+    "frequency": 7520.0,
+    "response_db": -67.41051600910308,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 22050,
+    "frequency": 20,
+    "response_db": 2.116031622281475e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 22050,
+    "frequency": 997,
+    "response_db": 2.7279332038495724e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 22050,
+    "frequency": 8820.0,
+    "response_db": -6.707097836703412e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 22050,
+    "frequency": 10363.5,
+    "response_db": -67.4264595649669,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 24000,
+    "frequency": 20,
+    "response_db": 4.3051686617939907e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 24000,
+    "frequency": 997,
+    "response_db": -1.4243695297827994e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 24000,
+    "frequency": 9600.0,
+    "response_db": -5.991112211986689e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 24000,
+    "frequency": 11280.0,
+    "response_db": -67.41065481382839,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 32000,
+    "frequency": 20,
+    "response_db": 2.438522988805122e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 32000,
+    "frequency": 997,
+    "response_db": 2.7618451904833787e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 32000,
+    "frequency": 12800.0,
+    "response_db": -5.977548702286137e-05,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 32000,
+    "frequency": 15040.0,
+    "response_db": -67.41051600910635,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 44100,
+    "frequency": 20,
+    "response_db": 1.928654933106574e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 44100,
+    "frequency": 997,
+    "response_db": -2.8929823996598616e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 44100,
+    "frequency": 17640.0,
+    "response_db": -7.7146197324263e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 44100,
+    "frequency": 20727.0,
+    "response_db": -1.2536257065192741e-14,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 48000,
+    "frequency": 20,
+    "response_db": 1.2805326513500432e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 48000,
+    "frequency": 997,
+    "response_db": 1.8788962233633482e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 48000,
+    "frequency": 18000,
+    "response_db": -0.0008083233030035357,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 48000,
+    "frequency": 22560.0,
+    "response_db": -105.49849008823625,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 48000,
+    "frequency": 23000,
+    "response_db": -107.09777304736234,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 64000,
+    "frequency": 20,
+    "response_db": 1.286678503069057e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 64000,
+    "frequency": 997,
+    "response_db": 1.8883756123775345e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 64000,
+    "frequency": 18000,
+    "response_db": -0.0008082697669842391,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 64000,
+    "frequency": 23000,
+    "response_db": -107.07850646212661,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 64000,
+    "frequency": 30080.0,
+    "response_db": -115.29950131006149,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 88200,
+    "frequency": 20,
+    "response_db": 5.314729194365144e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 88200,
+    "frequency": 997,
+    "response_db": 7.120741456116133e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 88200,
+    "frequency": 18000,
+    "response_db": -0.0008220962071256291,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 88200,
+    "frequency": 23000,
+    "response_db": -108.96702191057231,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 88200,
+    "frequency": 41454.0,
+    "response_db": -120.60398459825088,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 96000,
+    "frequency": 20,
+    "response_db": 1.284631949490182e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 96000,
+    "frequency": 997,
+    "response_db": 1.8853780107422116e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 96000,
+    "frequency": 18000,
+    "response_db": -0.0008082893050111878,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 96000,
+    "frequency": 23000,
+    "response_db": -107.0880783190327,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 96000,
+    "frequency": 45120.0,
+    "response_db": -125.24989904869479,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 176400,
+    "frequency": 20,
+    "response_db": 9.356381600740807e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 176400,
+    "frequency": 997,
+    "response_db": 1.3527550548788505e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 176400,
+    "frequency": 18000,
+    "response_db": -0.0008149158661984296,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 176400,
+    "frequency": 23000,
+    "response_db": -107.92988367824577,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 176400,
+    "frequency": 82908.0,
+    "response_db": -142.1534864703707,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 192000,
+    "frequency": 20,
+    "response_db": 1.286678503069057e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 192000,
+    "frequency": 997,
+    "response_db": 1.8884629283533375e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 192000,
+    "frequency": 18000,
+    "response_db": -0.0008082697669852035,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 192000,
+    "frequency": 23000,
+    "response_db": -107.08323942860359,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_a",
+    "rate": 192000,
+    "frequency": 90240.0,
+    "response_db": -131.2259266844634,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 7350,
+    "frequency": 20,
+    "response_db": -1.8362935772091399e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 7350,
+    "frequency": 997,
+    "response_db": -7.692233000784257e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 7350,
+    "frequency": 2940.0,
+    "response_db": 3.4125075835344526e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 7350,
+    "frequency": 3454.5,
+    "response_db": -37.856950659596784,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 8000,
+    "frequency": 20,
+    "response_db": -2.410777492945965e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 8000,
+    "frequency": 997,
+    "response_db": 1.6867626440275503e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 8000,
+    "frequency": 3200.0,
+    "response_db": 2.5565843242282326e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 8000,
+    "frequency": 3760.0,
+    "response_db": -37.85694754260734,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 11025,
+    "frequency": 20,
+    "response_db": 4.735370524972697e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 11025,
+    "frequency": 997,
+    "response_db": -2.546949210559108e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 11025,
+    "frequency": 4410.0,
+    "response_db": 3.778026193467601e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 11025,
+    "frequency": 5181.75,
+    "response_db": -37.85695190635386,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 12000,
+    "frequency": 20,
+    "response_db": -1.0900237916253437e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 12000,
+    "frequency": 997,
+    "response_db": -4.477311782548856e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 12000,
+    "frequency": 4800.0,
+    "response_db": 2.5609339809976333e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 12000,
+    "frequency": 5640.0,
+    "response_db": -37.856947639143854,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 16000,
+    "frequency": 20,
+    "response_db": -6.405946359168527e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 16000,
+    "frequency": 997,
+    "response_db": 3.6750365450176504e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 16000,
+    "frequency": 6400.0,
+    "response_db": 2.5565844013744275e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 16000,
+    "frequency": 7520.0,
+    "response_db": -37.856947542607244,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 22050,
+    "frequency": 20,
+    "response_db": 4.7153973744963124e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 22050,
+    "frequency": 997,
+    "response_db": 2.4014241878720895e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 22050,
+    "frequency": 8820.0,
+    "response_db": 4.5405528068969553e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 22050,
+    "frequency": 10363.5,
+    "response_db": -37.85695386931427,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 24000,
+    "frequency": 20,
+    "response_db": -2.799398276791844e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 24000,
+    "frequency": 997,
+    "response_db": -9.794531219674576e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 24000,
+    "frequency": 9600.0,
+    "response_db": 2.560932283781342e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 24000,
+    "frequency": 11280.0,
+    "response_db": -37.85694763914404,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 32000,
+    "frequency": 20,
+    "response_db": -1.6258966105146117e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 32000,
+    "frequency": 997,
+    "response_db": 8.976635087440728e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 32000,
+    "frequency": 12800.0,
+    "response_db": 2.5565889529999357e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 32000,
+    "frequency": 15040.0,
+    "response_db": -37.85694754260731,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 44100,
+    "frequency": 20,
+    "response_db": 1.928654933106574e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 44100,
+    "frequency": 997,
+    "response_db": -2.8929823996598616e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 44100,
+    "frequency": 17640.0,
+    "response_db": -7.7146197324263e-15,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 44100,
+    "frequency": 20727.0,
+    "response_db": -1.2536257065192741e-14,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 48000,
+    "frequency": 20,
+    "response_db": -8.372339281392471e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 48000,
+    "frequency": 997,
+    "response_db": -9.992968213616308e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 48000,
+    "frequency": 18000,
+    "response_db": 1.1617908553144544e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 48000,
+    "frequency": 22560.0,
+    "response_db": -160.06724958383688,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 48000,
+    "frequency": 23000,
+    "response_db": -141.78091670650824,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 64000,
+    "frequency": 20,
+    "response_db": -8.618319931584943e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 64000,
+    "frequency": 997,
+    "response_db": -1.0283052287420597e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 64000,
+    "frequency": 18000,
+    "response_db": 1.1599539737431845e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 64000,
+    "frequency": 23000,
+    "response_db": -141.7989802779039,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 64000,
+    "frequency": 30080.0,
+    "response_db": -164.57596975236768,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 88200,
+    "frequency": 20,
+    "response_db": 1.1890832691014702e-09,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 88200,
+    "frequency": 997,
+    "response_db": 1.375027136926196e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 88200,
+    "frequency": 18000,
+    "response_db": 1.2244009125995702e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 88200,
+    "frequency": 23000,
+    "response_db": -140.4637233060152,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 88200,
+    "frequency": 41454.0,
+    "response_db": -172.88059329102467,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 96000,
+    "frequency": 20,
+    "response_db": -8.536226734349155e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 96000,
+    "frequency": 997,
+    "response_db": -1.0185617121215734e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 96000,
+    "frequency": 18000,
+    "response_db": 1.1605176442872958e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 96000,
+    "frequency": 23000,
+    "response_db": -141.78973878704437,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 96000,
+    "frequency": 45120.0,
+    "response_db": -162.00988912049428,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 176400,
+    "frequency": 20,
+    "response_db": 3.1025886177344717e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 176400,
+    "frequency": 997,
+    "response_db": 3.4593656653390556e-08,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 176400,
+    "frequency": 18000,
+    "response_db": 1.1873937653757133e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 176400,
+    "frequency": 23000,
+    "response_db": -141.1032943833186,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 176400,
+    "frequency": 82908.0,
+    "response_db": -175.17527616824853,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 192000,
+    "frequency": 20,
+    "response_db": -8.618319931584943e-10,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 192000,
+    "frequency": 997,
+    "response_db": -1.028184321362872e-07,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 192000,
+    "frequency": 18000,
+    "response_db": 1.1599539679572206e-06,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 192000,
+    "frequency": 23000,
+    "response_db": -141.79415090354897,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  },
+  {
+    "kind": "SRC-quality",
+    "profile": "ref_fir_b",
+    "rate": 192000,
+    "frequency": 90240.0,
+    "response_db": -171.90378150471986,
+    "window_frames": [
+      4410,
+      83790
+    ]
+  }
+]
