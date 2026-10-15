@@ -1,0 +1,47 @@
+name: wp14 A6 macOS rehearsal
+
+# Software #438: the off-card A6 rehearsal (tools/wp14-capture/rehearse-macos.sh) on hosted
+# macOS arm64 with SIP on, against the released tapectl-macos (hash-checked by the script)
+# and a fresh 4 GiB + 1 MiB image. Uploads the raw capture. An observation, not acceptance.
+on:
+  pull_request:
+    paths:
+      - 'tools/wp14-capture/**'
+      - '.github/workflows/wp14-a6-macos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rehearse:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: released tapectl-macos (wp14-tapectl-5e2df5aaf23e)
+        run: |
+          set -eu
+          mkdir work
+          curl -sSfL -o work/tapectl https://github.com/mmsanders/Digital-Tape/releases/download/wp14-tapectl-5e2df5aaf23e/tapectl-macos
+          cp tools/wp14-capture/a6check.py tools/wp14-capture/rehearse-macos.sh work/
+          uname -m; sw_vers; csrutil status || true
+      - name: rehearsal (the exact script Michael runs)
+        working-directory: work
+        run: sh rehearse-macos.sh
+      - name: show the capture
+        if: always()
+        working-directory: work
+        run: |
+          d=$(ls -d a6-rh-mac-*/ | head -1)
+          ls -la "$d"; cat "$d"/tracer-exits.txt "$d"/gates.txt "$d"/verify-pid.txt "$d"/verify-out.txt 2>/dev/null || true
+          wc -l "$d/fsusage.txt"
+          grep -c tapectl "$d/fsusage.txt" || true
+          grep -E "pread|read|open|exec|posix_spawn|exit|lseek|write" "$d/fsusage.txt" | grep -v a6gate | head -120 || true
+          grep -E "rehearsal.img" "$d/fsusage.txt" | head -40 || true
+          cat "$d"/a6check.json 2>/dev/null | head -80 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-a6-macos-rehearsal
+          path: work/a6-rh-mac-*
