@@ -280,7 +280,7 @@ fn capacity_exact_fit_and_one_frame_over() {
     let d = t.join("out");
     let (c, _, e) = ingest(&d, 3, &[&a, &b]);
     assert_eq!(c, 2);
-    assert!(e.contains("by 44100 frames") && e.contains("0:01"), "{e}");
+    assert!(e.contains("by 44100 frames") && e.contains("(rounded up 00:01)"), "{e}");
     assert!(!d.exists());
     let (c, _, e) = ingest(&d, 4, &[&a, &b]);
     assert_eq!(c, 0, "{e}");
@@ -295,7 +295,7 @@ fn capacity_exact_fit_and_one_frame_over() {
     put(&b, "y.wav", &s16_wav(44100, 2, 44101));
     let (c, _, e) = ingest(&d2, 4, &[&a, &b]);
     assert_eq!(c, 2);
-    assert!(e.contains("by 1 frames") && e.contains("(rounded up 0:01)"), "{e}");
+    assert!(e.contains("by 1 frames") && e.contains("(rounded up 00:01)"), "{e}");
 }
 
 #[test]

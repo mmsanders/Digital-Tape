@@ -77,8 +77,9 @@ fn parse(argv: Vec<OsString>) -> Result<Cmd, String> {
     Ok(Cmd::Run(Args { out, seconds, folders }))
 }
 
+/// Contract §4 overage display: mm:ss with two-digit minutes (more digits past 99).
 fn mmss(secs: u64) -> String {
-    format!("{}:{:02}", secs / 60, secs % 60)
+    format!("{:02}:{:02}", secs / 60, secs % 60)
 }
 
 fn sha256_hex(parts: &[&[u8]]) -> String {
@@ -312,13 +313,14 @@ fn run(a: Args) -> Res<String> {
         .fold(0.0f32, f32::max);
     let joined_dbtp = (joined > 0.0).then(|| dsp::dbfs(joined as f64));
     observe::joined(joined_dbtp);
-    let h = 3 * 54i64;
+    let half = dsp::TP_HALF as i64;
+    let h = 3 * half;
     for k in 1..segs.len() {
         let b = segs[k].0 as i64;
         let mut worst = 0.0f32;
         for c in 0..2 {
             let local: Vec<f32> = (b - h..b + h).map(|i| sample(i, c)).collect();
-            worst = worst.max(tp.peak_range(&local, h - 54, h + 54));
+            worst = worst.max(tp.peak_range(&local, h - half, h + half));
         }
         let db = dsp::dbfs(worst as f64);
         if db + convert::GUARD_DB > convert::CEILING_DBTP {
@@ -415,7 +417,7 @@ fn run(a: Args) -> Res<String> {
                     ("input_dbtp", J::opt_dec(c.input_dbtp)),
                     ("output_lufs", J::opt_dec(c.output_lufs)),
                     ("output_dbtp", J::opt_dec(c.output_dbtp)),
-                    ("target_gain_db", J::dec(c.target_gain_db)),
+                    ("target_gain_db", J::opt_dec(c.target_gain_db)),
                     ("applied_gain_db", J::dec(c.applied_gain_db)),
                     ("peak_limited", J::Bool(c.peak_limited)),
                     ("loudness_status", J::s(c.status)),

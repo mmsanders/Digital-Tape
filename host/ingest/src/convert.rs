@@ -10,7 +10,8 @@ pub struct Converted {
     pub input_dbtp: Option<f64>,
     pub output_lufs: Option<f64>,
     pub output_dbtp: Option<f64>,
-    pub target_gain_db: f64,
+    /// `-16 - input_lufs`; undefined (null) when input loudness is undefined (§6).
+    pub target_gain_db: Option<f64>,
     pub applied_gain_db: f64,
     pub peak_limited: bool,
     pub status: &'static str,
@@ -56,7 +57,7 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
             input_dbtp: None,
             output_lufs: None,
             output_dbtp: None,
-            target_gain_db: 0.0,
+            target_gain_db: None,
             applied_gain_db: 0.0,
             peak_limited: false,
             status: "digital_silence",
@@ -81,9 +82,9 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
     let (target, mut g, mut limited) = match lin {
         Loud::Measured(li) => {
             let t = TARGET_LUFS - li;
-            (t, t.min(peak_bound), peak_bound < t)
+            (Some(t), t.min(peak_bound), peak_bound < t)
         }
-        _ => (0.0, peak_bound.min(0.0), peak_bound < 0.0),
+        _ => (None, peak_bound.min(0.0), peak_bound < 0.0),
     };
     for _ in 0..MAX_ATTEMPTS {
         let lin_gain = libm::pow(10.0, g / 20.0);
@@ -120,7 +121,8 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
             input_lufs: if let Loud::Measured(v) = lin { Some(v) } else { None },
             input_dbtp: Some(p_in),
             output_lufs: if let (Loud::Measured(v), "measured") = (lout, status) { Some(v) } else { None },
-            output_dbtp: Some(p_out),
+            // A nonzero source can legally quantize to all-zero PCM: no output peak.
+            output_dbtp: p_out.is_finite().then_some(p_out),
             target_gain_db: target,
             applied_gain_db: g,
             peak_limited: limited,

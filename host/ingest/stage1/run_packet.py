@@ -421,7 +421,9 @@ class Runner:
         (cdir / "before").mkdir(exist_ok=True)
         files = sorted(bd.iterdir(), key=lambda p: int(p.stem)) if bd.exists() else []
         big = [p for p in files if p.suffix == ".json"]
-        if len(files) == 1 and big:
+        # The compact entire-zero form is INTERFACE's for capacity/riff-largest-legal only;
+        # every other silent source gets its zero floats written out.
+        if len(files) == 1 and big and json.loads(big[0].read_text())["frames"] > (1 << 26):
             rec["before"] = json.loads(big[0].read_text())
         else:
             rec["before"] = []
@@ -548,6 +550,10 @@ def main():
     census = json.loads(Path(a.package, "CENSUS.json").read_text(encoding="utf-8"))["cases"]
     todo = [(n, c) for n, c in enumerate(census) if not a.only or a.only in c["id"]]
     cases = {}
+    if (root / "INDEX.json").exists():  # resume / accumulate development subsets
+        prior = json.loads((root / "INDEX.json").read_text(encoding="utf-8"))
+        if prior.get("binary_sha256") == sha_file(a.observe_bin):
+            cases.update(prior["cases"])
     big = [x for x in todo if x[1]["seconds"] > 3600]
     small = [x for x in todo if x[1]["seconds"] <= 3600]
     with cf.ThreadPoolExecutor(a.jobs) as ex:

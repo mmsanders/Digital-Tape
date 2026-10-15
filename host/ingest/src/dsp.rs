@@ -248,12 +248,14 @@ pub fn loudness(ch: &[&[f64]]) -> Loud {
 
 /// Polyphase interpolator: `TP_PHASES` sub-sample positions per input sample, Kaiser sinc
 /// cut at 22.05 kHz with transition 21.0–23.1 kHz, 80 dB. The 4x grid (every 64th phase)
-/// is evaluated everywhere; each grid local maximum of |x| at or above 0.92 of the grid
+/// is evaluated everywhere; each grid local maximum of |x| at or above 0.90 of the grid
 /// maximum is refined over the neighbouring grid intervals at the full phase resolution.
 pub const TP_PHASES: usize = 256;
 pub const TP_GRID: usize = 64; // 4x grid
 pub const TP_BLOCK: usize = 1 << 20; // streamed joined measurement block
-const TP_HALF: usize = 54; // taps each side
+/// Half-support in input samples: 256 each side, cut exactly at 22.05 kHz, Kaiser beta 14,
+/// so the interpolator is flat to within 0.1 dB to about 21.7 kHz (AP4).
+pub const TP_HALF: usize = 256;
 
 pub struct TruePeak {
     taps: Vec<f32>, // [phase][2*TP_HALF]
@@ -263,7 +265,7 @@ pub struct TruePeak {
 impl TruePeak {
     pub fn new() -> TruePeak {
         let w = 2 * TP_HALF;
-        let beta = 0.1102 * (80.0 - 8.7);
+        let beta = 14.0;
         let i0b = bessel_i0(beta);
         let cut = 0.5;
         let half = TP_HALF as f64;
@@ -344,7 +346,7 @@ impl TruePeak {
 
     /// Maximum absolute reconstructed value over input positions [lo, hi) (positions may
     /// run past the signal; outside samples are zero). One streaming pass over the 4x
-    /// grid; a grid local maximum at or above 0.92 of the running grid maximum is refined
+    /// grid; a grid local maximum at or above 0.90 of the running grid maximum is refined
     /// across its two neighbouring grid intervals at full phase resolution. The running
     /// maximum never exceeds the final one, so this refines a superset of the points a
     /// final-maximum threshold would.
@@ -365,7 +367,7 @@ impl TruePeak {
                 let next = if p < 3 { cur[p + 1] } else { nxt[0] };
                 gmax = gmax.max(v);
                 best = best.max(v);
-                if v > 0.0 && v >= gmax * 0.92 && v >= prev && v >= next {
+                if v > 0.0 && v >= gmax * 0.90 && v >= prev && v >= next {
                     let centre = (n0 * per + p as i64) * TP_GRID as i64;
                     for s in -(TP_GRID as i64) + 1..TP_GRID as i64 {
                         let pos = centre + s;

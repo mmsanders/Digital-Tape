@@ -21,7 +21,13 @@ tools/identity_run.sh OUT.txt           # cross-platform identity corpus → two
 Exit 0 only after both files are published; 2 for an input/contract refusal; 1 for an I/O or tool
 failure. Every refusal names the logical source path (`folder_ordinal/NFC_name`) or the join.
 
-## Arithmetic profile `INGEST1-AP3`
+## Arithmetic profile `INGEST1-AP4`
+
+`INGEST1-AP4` lengthens the true-peak interpolator to 256 input samples each side, Kaiser β 14,
+cut at 22.05 kHz (flat within 0.1 dB to about 21.7 kHz), because AP3's 54-sample design read
+broadband near-Nyquist content up to 0.63 dB low against the package's boundary vectors.
+
+### AP3
 
 `INGEST1-AP3` (#435 item 2) replaces AP2's per-phase DC renormalisation with one prototype FIR
 `h` at L·fin, so every resampler is exactly the INTERFACE generic descriptor
@@ -85,8 +91,8 @@ not raised as questions stay implementation choices, not contract text.
    FOLDER argument is resolved; entries inside it are never followed.
 8. **Gain**: start `min(-16-L, -1-P-0.1)`; on a final peak violation reduce by the excess +
    0.001 dB and set `peak_limited`; an unlimited source outside ±0.5 LU is moved by the error
-   (capped at the peak bound). `target_gain_db` is `-16-L`, or `0` for unmeasurable sources
-   and digital silence.
+   (capped at the peak bound). `target_gain_db` is `-16-L`, and null when input loudness is
+   undefined (unmeasurable sources and digital silence).
 9. **Joined true peak**: computed on the assembled stream at every boundary (source/source,
    source/gap); interior points are identical to the isolated measurement by construction.
 10. **Stage**: `.<DEST name>.ingest-stage-<pid>-<n>` beside DEST, published by
