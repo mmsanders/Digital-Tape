@@ -531,6 +531,19 @@
         "-B",
         "tests/wp14_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_subset_r1",
+      "tree": "c6cb573d654d337fef2f616f11cce0cee74e8968",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "fe8f3bdf16c83ef8564d073e900bb1b98cf125a4",
+      "attested_in": "Verification #183 / Product #440 / ADR-183",
+      "attestation": "Q-P2-1 any-subset 512-byte persistence model, sampling planner and ADAPTER.md execution dependency (P2V183-EXEC-001), published at Verification main fe8f3bdf (PR #184); imported byte-identically before any binding. Model self-test only: no engine operation has run in this mode; not WP-10 acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_subset_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
