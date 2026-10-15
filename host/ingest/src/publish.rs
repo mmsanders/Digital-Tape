@@ -4,7 +4,7 @@
 
 use crate::common::*;
 use crate::observe;
-use std::fs::{self, File, OpenOptions};
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -33,7 +33,7 @@ fn write_new(p: &Path, parts: &[&[u8]], which: &str) -> Res<()> {
 fn sync_dir(_p: &Path) -> Res<()> {
     #[cfg(unix)]
     {
-        let d = io("cannot open", _p, File::open(_p))?;
+        let d = io("cannot open", _p, fs::File::open(_p))?;
         io("cannot flush", _p, d.sync_all())?;
     }
     Ok(())

@@ -76,7 +76,7 @@ class Observer:
         probe = d / "probe.txt"
         probe.write_text("probe\n")
         script = ("cat '%s' >/dev/null; (cat '%s' >/dev/null); "
-                  ": > '%s/created.txt'; exec 3</dev/loop0 2>/dev/null; true") % (probe, probe, d)
+                  ": > '%s/created.txt'; (exec 3</dev/loop0) 2>/dev/null; true") % (probe, probe, d)
         trace = d / "trace.txt"
         p = subprocess.run(self.wrap(["sh", "-c", script], trace), capture_output=True)
         text = trace.read_text(errors="replace")
@@ -91,6 +91,9 @@ class Observer:
             "process_completion_seen": "+++ exited with 0 +++" in text,
         }
         ok = all(checks.values())
+        for name, passed in checks.items():
+            if not passed:
+                print(f"observer selftest check failed: {name}", file=sys.stderr)
         (d / "result.json").write_bytes(canonical({"observer": "strace", "qualified": ok, "checks": checks,
                                                    "trace_sha256": sha_file(trace)}))
         return ok
