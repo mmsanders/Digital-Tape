@@ -96,6 +96,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
+      # The imported package is pinned byte for byte (check_pins.py); Windows runners
+      # default to core.autocrlf=true, which would rewrite its text files on checkout.
+      - name: check out bytes exactly as committed
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
