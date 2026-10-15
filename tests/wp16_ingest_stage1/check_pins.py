@@ -3,6 +3,9 @@ import hashlib,json
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 
+def relative_name(path,root):
+    return path.relative_to(root).as_posix()
+
 def run():
     pins=json.loads((HERE/'PINS.json').read_text(encoding='utf-8'));assert pins['status']=='STAGE1_AUTHORED' and pins['pending_cells']==0
     for name,key in [('WP16-INGEST-CONTRACT.md','contract_blob'),('WP-16.md','wp16_blob')]:
@@ -22,7 +25,7 @@ def run():
     assert json.loads((HERE/'evidence/integration.json').read_text(encoding='utf-8'))['reference_cases']==10
     asset=json.loads((HERE/'ASSET.json').read_text(encoding='utf-8'));assert asset['member_count']==1765
     files=json.loads((HERE/'FILES.json').read_text(encoding='utf-8'))
-    actual={str(p.relative_to(HERE)) for p in HERE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.name!='FILES.json'}
+    actual={relative_name(p,HERE) for p in HERE.rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.name!='FILES.json'}
     assert set(files)==actual,'unindexed/omitted package member'
     for name,sha in files.items():assert hashlib.sha256((HERE/name).read_bytes()).hexdigest()==sha,name
     print('Stage1 authority/census/closed-file pins PASS; zero Product acceptance')

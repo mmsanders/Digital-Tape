@@ -111,3 +111,15 @@ acknowledgement round is needed. #169 stays open between stages.
 WP14A6/native/physical holds, real-card/fullWP16/WP15, hardware/media/atomicity,
 target<30s, write/async/recording/firmware/frozen-format and WP11-golden holds survive.
 No new Michael load/pull/dump/README/card test is requested by this publication.
+
+## Portability correction, 15 October
+
+Software's Stage2 return exposed a Windows-only authentication bug: native path
+strings used backslashes while FILES.json uses POSIX names. check_pins.py now
+canonicalizes relative member names with as_posix(). portability_selftest.py
+checks both path syntaxes and detects the legacy separator fault. Hash, exact
+member census, source/contract identities and all acceptance predicates are
+unchanged. This is a new publication identity; the original40dd4b5/tree13b36813
+remains immutable and correctly authenticates Software's original import.
+No native Windows execution or Windows11 qualification follows from this
+PureWindowsPath regression check. See the Stage2 disposition in findings/.
