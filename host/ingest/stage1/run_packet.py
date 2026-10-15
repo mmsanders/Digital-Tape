@@ -48,7 +48,13 @@ def platform_id():
     if s == "darwin":
         return "macos", arch
     if s.startswith("win"):
-        return "windows11", arch  # caller must confirm the host really is Windows 11
+        # Only a Windows 11 client is the required platform; a Server edition (GitHub's
+        # windows-latest) is not a substitute and must not carry that label.
+        edition = (platform.win32_edition() or "").lower()
+        build = int(platform.version().split(".")[-1] or 0)
+        if "server" in edition or build < 22000:
+            return "windows-server-" + (edition or "unknown"), arch
+        return "windows11", arch
     return s, arch
 
 
