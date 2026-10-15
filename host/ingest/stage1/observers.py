@@ -325,7 +325,9 @@ class FsUsage:
     def start(self, root):
         self.tools = root / "observer-tools"
         self.tools.mkdir(parents=True, exist_ok=True)
-        for src, name in (("/bin/sh", GATE), ("/bin/sh", "probe-parent"), ("/bin/cat", "probe-child")):
+        # /bin/sh is a trampoline that re-execs another shell under its own name, which the
+        # name filter would drop; copy real binaries so every probe keeps its name.
+        for src, name in (("/bin/test", GATE), ("/bin/bash", "probe-parent"), ("/bin/cat", "probe-child")):
             # contents and mode only: system binaries carry flags a user may not copy
             shutil.copyfile(src, self.tools / name)
             os.chmod(self.tools / name, 0o755)
@@ -333,7 +335,7 @@ class FsUsage:
     def stop(self):
         # keep identities, not copies of system binaries
         rec = {p.name: {"copied_from": src, "sha256": sha_file(p)} for p, src in
-               ((self.tools / GATE, "/bin/sh"), (self.tools / "probe-parent", "/bin/sh"), (self.tools / "probe-child", "/bin/cat"))}
+               ((self.tools / GATE, "/bin/test"), (self.tools / "probe-parent", "/bin/bash"), (self.tools / "probe-child", "/bin/cat"))}
         (self.tools / "tools.json").write_bytes(canonical(rec))
         for name in (GATE, "probe-parent", "probe-child"):
             (self.tools / name).unlink()
@@ -344,7 +346,7 @@ class FsUsage:
     def _gate(self, tag):
         self.n += 1
         token = str(self.tools / f"gate-{tag}-{os.getpid()}-{self.n}")
-        subprocess.run([str(self.tools / GATE), "-c", f"test -e '{token}'; true"])
+        subprocess.run([str(self.tools / GATE), "-e", token])
         return token
 
     def before(self, trace, ctx):
