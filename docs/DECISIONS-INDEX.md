@@ -152,4 +152,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-179](DECISIONS.md#adr-179--file-owner-latch-prototypes-and-clean-current-navigation) | 2026-10-14 PDT | Intake431 filing / navigation cleanup | Owner latch results primaryWP04, parked/no new round; current entrypoints refreshed; historical/pinned bytes retained |
 
-116 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-180](DECISIONS.md#adr-180--resolve-p2v16-002-aifc-sowt-and-software-429-interpretations) | 2026-10-14 PDT | P2V16-002 sowt / #429 (a)–(e) | AIFC sowt 16-bit only, non-16 refuses by name; ADTS one raw block, CRC verified when present; lossless gapless_known; LAME/FFmpeg tag CRC; stts agreement |
+
+117 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
