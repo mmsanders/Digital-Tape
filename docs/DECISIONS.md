@@ -3832,3 +3832,46 @@ that preflight, behind #435/#438. No lead is idle-assigned.
 
 **Gate/reversal cost.** Rungs unchanged: Phase1 36/36, Phase2 4/12. WP-15 stays rung 0 until
 built and disposed. All standing holds survive. Reversal is a contract amendment; nothing is built.
+
+## ADR-183 — APP-1 preflight corrections and Q-P2-1 adapter import routing
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("what should they be up to?").
+Input Verification main `fe8f3bdf16c83ef8564d073e900bb1b98cf125a4` (#184, CI SUCCESS): APP-1
+preflight blob `c05963fb`; any-subset package subtree `c6cb573d` (`tests/wp10_subset_r1`).
+
+**APP-1 findings upheld; contract revised.**
+- **P2V15-001.** Overage refusals carry integer `total_frames`/`capacity_frames`/`excess_frames`
+  in the report. The bar is drawn full in its "too long" style.
+- **P2V15-002.** `--report` is a narrow, opt-in diagnostic exception to INGEST-1 §6.
+  - The file is exclusive, never follows a symlink, is per-invocation and carries a nonce.
+  - It lives in an app-owned control directory, never in DEST or its stage, and never signals
+    success.
+  - No-flag behaviour and the two-file publication are unchanged.
+- **P2V15-003.** The destructive sequence becomes one `tapectl make` process with one device
+  open: provision, load, then verify through a NULL-write binding on the same open.
+  - An OS-reported removal or change stops it with `CARD_CHANGED`.
+  - Software demonstrates detection on Windows 11 and macOS. An undetectable case is a stated
+    limitation.
+  - The pre-launch gap is covered only by the app's recheck. The contract does not claim to detect
+    a deliberate equal-size swap there.
+  - This also reduces elevation to one prompt.
+- **P2V15-004.** App-origin events are named and tested with real OS/UI controls; child-origin
+  rows use real child outcomes; no fake-outcome switch. The events are `DROP_NOT_FOLDER`,
+  `SPAWN_FAILED`, `ELEVATION_DECLINED` and `CARD_RECHECK_MISMATCH`.
+- **§3 bindings.** Closed ID lists and progress steps become the first interface deliverable of the
+  Software build issue. PM issues them as an APP-1 annex before Verification freezes app tests.
+  `cards` reports exact layout recognition, runs unelevated, and gives an `unprobed` count with exit
+  1 when enumeration is unavailable.
+
+`make` is additive. The separate commands, the engine and the format are unchanged.
+
+**Q-P2-1 execution (P2V183-EXEC-001).** The any-subset model and controls are published, but the
+existing WP-10 workers cannot express subset persistence without a Product-side binding.
+Software imports `tests/wp10_subset_r1` verbatim and binds it to the existing WP-10 adapters
+(load, commit/record, reset-b, promote, respool, dup), per its `ADAPTER.md`. The engine stays at
+A8 `d96b4245`. Verification keeps persistence selection and outcome judgment. Software queue order:
+#435, #439, #438, then this import. The import is not on the WP14 critical path; it gates Q-P2-1(b)
+before Phase 3.
+
+**Gate/reversal cost.** Rungs unchanged. All holds survive. Reversal is a contract amendment or
+reassignment; nothing has been built.

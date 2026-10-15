@@ -161,4 +161,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-182](DECISIONS.md#adr-182--route-the-q-p2-1-any-subset-crash-mode-and-issue-wp-15-contract-app-1) | 2026-10-15 PDT | Q-P2-1 crash mode / WP-15 APP-1 | Verification authors the any-subset persistence mode and runs current engine; WP-15 contract issued for preflight with `tapectl cards` and `--report` additions |
 
-119 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-183](DECISIONS.md#adr-183--app-1-preflight-corrections-and-q-p2-1-adapter-import-routing) | 2026-10-15 PDT | APP-1 P2V15-001…004 / Q-P2-1 import | One-open `tapectl make` with `CARD_CHANGED`; report diagnostic exception with nonce; exact overage frames; app-origin events; Software imports any-subset package after #438 |
+
+120 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
