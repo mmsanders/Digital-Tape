@@ -6,7 +6,7 @@
 It is a standalone host tool: no device access, no engine code, no format logic (guardrails 03,
 09, 12). `tapectl load` consumes the WAV; the manifest stays on the computer.
 
-**Status:** Software implementation for #429. Not independently accepted. Verification #169
+**Status:** Software implementation for #429/#435 (ADR-180 applied). Not independently accepted. Verification #169
 authors the oracle separately; no real-card WP16 or WP15 claim.
 
 ```sh
@@ -21,7 +21,13 @@ tools/identity_run.sh OUT.txt           # cross-platform identity corpus → two
 Exit 0 only after both files are published; 2 for an input/contract refusal; 1 for an I/O or tool
 failure. Every refusal names the logical source path (`folder_ordinal/NFC_name`) or the join.
 
-## Arithmetic profile `INGEST1-AP1`
+## Arithmetic profile `INGEST1-AP2`
+
+`INGEST1-AP2` (#435) is `INGEST1-AP1` plus the ADR-180 validation: a verified ADTS CRC and the
+`sowt` 16-bit rule. No arithmetic changed. For every input both admit, `audio.wav` is byte-identical
+(identity corpus AP1 `e79bbf26…` reproduced by AP2). The manifest differs because its `libraries`
+entry for the patched `symphonia-codec-aac` tree changed, so the ID is bumped per §5.
+
 
 | Stage | Choice |
 |---|---|
@@ -45,8 +51,9 @@ desktop the contract qualifies; that native run is separate.
 
 ## Interface facts and interpretations for Verification/PM
 
-These are the implementation's choices where the contract leaves room. None changes an issued
-rule; each is returned to PM384 as a fact, not a self-acceptance.
+These are the implementation's choices where the contract leaves room. ADR-180 adopted (a), (c),
+(d) and (e) as contract text and ruled (b) the other way: a present ADTS CRC is verified. Items
+not raised as questions stay implementation choices, not contract text.
 
 1. **Lossless sources** (WAV/AIFF/FLAC) report `gapless_known`, `trim_evidence` `none`, trims 0.
    Only lossy streams without admitted metadata are `gapless_unknown`.
@@ -64,9 +71,13 @@ rule; each is returned to PM384 as a fact, not a self-acceptance.
    admitted only when it agrees exactly with the edit end; alone it refuses. `iTunSMPB` must
    agree with the edit list; alone it refuses. Tracks other than `soun`/`vide` (text, chapters)
    are ignored; `vide` refuses.
-6. **Known limitations inside the positive matrix**: ADTS frames carrying more than one raw data
-   block refuse by name; the ADTS CRC is not verified (the decoder then refuses corrupt data
-   only when it fails to decode). Both are returned to PM384.
+6. **ADTS** (ADR-180): one raw data block per frame; more refuses by name. When
+   `protection_absent=0` the CRC is verified: CRC-16 0x8005, initial 0xFFFF, over the 56 header
+   bits and then each SCE/LFE's first 192 bits, each CPE's first 192 bits and its second channel's
+   first 128 bits (zero-padded when shorter), and each DSE whole; FIL/END and the element IDs
+   are not covered. These are the FDK reference decoder's regions; the CRC fixtures come from the
+   FDK reference encoder (`tests/fixtures/fdkgen.rs`). A mismatch refuses by name.
+   **AIFC `sowt`** is little-endian PCM16 only; any other sampleSize refuses by name.
 7. **Names**: NFC; logical-path and case-folded (full Unicode lowercase) collisions refuse;
    characters Windows cannot store, trailing dot/space and reserved device names refuse. A
    FOLDER argument is resolved; entries inside it are never followed.
@@ -78,7 +89,11 @@ rule; each is returned to PM384 as a fact, not a self-acceptance.
    source/gap); interior points are identical to the isolated measurement by construction.
 10. **Stage**: `.<DEST name>.ingest-stage-<pid>-<n>` beside DEST, published by
    `renameat2(RENAME_NOREPLACE)` / `renamex_np(RENAME_EXCL)` / `MoveFileExW(0)`.
-11. **True-peak bandwidth**: the interpolator is flat to about 21 kHz. Native 44.1 kHz content
-   above that may under-read; resampled sources are already band-limited below 22.05 kHz.
+11. **True-peak bandwidth** (measured, `examples/tp_sweep.rs` and the interpolator response):
+   the half-sample phase is within ±0.0011 dB from DC to 21.0 kHz, −1.13 dB at 21.5 kHz and
+   −5.96 dB at 21.8 kHz. The §3 ≤0.1 dB under-read bound therefore holds for content up to
+   about 21.2 kHz; steady tones read within 0.001 dB to 22.04 kHz because their samples
+   eventually land on the peak. Resampled sources are band-limited below 22.05 kHz by the
+   resampler; native 44.1 kHz transients above ~21.2 kHz can under-read.
 
 Tests, fixtures and their regeneration: `tests/cli.rs`, `tests/fixtures/make.sh` (generated tones only).

@@ -149,7 +149,7 @@ fn pcm(dest: &Path) -> Vec<i16> {
 fn version_and_syntax() {
     let (c, o, _) = run(&["--version".as_ref()]);
     assert_eq!(c, 0);
-    assert!(o.contains("INGEST1-AP1"));
+    assert!(o.contains("INGEST1-AP2"));
     assert_eq!(run(&["--help".as_ref()]).0, 0);
     assert_eq!(run(&[]).0, 2);
     let t = tmp();
@@ -479,5 +479,140 @@ fn joined_peak_over_ceiling_refuses_naming_the_join() {
     put(&a, "2.wav", &wav_bytes(44100, 2, Fmt::F32, &vec![0.8; 2 * 44100], None));
     let (c, _, e) = ingest(&d, 60, &[&a]);
     assert_eq!(c, 0, "{e}");
+    no_stage(&t);
+}
+
+/// AIFF (`aifc` None) or AIFC with compression type `ct`; samples big-endian unless `le`.
+fn aiff_bytes(rate: u32, ch: u16, bits: u16, x: &[f64], aifc: Option<&[u8; 4]>, le: bool) -> Vec<u8> {
+    let mut d = Vec::new();
+    for &v in x {
+        let s = (v * ((1i64 << (bits - 1)) - 1) as f64).round() as i64;
+        let bytes = (s as i32).to_be_bytes();
+        let mut w = bytes[4 - bits as usize / 8..].to_vec();
+        if le {
+            w.reverse();
+        }
+        d.extend_from_slice(&w);
+    }
+    // 80-bit extended rate: integer rate exactly.
+    let e = 63 - (rate as u64).leading_zeros() as u16;
+    let mut ext = Vec::new();
+    ext.extend_from_slice(&(16383 + e).to_be_bytes());
+    ext.extend_from_slice(&((rate as u64) << (63 - e)).to_be_bytes());
+    let mut comm = Vec::new();
+    comm.extend_from_slice(&ch.to_be_bytes());
+    comm.extend_from_slice(&((x.len() / ch as usize) as u32).to_be_bytes());
+    comm.extend_from_slice(&bits.to_be_bytes());
+    comm.extend_from_slice(&ext);
+    if let Some(ct) = aifc {
+        comm.extend_from_slice(ct);
+        comm.extend_from_slice(&[0, 0]); // empty pstring, padded
+    }
+    let mut body = Vec::new();
+    body.extend_from_slice(if aifc.is_some() { b"AIFC" } else { b"AIFF" });
+    body.extend_from_slice(b"COMM");
+    body.extend_from_slice(&(comm.len() as u32).to_be_bytes());
+    body.extend_from_slice(&comm);
+    body.extend_from_slice(b"SSND");
+    body.extend_from_slice(&((d.len() + 8) as u32).to_be_bytes());
+    body.extend_from_slice(&[0; 8]);
+    body.extend_from_slice(&d);
+    if d.len() % 2 == 1 {
+        body.push(0);
+    }
+    let mut b = b"FORM".to_vec();
+    b.extend_from_slice(&(body.len() as u32).to_be_bytes());
+    b.extend_from_slice(&body);
+    b
+}
+
+#[test]
+fn aiff_matrix_and_sowt_is_16_bit_only() {
+    // ADR-180 / P2V16-002.
+    let t = tmp();
+    let a = t.join("a");
+    fs::create_dir(&a).unwrap();
+    let x = tone(44100, 2, 4410, 300.0, 0.4);
+    for bits in [8u16, 16, 24, 32] {
+        put(&a, &format!("aiff{bits}.aif"), &aiff_bytes(44100, 2, bits, &x, None, false));
+        put(&a, &format!("none{bits}.aifc"), &aiff_bytes(44100, 2, bits, &x, Some(b"NONE"), false));
+    }
+    put(&a, "sowt16.aifc", &aiff_bytes(44100, 2, 16, &x, Some(b"sowt"), true));
+    let d = t.join("out");
+    let (c, _, e) = ingest(&d, 60, &[&a]);
+    assert_eq!(c, 0, "{e}");
+    let m = manifest(&d);
+    assert!(m.contains("\"codec_profile\":\"sowt-s16le\""));
+    // sowt and big-endian 16-bit of the same samples convert identically.
+    let pcm = pcm(&d);
+    let paths = field(&m, "logical_path");
+    let starts = field(&m, "start_frame");
+    let idx = |name: &str| paths.iter().position(|p| p.contains(name)).unwrap();
+    let start = |name: &str| starts[starts.len() - paths.len() + idx(name)].parse::<usize>().unwrap() * 2;
+    let n = 4410 * 2;
+    assert_eq!(&pcm[start("sowt16")..start("sowt16") + n], &pcm[start("aiff16")..start("aiff16") + n]);
+    for (bits, le) in [(8u16, false), (24, true), (32, true), (24, false)] {
+        let f = t.join(format!("s{bits}{le}"));
+        fs::create_dir(&f).unwrap();
+        put(&f, "ok.aifc", &aiff_bytes(44100, 2, 16, &x, Some(b"sowt"), true));
+        put(&f, "x.aifc", &aiff_bytes(44100, 2, bits, &x, Some(b"sowt"), le));
+        let d = t.join(format!("o{bits}{le}"));
+        let (c, _, e) = ingest(&d, 60, &[&f]);
+        assert_eq!(c, 2, "sowt {bits}: {e}");
+        assert!(e.contains("0/x.aifc") && e.contains("'sowt' is 16-bit only"), "{e}");
+        assert!(!d.exists());
+    }
+    let f = t.join("fl32");
+    fs::create_dir(&f).unwrap();
+    put(&f, "x.aifc", &aiff_bytes(44100, 2, 32, &x, Some(b"fl32"), false));
+    let (c, _, e) = ingest(&t.join("of"), 60, &[&f]);
+    assert_eq!(c, 2);
+    assert!(e.contains("compressed AIFC") && e.contains("fl32"), "{e}");
+    no_stage(&t);
+}
+
+#[test]
+fn adts_crc_is_verified_when_present() {
+    // ADR-180 ruling (b). Fixtures from the FDK reference encoder with protection on.
+    let t = tmp();
+    let a = t.join("a");
+    fs::create_dir(&a).unwrap();
+    for f in ["tone_crc_stereo.aac", "tone_crc_mono.aac"] {
+        fs::copy(Path::new(FIX).join(f), a.join(f)).unwrap();
+    }
+    let (c, o, e) = ingest(&t.join("out"), 60, &[&a]);
+    assert_eq!(c, 0, "{e}");
+    assert!(o.contains("gapless-unknown 2"), "{o}");
+    let good = fs::read(Path::new(FIX).join("tone_crc_stereo.aac")).unwrap();
+    assert_eq!(good[1] & 1, 0, "fixture carries a CRC");
+    // Locate the second frame so the flips are mid-stream.
+    let len0 = (((good[3] & 3) as usize) << 11) | ((good[4] as usize) << 3) | (good[5] as usize >> 5);
+    let f1 = len0;
+    let flips: [(&str, usize, u8); 3] = [
+        ("crc field", f1 + 7, 0x01),
+        ("private bit in the header", f1 + 2, 0x02),
+        ("first payload bits", f1 + 9 + 2, 0x10),
+    ];
+    for (i, (what, byte, mask)) in flips.into_iter().enumerate() {
+        let mut bad = good.clone();
+        bad[byte] ^= mask;
+        let f = t.join(format!("f{i}"));
+        fs::create_dir(&f).unwrap();
+        put(&f, "ok.aac", &good);
+        put(&f, "x.aac", &bad);
+        let d = t.join(format!("o{i}"));
+        let (c, _, e) = ingest(&d, 60, &[&f]);
+        assert_eq!(c, 2, "{what}: {e}");
+        assert!(e.contains("0/x.aac") && (e.contains("CRC mismatch") || e.contains("does not decode")), "{what}: {e}");
+        assert!(!d.exists());
+    }
+    // The header private bit decodes identically, so only the CRC can refuse it.
+    let mut bad = good.clone();
+    bad[f1 + 2] ^= 0x02;
+    let f = t.join("priv");
+    fs::create_dir(&f).unwrap();
+    put(&f, "x.aac", &bad);
+    let (_, _, e) = ingest(&t.join("op"), 60, &[&f]);
+    assert!(e.contains("ADTS frame 1 CRC mismatch"), "{e}");
     no_stage(&t);
 }

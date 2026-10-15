@@ -47,9 +47,18 @@ pub struct AacDecoder {
     sbinfo: GASubbandInfo,
     params: AudioCodecParameters,
     buf: AudioBuffer<f32>,
+    /// digital-tape INGEST-1: ADTS CRC regions of the last packet as (start bit, end bit,
+    /// maximum bits; 0 = whole region), in CRC accumulation order (ISO/IEC 14496-3
+    /// adts_error_check as implemented by the FDK reference decoder).
+    crc_regions: Vec<(u64, u64, u32)>,
 }
 
 impl AacDecoder {
+    /// digital-tape INGEST-1: the ADTS CRC regions recorded while decoding the last packet.
+    pub fn crc_regions(&self) -> &[(u64, u64, u32)] {
+        &self.crc_regions
+    }
+
     pub fn try_new(params: &AudioCodecParameters, _opts: &AudioDecoderOptions) -> Result<Self> {
         // This decoder only supports AAC.
         if params.codec != CODEC_ID_AAC {
@@ -105,7 +114,7 @@ impl AacDecoder {
 
         let buf = AudioBuffer::new(AudioSpec::new(asc.sample_rate, channels), asc.samples);
 
-        Ok(AacDecoder { asc, pairs: Vec::new(), dsp: dsp::Dsp::new(), sbinfo, params, buf })
+        Ok(AacDecoder { asc, pairs: Vec::new(), dsp: dsp::Dsp::new(), sbinfo, params, buf, crc_regions: Vec::new() })
     }
 
     fn set_pair(&mut self, pair_no: usize, channel: usize, pair: bool) -> Result<()> {
@@ -126,8 +135,11 @@ impl AacDecoder {
     fn decode_ga<B: ReadBitsLtr + FiniteBitStream>(&mut self, bs: &mut B) -> Result<()> {
         let mut cur_pair = 0;
         let mut cur_ch = 0;
+        let total = bs.bits_left();
+        self.crc_regions.clear();
         while bs.bits_left() > 3 {
             let id = bs.read_bits_leq32(3)?;
+            let el_start = total - bs.bits_left();
 
             match id {
                 0 => {
@@ -135,6 +147,7 @@ impl AacDecoder {
                     let _tag = bs.read_bits_leq32(4)?;
                     self.set_pair(cur_pair, cur_ch, false)?;
                     self.pairs[cur_pair].decode_ga_sce(bs, self.asc.object_type)?;
+                    self.crc_regions.push((el_start, total - bs.bits_left(), 192));
                     cur_pair += 1;
                     cur_ch += 1;
                 }
@@ -142,7 +155,10 @@ impl AacDecoder {
                     // ID_CPE
                     let _tag = bs.read_bits_leq32(4)?;
                     self.set_pair(cur_pair, cur_ch, true)?;
-                    self.pairs[cur_pair].decode_ga_cpe(bs, self.asc.object_type)?;
+                    let ics1 = total - self.pairs[cur_pair].decode_ga_cpe(bs, self.asc.object_type)?;
+                    let el_end = total - bs.bits_left();
+                    self.crc_regions.push((el_start, el_end, 192));
+                    self.crc_regions.push((ics1, el_end, 128));
                     cur_pair += 1;
                     cur_ch += 2;
                 }
@@ -155,6 +171,7 @@ impl AacDecoder {
                     let _tag = bs.read_bits_leq32(4)?;
                     self.set_pair(cur_pair, cur_ch, false)?;
                     self.pairs[cur_pair].decode_ga_sce(bs, self.asc.object_type)?;
+                    self.crc_regions.push((el_start, total - bs.bits_left(), 192));
                     cur_pair += 1;
                     cur_ch += 1;
                 }
@@ -170,6 +187,7 @@ impl AacDecoder {
                         bs.realign(); // ????
                     }
                     bs.ignore_bits(count * 8)?; // no SBR payload or such
+                    self.crc_regions.push((el_start, total - bs.bits_left(), 0));
                 }
                 5 => {
                     // ID_PCE

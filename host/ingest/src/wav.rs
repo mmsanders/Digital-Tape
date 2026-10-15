@@ -231,15 +231,20 @@ pub fn decode_aiff(b: &[u8]) -> Res<Decoded> {
         }
     }
     check_channels(ch)?;
+    // ADR-180 (P2V16-002): `sowt` is little-endian PCM16 only. Any other COMM sampleSize
+    // refuses by name; it is never reinterpreted at the COMM width or frame count.
     let pcm = match (bits, little) {
-        (8, _) => Pcm::S8,
+        (16, true) => Pcm::S16Le,
+        (b, true) => {
+            return refuse(format!(
+                "AIFC 'sowt' with {b}-bit samples is outside INGEST-1 ('sowt' is 16-bit only)"
+            ))
+        }
+        (8, false) => Pcm::S8,
         (16, false) => Pcm::S16Be,
         (24, false) => Pcm::S24Be,
         (32, false) => Pcm::S32Be,
-        (16, true) => Pcm::S16Le,
-        (24, true) => Pcm::S24Le,
-        (32, true) => Pcm::S32Le,
-        (b, _) => return refuse(format!("{b}-bit AIFF samples are not supported")),
+        (b, false) => return refuse(format!("{b}-bit AIFF samples are not supported")),
     };
     check_rate(rate)?;
     if frames == 0 {

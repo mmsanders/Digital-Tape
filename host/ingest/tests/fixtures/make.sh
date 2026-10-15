@@ -18,3 +18,8 @@ $F -f lavfi -i "sine=f=440:d=1:r=44100" -ac 2 -c:a mp2 -b:a 192k tone.mp2
 $F -f lavfi -i "sine=f=440:d=1:r=44100" -ac 2 -c:a alac tone_alac.m4a
 $F -f lavfi -i "sine=f=440:d=1:r=44100" -f lavfi -i "color=c=black:s=16x16:d=1" -c:a aac -c:v mpeg4 -shortest tone_video.mp4
 $F -f lavfi -i "sine=f=440:d=1:r=44100" -ac 2 -c:a flac -f ogg tone.oga
+# tone_crc_stereo.aac / tone_crc_mono.aac: ADTS with protection_absent=0, from the FDK
+# reference encoder (crates.io fdk-aac-sys 0.5.0), which FFmpeg's native AAC cannot write.
+# Build fdkgen.rs as a standalone cargo project depending on fdk-aac-sys = "=0.5.0", then:
+#   fdkgen 44100 2 1 tone_crc_stereo.aac
+#   fdkgen 22050 1 1 tone_crc_mono.aac

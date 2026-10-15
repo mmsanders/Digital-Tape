@@ -105,7 +105,41 @@ fn make_asc(sfi: u32, cc: u32) -> [u8; 2] {
     v.to_be_bytes()
 }
 
-fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc) -> Res<Vec<Vec<f64>>> {
+/// ADTS `adts_error_check` CRC (ISO/IEC 14496-3; region rules as implemented by the FDK
+/// reference decoder): CRC-16 polynomial 0x8005, initial 0xFFFF, MSB first, over the 56
+/// header bits and then, in order, each recorded raw-data-block region: its first
+/// `min(len, max)` bits followed by `max - min(len, max)` zero bits (`max` 0 = whole region).
+pub fn adts_crc(header: &[u8], payload: &[u8], regions: &[(u64, u64, u32)]) -> u16 {
+    let mut crc: u16 = 0xFFFF;
+    let mut bit = |b: bool| {
+        let msb = crc & 0x8000 != 0;
+        crc <<= 1;
+        if msb != b {
+            crc ^= 0x8005;
+        }
+    };
+    for i in 0..56 {
+        bit((header[i / 8] >> (7 - i % 8)) & 1 == 1);
+    }
+    for &(start, end, max) in regions {
+        let len = end - start;
+        let take = if max == 0 { len } else { len.min(max as u64) };
+        for i in start..start + take {
+            let i = i as usize;
+            bit((payload[i / 8] >> (7 - i % 8)) & 1 == 1);
+        }
+        let pad = if max == 0 { 0 } else { max as u64 - take };
+        for _ in 0..pad {
+            bit(false);
+        }
+    }
+    crc
+}
+
+/// A present ADTS CRC: the frame's 7 header bytes and the transmitted value.
+type AdtsCrc = ([u8; 7], u16);
+
+fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc, crcs: Option<&[Option<AdtsCrc>]>) -> Res<Vec<Vec<f64>>> {
     let mut params = AudioCodecParameters::new();
     params.for_codec(CODEC_ID_AAC).with_extra_data(asc_bytes.to_vec().into_boxed_slice());
     let mut dec = symphonia_codec_aac::AacDecoder::try_new(&params, &AudioDecoderOptions::default())
@@ -127,6 +161,11 @@ fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc) -> Res<Vec<Vec<f64
             return refuse(format!("AAC access unit {i} decoded to an unexpected length or layout"));
         }
         buf.copy_to_vecs_planar::<f32>(&mut tmp);
+        if let Some(Some((hdr, want))) = crcs.map(|c| c[i]) {
+            if adts_crc(&hdr, u, dec.crc_regions()) != want {
+                return refuse(format!("ADTS frame {i} CRC mismatch (corrupt)"));
+            }
+        }
         for (p, t) in planes.iter_mut().zip(&tmp) {
             p.extend(t.iter().map(|&v| v as f64));
         }
@@ -139,6 +178,7 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
     let end = trailing_tags(b, start)?;
     let mut o = start;
     let mut units: Vec<&[u8]> = Vec::new();
+    let mut crcs: Vec<Option<AdtsCrc>> = Vec::new();
     let mut first: Option<(u32, u32, u32)> = None;
     while o < end {
         if end - o < 7 {
@@ -174,6 +214,11 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
             _ => {}
         }
         units.push(&b[o + hl..o + len]);
+        crcs.push(crc_present.then(|| {
+            let mut hdr = [0u8; 7];
+            hdr.copy_from_slice(h);
+            (hdr, u16be(b, o + 7))
+        }));
         o += len;
     }
     let Some((_, sfi, cc)) = first else { return refuse("the ADTS stream holds no frames") };
@@ -182,7 +227,7 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
     }
     let asc_bytes = make_asc(sfi, cc);
     let asc = parse_asc(&asc_bytes)?;
-    let planes = decode_units(&units, &asc_bytes, &asc)?;
+    let planes = decode_units(&units, &asc_bytes, &asc, Some(&crcs))?;
     Decoded {
         container: "adts",
         codec: "aac",
@@ -586,7 +631,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         }
         _ => {}
     }
-    let planes = decode_units(&units, &asc_bytes, &asc)?;
+    let planes = decode_units(&units, &asc_bytes, &asc, None)?;
     Decoded {
         container: "mp4",
         codec: "aac",

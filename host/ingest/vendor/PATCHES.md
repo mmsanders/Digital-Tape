@@ -27,3 +27,10 @@ and fails if a vendored source calls a transcendental `std` float method.
    `layer3/requantize.rs`: a `big_values` Huffman overrun returns
    `decode_error("mpa: big_values overrun")`. The benign, widely-tolerated `count1` overrun
    undo is unchanged.
+5. **ADTS CRC regions** (ADR-180 ruling (b)). `symphonia-codec-aac/src/aac/mod.rs` records,
+   per packet, the raw-data-block regions the ADTS `adts_error_check` CRC covers, in
+   accumulation order: each SCE/LFE from its element_instance_tag (first 192 bits), each CPE
+   from its tag (192) and from its second channel's ICS (128), each DSE whole
+   (`AacDecoder::crc_regions()`); `aac/cpe.rs` `decode_ga_cpe` returns the position where
+   the second ICS begins. Decoding is unchanged; ingest computes and compares the CRC
+   (`src/aac.rs`, `adts_crc`).

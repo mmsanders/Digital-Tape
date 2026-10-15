@@ -1,4 +1,4 @@
-//! Arithmetic profile INGEST1-AP1: resampler, BS.1770-5 / Tech 3341 meter, true peak and
+//! Arithmetic profile INGEST1-AP2 (arithmetic unchanged from AP1): resampler, BS.1770-5 / Tech 3341 meter, true peak and
 //! the issued TPDF quantizer (contract §3, §5).
 //!
 //! Every operation is scalar IEEE-754 binary64 (true-peak inner products binary32) in a

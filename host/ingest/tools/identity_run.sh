@@ -9,7 +9,7 @@ work="$(mktemp -d)"
 cargo build --release --locked --quiet --bin ingest
 cargo run --release --locked --quiet --example make_corpus -- "$work/corpus"
 mkdir -p "$work/corpus/encoded"
-for f in tone_cbr.mp3 tone_vbr_mono.mp3 tone_mpeg2.mp3 tone_noxing.mp3 tone.m4a tone_ts.m4a tone.aac tone16.flac tone24.flac; do
+for f in tone_cbr.mp3 tone_vbr_mono.mp3 tone_mpeg2.mp3 tone_noxing.mp3 tone.m4a tone_ts.m4a tone.aac tone_crc_stereo.aac tone16.flac tone24.flac; do
   cp "tests/fixtures/$f" "$work/corpus/encoded/$f"
 done
 bin=target/release/ingest

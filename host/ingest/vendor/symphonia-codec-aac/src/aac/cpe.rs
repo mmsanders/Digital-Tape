@@ -13,7 +13,7 @@
 
 use symphonia_core::audio::{AudioBuffer, AudioMut};
 use symphonia_core::errors::{Result, decode_error};
-use symphonia_core::io::ReadBitsLtr;
+use symphonia_core::io::{FiniteBitStream, ReadBitsLtr};
 
 use symphonia_common::mpeg::audio::AudioObjectType;
 
@@ -59,11 +59,13 @@ impl ChannelPair {
         Ok(())
     }
 
-    pub fn decode_ga_cpe<B: ReadBitsLtr>(
+    /// digital-tape INGEST-1: returns `bits_left()` where the second channel's ICS begins
+    /// (the start of ADTS CRC region 2).
+    pub fn decode_ga_cpe<B: ReadBitsLtr + FiniteBitStream>(
         &mut self,
         bs: &mut B,
         aot: AudioObjectType,
-    ) -> Result<()> {
+    ) -> Result<u64> {
         let common_window = bs.read_bool()?;
 
         if common_window {
@@ -104,6 +106,7 @@ impl ChannelPair {
         }
 
         self.ics0.decode(bs, &mut self.lcg, aot, common_window)?;
+        let ics1_start = bs.bits_left();
         self.ics1.decode(bs, &mut self.lcg, aot, common_window)?;
 
         // Joint-stereo decoding
@@ -156,7 +159,7 @@ impl ChannelPair {
             }
         }
 
-        Ok(())
+        Ok(ics1_start)
     }
 
     pub fn synth_audio(
