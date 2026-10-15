@@ -40,8 +40,13 @@ jobs:
           grep -E "pread|read|open|exec|posix_spawn|exit|lseek|write" "$d/fsusage.txt" | grep -v a6gate | head -120 || true
           grep -E "rehearsal.img" "$d/fsusage.txt" | head -40 || true
           cat "$d"/a6check.json 2>/dev/null | head -80 || true
+      - name: capability probe (known pread offsets and lengths under the same fs_usage)
+        if: always()
+        run: sh tools/wp14-capture/macos-probe/capability.sh work/a6-capability
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: wp14-a6-macos-rehearsal
-          path: work/a6-rh-mac-*
+          path: |
+            work/a6-rh-mac-*
+            work/a6-capability
