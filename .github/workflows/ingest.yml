@@ -113,7 +113,17 @@ jobs:
       - name: authenticated source pack (the package's own fetcher)
         working-directory: .
         run: |
-          python -B tests/wp16_ingest_stage1/check_pins.py
+          if [ "$RUNNER_OS" = Windows ]; then
+            # check_pins.py compares str(Path.relative_to()) (backslashes on Windows) with
+            # FILES.json's '/' keys, so it cannot pass on Windows (reported to Verification
+            # #169; the package is not ours to edit). Authenticate the same bytes by git:
+            # the working tree equals the commit, whose subtree is the declared import.
+            git diff --exit-code -- tests/wp16_ingest_stage1
+            test -z "$(git ls-files --others -- tests/wp16_ingest_stage1)"
+            test "$(git rev-parse HEAD:tests/wp16_ingest_stage1)" = 13b368138642506f6f154dd8172507c097432f32
+          else
+            python -B tests/wp16_ingest_stage1/check_pins.py
+          fi
           python -B tests/wp16_ingest_stage1/asset.py --destination "$RUNNER_TEMP/sources"
       - name: build shipping and observation binaries
         run: |
