@@ -3755,3 +3755,42 @@ evidence for package disposition, never substituted by Windows Server.
 acceptance, WP15 and all frozen/write/batching/async/recording/firmware/hardware/media/atomicity/<30s/
 purchase holds survive. Admitting non-16 `sowt` later is an additive host-contract amendment with its
 own independent expectations; no on-card change.
+
+## ADR-181 — route the stalled Mac A6 method and Windows 11 qualification
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("check current state and assign
+new work, resolve, unblock"). Input Product main `c6ff868086e3333bb7568e60d3a2f4ec60fd3344`;
+Verification main `9587317ac4bca4e8164347f0ec62eeb719245cf7`; Software #436 head `27919af`.
+
+**State.** ADR-180 merged. Verification #169 published complete Stage1 (`40dd4b5`), then held
+Product #436 `3c7a187` (#182, `9587317`). The held list is: native macOS/Windows observers,
+dropped/truncated false-pass controls, bounded exhaustion evidence, Windows 11 qualification,
+the corrected pin-checker import and a common config identity. Software #435 is already
+executing that list directly (`68c9d27`, `27919af`). No PM ruling is pending there, and none
+is added. The 1641 cross-platform output pairs and FIR/calibration checks stand as bounded evidence.
+
+**Mac A6 (unowned since Verification #177).** The DTrace rehearsal under SIP produced only
+BEGIN/END, with no process or I/O records. A second unchanged DTrace attempt is not useful.
+Software's ingest work now has a qualified-by-selftest macOS `fs_usage` (kdebug, root)
+observer. It runs with SIP enabled and has dropped/truncated mutation controls. **Decision:**
+Software owns one bounded replacement Mac A6 method. It uses `fs_usage` and reuses the ingest
+normalizer and its false-pass controls. It must bind the exact shipped binary, the process, and
+the offset and returned bytes of the mirror-superblock read. It changes no security policy
+(SIP stays on), rebuilds nothing and injects nothing. Hosted macOS rehearsal comes first. Then
+Verification #146 reviews the method. Then Michael runs one off-card Mac rehearsal. If `fs_usage`
+cannot bind offset or returned bytes for tapectl's actual call shape, Software returns that
+capability fact with raw evidence instead of trying a third tracer. PM then chooses between a
+content-pattern method and a recorded Mac limitation. Neither is pre-approved here, because
+both touch acceptance. The Windows A6 ETW method (#176 PASS) is unaffected. Michael's Windows
+off-card rehearsal is ready now.
+
+**Windows 11 qualification.** GitHub-hosted Windows runners are Server, which stays
+supplementary and never relabelled. The Windows 11 x64 run is Michael's hands on the family
+desktop. A self-hosted runner on that PC was considered and rejected. This repository is
+public, so fork pull requests could execute code on a family computer. Software prepares one
+ready, hash-pinned Windows 11 ingest packet script once Verification accepts the observer
+method. Michael's Windows sittings are batched wherever the work is ready together.
+
+**Gate/reversal cost.** No contract, oracle, assertion, engine or format change. Rungs
+unchanged: Phase1 36/36, Phase2 4/12. WP14 physical A6, WP16 real-card/full, WP15 and all
+standing holds survive. Reversal is reassignment only.

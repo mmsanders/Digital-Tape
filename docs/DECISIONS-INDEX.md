@@ -155,4 +155,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-180](DECISIONS.md#adr-180--resolve-p2v16-002-aifc-sowt-and-software-429-interpretations) | 2026-10-14 PDT | P2V16-002 sowt / #429 (a)–(e) | AIFC sowt 16-bit only, non-16 refuses by name; ADTS one raw block, CRC verified when present; lossless gapless_known; LAME/FFmpeg tag CRC; stts agreement |
 
-117 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-181](DECISIONS.md#adr-181--route-the-stalled-mac-a6-method-and-windows-11-qualification) | 2026-10-15 PDT | Mac A6 owner / Windows 11 route | Mac A6 moves from DTrace to fs_usage (Software, after #435); Windows 11 is Michael's hands, batched; self-hosted runner rejected (public repo) |
+
+118 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
