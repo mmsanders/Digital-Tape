@@ -54,6 +54,10 @@ path = "tests/tests.rs"
 [dependencies.lazy_static]
 version = "1.4.0"
 
+[dependencies.libm]
+version = "=0.2.16"
+default-features = false
+
 [dependencies.log]
 version = "0.4"
 

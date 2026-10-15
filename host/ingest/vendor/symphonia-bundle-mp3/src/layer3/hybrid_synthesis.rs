@@ -58,34 +58,34 @@ lazy_static! {
 
         // Window for Long blocks.
         for i in 0..36 {
-            windows[0][i] = (PI_36 * (i as f64 + 0.5)).sin() as f32;
+            windows[0][i] = libm::sin(PI_36 * (i as f64 + 0.5)) as f32;
         }
 
         // Window for Start blocks (indicies 30..36 implictly 0.0).
         for i in 0..18 {
-            windows[1][i] = (PI_36 * (i as f64 + 0.5)).sin() as f32;
+            windows[1][i] = libm::sin(PI_36 * (i as f64 + 0.5)) as f32;
         }
         for i in 18..24 {
             windows[1][i] = 1.0;
         }
         for i in 24..30 {
-            windows[1][i] = (PI_12 * ((i - 18) as f64 + 0.5)).sin() as f32;
+            windows[1][i] = libm::sin(PI_12 * ((i - 18) as f64 + 0.5)) as f32;
         }
 
         // Window for Short blocks.
         for i in 0..12 {
-            windows[2][i] = (PI_12 * (i as f64 + 0.5)).sin() as f32;
+            windows[2][i] = libm::sin(PI_12 * (i as f64 + 0.5)) as f32;
         }
 
         // Window for End blocks (indicies 0..6 implicitly 0.0).
         for i in 6..12 {
-            windows[3][i] = (PI_12 * ((i - 6) as f64 + 0.5)).sin() as f32;
+            windows[3][i] = libm::sin(PI_12 * ((i - 6) as f64 + 0.5)) as f32;
         }
         for i in 12..18 {
             windows[3][i] = 1.0;
         }
         for i in 18..36 {
-            windows[3][i] = (PI_36 * (i as f64 + 0.5)).sin() as f32;
+            windows[3][i] = libm::sin(PI_36 * (i as f64 + 0.5)) as f32;
         }
 
         windows
@@ -111,7 +111,7 @@ lazy_static! {
             for (k, cos_ik) in cos_i.iter_mut().enumerate() {
                 // Only compute the middle half of the cosine lookup table (i offset by 3).
                 let n = (2 * (i + 3) + (12 / 2) + 1) * (2 * k + 1);
-                *cos_ik = (PI_24 * n as f64).cos() as f32;
+                *cos_ik = libm::cos(PI_24 * n as f64) as f32;
             }
         }
 
@@ -499,7 +499,7 @@ mod tests {
             let mut sum = 0.0;
             for k in 0..6 {
                 sum +=
-                    (x[k] as f64) * (PI_24 * ((2 * i + (12 / 2) + 1) * (2 * k + 1)) as f64).cos();
+                    (x[k] as f64) * libm::cos(PI_24 * ((2 * i + (12 / 2) + 1) * (2 * k + 1)) as f64);
             }
             result[i] = sum as f32;
         }
@@ -792,7 +792,7 @@ mod imdct36 {
                 let mut sum = 0.0;
                 for j in 0..18 {
                     sum +=
-                        (x[j] as f64) * (PI_72 * (((2 * i) + 1 + 18) * ((2 * j) + 1)) as f64).cos();
+                        (x[j] as f64) * libm::cos(PI_72 * (((2 * i) + 1 + 18) * ((2 * j) + 1)) as f64);
                 }
                 result[i] = sum as f32;
             }

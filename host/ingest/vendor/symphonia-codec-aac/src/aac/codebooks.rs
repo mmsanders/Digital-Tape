@@ -601,7 +601,7 @@ where
 /// Inverse quantization.
 #[inline(always)]
 fn iquant(val: usize) -> f32 {
-    f32::powf(val as f32, 4.0 / 3.0)
+    libm::powf(val as f32, 4.0 / 3.0)
 }
 
 fn signed_pair<const MOD: usize>(cw: usize) -> (f32, f32) {

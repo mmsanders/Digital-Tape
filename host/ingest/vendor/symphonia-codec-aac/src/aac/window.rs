@@ -31,7 +31,7 @@ pub fn generate_window(mode: WindowType, scale: f32, size: usize, half: bool, ds
             let param =
                 if half { consts::PI / ((2 * size) as f32) } else { consts::PI / (size as f32) };
             for n in 0..size {
-                dst[n] = (((n as f32) + 0.5) * param).sin() * scale;
+                dst[n] = libm::sinf(((n as f32) + 0.5) * param) * scale;
             }
         }
         WindowType::KaiserBessel(alpha) => {

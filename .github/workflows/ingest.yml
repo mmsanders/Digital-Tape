@@ -1,0 +1,81 @@
+name: ingest
+
+# INGEST-1 host tool (WP-16, #429). Software's own build/test and cross-platform
+# byte-identity evidence; it accepts nothing (independent acceptance is Verification's).
+#
+# GitHub-hosted runners: ubuntu-latest (Linux x64), macos-latest (macOS arm64) and
+# windows-latest (Windows Server x64). Windows Server is NOT the Windows 11 desktop the
+# contract qualifies; a Windows 11 run is a separate native step, never substituted.
+
+on:
+  pull_request:
+    paths:
+      - 'host/ingest/**'
+      - '.github/workflows/ingest.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'host/ingest/**'
+      - '.github/workflows/ingest.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+    working-directory: host/ingest
+
+jobs:
+  vendor:
+    name: vendored decoder integrity (and its negative controls)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/check_vendor.py --selftest
+      - run: python3 -B tools/compare_identity.py --selftest
+
+  build:
+    name: build, test and identity run (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: toolchain (pinned by rust-toolchain.toml)
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: platform identity
+        run: |
+          rustc -vV
+          uname -a || true
+          case "$RUNNER_OS" in
+            macOS) sw_vers ;;
+            Windows) cmd //c ver ;;
+            Linux) cat /etc/os-release | head -3 ;;
+          esac
+      - name: unit and integration tests
+        run: cargo test --release --locked
+      - name: identity run
+        run: ./tools/identity_run.sh "$RUNNER_TEMP/identity-${{ runner.os }}-${{ runner.arch }}.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: identity-${{ runner.os }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/identity-*
+          if-no-files-found: error
+
+  identity:
+    name: byte-identical outputs across platforms
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: identity-*
+          path: ${{ runner.temp }}/id
+          merge-multiple: true
+      - run: python3 -B tools/compare_identity.py "$RUNNER_TEMP"/id/identity-*.txt

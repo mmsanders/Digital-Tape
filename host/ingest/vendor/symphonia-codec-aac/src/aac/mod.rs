@@ -191,7 +191,9 @@ impl AacDecoder {
                         match ext_type {
                             // EXT_SBR_DATA (0xd)
                             // EXT_SBR_DATA_CRC (0xe)
-                            0xd | 0xe => self.asc.sbr_present = true,
+                            // digital-tape INGEST-1: HE-AAC/HE-AACv2 is outside the positive matrix;
+                            // refuse rather than silently decode only the AAC-LC core.
+                            0xd | 0xe => return unsupported_error("aac: sbr extension present"),
                             // EXT_FILL (0x0)
                             // EXT_FILL_DATA (0x1)
                             // EXT_DATA_ELEMENT (0x2)

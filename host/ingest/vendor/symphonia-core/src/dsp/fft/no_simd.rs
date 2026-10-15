@@ -24,7 +24,7 @@ macro_rules! fft_twiddle_table {
                 let table: Vec<Complex<f32>> = (0..TABLE_SIZE)
                     .map(|k| {
                         let angle = theta * k as f64;
-                        Complex::new(angle.cos() as f32, -angle.sin() as f32)
+                        Complex::new(libm::cos(angle) as f32, -libm::sin(angle) as f32)
                     })
                     .collect();
 

@@ -85,6 +85,12 @@ impl BitResevoir {
 
             warn!("mpa: invalid main_data_begin, underflow by {underflow} bytes");
 
+            // digital-tape INGEST-1: a whole file is decoded from its first frame, so an
+            // underflow is corruption; refuse instead of concealing it.
+            if underflow > 0 {
+                return decode_error("mpa: main_data_begin underflow");
+            }
+
             underflow
         };
 

@@ -44,7 +44,7 @@ const POW43_TABLE_LEN: usize = 8192;
 lazy_static! {
     /// Pre-computed table of y = x^(4/3).
     static ref POW43_TABLE: Box<[f32; POW43_TABLE_LEN]> = {
-        let table: Vec<f32> = (0..POW43_TABLE_LEN).map(|i| (i as f32).powf(4.0 / 3.0)).collect();
+        let table: Vec<f32> = (0..POW43_TABLE_LEN).map(|i| libm::powf(i as f32, 4.0 / 3.0)).collect();
         table.into_boxed_slice().try_into().expect("vec initialized to correct table length")
     };
 }
@@ -58,7 +58,7 @@ lazy_static! {
     /// bands. Therefore, an input of 0 corresponds to -100.
     static ref NORMAL_SCF_TABLE: Box<[f32; NORMAL_SCF_TABLE_LEN]> = {
         let table: Vec<f32> = (0..NORMAL_SCF_TABLE_LEN)
-            .map(|i| 2.0f32.powf(0.25 * f32::from(i as i16 - 56 + NORMAL_SCALE_MIN)))
+            .map(|i| libm::powf(2.0f32, 0.25 * f32::from(i as i16 - 56 + NORMAL_SCALE_MIN)))
             .collect();
 
         table.into_boxed_slice().try_into().expect("vec initialized to correct table length")
@@ -74,7 +74,7 @@ lazy_static! {
     /// for intensity coded bands. Therefore, an input of 0 corresponds to -155.
     static ref INTENSITY_SCF_TABLE: Box<[f32; INTENSITY_SCF_TABLE_LEN]> = {
         let table: Vec<f32> = (0..INTENSITY_SCF_TABLE_LEN)
-            .map(|i| 0.5f32.powf(0.25 * f32::from(i as i16 + INTENSITY_SCALE_MIN)))
+            .map(|i| libm::powf(0.5f32, 0.25 * f32::from(i as i16 + INTENSITY_SCALE_MIN)))
             .collect();
 
         table.into_boxed_slice().try_into().expect("vec initialized to correct table length")

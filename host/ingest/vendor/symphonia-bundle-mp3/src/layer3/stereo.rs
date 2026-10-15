@@ -67,13 +67,13 @@ lazy_static! {
         for (i, is_pos) in (0..32).enumerate() {
             if is_pos & 1 != 0 {
                 // Odd case.
-                ratios[0][i] = (is_scale[0].powf(f64::from(is_pos + 1) / 2.0) as f32, 1.0);
-                ratios[1][i] = (is_scale[1].powf(f64::from(is_pos + 1) / 2.0) as f32, 1.0);
+                ratios[0][i] = (libm::pow(is_scale[0], f64::from(is_pos + 1) / 2.0) as f32, 1.0);
+                ratios[1][i] = (libm::pow(is_scale[1], f64::from(is_pos + 1) / 2.0) as f32, 1.0);
             }
             else {
                 // Even & zero case.
-                ratios[0][i] = (1.0, is_scale[0].powf(f64::from(is_pos) / 2.0) as f32);
-                ratios[1][i] = (1.0, is_scale[1].powf(f64::from(is_pos) / 2.0) as f32);
+                ratios[0][i] = (1.0, libm::pow(is_scale[0], f64::from(is_pos) / 2.0) as f32);
+                ratios[1][i] = (1.0, libm::pow(is_scale[1], f64::from(is_pos) / 2.0) as f32);
             }
         }
 
@@ -108,7 +108,7 @@ lazy_static! {
         let mut ratios = [(0.0, 0.0); 7];
 
         for (is_pos, ratio) in ratios.iter_mut().enumerate() {
-            let is_ratio = (PI_12 * is_pos as f64).tan();
+            let is_ratio = libm::tan(PI_12 * is_pos as f64);
             *ratio = (
                 (is_ratio / (1.0 + is_ratio)) as f32,
                 (1.0 / (1.0 + is_ratio)) as f32

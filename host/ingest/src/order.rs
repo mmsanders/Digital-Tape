@@ -1,0 +1,178 @@
+//! Folder listing, name validation and the issued natural order (contract §2).
+
+use crate::common::*;
+use std::cmp::Ordering;
+use std::fs;
+use std::path::{Path, PathBuf};
+use unicode_normalization::UnicodeNormalization;
+
+#[derive(Debug, PartialEq, Eq)]
+enum Tok {
+    Num(String), // ASCII digits, leading zeros stripped (value comparison)
+    Text(Vec<char>),
+}
+
+fn tokens(nfc: &str) -> Vec<Tok> {
+    let mut out = Vec::new();
+    let cs: Vec<char> = nfc.chars().collect();
+    let mut i = 0;
+    while i < cs.len() {
+        let digit = cs[i].is_ascii_digit();
+        let s = i;
+        while i < cs.len() && cs[i].is_ascii_digit() == digit {
+            i += 1;
+        }
+        if digit {
+            let d: String = cs[s..i].iter().collect();
+            let t = d.trim_start_matches('0');
+            out.push(Tok::Num(t.to_string()));
+        } else {
+            out.push(Tok::Text(cs[s..i].iter().map(|c| c.to_ascii_lowercase()).collect()));
+        }
+    }
+    out
+}
+
+fn cmp_tok(a: &Tok, b: &Tok) -> Ordering {
+    match (a, b) {
+        (Tok::Num(x), Tok::Num(y)) => x.len().cmp(&y.len()).then_with(|| x.cmp(y)),
+        (Tok::Num(_), Tok::Text(_)) => Ordering::Less,
+        (Tok::Text(_), Tok::Num(_)) => Ordering::Greater,
+        (Tok::Text(x), Tok::Text(y)) => x.cmp(y),
+    }
+}
+
+/// Primary key: tokens; a token-prefix sorts first. Ties: NFC original-case scalars, then
+/// original UTF-8 bytes.
+pub fn natural_cmp(a_nfc: &str, a_raw: &str, b_nfc: &str, b_raw: &str) -> Ordering {
+    let ta = tokens(a_nfc);
+    let tb = tokens(b_nfc);
+    for (x, y) in ta.iter().zip(&tb) {
+        let o = cmp_tok(x, y);
+        if o != Ordering::Equal {
+            return o;
+        }
+    }
+    ta.len()
+        .cmp(&tb.len())
+        .then_with(|| a_nfc.chars().cmp(b_nfc.chars()))
+        .then_with(|| a_raw.as_bytes().cmp(b_raw.as_bytes()))
+}
+
+pub struct Entry {
+    pub path: PathBuf,
+    pub logical: String,
+}
+
+const WIN_RESERVED: [&str; 22] = [
+    "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1",
+    "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+];
+
+/// A name a required OS (Windows 11, macOS, Linux) cannot represent is refused, not renamed.
+fn check_name(name: &str) -> Result<(), String> {
+    if name.chars().any(|c| (c as u32) < 0x20 || "<>:\"/\\|?*".contains(c)) {
+        return Err("contains a character Windows or macOS cannot store in a file name".into());
+    }
+    if name.ends_with(' ') || name.ends_with('.') {
+        return Err("ends in a space or dot, which Windows cannot store".into());
+    }
+    let stem = name.split('.').next().unwrap_or("").trim_end().to_ascii_uppercase();
+    if WIN_RESERVED.contains(&stem.as_str()) {
+        return Err("is a reserved Windows device name".into());
+    }
+    Ok(())
+}
+
+/// List one folder: immediate regular files only, validated and in natural order.
+pub fn list_folder(dir: &Path, ordinal: usize) -> Res<Vec<Entry>> {
+    let disp = dir.display();
+    let rd = fs::read_dir(dir).map_err(|e| Fail::Io(format!("cannot read folder {disp}: {e}")))?;
+    let mut items: Vec<(String, String, PathBuf)> = Vec::new();
+    for ent in rd {
+        let ent = ent.map_err(|e| Fail::Io(format!("cannot read folder {disp}: {e}")))?;
+        let os = ent.file_name();
+        let Some(raw) = os.to_str() else {
+            return Err(Fail::Refuse(format!(
+                "{disp}: a file name is not valid Unicode ({})",
+                os.to_string_lossy()
+            )));
+        };
+        let raw = raw.to_string();
+        let ft = ent.file_type().map_err(|e| Fail::Io(format!("{disp}/{raw}: {e}")))?;
+        if ft.is_symlink() {
+            return Err(Fail::Refuse(format!("{disp}/{raw}: symbolic links are not followed; refusing")));
+        }
+        if ft.is_dir() {
+            return Err(Fail::Refuse(format!("{disp}/{raw}: nested folders are not allowed; a source folder must hold only audio files")));
+        }
+        if !ft.is_file() {
+            return Err(Fail::Refuse(format!("{disp}/{raw}: not a regular file")));
+        }
+        let nfc: String = raw.nfc().collect();
+        if let Err(why) = check_name(&nfc) {
+            return Err(Fail::Refuse(format!("{disp}/{raw}: the name {why}")));
+        }
+        items.push((nfc, raw, ent.path()));
+    }
+    if items.is_empty() {
+        return Err(Fail::Refuse(format!("{disp}: the folder is empty")));
+    }
+    // Collisions: identical NFC logical paths, or names equal under case folding (refused
+    // because Windows and macOS default volumes cannot hold both).
+    let mut keys: Vec<(String, &str)> = items.iter().map(|(n, r, _)| (n.to_lowercase(), r.as_str())).collect();
+    keys.sort();
+    for w in keys.windows(2) {
+        if w[0].0 == w[1].0 {
+            return Err(Fail::Refuse(format!(
+                "{disp}: '{}' and '{}' collide after Unicode normalization or case folding",
+                w[0].1, w[1].1
+            )));
+        }
+    }
+    items.sort_by(|a, b| natural_cmp(&a.0, &a.1, &b.0, &b.1));
+    Ok(items
+        .into_iter()
+        .map(|(nfc, _, path)| Entry { logical: format!("{ordinal}/{nfc}"), path })
+        .collect())
+}
+
+/// Filesystem identity used to require distinct folders.
+pub fn identity(p: &Path) -> Res<String> {
+    let md = fs::metadata(p).map_err(|e| Fail::Refuse(format!("{}: folder does not exist or cannot be read ({e})", p.display())))?;
+    if !md.is_dir() {
+        return Err(Fail::Refuse(format!("{}: not a folder", p.display())));
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        Ok(format!("{}:{}", md.dev(), md.ino()))
+    }
+    #[cfg(not(unix))]
+    {
+        let c = fs::canonicalize(p).map_err(|e| Fail::Io(format!("{}: {e}", p.display())))?;
+        Ok(c.to_string_lossy().to_lowercase())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn sort(v: &[&str]) -> Vec<String> {
+        let mut x: Vec<(String, String)> = v.iter().map(|s| (s.nfc().collect(), s.to_string())).collect();
+        x.sort_by(|a, b| natural_cmp(&a.0, &a.1, &b.0, &b.1));
+        x.into_iter().map(|p| p.1).collect()
+    }
+    #[test]
+    fn contract_examples() {
+        assert_eq!(sort(&["10", "2", "1"]), ["1", "2", "10"]);
+        assert_eq!(sort(&["2", "02"]), ["02", "2"]);
+        assert_eq!(sort(&["a", "A"]), ["A", "a"]);
+        assert_eq!(sort(&["a1", "a"]), ["a", "a1"]);
+        assert_eq!(sort(&["b", "1"]), ["1", "b"]);
+        assert_eq!(sort(&["track 99999999999999999999999.wav", "track 100000000000000000000000.wav"]),
+            ["track 99999999999999999999999.wav", "track 100000000000000000000000.wav"]);
+        // non-ASCII digits are text
+        assert_eq!(sort(&["\u{0663}", "5"]), ["5", "\u{0663}"]);
+    }
+}

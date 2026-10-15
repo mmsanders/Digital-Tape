@@ -5,7 +5,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use symphonia_core::errors::Result;
+use symphonia_core::errors::{Result, decode_error};
 use symphonia_core::io::ReadBitsLtr;
 
 use crate::common::FrameHeader;
@@ -26,7 +26,7 @@ lazy_static! {
     /// Lookup table for computing x(i) = s(i)^(4/3) where s(i) is a decoded Huffman sample. The
     /// value of s(i) is bound between 0..8207.
     static ref POW43: Box<[f32; POW43_LEN]> = {
-        let pow43: Vec<f32> = (0..POW43_LEN).map(|i| f32::powf(i as f32, 4.0 / 3.0)).collect();
+        let pow43: Vec<f32> = (0..POW43_LEN).map(|i| libm::powf(i as f32, 4.0 / 3.0)).collect();
         pow43.into_boxed_slice().try_into().expect("vec initialized to POW43_LEN")
     };
 }
@@ -227,6 +227,8 @@ pub(super) fn read_huffman_samples<B: ReadBitsLtr>(
         // It seems that most other decoders don't undo overruns of the big values. We'll just print
         // a message for now.
         info!("big_values overrun, malformed bitstream");
+        // digital-tape INGEST-1: refuse a malformed bitstream instead of concealing it.
+        return decode_error("mpa: big_values overrun");
     }
 
     // The final partition after the count1 partition is the rzero partition. Samples in this
@@ -277,7 +279,7 @@ fn requantize_long(channel: &GranuleChannel, bands: &[usize], buf: &mut [f32; 57
         // Calculate 2^(0.25*A) * 2^(-B). This can be rewritten as 2^{ 0.25 * (A - 4 * B) }.
         // Since scalefac_shift was multiplies by 4 above, the final equation becomes
         // 2^{ 0.25 * (A - B) }.
-        let pow2ab = f64::powf(2.0, 0.25 * f64::from(a - b)) as f32;
+        let pow2ab = libm::pow(2.0, 0.25 * f64::from(a - b)) as f32;
 
         // Calculate the ending sample index for the scale-factor band, clamping it to the length of
         // the sample buffer.
@@ -340,7 +342,7 @@ fn requantize_short(
         // Calculate 2^(0.25*A) * 2^(-B). This can be rewritten as 2^{ 0.25 * (A - 4 * B) }.
         // Since scalefac_shift multiplies by 4 above, the final equation becomes
         // 2^{ 0.25 * (A - B) }.
-        let pow2ab = f64::powf(2.0, 0.25 * f64::from(a[i % 3] - b)) as f32;
+        let pow2ab = libm::pow(2.0, 0.25 * f64::from(a[i % 3] - b)) as f32;
 
         // Clamp the ending sample index to the rzero sample index. Since samples starting from
         // rzero are 0, there is no point in requantizing them.
