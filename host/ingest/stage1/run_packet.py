@@ -361,7 +361,7 @@ class Runner:
             native.update(events=[], failed_ops=[], complete=False, process_completion=None,
                           integrity={"session_pending": False})
             native["_pending"] = {"pid": p.pid, "k": k, "dest": str(dest), "stage_prefix": stage_prefix,
-                                  "obsdir": str(obsdir), "seam": seam}
+                                  "obsdir": str(obsdir), "seam": seam, "argv": cmd}
         else:
             events, failed, completion, checks = self.obs.normalize(trace, dest, stage_prefix, obsdir, seam, ctx)
             native.update(events=events, failed_ops=failed, process_completion=completion, integrity=checks,
@@ -446,7 +446,13 @@ class Runner:
         obs = self.obs
         owners = {}
         for native_path, trace_path, pend in self.pending:
+            # Two independent bindings must name the same process instance: the runner's
+            # (pid, n-th launch of that pid) and the exact command line Procmon recorded.
             insts = obs.instances_for(pend["pid"], pend["k"])
+            by_cmd = obs.instances_for_cmdline(subprocess.list2cmdline(pend["argv"]))
+            agrees = bool(insts) and len(by_cmd) == 1 and insts[0] is by_cmd[0]
+            if not agrees:
+                insts = []
             idx = obs.extract(trace_path, insts)
             owners[str(native_path.relative_to(self.root))] = idx
             native = json.loads(native_path.read_text(encoding="utf-8"))
@@ -456,7 +462,8 @@ class Runner:
             native.update(events=events, failed_ops=failed, process_completion=completion, integrity=checks,
                           complete=completion is not None and all(checks.values()),
                           raw_trace_sha256=sha_file(trace_path), observer_selftest=self.selftest_ok,
-                          session_record_indices=idx)
+                          session_record_indices=idx, session_binding_agrees=agrees,
+                          session_binding={k: pend[k] for k in ("pid", "k", "dest", "stage_prefix", "obsdir")})
             native_path.write_bytes(canonical(native))
         for pid, k, tag in self.unobserved:
             owners[tag] = [i for x in obs.instances_for(pid, k) for i in x["rows"]]
@@ -607,6 +614,7 @@ def main():
     tool_version, profile = ver[1], ver[-1]
     kind = choose_observer(plat, a.observer, a.procmon)
     obs = observers.make(kind, a.procmon)
+    obs.observe_bin = a.observe_bin
     obs.start(root)
     if obs.deferred:
         obs.selftest_run(root)
@@ -656,6 +664,7 @@ def main():
             d["observer_selftest"] = selftest_ok
             nat.write_bytes(canonical(d))
         obs.compress()
+        obs.drop_tools()
     host = {
         "platform": plat, "architecture": arch,
         "shipping_binary_sha256": sha_file(a.shipping_bin), "observe_binary_sha256": sha_file(a.observe_bin),

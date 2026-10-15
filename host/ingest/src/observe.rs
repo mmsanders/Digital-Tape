@@ -13,6 +13,8 @@
 //! - `INGEST_FAULT=<op>` makes that operation fail as an I/O error;
 //! - `INGEST_PAUSE_AT=<op>` with `INGEST_PAUSE_FILE=<path>` creates `<path>.waiting`
 //!   and blocks until `<path>` exists (the runner mutates a source or creates DEST);
+//! - `INGEST_OBSERVE_PROBE=parent|child` turns the process into the native observer's
+//!   selftest probe (see `probe`), so the probe needs no other program on the host;
 //! - `INGEST_HEAP_LIMIT=<bytes>` caps live heap bytes through `CapAlloc`, the test
 //!   build's global allocator, so an allocation beyond it fails as the OS would when
 //!   memory is exhausted (bounded-memory method where no OS limit applies).
@@ -90,6 +92,22 @@ mod imp {
         let _ = std::fs::write(d.join("joined.json"), format!("{{\"joined_dbtp\":{v}}}\n"));
     }
 
+    /// Observer selftest probe. `parent FILE CREATED CHILD DEVICE`: read FILE, run CHILD
+    /// (`child FILE`, which reads FILE), create CREATED, open DEVICE for reading and close it
+    /// without reading; exit 0. Returns None when this process is not a probe.
+    pub fn probe() -> Option<i32> {
+        let role = std::env::var("INGEST_OBSERVE_PROBE").ok()?;
+        let a: Vec<std::ffi::OsString> = std::env::args_os().skip(1).collect();
+        let arg = |i: usize| a.get(i).cloned().unwrap_or_default();
+        let _ = std::fs::read(arg(0));
+        if role == "parent" {
+            let _ = std::process::Command::new(arg(2)).arg(arg(0)).env("INGEST_OBSERVE_PROBE", "child").status();
+            let _ = std::fs::File::create(arg(1));
+            let _ = std::fs::OpenOptions::new().read(true).open(arg(3));
+        }
+        Some(0)
+    }
+
     use std::alloc::{GlobalAlloc, Layout, System};
     use std::sync::atomic::AtomicUsize;
 
@@ -158,6 +176,10 @@ mod imp {
     pub fn joined(_db: Option<f64>) {}
     #[inline(always)]
     pub fn init_heap_limit() {}
+    #[inline(always)]
+    pub fn probe() -> Option<i32> {
+        None
+    }
 }
 
 pub use imp::*;

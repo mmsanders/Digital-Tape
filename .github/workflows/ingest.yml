@@ -165,3 +165,41 @@ jobs:
           path: ${{ runner.temp }}/packet
           if-no-files-found: error
           retention-days: 90
+
+  win11-script-rehearsal:
+    # stage1/win11_packet.ps1 is what Michael runs on the Windows 11 desktop. This runs it
+    # end to end on Windows Server against the same candidate and win11-kit, so a script
+    # failure is found here, not on his machine. The packet is labelled windows-server.
+    name: Windows 11 packet script, rehearsed on Windows Server
+    needs: stage1-packet
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: win11-kit
+          path: ${{ runner.temp }}/kit
+      - name: run win11_packet.ps1 -Rehearsal
+        shell: pwsh
+        run: |
+          $sha = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $kitzip = Join-Path $env:RUNNER_TEMP "win11-kit.zip"
+          Compress-Archive -Path (Join-Path $env:RUNNER_TEMP "kit\*") -DestinationPath $kitzip
+          $ship = (Get-FileHash (Join-Path $env:RUNNER_TEMP "kit\ingest.exe")).Hash
+          $obs = (Get-FileHash (Join-Path $env:RUNNER_TEMP "kit\observe\ingest.exe")).Hash
+          Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/mmsanders/Digital-Tape/$sha/host/ingest/stage1/win11_packet.ps1" -OutFile win11_packet.ps1
+          New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "out") | Out-Null
+          powershell -ExecutionPolicy Bypass -File .\win11_packet.ps1 -Candidate $sha -Kit $kitzip `
+            -ShippingSha256 $ship -ObserveSha256 $obs -Work (Join-Path $env:RUNNER_TEMP "w") `
+            -Out (Join-Path $env:RUNNER_TEMP "out") -Rehearsal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win11-script-rehearsal-packet
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 30
+

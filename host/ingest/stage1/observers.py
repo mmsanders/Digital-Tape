@@ -18,7 +18,7 @@ Common to all: the observation build stats `.mark/<seq>-<op>` at each milestone 
 also logs the same marks to its own events.jsonl. The native trace must show every
 mark, in order, contiguous from 0, and identical to that independent log.
 """
-import csv, gzip, hashlib, json, os, re, shutil, signal, subprocess, sys, threading, time
+import csv, gzip, hashlib, json, ntpath, os, re, shutil, signal, subprocess, sys, threading, time
 from pathlib import Path
 
 
@@ -38,19 +38,21 @@ MARK = re.compile(r"[/\\]\.mark[/\\](\d+)-([a-z_]+)")
 STAGE_SEP = ".ingest-stage-"
 
 
-def norm(p):
-    return os.path.normcase(os.path.normpath(p)) if p else p
+def norm(p, pm=os.path):
+    return pm.normcase(pm.normpath(p)) if p else p
 
 
 # ---- common mapping ----------------------------------------------------------------------
 # A raw op is a dict: kind in mark|mkdir|create|open|flush|close|rename|device, plus
 # path / key / dst / ok / noreplace / line. Each observer's parser yields these.
 
-def to_events(rawops, dest, stage_prefix, obsdir):
+def to_events(rawops, dest, stage_prefix, obsdir, pm=os.path):
+    """pm is the path module of the traced host (ntpath for Procmon traces), so a trace
+    normalizes identically wherever it is replayed."""
     events, failed = [], []
     flushed, preflight_done = set(), False
-    dest_n, obs_n = norm(str(dest)), norm(str(obsdir))
-    dest_parent = os.path.dirname(dest_n)
+    dest_n, obs_n = norm(str(dest), pm), norm(str(obsdir), pm)
+    dest_parent = pm.dirname(dest_n)
 
     def ev(op, r, **kw):
         events.append(dict(seq=len(events), op=op, line=r.get("line"), **kw))
@@ -65,28 +67,29 @@ def to_events(rawops, dest, stage_prefix, obsdir):
         if k == "device":
             ev("device_open", r, path=path)
             continue
-        if path and norm(path).startswith(obs_n):
+        if path and norm(path, pm).startswith(obs_n):
             continue  # the observation build's own output
-        in_stage = stage_prefix in os.path.basename(os.path.dirname(path)) if path else False
+        in_stage = stage_prefix in pm.basename(pm.dirname(path)) if path else False
         if k == "mkdir" and r.get("ok"):
-            if os.path.basename(path).startswith(stage_prefix):
-                ev("stage_create", r, exclusive=True, adjacent=os.path.dirname(norm(path)) == dest_parent)
+            if pm.basename(path).startswith(stage_prefix):
+                ev("stage_create", r, exclusive=True, adjacent=pm.dirname(norm(path, pm)) == dest_parent)
             elif not preflight_done:
                 ev("preflight_disk_scratch", r, path=path)
         elif k == "create" and r.get("ok"):
             if in_stage:
-                ev("output_open", r, file=os.path.basename(path))
+                ev("output_open", r, file=pm.basename(path))
             elif not preflight_done:
                 ev("preflight_disk_scratch", r, path=path)
         elif k == "flush" and r.get("ok"):
             flushed.add(r["key"])
         elif k == "close":
-            if r["key"] in flushed and in_stage and os.path.basename(path) in ("audio.wav", "manifest.json"):
-                ev(os.path.basename(path).split(".")[0] + "_flush_close", r)
+            if r["key"] in flushed and in_stage and pm.basename(path) in ("audio.wav", "manifest.json"):
+                ev(pm.basename(path).split(".")[0] + "_flush_close", r)
+                flushed.discard(r["key"])  # one flush pairs with one close (a later delete-open is not one)
         elif k == "rename":
-            src_stage = os.path.basename(path).startswith(stage_prefix)
+            src_stage = pm.basename(path).startswith(stage_prefix)
             dst = r.get("dst")
-            into_dest = (dst is None and src_stage) or (dst is not None and norm(dst) == dest_n)
+            into_dest = (dst is None and src_stage) or (dst is not None and norm(dst, pm) == dest_n)
             if not into_dest:
                 continue
             op = "publish_dir_noreplace" if (src_stage and r.get("noreplace")) else "publish_file"
@@ -557,10 +560,12 @@ class Procmon:
         self.session.mkdir(parents=True, exist_ok=True)
         self.tools = root / "observer-tools"
         self.tools.mkdir(parents=True, exist_ok=True)
-        py = Path(sys.executable)
+        # The probe is the observation build itself (INGEST_OBSERVE_PROBE), copied under
+        # probe names: it needs no interpreter, so any Python on the host (python.org,
+        # Store, a venv launcher) can drive the runner.
         for name in ("probe-parent.exe", "probe-child.exe"):
-            shutil.copy2(py, py.parent / name)
-        self.probe_dir = py.parent
+            shutil.copyfile(self.observe_bin, self.tools / name)
+        self.probe_dir = self.tools
         rules = [Rule("Process_Name", "is", "ingest.exe", "include"),
                  Rule("Process_Name", "begins_with", "probe-", "include"),
                  Rule("Event_Class", "is", "Registry", "exclude"),
@@ -654,6 +659,15 @@ class Procmon:
             return []
         return self._with_children([same[k]])
 
+    def instances_for_cmdline(self, cmdline):
+        """The ingest.exe instances whose Process Start command line is exactly cmdline."""
+        out = []
+        for x in self.instances:
+            m = re.search(r"Command line: (.*?), Current directory: ", x["detail"])
+            if m and m.group(1) == cmdline and x["name"].lower() == "ingest.exe":
+                out.append(x)
+        return out
+
     def _with_children(self, roots):
         out = list(roots)
         col = self.col
@@ -705,7 +719,9 @@ class Procmon:
                     rawops.append({"kind": "device", "path": path, "line": n})
                 disp = re.search(r"Disposition: (\w+)", det)
                 creating = bool(disp and disp.group(1) in ("Create", "OverwriteIf", "OpenIf", "Supersede")) and "OpenResult: Opened" not in det
-                is_dir = "Directory File" in det and "Non-Directory File" not in det
+                opts = re.search(r"Options: (.*?), Attributes: ", det)
+                opts = set(opts.group(1).split(", ")) if opts else set()
+                is_dir = bool(opts & {"Directory", "Directory File"}) and "Non-Directory File" not in opts
                 rawops.append({"kind": "mkdir" if (creating and is_dir) else ("create" if creating else "open"),
                                "path": path, "ok": ok, "line": n})
                 if ok:
@@ -738,7 +754,7 @@ class Procmon:
             "every_success_open_closed": all(v <= 0 for p, v in open_ok.items() if stage_prefix in p),
         }
         checks.update(marks_check(rawops, seam))
-        events, failed = to_events(rawops, dest, stage_prefix, obsdir)
+        events, failed = to_events(rawops, dest, stage_prefix, obsdir, ntpath)
         completion = None
         if root.get("exit"):
             m = re.search(r"Exit Status: (-?\d+)", root["exit"])
@@ -751,16 +767,10 @@ class Procmon:
         d.mkdir(parents=True, exist_ok=True)
         (d / "probe.txt").write_text("probe\n")
         child = self.probe_dir / "probe-child.exe"
-        code = ("import ctypes,subprocess,sys;p=sys.argv[1];open(p).read();"
-                "subprocess.run([sys.argv[2],'-c','import sys;open(sys.argv[1]).read()',p]);"
-                "open(sys.argv[3],'w').close();"
-                "k=ctypes.windll.kernel32;k.CreateFileW.restype=ctypes.c_void_p;"
-                "[k.CloseHandle(ctypes.c_void_p(h)) for d in ('\\\\\\\\.\\\\PhysicalDrive0','\\\\\\\\.\\\\C:')"
-                " for a in (0,0x80000000) for h in [k.CreateFileW(d,a,3,None,3,0,None)]"
-                " if h not in (None,ctypes.c_void_p(-1).value)]")
         self.selftest_token = str(d / "probe.txt")
-        p = subprocess.run([str(self.probe_dir / "probe-parent.exe"), "-c", code, str(d / "probe.txt"), str(child),
-                            str(d / "created.txt")], capture_output=True)
+        p = subprocess.run([str(self.probe_dir / "probe-parent.exe"), str(d / "probe.txt"), str(d / "created.txt"),
+                            str(child), "\\\\.\\PhysicalDrive0"],
+                           capture_output=True, env=dict(os.environ, INGEST_OBSERVE_PROBE="parent"))
         self.selftest_exit = p.returncode
         (d / "probe-stderr.txt").write_bytes(p.stderr)
 
@@ -838,6 +848,13 @@ class Procmon:
         if write:
             (self.session / "partition.json").write_bytes(canonical(rec))
         return rec
+
+    def drop_tools(self):
+        rec = {n: {"copied_from": str(self.observe_bin), "sha256": sha_file(self.tools / n)}
+               for n in ("probe-parent.exe", "probe-child.exe")}
+        (self.tools / "tools.json").write_bytes(canonical(rec))
+        for n in rec:
+            (self.tools / n).unlink()
 
     def compress(self):
         for p in (self.pml, self.csv):

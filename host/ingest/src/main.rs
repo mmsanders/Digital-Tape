@@ -484,6 +484,9 @@ fn run(a: Args) -> Res<String> {
 static HEAP: observe::CapAlloc = observe::CapAlloc;
 
 fn main() {
+    if let Some(code) = observe::probe() {
+        std::process::exit(code);
+    }
     observe::init_heap_limit();
     let argv: Vec<OsString> = std::env::args_os().skip(1).collect();
     let code = match parse(argv) {

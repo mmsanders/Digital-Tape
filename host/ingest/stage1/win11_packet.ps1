@@ -22,7 +22,11 @@ param(
     [Parameter(Mandatory = $true)][string]$ShippingSha256,
     [Parameter(Mandatory = $true)][string]$ObserveSha256,
     [string]$Work = "$env:SystemDrive\ingest-win11-work",
-    [string]$Out = "$env:USERPROFILE\Desktop"
+    [string]$Out = "$env:USERPROFILE\Desktop",
+    # CI only: rehearse the script end to end on a non-Windows-11 host. The packet still
+    # carries its real platform label (run_packet.py reads the edition), so a rehearsal
+    # packet can never stand in for the Windows 11 one.
+    [switch]$Rehearsal
 )
 $ErrorActionPreference = "Stop"
 
@@ -30,8 +34,8 @@ $ErrorActionPreference = "Stop"
 # committed transport files, so this script cannot silently go stale.
 $ProcmonZipSha256 = "80a6442b46af762ed1432f6fec3f7e20366bed62a2522b3486503398a40a1128"
 $Transport = @{
-    "host/ingest/stage1/run_packet.py" = "bde40fda7f38a4ef468d6a652e1e8d44c088e8c0f809d180d164c4cbc0d38e12"
-    "host/ingest/stage1/observers.py" = "86d63eec46678a1788c2ac51425e03b4abaac4b6b9ba2cfe4d9dd1548f9577a0"
+    "host/ingest/stage1/run_packet.py" = "aa2c377db694e060d0d163a84f7aaced9172a2bf7dc1375564674b85c91842b2"
+    "host/ingest/stage1/observers.py" = "01a2e3a46f646b0dfe5ac25e1cac190f15c9dc7cb77b4c88a6158d7dd28a0a51"
     "host/ingest/stage1/summarize_packet.py" = "48c175cf962542de3a43495067aaeee48c9099098e3bdbde0bcbeb4dbfd9e1e9"
 }
 
@@ -43,16 +47,25 @@ $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     [Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $admin) { Fail "open PowerShell with 'Run as administrator'" }
 $os = Get-CimInstance Win32_OperatingSystem
-if ($os.ProductType -ne 1 -or [int]$os.BuildNumber -lt 22000) { Fail "not a Windows 11 client: $($os.Caption) build $($os.BuildNumber)" }
+if ($os.ProductType -ne 1 -or [int]$os.BuildNumber -lt 22000) {
+    if (-not $Rehearsal) { Fail "not a Windows 11 client: $($os.Caption) build $($os.BuildNumber)" }
+    Write-Host "REHEARSAL on $($os.Caption) build $($os.BuildNumber): not a Windows 11 packet"
+}
 if ($env:PROCESSOR_ARCHITECTURE -ne "AMD64") { Fail "not x64: $env:PROCESSOR_ARCHITECTURE" }
 $free = (Get-PSDrive ($Work.Substring(0, 1))).Free
 if ($free -lt 25GB) { Fail "need 25 GB free on $($Work.Substring(0, 2)) (the census writes two 4 GiB WAVs); free: $([math]::Round($free / 1GB)) GB" }
 Write-Host "Windows 11 $($os.Version) build $($os.BuildNumber), Administrator, x64"
 
-$py = (Get-Command py -ErrorAction SilentlyContinue)
-if (-not $py) { Fail "Python 3.12 is missing: run 'winget install -e --id Python.Python.3.12', then run this again" }
-& py -3.12 -c "import sys; print(sys.version)"
-if ($LASTEXITCODE -ne 0) { Fail "Python 3.12 is missing: run 'winget install -e --id Python.Python.3.12', then run this again" }
+# Python 3.12: the py launcher (python.org) or "python" (python.org or Microsoft Store).
+$pyexe = $null; $pyargs = @()
+if ((Get-Command py -ErrorAction SilentlyContinue) -and ((& py -3.12 -c "print(1)" 2>$null) -eq "1")) {
+    $pyexe = "py"; $pyargs = @("-3.12")
+} elseif ((Get-Command python -ErrorAction SilentlyContinue) -and
+          ((& python -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null) -eq "3.12")) {
+    $pyexe = "python"
+}
+if (-not $pyexe) { Fail "Python 3.12 is missing: run 'winget install -e --id Python.Python.3.12', then run this again" }
+& $pyexe @pyargs -c "import sys; print('Python', sys.version, sys.executable)"
 
 if (Test-Path $Work) { Fail "$Work already exists; remove it or pass -Work <new folder>" }
 New-Item -ItemType Directory -Path $Work | Out-Null
@@ -87,7 +100,7 @@ Expand-Archive -LiteralPath $pmZip -DestinationPath (Join-Path $Work "procmon")
 $procmon = Join-Path $Work "procmon\Procmon64.exe"
 
 # 5. A private Python environment with the package's pinned requirements.
-& py -3.12 -m venv (Join-Path $Work "venv")
+& $pyexe @pyargs -m venv (Join-Path $Work "venv")
 $python = Join-Path $Work "venv\Scripts\python.exe"
 $pkg = Join-Path $repo "tests\wp16_ingest_stage1"
 & $python -m pip install --disable-pip-version-check -q -r (Join-Path $pkg "requirements.txt") procmon-parser==0.4.0
@@ -108,7 +121,11 @@ if ($LASTEXITCODE -ne 0) { Fail "run_packet.py failed" }
 
 # 8. One zip to send.
 $zip = Join-Path $Out "ingest-win11-packet-$($Candidate.Substring(0, 12)).zip"
-Compress-Archive -Path (Join-Path $packet "*") -DestinationPath $zip -Force
+# .NET's ZipFile writes zip64, so the 4 GiB census WAV and a >2 GiB packet fit
+# (Compress-Archive stops at 2 GiB with "Stream was too long").
+if (Test-Path $zip) { Remove-Item $zip }
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::CreateFromDirectory($packet, $zip, [System.IO.Compression.CompressionLevel]::Optimal, $false)
 Write-Host ""
 Write-Host "PACKET: $zip"
 Write-Host "SHA256: $(Sha $zip)"
