@@ -317,6 +317,7 @@ class FsUsage:
     def __init__(self):
         self.tools = None
         self.n = 0
+        self.diagnosed = False
 
     def version(self):
         return "fs_usage (macOS " + subprocess.run(["sw_vers", "-productVersion"], capture_output=True, text=True).stdout.strip() + ")"
@@ -368,6 +369,13 @@ class FsUsage:
         t.start()
         ctx.update(proc=p, master=master, out=out, pump=t)
         ctx["start_gate"] = self._wait_gate("start", trace)
+        if not ctx["start_gate"] and not self.diagnosed:
+            self.diagnosed = True
+            raw = Path(trace).read_bytes()
+            print(f"fs_usage start gate not seen; fs_usage running={p.poll() is None} rc={p.returncode} "
+                  f"bytes={len(raw)}; first lines:", file=sys.stderr)
+            for l in raw.decode("utf-8", "replace").splitlines()[:40]:
+                print("  | " + l, file=sys.stderr)
 
     def _wait_gate(self, tag, trace, timeout=30):
         deadline = time.time() + timeout
@@ -484,7 +492,8 @@ class FsUsage:
 
         def accepts(txt):
             ro, _, w = self.parse(txt, names)
-            return (not w and ctx.get("start_gate", "") in txt and ctx.get("end_gate", "") in txt
+            return (not w and bool(ctx.get("start_gate")) and ctx["start_gate"] in txt
+                    and bool(ctx.get("end_gate")) and ctx["end_gate"] in txt
                     and any(r["kind"] == "device" for r in ro)
                     and sum(1 for l in txt.splitlines() if "probe.txt" in l) >= 2)
         dev = next((i for i, l in enumerate(lines) if "/dev/disk0" in l), None)
