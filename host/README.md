@@ -26,6 +26,11 @@ plus the facts seam and a `probe DEV` command). `make -C host test` runs:
 - the check that the shipped binary has no seam (`test_seam.sh`);
 - the observation seam's transport self-check (`trace_selfcheck.sh`).
 
+**Built (Phase 2 P2-R2, #429, pending Verification #169):** [`ingest/`](ingest/README.md), the standalone
+INGEST-1 host tool per [the WP-16 ingest contract](../docs/WP16-INGEST-CONTRACT.md): ordered audio
+folders → canonical `audio.wav` + `manifest.json`. Rust, no engine or device code; CI is
+`.github/workflows/ingest.yml`.
+
 `device_e2e.sh` is the round trip on a real device node. CI runs it on a Linux loop device, an
 `hdiutil` disk image on macOS and a VHD on Windows.
 

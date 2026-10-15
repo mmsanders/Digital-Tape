@@ -48,8 +48,8 @@ impl Imdct {
 
         for k in 0..n2 {
             let theta = pi_n * (alpha + k as f64);
-            let re = sqrt_scale * theta.cos();
-            let im = sqrt_scale * theta.sin();
+            let re = sqrt_scale * libm::cos(theta);
+            let im = sqrt_scale * libm::sin(theta);
             twiddle.push(Complex::new(re as f32, im as f32));
         }
 
@@ -167,7 +167,7 @@ mod tests {
                 .map(f64::from)
                 .enumerate()
                 .take(n_in)
-                .map(|(j, jtem)| jtem * (pi_2n * ((2 * i + 1 + n_in) * (2 * j + 1)) as f64).cos())
+                .map(|(j, jtem)| jtem * libm::cos(pi_2n * ((2 * i + 1 + n_in) * (2 * j + 1)) as f64))
                 .sum();
 
             *item = (scale * accum) as f32;

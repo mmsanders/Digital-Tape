@@ -856,7 +856,7 @@ mod tests {
             *item = x
                 .iter()
                 .enumerate()
-                .map(|(j, &jtem)| jtem * (PI_32 * (i as f64) * ((j as f64) + 0.5)).cos() as f32)
+                .map(|(j, &jtem)| jtem * libm::cos(PI_32 * (i as f64) * ((j as f64) + 0.5)) as f32)
                 .sum();
         }
 

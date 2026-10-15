@@ -85,7 +85,7 @@ impl TnsCoeffs {
                     val as i8
                 });
 
-                *el = (if c >= 0.0 { c / iqfac } else { c / iqfac_m }).sin();
+                *el = libm::sinf(if c >= 0.0 { c / iqfac } else { c / iqfac_m });
             }
 
             // Generate LPC coefficients

@@ -830,7 +830,7 @@ fn try_read_info_tag_inner(buf: &[u8], header: &FrameHeader) -> Result<Option<Xi
         // Replay gain peak in 9.23 (bit) fixed-point format.
         let replaygain_peak = match reader.read_be_u32()? {
             0 => None,
-            peak => Some(32767.0 * (peak as f32 / 2.0f32.powi(23))),
+            peak => Some(32767.0 * (peak as f32 / 8388608.0f32)),
         };
 
         // Radio replay gain.

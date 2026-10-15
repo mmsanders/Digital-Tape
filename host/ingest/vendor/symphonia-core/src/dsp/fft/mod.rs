@@ -52,8 +52,8 @@ mod tests {
 
                 let ij = ((i as u64) * (j as u64)) & (n - 1);
 
-                let wre = (theta * ij as f64).cos();
-                let wim = -(theta * ij as f64).sin();
+                let wre = libm::cos(theta * ij as f64);
+                let wim = -libm::sin(theta * ij as f64);
 
                 re += (xre * wre) - (xim * wim);
                 im += (xre * wim) + (xim * wre);
