@@ -61,7 +61,8 @@ def main():
         for name, c in (r.get("false_pass_controls") or {}).items():
             print(f"  false-pass control {name}: rejected={c.get('rejected')}")
     if st.exists():
-        for key in ("session_alignment", "device_like_rows", "probe_stderr_tail", "limitation"):
+        for key in ("session_alignment", "device_like_rows", "probe_stderr_tail", "probe_paths_outside_python",
+                    "limitation"):
             if key in r:
                 print(f"  {key}: {json.dumps(r[key], ensure_ascii=True)[:3000]}")
     part = root / "observer-session" / "partition.json"

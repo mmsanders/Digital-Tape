@@ -556,7 +556,10 @@ class Procmon:
             shutil.copy2(py, py.parent / name)
         self.probe_dir = py.parent
         rules = [Rule("Process_Name", "is", "ingest.exe", "include"),
-                 Rule("Process_Name", "begins_with", "probe-", "include")]
+                 Rule("Process_Name", "begins_with", "probe-", "include"),
+                 Rule("Event_Class", "is", "Registry", "exclude"),
+                 Rule("Event_Class", "is", "Network", "exclude"),
+                 Rule("Event_Class", "is", "Profiling", "exclude")]
         with open(self.session / "filter.pmc", "wb") as f:
             dump_configuration({"FilterRules": rules, "DestructiveFilter": 1}, f)
         self.pml = self.session / "session.pml"
@@ -589,9 +592,15 @@ class Procmon:
                 for i in range(min(len(r), len(self.rows))):
                     e = r[i]
                     row = self.rows[i]
+                    cpath, ppath = row[col["Path"]] or "", e.path or ""
+                    # Procmon's CSV renders a QueryDirectory path with its search pattern appended
+                    # ("dir\\*"); the PML records the directory. Any other difference is a mismatch.
+                    if (row[col["Operation"]] == "QueryDirectory" and cpath.startswith(ppath.rstrip("\\") + "\\")
+                            and "\\" not in cpath[len(ppath.rstrip("\\")) + 1:]):
+                        cpath = ppath
                     diff = [k for k, a, b in (("pid", row[col["PID"]], str(e.process.pid)),
                                               ("name", row[col["Process Name"]], e.process.process_name),
-                                              ("path", row[col["Path"]] or "", e.path or "")) if a != b]
+                                              ("path", cpath, ppath)) if a != b]
                     if diff:
                         mism += 1
                         if len(samples) < 8:
@@ -604,7 +613,9 @@ class Procmon:
             self.align["pml_error"] = f"{type(x).__name__}: {x}"
         self.align["aligned"] = (self.align.get("pml_events") == len(self.rows)
                                  and self.align.get("row_mismatches") == 0)
-        # process instances: a PID's rows from its Process Start to its Process Exit
+        # process instances: a PID's rows from its Process Start up to the next Process Start of
+        # that PID. Windows logs handle cleanup (CloseFile, RegCloseKey) after Process Exit, and
+        # those records belong to the exited instance; a PID is only reused by a new start.
         self.instances = []
         live = {}
         for i, row in enumerate(self.rows):
@@ -619,7 +630,6 @@ class Procmon:
             inst["rows"].append(i)
             if op == "Process Exit":
                 inst["exit"] = row[col["Detail"]]
-                live.pop(pid, None)
 
     def wrap(self, argv, trace):
         return argv
@@ -740,7 +750,8 @@ class Procmon:
                 "open(sys.argv[3],'w').close();"
                 "k=ctypes.windll.kernel32;k.CreateFileW.restype=ctypes.c_void_p;"
                 "[k.CloseHandle(ctypes.c_void_p(h)) for d in ('\\\\\\\\.\\\\PhysicalDrive0','\\\\\\\\.\\\\C:')"
-                " for h in [k.CreateFileW(d,0,3,None,3,0,None)] if h not in (None,ctypes.c_void_p(-1).value)]")
+                " for a in (0,0x80000000) for h in [k.CreateFileW(d,a,3,None,3,0,None)]"
+                " if h not in (None,ctypes.c_void_p(-1).value)]")
         self.selftest_token = str(d / "probe.txt")
         p = subprocess.run([str(self.probe_dir / "probe-parent.exe"), "-c", code, str(d / "probe.txt"), str(child),
                             str(d / "created.txt")], capture_output=True)
