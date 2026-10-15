@@ -3712,3 +3712,46 @@ dashboard test required before publication. Source counts/size are an inventory,
 not a whole-repo correctness proof. Current status/index links own the live view;
 dated records retain exact identity. Phase1 36/36, Phase2 4/12, all frozen/<30s/write/
 async/recording/firmware/hardware/media/atomicity/purchase holds remain unchanged.
+
+## ADR-180 — resolve P2V16-002 (AIFC sowt) and Software #429 interpretations
+
+**Date:** 14 October 2026 PDT. **Owner:** PM, Michael's activation ("verification needs input on an
+ambiguity and software has work in too"). Input Product main `8f3c0f0eb3da74186ab8482e22e685c714a7a258`;
+Verification main `10db792e0eb66d048257dedb0360af6d37b1c1ed` (#180, CI38682841791/38682997294 SUCCESS),
+finding subtree `fb309f9dfd07ea891567264dd5a65cf90d6fc4c1`; Software draft #433 head `a9e11da`, #429 closed ready-held.
+
+**P2V16-002 upheld.** INGEST-1 §2 listed AIFF/AIFC signed PCM8/16/24/32 with "AIFC NONE or sowt",
+which read as a full cross-product. Apple's registration defines `sowt` as 16-bit little-endian; a
+generated COMM 24-bit/256-frame `sowt` file decodes as 384 pcm_s16le frames in FFmpeg. Other readers
+take the width from COMM. The bytes therefore carry contradictory precision signals and the result
+would be decoder-dependent, which §2 already forbids. **Decision:** AIFF and AIFC `NONE` admit
+big-endian signed PCM8/16/24/32; AIFC `sowt` admits COMM sampleSize 16 only; any other `sowt`
+sampleSize refuses by name and is never reinterpreted. Other AIFC compression types stay outside
+INGEST-1. This is Verification's recommended narrow reading. Non-16 `sowt` is rare, and the
+seven-year-old tiebreaker favours a named refusal over a silent guess. The 90 PENDING cells resolve
+to refusal (non-16) or positive (16) without relaxing any sample/count check.
+
+**Software #429 (a)–(e), safe defaults adopted except (b).** (a) ADTS frames with more than one raw
+data block refuse by name: the positive row becomes one raw data block per frame. (b) **Not adopted.**
+§2 already refuses CRC errors and concealed corruption. When `protection_absent=0` the ADTS CRC must
+be verified and a mismatch refuses. Candidate `a9e11da` needs this correction before disposition.
+(c) Lossless sources report `gapless_known`, trim_evidence `none`, trims 0. (d) A LAME-compatible
+tag CRC validates under LAME's or FFmpeg's writer span; other mismatches refuse. This admits common
+FFmpeg-encoded MP3s without weakening validation. (e) A shortened final `stts` is a redundant
+declaration: admitted only in exact agreement with the edit, refused alone. README items 1–11 not
+raised as questions are implementation choices, not contract text. Item 11 (true-peak flatness) is
+no waiver: the ≤0.1 dB under-read bound stands and is independently tested.
+
+**Routing.** Verification169 resumes the PENDING cells and adds causal controls: non-16 `sowt`
+refusal with a 16-bit `sowt` positive neighbour, ADTS multi-block refusal, ADTS CRC mismatch with a
+valid protected neighbour, an FFmpeg-written and a LAME-written MP3 tag, a lone shortened `stts`, and
+lossless gapless status. Software gets one fresh issue: apply this ADR to the #433 candidate, then
+import #169's complete main publication verbatim when it lands and route the clean head directly
+to Verification. That removes the separate post-publication PM round. No PM review/merge of product
+code. A Windows 11 desktop identity run is not requested now; it is collected with the qualified-platform
+evidence for package disposition, never substituted by Windows Server.
+
+**Gate/reversal cost.** Phase1 36/36, Phase2 4/12 unchanged. WP14 physical A6, WP16 real-card/full
+acceptance, WP15 and all frozen/write/batching/async/recording/firmware/hardware/media/atomicity/<30s/
+purchase holds survive. Admitting non-16 `sowt` later is an additive host-contract amendment with its
+own independent expectations; no on-card change.
