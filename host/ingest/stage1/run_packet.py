@@ -8,25 +8,24 @@ pre-gain observations for successes.
 It judges nothing. Exit codes, PASS decisions and receipts are Verification's
 (review.py / campaign.py with Verification's own receipts). Standard library only.
 
-Native observer: Linux uses strace (complete syscall trace of the process tree);
-other platforms are recorded as observer "none" with complete=false and
-observer_selftest=false, which the published review rejects -- an honest gap,
-never a substitute.
+Native observers (stage1/observers.py): Linux strace, macOS fs_usage, Windows
+Process Monitor. Each is qualified by its own selftest with positive probes and
+deliberate dropped/truncated-record false-pass controls; a host without one records
+observer "none", which the published review rejects -- an honest gap, never a
+substitute.
 
 usage: run_packet.py --package DIR --sources DIR --observe-bin BIN --shipping-bin BIN
                      --profile-dir DIR --out PACKET --candidate-sha SHA [--jobs N] [--only S]
 """
 import argparse, concurrent.futures as cf, hashlib, json, os, platform, re, shutil, signal
-import subprocess, sys, tempfile, time, unicodedata
+import subprocess, sys, tempfile, threading, time, unicodedata
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import observers  # noqa: E402
 
 CUTS_KILL = {"before-stage", "audio-open", "audio-flush", "manifest-open", "manifest-flush",
              "before-publish", "after-publish"}
-STRACE_SET = ("openat,open,creat,mkdir,mkdirat,rename,renameat,renameat2,fsync,fdatasync,"
-              "close,unlink,unlinkat,rmdir,newfstatat,statx,stat,lstat,execve,exit_group,"
-              "clone,clone3,fork,vfork")
-
-
 def sha_file(p):
     h = hashlib.sha256()
     with open(p, "rb") as f:
@@ -37,6 +36,19 @@ def sha_file(p):
 
 def canonical(obj):
     return (json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
+
+
+def tree_sha(d):
+    """sha256 over sorted (posix relative path, file sha256) lines of a directory."""
+    lines = sorted(f"{p.relative_to(d).as_posix()} {sha_file(p)}" for p in Path(d).rglob("*") if p.is_file())
+    return hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
+
+
+def tool_out(argv):
+    try:
+        return subprocess.run(argv, capture_output=True, text=True).stdout.strip()
+    except OSError as e:
+        return f"unavailable: {e}"
 
 
 def platform_id():
@@ -58,134 +70,59 @@ def platform_id():
     return s, arch
 
 
-# ---- native observer ---------------------------------------------------------------------
+# ---- Windows bounded memory (Job object) --------------------------------------------------
 
-class Observer:
-    def __init__(self, kind):
-        self.kind = kind
+def _job_structs():
+    import ctypes
+    from ctypes import wintypes
 
-    def wrap(self, argv, trace):
-        if self.kind == "strace":
-            return ["strace", "-f", "-q", "-tt", "-y", "-s", "4096", "-e", "trace=" + STRACE_SET,
-                    "-o", str(trace), "--"] + argv
-        return argv
+    class IO(ctypes.Structure):
+        _fields_ = [(n, ctypes.c_ulonglong) for n in ("r", "w", "o", "rt", "wt", "ot")]
 
-    def selftest(self, root):
-        """Positive visibility, a deliberate forbidden device open, child processes,
-        record completeness and process completion, on this host's native method."""
-        d = root / "observer-selftest"
-        d.mkdir(parents=True, exist_ok=True)
-        if self.kind != "strace":
-            (d / "result.json").write_bytes(canonical({"observer": self.kind, "qualified": False,
-                                                       "reason": "no native observer implemented on this platform"}))
-            return False
-        probe = d / "probe.txt"
-        probe.write_text("probe\n")
-        script = ("cat '%s' >/dev/null; (cat '%s' >/dev/null); "
-                  ": > '%s/created.txt'; (exec 3</dev/loop0) 2>/dev/null; true") % (probe, probe, d)
-        trace = d / "trace.txt"
-        p = subprocess.run(self.wrap(["sh", "-c", script], trace), capture_output=True)
-        text = trace.read_text(errors="replace")
-        opens = [l for l in text.splitlines() if "probe.txt" in l and "openat(" in l]
-        pids = {l.split()[0] for l in opens}
-        checks = {
-            "process_exit_zero": p.returncode == 0,
-            "two_probe_opens_seen": len(opens) >= 2,
-            "child_process_followed": len(pids) >= 2,
-            "creation_seen": "created.txt" in text and "O_CREAT" in text,
-            "forbidden_device_open_seen": "/dev/loop0" in text,
-            "process_completion_seen": "+++ exited with 0 +++" in text,
-        }
-        ok = all(checks.values())
-        for name, passed in checks.items():
-            if not passed:
-                print(f"observer selftest check failed: {name}", file=sys.stderr)
-        (d / "result.json").write_bytes(canonical({"observer": "strace", "qualified": ok, "checks": checks,
-                                                   "trace_sha256": sha_file(trace)}))
-        return ok
+    class BASIC(ctypes.Structure):
+        _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64), ("PerJobUserTimeLimit", ctypes.c_int64),
+                    ("LimitFlags", wintypes.DWORD), ("MinimumWorkingSetSize", ctypes.c_size_t),
+                    ("MaximumWorkingSetSize", ctypes.c_size_t), ("ActiveProcessLimit", wintypes.DWORD),
+                    ("Affinity", ctypes.c_size_t), ("PriorityClass", wintypes.DWORD),
+                    ("SchedulingClass", wintypes.DWORD)]
+
+    class EXT(ctypes.Structure):
+        _fields_ = [("Basic", BASIC), ("Io", IO), ("ProcessMemoryLimit", ctypes.c_size_t),
+                    ("JobMemoryLimit", ctypes.c_size_t), ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                    ("PeakJobMemoryUsed", ctypes.c_size_t)]
+    return ctypes, wintypes, EXT
 
 
-LINE = re.compile(r"^(\d+)\s+\S+\s+(\w+)\((.*)\)\s+=\s+(-?\d+|\?)")
-DEVICE = re.compile(r'"/dev/(sd[a-z]|nvme|mmcblk|loop|disk|rdisk|hd[a-z]|vd[a-z]|xvd|sr)')
+def windows_memory_job(limit):
+    """A Job object with JOB_OBJECT_LIMIT_PROCESS_MEMORY: the OS fails commits beyond it."""
+    ctypes, wintypes, EXT = _job_structs()
+    k = ctypes.windll.kernel32
+    k.CreateJobObjectW.restype = wintypes.HANDLE
+    job = k.CreateJobObjectW(None, None)
+    info = EXT()
+    info.Basic.LimitFlags = 0x100  # JOB_OBJECT_LIMIT_PROCESS_MEMORY
+    info.ProcessMemoryLimit = int(limit)
+    if not k.SetInformationJobObject(wintypes.HANDLE(job), 9, ctypes.byref(info), ctypes.sizeof(info)):
+        raise OSError(ctypes.get_last_error(), "SetInformationJobObject failed")
+    return job
 
 
-def map_strace(trace, dest, stage_prefix, observe_dir):
-    """Normalize a raw strace trace into ordered INTERFACE ops (the mapping is
-    published with the packet; Verification reviews it against the raw trace)."""
-    events, failed, notes = [], [], []
-    flushed = set()
-    preflight_done = False
-    root_pid = None
-    completion = None
-    obs = str(observe_dir)
-    for n, l in enumerate(Path(trace).read_text(errors="replace").splitlines()):
-        if root_pid is None and l.split():
-            root_pid = l.split()[0]
-        if l.startswith(root_pid + " ") and "+++ exited with" in l:
-            completion = "exited"
-        if l.startswith(root_pid + " ") and "+++ killed by" in l:
-            completion = "killed"
-        m = LINE.match(l)
-        if not m:
-            continue
-        pid, call, args, ret = m.groups()
-        ok = ret not in ("?",) and int(ret) >= 0
+def windows_job_assign_and_resume(job, p):
+    ctypes, wintypes, _ = _job_structs()
+    h = wintypes.HANDLE(int(p._handle))
+    if not ctypes.windll.kernel32.AssignProcessToJobObject(wintypes.HANDLE(job), h):
+        p.kill()
+        raise OSError("AssignProcessToJobObject failed")
+    ctypes.windll.ntdll.NtResumeProcess(h)
 
-        def ev(op, **kw):
-            events.append(dict(seq=len(events), op=op, line=n, **kw))
 
-        mark = re.search(r"/\.mark/\d+-([a-z_]+)\"", args)
-        if mark and call in ("statx", "newfstatat", "stat", "lstat"):
-            op = mark.group(1)
-            if op in ("preflight_complete", "sources_revalidated", "source_mutation_detected"):
-                ev(op)
-                preflight_done = preflight_done or op == "preflight_complete"
-            continue
-        if obs in args:
-            continue  # the test build's own instrumentation output
-        if call in ("mkdir", "mkdirat"):
-            path = re.search(r'"([^"]*)"', args).group(1)
-            if Path(path).name.startswith(stage_prefix) and ok:
-                ev("stage_create", exclusive=True,
-                   adjacent=os.path.dirname(os.path.abspath(path)) == os.path.dirname(os.path.abspath(dest)))
-            elif ok and not preflight_done:
-                ev("preflight_disk_scratch", path=path)
-        elif call in ("openat", "open", "creat"):
-            if DEVICE.search(args):
-                ev("device_open")
-            creating = "O_CREAT" in args or call == "creat"
-            q = re.findall(r'"([^"]*)"', args)
-            path = q[0] if q else ""
-            if creating and ok:
-                if stage_prefix in path:
-                    ev("output_open", file=os.path.basename(path))
-                elif not preflight_done:
-                    ev("preflight_disk_scratch", path=path)
-        elif call in ("fsync", "fdatasync") and ok:
-            fd = re.search(r"<([^>]*)>", args)
-            if fd:
-                flushed.add(fd.group(1))
-        elif call == "close" and ok:
-            fd = re.search(r"<([^>]*)>", args)
-            if fd and fd.group(1) in flushed and stage_prefix in fd.group(1):
-                base = os.path.basename(fd.group(1))
-                if base in ("audio.wav", "manifest.json"):
-                    ev(base.split(".")[0].replace("audio", "audio") + "_flush_close")
-        elif call in ("rename", "renameat", "renameat2"):
-            q = re.findall(r'"([^"]*)"', args)
-            into_dest = len(q) == 2 and os.path.abspath(q[1]).startswith(os.path.abspath(dest))
-            noreplace = "RENAME_NOREPLACE" in args
-            if into_dest and noreplace and stage_prefix in q[0]:
-                if ok:
-                    ev("publish_dir_noreplace")
-                else:
-                    failed.append({"op": "publish_dir_noreplace", "line": n, "result": ret})
-            elif into_dest:
-                ev("publish_file") if ok else failed.append({"op": "publish_file", "line": n, "result": ret})
-    for e in events:
-        if e["op"] == "audio_flush_close":
-            pass
-    return events, failed, completion
+def windows_job_peak(job):
+    ctypes, wintypes, EXT = _job_structs()
+    info = EXT()
+    ctypes.windll.kernel32.QueryInformationJobObject(wintypes.HANDLE(job), 9, ctypes.byref(info),
+                                                     ctypes.sizeof(info), None)
+    ctypes.windll.kernel32.CloseHandle(wintypes.HANDLE(job))
+    return int(info.PeakProcessMemoryUsed)
 
 
 # ---- case setup --------------------------------------------------------------------------
@@ -212,7 +149,7 @@ def setup_case(case, w, assets):
         for e in f:
             place(assets / e["asset"], os.path.join(os.fsencode(d), os.fsencode(e["name"])))
         folders.append(str(d))
-    cid, env, notes = case["id"], {}, []
+    cid, env, notes, capability = case["id"], {}, [], {}
     length = str(case["seconds"])
     head = ["--out", str(dest), "--length", length]
     tail = folders
@@ -234,25 +171,66 @@ def setup_case(case, w, assets):
     elif cid == "native/artwork":
         Path(folders[0], "cover.jpg").write_bytes(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00" + bytes(64) + b"\xff\xd9")
     elif cid == "native/invalid-unicode":
+        # The literal case: a file whose native name is not valid Unicode. Linux names
+        # are bytes; NTFS names are UTF-16 and keep a lone surrogate. APFS refuses such
+        # a name itself; that refusal is recorded, and the corresponding native
+        # boundary -- an invalid-Unicode path argument -- is exercised instead.
+        src = os.path.join(folders[0], "short.wav")
         if sys.platform.startswith("linux"):
-            shutil.copyfile(os.path.join(folders[0], "short.wav"), os.path.join(os.fsencode(folders[0]), b"bad\xff.wav"))
+            shutil.copyfile(src, os.path.join(os.fsencode(folders[0]), b"bad\xff.wav"))
+        elif sys.platform == "win32":
+            shutil.copyfile(src, os.path.join(folders[0], "bad\ud800.wav"))
+            listing = os.listdir(folders[0])
+            capability["created"] = [ascii(n) for n in listing]
+            if not any("\ud800" in n for n in listing):
+                raise Unavailable("filesystem did not keep a lone-surrogate name: " + ascii(listing))
         else:
-            raise Unavailable("this filesystem stores only valid Unicode names; the native invalid-name boundary is not creatable here")
+            target = os.path.join(os.fsencode(folders[0]), b"bad\xff.wav")
+            try:
+                shutil.copyfile(src, target)
+                capability["created"] = True
+            except OSError as x:
+                capability.update(attempt=ascii(target), refused_errno=x.errno, refused=os.strerror(x.errno or 0),
+                                  listing=sorted(os.listdir(folders[0])))
+                boundary = os.fsdecode(os.fsencode(folders[0]) + b"/bad\xff")
+                tail = [folders[0], boundary]
+                notes.append("APFS refuses a non-UTF-8 file name (errno recorded); boundary run passes an "
+                             "invalid-UTF-8 folder argument beside the real folder")
     elif cid == "native/nfc-collision":
         src = os.path.join(folders[0], "short.wav")
         shutil.copyfile(src, os.path.join(folders[0], "\u00e9.wav"))  # precomposed
-        try:
-            shutil.copyfile(src, os.path.join(folders[0], "e\u0301.wav"))  # e + combining acute
-        except OSError as x:
-            raise Unavailable(f"filesystem refused the second normalized name: {x}")
-        if len(os.listdir(folders[0])) < 3:
-            raise Unavailable("normalization-insensitive filesystem: both spellings name one file; that exclusion is the filesystem's")
+        shutil.copyfile(src, os.path.join(folders[0], "e\u0301.wav"))  # e + combining acute
+        listing = sorted(os.listdir(folders[0]))
+        capability.update(listing=[ascii(n) for n in listing])
+        if len(listing) < 3:
+            # Normalization-insensitive filesystem: both spellings name ONE file. Remove
+            # it, and exercise the same exclusion at the folder level: one folder named
+            # with NFC, passed once as NFC and once as NFD (same native identity).
+            capability["normalization_insensitive"] = True
+            for n in listing:
+                if n != "short.wav":
+                    os.remove(os.path.join(folders[0], n))
+            nfc = inp / "f\u00e9"
+            os.rename(folders[0], nfc)
+            tail = [str(nfc), str(inp / "fe\u0301")]
+            notes.append("normalization-insensitive filesystem kept one file for both spellings; boundary run "
+                         "passes one folder spelled NFC and NFD")
     elif cid == "native/case-unrepresentable":
         src = os.path.join(folders[0], "short.wav")
         shutil.copyfile(src, os.path.join(folders[0], "a.wav"))
         shutil.copyfile(src, os.path.join(folders[0], "A.wav"))
-        if len(os.listdir(folders[0])) < 3:
-            raise Unavailable("case-insensitive filesystem: a.wav and A.wav cannot coexist; that exclusion is the filesystem's, not ingest's")
+        listing = sorted(os.listdir(folders[0]))
+        capability.update(listing=listing)
+        if len(listing) < 3:
+            capability["case_insensitive"] = True
+            for n in listing:
+                if n.lower() == "a.wav":
+                    os.remove(os.path.join(folders[0], n))
+            cased = inp / "Case"
+            os.rename(folders[0], cased)
+            tail = [str(cased), str(inp / "CASE")]
+            notes.append("case-insensitive filesystem kept one file for a.wav/A.wav; boundary run passes one "
+                         "folder spelled Case and CASE")
     elif cid == "native/dest-exists":
         dest.mkdir(); (dest / "keep.txt").write_text("existing data\n")
     elif cid == "native/syntax-missing-out":
@@ -280,7 +258,7 @@ def setup_case(case, w, assets):
     elif sc == "concurrent-dest":
         env["INGEST_PAUSE_AT"] = "before-publish"
         env["INGEST_PAUSE_FILE"] = str(w / "resume")
-    return head + tail, dest, env, notes
+    return head + tail, dest, env, notes, capability
 
 
 def snapshot(d):
@@ -302,22 +280,47 @@ class Runner:
         self.assets = Path(a.sources) / "assets"
         self.root = Path(a.out)
         self.config_sha = None
+        self.lock = threading.Lock()
+        self.launches, self.pending, self.unobserved = {}, [], []
+        self.exhaust = None
 
-    def invoke(self, argv_tail, dest, env, w, tag, case, exhaust_limit=None):
+    def launch(self, cmd, env, job=None, **kw):
+        """Start an ingest process and register it: on Windows the observer attributes
+        process instances by (pid, n-th launch of that pid), so every ingest launch --
+        observation or shipping -- is registered in start order."""
+        flags = 0x4 if job is not None else 0  # CREATE_SUSPENDED until it is in the job
+        p = subprocess.Popen(cmd, env=env, creationflags=flags, **kw) if os.name == "nt" else \
+            subprocess.Popen(cmd, env=env, **kw)
+        if job is not None:
+            windows_job_assign_and_resume(job, p)
+        with self.lock:
+            k = self.launches.get(p.pid, 0)
+            self.launches[p.pid] = k + 1
+        return p, k
+
+    def invoke(self, argv_tail, dest, env, w, tag, case, exhaust=None):
         obsdir = w / f"obs-{tag}"
         (obsdir / ".mark").mkdir(parents=True)
         trace = w / f"trace-{tag}.txt"
         argv = [self.a.observe_bin] + argv_tail
         cmd = argv
-        if exhaust_limit:
-            cmd = ["prlimit", f"--as={exhaust_limit}", "--"] + cmd
-        cmd = self.obs.wrap(cmd, trace)
         e = dict(os.environ, INGEST_OBSERVE_DIR=str(obsdir), **env)
+        job = None
+        if exhaust is not None:
+            if exhaust["method"].startswith("prlimit"):
+                cmd = ["prlimit", f"--as={exhaust['bytes']}", "--"] + cmd
+            elif exhaust["method"].startswith("INGEST_HEAP_LIMIT"):
+                e["INGEST_HEAP_LIMIT"] = str(exhaust["bytes"])
+            else:
+                job = windows_memory_job(exhaust["bytes"])
+        cmd = self.obs.wrap(cmd, trace)
         stage_prefix = "." + dest.name + ".ingest-stage-"
         unrelated = dest.parent / "unrelated.txt"
         before_unrel = sha_file(unrelated)
         dest_before, dest_before_sha = snapshot(dest)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=e)
+        ctx = {}
+        self.obs.before(trace, ctx)
+        p, k = self.launch(cmd, e, job, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         competitor = None
         if "INGEST_PAUSE_AT" in env:
             waiting = Path(env["INGEST_PAUSE_FILE"] + ".waiting")
@@ -335,29 +338,37 @@ class Runner:
             Path(env["INGEST_PAUSE_FILE"]).write_text("")
         out, err = p.communicate()
         code = p.returncode
+        peak = windows_job_peak(job) if job is not None else None
         if code is not None and code < 0:
             code = None  # killed by a signal
         if (obsdir / "events.jsonl").exists() and '"op":"kill"' in (obsdir / "events.jsonl").read_text():
             code = None  # the seam aborted at a kill cut (Windows reports a fail-fast status)
-        if not self.obs.kind == "strace":
-            trace.write_bytes(b"")
+        ctx["exit"] = p.returncode
+        self.obs.after(trace, ctx)
         dest_after, dest_after_sha = snapshot(dest)
         stage_left = [x.name for x in dest.parent.iterdir() if x.name.startswith(stage_prefix)]
-        events, failed, completion = ([], [], None)
-        if self.obs.kind == "strace":
-            events, failed, completion = map_strace(trace, dest, stage_prefix, obsdir)
         seam = []
         if (obsdir / "events.jsonl").exists():
             seam = [json.loads(l) for l in (obsdir / "events.jsonl").read_text().splitlines() if l.strip()]
         native = {
-            "scenario": None, "exit": code, "complete": completion is not None,
-            "raw_trace_sha256": sha_file(trace), "observer": self.obs.kind,
-            "observer_selftest": self.selftest_ok, "events": events, "failed_ops": failed,
-            "seam_events": seam, "dest_after": dest_after, "owned_stage_after": bool(stage_left),
-            "unrelated_unchanged": sha_file(unrelated) == before_unrel,
-            "binary_sha256": sha_file(self.a.observe_bin), "argv": argv, "env": env,
-            "process_completion": completion,
+            "scenario": None, "exit": code, "raw_trace_sha256": None, "observer": self.obs.kind,
+            "observer_selftest": self.selftest_ok, "seam_events": seam, "dest_after": dest_after,
+            "owned_stage_after": bool(stage_left), "unrelated_unchanged": sha_file(unrelated) == before_unrel,
+            "binary_sha256": sha_file(self.a.observe_bin), "argv": argv, "env": env, "process_exit_status": p.returncode,
         }
+        if self.obs.deferred:
+            Path(trace).write_bytes(b"")
+            native.update(events=[], failed_ops=[], complete=False, process_completion=None,
+                          integrity={"session_pending": False})
+            native["_pending"] = {"pid": p.pid, "k": k, "dest": str(dest), "stage_prefix": stage_prefix,
+                                  "obsdir": str(obsdir), "seam": seam}
+        else:
+            events, failed, completion, checks = self.obs.normalize(trace, dest, stage_prefix, obsdir, seam, ctx)
+            native.update(events=events, failed_ops=failed, process_completion=completion, integrity=checks,
+                          complete=completion is not None and all(checks.values()))
+        native["raw_trace_sha256"] = sha_file(trace)
+        if peak is not None:
+            native["job_peak_process_memory"] = peak
         if dest_before:
             native["dest_before"] = dest_before
             native["dest_before_sha256"] = dest_before_sha
@@ -365,6 +376,13 @@ class Runner:
         if competitor is not None:
             native["competitor_unchanged"] = (dest / "competitor.txt").exists() and sha_file(dest / "competitor.txt") == competitor
         return code, out, err, trace, native, obsdir
+
+    def write_native(self, native, native_path, trace_path):
+        pend = native.pop("_pending", None)
+        native_path.write_bytes(canonical(native))
+        if pend is not None:
+            with self.lock:
+                self.pending.append((native_path, trace_path, pend))
 
     def run_case(self, n, case):
         a = self.a
@@ -375,23 +393,23 @@ class Runner:
         w = Path(tempfile.mkdtemp(dir=a.work))
         try:
             try:
-                tail, dest, env, notes = setup_case(case, w, self.assets)
-                if case["id"] == "resources/exhaustion" and not shutil.which("prlimit"):
-                    raise Unavailable("no bounded-memory method implemented on this platform (Linux uses prlimit RLIMIT_AS)")
+                tail, dest, env, notes, capability = setup_case(case, w, self.assets)
             except (Unavailable, OSError) as x:
                 return case["id"], self.unavailable(n, cdir, case, str(x))
-            limit = a.exhaust_limit if case["id"] == "resources/exhaustion" else None
-            code, out, err, trace, native, obsdir = self.invoke(tail, dest, env, w, "main", case, limit)
+            exhaust = self.exhaust if case["id"] == "resources/exhaustion" else None
+            code, out, err, trace, native, obsdir = self.invoke(tail, dest, env, w, "main", case, exhaust)
             sc = case.get("scenario") or ("success" if code == 0 else "preflight-refusal" if code == 2 else "write-error")
             native["scenario"] = sc
             native["diagnostic_ok"] = bool(err.strip()) and err.decode("utf-8", "replace").startswith("ingest:")
             native["setup_notes"] = notes
-            if case["id"] == "resources/exhaustion":
-                native["resource_limit"] = {"method": "prlimit RLIMIT_AS", "bytes": a.exhaust_limit}
+            if capability:
+                native["filesystem_capability"] = capability
+            if exhaust is not None:
+                native["resource_limit"] = exhaust
             (cdir / "stdout.txt").write_bytes(out)
             (cdir / "stderr.txt").write_bytes(err)
             shutil.move(str(trace), cdir / "trace.txt")
-            (cdir / "native.json").write_bytes(canonical(native))
+            self.write_native(native, cdir / "native.json", cdir / "trace.txt")
             rec = {"exit": code, "argv": [os.path.basename(a.observe_bin)] + tail, "config_sha256": self.config_sha,
                    "stdout_file": f"cases/{n:04d}/stdout.txt", "stderr_file": f"cases/{n:04d}/stderr.txt",
                    "native_record": f"cases/{n:04d}/native.json", "raw_trace": f"cases/{n:04d}/trace.txt"}
@@ -421,6 +439,28 @@ class Runner:
                "native_record": f"cases/{n:04d}/native.json", "raw_trace": f"cases/{n:04d}/trace.txt"}
         (cdir / "record.json").write_bytes(canonical(rec))
         return f"cases/{n:04d}/record.json"
+
+    def finalize(self):
+        """Session observers (Procmon): after the session ends, give every pending run
+        its extract as raw trace, normalize it, and partition the whole session."""
+        obs = self.obs
+        owners = {}
+        for native_path, trace_path, pend in self.pending:
+            insts = obs.instances_for(pend["pid"], pend["k"])
+            idx = obs.extract(trace_path, insts)
+            owners[str(native_path.relative_to(self.root))] = idx
+            native = json.loads(native_path.read_text(encoding="utf-8"))
+            events, failed, completion, checks = obs.normalize(
+                trace_path, Path(pend["dest"]), pend["stage_prefix"], Path(pend["obsdir"]), pend["seam"],
+                {"instances": insts})
+            native.update(events=events, failed_ops=failed, process_completion=completion, integrity=checks,
+                          complete=completion is not None and all(checks.values()),
+                          raw_trace_sha256=sha_file(trace_path), observer_selftest=self.selftest_ok,
+                          session_record_indices=idx)
+            native_path.write_bytes(canonical(native))
+        for pid, k, tag in self.unobserved:
+            owners[tag] = [i for x in obs.instances_for(pid, k) for i in x["rows"]]
+        return owners
 
     def collect(self, rec, cdir, n, dest, obsdir, out):
         shutil.move(str(dest / "audio.wav"), cdir / "audio.wav")
@@ -455,7 +495,10 @@ class Runner:
         compare published bytes with the observation build's."""
         d2 = dest.parent / "SHIPPING"
         argv = [self.a.shipping_bin, "--out", str(d2)] + tail[2:]
-        p = subprocess.run(argv, capture_output=True)
+        p, k = self.launch(argv, None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p.communicate()
+        with self.lock:
+            self.unobserved.append((p.pid, k, f"shipping:{cdir.name}"))
         res = {"shipping_binary_sha256": sha_file(self.a.shipping_bin), "exit": p.returncode,
                "argv": [os.path.basename(self.a.shipping_bin)] + argv[1:]}
         if p.returncode == 0:
@@ -498,7 +541,7 @@ class Runner:
         (sub / "stdout.txt").write_bytes(o)
         (sub / "stderr.txt").write_bytes(e)
         native["scenario"] = "success" if code == 0 else "comparison-failed"
-        (sub / "native.json").write_bytes(canonical(native))
+        self.write_native(native, sub / "native.json", sub / "trace.txt")
         if code == 0:
             shutil.move(str(d2 / "audio.wav"), sub / "audio.wav")
             shutil.move(str(d2 / "manifest.json"), sub / "manifest.json")
@@ -517,6 +560,27 @@ def case_input(w, folder, name):
     return os.path.join(os.fsencode(str(w / "in" / f"f{folder}")), os.fsencode(name))
 
 
+EXHAUST = {
+    "linux": {"method": "prlimit RLIMIT_AS", "bytes": 6 << 20},
+    "macos": {"method": "INGEST_HEAP_LIMIT: observation-build allocator cap (macOS does not enforce RLIMIT_AS)",
+              "bytes": 1000000},
+    "windows": {"method": "Job object JOB_OBJECT_LIMIT_PROCESS_MEMORY", "bytes": 3 << 20},
+}
+
+
+def choose_observer(plat, requested, procmon):
+    if requested:
+        return requested
+    if plat == "linux":
+        return "strace" if shutil.which("strace") else "none"
+    if plat == "macos":
+        ok = subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0
+        return "fs_usage" if ok and shutil.which("fs_usage") else "none"
+    if plat.startswith("windows"):
+        return "procmon" if procmon and os.path.exists(procmon) else "none"
+    return "none"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--package", required=True)
@@ -529,8 +593,8 @@ def main():
     ap.add_argument("--work", default=None)
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--only", default=None, help="case-id substring (development runs only)")
-    ap.add_argument("--observer", default=None, choices=["strace", "none"])
-    ap.add_argument("--exhaust-limit", default=str(6 << 20), help="RLIMIT_AS bytes for resources/exhaustion")
+    ap.add_argument("--observer", default=None, choices=["strace", "fs_usage", "procmon", "none"])
+    ap.add_argument("--procmon", default=os.environ.get("PROCMON"), help="Procmon64.exe (Windows)")
     a = ap.parse_args()
     a.observe_bin = os.path.abspath(a.observe_bin)
     a.shipping_bin = os.path.abspath(a.shipping_bin)
@@ -539,43 +603,80 @@ def main():
     a.work = a.work or tempfile.mkdtemp(prefix="ingest-packet-")
     os.makedirs(a.work, exist_ok=True)
     plat, arch = platform_id()
-    kind = a.observer or ("strace" if plat == "linux" and shutil.which("strace") else "none")
-    obs = Observer(kind)
-    selftest_ok = obs.selftest(root)
-    shutil.copytree(a.profile_dir, root / "profile", dirs_exist_ok=True)
     ver = subprocess.run([a.shipping_bin, "--version"], capture_output=True, text=True).stdout.split()
     tool_version, profile = ver[1], ver[-1]
+    kind = choose_observer(plat, a.observer, a.procmon)
+    obs = observers.make(kind, a.procmon)
+    obs.start(root)
+    if obs.deferred:
+        obs.selftest_run(root)
+        selftest_ok = None  # judged once the session has ended
+    else:
+        selftest_ok = obs.selftest(root)
+    shutil.copytree(a.profile_dir, root / "profile", dirs_exist_ok=True)
+    # config.json is the platform-independent identity every same-profile packet
+    # shares (campaign.py requires one config_sha256): build commands, lockfile,
+    # toolchain pin, profile and its declared filters, and this runner. Binary
+    # hashes, observer and host facts differ truthfully per platform and live in
+    # platform.json, bound by sha256 from INDEX.json.
+    here = Path(__file__).resolve().parent
     config = {
         "build": "cargo build --release --locked (shipping); cargo build --release --locked --features observe (observation build)",
-        "cargo_lock_sha256": sha_file(Path(__file__).resolve().parents[1] / "Cargo.lock"),
-        "rust_toolchain": (Path(__file__).resolve().parents[1] / "rust-toolchain.toml").read_text(),
-        "shipping_binary_sha256": sha_file(a.shipping_bin), "observe_binary_sha256": sha_file(a.observe_bin),
-        "observer": kind, "profile": profile, "tool_version": tool_version,
-        "runner_sha256": sha_file(__file__),
+        "cargo_lock_sha256": sha_file(here.parent / "Cargo.lock"),
+        "rust_toolchain": (here.parent / "rust-toolchain.toml").read_text(),
+        "profile": profile, "tool_version": tool_version,
+        "profile_tree_sha256": tree_sha(root / "profile"),
+        "transport_sha256": {f: sha_file(here / f) for f in ("run_packet.py", "observers.py")},
     }
     (root / "config.json").write_bytes(canonical(config))
     r = Runner(a, obs, selftest_ok)
     r.config_sha = sha_file(root / "config.json")
+    r.exhaust = EXHAUST.get("windows" if plat.startswith("windows") else plat)
     census = json.loads(Path(a.package, "CENSUS.json").read_text(encoding="utf-8"))["cases"]
     todo = [(n, c) for n, c in enumerate(census) if not a.only or a.only in c["id"]]
     cases = {}
-    if (root / "INDEX.json").exists():  # resume / accumulate development subsets
+    if (root / "INDEX.json").exists() and not obs.deferred:  # resume / accumulate development subsets
         prior = json.loads((root / "INDEX.json").read_text(encoding="utf-8"))
         if prior.get("binary_sha256") == sha_file(a.observe_bin):
             cases.update(prior["cases"])
     big = [x for x in todo if x[1]["seconds"] > 3600]
     small = [x for x in todo if x[1]["seconds"] <= 3600]
-    with cf.ThreadPoolExecutor(a.jobs) as ex:
+    with cf.ThreadPoolExecutor(1 if obs.serial else a.jobs) as ex:
         for cid, path in ex.map(lambda x: r.run_case(*x), small):
             cases[cid] = path
     for n, c in big:  # one at a time: these are the multi-GiB boundaries
         cid, path = r.run_case(n, c)
         cases[cid] = path
+    obs.stop()
+    if obs.deferred:
+        owners = r.finalize()
+        selftest_ok = obs.selftest_finish(root, owners)
+        for nat in list(root.glob("cases/*/native.json")) + list(root.glob("cases/*/comparisons/*/native.json")):
+            d = json.loads(nat.read_text(encoding="utf-8"))
+            d["observer_selftest"] = selftest_ok
+            nat.write_bytes(canonical(d))
+        obs.compress()
+    host = {
+        "platform": plat, "architecture": arch,
+        "shipping_binary_sha256": sha_file(a.shipping_bin), "observe_binary_sha256": sha_file(a.observe_bin),
+        "observer": kind, "observer_version": obs.version(), "observer_selftest_qualified": selftest_ok,
+        "resource_limit_method": r.exhaust,
+        "os": platform.platform(), "os_release": platform.release(), "os_version": platform.version(),
+        "machine": platform.machine(), "python": sys.version,
+        "rustc": tool_out(["rustc", "-vV"]), "cargo": tool_out(["cargo", "--version"]),
+    }
+    if plat.startswith("windows"):
+        host["windows_edition"] = platform.win32_edition()
+    if plat == "macos":
+        host["sw_vers"] = tool_out(["sw_vers"])
+    (root / "platform.json").write_bytes(canonical(host))
     index = {
         "candidate_sha": a.candidate_sha, "binary_sha256": sha_file(a.observe_bin),
         "shipping_binary_sha256": sha_file(a.shipping_bin), "tool_version": tool_version, "profile": profile,
         "platform": plat, "architecture": arch, "config_sha256": r.config_sha,
-        "profile_file": "profile/profile.json", "observer": kind, "cases": dict(sorted(cases.items())),
+        "profile_file": "profile/profile.json", "observer": kind,
+        "platform_file": "platform.json", "platform_sha256": sha_file(root / "platform.json"),
+        "cases": dict(sorted(cases.items())),
     }
     (root / "INDEX.json").write_bytes(canonical(index))
     print(f"{len(cases)} case records; observer {kind}; selftest {'qualified' if selftest_ok else 'NOT qualified'}")

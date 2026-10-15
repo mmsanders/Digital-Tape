@@ -9,7 +9,7 @@ otherwise pass by looking for strings that never exist).
 import sys
 
 MARKERS = [b"INGEST_OBSERVE_DIR", b"INGEST_KILL_AT", b"INGEST_FAULT", b"INGEST_PAUSE_AT",
-           b"INGEST_PAUSE_FILE", b"injected test fault", b"events.jsonl"]
+           b"INGEST_PAUSE_FILE", b"INGEST_HEAP_LIMIT", b"injected test fault", b"events.jsonl"]
 
 
 def found(path):

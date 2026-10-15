@@ -52,6 +52,21 @@ def main():
         print(f"  NOT-EQUIVALENT {cid}")
     for cid in missing:
         print(f"  MISSING {cid}")
+    st = root / "observer-selftest" / "result.json"
+    if st.exists():
+        r = json.loads(st.read_text(encoding="utf-8"))
+        print(f"observer selftest: qualified={r.get('qualified')} checks={r.get('checks')}")
+        for name, c in (r.get("false_pass_controls") or {}).items():
+            print(f"  false-pass control {name}: rejected={c.get('rejected')}")
+    incomplete = []
+    for nat in sorted(root.glob("cases/*/native.json")) + sorted(root.glob("cases/*/comparisons/*/native.json")):
+        d = json.loads(nat.read_text(encoding="utf-8"))
+        if not d.get("complete") and not d.get("unavailable"):
+            incomplete.append((nat.relative_to(root).as_posix(), d.get("scenario"), d.get("process_completion"),
+                               {k: v for k, v in (d.get("integrity") or {}).items() if not v}))
+    print(f"native records not complete: {len(incomplete)}")
+    for x in incomplete[:25]:
+        print("  INCOMPLETE", *x)
     print("This summary is Software's observation only; it is not a review, receipt or PASS.")
     return 1 if (mismatch or notequiv or missing) else 0
 

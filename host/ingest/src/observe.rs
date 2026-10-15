@@ -12,7 +12,10 @@
 //! - `INGEST_KILL_AT=<cut>` aborts the process at that cut (no cleanup runs);
 //! - `INGEST_FAULT=<op>` makes that operation fail as an I/O error;
 //! - `INGEST_PAUSE_AT=<op>` with `INGEST_PAUSE_FILE=<path>` creates `<path>.waiting`
-//!   and blocks until `<path>` exists (the runner mutates a source or creates DEST).
+//!   and blocks until `<path>` exists (the runner mutates a source or creates DEST);
+//! - `INGEST_HEAP_LIMIT=<bytes>` caps live heap bytes through `CapAlloc`, the test
+//!   build's global allocator, so an allocation beyond it fails as the OS would when
+//!   memory is exhausted (bounded-memory method where no OS limit applies).
 
 #[cfg(feature = "observe")]
 mod imp {
@@ -86,6 +89,55 @@ mod imp {
         let v = db.map(|x| format!("{x:?}")).unwrap_or_else(|| "null".into());
         let _ = std::fs::write(d.join("joined.json"), format!("{{\"joined_dbtp\":{v}}}\n"));
     }
+
+    use std::alloc::{GlobalAlloc, Layout, System};
+    use std::sync::atomic::AtomicUsize;
+
+    static LIVE: AtomicUsize = AtomicUsize::new(0);
+    static LIMIT: AtomicUsize = AtomicUsize::new(0);
+
+    /// Reads `INGEST_HEAP_LIMIT` once at startup (reading the environment allocates,
+    /// so it cannot happen inside the allocator). Zero means unlimited.
+    pub fn init_heap_limit() {
+        if dir().is_none() {
+            return;
+        }
+        if let Some(n) = std::env::var("INGEST_HEAP_LIMIT").ok().and_then(|v| v.parse::<usize>().ok()) {
+            LIMIT.store(n, Ordering::SeqCst);
+        }
+    }
+
+    pub struct CapAlloc;
+
+    unsafe impl GlobalAlloc for CapAlloc {
+        unsafe fn alloc(&self, l: Layout) -> *mut u8 {
+            let limit = LIMIT.load(Ordering::Relaxed);
+            if limit != 0 && LIVE.load(Ordering::Relaxed).saturating_add(l.size()) > limit {
+                return std::ptr::null_mut();
+            }
+            let p = unsafe { System.alloc(l) };
+            if !p.is_null() {
+                LIVE.fetch_add(l.size(), Ordering::Relaxed);
+            }
+            p
+        }
+        unsafe fn dealloc(&self, p: *mut u8, l: Layout) {
+            unsafe { System.dealloc(p, l) };
+            LIVE.fetch_sub(l.size(), Ordering::Relaxed);
+        }
+        unsafe fn realloc(&self, p: *mut u8, l: Layout, n: usize) -> *mut u8 {
+            let limit = LIMIT.load(Ordering::Relaxed);
+            if limit != 0 && n > l.size() && LIVE.load(Ordering::Relaxed).saturating_add(n - l.size()) > limit {
+                return std::ptr::null_mut();
+            }
+            let q = unsafe { System.realloc(p, l, n) };
+            if !q.is_null() {
+                LIVE.fetch_add(n, Ordering::Relaxed);
+                LIVE.fetch_sub(l.size(), Ordering::Relaxed);
+            }
+            q
+        }
+    }
 }
 
 #[cfg(not(feature = "observe"))]
@@ -104,6 +156,8 @@ mod imp {
     pub fn before_zero(_pos: usize, _frames: u64) {}
     #[inline(always)]
     pub fn joined(_db: Option<f64>) {}
+    #[inline(always)]
+    pub fn init_heap_limit() {}
 }
 
 pub use imp::*;

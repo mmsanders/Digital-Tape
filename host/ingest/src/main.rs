@@ -479,7 +479,12 @@ fn run(a: Args) -> Res<String> {
     ))
 }
 
+#[cfg(feature = "observe")]
+#[global_allocator]
+static HEAP: observe::CapAlloc = observe::CapAlloc;
+
 fn main() {
+    observe::init_heap_limit();
     let argv: Vec<OsString> = std::env::args_os().skip(1).collect();
     let code = match parse(argv) {
         Ok(Cmd::Help) => {
