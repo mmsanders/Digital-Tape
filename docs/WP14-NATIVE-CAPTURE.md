@@ -152,12 +152,49 @@ PartitionStyle` as geometry and `'verify', '\\.\PhysicalDriveN'`. The ETL holds 
 process's file and disk activity during the window: close other applications first, and
 keep the ETL beside the XML.
 
+### 2.3 The actual Windows 11 export shape (Software #439, Verification #185)
+
+Michael's off-card rehearsal on Windows 11 Home build 26200 (1,232,801 events, zero lost)
+showed two shapes the first parser did not handle. Both are now decoded in `a6check.py`,
+and any other shape is HELD or FAIL, never PASS:
+
+- **Event class location (WIN-A6-001).** Classic kernel records carry the kernel-session
+  GUID `9e814aad…` in `System/Provider/@Guid` and their class in
+  `ExtendedTracingInfo/EventGuid`. The EventGuid is authoritative whenever present. A
+  kernel-session record with no EventGuid, or a Provider that names a different known class
+  than the EventGuid, is counted and HELD.
+- **Undecoded payloads (WIN-A6-002).** tracerpt wrote `ProcessingErrorData` 15005 and the
+  raw `EventPayload` (no `EventData`) for FileIo Read/Write (67/68) and Thread 1–4. These are
+  decoded from the raw little-endian bytes with documented kernel MOF layouts. Each layout is
+  keyed by class, opcode, event `Version` and the header's `PointerSize`, and accepted only
+  at payload lengths actually seen:
+  FileIo_ReadWrite v3 x64 = Offset u64, IrpPtr, FileObject, FileKey, TTID u32, IoSize u32,
+  IoFlags u32 (44 bytes; build 26200 emits 48, and the 4 trailing bytes are reported but not
+  interpreted). The decoded TTID must equal the record header's `Execution/@ThreadID`,
+  otherwise the layout is wrong for that record.
+  Thread_TypeGroup1 v3 x64 = ProcessId, TThreadId, seven pointers, SubProcessTag u32, four
+  priority/flag bytes (72 bytes), then optionally one NUL-terminated UTF-16 name (build
+  26200: an empty name, 74 bytes).
+  Any other version, pointer size, length, missing payload or failed cross-check leaves the
+  record UNDECODED. An undecoded record in a class the judgment reads (FileIo, Thread 1–4,
+  Process 1–4, DiskIo 10/11, header) HOLDS the verdict whoever issued it, because the issuer
+  is one of the fields that could not be decoded. No field is zero-filled, and
+  `System/Execution/@ProcessID` never stands in for thread/process lifetime attribution.
+- **Why raw payloads and not a re-export.** The raw bytes are already in the retained XML,
+  and their layout is fixed and documented. Verification called `tracerpt -lr` unqualified.
+- **Bounded memory.** The XML is streamed one `Event` at a time, and only records of (or
+  stale for) `--pid` are kept. The selftest judges a 145 MB export at about 20 MB peak RSS.
+
+`retained-win11.py ORIGINAL.zip --out result.json` checks the original ZIP and every member
+it uses against Verification's pins. It then runs `a6check.py` with exactly the arguments
+Verification's own replay gave the unchanged parser. No Windows binary is executed.
+
 ## 3. Validation actually performed: Linux x86_64 container only
 
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (130 cases; 124 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (162 cases; 156 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |
@@ -172,6 +209,8 @@ been seen. The synthetic fixtures check the parser's logic only.
 | Verification #174's files, byte-identical with their own side files (`fixtures/verification-174/`) | Verification's controls | their baseline → PASS; competing request classes 69, 70, 71, 72, 73, 74, 75, 77 → HELD (overlapping lifecycle); FileObject missing/empty/zero/non-numeric → HELD (no valid FileObject). Their 70-case `lifecycle_controls.py` generator also passes 70/70 against this checker (run from a scratch copy, not committed) |
 | Verification #175's files, byte-identical (`fixtures/verification-175/`; all run with their published 001 side files) | Verification's controls | their baseline → PASS; Cleanup (65), Close (66) and Write (68) each with missing/empty/zero/non-numeric FileObject → HELD (12 cases) |
 | `fixtures/dtrace-good`, `fixtures/etw-good`: 83 cases (14 positives, 69 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, IRP correlation (missing, empty, zero, invalid, orphan, competing, overlapping lifecycles with partial and full completion, reuse before and after resolution, unlisted request classes, name records without `IrpPtr`, object identity on Create/Read/Close), process image, device, geometry, writes and timestamp order |
+| Verification #185's exact five-record Windows 11 excerpt, byte-identical (`fixtures/verification-185/`, SHA-256 `28a02766…6dcb`) | **Real** native records, excerpt only | all five decode (header PointerSize 8, raw Read 67 v3 = Offset 0, IoSize 3496, FileObject `0xFFFFA1861B91AB60`, raw Thread Start v3); FAIL only because the excerpt has no tapectl process start. EventGuids removed → FAIL with "carry no EventGuid"; Read payload cut to 36 bytes → FAIL with "undecoded" |
+| `win11()` conversion of `fixtures/etw-good` to the build 26200 shape: 27 cases | **Synthetic** in the real shape | converted good set → PASS. Missing/foreign EventGuid, Provider/EventGuid conflict, missing payload, truncated payload, Version 2, PointerSize 4 or absent, TTID ≠ header ThreadID, Thread name tail garbage, undecoded record of another process → HELD/FAIL. 14 earlier families (loss, header, status, coverage, foreign object, lifetimes, image, order, close, competing IRP, invalid-object write, harmless write) give their old verdicts in the new shape. Streaming: 145 MB export at about 20 MB peak RSS |
 
 ## 4. #423 bounded diagnosis
 
