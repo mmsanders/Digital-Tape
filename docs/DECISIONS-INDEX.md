@@ -158,4 +158,7 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-181](DECISIONS.md#adr-181--route-the-stalled-mac-a6-method-and-windows-11-qualification) | 2026-10-15 PDT | Mac A6 owner / Windows 11 route | Mac A6 moves from DTrace to fs_usage (Software, after #435); Windows 11 is Michael's hands, batched; self-hosted runner rejected (public repo) |
 
-118 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-182](DECISIONS.md#adr-182--route-the-q-p2-1-any-subset-crash-mode-and-issue-wp-15-contract-app-1) | 2026-10-15 PDT | Q-P2-1 crash mode / WP-15 APP-1 | Verification authors the any-subset persistence mode and runs current engine; WP-15 contract issued for preflight with `tapectl cards` and `--report` additions |
+
+119 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

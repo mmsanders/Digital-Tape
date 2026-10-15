@@ -3794,3 +3794,41 @@ method. Michael's Windows sittings are batched wherever the work is ready togeth
 **Gate/reversal cost.** No contract, oracle, assertion, engine or format change. Rungs
 unchanged: Phase1 36/36, Phase2 4/12. WP14 physical A6, WP16 real-card/full, WP15 and all
 standing holds survive. Reversal is reassignment only.
+
+## ADR-182 — route the Q-P2-1 any-subset crash mode and issue WP-15 contract APP-1
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's request ("any possible work not blocked
+by me?"). Input as ADR-181.
+
+**Idle capacity.** Verification has no ready work: #146 waits on Michael's Windows rehearsal or
+Software #438. Software is queued with #435 and then #438. Two items are free of Michael's hands.
+
+**Q-P2-1 crash mode, routed.** Verification's Q-P2-1(a) answer (preflight 5 October, published at
+`6837102`) shows the two WP-10 crash modes, flush-required and write-through, never produce the
+state where a later block persists while an earlier one is lost. That answer specified a third
+mode, and ADR-168 requires arbitrary-persistence coverage before any write or batching change. It
+was never routed. It also bears on today's product: `tapefs` §8.1 already lets a port persist any
+subset of unflushed writes, and desktop OS caches over real cards do exactly that. **Decision:**
+Verification authors the any-subset persistence mode to its own published specification. It
+self-tests the mode, including the `(a,B)` mask, and runs it against the current pinned engine for
+the WP-10 operations. Small epochs are exhaustive; large ones use recorded seeds with stated
+bounds. A violation is a finding to PM, not an engine fix. No engine, port or batching change
+follows from this routing. PM rules Q-P2-1(b) on its result, before Phase 3 as the plan requires.
+
+**WP-15 contract APP-1 issued for preflight** (`docs/WP15-APP-CONTRACT.md`). The main choices:
+- one window with four states, and folders only;
+- `ingest` runs on each drop, so length and refusals show before the card is touched;
+- one card at a time instead of a picker, which satisfies G4 and removes wrong-card choices;
+- one erase confirmation, then provision, load and verify, with no automatic retry;
+- only the `tapectl` device children run elevated.
+
+Two additive host surfaces are named: `tapectl cards` (read-only, zero writes, refused disks never
+printed) and an opt-in `--report FILE` that writes counts-only progress and closed refusal IDs.
+Absent the new flags, existing outputs are unchanged, so INGEST-1 Stage1 and accepted WP-14
+evidence are untouched. Michael's taste items carry defaults and are not blocking: the fixed
+60-minute length, folders only, the message wording and one card at a time.
+Verification preflights APP-1 (R3) after the crash-mode work. The Software build issue follows
+that preflight, behind #435/#438. No lead is idle-assigned.
+
+**Gate/reversal cost.** Rungs unchanged: Phase1 36/36, Phase2 4/12. WP-15 stays rung 0 until
+built and disposed. All standing holds survive. Reversal is a contract amendment; nothing is built.
