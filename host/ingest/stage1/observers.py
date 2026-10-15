@@ -518,7 +518,8 @@ class FsUsage:
 
 # ---- Windows: Process Monitor ------------------------------------------------------------
 
-W_DEVICE = re.compile(r"^(\\\\\.\\PhysicalDrive\d+|\\\\\.\\[A-Za-z]:$|\\Device\\Harddisk)", re.I)
+# raw disk (\\.\PhysicalDriveN, \Device\HarddiskN) or volume (\\.\C:, shown by Procmon as "C:")
+W_DEVICE = re.compile(r"^(\\\\\.\\PhysicalDrive\d+|\\\\\.\\[A-Za-z]:\\?$|\\Device\\Harddisk|[A-Za-z]:\\?$)", re.I)
 
 
 class Procmon:
@@ -581,16 +582,22 @@ class Procmon:
             with open(self.pml, "rb") as f:
                 r = ProcmonLogsReader(f, should_get_stacktrace=False, should_get_details=False)
                 self.align["pml_events"] = len(r)
-                mism = 0
+                mism, samples = 0, []
                 self.parent = {}
                 for i in range(min(len(r), len(self.rows))):
                     e = r[i]
                     row = self.rows[i]
-                    if (row[col["PID"]] != str(e.process.pid) or row[col["Process Name"]] != e.process.process_name
-                            or (row[col["Path"]] or "") != (e.path or "")):
+                    diff = [k for k, a, b in (("pid", row[col["PID"]], str(e.process.pid)),
+                                              ("name", row[col["Process Name"]], e.process.process_name),
+                                              ("path", row[col["Path"]] or "", e.path or "")) if a != b]
+                    if diff:
                         mism += 1
+                        if len(samples) < 8:
+                            samples.append({"index": i, "fields": diff, "csv": row[:6],
+                                            "pml": [e.process.process_name, e.process.pid, str(e.operation), e.path]})
                     self.parent[i] = e.process.parent_pid
                 self.align["row_mismatches"] = mism
+                self.align["mismatch_samples"] = samples
         except Exception as x:  # recorded, and it fails every case's integrity
             self.align["pml_error"] = f"{type(x).__name__}: {x}"
         self.align["aligned"] = (self.align.get("pml_events") == len(self.rows)
@@ -694,6 +701,9 @@ class Procmon:
                 dst = re.search(r"FileName: (.*?)(?:, \w+: |$)", det)
                 rawops.append({"kind": "rename", "path": path, "dst": dst.group(1) if dst else None,
                                "noreplace": "ReplaceIfExists: False" in det, "ok": ok, "line": n, "result": res})
+                if ok and dst:  # the renaming handle now carries the new name; its close is logged there
+                    open_ok[path] = open_ok.get(path, 0) - 1
+                    open_ok[dst.group(1)] = open_ok.get(dst.group(1), 0) + 1
         return rawops, open_ok
 
     def normalize(self, trace, dest, stage_prefix, obsdir, seam, ctx):
@@ -727,8 +737,8 @@ class Procmon:
                 "subprocess.run([sys.argv[2],'-c','import sys;open(sys.argv[1]).read()',p]);"
                 "open(sys.argv[3],'w').close();"
                 "k=ctypes.windll.kernel32;k.CreateFileW.restype=ctypes.c_void_p;"
-                "h=k.CreateFileW('\\\\\\\\.\\\\PhysicalDrive0',0,3,None,3,0,None);"
-                "k.CloseHandle(ctypes.c_void_p(h)) if h not in (None,ctypes.c_void_p(-1).value) else None")
+                "[k.CloseHandle(ctypes.c_void_p(h)) for d in ('\\\\\\\\.\\\\PhysicalDrive0','\\\\\\\\.\\\\C:')"
+                " for h in [k.CreateFileW(d,0,3,None,3,0,None)] if h not in (None,ctypes.c_void_p(-1).value)]")
         self.selftest_token = str(d / "probe.txt")
         p = subprocess.run([str(self.probe_dir / "probe-parent.exe"), "-c", code, str(d / "probe.txt"), str(child),
                             str(d / "created.txt")], capture_output=True)
@@ -781,8 +791,16 @@ class Procmon:
                               "unowned_after_mutation": res["unowned_count"],
                               "rejected": res["unowned_count"] > 0 or res["multiply_owned"] > 0}
         self.partition(owners)
+        device_like = [[i] + self.rows[i][1:6] for i in idx
+                       if re.search(r"Physical|Harddisk|\\\\\.\\|\\Device\\", self.rows[i][col["Path"]], re.I)][:20]
+        probe_err = (d / "probe-stderr.txt").read_bytes().decode("utf-8", "replace")[-2000:]
+        pydir = str(self.probe_dir).lower()
+        probe_paths = sorted({(self.rows[i][col["Operation"]], self.rows[i][col["Path"]], self.rows[i][col["Result"]])
+                              for i in idx if not self.rows[i][col["Path"]].lower().startswith(pydir)})[:80]
         return finish_selftest(d, "procmon", checks, controls,
                                {"trace": "trace.txt", "trace_sha256": sha_file(trace), "session_alignment": self.align,
+                                "device_like_rows": device_like, "probe_stderr_tail": probe_err,
+                                "probe_paths_outside_python": probe_paths,
                                 "detection": "every captured session record has exactly one owner (a case run, a "
                                              "shipping rerun or this selftest); an extract missing any record "
                                              "leaves that session index unowned"})

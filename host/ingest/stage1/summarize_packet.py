@@ -42,6 +42,8 @@ def main():
             notequiv.append(c["id"])
     print(f"packet {root}: platform {index['platform']}/{index['architecture']}, observer {index.get('observer')}, "
           f"profile {index['profile']}, candidate {index['candidate_sha']}")
+    print(f"binaries: observation {index['binary_sha256']}, shipping {index.get('shipping_binary_sha256')}; "
+          f"config_sha256 {index['config_sha256']}")
     print(f"census {len(census)}: ran {ran}, unavailable {len(unavailable)}, missing {len(missing)}, "
           f"exit differs from descriptor {len(mismatch)}, shipping/observe byte differences {len(notequiv)}")
     for cid, why in unavailable:
@@ -58,6 +60,17 @@ def main():
         print(f"observer selftest: qualified={r.get('qualified')} checks={r.get('checks')}")
         for name, c in (r.get("false_pass_controls") or {}).items():
             print(f"  false-pass control {name}: rejected={c.get('rejected')}")
+    if st.exists():
+        for key in ("session_alignment", "device_like_rows", "probe_stderr_tail", "limitation"):
+            if key in r:
+                print(f"  {key}: {json.dumps(r[key], ensure_ascii=True)[:3000]}")
+    part = root / "observer-session" / "partition.json"
+    if part.exists():
+        pj = json.loads(part.read_text(encoding="utf-8"))
+        print(f"session partition: records={pj['records']} owned={pj['owned']} unowned={pj['unowned_count']} "
+              f"multiply_owned={pj['multiply_owned']} owners={len(pj['owners'])}")
+        for u in pj["unowned"][:10]:
+            print("  UNOWNED", json.dumps(u, ensure_ascii=True)[:300])
     incomplete = []
     for nat in sorted(root.glob("cases/*/native.json")) + sorted(root.glob("cases/*/comparisons/*/native.json")):
         d = json.loads(nat.read_text(encoding="utf-8"))
