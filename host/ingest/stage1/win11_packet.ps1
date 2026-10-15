@@ -31,7 +31,7 @@ $ErrorActionPreference = "Stop"
 $ProcmonZipSha256 = "80a6442b46af762ed1432f6fec3f7e20366bed62a2522b3486503398a40a1128"
 $Transport = @{
     "host/ingest/stage1/run_packet.py" = "bde40fda7f38a4ef468d6a652e1e8d44c088e8c0f809d180d164c4cbc0d38e12"
-    "host/ingest/stage1/observers.py" = "7d3b0994f3449161b0b7b38d7f8f0a457977e7aabf23f6b444c3f9b6225e9da1"
+    "host/ingest/stage1/observers.py" = "86d63eec46678a1788c2ac51425e03b4abaac4b6b9ba2cfe4d9dd1548f9577a0"
     "host/ingest/stage1/summarize_packet.py" = "48c175cf962542de3a43495067aaeee48c9099098e3bdbde0bcbeb4dbfd9e1e9"
 }
 

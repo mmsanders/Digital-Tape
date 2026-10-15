@@ -380,12 +380,18 @@ class FsUsage:
                 print("  | " + l, file=sys.stderr)
 
     def _wait_gate(self, tag, trace, timeout=30):
-        deadline = time.time() + timeout
+        """Run gate processes until one of them appears in the trace. fs_usage emits kdebug
+        events with some delay, so any gate issued during this wait counts; the first one
+        seen is returned (every gate here was issued after the state being bracketed)."""
+        deadline, issued = time.time() + timeout, []
         while time.time() < deadline:
-            token = self._gate(tag)
-            if token in Path(trace).read_bytes().decode("utf-8", "replace"):
-                return token
-            time.sleep(0.05)
+            if len(issued) < 50:
+                issued.append(self._gate(tag))
+            time.sleep(0.1)
+            text = Path(trace).read_bytes().decode("utf-8", "replace")
+            seen = [t for t in issued if t in text]
+            if seen:
+                return seen[0]
         return None
 
     def after(self, trace, ctx):
