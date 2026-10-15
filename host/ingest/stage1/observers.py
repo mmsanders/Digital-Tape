@@ -325,7 +325,9 @@ class FsUsage:
         self.tools = root / "observer-tools"
         self.tools.mkdir(parents=True, exist_ok=True)
         for src, name in (("/bin/sh", GATE), ("/bin/sh", "probe-parent"), ("/bin/cat", "probe-child")):
-            shutil.copy2(src, self.tools / name)
+            # contents and mode only: system binaries carry flags a user may not copy
+            shutil.copyfile(src, self.tools / name)
+            os.chmod(self.tools / name, 0o755)
 
     def stop(self):
         # keep identities, not copies of system binaries
