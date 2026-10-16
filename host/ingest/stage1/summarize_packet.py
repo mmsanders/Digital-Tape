@@ -81,6 +81,30 @@ def main():
     print(f"native records not complete: {len(incomplete)}")
     for x in incomplete[:25]:
         print("  INCOMPLETE", *x)
+    # Diagnostic only: the imported package's own audit.transaction predicates, unchanged,
+    # applied to every native record. raw_review is set only so the predicates evaluate (it is
+    # Verification's receipt, never Software's); a record passing here is not reviewed.
+    sys.path.insert(0, str(Path(a.package).resolve()))
+    try:
+        import audit
+    except ImportError as e:
+        audit = None
+        print(f"transaction diagnostic unavailable: {e}")
+    if audit is not None:
+        fails = {}
+        nats = sorted(root.glob("cases/*/native.json")) + sorted(root.glob("cases/*/comparisons/*/native.json"))
+        for nat in nats:
+            d = json.loads(nat.read_text(encoding="utf-8"))
+            if d.get("unavailable"):
+                continue
+            try:
+                audit.transaction(dict(d, raw_review="PASS"))
+            except Exception as e:
+                fails.setdefault(str(e), []).append(nat.relative_to(root).as_posix())
+        print(f"transaction diagnostic (unchanged audit.transaction; not a review): "
+              f"{sum(map(len, fails.values()))} of {len(nats)} native records fail")
+        for why, ids in sorted(fails.items(), key=lambda x: -len(x[1])):
+            print(f"  {len(ids)} x {why}: {', '.join(ids[:5])}")
     print("This summary is Software's observation only; it is not a review, receipt or PASS.")
     return 1 if (mismatch or notequiv or missing) else 0
 
