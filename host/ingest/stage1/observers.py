@@ -583,7 +583,7 @@ D_SCRIPT = r"""#pragma D option quiet
 #pragma D option switchrate=20hz
 #pragma D option bufsize=64m
 #pragma D option dynvarsize=64m
-#pragma D option cleanrate=499hz
+#pragma D option cleanrate=50hz
 #pragma D option strsize=%(strsize)d
 
 inline int TR = (%(names)s);
@@ -596,14 +596,16 @@ syscall::openat:entry, syscall::openat_nocancel:entry, syscall::mkdirat:entry,
 syscall::fstatat64:entry, syscall::fstatat:entry, syscall::faccessat:entry
 /TR/ { self->u0 = arg1; self->u1 = 0; self->fd = arg0; self->a = arg2; self->in = 1; }
 
+/* Rename paths are copied at entry (they are rare, so the thread-local strings cost
+   little); the other calls copy their one path at return. */
 syscall::rename:entry
-/TR/ { self->u0 = arg0; self->u1 = arg1; self->fd = -1; self->a = 0; self->in = 1; }
+/TR/ { self->r0 = copyinstr(arg0); self->r1 = copyinstr(arg1); self->u0 = 0; self->u1 = 0; self->fd = -1; self->a = 0; self->in = 1; self->rn = 1; }
 
 syscall::renameat:entry
-/TR/ { self->u0 = arg1; self->u1 = arg3; self->fd = arg0; self->a = 0; self->in = 1; }
+/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = 0; self->in = 1; self->rn = 1; }
 
 syscall::renameatx_np:entry
-/TR/ { self->u0 = arg1; self->u1 = arg3; self->fd = arg0; self->a = arg4; self->in = 1; }
+/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = arg4; self->in = 1; self->rn = 1; }
 
 syscall::close:entry, syscall::close_nocancel:entry, syscall::fsync:entry, syscall::fsync_nocancel:entry
 /TR/ { self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = 0; self->in = 1; }
@@ -613,13 +615,17 @@ syscall::fcntl:entry, syscall::fcntl_nocancel:entry
 
 syscall:::return
 /self->in/ {
-  this->s0 = self->u0 ? copyinstr(self->u0) : "";
-  this->s1 = self->u1 ? copyinstr(self->u1) : "";
+  this->s0 = self->rn ? self->r0 : self->u0 ? copyinstr(self->u0) : "";
+  this->s1 = self->rn ? self->r1 : "";
   printf("R %%d %%d %%d %%d %%s %%s ret=%%d err=%%d fd=%%d a=%%d l0=%%d l1=%%d|%%s|%%s\n", timestamp, pid, tid,
          ++self->n, execname, probefunc, (int)arg0, errno, (int)self->fd, (int)self->a,
          strlen(this->s0), strlen(this->s1), this->s0, this->s1);
-  self->u0 = 0; self->u1 = 0; self->fd = 0; self->a = 0; self->in = 0;
 }
+
+/* A separate clause: an error in the clause above (reported, so the run is incomplete)
+   must not leave this call's state behind for the thread's next syscall. */
+syscall:::return
+/self->in/ { self->r0 = 0; self->r1 = 0; self->rn = 0; self->u0 = 0; self->u1 = 0; self->fd = 0; self->a = 0; self->in = 0; }
 
 proc:::exec-success /TR/ { printf("E %%d %%d %%d %%d %%s\n", timestamp, pid, tid, ++self->n, execname); }
 proc:::signal-send /TR/ { printf("S %%d %%d %%d %%d %%s sig=%%d\n", timestamp, pid, tid, ++self->n, execname, args[2]); }
