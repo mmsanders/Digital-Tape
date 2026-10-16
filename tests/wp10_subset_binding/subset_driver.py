@@ -311,6 +311,14 @@ class Campaign:
         self.snaps.close()
 
 
+def selected(key, only, exclude=None) -> bool:
+    """--only / --exclude: comma-separated prefixes of the "/"-joined scenario key."""
+    k = "/".join(map(str, key))
+    if only and not any(k.startswith(p) for p in only.split(",")):
+        return False
+    return not (exclude and any(k.startswith(p) for p in exclude.split(",")))
+
+
 def tasks(counts: dict, second: int) -> list:
     """Every run coordinate, in a fixed order, so shards partition the campaign exactly."""
     out = []
@@ -396,7 +404,8 @@ def campaign_main(binding, argv=None) -> int:
     import sys
     ap = argparse.ArgumentParser(description=binding.__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--evidence", type=Path, required=True)
-    ap.add_argument("--only", help="scenario key prefix (development runs)")
+    ap.add_argument("--only", help="comma-separated scenario key prefixes to run")
+    ap.add_argument("--exclude", help="comma-separated scenario key prefixes to leave out")
     ap.add_argument("--second-cut", type=int, default=2, help="first-cut images re-run per scenario")
     ap.add_argument("--shard", default="0/1", help="I/N: run the tasks whose index %% N == I")
     ap.add_argument("--jobs", type=int, default=1, help="parallel worker processes in this shard")
@@ -407,7 +416,7 @@ def campaign_main(binding, argv=None) -> int:
     try:
         w = binding.make_worker(tmp)
         counts = {}
-        for key in binding.scenarios(a.only):
+        for key in [k for k in binding.scenarios(None) if selected(k, a.only, a.exclude)]:
             r, _, _ = binding.s_run(w, tmp, key, None, "-", "-", "-", "-")
             counts[key] = (r["op_units"], r["op_barriers"], r["op_calls"])
         w.close()
@@ -426,6 +435,7 @@ def campaign_main(binding, argv=None) -> int:
         with mp.get_context("spawn").Pool(a.jobs) as pool:
             res = pool.map(_run_part, jobs)
     summary = {"format": "WP10-SUBSET-SUMMARY-1", "binding": binding.NAME, "shard": a.shard,
+               "only": a.only, "exclude": a.exclude,
                "tasks_total": len(allt), "tasks_this_shard": len(mine), "parts": res,
                "scenarios": {"/".join(map(str, k)): {"op_units": v[0], "op_barriers": v[1], "op_calls": v[2]}
                              for k, v in counts.items()},
