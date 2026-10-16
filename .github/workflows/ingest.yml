@@ -119,7 +119,7 @@ jobs:
             # The same Procmon that stage1/win11_packet.ps1 pins, so the observer qualified
             # here is the one Michael's script will run; a Microsoft update shows up here first.
             pin=$(sed -n 's/^\$ProcmonZipSha256 = "\([0-9a-f]*\)".*/\1/p' host/ingest/stage1/win11_packet.ps1)
-            got=$(sha256sum "$RUNNER_TEMP/procmon.zip" | cut -d' ' -f1)
+            got=$(sha256sum < "$RUNNER_TEMP/procmon.zip" | cut -d' ' -f1)   # stdin: Git-Bash escapes a backslash path with a leading "\"
             [ -n "$pin" ] && [ "$got" = "$pin" ] || { echo "ProcessMonitor.zip is $got; win11_packet.ps1 pins '$pin': re-pin both after qualifying the new one"; exit 1; }
             unzip -o -q "$RUNNER_TEMP/procmon.zip" -d "$RUNNER_TEMP/procmon"
             python -m pip install procmon-parser==0.4.0
