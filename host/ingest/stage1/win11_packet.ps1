@@ -34,7 +34,7 @@ $ErrorActionPreference = "Stop"
 # committed transport files, so this script cannot silently go stale.
 $ProcmonZipSha256 = "80a6442b46af762ed1432f6fec3f7e20366bed62a2522b3486503398a40a1128"
 $Transport = @{
-    "host/ingest/stage1/run_packet.py" = "7b6b423a87e414ccb71f9b85663fb5ddea2ae5bed0dc2c383e18921ae38d2b3f"
+    "host/ingest/stage1/run_packet.py" = "85e953d67322f577b9d85354b341f4a6b57f8162cf3af7ed16a2e07cc5b00056"
     "host/ingest/stage1/observers.py" = "9828fcc6f400ab04fb0f084651ec938ad7894002c47e61cc4938c31e2f3db26e"
     "host/ingest/stage1/summarize_packet.py" = "48c175cf962542de3a43495067aaeee48c9099098e3bdbde0bcbeb4dbfd9e1e9"
 }

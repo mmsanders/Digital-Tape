@@ -34,6 +34,17 @@ def sha_file(p):
     return h.hexdigest()
 
 
+def raw_arg(a):
+    """One argv element as JSON. Valid Unicode stays a string; an element that is not (an
+    APFS invalid-UTF-8 boundary argument, decoded by os.fsdecode with surrogateescape)
+    keeps its exact native bytes, since a JSON string cannot hold them."""
+    try:
+        a.encode("utf-8")
+        return a
+    except UnicodeEncodeError:
+        return {"bytes_hex": os.fsencode(a).hex(), "ascii": ascii(a)}
+
+
 def canonical(obj):
     return (json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
 
@@ -354,7 +365,8 @@ class Runner:
             "scenario": None, "exit": code, "raw_trace_sha256": None, "observer": self.obs.kind,
             "observer_selftest": self.selftest_ok, "seam_events": seam, "dest_after": dest_after,
             "owned_stage_after": bool(stage_left), "unrelated_unchanged": sha_file(unrelated) == before_unrel,
-            "binary_sha256": sha_file(self.a.observe_bin), "argv": argv, "env": env, "process_exit_status": p.returncode,
+            "binary_sha256": sha_file(self.a.observe_bin), "argv": [raw_arg(x) for x in argv], "env": env,
+            "process_exit_status": p.returncode,
         }
         if self.obs.deferred:
             Path(trace).write_bytes(b"")
@@ -410,7 +422,8 @@ class Runner:
             (cdir / "stderr.txt").write_bytes(err)
             shutil.move(str(trace), cdir / "trace.txt")
             self.write_native(native, cdir / "native.json", cdir / "trace.txt")
-            rec = {"exit": code, "argv": [os.path.basename(a.observe_bin)] + tail, "config_sha256": self.config_sha,
+            rec = {"exit": code, "argv": [raw_arg(x) for x in [os.path.basename(a.observe_bin)] + tail],
+                   "config_sha256": self.config_sha,
                    "stdout_file": f"cases/{n:04d}/stdout.txt", "stderr_file": f"cases/{n:04d}/stderr.txt",
                    "native_record": f"cases/{n:04d}/native.json", "raw_trace": f"cases/{n:04d}/trace.txt"}
             if native["dest_after"] == ["audio.wav", "manifest.json"]:
@@ -507,7 +520,7 @@ class Runner:
         with self.lock:
             self.unobserved.append((p.pid, k, f"shipping:{cdir.name}"))
         res = {"shipping_binary_sha256": sha_file(self.a.shipping_bin), "exit": p.returncode,
-               "argv": [os.path.basename(self.a.shipping_bin)] + argv[1:]}
+               "argv": [raw_arg(x) for x in [os.path.basename(self.a.shipping_bin)] + argv[1:]]}
         if p.returncode == 0:
             for name in ("audio.wav", "manifest.json"):
                 res[name] = {"shipping_sha256": sha_file(d2 / name),
@@ -553,7 +566,7 @@ class Runner:
             shutil.move(str(d2 / "audio.wav"), sub / "audio.wav")
             shutil.move(str(d2 / "manifest.json"), sub / "manifest.json")
         base = f"cases/{n:04d}/comparisons/0"
-        out.append({"mode": mode, "exit": code, "argv": [os.path.basename(self.a.observe_bin)] + argv,
+        out.append({"mode": mode, "exit": code, "argv": [raw_arg(x) for x in [os.path.basename(self.a.observe_bin)] + argv],
                     "manifest": base + "/manifest.json", "wav": base + "/audio.wav",
                     "raw_trace": base + "/trace.txt", "native_record": base + "/native.json"})
         return out
