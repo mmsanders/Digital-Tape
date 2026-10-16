@@ -107,6 +107,101 @@ static unsigned char *g_play;
 static unsigned char *g_rec;
 static int16_t g_zero_pcm[1 * TAPE_CHANNELS];
 
+/* ---- Any-subset transport (Product #440; tests/wp10_subset_r1/ADAPTER.md) ---------------
+ * Commands S and R only. Transports actual callbacks: while g_sub.on, every write unit
+ * (512 bytes; a multi-block call logs one unit per block, keeping its call number) and
+ * every barrier result is appended to the trace, from fixture load on. Persistence
+ * selection belongs to tests/wp10_subset_r1/model.py in the driver, never to this worker;
+ * the worker keeps no durable image of its own in this mode. A cut ends the device: the
+ * interrupted call and every later callback fail and log nothing more. The old commands
+ * B and C never set g_sub.on and are unchanged. */
+struct sub_state {
+    bool on;
+    bool op;                    /* operation phase (after setup) */
+    FILE *trace;
+    unsigned long next_id;
+    unsigned long calls;
+    unsigned long op_units, op_calls, op_flushes, flushes;
+    long cut_unit;              /* cut before op unit N; -1 none */
+    long cut_flush;             /* cut at entry of op barrier N; -1 none */
+    long err_call;              /* op write call N fails (attempted, not visible); -1 none */
+    long err_flush;             /* op barrier N fails; -1 none */
+    bool cut, err_fired;
+};
+static struct sub_state g_sub;
+static bool is_superblock_lba(uint32_t lba);
+
+static void sub_hex(FILE *fp, const unsigned char *p, size_t n)
+{
+    static const char d[] = "0123456789abcdef";
+    size_t i;
+    for (i = 0u; i < n; i++) {
+        fputc(d[(p[i] >> 4) & 15u], fp);
+        fputc(d[p[i] & 15u], fp);
+    }
+}
+
+static void sub_unit(uint32_t lba, const unsigned char *src, bool ack)
+{
+    fprintf(g_sub.trace, "{\"t\":\"W\",\"id\":%lu,\"call\":%lu,\"lba\":%u,\"ack\":%s,\"phase\":\"%s\",\"hex\":\"",
+            g_sub.next_id++, g_sub.calls, lba, ack ? "true" : "false", g_sub.op ? "op" : "setup");
+    sub_hex(g_sub.trace, src, BLOCK);
+    fputs("\"}\n", g_sub.trace);
+}
+
+static int sub_write(uint32_t lba, uint32_t count, const unsigned char *src)
+{
+    uint32_t i, n = count;
+    bool fail = false;
+    if (g_sub.cut) return -1;
+    if (!g_sub.op && g_devctx.setup_repair_fault && is_superblock_lba(lba)) {
+        fail = true;                       /* the closure seed's setup repair fault, as in B/C */
+        g_devctx.setup_repair_fault_fired = true;
+    }
+    if (g_sub.op && g_sub.err_call >= 0 && g_sub.op_calls == (unsigned long)g_sub.err_call) {
+        fail = true;                       /* attempted, eligible to persist, not visible */
+        g_sub.err_fired = true;
+    }
+    if (g_sub.op && g_sub.cut_unit >= 0 && g_sub.op_units + count > (unsigned long)g_sub.cut_unit) {
+        n = (uint32_t)((unsigned long)g_sub.cut_unit - g_sub.op_units);
+        g_sub.cut = true;                  /* units before the cut were attempted */
+    }
+    for (i = 0u; i < n; i++) {
+        sub_unit(lba + i, src + (size_t)i * BLOCK, !fail && !g_sub.cut);
+        if (!fail && !g_sub.cut) memcpy(g_working + (size_t)(lba + i) * BLOCK, src + (size_t)i * BLOCK, BLOCK);
+    }
+    if (g_sub.cut) {
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"unit\",\"op_unit\":%ld,\"call\":%lu,\"units_in_call\":%u}\n",
+                g_sub.cut_unit, g_sub.calls, n);
+    }
+    g_sub.calls++;
+    if (g_sub.op) {
+        g_sub.op_calls++;
+        g_sub.op_units += n;
+    }
+    return (fail || g_sub.cut) ? -1 : 0;
+}
+
+static int sub_flush(void)
+{
+    bool ok = true;
+    if (g_sub.cut) return -1;
+    if (g_sub.op && g_sub.cut_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.cut_flush) {
+        g_sub.cut = true;
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"flush_entry\",\"op_flush\":%ld}\n", g_sub.cut_flush);
+        return -1;
+    }
+    if (g_sub.op && g_sub.err_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.err_flush) {
+        ok = false;
+        g_sub.err_fired = true;
+    }
+    fprintf(g_sub.trace, "{\"t\":\"F\",\"ord\":%lu,\"ok\":%s,\"phase\":\"%s\"}\n",
+            g_sub.flushes, ok ? "true" : "false", g_sub.op ? "op" : "setup");
+    g_sub.flushes++;
+    if (g_sub.op) g_sub.op_flushes++;
+    return ok ? 0 : -1;
+}
+
 static const char *result_name(tape_result r)
 {
     switch (r) {
@@ -225,6 +320,7 @@ static int dev_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
     size_t off, n;
     (void)ctx;
     if (dst == NULL || !range_ok(lba, count)) return -1;
+    if (g_sub.on && g_sub.cut) return -1;
     off = (size_t)lba * BLOCK;
     n = (size_t)count * BLOCK;
     memcpy(dst, g_working + off, n);
@@ -246,6 +342,7 @@ static int dev_write(void *ctx, uint32_t lba, uint32_t count, const void *src)
     (void)ctx;
 
     if (src == NULL || !range_ok(lba, count)) return -1;
+    if (g_sub.on) return sub_write(lba, count, (const unsigned char *)src);
 
     if (!g_devctx.scope && g_devctx.setup_repair_fault && is_superblock_lba(lba)) {
         g_devctx.setup_repair_fault_fired = true;
@@ -308,6 +405,7 @@ static int dev_flush(void *ctx)
     unsigned ordinal;
     (void)ctx;
 
+    if (g_sub.on) return sub_flush();
     if (!g_devctx.scope) {
         memcpy(g_durable, g_working, g_len);
         return 0;
@@ -683,6 +781,133 @@ static int run_injected(unsigned long case_index,
     return 0;
 }
 
+/* ---- S and R: any-subset transport commands (Product #440) ------------------------------ */
+
+static int sub_load_path(const char *path)
+{
+    FILE *fp = fopen(path, "rb");
+    size_t got;
+    if (fp == NULL) return -1;
+    got = fread(g_durable, 1u, g_len, fp);
+    if (got != g_len || fgetc(fp) != EOF) { fclose(fp); return -1; }
+    fclose(fp);
+    memcpy(g_working, g_durable, g_len);
+    memset(&g_devctx, 0, sizeof g_devctx);
+    g_devctx.durable = g_durable;
+    g_devctx.working = g_working;
+    g_devctx.len = g_len;
+    g_devctx.blocks = g_blocks;
+    return 0;
+}
+
+static int sub_save(const char *path, const unsigned char *p)
+{
+    FILE *fp = fopen(path, "wb");
+    if (fp == NULL) return -1;
+    if (fwrite(p, 1u, g_len, fp) != g_len) { fclose(fp); return -1; }
+    return fclose(fp) == 0 ? 0 : -1;
+}
+
+static long sub_arg(const char *s)
+{
+    return strcmp(s, "-") == 0 ? -1L : strtol(s, NULL, 10);
+}
+
+/* S family variant seed base cut_unit cut_flush err_call err_flush trace initial_out
+ * base is "-" (the scenario's fixture) or "@<path>" (an image, e.g. a first-cut
+ * projection after actual recovery). Setup runs exactly as for B/C, but every callback
+ * is transported; the setup-phase repair fault of the closure seeds stays an actual
+ * failed (unacknowledged, eligible) write. */
+static int run_subset(char **f)
+{
+    const char *family = f[1], *variant = f[2], *seed = f[3], *base = f[4];
+    char name[96];
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    bool setup_fault = false, needs_repair = false;
+    tape *t = NULL;
+    tape_result r = TAPE_ERR_INVALID_ARG;
+    int setup = -1;
+
+    if (strcmp(base, "-") == 0) {
+        if (fixture_name(name, sizeof name, family, variant, seed) != 0 || load_fixture(name) != 0) return -1;
+    } else if (base[0] != '@' || sub_load_path(base + 1) != 0) {
+        return -1;
+    }
+    if (sub_save(f[10], g_durable) != 0) return -1;
+    hash_bytes(g_durable, g_len, digest);
+    init_dev();
+
+    memset(&g_sub, 0, sizeof g_sub);
+    g_sub.trace = fopen(f[9], "w");
+    if (g_sub.trace == NULL) return -1;
+    g_sub.cut_unit = sub_arg(f[5]);
+    g_sub.cut_flush = sub_arg(f[6]);
+    g_sub.err_call = sub_arg(f[7]);
+    g_sub.err_flush = sub_arg(f[8]);
+    g_sub.on = true;
+
+    if (strcmp(family, "record_commit") == 0) setup = setup_record(variant, &t);
+    else if (strcmp(family, "reset_b") == 0) setup = setup_reset(variant, &t);
+    else if (strcmp(family, "stage_clear") == 0) setup = setup_stage(seed, &t, &setup_fault, &needs_repair);
+    g_devctx.setup_repair_fault = false;
+    if (setup == 0) {
+        g_sub.op = true;
+        r = run_operation(t, family, variant);
+        g_sub.op = false;
+    }
+    g_sub.on = false;
+    fclose(g_sub.trace);
+    g_sub.trace = NULL;
+
+    printf("{\"format\":\"WP10-SUBSET-RUN-1\",\"family\":\"%s\",\"variant\":\"%s\",\"seed\":\"%s\","
+           "\"base\":\"%s\",\"initial_sha256\":\"", family, variant, seed, base);
+    hex_bytes(digest, sizeof digest);
+    printf("\",\"setup_ok\":%s,\"setup_repair_fault_fired\":%s,\"setup_needs_repair\":%s,"
+           "\"operation_result\":\"%s\",\"units\":%lu,\"calls\":%lu,\"barriers\":%lu,"
+           "\"op_units\":%lu,\"op_calls\":%lu,\"op_barriers\":%lu,\"cut_fired\":%s,\"error_fired\":%s}\n",
+           setup == 0 ? "true" : "false", g_devctx.setup_repair_fault_fired ? "true" : "false",
+           needs_repair ? "true" : "false", setup == 0 ? result_name(r) : "SETUP_FAILED",
+           g_sub.next_id, g_sub.calls, g_sub.flushes, g_sub.op_units, g_sub.op_calls,
+           g_sub.op_flushes, g_sub.cut ? "true" : "false", g_sub.err_fired ? "true" : "false");
+    fflush(stdout);
+    return 0;
+}
+
+/* R image side: a fresh engine (instance and rings zeroed) mounts a device whose durable
+ * and working bytes are exactly the image; nothing from any earlier run survives. Emits
+ * the raw image snapshot, the mount result and public info, and the durable snapshot
+ * after the mount (which may itself repair through ordinary flushes). */
+static int run_remount(char **f)
+{
+    struct snapshot pre, post;
+    tape *t = NULL;
+    tape_info info;
+    tape_result mr, ir = TAPE_ERR_NOT_MOUNTED;
+    tape_side side = strcmp(f[2], "A") == 0 ? TAPE_SIDE_A : TAPE_SIDE_B;
+
+    memset(&info, 0, sizeof info);
+    if (sub_load_path(f[1]) != 0) return -1;
+    init_dev();
+    capture_snapshot(&pre);
+    mr = fresh_mount(side, &t);
+    if (mr == TAPE_OK) ir = tape_get_info(t, &info);
+    capture_snapshot(&post);
+    printf("{\"format\":\"WP10-SUBSET-REMOUNT-1\",\"side\":\"%s\",\"remount_result\":\"%s\","
+           "\"info_result\":\"%s\",\"info\":{\"writable\":%s,\"side_b_valid\":%s,\"needs_repair\":%s,"
+           "\"entry_count\":%u,\"total_frames\":%llu,\"total_chunks\":%u,\"free_chunks\":%u},"
+           "\"image_snapshot\":",
+           side == TAPE_SIDE_A ? "A" : "B", result_name(mr), result_name(ir),
+           info.writable ? "true" : "false", info.side_b_valid ? "true" : "false",
+           info.needs_repair ? "true" : "false", (unsigned)info.entry_count,
+           (unsigned long long)info.total_frames, (unsigned)info.total_chunks, (unsigned)info.free_chunks);
+    emit_snapshot(&pre);
+    fputs(",\"after_mount_snapshot\":", stdout);
+    emit_snapshot(&post);
+    fputs("}\n", stdout);
+    fflush(stdout);
+    return 0;
+}
+
 static int split_tabs(char *line, char **fields, int max_fields)
 {
     int n = 0;
@@ -744,6 +969,14 @@ int main(int argc, char **argv)
         if (strcmp(f[0], "D") == 0) break;
         if (strcmp(f[0], "B") == 0) {
             if (n != 4 || compute_baseline(f[1], f[2], f[3]) != 0) return 2;
+            continue;
+        }
+        if (strcmp(f[0], "S") == 0) {
+            if (n != 11 || run_subset(f) != 0) return 2;
+            continue;
+        }
+        if (strcmp(f[0], "R") == 0) {
+            if (n != 3 || run_remount(f) != 0) return 2;
             continue;
         }
         if (strcmp(f[0], "C") == 0) {
