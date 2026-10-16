@@ -257,6 +257,7 @@ class Campaign:
     def run(self, key, base=None, cut_unit="-", cut_flush="-", err_call="-", err_flush="-",
             label=None, extra=None):
         res, trace, initial = self.b.s_run(self.w, self.tmp, key, base, cut_unit, cut_flush, err_call, err_flush)
+        self.last_trace = trace
         isha = sha(initial)
         ip = self.ev / "initial" / f"{isha}.img.gz"
         if not ip.exists():
@@ -311,6 +312,61 @@ class Campaign:
         self.snaps.close()
 
 
+# ---- the bounded unit-boundary plan (Verification #186, "long-epoch scale") ---------------
+#
+# For an operation with U actual units, the union (deduplicated, clamped into 0..U) of:
+#   0..8 and max(0, U-8)..U;  2^k-1, 2^k, 2^k+1 for every power of two <= U;
+#   1024j-1, 1024j, 1024j+1 for every positive 1024j <= U;
+#   every metadata/identity/index write boundary (each such call's first and end unit
+#   boundary) and the boundaries adjacent to it;  every barrier entry's unit boundary and
+#   its two neighbours.
+# Unit boundary k is the cut after k units. A metadata/identity/index unit is one outside the
+# chunk area of the public layout (engine/include/tape.h: below TAPE_LBA_CHUNK_BASE, or the
+# mirror superblock in the last block). Error writes: every call that contains a unit next to
+# a selected boundary, and every metadata/identity/index call. Barrier entries and barrier
+# errors: all. The selection is unit-coordinate SAMPLING of a long copy, never every boundary.
+
+TAPE_LBA_CHUNK_BASE = 2048
+
+
+def boundary_plan(trace: list[dict], nblocks: int) -> dict:
+    units = [r for r in trace if r["t"] == "W"]
+    U = len(units)
+    want = set(range(0, 9)) | set(range(max(0, U - 8), U + 1))
+    k = 1
+    while k <= U:
+        want |= {k - 1, k, k + 1}
+        k *= 2
+    for j in range(1024, U + 1, 1024):
+        want |= {j - 1, j, j + 1}
+    calls, meta_calls = {}, set()
+    for i, u in enumerate(units):
+        calls.setdefault(u["call"], []).append(i)
+        if u["lba"] < TAPE_LBA_CHUNK_BASE or u["lba"] == nblocks - 1:
+            meta_calls.add(u["call"])
+    for c in meta_calls:
+        first, end = calls[c][0], calls[c][-1] + 1
+        want |= {first - 1, first, first + 1, end - 1, end, end + 1}
+    n = 0
+    for r in trace:
+        if r["t"] == "W":
+            n += 1
+        elif r["t"] == "F":
+            want |= {n - 1, n, n + 1}
+    cuts = sorted(x for x in want if 0 <= x <= U)
+    call_of = [u["call"] for u in units]
+    err_calls = set(meta_calls)
+    for x in cuts:
+        for i in (x - 1, x):
+            if 0 <= i < U:
+                err_calls.add(call_of[i])
+    order = sorted(calls)          # error_write coordinates are call ordinals, as in tasks()
+    return {"plan": "v186-bounded", "label": "SAMPLED unit coordinates (not every boundary)",
+            "op_units": U, "cut_units": cuts,
+            "error_write_calls": sorted(order.index(c) for c in err_calls),
+            "metadata_calls": len(meta_calls), "barriers": sum(1 for r in trace if r["t"] == "F")}
+
+
 def selected(key, only, exclude=None) -> bool:
     """--only / --exclude: comma-separated prefixes of the "/"-joined scenario key."""
     k = "/".join(map(str, key))
@@ -319,17 +375,49 @@ def selected(key, only, exclude=None) -> bool:
     return not (exclude and any(k.startswith(p) for p in exclude.split(",")))
 
 
-def tasks(counts: dict, second: int) -> list:
-    """Every run coordinate, in a fixed order, so shards partition the campaign exactly."""
+def tasks(counts: dict, second: int, bounded: dict | None = None) -> list:
+    """Every run coordinate, in a fixed order, so shards partition the campaign exactly.
+    With a bounded plan for a key, its unit cuts and error writes are the plan's."""
     out = []
     for key, (u, b, k) in counts.items():
+        bp = (bounded or {}).get(key)
         out.append((key, "complete", None))
-        out += [(key, "cut_unit", i) for i in range(u + 1)]
+        out += [(key, "cut_unit", i) for i in (bp["cut_units"] if bp else range(u + 1))]
         out += [(key, "cut_barrier_entry", j) for j in range(b)]
-        out += [(key, "error_write", j) for j in range(k)]
+        out += [(key, "error_write", j) for j in (bp["error_write_calls"] if bp else range(k))]
         out += [(key, "error_barrier", j) for j in range(b)]
         out += [(key, "second", n) for n in range(second)]
     return out
+
+
+def bounded_bases(c: Campaign, key, cuts: list):
+    """Two DISTINCT first-cut durable bases for the bounded plan: the first distinct image
+    over the selected boundaries in order, and the first distinct LATER-ONLY projection (a
+    later event persisted while an earlier one did not), else the next distinct image.
+    Recomputed from actual runs. Returns the bases found (possibly fewer than two) and every
+    distinct image identity enumerated."""
+    first, later, nxt, seen = None, None, None, {}
+    for i in cuts:
+        _, dev, proj = c.run(key, cut_unit=i, label="first_cut_for_second")
+        ids = [e.id for e in dev.events]
+        for q in proj:
+            h = q["image_sha256"]
+            if h in seen:
+                continue
+            sel = set(q["landing_order"])
+            lo = bool(sel) and any(e not in sel and e < max(sel) for e in ids)
+            seen[h] = {"first_cut_op_unit": i, "later_only": lo}
+            item = (i, q, materialize(dev, q["landing_order"], len(dev.durable)), lo)
+            if first is None:
+                first = item
+            elif lo and later is None:
+                later = item
+            elif nxt is None:
+                nxt = item
+        if first is not None and later is not None:
+            break
+    bases = [b for b in (first, later or nxt) if b is not None]
+    return bases, seen
 
 
 def first_cut_base(c: Campaign, key, u: int, n: int):
@@ -346,7 +434,7 @@ def first_cut_base(c: Campaign, key, u: int, n: int):
     return None
 
 
-def do_task(c: Campaign, tmp: Path, task, counts: dict) -> None:
+def do_task(c: Campaign, tmp: Path, task, counts: dict, bounded: dict | None = None) -> None:
     key, kind, x = task
     why = getattr(c.b, "unreachable", lambda k, kd, v: None)(key, kind, x)
     if why:
@@ -365,6 +453,31 @@ def do_task(c: Campaign, tmp: Path, task, counts: dict) -> None:
         c.run(key, err_call=x, label="error_write")
     elif kind == "error_barrier":
         c.run(key, err_flush=x, label="error_barrier")
+    elif kind == "second" and (bounded or {}).get(key):
+        # Bounded plan: one of two DISTINCT first-cut bases, RAM destroyed (a fresh run from
+        # the base's bytes only), and the same bounded plan applied to the second run's own
+        # actual trace. Fewer than two distinct bases is recorded, never duplicated.
+        bases, seen = bounded_bases(c, key, bounded[key]["cut_units"])
+        if x >= len(bases):
+            c.runs.write(json.dumps({"format": "WP10-SUBSET-RUN-ROW-1", "binding": c.b.NAME, "label": "second",
+                                     "scenario": list(key), "coordinate_index": x,
+                                     "not_available": "only %d distinct first-cut base(s) exist over the bounded plan"
+                                                      % len(bases),
+                                     "enumerated_first_cut_images": seen}, sort_keys=True) + "\n")
+            return
+        i, q, img, lo = bases[x]
+        p = tmp / "second-base.img"
+        p.write_bytes(img)
+        tag = {"first_cut_op_unit": i, "first_mask": q["mask"], "first_landing_order": q["landing_order"],
+               "first_image_sha256": q["image_sha256"], "second_base_index": x, "later_only": lo,
+               "base_selection": "first distinct" if x == 0 else ("later-only" if lo else "next distinct")}
+        r2, dev2, _ = c.run(key, base=p, label="second_complete", extra=tag)
+        if r2.get("setup_ok", True):
+            bp2 = boundary_plan(c.last_trace, len(img) // BLOCK)
+            tag["second_plan"] = {k: v for k, v in bp2.items() if k != "cut_units"}
+            tag["second_plan"]["cut_units_sha256"] = sha(_canon(bp2["cut_units"]))
+            for j in bp2["cut_units"]:
+                c.run(key, base=p, cut_unit=j, label="second_cut", extra=tag)
     elif kind == "second":
         # Second interruption after actual recovery: a fresh run of the same operation whose
         # base is a first-cut projection's durable bytes only, cut at every unit again.
@@ -383,14 +496,14 @@ def do_task(c: Campaign, tmp: Path, task, counts: dict) -> None:
 
 
 def _run_part(args) -> dict:
-    modname, evidence, part, counts, second = args
+    modname, evidence, part, counts, second, bounded = args
     binding = importlib.import_module(modname)
     tmp = Path(tempfile.mkdtemp())
     try:
         w = binding.make_worker(tmp)
         c = Campaign(binding, evidence, w, tmp)
         for t in part:
-            do_task(c, tmp, t, counts)
+            do_task(c, tmp, t, counts, bounded)
         c.close()
         return {"worker_exit": w.close(), "runs": c.n_runs, "projections": c.n_proj,
                 "distinct_remounted_images": len(c.seen), "tasks": len(part)}
@@ -409,22 +522,26 @@ def campaign_main(binding, argv=None) -> int:
     ap.add_argument("--second-cut", type=int, default=2, help="first-cut images re-run per scenario")
     ap.add_argument("--shard", default="0/1", help="I/N: run the tasks whose index %% N == I")
     ap.add_argument("--jobs", type=int, default=1, help="parallel worker processes in this shard")
+    ap.add_argument("--unit-plan", choices=("every", "v186"), default="every",
+                    help="every unit boundary, or Verification #186's bounded boundary set")
     a = ap.parse_args(argv)
     si, sn = (int(v) for v in a.shard.split("/"))
     a.evidence.mkdir(parents=True, exist_ok=True)
     tmp = Path(tempfile.mkdtemp())
     try:
         w = binding.make_worker(tmp)
-        counts = {}
+        counts, bounded = {}, {}
         for key in [k for k in binding.scenarios(None) if selected(k, a.only, a.exclude)]:
-            r, _, _ = binding.s_run(w, tmp, key, None, "-", "-", "-", "-")
+            r, tr, init = binding.s_run(w, tmp, key, None, "-", "-", "-", "-")
             counts[key] = (r["op_units"], r["op_barriers"], r["op_calls"])
+            if a.unit_plan == "v186":
+                bounded[key] = boundary_plan(tr, len(init) // BLOCK)
         w.close()
     finally:
         shutil.rmtree(tmp)
-    allt = tasks(counts, a.second_cut)
+    allt = tasks(counts, a.second_cut, bounded)
     mine = [t for n, t in enumerate(allt) if n % sn == si]
-    jobs = [(binding.__name__, a.evidence / f"part-{si:03d}-{j:02d}", mine[j::a.jobs], counts, a.second_cut)
+    jobs = [(binding.__name__, a.evidence / f"part-{si:03d}-{j:02d}", mine[j::a.jobs], counts, a.second_cut, bounded)
             for j in range(a.jobs)]
     if sys.path[0] not in os.environ.get("PYTHONPATH", ""):
         os.environ["PYTHONPATH"] = os.pathsep.join([str(Path(binding.__file__).resolve().parent),
@@ -434,7 +551,11 @@ def campaign_main(binding, argv=None) -> int:
     else:
         with mp.get_context("spawn").Pool(a.jobs) as pool:
             res = pool.map(_run_part, jobs)
+    import time as _t
     summary = {"format": "WP10-SUBSET-SUMMARY-1", "binding": binding.NAME, "shard": a.shard,
+               "unit_plan": a.unit_plan,
+               "bounded_plans": {"/".join(map(str, k)): dict(v, cut_units_count=len(v["cut_units"]))
+                                 for k, v in bounded.items()},
                "only": a.only, "exclude": a.exclude,
                "tasks_total": len(allt), "tasks_this_shard": len(mine), "parts": res,
                "scenarios": {"/".join(map(str, k)): {"op_units": v[0], "op_barriers": v[1], "op_calls": v[2]}

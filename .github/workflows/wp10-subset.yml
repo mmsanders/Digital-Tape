@@ -7,8 +7,9 @@ name: wp10 any-subset binding
 #
 # Pull requests run the binding self-proofs and the complete campaign of every scenario
 # whose epochs are small. The two long chunk-copy epochs (core stage-clear respool and the
-# respool_full v3 passes, over 1000 units with no barrier) run only on dispatch, sharded:
-# about 175 CPU-hours and ~10 GB of evidence at every unit boundary (see the README).
+# respool_full v3 passes, over 1000 units with no barrier) run only on dispatch, sharded,
+# on Verification #186's bounded unit-boundary plan (--unit-plan v186; every boundary would
+# be about 175 CPU-hours): SAMPLED unit coordinates, two distinct second-cut bases.
 on:
   pull_request:
     paths:
@@ -105,9 +106,14 @@ jobs:
           make -s -C tests/crash_core_adapter clean all
           make -s -C tests/respool_full_adapter clean all
       - name: core stage-clear respool
-        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core-respool" --only stage_clear/respool --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
+        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core-respool" --only stage_clear/respool --unit-plan v186 --second-cut 2 --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
       - name: respool_full v3 passes
-        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-v3" --only v3_003 --second-cut 1 --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
+        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-v3" --only v3_003 --unit-plan v186 --second-cut 2 --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
       - uses: actions/upload-artifact@v4
         if: always()
         with:

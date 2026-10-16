@@ -100,6 +100,23 @@ The two long chunk-copy epochs dominate everything else:
 - the core stage-clear respool: about 1028 units with no barrier, ×5 seeds;
 - the respool_full v3 passes: 4100 units each.
 
-At every unit boundary with 201 sampled projections, these two cost about 175 CPU-hours
-and about 10 GB of evidence. `wp10-subset.yml` runs everything else on each pull request.
-It runs these two only on dispatch, sharded, pending Verification/PM's call on scale.
+At every unit boundary with 201 sampled projections, these two would cost about 175
+CPU-hours and about 10 GB of evidence. Verification #186 did not authorize that; it issued
+a bounded plan instead, run with `--unit-plan v186` (`subset_driver.boundary_plan`):
+- unit boundaries 0..8 and U-8..U; 2^k-1, 2^k, 2^k+1 for every power of two <= U;
+  1024j-1, 1024j, 1024j+1; each metadata/identity/index call's first and end boundary and
+  their neighbours (a unit outside the public chunk area: LBA < TAPE_LBA_CHUNK_BASE, or the
+  mirror superblock); and every barrier entry's boundary and its neighbours;
+- every barrier entry and barrier error, the complete operation, and error writes at every
+  call next to a selected boundary plus every metadata/identity/index call;
+- two DISTINCT first-cut bases per scenario: the first distinct image, and the first
+  later-only projection (a later event persisted while an earlier one did not), else the
+  next distinct image. Each second run starts from that base's bytes only, and the same
+  plan is applied to its own actual trace. Fewer than two distinct bases is a recorded
+  row with every enumerated image identity, never a duplicate;
+- exhaustive plans for epochs <= 8, otherwise all 201 sampled plans.
+
+These are SAMPLED unit coordinates of a long copy, not every boundary and not full WP-10
+acceptance. `summary-*.json` records each scenario's plan (selected coordinates, error
+calls, barriers) separately from its persistence plans. `wp10-subset.yml` runs everything
+else on each pull request and these two on dispatch, sharded.
