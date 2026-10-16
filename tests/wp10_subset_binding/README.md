@@ -35,7 +35,14 @@ closure's refused mount writes.
 
 **R (remount).** A fresh engine instance and rings mount a device whose bytes are exactly
 the projection. It emits that worker's existing raw facts: snapshots, mount results,
-public info, and, where the worker renders, PCM hashes.
+public info, and, where the worker renders, PCM hashes. Every mount starts from the
+projection itself (Verification #186 V186-01, audited per binding):
+- core, format/dup and respool mount one side, once;
+- promote renders side A and side B, each from its own `img_copy` of the projection;
+- the load route runs `verify`, `dump --side A` and `dump --side B` as three processes,
+  each on its own fresh copy. Each command's image hash before and after, its seam trace and
+  its output are kept, and a command that changed its image is listed in `mutated_by`. A
+  repair by one command is never another command's starting state.
 
 **Driver** (`subset_driver.py`):
 - It replays each actual history into `model.Device`, one call at a time (model imported
@@ -54,9 +61,11 @@ public info, and, where the worker renders, PCM hashes.
 - Write errors: the seam has no write-error fault.
 - Barrier errors other than the first: `native-flush-error` fails every barrier.
 
-A load cut is the complete run's actual history up to the coordinate. The route is
-deterministic, and every real cut run of the other bindings was checked to be such a
-prefix.
+A load cut is a projection of the complete run's actual trace up to the coordinate, not an
+interrupted host execution. The route is deterministic, and every real cut run of the
+other bindings was checked to be such a prefix; that supports, but does not prove, the host
+route under every cut. The 404 unreachable load coordinates are missing coverage, not
+executed error coverage.
 
 ## Evidence (per shard part)
 
@@ -68,6 +77,7 @@ prefix.
 | `traces/` | actual traces, gzip. A cut trace equal to the complete trace up to record k (checked record by record) is cited as that prefix |
 | `initial/` | every distinct initial image, gzip |
 | `summary-*.json` | counts, scenario sizes, model and worker hashes |
+| `SHA256SUMS` (bundle root) | SHA-256 of every OTHER file in the bundle; it is written outside the tree and moved in last, so it never lists itself, and `sha256sum -c` runs on it in CI |
 
 An epoch of 256 events or fewer keeps every event, mask and landing order inline. A longer
 epoch keeps its event-list hash and first and last IDs. Each of its sampled projections

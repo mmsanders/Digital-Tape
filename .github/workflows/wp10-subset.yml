@@ -65,7 +65,10 @@ jobs:
         if: always()
         run: |
           cp "$RUNNER_TEMP/binding-proofs-core.json" "$RUNNER_TEMP/ev/" 2>/dev/null || true
-          (cd "$RUNNER_TEMP/ev" && find . -type f | sort | xargs sha256sum > SHA256SUMS && du -sh .)
+          # SHA256SUMS lists every OTHER file: it is written outside the tree and moved in
+          # last, so it never lists itself (Verification #186: its self-entry was the empty digest)
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
       - uses: actions/upload-artifact@v4
         if: always()
         with:

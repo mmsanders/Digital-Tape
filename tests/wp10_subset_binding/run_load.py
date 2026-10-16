@@ -18,9 +18,14 @@ seam's existing native-flush-error fault (a real failed OS barrier); it fails ev
 so only "error at barrier 0" is reachable. The seam has no write-error fault, so error-write
 coordinates are recorded as not reachable on this route without changing the test binary.
 
-Remount: on a copy of the projection, tapectl-test verify (its trace: engine_mount and
-engine_info results) and dump of side A and side B (the rendered PCM, hashed), each a fresh
-process from those bytes only; the copy's hash after the three commands is recorded.
+Cut histories are projections of the COMPLETE run's actual trace at each coordinate, not
+interrupted host executions (the route is deterministic; see Coordinates above).
+
+Remount (V186-01): tapectl-test verify (its trace: engine_mount and engine_info results), and
+dump of side A and of side B (the rendered PCM, hashed), each a fresh process on its own fresh
+copy of the projection. Each command's image hash before and after, its trace and its output
+are recorded; a command that changed its image is listed in mutated_by. No command's output
+image is ever another command's input.
 """
 from __future__ import annotations
 
@@ -149,23 +154,50 @@ def s_run(w, tmp, key, base, cut_unit, cut_flush, err_call, err_flush):
     return res, rows, initial
 
 
-def remount(w, tmp, key, image: bytes) -> dict:
-    p = tmp / "remount.img"
+def _fresh(tmp: Path, image: bytes, name: str) -> Path:
+    p = tmp / name
     p.write_bytes(image)
-    tr = tmp / "verify-trace.json"
-    v = tapectl(["verify", str(p)], {"TAPECTL_TEST_TRACE": str(tr)})
-    seam = json.loads(tr.read_text()) if tr.exists() else {"events": []}
-    obs = {"format": "WP10-SUBSET-REMOUNT-1", "verify_exit": v.returncode, "verify_stdout": v.stdout,
-           "verify_stderr": v.stderr,
-           "engine": [e for e in seam["events"] if e["kind"] in ("engine_mount", "engine_info", "engine_bind")]}
-    for side in ("A", "B"):
-        out = tmp / f"dump-{side}.wav"
-        if out.exists():
-            out.unlink()
-        d = tapectl(["dump", str(p), "--side", side, "-o", str(out)])
-        obs[f"dump_{side}"] = {"exit": d.returncode, "stderr": d.stderr,
-                               "wav_sha256": sd.sha_file(out) if out.exists() else None}
-    obs["image_sha256_after"] = sd.sha_file(p)
+    return p
+
+
+def remount(w, tmp, key, image: bytes) -> dict:
+    """Each command is its own fresh process on its OWN pristine copy of the projection
+    (Verification #186 V186-01): a command that repairs or otherwise writes its image can
+    never supply another command's starting bytes. Every command records its image hash
+    before and after, its own seam trace and its output; a changed image is reported as
+    mutated (lawful repair is judged by the operation's own oracle, not here)."""
+    want = sd.sha(image)
+    obs = {"format": "WP10-SUBSET-REMOUNT-2", "projection_sha256": want, "fresh_image_per_command": True}
+    for cmd in ("verify", "dump_A", "dump_B"):
+        p = _fresh(tmp, image, f"remount-{cmd}.img")
+        before = sd.sha_file(p)
+        if before != want:
+            raise RuntimeError("the fresh copy is not the projection")
+        tr = tmp / f"{cmd}-trace.json"
+        if tr.exists():
+            tr.unlink()
+        if cmd == "verify":
+            r = tapectl(["verify", str(p)], {"TAPECTL_TEST_TRACE": str(tr)})
+        else:
+            out = tmp / f"{cmd}.wav"
+            if out.exists():
+                out.unlink()
+            r = tapectl(["dump", str(p), "--side", cmd[-1], "-o", str(out)], {"TAPECTL_TEST_TRACE": str(tr)})
+        seam = json.loads(tr.read_text()) if tr.exists() else {"events": []}
+        after = sd.sha_file(p)
+        rec = {"exit": r.returncode, "stdout": r.stdout, "stderr": r.stderr,
+               "image_sha256_before": before, "image_sha256_after": after, "image_mutated": after != before,
+               "seam_trace_sha256": sd.sha_file(tr) if tr.exists() else None,
+               "engine": [e for e in seam["events"] if e["kind"] in ("engine_mount", "engine_info", "engine_bind")],
+               "seam_writes": sum(1 for e in seam["events"] if e["kind"] == "write"),
+               "seam_flushes": sum(1 for e in seam["events"] if e["kind"] == "flush")}
+        if cmd != "verify":
+            rec["wav_sha256"] = sd.sha_file(out) if out.exists() else None
+        obs[cmd] = rec
+    # the earlier single-copy fields, kept for readers of REMOUNT-1, now per command
+    obs["verify_exit"], obs["verify_stdout"], obs["verify_stderr"] = (
+        obs["verify"]["exit"], obs["verify"]["stdout"], obs["verify"]["stderr"])
+    obs["mutated_by"] = [c for c in ("verify", "dump_A", "dump_B") if obs[c]["image_mutated"]]
     return obs
 
 
