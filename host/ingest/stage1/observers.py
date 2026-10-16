@@ -588,44 +588,43 @@ D_SCRIPT = r"""#pragma D option quiet
 
 inline int TR = (%(names)s);
 
+/* Every path is copied at entry, while the caller's string is certainly mapped (a copy
+   at return was seen to fault now and then). A fault is reported on stderr and makes the
+   run incomplete. */
 syscall::open:entry, syscall::open_nocancel:entry, syscall::mkdir:entry,
 syscall::stat64:entry, syscall::lstat64:entry, syscall::stat:entry, syscall::lstat:entry, syscall::access:entry
-/TR/ { self->u0 = arg0; self->u1 = 0; self->fd = -1; self->a = arg1; self->in = 1; }
+/TR/ { self->r0 = copyinstr(arg0); self->r1 = ""; self->fd = -1; self->a = arg1; self->in = 1; }
 
 syscall::openat:entry, syscall::openat_nocancel:entry, syscall::mkdirat:entry,
 syscall::fstatat64:entry, syscall::fstatat:entry, syscall::faccessat:entry
-/TR/ { self->u0 = arg1; self->u1 = 0; self->fd = arg0; self->a = arg2; self->in = 1; }
+/TR/ { self->r0 = copyinstr(arg1); self->r1 = ""; self->fd = arg0; self->a = arg2; self->in = 1; }
 
-/* Rename paths are copied at entry (they are rare, so the thread-local strings cost
-   little); the other calls copy their one path at return. */
 syscall::rename:entry
-/TR/ { self->r0 = copyinstr(arg0); self->r1 = copyinstr(arg1); self->u0 = 0; self->u1 = 0; self->fd = -1; self->a = 0; self->in = 1; self->rn = 1; }
+/TR/ { self->r0 = copyinstr(arg0); self->r1 = copyinstr(arg1); self->fd = -1; self->a = 0; self->in = 1; }
 
 syscall::renameat:entry
-/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = 0; self->in = 1; self->rn = 1; }
+/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->fd = arg0; self->a = 0; self->in = 1; }
 
 syscall::renameatx_np:entry
-/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = arg4; self->in = 1; self->rn = 1; }
+/TR/ { self->r0 = copyinstr(arg1); self->r1 = copyinstr(arg3); self->fd = arg0; self->a = arg4; self->in = 1; }
 
 syscall::close:entry, syscall::close_nocancel:entry, syscall::fsync:entry, syscall::fsync_nocancel:entry
-/TR/ { self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = 0; self->in = 1; }
+/TR/ { self->r0 = ""; self->r1 = ""; self->fd = arg0; self->a = 0; self->in = 1; }
 
 syscall::fcntl:entry, syscall::fcntl_nocancel:entry
-/TR && arg1 == %(fullfsync)d/ { self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = arg1; self->in = 1; }
+/TR && arg1 == %(fullfsync)d/ { self->r0 = ""; self->r1 = ""; self->fd = arg0; self->a = arg1; self->in = 1; }
 
 syscall:::return
 /self->in/ {
-  this->s0 = self->rn ? self->r0 : self->u0 ? copyinstr(self->u0) : "";
-  this->s1 = self->rn ? self->r1 : "";
   printf("R %%d %%d %%d %%d %%s %%s ret=%%d err=%%d fd=%%d a=%%d l0=%%d l1=%%d|%%s|%%s\n", timestamp, pid, tid,
          ++self->n, execname, probefunc, (int)arg0, errno, (int)self->fd, (int)self->a,
-         strlen(this->s0), strlen(this->s1), this->s0, this->s1);
+         strlen(self->r0), strlen(self->r1), self->r0, self->r1);
 }
 
 /* A separate clause: an error in the clause above (reported, so the run is incomplete)
    must not leave this call's state behind for the thread's next syscall. */
 syscall:::return
-/self->in/ { self->r0 = 0; self->r1 = 0; self->rn = 0; self->u0 = 0; self->u1 = 0; self->fd = 0; self->a = 0; self->in = 0; }
+/self->in/ { self->r0 = 0; self->r1 = 0; self->fd = 0; self->a = 0; self->in = 0; }
 
 proc:::exec-success /TR/ { printf("E %%d %%d %%d %%d %%s\n", timestamp, pid, tid, ++self->n, execname); }
 proc:::signal-send /TR/ { printf("S %%d %%d %%d %%d %%s sig=%%d\n", timestamp, pid, tid, ++self->n, execname, args[2]); }
@@ -647,6 +646,10 @@ def d_scan(data):
     while i < n:
         if data[i:i + 1] in (b"\n", b"\r"):
             i += 1
+            continue
+        if data[i:i + 2] in (b"W ", b"U "):  # the runner's own annotations, judged by parse()
+            j = data.find(b"\n", i)
+            i = n if j < 0 else j + 1
             continue
         m = D_REC.match(data, i)
         if not m:
