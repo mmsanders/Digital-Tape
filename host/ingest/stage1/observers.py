@@ -6,9 +6,13 @@ applied. It decides no PASS; Verification reviews the raw traces and mappings.
   linux    strace -f -C   ptrace; the trailing -C call tally is the tracer's own count
                           of every traced syscall, so a dropped record or a truncated
                           trace no longer matches it.
-  macos    fs_usage -w    kdebug, one root session per case (runs are serial). A start
-                          and end gate process bracket each window, so the window is
-                          known to cover the whole run.
+  macos    dtrace         syscall provider, one root session per packet, gated per run
+                          (runs are serial). Every record has a per-thread sequence that
+                          ends in the thread's exit record, so a dropped record or a
+                          truncated trace is detectable; renameatx_np is recorded with
+                          both paths, flags and result. fs_usage (kdebug) remains for
+                          hosts where dtrace is restricted, but it has no event for
+                          renameatx_np and cannot show the publication.
   windows  Process Monitor one capture-filtered session for the whole packet; the PML
                           is exported to CSV by Procmon itself and the two are aligned
                           row by row. Every PML event is assigned to exactly one owner,
@@ -561,6 +565,398 @@ class FsUsage:
                                               "isolated unpaired records are not self-detectable"})
 
 
+# ---- macOS: dtrace -----------------------------------------------------------------------
+
+# One record per traced event; every record carries a per-thread sequence number kept in
+# a thread-local D variable (a thread runs on one CPU at a time, so it needs no lock).
+# R records are written at syscall return and carry the result, errno, both path
+# arguments with their byte lengths (so a name with any bytes parses exactly), the fd and
+# the flags argument. E/T/X/S are exec, thread end, process exit and signal sent.
+D_REC = re.compile(rb"([RETXS]) (\d+) (\d+) (\d+) (\d+) (\S+)")
+D_R = re.compile(rb" (\w+) ret=(-?\d+) err=(\d+) fd=(-?\d+) a=(-?\d+) l0=(\d+) l1=(\d+)\|")
+D_STRSIZE = 1024
+O_CREAT = 0x200
+RENAME_SWAP, RENAME_EXCL = 0x2, 0x4
+F_FULLFSYNC = 51
+
+D_SCRIPT = r"""#pragma D option quiet
+#pragma D option switchrate=20hz
+#pragma D option bufsize=64m
+#pragma D option dynvarsize=64m
+#pragma D option cleanrate=499hz
+#pragma D option strsize=%(strsize)d
+
+inline int TR = (%(names)s);
+
+syscall::open:entry, syscall::open_nocancel:entry, syscall::mkdir:entry,
+syscall::stat64:entry, syscall::lstat64:entry, syscall::stat:entry, syscall::lstat:entry, syscall::access:entry
+/TR/ { self->u0 = arg0; self->u1 = 0; self->fd = -1; self->a = arg1; self->in = 1; }
+
+syscall::openat:entry, syscall::openat_nocancel:entry, syscall::mkdirat:entry,
+syscall::fstatat64:entry, syscall::fstatat:entry, syscall::faccessat:entry
+/TR/ { self->u0 = arg1; self->u1 = 0; self->fd = arg0; self->a = arg2; self->in = 1; }
+
+syscall::rename:entry
+/TR/ { self->u0 = arg0; self->u1 = arg1; self->fd = -1; self->a = 0; self->in = 1; }
+
+syscall::renameat:entry
+/TR/ { self->u0 = arg1; self->u1 = arg3; self->fd = arg0; self->a = 0; self->in = 1; }
+
+syscall::renameatx_np:entry
+/TR/ { self->u0 = arg1; self->u1 = arg3; self->fd = arg0; self->a = arg4; self->in = 1; }
+
+syscall::close:entry, syscall::close_nocancel:entry, syscall::fsync:entry, syscall::fsync_nocancel:entry
+/TR/ { self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = 0; self->in = 1; }
+
+syscall::fcntl:entry, syscall::fcntl_nocancel:entry
+/TR && arg1 == %(fullfsync)d/ { self->u0 = 0; self->u1 = 0; self->fd = arg0; self->a = arg1; self->in = 1; }
+
+syscall:::return
+/self->in/ {
+  this->s0 = self->u0 ? copyinstr(self->u0) : "";
+  this->s1 = self->u1 ? copyinstr(self->u1) : "";
+  printf("R %%d %%d %%d %%d %%s %%s ret=%%d err=%%d fd=%%d a=%%d l0=%%d l1=%%d|%%s|%%s\n", timestamp, pid, tid,
+         ++self->n, execname, probefunc, (int)arg0, errno, (int)self->fd, (int)self->a,
+         strlen(this->s0), strlen(this->s1), this->s0, this->s1);
+  self->u0 = 0; self->u1 = 0; self->fd = 0; self->a = 0; self->in = 0;
+}
+
+proc:::exec-success /TR/ { printf("E %%d %%d %%d %%d %%s\n", timestamp, pid, tid, ++self->n, execname); }
+proc:::signal-send /TR/ { printf("S %%d %%d %%d %%d %%s sig=%%d\n", timestamp, pid, tid, ++self->n, execname, args[2]); }
+proc:::exit /TR/ { printf("X %%d %%d %%d %%d %%s reason=%%d\n", timestamp, pid, tid, ++self->n, execname, args[0]); }
+proc:::lwp-exit /TR/ { printf("T %%d %%d %%d %%d %%s\n", timestamp, pid, tid, ++self->n, execname); self->n = 0; }
+"""
+
+
+def dtrace_script(names):
+    return D_SCRIPT % {"strsize": D_STRSIZE, "fullfsync": F_FULLFSYNC,
+                       "names": " || ".join('execname == "%s"' % n for n in names)}
+
+
+def d_scan(data):
+    """Split dtrace output bytes into records. Returns (records, unparsed). A record is a
+    dict with the raw bytes it came from; anything that does not parse as a whole record
+    is returned as unparsed bytes (never silently skipped)."""
+    recs, bad, i, n = [], [], 0, len(data)
+    while i < n:
+        if data[i:i + 1] in (b"\n", b"\r"):
+            i += 1
+            continue
+        m = D_REC.match(data, i)
+        if not m:
+            j = data.find(b"\n", i)
+            j = n if j < 0 else j + 1
+            bad.append(data[i:j])
+            i = j
+            continue
+        tag = m.group(1).decode()
+        r = {"tag": tag, "ts": int(m.group(2)), "pid": int(m.group(3)), "tid": int(m.group(4)),
+             "seq": int(m.group(5)), "exe": m.group(6).decode("utf-8", "replace"), "start": i}
+        j = m.end()
+        if tag == "R":
+            h = D_R.match(data, j)
+            if not h:
+                k = data.find(b"\n", i)
+                k = n if k < 0 else k + 1
+                bad.append(data[i:k])
+                i = k
+                continue
+            l0, l1 = int(h.group(6)), int(h.group(7))
+            p0 = h.end()
+            p1 = p0 + l0 + 1
+            end = p1 + l1
+            if data[p0 + l0:p1] != b"|" or data[end:end + 1] != b"\n":
+                k = data.find(b"\n", i)
+                k = n if k < 0 else k + 1
+                bad.append(data[i:k])
+                i = k
+                continue
+            r.update(call=h.group(1).decode(), ret=int(h.group(2)), err=int(h.group(3)), fd=int(h.group(4)),
+                     a=int(h.group(5)), p0=data[p0:p0 + l0], p1=data[p1:end],
+                     truncated=l0 >= D_STRSIZE - 1 or l1 >= D_STRSIZE - 1)
+            j = end + 1
+        else:
+            k = data.find(b"\n", j)
+            k = n if k < 0 else k
+            rest = data[j:k].decode("utf-8", "replace").strip()
+            if tag == "S":
+                r["sig"] = int(rest.split("sig=")[1]) if "sig=" in rest else None
+            if tag == "X":
+                r["reason"] = int(rest.split("reason=")[1]) if "reason=" in rest else None
+            j = k + 1
+        r["raw"] = data[i:j]
+        recs.append(r)
+        i = j
+    return recs, bad
+
+
+class Dtrace(FsUsage):
+    """macOS syscall-provider dtrace (needs dtrace not restricted by System Integrity
+    Protection, as on GitHub's hosted macOS runners). One session for the packet, gated per
+    run like fs_usage. Unlike fs_usage it reports renameatx_np with both paths, its flags and
+    its result, and every record carries a per-thread sequence number that ends in that
+    thread's lwp-exit record: a dropped record leaves a gap, a truncated trace loses the
+    thread-end and process-exit records, and dtrace's own drop/error reports on stderr are
+    copied into the run's trace as W lines. Any of these makes the run incomplete."""
+    kind = "dtrace"
+    names = ["ingest", GATE, "probe-parent", "probe-child"]
+
+    @staticmethod
+    def available():
+        try:
+            r = subprocess.run(["sudo", "-n", "dtrace", "-l", "-n", "syscall::renameatx_np:return"],
+                               capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired):
+            return False
+        return r.returncode == 0 and "renameatx_np" in r.stdout
+
+    def version(self):
+        v = subprocess.run(["sudo", "-n", "dtrace", "-V"], capture_output=True, text=True).stdout.strip()
+        return f"{v} (macOS " + subprocess.run(["sw_vers", "-productVersion"], capture_output=True, text=True).stdout.strip() + ")"
+
+    def start(self, root):
+        self.tools = root / "observer-tools"
+        self.tools.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile("/bin/test", self.tools / GATE)
+        os.chmod(self.tools / GATE, 0o755)
+        # The probe is the observation build itself (INGEST_OBSERVE_PROBE), under the probe
+        # names, so the selftest exercises the shipping no-replace rename code.
+        for name in ("probe-parent", "probe-child"):
+            shutil.copyfile(self.observe_bin, self.tools / name)
+            os.chmod(self.tools / name, 0o755)
+        (self.tools / "observer.d").write_text(dtrace_script(self.names))
+
+    def _session(self):
+        if self.sess is not None:
+            return self.sess
+        d = Path(tempfile.mkdtemp(prefix="dtrace-session-"))
+        path, err = d / "session.txt", d / "stderr.txt"
+        errf = open(err, "wb")
+        p = subprocess.Popen(["sudo", "-n", "dtrace", "-q", "-s", str(self.tools / "observer.d"), "-o", str(path)],
+                             stdout=errf, stderr=errf, stdin=subprocess.DEVNULL)
+        deadline = time.time() + 60
+        while not path.exists() and time.time() < deadline and p.poll() is None:
+            time.sleep(0.1)
+        self.sess = {"proc": p, "path": path, "err": err, "errf": errf}
+        return self.sess
+
+    def _end_session(self):
+        s = self.sess
+        if s is None:
+            return
+        self.sess = None
+        p = s["proc"]
+        p.send_signal(signal.SIGINT)
+        try:
+            p.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            subprocess.run(["sudo", "-n", "pkill", "-9", "-x", "dtrace"])
+            p.wait()
+        s["errf"].close()
+        shutil.rmtree(s["path"].parent, ignore_errors=True)
+
+    def stop(self):
+        self._end_session()
+        rec = {GATE: {"copied_from": "/bin/test", "sha256": sha_file(self.tools / GATE)}}
+        for name in ("probe-parent", "probe-child"):
+            rec[name] = {"copied_from": "observation build", "sha256": sha_file(self.tools / name)}
+        rec["observer.d"] = {"sha256": sha_file(self.tools / "observer.d")}
+        (self.tools / "tools.json").write_bytes(canonical(rec))
+        for name in (GATE, "probe-parent", "probe-child"):
+            (self.tools / name).unlink()
+
+    def _bytes_from(self, offset):
+        with open(self.sess["path"], "rb") as f:
+            f.seek(offset)
+            return f.read()
+
+    def _text_from(self, offset):
+        return self._bytes_from(offset).decode("utf-8", "replace")
+
+    def before(self, trace, ctx):
+        s = self._session()
+        ctx["err_offset"] = s["err"].stat().st_size
+        super().before(trace, ctx)
+
+    def after(self, trace, ctx):
+        ctx["end_gate"] = self._wait_gate("end", ctx["offset"])
+        # dtrace writes each CPU's buffer in turn, so a record of this run can follow the
+        # end gate in the output; one more gate seen means every buffer that held a record
+        # older than the end gate has been written.
+        self._wait_gate("flush", ctx["offset"])
+        data = self._bytes_from(ctx["offset"])
+        with open(self.sess["err"], "rb") as f:
+            f.seek(ctx.pop("err_offset", 0))
+            err = f.read()
+        ctx.pop("offset", None)
+        recs, bad = d_scan(data)
+
+        def gate_ts(token):
+            if not token:
+                return None
+            t = token.encode()
+            return next((r["ts"] for r in recs if r["tag"] == "R" and r["exe"] == GATE and r["p0"] == t), None)
+        lo, hi = gate_ts(ctx.get("start_gate")), gate_ts(ctx.get("end_gate"))
+        if lo is None:
+            lo = min((r["ts"] for r in recs), default=0)
+        if hi is None:
+            hi = max((r["ts"] for r in recs), default=0)
+        keep = sorted((r for r in recs if lo <= r["ts"] <= hi), key=lambda r: r["ts"])
+        out = b"".join(r["raw"] for r in keep)
+        out += b"".join(b"U " + b.hex().encode() + b"\n" for b in bad)
+        out += b"".join(b"W " + l + b"\n" for l in err.splitlines() if l.strip())
+        Path(trace).write_bytes(out)
+
+    @staticmethod
+    def parse(data, names=("ingest",)):
+        """-> rawops, integrity checks, open-at-exit paths, native completion text."""
+        recs, bad = d_scan(data)
+        warn = [l for l in data.splitlines() if l.startswith(b"W ")]
+        unparsed = [l for l in data.splitlines() if l.startswith(b"U ")]
+        mine = [r for r in recs if r["exe"] in names]
+        rawops, fds, threads = [], {}, {}
+        # the root is the first process of the first name (exec-success is not reported for
+        # every spawn path, so the first record stands in for it)
+        root = next((r["pid"] for r in mine if r["exe"] == names[0]), None)
+        exited, signals = set(), {}
+        for n, r in enumerate(recs):
+            if r["exe"] not in names:
+                continue
+            threads.setdefault((r["pid"], r["tid"]), []).append((r["seq"], r["tag"]))
+            if r["tag"] == "X":
+                exited.add(r["pid"])
+            if r["tag"] == "S":
+                signals.setdefault(r["pid"], r.get("sig"))
+            if r["tag"] != "R":
+                continue
+            call, ok = r["call"], r["ret"] >= 0
+            path = os.fsdecode(r["p0"])
+            key = f"{r['pid']}:{r['ret'] if call.startswith('open') else r['fd']}"
+            if call.startswith(("stat", "lstat", "fstatat", "access", "faccessat")):
+                mk = mark_of(path)
+                if mk:
+                    rawops.append({"kind": "mark", "seq": mk[0], "op": mk[1], "line": n})
+                continue
+            if call.startswith("open"):
+                if F_DEVICE.search(" " + path):
+                    rawops.append({"kind": "device", "path": path, "line": n})
+                rawops.append({"kind": "create" if r["a"] & O_CREAT else "open", "path": path, "ok": ok, "line": n})
+                if ok:
+                    fds[key] = path
+            elif call.startswith("mkdir"):
+                rawops.append({"kind": "mkdir", "path": path, "ok": ok, "line": n})
+            elif call.startswith("fsync") or call.startswith("fcntl"):
+                rawops.append({"kind": "flush", "key": key, "path": fds.get(key, ""), "ok": ok, "line": n})
+            elif call.startswith("close"):
+                rawops.append({"kind": "close", "key": key, "path": fds.pop(key, ""), "ok": ok, "line": n})
+            elif call.startswith("rename"):
+                excl = call == "renameatx_np" and (r["a"] & RENAME_EXCL) and not (r["a"] & RENAME_SWAP)
+                rawops.append({"kind": "rename", "path": path, "dst": os.fsdecode(r["p1"]), "noreplace": bool(excl),
+                               "ok": r["ret"] == 0, "result": str(r["err"]), "line": n})
+        contiguous = all(sorted(s for s, _ in v) == list(range(1, len(v) + 1)) for v in threads.values())
+        ended = all(max(v)[1] == "T" for v in threads.values())
+        checks = {
+            "no_tracer_loss_warning": not warn,
+            "no_unparsed_records": not bad and not unparsed,
+            "no_truncated_paths": not any(r.get("truncated") for r in mine),
+            "per_thread_sequences_contiguous": bool(threads) and contiguous,
+            "every_thread_end_seen": bool(threads) and ended,
+            "root_exit_seen": root is not None and root in exited,
+        }
+        open_at_exit = sorted(v for k, v in fds.items() if int(k.split(":")[0]) in exited)
+        completion = None
+        if root is not None and root in exited:
+            sig = signals.get(root)
+            completion = f"native exit seen (signal {sig} sent by the process)" if sig else "native exit seen"
+        return rawops, checks, open_at_exit, completion
+
+    def normalize(self, trace, dest, stage_prefix, obsdir, seam, ctx):
+        data = Path(trace).read_bytes()
+        rawops, checks, open_at_exit, native = self.parse(data)
+        exited = ctx.get("exit") is not None
+        checks = {
+            "start_gate_seen": bool(ctx.get("start_gate")) and ctx["start_gate"].encode() in data,
+            "end_gate_seen_after_exit": bool(ctx.get("end_gate")) and ctx["end_gate"].encode() in data,
+            **checks,
+        }
+        checks.update(marks_check(rawops, seam))
+        events, failed = to_events(rawops, dest, stage_prefix, obsdir)
+        # Files the process still held when it ended are closed by the kernel as the process
+        # exits; dtrace sees the exit, not a close call, so they are listed, never paired.
+        ctx["open_at_exit"] = open_at_exit
+        completion = (f"exited {ctx['exit']}; {native}") if (exited and native and checks["end_gate_seen_after_exit"]) else None
+        return events, failed, completion, checks
+
+    def selftest(self, root):
+        d = root / "observer-selftest"
+        d.mkdir(parents=True, exist_ok=True)
+        probe = d / "probe.txt"
+        probe.write_text("probe\n")
+        published = d / "published"
+        trace = d / "trace.txt"
+        ctx = {}
+        self.before(trace, ctx)
+        env = dict(os.environ, INGEST_OBSERVE_PROBE="parent")
+        p = subprocess.run([str(self.tools / "probe-parent"), str(probe), str(d / "created.txt"),
+                            str(self.tools / "probe-child"), "/dev/disk0", str(published)],
+                           capture_output=True, env=env)
+        ctx["exit"] = p.returncode
+        self.after(trace, ctx)
+        data = trace.read_bytes()
+        names = ("probe-parent", "probe-child")
+        rawops, integ, _, native = self.parse(data, names)
+        recs, _ = d_scan(data)
+        pb = str(probe).encode()
+        probe_opens = [r for r in recs if r["tag"] == "R" and r["call"].startswith("open") and r["p0"] == pb]
+        renames = [r for r in rawops if r["kind"] == "rename" and r["noreplace"] and r["dst"] == str(published)]
+        checks = {
+            "process_exit_zero": p.returncode == 0,
+            "start_and_end_gates_seen": bool(ctx.get("start_gate")) and bool(ctx.get("end_gate")),
+            "two_probe_opens_seen": len(probe_opens) >= 2,
+            "child_process_seen": any(r["exe"] == "probe-child" for r in probe_opens),
+            "creation_seen": any(r["kind"] == "create" and r["path"].endswith("created.txt") for r in rawops),
+            "forbidden_device_open_seen": any(r["kind"] == "device" for r in rawops),
+            "noreplace_publication_seen": any(r["ok"] and r["path"] == str(published) + ".stage" for r in renames),
+            "failed_noreplace_attempt_seen": any(not r["ok"] and r["result"] == "17" for r in renames),
+            "published_folder_exists": published.is_dir(),
+            "process_completion_seen": native is not None,
+            "positive_trace_integrity": all(integ.values()),
+        }
+
+        def accepts(txt):
+            return all(self.parse(txt.encode("latin-1"), names)[1].values())
+        lines = [r["raw"].decode("latin-1") for r in recs]
+        idx = lambda pred: next((i for i, r in enumerate(recs) if pred(r)), None)
+        drop = lambda i: lines[:i] + lines[i + 1:] if i is not None else lines
+        dev = idx(lambda r: r["tag"] == "R" and r["p0"] == b"/dev/disk0")
+        pub = idx(lambda r: r["tag"] == "R" and r["call"] == "renameatx_np" and r["ret"] == 0)
+        popen = idx(lambda r: r["tag"] == "R" and r["call"].startswith("open") and r["p0"] == pb)
+        child_end = idx(lambda r: r["tag"] == "T" and r["exe"] == "probe-child")
+        root_exit = idx(lambda r: r["tag"] == "X" and r["exe"] == "probe-parent")
+        last_parent = max((i for i, r in enumerate(recs) if r["exe"] == "probe-parent"), default=len(recs) - 1)
+        strip = lambda ls: [l.rstrip("\n") for l in ls]
+        mutations = {
+            "drop_forbidden_device_open": strip(drop(dev)),
+            "drop_noreplace_publication": strip(drop(pub)),
+            "drop_probe_open": strip(drop(popen)),
+            "drop_child_thread_end": strip(drop(child_end)),
+            "drop_root_exit": strip(drop(root_exit)),
+            "truncate_before_last_parent_record": strip(lines[:last_parent]),
+            "truncate_mid_trace": strip(lines[:max(1, len(lines) // 2)]),
+            "tracer_reported_drops": strip(lines) + ["W dtrace: 3 drops on CPU 0"],
+        }
+        controls = write_controls(d, mutations, accepts)
+        for c in controls.values():
+            c["detectable_without_planted_expectation"] = True
+        return finish_selftest(d, "dtrace", checks, controls,
+                               {"trace": "trace.txt", "trace_sha256": sha_file(trace),
+                                "integrity_method": "per-thread record sequence ending in lwp-exit; root process "
+                                                    "exit record; dtrace drop/error reports; whole-record parse",
+                                "limitation": "requires dtrace's syscall provider (System Integrity Protection "
+                                              "dtrace restrictions off); files open when a process ends are "
+                                              "closed by the kernel at exit and listed as open_at_exit"})
+
+
 # ---- Windows: Process Monitor ------------------------------------------------------------
 
 # raw disk (\\.\PhysicalDriveN, \Device\HarddiskN) or volume (\\.\C:, shown by Procmon as "C:")
@@ -937,6 +1333,8 @@ def make(kind, procmon=None):
         return Strace()
     if kind == "fs_usage":
         return FsUsage()
+    if kind == "dtrace":
+        return Dtrace()
     if kind == "procmon":
         return Procmon(procmon)
     return NoObserver()

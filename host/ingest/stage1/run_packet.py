@@ -8,7 +8,7 @@ pre-gain observations for successes.
 It judges nothing. Exit codes, PASS decisions and receipts are Verification's
 (review.py / campaign.py with Verification's own receipts). Standard library only.
 
-Native observers (stage1/observers.py): Linux strace, macOS fs_usage, Windows
+Native observers (stage1/observers.py): Linux strace, macOS dtrace (fs_usage fallback), Windows
 Process Monitor. Each is qualified by its own selftest with positive probes and
 deliberate dropped/truncated-record false-pass controls; a host without one records
 observer "none", which the published review rejects -- an honest gap, never a
@@ -378,6 +378,8 @@ class Runner:
             events, failed, completion, checks = self.obs.normalize(trace, dest, stage_prefix, obsdir, seam, ctx)
             native.update(events=events, failed_ops=failed, process_completion=completion, integrity=checks,
                           complete=completion is not None and all(checks.values()))
+            if "open_at_exit" in ctx:
+                native["open_at_exit"] = ctx["open_at_exit"]
         native["raw_trace_sha256"] = sha_file(trace)
         if peak is not None:
             native["job_peak_process_memory"] = peak
@@ -595,6 +597,8 @@ def choose_observer(plat, requested, procmon):
         return "strace" if shutil.which("strace") else "none"
     if plat == "macos":
         ok = subprocess.run(["sudo", "-n", "true"], capture_output=True).returncode == 0
+        if ok and observers.Dtrace.available():
+            return "dtrace"  # fs_usage has no event for renameatx_np, so it cannot show publication
         return "fs_usage" if ok and shutil.which("fs_usage") else "none"
     if plat.startswith("windows"):
         return "procmon" if procmon and os.path.exists(procmon) else "none"
@@ -613,7 +617,7 @@ def main():
     ap.add_argument("--work", default=None)
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--only", default=None, help="case-id substring (development runs only)")
-    ap.add_argument("--observer", default=None, choices=["strace", "fs_usage", "procmon", "none"])
+    ap.add_argument("--observer", default=None, choices=["strace", "dtrace", "fs_usage", "procmon", "none"])
     ap.add_argument("--procmon", default=os.environ.get("PROCMON"), help="Procmon64.exe (Windows)")
     a = ap.parse_args()
     a.observe_bin = os.path.abspath(a.observe_bin)

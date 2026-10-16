@@ -40,7 +40,7 @@ fn sync_dir(_p: &Path) -> Res<()> {
 }
 
 #[cfg(target_os = "linux")]
-fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
+pub(crate) fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
     use std::ffi::CString;
     use std::os::unix::ffi::OsStrExt;
     let ca = CString::new(a.as_os_str().as_bytes())?;
@@ -53,7 +53,7 @@ fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
 }
 
 #[cfg(target_os = "macos")]
-fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
+pub(crate) fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
     use std::ffi::CString;
     use std::os::unix::ffi::OsStrExt;
     let ca = CString::new(a.as_os_str().as_bytes())?;
@@ -64,7 +64,7 @@ fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
 }
 
 #[cfg(windows)]
-fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
+pub(crate) fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::MoveFileExW;
     let wa: Vec<u16> = a.as_os_str().encode_wide().chain(Some(0)).collect();
@@ -75,7 +75,7 @@ fn rename_noreplace(a: &Path, b: &Path) -> std::io::Result<()> {
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "macos", windows)))]
-fn rename_noreplace(_a: &Path, _b: &Path) -> std::io::Result<()> {
+pub(crate) fn rename_noreplace(_a: &Path, _b: &Path) -> std::io::Result<()> {
     Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "no no-replace rename on this platform"))
 }
 

@@ -92,9 +92,11 @@ mod imp {
         let _ = std::fs::write(d.join("joined.json"), format!("{{\"joined_dbtp\":{v}}}\n"));
     }
 
-    /// Observer selftest probe. `parent FILE CREATED CHILD DEVICE`: read FILE, run CHILD
-    /// (`child FILE`, which reads FILE), create CREATED, open DEVICE for reading and close it
-    /// without reading; exit 0. Returns None when this process is not a probe.
+    /// Observer selftest probe. `parent FILE CREATED CHILD DEVICE [PUBLISH]`: read FILE, run
+    /// CHILD (`child FILE`, which reads FILE), create CREATED, open DEVICE for reading and
+    /// close it without reading; with PUBLISH, create folder `PUBLISH.stage` and publish it to
+    /// PUBLISH with the shipping no-replace rename twice (the second attempt must fail because
+    /// PUBLISH exists); exit 0. Returns None when this process is not a probe.
     pub fn probe() -> Option<i32> {
         let role = std::env::var("INGEST_OBSERVE_PROBE").ok()?;
         let a: Vec<std::ffi::OsString> = std::env::args_os().skip(1).collect();
@@ -104,6 +106,15 @@ mod imp {
             let _ = std::process::Command::new(arg(2)).arg(arg(0)).env("INGEST_OBSERVE_PROBE", "child").status();
             let _ = std::fs::File::create(arg(1));
             let _ = std::fs::OpenOptions::new().read(true).open(arg(3));
+            if let Some(publish) = a.get(4).map(PathBuf::from) {
+                let mut stage = publish.clone().into_os_string();
+                stage.push(".stage");
+                let stage = PathBuf::from(stage);
+                let _ = std::fs::create_dir(&stage);
+                let _ = crate::publish::rename_noreplace(&stage, &publish);
+                let _ = std::fs::create_dir(&stage);
+                let _ = crate::publish::rename_noreplace(&stage, &publish);
+            }
         }
         Some(0)
     }
