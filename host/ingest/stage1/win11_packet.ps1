@@ -32,7 +32,7 @@ $ErrorActionPreference = "Stop"
 
 # Pinned identities. tools/check_win11_script.py proves in CI that these equal the
 # committed transport files, so this script cannot silently go stale.
-$ProcmonZipSha256 = "80a6442b46af762ed1432f6fec3f7e20366bed62a2522b3486503398a40a1128"
+$ProcmonZipSha256 = "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10"   # qualified by the CI packet job
 $Transport = @{
     "host/ingest/stage1/run_packet.py" = "85e953d67322f577b9d85354b341f4a6b57f8162cf3af7ed16a2e07cc5b00056"
     "host/ingest/stage1/observers.py" = "9828fcc6f400ab04fb0f084651ec938ad7894002c47e61cc4938c31e2f3db26e"
@@ -54,7 +54,7 @@ if ($os.ProductType -ne 1 -or [int]$os.BuildNumber -lt 22000) {
 if ($env:PROCESSOR_ARCHITECTURE -ne "AMD64") { Fail "not x64: $env:PROCESSOR_ARCHITECTURE" }
 $free = (Get-PSDrive ($Work.Substring(0, 1))).Free
 if ($free -lt 25GB) { Fail "need 25 GB free on $($Work.Substring(0, 2)) (the census writes two 4 GiB WAVs); free: $([math]::Round($free / 1GB)) GB" }
-Write-Host "Windows 11 $($os.Version) build $($os.BuildNumber), Administrator, x64"
+Write-Host "$($os.Caption) $($os.Version) build $($os.BuildNumber), Administrator, x64"
 
 # Python 3.12: the py launcher (python.org) or "python" (python.org or Microsoft Store).
 $pyexe = $null; $pyargs = @()
@@ -98,6 +98,10 @@ if ((Sha $pmZip) -ne $ProcmonZipSha256) {
 }
 Expand-Archive -LiteralPath $pmZip -DestinationPath (Join-Path $Work "procmon")
 $procmon = Join-Path $Work "procmon\Procmon64.exe"
+$sig = Get-AuthenticodeSignature -LiteralPath $procmon
+if ($sig.Status -ne "Valid" -or $sig.SignerCertificate.Subject -notmatch "O=Microsoft Corporation") {
+    Fail "Procmon64.exe signature is $($sig.Status) by '$($sig.SignerCertificate.Subject)', not a valid Microsoft signature"
+}
 
 # 5. A private Python environment with the package's pinned requirements.
 & $pyexe @pyargs -m venv (Join-Path $Work "venv")
