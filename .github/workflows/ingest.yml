@@ -186,6 +186,8 @@ jobs:
           path: ${{ runner.temp }}/kit
       - name: run win11_packet.ps1 -Rehearsal
         shell: pwsh
+        # this job has no checkout: the workflow default (host/ingest) does not exist here
+        working-directory: ${{ runner.temp }}
         run: |
           $sha = "${{ github.event.pull_request.head.sha || github.sha }}"
           $kitzip = Join-Path $env:RUNNER_TEMP "win11-kit.zip"
