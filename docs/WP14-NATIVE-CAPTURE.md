@@ -34,9 +34,9 @@ every reason, and is PASS only when all of the following hold for the bound proc
 | Property | How it is bound | Missing → | Contradicted → |
 |---|---|---|---|
 | Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
-| Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs | — | FAIL |
+| Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs, except a Cleanup/Close of a positively unrelated stream (§2.4) | — | FAIL |
 | Result join (ETW) | a FileIo read gets a native result only from the OpEnd with the **same valid, nonzero `IrpPtr`**, only if it was the sole request pending on that `IrpPtr`, and only if the OpEnd carries both `NtStatus` and `ExtraInfo`. Missing, empty, zero or non-numeric identities never join. A request of any type that arrives while another is outstanding on the same `IrpPtr` makes that lifecycle ambiguous, and it stays ambiguous until **every** outstanding request has completed; requests added meanwhile are ambiguous too. Reuse only after the lifecycle fully resolves is legitimate. **Every** FileIo request class that carries an `IrpPtr` takes part: Create/Cleanup/Close/Read/Write (64–68), Info (69–71, 74, 75), Flush (73), DirEnum/DirNotify (72, 77), and any class not listed. Such a request can only add ambiguity; it never supplies a Read result | HELD | — |
-| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read. **Any** FileIo record of the selected process with such a key (Create, Cleanup, Close, Read, Write or any other class) is HELD: it may have closed or written the target, so object lifetimes and the no-write claim cannot be established. A Close or Write on a valid non-target object stays harmless. A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
+| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read. **Any** FileIo record of the selected process with such a key (Create, Cleanup, Close, Read, Write or any other class) is HELD: it may have closed or written the target, so object lifetimes and the no-write claim cannot be established. A Close on a valid non-target object stays harmless. A Write is not a target write only when its FileKey identity is positively another stream (§2.4); an unresolved identity is HELD. A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
 | Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
 | Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
 | No writes | no write of any kind by the process reaches the target | — | FAIL |
@@ -185,6 +185,39 @@ and any other shape is HELD or FAIL, never PASS:
 - **Bounded memory.** The XML is streamed one `Event` at a time, and only records of (or
   stale for) `--pid` are kept. The selftest judges a 145 MB export at about 20 MB peak RSS.
 
+### 2.4 Target class, write identity and post-exit teardown (Software #439, V146-WIN-R2-01/02)
+
+Verification #146 (findings `P2-R1-WP14-A6-RETURNS-2026-10-16`) ruled that an image's backing
+disk holds unrelated files, and that post-exit rundown is not a blanket exemption.
+`a6check.py` now judges identity by FileKey as well as FileObject:
+
+- **Target class.** `--geometry` as a bare byte count means an image target. A raw-disk path
+  (`\Device\HarddiskN\DRn`, `PhysicalDriveN`) names the target only for a raw-disk target.
+  For an image, DiskIo on the backing disk is never mapped into the image's offsets. It
+  supplies no read coverage, and a DiskIo write is a target write only when its FileObject
+  field (the stream's FileKey) is a target key. For a raw `PhysicalDriveN` target, every
+  DiskIo write on that disk still FAILs.
+- **Target keys.** Every Create that names the target starts an object lifecycle. The FileKeys
+  that object's records carry, plus any FileKey that a FileIo name record (32 FileCreate,
+  35 FileDelete, 36 FileRundown, 0 Name) names as the target, form the target-key set. The
+  set is complete only if every target object showed its key.
+- **A FileIo write is one of three things.**
+  - **target** (FAIL): its object names the target, its key is a target key, or a name
+    record names its key as the target.
+  - **unrelated** (noted): its key is positively another stream, from the object's Create
+    path with a consistent key, or from the key's name records at that point in the trace.
+    The name records must be the last one before the write (not a FileDelete) and the first
+    one after it (not a new FileCreate), and the two must agree.
+  - **unresolved** (HELD): anything else. That covers a missing or zero key; an unnamed
+    object whose key has no name at that point; a key deleted before the write; names that
+    disagree; an object with two keys; or an object-name-only identity while the target-key
+    set is incomplete.
+- **Post-exit records.** A record from a thread or process after its end record is still never
+  attributed. Only a Cleanup/Close (65/66) of an **unrelated** stream is set aside as
+  teardown, and so is image backing-disk DiskIo without a target key. Every other post-exit
+  record still FAILs: any read or write (even to a named unrelated stream), a target object,
+  and an unresolved identity.
+
 `retained-win11.py ORIGINAL.zip --out result.json` checks the original ZIP and every member
 it uses against Verification's pins. It then runs `a6check.py` with exactly the arguments
 Verification's own replay gave the unchanged parser. No Windows binary is executed.
@@ -194,7 +227,7 @@ Verification's own replay gave the unchanged parser. No Windows binary is execut
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (162 cases; 156 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (188 cases; 182 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |

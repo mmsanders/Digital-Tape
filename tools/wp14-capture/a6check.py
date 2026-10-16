@@ -367,7 +367,12 @@ def parse_etw_xml(source, v, keep=None):
     # one request, a read, from start to completion can supply a result, and only from an
     # OpEnd carrying both NtStatus and ExtraInfo. Missing or invalid identities never join.
     # Reuse after a lifecycle fully resolves (zero outstanding) is legitimate.
-    files, pending = {}, {}
+    # Identity (V146-WIN-R2-01). Each Create starts one object lifecycle {path, keys}: the
+    # FileKeys (file/stream identities) its records carry while it names that path. FileIo
+    # name records (0 Name, 32 FileCreate, 35 FileDelete, 36 FileRundown) name a FileKey;
+    # tracerpt calls that field FileObject. Both are kept for the judgment, which needs the
+    # whole trace (a rundown at the end names keys used much earlier).
+    files, pending, lcs, names = {}, {}, [], {}
     st = {'n': 0, 'headers': 0, 'last': None, 'inversions': 0, 'untimed': 0, 'ptr': None,
           'noclass': 0, 'conflict': 0, 'undecoded': {}, 'raw': {}, 'tails': {}}
 
@@ -469,11 +474,23 @@ def parse_etw_xml(source, v, keep=None):
                     ended[tid] = threads.pop(tid)
             elif g == G_DISKIO and op in (10, 11):
                 pid, stale = owner(d.get('IssuingThreadId'))
-                emit(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
-                        fd='disk%d' % _int(d['DiskNumber']),
-                        off=_int(d['ByteOffset']), len=_int(d['TransferSize']), ret=None, status_src=None))
+                e2 = emit(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
+                             fd='disk%d' % _int(d['DiskNumber']),
+                             off=_int(d['ByteOffset']), len=_int(d['TransferSize']), ret=None, status_src=None))
+                # DiskIo's FileObject field carries the FileKey of the stream the I/O is for.
+                e2.update(n=n, fk=_irp(d.get('FileObject')))
             if g != G_FILEIO:
                 continue
+            if op in (0, 32, 35, 36):
+                k = _irp(d.get('FileObject'))
+                if k is not None:
+                    names.setdefault(k, []).append((n, op, d.get('FileName', '')))
+                continue
+            fk = _irp(d.get('FileKey'))
+            if op != 76 and fk is not None:
+                lc = files.get(_irp(d.get('FileObject')))
+                if lc is not None:
+                    lcs[lc]['keys'].add(fk)
             if op != 76 and _irp(d.get('FileObject')) is None:
                 # Any FileIo record of a process whose FileObject is missing or invalid leaves that
                 # process's object lifetimes and write targets unknown: it may have closed or
@@ -485,22 +502,25 @@ def parse_etw_xml(source, v, keep=None):
                 occupy(d.get('IrpPtr'), None)
                 fo = _irp(d.get('FileObject'))    # a FileObject must be a valid nonzero identity too
                 if fo is not None:
-                    files[fo] = d.get('OpenPath', '')
+                    files[fo] = len(lcs)
+                    lcs.append({'path': d.get('OpenPath', ''), 'keys': {fk} if fk is not None else set()})
                 emit(ev(pid=pid, stale=stale, op='open', fd=fo, path=d.get('OpenPath', ''), mode=None, ret=0))
             elif op in (65, 66):
                 pid, stale = owner(d.get('TTID'))
                 occupy(d.get('IrpPtr'), None)
                 fo = _irp(d.get('FileObject'))
+                e2 = emit(ev(pid=pid, stale=stale, op='close', fd=fo))
+                e2.update(n=n, fk=fk, lc=files.get(fo) if fo is not None else None)
                 if fo is not None:
                     files.pop(fo, None)
-                emit(ev(pid=pid, stale=stale, op='close', fd=fo))
             elif op in (67, 68):
                 pid, stale = owner(d.get('TTID'))
                 fo = _irp(d.get('FileObject'))
+                lc = files.get(fo) if fo is not None else None
                 e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=fo,
-                        path=files.get(fo) if fo is not None else None,
+                        path=lcs[lc]['path'] if lc is not None else None,
                         off=_int(d['Offset']), len=_int(d['IoSize']))
-                e2['fileio'] = True
+                e2.update(fileio=True, n=n, fk=fk, lc=lc)
                 if fo is None:
                     e2['why'] = 'no valid FileObject on the request'
                 occupy(d.get('IrpPtr'), e2)
@@ -557,6 +577,7 @@ def parse_etw_xml(source, v, keep=None):
         v.notes.append('ETW: %d FileIo read/write payload(s) end with undocumented bytes %s '
                        '(not interpreted)' % (cnt, tl))
     v.notes.append('ETW: %d records streamed; pointer size %s' % (st['n'], st['ptr']))
+    v.etw = {'lcs': lcs, 'names': names}
     return out
 
 
@@ -638,11 +659,79 @@ def target_matches(path, a):
     p = path.replace('/', '\\').lower() if a.format == 'etw-xml' else path
     if a.format == 'etw-xml':
         t = a.target.replace('/', '\\').lower()
-        if a.disk is not None and (re.search(r'physicaldrive%d$' % a.disk, p)
+        # A raw-disk path names the target only when the target IS that disk; for an image
+        # target the disk holds the image among unrelated files (V146-WIN-R2-01).
+        if a.disk is not None and not getattr(a, 'image', False) and (re.search(r'physicaldrive%d$' % a.disk, p)
                                    or re.search(r'\\device\\harddisk%d\\dr\d+$' % a.disk, p)):
             return True
         return p == t or p.endswith('\\' + t.lstrip('.\\'))
     return path == a.target or path.endswith('/' + a.target.lstrip('./'))
+
+
+def _norm(p):
+    return (p or '').replace('/', '\\').rstrip('\\').lower()
+
+
+class Identity:
+    """Which file a FileIo/DiskIo record's FileObject/FileKey is (V146-WIN-R2-01/02).
+    'target': the object names the target, or the key is one of the target's keys.
+    'unrelated': positively a different, named stream, with no conflicting evidence.
+    'unresolved': anything else (missing/zero key, unnamed key, conflicting object/key,
+    a key used outside its named life, or an incomplete target-key set). Unknown is never
+    treated as unrelated."""
+
+    def __init__(self, v, a):
+        self.lcs, self.names, self.a = v.etw['lcs'], v.etw['names'], a
+        tl = [lc for lc in self.lcs if target_matches(lc['path'], a)]
+        self.keys = set().union(*[lc['keys'] for lc in tl]) if tl else set()
+        self.keys |= {k for k, evs in self.names.items() if any(target_matches(nm, a) for _, _, nm in evs)}
+        # every captured target object must show its key, or a key outside this set could
+        # still be the target's
+        self.complete = all(lc['keys'] for lc in tl)
+        self.n_target_objects = len(tl)
+
+    def key_name(self, k, n):
+        """The name a FileKey has at record n, from its name records: the last one before n
+        (unless that was its FileDelete) and the first one after n (unless that was a new
+        FileCreate). Both must agree; a key deleted before n is not named."""
+        evs = self.names.get(k, [])
+        before = [x for x in evs if x[0] < n]
+        after = [x for x in evs if x[0] > n]
+        b = before[-1] if before else None
+        f = after[0] if after else None
+        if b is not None and b[1] == 35:
+            return None, 'FileKey 0x%x was deleted (FileDelete) before this record' % k
+        nb = b[2] if b is not None else None
+        na = f[2] if f is not None and f[1] != 32 else None
+        if nb and na and _norm(nb) != _norm(na):
+            return None, 'FileKey 0x%x is named both %r and %r around this record' % (k, nb, na)
+        if not (nb or na):
+            return None, 'FileKey 0x%x has no name record for this point in the trace' % k
+        return nb or na, None
+
+    def of(self, e):
+        a, fk = self.a, e.get('fk')
+        lc = self.lcs[e['lc']] if e.get('lc') is not None else None
+        if lc is not None and target_matches(lc['path'], a):
+            return 'target', lc['path']
+        if fk is not None and fk in self.keys:
+            return 'target', 'FileKey 0x%x of the target' % fk
+        if fk is None:
+            return 'unresolved', 'no valid FileKey'
+        if lc is not None and len(lc['keys']) > 1:
+            return 'unresolved', 'its object carried %d different FileKeys' % len(lc['keys'])
+        kn, why = self.key_name(fk, e['n'])
+        if kn is not None and target_matches(kn, a):
+            return 'target', kn
+        if lc is not None:
+            if kn is not None and _norm(kn) != _norm(lc['path']):
+                return 'unresolved', 'object names %r but FileKey 0x%x is %r' % (lc['path'], fk, kn)
+            if kn is None and not self.complete:
+                return 'unresolved', 'the target-key set is incomplete and FileKey 0x%x is not named' % fk
+            return 'unrelated', lc['path']
+        if kn is None:
+            return 'unresolved', 'unnamed FileObject and ' + why
+        return 'unrelated', kn
 
 
 def judge(a):
@@ -660,6 +749,7 @@ def judge(a):
         v.fail.append('geometry reports %d bytes, not --capacity %d' % (geo['bytes'], a.capacity))
     if geo.get('sector') not in (SECTOR,):
         v.held.append('geometry does not show 512-byte sectors (%s)' % geo.get('sector'))
+    a.image = bool(geo.get('image'))
     if a.format == 'etw-xml':
         if a.disk is None:
             raise InputError('etw-xml needs --disk N as well as --target')
@@ -712,6 +802,26 @@ def judge(a):
         v.fail.append('dtrace -c target is PID %s, not --pid %d' % (tgt[0], a.pid))
     mine = [e for e in events if e['pid'] == a.pid and e['op'] != 'target']
     stale = [e for e in events if e.get('stale') == a.pid]
+    ident = Identity(v, a) if a.format == 'etw-xml' else None
+    post_exit = {'excluded': [], 'remaining': []}
+    if ident is not None:
+        # V146-WIN-R2-02: only a Cleanup/Close of a positively unrelated stream is teardown
+        # that may be set aside; every other stale record (any read or write, any target or
+        # unresolved identity) still counts. An image's backing-disk DiskIo is judged by
+        # FileKey only, as during life.
+        keep = []
+        for e in stale:
+            kind, what = ident.of(e) if e['op'] in ('close', 'read', 'write') else ('unresolved', e['op'])
+            disk_io = str(e['fd']).startswith('disk')
+            if e['op'] == 'close' and kind == 'unrelated':
+                post_exit['excluded'].append({'n': e['n'], 'op': 'close', 'stream': what})
+            elif disk_io and a.image and not (e.get('fk') is not None and e['fk'] in ident.keys):
+                post_exit['excluded'].append({'n': e['n'], 'op': 'disk-' + e['op'], 'stream': (
+                    ident.key_name(e['fk'], e['n'])[0] if e.get('fk') is not None else None)})
+            else:
+                keep.append(e)
+                post_exit['remaining'].append({'n': e.get('n'), 'op': e['op'], 'identity': kind, 'detail': what})
+        stale = keep
     if stale:
         v.fail.append('%d record(s) come from a thread of PID %d outside the observed life of that '
                       'thread and process; they are not attributed' % (len(stale), a.pid))
@@ -740,6 +850,7 @@ def judge(a):
 
     # --- target binding: opens, reads, writes
     fdmap, opens, calls = {}, [], []
+    disk_writes, wid = [], {'unrelated': {}, 'unresolved': {}}
     for e in mine:
         if e['op'] == 'open':
             hit = target_matches(e['path'], a)
@@ -752,8 +863,24 @@ def judge(a):
         elif e['op'] in ('read', 'write', 'flush'):
             if a.format == 'etw-xml':
                 # DiskIo by disk number; FileIo by the path its object names AT THIS READ.
+                if str(e['fd']).startswith('disk') and a.image:
+                    # The image's backing disk holds unrelated files: a DiskIo record is a
+                    # target write only through a target FileKey, and its disk offsets are
+                    # never mapped into the image (V146-WIN-R2-01).
+                    if e['op'] == 'write':
+                        if e.get('fk') is not None and e['fk'] in ident.keys:
+                            calls.append(e)
+                        else:
+                            disk_writes.append(e)
+                    continue
                 if e['fd'] == 'disk%d' % a.disk:
                     calls.append(e)
+                elif e.get('fileio') and e['op'] == 'write' and e['fd'] is not None:
+                    kind, what = ident.of(e)
+                    if kind == 'target':
+                        calls.append(e)
+                    else:
+                        wid[kind].setdefault(what, []).append(e['n'])
                 elif e.get('fileio') and e['fd'] is None:
                     if e['off'] is not None and e['off'] < a.capacity and e['off'] + (e['len'] or 0) > mirror:
                         v.held.append('a FileIo read by PID %d of the last sector has no valid FileObject; '
@@ -779,6 +906,22 @@ def judge(a):
     writes = [c for c in calls if c['op'] == 'write']
     if writes:
         v.fail.append('%d write(s) by PID %d reached the target' % (len(writes), a.pid))
+    for what, ns in sorted(wid['unresolved'].items()):
+        v.held.append('%d write(s) by PID %d have an unresolved identity (%s); they may have reached '
+                      'the target' % (len(ns), a.pid, what))
+    for what, ns in sorted(wid['unrelated'].items()):
+        v.notes.append('%d write(s) by PID %d are to %s, a stream other than the target' % (len(ns), a.pid, what))
+    if disk_writes:
+        v.notes.append('%d DiskIo write(s) by PID %d on the image\'s backing disk carry no target FileKey '
+                       '(streams: %s); not mapped into the image' % (len(disk_writes), a.pid, ', '.join(sorted(
+                           {str(ident.key_name(e['fk'], e['n'])[0] if e.get('fk') is not None else None)
+                            for e in disk_writes}))))
+    for x in post_exit['excluded']:
+        if x['op'] == 'close':
+            v.notes.append('post-exit close of %s set aside as unrelated teardown (record %s)' % (x['stream'], x['n']))
+        else:
+            v.notes.append('post-exit %s on the image\'s backing disk carries no target FileKey (stream %s, record %s); '
+                           'backing-disk I/O is judged by FileKey only' % (x['op'], x['stream'], x['n']))
 
     # --- full last-sector coverage by successful, status-bearing, >4 GiB reads
     reads = [c for c in calls if c['op'] == 'read' and c['off'] is not None
@@ -843,6 +986,15 @@ def judge(a):
         'last_sector_reads': [{k: c[k] for k in ('off', 'len', 'ret', 'err', 'status_src', 'why')} for c in reads],
         'open_claim': open_claim,
         'target_calls': {op: sum(1 for c in calls if c['op'] == op) for op in ('read', 'write', 'flush')},
+        'identity': None if ident is None else {
+            'target_kind': 'image' if a.image else 'disk',
+            'target_objects': ident.n_target_objects,
+            'target_keys': sorted(hex(k) for k in ident.keys),
+            'target_key_set_complete': ident.complete,
+            'writes_unrelated': {k: len(x) for k, x in sorted(wid['unrelated'].items())},
+            'writes_unresolved': {k: len(x) for k, x in sorted(wid['unresolved'].items())},
+            'backing_disk_writes': len(disk_writes),
+            'post_exit': post_exit},
         'exit': {'traced': traced[0] if traced else None, 'recorded': a.exit_code},
         'tracer_steps': steps,
         'geometry': geo,

@@ -132,8 +132,10 @@ def win11(xml, eventguid=True, provider='kernel'):
         if g == '90cbdc39-4a3e-11d1-84f4-0000f80464e3':
             ver, tid = 3, _num(d['TTID']) if 'TTID' in d else 0
             if op in (67, 68):
+                # one FileKey per FileObject: two objects of the synthetic set are never one file
                 payload = struct.pack('<QQQQIII', _num(d['Offset']), _num(d['IrpPtr']), _num(d['FileObject']),
-                                      0xFFFF8B022660EAB0, tid, _num(d['IoSize']), _num(d['IoFlags'])) + bytes(4)
+                                      0xFFFF8B0000000000 | _num(d['FileObject']), tid, _num(d['IoSize']),
+                                      _num(d['IoFlags'])) + bytes(4)
         elif g == '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c':
             ver = 3
             if op in (1, 2, 3, 4):
@@ -155,6 +157,94 @@ def win11(xml, eventguid=True, provider='kernel'):
     out, n = _EV.subn(one, xml)
     assert n == xml.count('<Event '), 'win11(): an event did not convert'
     return out
+
+
+# V146-WIN-R2-01/02 (Software-authored; Verification's own 13 controls are run separately
+# from their publication). An IMAGE target on disk 0, Windows 11 field shapes: Create has no
+# FileKey; reads, writes and Cleanup/Close carry one; FileIo name records (32 FileCreate,
+# 35 FileDelete, 36 FileRundown) name a FileKey in a field tracerpt calls FileObject; DiskIo
+# carries the stream's FileKey as FileObject. Each case changes one property of a PASS set.
+def identity_controls(c):
+    print('== Image-target write identity and post-exit teardown (synthetic, V146-WIN-R2)')
+    G = {'p': '3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c', 't': '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c',
+         'f': '90cbdc39-4a3e-11d1-84f4-0000f80464e3', 'd': '3d6fa8d4-fe05-11d0-9dda-00c04fd7ba7c',
+         'h': '68fdd900-4a3e-11d1-84f4-0000f80464e3'}
+    clock = [0]
+
+    def e(k, op, **d):
+        clock[0] += 1
+        return ('<Event><System><Provider Guid="{%s}"/><Opcode>%d</Opcode><TimeCreated SystemTime="2026-10-14T18:%02d:%02d.0Z"/>'
+                '</System><EventData>%s</EventData></Event>' % (G[k], op, clock[0] // 60, clock[0] % 60,
+                                                                ''.join('<Data Name="%s">%s</Data>' % kv for kv in d.items())))
+    IMG, VOL = 'rehearsal.img', '\\Device\\HarddiskVolume3\\rh\\'
+    TK = '0xE1'
+
+    def mk(*, pre=(), during=(), post=(), rundown=None, read_key=TK, out_create=True):
+        clock[0] = 0
+        ev = [e('h', 0, EventsLost=0, BuffersLost=0, PointerSize=8)] + [x() for x in pre]
+        ev += [e('p', 1, ProcessId=4242, ImageFileName='tapectl.exe', CommandLine='tapectl.exe verify ' + IMG),
+               e('t', 1, ProcessId=4242, TThreadId=5000)]
+        if out_create:
+            ev.append(e('f', 64, IrpPtr='0xA0', TTID=5000, FileObject='0xF2', OpenPath=VOL + 'verify-out.txt'))
+        ev += [e('f', 64, IrpPtr='0xA1', TTID=5000, FileObject='0xF1', OpenPath=VOL + IMG),
+               e('f', 67, Offset=4296015360, IrpPtr='0xB2', FileObject='0xF1', FileKey=read_key, TTID=5000, IoSize=512, IoFlags=0),
+               e('f', 76, IrpPtr='0xB2', ExtraInfo=512, NtStatus=0)]
+        ev += [x() for x in during]
+        ev += [e('t', 2, ProcessId=4242, TThreadId=5000), e('p', 2, ProcessId=4242, ImageFileName='tapectl.exe')]
+        ev += [x() for x in post]
+        for k, nm in (rundown if rundown is not None else [(TK, VOL + IMG), ('0xE2', VOL + 'verify-out.txt')]):
+            ev.append(e('f', 36, FileObject=k, FileName=nm))
+        return '<Events>' + ''.join(ev) + '</Events>'
+    wr = lambda fo='0xF2', fk='0xE2', irp='0xD1': lambda: e('f', 68, Offset=0, IrpPtr=irp, FileObject=fo, FileKey=fk, TTID=5000, IoSize=3, IoFlags=0)
+    cl = lambda fo='0xF2', fk='0xE2', op=66: lambda: e('f', op, TTID=5000, FileObject=fo, FileKey=fk)
+    disk = lambda fk=None: lambda: e('d', 11, DiskNumber=0, IrpFlags='0x60043', TransferSize=4096, ByteOffset=123456,
+                                      IssuingThreadId=5000, **({'FileObject': fk} if fk else {}))
+    name = lambda op, k, nm: lambda: e('f', op, FileObject=k, FileName=nm)
+
+    def run_(label, want, reason, xml):
+        c.check(label, want, reason, etw_set(c, xml=xml, geo='4296015872\n', disk='0', target=IMG, out='OK\n',
+                                             extra=['--capacity', '4296015872']))
+    held, tw, stale = 'unresolved identity', 'reached the target', 'outside the observed life'
+    run_('image baseline', 'PASS', None, mk())
+    run_('write to a named non-target object (its key consistent)', 'PASS', None, mk(during=[wr()]))
+    run_('write through an inherited, unnamed object; key named by FileCreate', 'PASS', None,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'verify-out.txt')], during=[wr()]))
+    run_('write through an unnamed object; key named only by the end rundown', 'PASS', None,
+         mk(out_create=False, during=[wr()]))
+    run_('backing-disk DiskIo write without a FileKey is not mapped into the image', 'PASS', None,
+         mk(during=[wr(), disk()]))
+    run_('backing-disk DiskIo write on an unrelated FileKey', 'PASS', None, mk(during=[wr(), disk('0xE2')]))
+    run_('post-exit Close of a named unrelated object is teardown', 'PASS', None, mk(post=[cl()]))
+    run_('post-exit Cleanup and Close of an unnamed object whose key is named', 'PASS', None,
+         mk(out_create=False, post=[cl(op=65), cl()]))
+    # -- must not PASS
+    run_('write through the target object', 'FAIL', tw, mk(during=[wr('0xF1', TK)]))
+    run_('foreign named object carrying the target FileKey', 'FAIL', tw, mk(during=[wr('0xF2', TK)]))
+    run_('unnamed object carrying the target FileKey', 'FAIL', tw, mk(out_create=False, during=[wr('0xF9', TK)]))
+    run_('unnamed object whose key a name record names as the target', 'FAIL', tw,
+         mk(out_create=False, during=[wr('0xF9', '0xE7')], rundown=[(TK, VOL + IMG), ('0xE7', VOL + IMG)]))
+    run_('backing-disk DiskIo write carrying the target FileKey', 'FAIL', tw, mk(during=[disk(TK)]))
+    run_('unnamed object, zero FileKey', 'HELD', held, mk(out_create=False, during=[wr('0xF9', '0')]))
+    run_('unnamed object, FileKey with no name record', 'HELD', held,
+         mk(out_create=False, during=[wr('0xF9', '0xE9')]))
+    run_('unnamed object, FileKey deleted (FileDelete) before the write', 'HELD', held,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            during=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('FileKey named differently before and after the write', 'HELD', held,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'a.txt')], during=[wr()]))
+    run_('named object whose FileKey a name record names as another file', 'HELD', held,
+         mk(during=[wr()], rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'other.txt')]))
+    run_('one object carrying two FileKeys', 'HELD', held, mk(during=[wr(), wr(fk='0xE8', irp='0xD2')],
+                                                             rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'verify-out.txt'),
+                                                                      ('0xE8', VOL + 'verify-out.txt')]))
+    run_('target object never shows its key; non-target write identified only by object name', 'HELD', held,
+         mk(read_key=None, during=[wr()], rundown=[]).replace('<Data Name="FileKey">None</Data>', ''))
+    run_('post-exit write to a named unrelated object (writes are never teardown)', 'FAIL', stale, mk(post=[wr()]))
+    run_('post-exit Close of an unnamed object with an unnamed key', 'FAIL', stale,
+         mk(out_create=False, post=[cl('0xF9', '0xE9')]))
+    run_('post-exit Close of the target object', 'FAIL', stale, mk(post=[cl('0xF1', TK)]))
+    run_('post-exit Close with no FileKey', 'FAIL', stale, mk(out_create=False, post=[cl('0xF9', '0')]))
+    run_('post-exit DiskIo write carrying the target FileKey', 'FAIL', stale, mk(post=[disk(TK)]))
 
 
 def bounded_memory(c, w11, n=120000):
@@ -507,8 +597,14 @@ def main():
                                              ('OpenPath', '\\Device\\HarddiskVolume3\\log.txt')])
         other_wr = ev_(FIO, 68, '0001500', [('Offset', '0'), ('IrpPtr', '0xC2'), ('FileObject', '0xF6'),
                                              ('TTID', '0x1388'), ('IoSize', '512'), ('IoFlags', '0x0')])
-        c.check('a Write to a valid non-target file is not a target write', 'PASS', None,
+        # V146-WIN-R2-01: a write's absence from the target needs its FileKey; the old shape has none
+        c.check('a Write to a valid non-target file, without FileKeys', 'HELD', 'unresolved identity (no valid FileKey)',
                 etw_set(c, xml=before_read(other_cr, other_wr)))
+        keyed = lambda x, fo, k: x.replace('<Data Name="FileObject">%s</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">' % fo,
+                                           '<Data Name="FileObject">%s</Data><Data Name="FileKey">%s</Data><Data Name="TTID">0x1388</Data>'
+                                           '<Data Name="IoSize">' % (fo, k))
+        c.check('a Write to a valid non-target file, every read/write keyed', 'PASS', None,
+                etw_set(c, xml=keyed(keyed(before_read(other_cr, other_wr), '0xF6', '0xE6'), '0xF1', '0xE1')))
         bad_wr = other_wr.replace('<Data Name="FileObject">0xF6</Data>', '<Data Name="FileObject">0x0</Data>')
         c.check('a Write with an invalid FileObject may have reached the target', 'HELD',
                 'without a valid FileObject (opcode 68)', etw_set(c, xml=before_read(bad_wr)))
@@ -618,6 +714,8 @@ def main():
                  before_read(bad_wr)),
                 ('a Write to a valid non-target file', 'PASS', None, before_read(other_cr, other_wr))):
             c.check('Win11 shape: ' + name, want, reason, etw_set(c, xml=win11(xml)))
+
+        identity_controls(c)
 
         peak, size = bounded_memory(c, win11(gx))
         c.direct('streaming: a %d MB Win11 export judged in %.0f MB peak RSS' % (size >> 20, peak / 2**20),
