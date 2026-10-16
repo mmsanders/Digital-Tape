@@ -95,7 +95,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 300
+    timeout-minutes: 340
     steps:
       # The imported package is pinned byte for byte (check_pins.py); Windows runners
       # default to core.autocrlf=true, which would rewrite its text files on checkout.
@@ -136,6 +136,7 @@ jobs:
           ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
           python -B tools/check_seam.py target/release/ingest$ext target/observe/release/ingest$ext
       - name: run every census case
+        timeout-minutes: 300   # so a slow host still uploads what it produced (below)
         run: |
           ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
           python -B stage1/run_packet.py --package ../../tests/wp16_ingest_stage1 \
@@ -160,6 +161,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: stage1-packet-${{ runner.os }}-${{ runner.arch }}
           path: ${{ runner.temp }}/packet

@@ -18,7 +18,7 @@ Common to all: the observation build stats `.mark/<seq>-<op>` at each milestone 
 also logs the same marks to its own events.jsonl. The native trace must show every
 mark, in order, contiguous from 0, and identical to that independent log.
 """
-import csv, gzip, hashlib, json, ntpath, os, re, shutil, signal, subprocess, sys, threading, time
+import csv, gzip, hashlib, json, ntpath, os, re, shutil, signal, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 
 
@@ -308,10 +308,13 @@ GATE = "ingestgate"
 
 
 class FsUsage:
-    """One fs_usage session per run, filtered to the observed command names. fs_usage
-    runs on a pty so it line-buffers; a gate process stat-ing a unique path marks the
-    start (session is live) and the end (everything up to after the run's exit has
-    been emitted)."""
+    """One fs_usage session for the whole packet, filtered to the observed command names.
+    fs_usage runs on a pty so it line-buffers. Runs are serial; each is bracketed by gate
+    processes stat-ing unique paths: the start gate is issued after the previous run's end
+    and before this run starts, the end gate after this run has exited, and the run's raw
+    trace is exactly the session text from its start-gate line through its end-gate line.
+    (One session per run cost seconds of fs_usage start-up and shutdown per run; the
+    census did not fit a hosted runner's job limit that way.)"""
     kind = "fs_usage"
     deferred = False
     serial = True
@@ -321,6 +324,7 @@ class FsUsage:
         self.tools = None
         self.n = 0
         self.diagnosed = False
+        self.sess = None
 
     def version(self):
         return "fs_usage (macOS " + subprocess.run(["sw_vers", "-productVersion"], capture_output=True, text=True).stdout.strip() + ")"
@@ -335,27 +339,13 @@ class FsUsage:
             shutil.copyfile(src, self.tools / name)
             os.chmod(self.tools / name, 0o755)
 
-    def stop(self):
-        # keep identities, not copies of system binaries
-        rec = {p.name: {"copied_from": src, "sha256": sha_file(p)} for p, src in
-               ((self.tools / GATE, "/bin/test"), (self.tools / "probe-parent", "/bin/bash"), (self.tools / "probe-child", "/bin/cat"))}
-        (self.tools / "tools.json").write_bytes(canonical(rec))
-        for name in (GATE, "probe-parent", "probe-child"):
-            (self.tools / name).unlink()
-
-    def wrap(self, argv, trace):
-        return argv
-
-    def _gate(self, tag):
-        self.n += 1
-        token = str(self.tools / f"gate-{tag}-{os.getpid()}-{self.n}")
-        subprocess.run([str(self.tools / GATE), "-e", token])
-        return token
-
-    def before(self, trace, ctx):
+    def _session(self):
+        if self.sess is not None:
+            return self.sess
         import pty
+        path = Path(tempfile.mkdtemp(prefix="fs_usage-session-")) / "session.txt"
         master, slave = pty.openpty()
-        out = open(trace, "wb")
+        out = open(path, "wb")
         p = subprocess.Popen(["sudo", "-n", "fs_usage", "-w", "-f", "filesys", "-f", "exec"] + self.names,
                              stdout=slave, stderr=slave, stdin=subprocess.DEVNULL)
         os.close(slave)
@@ -372,45 +362,89 @@ class FsUsage:
                 out.flush()
         t = threading.Thread(target=pump, daemon=True)
         t.start()
-        ctx.update(proc=p, master=master, out=out, pump=t)
-        ctx["start_gate"] = self._wait_gate("start", trace)
-        if not ctx["start_gate"] and not self.diagnosed:
-            self.diagnosed = True
-            raw = Path(trace).read_bytes()
-            print(f"fs_usage start gate not seen; fs_usage running={p.poll() is None} rc={p.returncode} "
-                  f"bytes={len(raw)}; first lines:", file=sys.stderr)
-            for l in raw.decode("utf-8", "replace").splitlines()[:40]:
-                print("  | " + l, file=sys.stderr)
+        self.sess = {"proc": p, "master": master, "out": out, "pump": t, "path": path}
+        return self.sess
 
-    def _wait_gate(self, tag, trace, timeout=30):
-        """Run gate processes until one of them appears in the trace. fs_usage emits kdebug
-        events with some delay, so any gate issued during this wait counts; the first one
-        seen is returned (every gate here was issued after the state being bracketed)."""
-        deadline, issued = time.time() + timeout, []
-        while time.time() < deadline:
-            if len(issued) < 50:
-                issued.append(self._gate(tag))
-            time.sleep(0.1)
-            text = Path(trace).read_bytes().decode("utf-8", "replace")
-            seen = [t for t in issued if t in text]
-            if seen:
-                return seen[0]
-        return None
-
-    def after(self, trace, ctx):
-        ctx["end_gate"] = self._wait_gate("end", trace)
-        p = ctx["proc"]
+    def _end_session(self):
+        s = self.sess
+        if s is None:
+            return
+        self.sess = None
+        p = s["proc"]
         p.send_signal(signal.SIGINT)
         try:
             p.wait(timeout=20)
         except subprocess.TimeoutExpired:
             subprocess.run(["sudo", "-n", "kill", "-9", str(p.pid)])
             p.wait()
-        ctx["pump"].join(timeout=5)
-        os.close(ctx["master"])
-        ctx["out"].close()
-        for k in ("proc", "master", "out", "pump"):
-            ctx.pop(k, None)
+        s["pump"].join(timeout=5)
+        os.close(s["master"])
+        s["out"].close()
+        shutil.rmtree(s["path"].parent, ignore_errors=True)
+
+    def stop(self):
+        self._end_session()
+        # keep identities, not copies of system binaries
+        rec = {p.name: {"copied_from": src, "sha256": sha_file(p)} for p, src in
+               ((self.tools / GATE, "/bin/test"), (self.tools / "probe-parent", "/bin/bash"), (self.tools / "probe-child", "/bin/cat"))}
+        (self.tools / "tools.json").write_bytes(canonical(rec))
+        for name in (GATE, "probe-parent", "probe-child"):
+            (self.tools / name).unlink()
+
+    def wrap(self, argv, trace):
+        return argv
+
+    def _gate(self, tag):
+        self.n += 1
+        token = str(self.tools / f"gate-{tag}-{os.getpid()}-{self.n}")
+        subprocess.run([str(self.tools / GATE), "-e", token])
+        return token
+
+    def _text_from(self, offset):
+        with open(self.sess["path"], "rb") as f:
+            f.seek(offset)
+            return f.read().decode("utf-8", "replace")
+
+    def before(self, trace, ctx):
+        s = self._session()
+        ctx["offset"] = s["path"].stat().st_size
+        ctx["start_gate"] = self._wait_gate("start", ctx["offset"])
+        if not ctx["start_gate"] and not self.diagnosed:
+            self.diagnosed = True
+            raw = self._text_from(0)
+            print(f"fs_usage start gate not seen; fs_usage running={s['proc'].poll() is None} "
+                  f"rc={s['proc'].returncode} bytes={len(raw)}; first lines:", file=sys.stderr)
+            for l in raw.splitlines()[:40]:
+                print("  | " + l, file=sys.stderr)
+
+    def _wait_gate(self, tag, offset, timeout=30):
+        """Run gate processes until one of them appears in the session after `offset`.
+        fs_usage emits kdebug events with some delay, so any gate issued during this wait
+        counts; the first one seen is returned (every gate here was issued after the state
+        being bracketed)."""
+        deadline, issued = time.time() + timeout, []
+        while time.time() < deadline:
+            if len(issued) < 50:
+                issued.append(self._gate(tag))
+            time.sleep(0.05)
+            text = self._text_from(offset)
+            seen = [t for t in issued if t in text]
+            if seen:
+                return seen[0]
+        return None
+
+    def after(self, trace, ctx):
+        ctx["end_gate"] = self._wait_gate("end", ctx["offset"])
+        text = self._text_from(ctx["offset"])
+        lines = text.replace("\r", "").splitlines(keepends=True)
+        start = next((i for i, l in enumerate(lines) if ctx.get("start_gate") and ctx["start_gate"] in l), None)
+        end = next((i for i, l in enumerate(lines) if ctx.get("end_gate") and ctx["end_gate"] in l), None)
+        if start is None:
+            seg = lines if end is None else lines[:end + 1]   # no start gate: keep all, the checks fail
+        else:
+            seg = lines[start:] if end is None else lines[start:end + 1]
+        Path(trace).write_text("".join(seg))
+        ctx.pop("offset", None)
 
     @staticmethod
     def parse(text, names=("ingest",)):

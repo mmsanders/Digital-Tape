@@ -649,12 +649,20 @@ def main():
             cases.update(prior["cases"])
     big = [x for x in todo if x[1]["seconds"] > 3600]
     small = [x for x in todo if x[1]["seconds"] <= 3600]
+    t0, done = time.time(), 0
+
+    def progress(cid):  # one line per finished case, so a slow host shows where time goes
+        nonlocal done
+        done += 1
+        print(f"[{done}/{len(todo)}] {time.time() - t0:8.1f}s {cid}", file=sys.stderr, flush=True)
     with cf.ThreadPoolExecutor(1 if obs.serial else a.jobs) as ex:
         for cid, path in ex.map(lambda x: r.run_case(*x), small):
             cases[cid] = path
+            progress(cid)
     for n, c in big:  # one at a time: these are the multi-GiB boundaries
         cid, path = r.run_case(n, c)
         cases[cid] = path
+        progress(cid)
     obs.stop()
     if obs.deferred:
         owners = r.finalize()
