@@ -1,0 +1,135 @@
+{
+  "a6check_sha256": "78bef9c8fc8a2e933c13fef8e8eee302b852ae9f2fc0eb407d01d08456d15b8a",
+  "archive": {
+    "members": {
+      "geometry.txt": "869d638d624a307d24df91c2428f4f578eeb4174a6d4e9b5372f4fa5957a9762",
+      "tapectl.exe": "82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9",
+      "tracer-exits.txt": "37dd58cb1c236c53d618d1e412e2185e59a31f72e0c4dd68acbe31c7b984df9a",
+      "tracerpt-err.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tracerpt-out.txt": "7add796ce54039ed9ff9d569a2aebaeec739b7d54c2025b9648b06dc42892a2c",
+      "verify-exit.txt": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "verify-out.txt": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+      "verify-pid.txt": "0665c611f70c7d5c2541edbb58c79ec893af8303b64b53881fc07f4c6c4a8139",
+      "verify.etl": "8241f5560b5d5e367d1d9b6e954ef34d26db630824bad72d7e23874a033872cc",
+      "verify.xml": "e50da0d54c0ab406e49431ff23f189ce28475670358e19dc4978232899f834d8",
+      "wpr-stop-err.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wpr-stop-out.txt": "56f7594e4d60953c950db6c9a06253129b7d11f145d55c129ff61fe31f466486"
+    },
+    "name": "a6-rh-win-a00d8c054a0d41ccb1e026d735f97dbc.zip",
+    "sha256": "9b23466b502f386bc3c12ac8a6674710d0caf9491358c2c654bb5717d7cbd755"
+  },
+  "capacity": 4296015872,
+  "exit": {
+    "recorded": 0,
+    "traced": null
+  },
+  "exit_status": 1,
+  "fail": [
+    "10 record(s) come from a thread of PID 4596 outside the observed life of that thread and process; they are not attributed",
+    "3 write(s) by PID 4596 reached the target"
+  ],
+  "geometry": {
+    "bytes": 4296015872,
+    "image": true,
+    "sector": 512
+  },
+  "held": [],
+  "inputs": {
+    "diagnostics": [
+      {
+        "path": "wpr-stop-err.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "wpr-stop-out.txt",
+        "sha256": "56f7594e4d60953c950db6c9a06253129b7d11f145d55c129ff61fe31f466486"
+      },
+      {
+        "path": "tracerpt-err.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "tracerpt-out.txt",
+        "sha256": "7add796ce54039ed9ff9d569a2aebaeec739b7d54c2025b9648b06dc42892a2c"
+      }
+    ],
+    "exe": {
+      "path": "tapectl.exe",
+      "sha256": "82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9"
+    },
+    "geometry": {
+      "path": "geometry.txt",
+      "sha256": "869d638d624a307d24df91c2428f4f578eeb4174a6d4e9b5372f4fa5957a9762"
+    },
+    "stdout": {
+      "path": "verify-out.txt",
+      "sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    "trace": {
+      "path": "verify.xml",
+      "sha256": "e50da0d54c0ab406e49431ff23f189ce28475670358e19dc4978232899f834d8"
+    },
+    "tracer_log": {
+      "path": "tracer-exits.txt",
+      "sha256": "37dd58cb1c236c53d618d1e412e2185e59a31f72e0c4dd68acbe31c7b984df9a"
+    }
+  },
+  "last_sector": [
+    4296015360,
+    4296015872
+  ],
+  "last_sector_reads": [
+    {
+      "err": null,
+      "len": 512,
+      "off": 4296015360,
+      "ret": 512,
+      "status_src": "FileIo OpEnd NtStatus/ExtraInfo",
+      "why": null
+    },
+    {
+      "err": null,
+      "len": 512,
+      "off": 4296015360,
+      "ret": 512,
+      "status_src": "FileIo OpEnd NtStatus/ExtraInfo",
+      "why": null
+    }
+  ],
+  "notes": [
+    "ETW diagnostics wpr-stop-err.txt kept raw; loss is judged from the header counters",
+    "ETW diagnostics wpr-stop-out.txt kept raw; loss is judged from the header counters",
+    "ETW diagnostics tracerpt-err.txt kept raw; loss is judged from the header counters",
+    "ETW diagnostics tracerpt-out.txt kept raw; loss is judged from the header counters",
+    "ETW: 399 record(s) of 3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c:1 v3 decoded from raw EventPayload",
+    "ETW: 1186 record(s) of 3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c:2 v3 decoded from raw EventPayload",
+    "ETW: 6377 record(s) of 3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c:3 v3 decoded from raw EventPayload",
+    "ETW: 5610 record(s) of 3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c:4 v3 decoded from raw EventPayload",
+    "ETW: 41684 record(s) of 90cbdc39-4a3e-11d1-84f4-0000f80464e3:67 v3 decoded from raw EventPayload",
+    "ETW: 8769 record(s) of 90cbdc39-4a3e-11d1-84f4-0000f80464e3:68 v3 decoded from raw EventPayload",
+    "ETW: 50453 FileIo read/write payload(s) end with undocumented bytes 00000000 (not interpreted)",
+    "ETW: 1232801 records streamed; pointer size 8"
+  ],
+  "open_claim": "open access mode is not observable in kernel ETW (FileIo Create has no DesiredAccess); claim limited to observed reads and no observed writes",
+  "pid": 4596,
+  "target_calls": {
+    "flush": 0,
+    "read": 17,
+    "write": 3
+  },
+  "tracer_steps": [
+    [
+      "wpr-start",
+      0
+    ],
+    [
+      "wpr-stop",
+      0
+    ],
+    [
+      "tracerpt",
+      0
+    ]
+  ],
+  "verdict": "FAIL"
+}
