@@ -34,9 +34,9 @@ $ErrorActionPreference = "Stop"
 # committed transport files, so this script cannot silently go stale.
 $ProcmonZipSha256 = "477754bf299c9e5b311c5666f7a4a48dfdb21265eaa8f0cca70ef9d9552e3a10"   # qualified by the CI packet job
 $Transport = @{
-    "host/ingest/stage1/run_packet.py" = "85e953d67322f577b9d85354b341f4a6b57f8162cf3af7ed16a2e07cc5b00056"
-    "host/ingest/stage1/observers.py" = "9828fcc6f400ab04fb0f084651ec938ad7894002c47e61cc4938c31e2f3db26e"
-    "host/ingest/stage1/summarize_packet.py" = "48c175cf962542de3a43495067aaeee48c9099098e3bdbde0bcbeb4dbfd9e1e9"
+    "host/ingest/stage1/run_packet.py" = "d37d63e5b13b2fb64750e0f337f468e0f569630a42f1dfac82f9a96475b6dea2"
+    "host/ingest/stage1/observers.py" = "00a07576164863636c1d90ade87714e466aeb602781e6e88aa06458bb319758d"
+    "host/ingest/stage1/summarize_packet.py" = "dd18e797210da43021f1bac187bfdeb7b6a5f6ae7e9ae18d3098de8f9cf79f4a"
 }
 
 function Fail($msg) { Write-Host "STOPPED: $msg" -ForegroundColor Red; exit 1 }
