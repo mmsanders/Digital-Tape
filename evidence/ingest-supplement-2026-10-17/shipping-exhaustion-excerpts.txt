@@ -1,0 +1,29 @@
+# #451 shipping-binary exhaustion, census case 1926 (resources/exhaustion), candidate 6126d04 unchanged.
+# Verbatim result lines from runs 39041650946 (head 10ad7a6) and 39042030018 (head 9c0fe71).
+# Each row: `ingest --version` exit under the limit | case exit | own OOM diagnostic | clean
+# (DEST absent, no owned stage, unrelated sentinel unchanged) | stderr head.
+
+## Windows Server 2025, EXACT win11-kit ingest.exe 0e1ef2cb4f283eb876f08019222da5d3ac744ec30d49f020a2e87323f31bcac1
+## (kit artifact 12067900169 of run 38948012087, digest sha256:32d6643c... verified on download).
+## Job object JOB_OBJECT_LIMIT_PROCESS_MEMORY; packet value 3 MiB. Run 39042030018 job 117423290169:
+windows    2 MiB: version 0 | case exit 1 oom-diag True clean True | 'ingest: error: out of memory (needed 1411244 elements); nothing was written\n'
+windows    3 MiB: version 0 | case exit 1 oom-diag True clean True | 'ingest: error: 0/ordinary.wav: out of memory (needed 88200 elements); nothing was written\n'
+windows    4 MiB: version 0 | case exit 1 oom-diag True clean True | 'ingest: error: 0/ordinary.wav: out of memory (needed 88200 elements); nothing was written\n'
+windows    6 MiB: version 0 | case exit 3221226505 oom-diag False clean True | 'memory allocation of 4196368 bytes failed\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n'
+windows    8 MiB: version 0 | case exit 0 oom-diag False clean False | ''
+(12..128 MiB: case exit 0, publishes.)  Run 39041650946 job 117422193896: identical rows 4/6/8+.
+# 3221226505 = 0xC0000409 (fail-fast). 4196368 = (2^20 + 516) * 4: dsp.rs:395 TruePeak::peak_streamed
+# `vec![0.0f32; TP_BLOCK + 2 * margin]` (TP_BLOCK 1<<20, margin TP_HALF+2 = 258), an infallible allocation.
+
+## Linux (ubuntu-latest), rebuilt shipping binary 9218400f2d3fa99ea2713c791ca0a0a799636452e21f933c6d1cb65859e77c88
+## == the Linux packet's shipping_binary_sha256. prlimit RLIMIT_AS; packet value 6 MiB.
+## Runs 39041650946 job 117422193742 and 39042030018 job 117423290388: exhaustion_rows_mib [4, 6, 8]
+linux 4/6/8 MiB: version 0 | case exit 1 oom-diag True clean True
+linux   12 MiB: version 0 | case exit 0 oom-diag False clean False | ''   (and every larger limit)
+
+## macOS 26 arm64 (macos-latest), rebuilt shipping binary f0dc9e7a57443870ce434e9eeff109d1bbb49b445ebb7b550a2ebc875d229a38
+## == the macOS packet's shipping_binary_sha256. Run 39042030018 job 117423290382:
+macos    6 MiB: setrlimit probe {"RLIMIT_AS": {"exit": 1, ... "ValueError: current limit exceeds maximum limit"}, "RLIMIT_DATA": {"exit": 1, ... same}}
+macos    6 MiB: version 0 | case exit 0 oom-diag False clean False | ''
+macos   64 MiB: (same probe failure) version 0 | case exit 0 oom-diag False clean False | ''
+# No ordinary-process memory limit could be set or enforced: no shipping exhaustion receipt on macOS.
