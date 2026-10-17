@@ -169,6 +169,8 @@ def main():
     a = ap.parse_args()
     a.base, a.new = os.path.abspath(a.base), os.path.abspath(a.new)
     a.work = a.work or tempfile.mkdtemp(prefix="app1a-eq-")
+    os.makedirs(a.work, exist_ok=True)
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     census = json.loads(Path(a.package, "CENSUS.json").read_text(encoding="utf-8"))["cases"]
     todo = [(n, c) for n, c in enumerate(census)
             if c["seconds"] <= a.max_seconds and (not a.only or a.only in c["id"]) and not c.get("scenario") in
