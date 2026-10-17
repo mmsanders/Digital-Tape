@@ -73,12 +73,19 @@ def px_pwrite(fd, b, off):
 
 
 def mac_fullfsync(fd):
-    import fcntl
+    """WP-14 §6 order: F_FULLFSYNC; only ENOTTY/ENOTSUP permits DKIOCSYNCHRONIZECACHE."""
+    import errno, fcntl
     try:
         fcntl.fcntl(fd, 51)  # F_FULLFSYNC
         return None
     except OSError as e:
-        return {'errno': e.errno, 'err': os.strerror(e.errno)}
+        if e.errno not in (errno.ENOTTY, errno.ENOTSUP):
+            return {'errno': e.errno, 'err': os.strerror(e.errno), 'barrier': 'F_FULLFSYNC'}
+    try:
+        fcntl.ioctl(fd, 0x20006416)  # DKIOCSYNCHRONIZECACHE = _IO('d', 22)
+        return None
+    except OSError as e:
+        return {'errno': e.errno, 'err': os.strerror(e.errno), 'barrier': 'DKIOCSYNCHRONIZECACHE'}
 
 
 def plist(argv):

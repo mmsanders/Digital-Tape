@@ -26,6 +26,10 @@ def main(path, neg, pos):
             op = next((e.text for e in el.iter() if e.tag.endswith('Opcode') and e.text), '')
             k = f'{task}/{op}'
             seen[role]['events'][k] = seen[role]['events'].get(k, 0) + 1
+            if role == 'negative' and op in ('64', '0') and len(seen[role].setdefault('unnamed', [])) < 6:
+                data = {d.get('Name'): d.text for d in el.iter() if d.tag.endswith('Data')}
+                if not any(v and ('\\' in v) for v in data.values()):
+                    seen[role]['unnamed'].append({'event': k, 'data': data})
             for d in el.iter():
                 if d.tag.endswith('Data') and d.text and ('\\' in d.text or 'Drive' in d.text):
                     seen[role]['all'].add(d.text)

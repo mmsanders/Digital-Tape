@@ -80,24 +80,41 @@ for d in $(hdiutil info | awk '/^\/dev\/disk[0-9]+[ \t]/{print $1}'); do
 done
 ls "$OUT"/f3-info-*.plist
 
-log "G1 runtime observation: fs_usage on a control that opens a disk and one that does not"
+log "G1 runtime observation: fs_usage and eslogger on controls"
+# Negative controls: an unelevated attempt (fails EACCES, as an unelevated app's
+# would) and an elevated open that succeeds. Positive: an ordinary file open.
+g1_round() {   # TRACER-NAME, run with the tracer already started
+  python3 -I "$HERE/probe.py" touch "$A" >"$OUT/g1-$1-neg-unelev.jsonl"
+  sudo python3 -I "$HERE/probe.py" touch "$A" >"$OUT/g1-$1-neg-root.jsonl"
+  python3 -I "$HERE/probe.py" touch "$RUNNER_TEMP/A.raw" >"$OUT/g1-$1-pos.jsonl"
+  cat "$OUT"/g1-$1-*.jsonl
+}
+pid_of() { python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['pid'])" "$1"; }
 lim 40 sudo fs_usage -w -f pathname -t 12 >"$OUT/g1-fs_usage.txt" 2>"$OUT/g1-fs_usage.err" &
-FSU=$!; sleep 3
-python3 -I "$HERE/probe.py" touch "$A" | tee "$OUT/g1-negative.jsonl"
-python3 -I "$HERE/probe.py" touch "$RUNNER_TEMP/A.raw" | tee "$OUT/g1-positive.jsonl"
-sleep 2; sudo kill -INT $FSU 2>/dev/null; wait $FSU; echo "fs_usage exit $?" >>"$OUT/g1-fs_usage.err"
-NPID=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['pid'])" "$OUT/g1-negative.jsonl")
-PPID_=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['pid'])" "$OUT/g1-positive.jsonl")
-echo "negative pid $NPID lines naming /dev/:"; grep -E "\.$NPID\b|\b$NPID\$" "$OUT/g1-fs_usage.txt" | grep '/dev/' | head -5 | tee "$OUT/g1-negative-hits.txt"
-echo "positive pid $PPID_ lines naming /dev/:"; grep -E "\.$PPID_\b|\b$PPID_\$" "$OUT/g1-fs_usage.txt" | grep '/dev/' | head -5 | tee "$OUT/g1-positive-hits.txt"
-echo "positive pid lines naming the image:"; grep -E "\.$PPID_\b" "$OUT/g1-fs_usage.txt" | grep 'A.raw' | head -3
-wc -l "$OUT/g1-fs_usage.txt"; head -c 600 "$OUT/g1-fs_usage.err"
-log "G1 eslogger availability (ordinary-settings tracer)"
-lim 30 sudo eslogger open >"$OUT/g1-eslogger.json" 2>"$OUT/g1-eslogger.err" &
-ESP=$!; sleep 3; python3 -I "$HERE/probe.py" touch "$A" >/dev/null; sleep 2
-sudo pkill -INT -x eslogger 2>/dev/null; wait $ESP; echo "eslogger exit $?" >>"$OUT/g1-eslogger.err"
-echo "eslogger: $(wc -c <"$OUT/g1-eslogger.json") bytes"; head -c 400 "$OUT/g1-eslogger.err"
-grep -c '"/dev/' "$OUT/g1-eslogger.json" 2>/dev/null || true
+FSU=$!; sleep 3; g1_round fsu; sleep 2; sudo pkill -INT -x fs_usage 2>/dev/null; wait $FSU; echo "fs_usage exit $?" >>"$OUT/g1-fs_usage.err"
+for k in neg-unelev neg-root; do
+  python3 -I "$HERE/g1_mac.py" fs_usage "$OUT/g1-fs_usage.txt" "$(pid_of "$OUT/g1-fsu-$k.jsonl")" "$(pid_of "$OUT/g1-fsu-pos.jsonl")" | sed "s/^/$k: /" | tee -a "$OUT/g1-summary.txt"
+done
+wc -l <"$OUT/g1-fs_usage.txt"; rm -f "$OUT/g1-fs_usage.txt"
+lim 30 sudo eslogger open >"$RUNNER_TEMP/g1-eslogger.json" 2>"$OUT/g1-eslogger.err" &
+ESP=$!; sleep 4; g1_round esl; sleep 2
+sudo pkill -INT -x eslogger 2>/dev/null; wait $ESP; echo "eslogger exit $?" >>"$OUT/g1-eslogger.err"; head -c 400 "$OUT/g1-eslogger.err"
+for k in neg-unelev neg-root; do
+  python3 -I "$HERE/g1_mac.py" eslogger "$RUNNER_TEMP/g1-eslogger.json" "$(pid_of "$OUT/g1-esl-$k.jsonl")" "$(pid_of "$OUT/g1-esl-pos.jsonl")" | sed "s/^/$k: /" | tee -a "$OUT/g1-summary.txt"
+done
+
+log "F3b removal under a held descriptor when detach is refused: stop the disk-image I/O process"
+hdiutil info | tee "$OUT/f3b-hdiutil-info.txt" | grep -iE 'process|image-path|/dev/disk' | head -20
+lim 40 sudo python3 -I "$HERE/probe.py" hold "$A" 25 >"$OUT/f3b-hold.jsonl" &
+HP=$!; sleep 3
+lim 30 sudo hdiutil detach "$A" -force; echo "detach -force exit $?" | tee -a "$OUT/f3b-events.txt"
+IOP=$(hdiutil info | awk -F: '/process ID/ {gsub(/ /,"",$2); print $2}' | sort -u | head -5)
+echo "image process IDs: ${IOP:-none listed}" | tee -a "$OUT/f3b-events.txt"
+for p in $IOP; do ps -o pid=,comm= -p "$p"; done | tee -a "$OUT/f3b-events.txt"
+for n in diskimagesiod diskimages-helper; do pgrep -lx "$n"; done | tee -a "$OUT/f3b-events.txt"
+sudo pkill -9 -x diskimagesiod; sudo pkill -9 -x diskimages-helper; echo "killed image I/O processes at $(date -u +%T)" | tee -a "$OUT/f3b-events.txt"
+wait $HP; cat "$OUT/f3b-hold.jsonl"
+ls /dev/disk* | tr '\n' ' ' | tee -a "$OUT/f3b-events.txt"; echo
 
 log done
 for d in $(hdiutil info | awk '/^\/dev\/disk[0-9]+[ \t]/{print $1}'); do detach "$d" 2>/dev/null || true; done
