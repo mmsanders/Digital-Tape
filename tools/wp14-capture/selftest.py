@@ -165,7 +165,7 @@ def win11(xml, eventguid=True, provider='kernel'):
 # 35 FileDelete, 36 FileRundown) name a FileKey in a field tracerpt calls FileObject; DiskIo
 # carries the stream's FileKey as FileObject. Each case changes one property of a PASS set.
 def identity_controls(c):
-    print('== Image-target write identity and post-exit teardown (synthetic, V146-WIN-R2)')
+    print('== Image-target write identity and post-exit teardown (synthetic, V146-WIN-R2/R3)')
     G = {'p': '3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c', 't': '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c',
          'f': '90cbdc39-4a3e-11d1-84f4-0000f80464e3', 'd': '3d6fa8d4-fe05-11d0-9dda-00c04fd7ba7c',
          'h': '68fdd900-4a3e-11d1-84f4-0000f80464e3'}
@@ -239,7 +239,42 @@ def identity_controls(c):
                                                                       ('0xE8', VOL + 'verify-out.txt')]))
     run_('target object never shows its key; non-target write identified only by object name', 'HELD', held,
          mk(read_key=None, during=[wr()], rundown=[]).replace('<Data Name="FileKey">None</Data>', ''))
-    run_('post-exit write to a named unrelated object (writes are never teardown)', 'FAIL', stale, mk(post=[wr()]))
+    # V146-WIN-R3-01: an image target's post-exit write positively proved to be another stream
+    # is set aside (not attributed); any doubt about its identity keeps it counted
+    run_('post-exit write to a named unrelated object (positively not the target)', 'PASS', None, mk(post=[wr()]))
+    run_('post-exit write through an unnamed object whose key is named', 'PASS', None,
+         mk(out_create=False, post=[wr()]))
+    run_('post-exit write, unnamed object, FileKey with no name record', 'FAIL', stale,
+         mk(out_create=False, post=[wr('0xF9', '0xE9')]))
+    run_('post-exit write to a named object whose key was deleted before it', 'FAIL', stale,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            post=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('post-exit write through the target object', 'FAIL', stale, mk(post=[wr('0xF1', TK)]))
+    run_('post-exit read of the target (no read exemption)', 'FAIL', stale,
+         mk(post=[lambda: e('f', 67, Offset=4296015360, IrpPtr='0xB9', FileObject='0xF1', FileKey=TK, TTID=5000,
+                            IoSize=512, IoFlags=0)]))
+    run_('post-exit read of an unrelated stream (no read exemption)', 'FAIL', stale,
+         mk(post=[lambda: e('f', 67, Offset=0, IrpPtr='0xB9', FileObject='0xF2', FileKey='0xE2', TTID=5000,
+                            IoSize=512, IoFlags=0)]))
+    # V146-WIN-R3-02: contradictory key history is not overridden by a named object's Create path
+    run_('named object, its FileKey deleted (FileDelete) before the write', 'HELD', held,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            during=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('named object, its FileKey named differently before and after the write', 'HELD', held,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt')], during=[wr()],
+            rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'different-stream.txt')]))
+    run_('named object, its FileKey with no name record (complete target-key set)', 'PASS', None,
+         mk(during=[wr()], rundown=[(TK, VOL + IMG)]))
+    # a raw PhysicalDrive target keeps its whole-disk rule: no post-exit write exemption
+    def run_phys(label, want, reason, xml):
+        xml = xml.replace('tapectl.exe verify ' + IMG, 'tapectl.exe verify \\\\.\\PhysicalDrive0').replace(
+            VOL + IMG, '\\Device\\Harddisk0\\DR0')
+        c.check(label, want, reason, etw_set(c, xml=xml, geo='Number : 0\nSize : 4296015872\nLogicalSectorSize : 512\n',
+                                             disk='0', target='\\\\.\\PhysicalDrive0', out='OK\n',
+                                             extra=['--capacity', '4296015872']))
+    run_phys('raw-disk target baseline', 'PASS', None, mk())
+    run_phys('raw-disk target: post-exit write to a named unrelated object still counts', 'FAIL', stale,
+             mk(post=[wr()]))
     run_('post-exit Close of an unnamed object with an unnamed key', 'FAIL', stale,
          mk(out_create=False, post=[cl('0xF9', '0xE9')]))
     run_('post-exit Close of the target object', 'FAIL', stale, mk(post=[cl('0xF1', TK)]))

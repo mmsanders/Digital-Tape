@@ -211,12 +211,16 @@ disk holds unrelated files, and that post-exit rundown is not a blanket exemptio
   - **unresolved** (HELD): anything else. That covers a missing or zero key; an unnamed
     object whose key has no name at that point; a key deleted before the write; names that
     disagree; an object with two keys; or an object-name-only identity while the target-key
-    set is incomplete.
+    set is incomplete. A key deleted before the write, or named differently around it, stays
+    unresolved even when its object has a Create path (V146-WIN-R3-02): only an absent name
+    record may fall back to the Create path.
 - **Post-exit records.** A record from a thread or process after its end record is still never
-  attributed. Only a Cleanup/Close (65/66) of an **unrelated** stream is set aside as
-  teardown, and so is image backing-disk DiskIo without a target key. Every other post-exit
-  record still FAILs: any read or write (even to a named unrelated stream), a target object,
-  and an unresolved identity.
+  attributed. Set aside, each with its full record and the evidence that identified it:
+  a Cleanup/Close (65/66) of an **unrelated** stream; image backing-disk DiskIo without a
+  target key; and, for an IMAGE target only, a FileIo write whose identity is positively
+  **unrelated** by the rules above (V146-WIN-R3-01). Every other post-exit record still FAILs:
+  any read, a target object or key, an unresolved identity, and, for a raw PhysicalDrive
+  target, any write.
 
 `retained-win11.py ORIGINAL.zip --out result.json` checks the original ZIP and every member
 it uses against Verification's pins. It then runs `a6check.py` with exactly the arguments
@@ -227,7 +231,7 @@ Verification's own replay gave the unchanged parser. No Windows binary is execut
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (188 cases; 182 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (199 cases; 193 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |

@@ -693,45 +693,63 @@ class Identity:
     def key_name(self, k, n):
         """The name a FileKey has at record n, from its name records: the last one before n
         (unless that was its FileDelete) and the first one after n (unless that was a new
-        FileCreate). Both must agree; a key deleted before n is not named."""
+        FileCreate). Both must agree; a key deleted before n is not named.
+        -> (name, why, state): state 'named', 'missing' (no name evidence for this point) or
+        'invalid' (the key's captured history contradicts any identity here: deleted before
+        the record, or named differently around it). V146-WIN-R3-02: only 'missing' may fall
+        back to an object's Create path; 'invalid' never can."""
         evs = self.names.get(k, [])
         before = [x for x in evs if x[0] < n]
         after = [x for x in evs if x[0] > n]
         b = before[-1] if before else None
         f = after[0] if after else None
         if b is not None and b[1] == 35:
-            return None, 'FileKey 0x%x was deleted (FileDelete) before this record' % k
+            return None, 'FileKey 0x%x was deleted (FileDelete) before this record' % k, 'invalid'
         nb = b[2] if b is not None else None
         na = f[2] if f is not None and f[1] != 32 else None
         if nb and na and _norm(nb) != _norm(na):
-            return None, 'FileKey 0x%x is named both %r and %r around this record' % (k, nb, na)
+            return None, 'FileKey 0x%x is named both %r and %r around this record' % (k, nb, na), 'invalid'
         if not (nb or na):
-            return None, 'FileKey 0x%x has no name record for this point in the trace' % k
-        return nb or na, None
+            return None, 'FileKey 0x%x has no name record for this point in the trace' % k, 'missing'
+        return nb or na, None, 'named'
 
     def of(self, e):
+        return self.of_basis(e)[:2]
+
+    def of_basis(self, e):
+        """-> (kind, detail, basis): basis says what evidence made an 'unrelated' identity."""
+        k, d, b = self._of(e)
+        return k, d, b
+
+    def _of(self, e):
         a, fk = self.a, e.get('fk')
         lc = self.lcs[e['lc']] if e.get('lc') is not None else None
         if lc is not None and target_matches(lc['path'], a):
-            return 'target', lc['path']
+            return 'target', lc['path'], None
         if fk is not None and fk in self.keys:
-            return 'target', 'FileKey 0x%x of the target' % fk
+            return 'target', 'FileKey 0x%x of the target' % fk, None
         if fk is None:
-            return 'unresolved', 'no valid FileKey'
+            return 'unresolved', 'no valid FileKey', None
         if lc is not None and len(lc['keys']) > 1:
-            return 'unresolved', 'its object carried %d different FileKeys' % len(lc['keys'])
-        kn, why = self.key_name(fk, e['n'])
+            return 'unresolved', 'its object carried %d different FileKeys' % len(lc['keys']), None
+        kn, why, state = self.key_name(fk, e['n'])
         if kn is not None and target_matches(kn, a):
-            return 'target', kn
+            return 'target', kn, None
+        if state == 'invalid':
+            # contradictory key history is never overridden by an older Create path
+            return 'unresolved', why, None
         if lc is not None:
             if kn is not None and _norm(kn) != _norm(lc['path']):
-                return 'unresolved', 'object names %r but FileKey 0x%x is %r' % (lc['path'], fk, kn)
+                return 'unresolved', 'object names %r but FileKey 0x%x is %r' % (lc['path'], fk, kn), None
             if kn is None and not self.complete:
-                return 'unresolved', 'the target-key set is incomplete and FileKey 0x%x is not named' % fk
-            return 'unrelated', lc['path']
+                return 'unresolved', 'the target-key set is incomplete and FileKey 0x%x is not named' % fk, None
+            return 'unrelated', lc['path'], ('object Create path and its single FileKey 0x%x, agreeing with the key\'s '
+                                             'name records' % fk if kn is not None else
+                                             'object Create path and its single FileKey 0x%x (no name record for the key; '
+                                             'complete target-key set)' % fk)
         if kn is None:
-            return 'unresolved', 'unnamed FileObject and ' + why
-        return 'unrelated', kn
+            return 'unresolved', 'unnamed FileObject and ' + why, None
+        return 'unrelated', kn, 'FileKey 0x%x name records around this record (unnamed object)' % fk
 
 
 def judge(a):
@@ -811,10 +829,19 @@ def judge(a):
         # FileKey only, as during life.
         keep = []
         for e in stale:
-            kind, what = ident.of(e) if e['op'] in ('close', 'read', 'write') else ('unresolved', e['op'])
+            kind, what, basis = ident.of_basis(e) if e['op'] in ('close', 'read', 'write') else ('unresolved', e['op'], None)
             disk_io = str(e['fd']).startswith('disk')
             if e['op'] == 'close' and kind == 'unrelated':
-                post_exit['excluded'].append({'n': e['n'], 'op': 'close', 'stream': what})
+                post_exit['excluded'].append({'n': e['n'], 'op': 'close', 'stream': what, 'basis': basis})
+            elif (e['op'] == 'write' and e.get('fileio') and a.image and kind == 'unrelated'):
+                # V146-WIN-R3-01: an image target's post-exit FileIo write whose native object/key/
+                # name evidence positively proves another stream, with no contradiction. Kept with
+                # its reason; never attributed to the ended process. Reads get no such exemption,
+                # and a raw-disk target keeps its whole-disk rule.
+                post_exit['excluded'].append({'n': e['n'], 'op': 'write', 'stream': what, 'basis': basis,
+                                              'fd': hex(e['fd']) if e['fd'] else None,
+                                              'filekey': hex(e['fk']) if e.get('fk') is not None else None,
+                                              'offset': e['off'], 'bytes': e['len']})
             elif disk_io and a.image and not (e.get('fk') is not None and e['fk'] in ident.keys):
                 post_exit['excluded'].append({'n': e['n'], 'op': 'disk-' + e['op'], 'stream': (
                     ident.key_name(e['fk'], e['n'])[0] if e.get('fk') is not None else None)})
@@ -919,6 +946,9 @@ def judge(a):
     for x in post_exit['excluded']:
         if x['op'] == 'close':
             v.notes.append('post-exit close of %s set aside as unrelated teardown (record %s)' % (x['stream'], x['n']))
+        elif x['op'] == 'write':
+            v.notes.append('post-exit write to %s set aside: not the target (record %s; %s); not attributed to '
+                           'the ended process' % (x['stream'], x['n'], x['basis']))
         else:
             v.notes.append('post-exit %s on the image\'s backing disk carries no target FileKey (stream %s, record %s); '
                            'backing-disk I/O is judged by FileKey only' % (x['op'], x['stream'], x['n']))
