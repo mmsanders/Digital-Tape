@@ -3755,3 +3755,123 @@ evidence for package disposition, never substituted by Windows Server.
 acceptance, WP15 and all frozen/write/batching/async/recording/firmware/hardware/media/atomicity/<30s/
 purchase holds survive. Admitting non-16 `sowt` later is an additive host-contract amendment with its
 own independent expectations; no on-card change.
+
+## ADR-181 — route the stalled Mac A6 method and Windows 11 qualification
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("check current state and assign
+new work, resolve, unblock"). Input Product main `c6ff868086e3333bb7568e60d3a2f4ec60fd3344`;
+Verification main `9587317ac4bca4e8164347f0ec62eeb719245cf7`; Software #436 head `27919af`.
+
+**State.** ADR-180 merged. Verification #169 published complete Stage1 (`40dd4b5`), then held
+Product #436 `3c7a187` (#182, `9587317`). The held list is: native macOS/Windows observers,
+dropped/truncated false-pass controls, bounded exhaustion evidence, Windows 11 qualification,
+the corrected pin-checker import and a common config identity. Software #435 is already
+executing that list directly (`68c9d27`, `27919af`). No PM ruling is pending there, and none
+is added. The 1641 cross-platform output pairs and FIR/calibration checks stand as bounded evidence.
+
+**Mac A6 (unowned since Verification #177).** The DTrace rehearsal under SIP produced only
+BEGIN/END, with no process or I/O records. A second unchanged DTrace attempt is not useful.
+Software's ingest work now has a qualified-by-selftest macOS `fs_usage` (kdebug, root)
+observer. It runs with SIP enabled and has dropped/truncated mutation controls. **Decision:**
+Software owns one bounded replacement Mac A6 method. It uses `fs_usage` and reuses the ingest
+normalizer and its false-pass controls. It must bind the exact shipped binary, the process, and
+the offset and returned bytes of the mirror-superblock read. It changes no security policy
+(SIP stays on), rebuilds nothing and injects nothing. Hosted macOS rehearsal comes first. Then
+Verification #146 reviews the method. Then Michael runs one off-card Mac rehearsal. If `fs_usage`
+cannot bind offset or returned bytes for tapectl's actual call shape, Software returns that
+capability fact with raw evidence instead of trying a third tracer. PM then chooses between a
+content-pattern method and a recorded Mac limitation. Neither is pre-approved here, because
+both touch acceptance. The Windows A6 ETW method (#176 PASS) is unaffected. Michael's Windows
+off-card rehearsal is ready now.
+
+**Windows 11 qualification.** GitHub-hosted Windows runners are Server, which stays
+supplementary and never relabelled. The Windows 11 x64 run is Michael's hands on the family
+desktop. A self-hosted runner on that PC was considered and rejected. This repository is
+public, so fork pull requests could execute code on a family computer. Software prepares one
+ready, hash-pinned Windows 11 ingest packet script once Verification accepts the observer
+method. Michael's Windows sittings are batched wherever the work is ready together.
+
+**Gate/reversal cost.** No contract, oracle, assertion, engine or format change. Rungs
+unchanged: Phase1 36/36, Phase2 4/12. WP14 physical A6, WP16 real-card/full, WP15 and all
+standing holds survive. Reversal is reassignment only.
+
+## ADR-182 — route the Q-P2-1 any-subset crash mode and issue WP-15 contract APP-1
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's request ("any possible work not blocked
+by me?"). Input as ADR-181.
+
+**Idle capacity.** Verification has no ready work: #146 waits on Michael's Windows rehearsal or
+Software #438. Software is queued with #435 and then #438. Two items are free of Michael's hands.
+
+**Q-P2-1 crash mode, routed.** Verification's Q-P2-1(a) answer (preflight 5 October, published at
+`6837102`) shows the two WP-10 crash modes, flush-required and write-through, never produce the
+state where a later block persists while an earlier one is lost. That answer specified a third
+mode, and ADR-168 requires arbitrary-persistence coverage before any write or batching change. It
+was never routed. It also bears on today's product: `tapefs` §8.1 already lets a port persist any
+subset of unflushed writes, and desktop OS caches over real cards do exactly that. **Decision:**
+Verification authors the any-subset persistence mode to its own published specification. It
+self-tests the mode, including the `(a,B)` mask, and runs it against the current pinned engine for
+the WP-10 operations. Small epochs are exhaustive; large ones use recorded seeds with stated
+bounds. A violation is a finding to PM, not an engine fix. No engine, port or batching change
+follows from this routing. PM rules Q-P2-1(b) on its result, before Phase 3 as the plan requires.
+
+**WP-15 contract APP-1 issued for preflight** (`docs/WP15-APP-CONTRACT.md`). The main choices:
+- one window with four states, and folders only;
+- `ingest` runs on each drop, so length and refusals show before the card is touched;
+- one card at a time instead of a picker, which satisfies G4 and removes wrong-card choices;
+- one erase confirmation, then provision, load and verify, with no automatic retry;
+- only the `tapectl` device children run elevated.
+
+Two additive host surfaces are named: `tapectl cards` (read-only, zero writes, refused disks never
+printed) and an opt-in `--report FILE` that writes counts-only progress and closed refusal IDs.
+Absent the new flags, existing outputs are unchanged, so INGEST-1 Stage1 and accepted WP-14
+evidence are untouched. Michael's taste items carry defaults and are not blocking: the fixed
+60-minute length, folders only, the message wording and one card at a time.
+Verification preflights APP-1 (R3) after the crash-mode work. The Software build issue follows
+that preflight, behind #435/#438. No lead is idle-assigned.
+
+**Gate/reversal cost.** Rungs unchanged: Phase1 36/36, Phase2 4/12. WP-15 stays rung 0 until
+built and disposed. All standing holds survive. Reversal is a contract amendment; nothing is built.
+
+## ADR-183 — APP-1 preflight corrections and Q-P2-1 adapter import routing
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("what should they be up to?").
+Input Verification main `fe8f3bdf16c83ef8564d073e900bb1b98cf125a4` (#184, CI SUCCESS): APP-1
+preflight blob `c05963fb`; any-subset package subtree `c6cb573d` (`tests/wp10_subset_r1`).
+
+**APP-1 findings upheld; contract revised.**
+- **P2V15-001.** Overage refusals carry integer `total_frames`/`capacity_frames`/`excess_frames`
+  in the report. The bar is drawn full in its "too long" style.
+- **P2V15-002.** `--report` is a narrow, opt-in diagnostic exception to INGEST-1 §6.
+  - The file is exclusive, never follows a symlink, is per-invocation and carries a nonce.
+  - It lives in an app-owned control directory, never in DEST or its stage, and never signals
+    success.
+  - No-flag behaviour and the two-file publication are unchanged.
+- **P2V15-003.** The destructive sequence becomes one `tapectl make` process with one device
+  open: provision, load, then verify through a NULL-write binding on the same open.
+  - An OS-reported removal or change stops it with `CARD_CHANGED`.
+  - Software demonstrates detection on Windows 11 and macOS. An undetectable case is a stated
+    limitation.
+  - The pre-launch gap is covered only by the app's recheck. The contract does not claim to detect
+    a deliberate equal-size swap there.
+  - This also reduces elevation to one prompt.
+- **P2V15-004.** App-origin events are named and tested with real OS/UI controls; child-origin
+  rows use real child outcomes; no fake-outcome switch. The events are `DROP_NOT_FOLDER`,
+  `SPAWN_FAILED`, `ELEVATION_DECLINED` and `CARD_RECHECK_MISMATCH`.
+- **§3 bindings.** Closed ID lists and progress steps become the first interface deliverable of the
+  Software build issue. PM issues them as an APP-1 annex before Verification freezes app tests.
+  `cards` reports exact layout recognition, runs unelevated, and gives an `unprobed` count with exit
+  1 when enumeration is unavailable.
+
+`make` is additive. The separate commands, the engine and the format are unchanged.
+
+**Q-P2-1 execution (P2V183-EXEC-001).** The any-subset model and controls are published, but the
+existing WP-10 workers cannot express subset persistence without a Product-side binding.
+Software imports `tests/wp10_subset_r1` verbatim and binds it to the existing WP-10 adapters
+(load, commit/record, reset-b, promote, respool, dup), per its `ADAPTER.md`. The engine stays at
+A8 `d96b4245`. Verification keeps persistence selection and outcome judgment. Software queue order:
+#435, #439, #438, then this import. The import is not on the WP14 critical path; it gates Q-P2-1(b)
+before Phase 3.
+
+**Gate/reversal cost.** Rungs unchanged. All holds survive. Reversal is a contract amendment or
+reassignment; nothing has been built.
