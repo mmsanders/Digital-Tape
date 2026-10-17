@@ -3933,6 +3933,8 @@ WP15 remains0/4 because APP-1 is issued for preflight with an unissued §3 annex
 build contract has not reached its complete gate. Phase2 therefore5/12. No implementation
 or acceptance rung is awarded for issue closure, model replay or bounded observer PASS.
 
+**Fresh issue handoff (Michael’s explicit follow-up).** Close accumulated Product384/386 and Verification146 as superseded; Software435 closes at its returned stop. Current bounded PM446 finishes this publication; Software444 carries the interface groundwork, Verification193 the ready Windows disposition, Verification192 subset/INGEST receipts, and Michael447 the concise pending hands-on queue. Old threads preserve evidence with one successor link; future PM activations and corrections get fresh bounded issues, not layers of new scope in comment logs. This changes routing only; no re-execution or reacceptance.
+
 **Cleanup and stop.** PM437's existing green docs/spec issuance is merged. Software owns
 closing superseded433/stopped442 unmerged, refreshing stale candidate descriptions and
 removing only its throwaway probe branch after preserving unique evidence/restore identity.

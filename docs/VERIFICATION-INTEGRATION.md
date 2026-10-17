@@ -16,7 +16,7 @@ and the 25 September boundary in [its own archive](archive/verification-integrat
 - Verification191 `fc80e0ec`: V186-01/checksum PASS at443/33df48e;3995 retained
   runs/187486 projections replayed. V186-02 correction443/85b7c3f awaits192.
   Preserve SAMPLED long epochs, missing host faults and operation-row exclusions.
-- Windows441/a50a211 checker PASS is a new Software return for146, not acceptance;
+- Windows441/a50a211 checker PASS is a new Software return for193, not acceptance;
   same original capture and R3 controls. No new Michael capture.
 - Complete INGEST Stage1 I1–I8 coverage is on Verification main (1927 descriptors,
   corrected tree609a4c81); WP16 rung2 only. Candidate436 remains unmerged/HELD.
