@@ -27,6 +27,10 @@ on:
       heavy_shards:
         description: shards for the long-epoch respool campaigns (0 = skip)
         default: '0'
+      v186_fill:
+        description: run only the coordinates Verification #186 V186-02 found missing (operation-relative plan)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -108,6 +112,40 @@ jobs:
         if: always()
         with:
           name: wp10-subset-load-${{ matrix.shard }}
+          path: ${{ runner.temp }}/ev
+          if-no-files-found: error
+          retention-days: 90
+
+  # V186-02: the bounded plan now numbers only phase=op records. This fills exactly the
+  # coordinates it adds to the earlier all-records plan (recomputing the second-cut bases)
+  # and records the removed ones; the earlier authenticated heavy evidence is reused.
+  v186-fill:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.v186_fill }}
+    name: V186-02 operation-relative fill (core stage-clear respool, respool_full v3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          make -s -C engine clean all
+          make -s -C tests/crash_core_adapter clean all
+          make -s -C tests/respool_full_adapter clean all
+      - name: core stage-clear respool fill
+        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core-respool-fill" --only stage_clear/respool --unit-plan v186 --second-cut 2 --fill-v186-02 --jobs 4
+      - name: respool_full v3 fill
+        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-v3-fill" --only v3_003 --unit-plan v186 --second-cut 2 --fill-v186-02 --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-v186-fill
           path: ${{ runner.temp }}/ev
           if-no-files-found: error
           retention-days: 90

@@ -116,6 +116,18 @@ a bounded plan instead, run with `--unit-plan v186` (`subset_driver.boundary_pla
   row with every enumerated image identity, never a duplicate;
 - exhaustive plans for epochs <= 8, otherwise all 201 sampled plans.
 
+Coordinates are operation-relative (Verification #186 V186-02): unit, call and barrier
+ordinals count `phase=op` records only, as the worker's cut/error arguments do; setup
+callbacks (a failed setup repair write in four core closure seeds) stay in the durability
+replay and are excluded only from numbering. The plan is checked against the worker's own
+`op_units`/`op_calls`/`op_barriers`, and every run row records whether a requested cut or
+error fired (`requested_fault`). `--fill-v186-02` runs only what the corrected plan adds
+to the earlier all-records plan (cut 1020 and error call 1019 in those four seeds, and the
+first second base's cut 1020), recomputes the second-cut bases under it, and records the
+removed spurious coordinates (cut 1029, error call 1028); the earlier authenticated
+evidence is otherwise reused. Respool_full has no setup callbacks (pass 1: 4100 units,
+pass 2: 2050), so nothing changes there.
+
 These are SAMPLED unit coordinates of a long copy, not every boundary and not full WP-10
 acceptance. `summary-*.json` records each scenario's plan (selected coordinates, error
 calls, barriers) separately from its persistence plans. `wp10-subset.yml` runs everything

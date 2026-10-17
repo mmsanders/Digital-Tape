@@ -157,6 +157,7 @@ import tempfile
 
 
 INLINE_LIMIT = 256   # epochs up to this many events keep every event, mask and order inline
+FILL = False         # --fill-v186-02: only the coordinates the corrected plan adds
 
 
 def _canon(obj) -> bytes:
@@ -299,6 +300,15 @@ class Campaign:
                "remount_key": self.b.remount_key(key), "epoch": epoch,
                "plan": kind, "projections_inline": inline, "projections": proj,
                "distinct_images": len({q["image_sha256"] for q in proj})}
+        # V186-02: a requested fault that did not fire is explicit, never a silent observation
+        if cut_unit != "-" or cut_flush != "-":
+            # a cut exactly at the operation's end boundary may have no later callback at which
+            # to fire; the row's coordinate and the scenario's op_units let a reader tell that
+            # apart from a missed fault
+            row["requested_fault"] = {"kind": "cut", "fired": res.get("cut_fired"),
+                                      "op_units_done": res.get("op_units")}
+        elif err_call != "-" or err_flush != "-":
+            row["requested_fault"] = {"kind": "error", "fired": res.get("error_fired")}
         if extra:
             row["second_cut_of"] = extra
         self.runs.write(json.dumps(row, sort_keys=True) + "\n")
@@ -329,8 +339,17 @@ class Campaign:
 TAPE_LBA_CHUNK_BASE = 2048
 
 
-def boundary_plan(trace: list[dict], nblocks: int) -> dict:
-    units = [r for r in trace if r["t"] == "W"]
+def _is_op(r: dict, phase_aware: bool) -> bool:
+    return not phase_aware or r.get("phase", "op") == "op"
+
+
+def boundary_plan(trace: list[dict], nblocks: int, phase_aware: bool = True) -> dict:
+    """Operation-relative (V186-02): unit, call and barrier ordinals count phase=op records
+    only, because the worker's cut/error arguments are operation-relative. Setup callbacks
+    (e.g. a failed setup repair write) stay in the trace and the durability replay; they are
+    only excluded from coordinate numbering. phase_aware=False reproduces the earlier
+    planner (every record counted), used solely to find what it missed or added."""
+    units = [r for r in trace if r["t"] == "W" and _is_op(r, phase_aware)]
     U = len(units)
     want = set(range(0, 9)) | set(range(max(0, U - 8), U + 1))
     k = 1
@@ -349,6 +368,8 @@ def boundary_plan(trace: list[dict], nblocks: int) -> dict:
         want |= {first - 1, first, first + 1, end - 1, end, end + 1}
     n = 0
     for r in trace:
+        if not _is_op(r, phase_aware):
+            continue
         if r["t"] == "W":
             n += 1
         elif r["t"] == "F":
@@ -361,10 +382,26 @@ def boundary_plan(trace: list[dict], nblocks: int) -> dict:
             if 0 <= i < U:
                 err_calls.add(call_of[i])
     order = sorted(calls)          # error_write coordinates are call ordinals, as in tasks()
-    return {"plan": "v186-bounded", "label": "SAMPLED unit coordinates (not every boundary)",
-            "op_units": U, "cut_units": cuts,
+    return {"plan": "v186-bounded" + ("" if phase_aware else "-unphased"),
+            "label": "SAMPLED unit coordinates (not every boundary)",
+            "op_units": U, "op_calls": len(order), "cut_units": cuts,
             "error_write_calls": sorted(order.index(c) for c in err_calls),
-            "metadata_calls": len(meta_calls), "barriers": sum(1 for r in trace if r["t"] == "F")}
+            "metadata_calls": len(meta_calls),
+            "barriers": sum(1 for r in trace if r["t"] == "F" and _is_op(r, phase_aware)),
+            "setup_units": sum(1 for r in trace if r["t"] == "W" and not _is_op(r, True)),
+            "setup_barriers": sum(1 for r in trace if r["t"] == "F" and not _is_op(r, True)),
+            # op unit ordinal -> the trace's own event ID and call (first and last of each run)
+            "op_unit_map": {"first": [units[0]["id"], units[0]["call"]] if units else None,
+                            "last": [units[-1]["id"], units[-1]["call"]] if units else None}}
+
+
+def check_plan(bp: dict, res: dict) -> None:
+    """The plan must agree with the worker's own operation counters."""
+    for k in ("op_units", "op_calls"):
+        if k in res and res[k] != bp[k]:
+            raise RuntimeError("plan %s %s != worker %s %s" % (k, bp[k], k, res[k]))
+    if "op_barriers" in res and res["op_barriers"] != bp["barriers"]:
+        raise RuntimeError("plan barriers %s != worker op_barriers %s" % (bp["barriers"], res["op_barriers"]))
 
 
 def selected(key, only, exclude=None) -> bool:
@@ -474,9 +511,16 @@ def do_task(c: Campaign, tmp: Path, task, counts: dict, bounded: dict | None = N
         r2, dev2, _ = c.run(key, base=p, label="second_complete", extra=tag)
         if r2.get("setup_ok", True):
             bp2 = boundary_plan(c.last_trace, len(img) // BLOCK)
+            check_plan(bp2, r2)
             tag["second_plan"] = {k: v for k, v in bp2.items() if k != "cut_units"}
             tag["second_plan"]["cut_units_sha256"] = sha(_canon(bp2["cut_units"]))
-            for j in bp2["cut_units"]:
+            todo = bp2["cut_units"]
+            if FILL:
+                old = boundary_plan(c.last_trace, len(img) // BLOCK, phase_aware=False)
+                todo = sorted(set(bp2["cut_units"]) - set(old["cut_units"]))
+                tag["v186_02_fill"] = {"added_cut_units": todo,
+                                       "removed_cut_units": sorted(set(old["cut_units"]) - set(bp2["cut_units"]))}
+            for j in todo:
                 c.run(key, base=p, cut_unit=j, label="second_cut", extra=tag)
     elif kind == "second":
         # Second interruption after actual recovery: a fresh run of the same operation whose
@@ -496,7 +540,9 @@ def do_task(c: Campaign, tmp: Path, task, counts: dict, bounded: dict | None = N
 
 
 def _run_part(args) -> dict:
-    modname, evidence, part, counts, second, bounded = args
+    modname, evidence, part, counts, second, bounded, fill = args
+    global FILL
+    FILL = fill
     binding = importlib.import_module(modname)
     tmp = Path(tempfile.mkdtemp())
     try:
@@ -524,6 +570,10 @@ def campaign_main(binding, argv=None) -> int:
     ap.add_argument("--jobs", type=int, default=1, help="parallel worker processes in this shard")
     ap.add_argument("--unit-plan", choices=("every", "v186"), default="every",
                     help="every unit boundary, or Verification #186's bounded boundary set")
+    ap.add_argument("--fill-v186-02", action="store_true",
+                    help="with --unit-plan v186: run only the coordinates the operation-relative plan "
+                         "adds to the earlier all-records plan (second-cut bases recomputed), and record "
+                         "the removed ones")
     a = ap.parse_args(argv)
     si, sn = (int(v) for v in a.shard.split("/"))
     a.evidence.mkdir(parents=True, exist_ok=True)
@@ -535,14 +585,30 @@ def campaign_main(binding, argv=None) -> int:
             r, tr, init = binding.s_run(w, tmp, key, None, "-", "-", "-", "-")
             counts[key] = (r["op_units"], r["op_barriers"], r["op_calls"])
             if a.unit_plan == "v186":
-                bounded[key] = boundary_plan(tr, len(init) // BLOCK)
+                bp = boundary_plan(tr, len(init) // BLOCK)
+                check_plan(bp, r)
+                if a.fill_v186_02:
+                    old = boundary_plan(tr, len(init) // BLOCK, phase_aware=False)
+                    bp["v186_02_fill"] = {
+                        "added_cut_units": sorted(set(bp["cut_units"]) - set(old["cut_units"])),
+                        "removed_cut_units": sorted(set(old["cut_units"]) - set(bp["cut_units"])),
+                        "added_error_write_calls": sorted(set(bp["error_write_calls"]) - set(old["error_write_calls"])),
+                        "removed_error_write_calls": sorted(set(old["error_write_calls"]) - set(bp["error_write_calls"]))}
+                bounded[key] = bp
         w.close()
     finally:
         shutil.rmtree(tmp)
     allt = tasks(counts, a.second_cut, bounded)
+    if a.fill_v186_02:
+        # first operation: only the added coordinates; every second-base task is kept (bases are
+        # recomputed under the corrected plan, and only added second cuts are run)
+        allt = [t for t in allt
+                if not bounded.get(t[0]) or t[1] == "second"
+                or (t[1] == "cut_unit" and t[2] in bounded[t[0]]["v186_02_fill"]["added_cut_units"])
+                or (t[1] == "error_write" and t[2] in bounded[t[0]]["v186_02_fill"]["added_error_write_calls"])]
     mine = [t for n, t in enumerate(allt) if n % sn == si]
-    jobs = [(binding.__name__, a.evidence / f"part-{si:03d}-{j:02d}", mine[j::a.jobs], counts, a.second_cut, bounded)
-            for j in range(a.jobs)]
+    jobs = [(binding.__name__, a.evidence / f"part-{si:03d}-{j:02d}", mine[j::a.jobs], counts, a.second_cut, bounded,
+             a.fill_v186_02) for j in range(a.jobs)]
     if sys.path[0] not in os.environ.get("PYTHONPATH", ""):
         os.environ["PYTHONPATH"] = os.pathsep.join([str(Path(binding.__file__).resolve().parent),
                                                     os.environ.get("PYTHONPATH", "")])
@@ -553,7 +619,7 @@ def campaign_main(binding, argv=None) -> int:
             res = pool.map(_run_part, jobs)
     import time as _t
     summary = {"format": "WP10-SUBSET-SUMMARY-1", "binding": binding.NAME, "shard": a.shard,
-               "unit_plan": a.unit_plan,
+               "unit_plan": a.unit_plan, "fill_v186_02": a.fill_v186_02,
                "bounded_plans": {"/".join(map(str, k)): dict(v, cut_units_count=len(v["cut_units"]))
                                  for k, v in bounded.items()},
                "only": a.only, "exclude": a.exclude,
