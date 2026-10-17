@@ -68,7 +68,11 @@ jobs:
         run: |
           sha=$(python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$DT_TEST_INGEST")
           DT_INGEST_SHA256=$sha DT_INGEST_VERSION="$INGEST_VERSION" cargo build --release --locked
-          ls -la target/release/
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          app=$(python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" target/release/digital-tape$ext)
+          echo "pinned ingest child $sha; app $app"
+          echo "::notice title=${{ runner.os }} pinned ingest child::$sha"
+          echo "::notice title=${{ runner.os }} app executable::$app"
       - name: window launches and stays up (Linux, Xvfb)
         if: runner.os == 'Linux'
         working-directory: host/app
