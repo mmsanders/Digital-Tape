@@ -1,0 +1,120 @@
+{
+  "brute_force_unique_images_N0_to_5": [
+    1,
+    2,
+    4,
+    6,
+    12,
+    18
+  ],
+  "controls": [
+    "old_modes_and_prefixes_miss_aB",
+    "multi_block_split",
+    "repeated_versions",
+    "last_landed_wins",
+    "failed_write_unknown",
+    "failed_flush_not_barrier",
+    "successful_barrier_final_state",
+    "fresh_remount_two_interruptions",
+    "torn_rejected",
+    "dropped_barrier",
+    "identity_before_data"
+  ],
+  "engine_operations_executed": 0,
+  "exhaustive_census": [
+    {
+      "classes": 1,
+      "events": 0,
+      "repeated_lba": false
+    },
+    {
+      "classes": 1,
+      "events": 0,
+      "repeated_lba": true
+    },
+    {
+      "classes": 2,
+      "events": 1,
+      "repeated_lba": false
+    },
+    {
+      "classes": 2,
+      "events": 1,
+      "repeated_lba": true
+    },
+    {
+      "classes": 4,
+      "events": 2,
+      "repeated_lba": false
+    },
+    {
+      "classes": 5,
+      "events": 2,
+      "repeated_lba": true
+    },
+    {
+      "classes": 8,
+      "events": 3,
+      "repeated_lba": false
+    },
+    {
+      "classes": 13,
+      "events": 3,
+      "repeated_lba": true
+    },
+    {
+      "classes": 16,
+      "events": 4,
+      "repeated_lba": false
+    },
+    {
+      "classes": 33,
+      "events": 4,
+      "repeated_lba": true
+    },
+    {
+      "classes": 32,
+      "events": 5,
+      "repeated_lba": false
+    },
+    {
+      "classes": 81,
+      "events": 5,
+      "repeated_lba": true
+    },
+    {
+      "classes": 64,
+      "events": 6,
+      "repeated_lba": false
+    },
+    {
+      "classes": 193,
+      "events": 6,
+      "repeated_lba": true
+    },
+    {
+      "classes": 128,
+      "events": 7,
+      "repeated_lba": false
+    },
+    {
+      "classes": 449,
+      "events": 7,
+      "repeated_lba": true
+    },
+    {
+      "classes": 256,
+      "events": 8,
+      "repeated_lba": false
+    },
+    {
+      "classes": 1025,
+      "events": 8,
+      "repeated_lba": true
+    }
+  ],
+  "result": "PASS (model only)",
+  "sampled_epoch_events": 32,
+  "sampled_rows": 201,
+  "sampled_sha256": "8a4387377affa27496c1b4073b310fc0696d65743272b7918086c4ca9d904d60"
+}

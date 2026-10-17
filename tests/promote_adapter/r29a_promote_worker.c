@@ -150,6 +150,7 @@ struct dev_ctx {
     long fail_write_at;
     unsigned writes_total;
     unsigned scope_writes, scope_flushes;
+    bool sub_own;            /* #440: this device's callbacks go to the subset transport */
 };
 
 struct event {
@@ -197,6 +198,89 @@ static void log_ev(const struct dev_ctx *c, char op, uint32_t lba, uint32_t coun
     }
 }
 
+/* ---- Any-subset transport (Product #440; tests/wp10_subset_r1/ADAPTER.md) ---------------
+ * Commands S and R only, own device only. While g_sub.on every write unit (512 bytes; a
+ * multi-block call logs one unit per block, keeping its call number) and barrier result of
+ * the own device is appended to the trace, from mount on; "op" marks units issued inside
+ * tape_promote. Persistence selection belongs to tests/wp10_subset_r1/model.py in the
+ * driver. A cut ends the device: the interrupted call and every later callback fail and
+ * log nothing more. B, BZ, C, Z and K never set g_sub.on and are unchanged. */
+struct sub_state {
+    bool on;
+    FILE *trace;
+    unsigned long next_id, calls, flushes;
+    unsigned long op_units, op_calls, op_flushes;
+    long cut_unit, cut_flush, err_call, err_flush;
+    bool cut, err_fired;
+};
+static struct sub_state g_sub;
+
+static void sub_hex(FILE *fp, const unsigned char *p, size_t n)
+{
+    static const char d[] = "0123456789abcdef";
+    size_t i;
+    for (i = 0u; i < n; i++) {
+        fputc(d[(p[i] >> 4) & 15u], fp);
+        fputc(d[p[i] & 15u], fp);
+    }
+}
+
+static int sub_write(struct dev_ctx *c, uint32_t lba, uint32_t count, const unsigned char *src)
+{
+    bool op = g_promote_depth > 0, fail = false;
+    uint32_t i, n = count;
+    if (g_sub.cut) return -1;
+    if (g_in_mount && c->refuse_mount_writes) fail = true;   /* closure: repair refused, as in Z */
+    if (op && g_sub.err_call >= 0 && g_sub.op_calls == (unsigned long)g_sub.err_call) {
+        fail = true;
+        g_sub.err_fired = true;
+    }
+    if (op && g_sub.cut_unit >= 0 && g_sub.op_units + count > (unsigned long)g_sub.cut_unit) {
+        n = (uint32_t)((unsigned long)g_sub.cut_unit - g_sub.op_units);
+        g_sub.cut = true;
+    }
+    for (i = 0u; i < n; i++) {
+        bool ack = !fail && !g_sub.cut;
+        fprintf(g_sub.trace, "{\"t\":\"W\",\"id\":%lu,\"call\":%lu,\"lba\":%u,\"ack\":%s,\"phase\":\"%s\",\"hex\":\"",
+                g_sub.next_id++, g_sub.calls, lba + i, ack ? "true" : "false",
+                op ? "op" : (g_in_mount ? "mount" : "setup"));
+        sub_hex(g_sub.trace, src + (size_t)i * BLOCK, BLOCK);
+        fputs("\"}\n", g_sub.trace);
+        if (ack) img_put(&c->working, lba + i, src + (size_t)i * BLOCK, BLOCK);
+    }
+    if (g_sub.cut) {
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"unit\",\"op_unit\":%ld,\"call\":%lu,\"units_in_call\":%u}\n",
+                g_sub.cut_unit, g_sub.calls, n);
+    }
+    g_sub.calls++;
+    if (op) {
+        g_sub.op_calls++;
+        g_sub.op_units += n;
+    }
+    if (g_sub.cut) return -1;
+    return fail ? (g_in_mount && c->refuse_mount_writes ? 5 : -1) : 0;
+}
+
+static int sub_flush(void)
+{
+    bool op = g_promote_depth > 0, ok = true;
+    if (g_sub.cut) return -1;
+    if (op && g_sub.cut_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.cut_flush) {
+        g_sub.cut = true;
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"flush_entry\",\"op_flush\":%ld}\n", g_sub.cut_flush);
+        return -1;
+    }
+    if (op && g_sub.err_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.err_flush) {
+        ok = false;
+        g_sub.err_fired = true;
+    }
+    fprintf(g_sub.trace, "{\"t\":\"F\",\"ord\":%lu,\"ok\":%s,\"phase\":\"%s\"}\n",
+            g_sub.flushes, ok ? "true" : "false", op ? "op" : (g_in_mount ? "mount" : "setup"));
+    g_sub.flushes++;
+    if (op) g_sub.op_flushes++;
+    return ok ? 0 : -1;
+}
+
 static bool is_sb_lba(const struct dev_ctx *c, uint32_t lba)
 {
     return lba == 0u || lba == c->block_count - 1u;
@@ -211,6 +295,7 @@ static int cb_read(void *v, uint32_t lba, uint32_t count, void *dst)
 {
     struct dev_ctx *c = (struct dev_ctx *)v;
     uint32_t i;
+    if (g_sub.on && c->sub_own && g_sub.cut) return -1;
     if (c->dead || dst == NULL || count == 0u || (uint64_t)lba + count > c->block_count) {
         log_ev(c, 'r', lba, count, -1, NULL);
         return -1;
@@ -260,6 +345,10 @@ static int cb_write(void *v, uint32_t lba, uint32_t count, const void *srcv)
     unsigned ord;
     int rc;
 
+    if (g_sub.on && c->sub_own) {
+        if (src == NULL || count == 0u || (uint64_t)lba + count > c->block_count) return -1;
+        return sub_write(c, lba, count, src);
+    }
     if (c->dead || src == NULL || count == 0u || (uint64_t)lba + count > c->block_count) {
         log_ev(c, 'w', lba, count, -1, src);
         return -1;
@@ -300,6 +389,7 @@ static int cb_write(void *v, uint32_t lba, uint32_t count, const void *srcv)
 static int cb_flush(void *v)
 {
     struct dev_ctx *c = (struct dev_ctx *)v;
+    if (g_sub.on && c->sub_own) return sub_flush();
     if (c->dead) { log_ev(c, 'f', 0u, 0u, -1, NULL); return -1; }
     if (c->fail_next_flush) {
         c->fail_next_flush = false;
@@ -1415,6 +1505,67 @@ static void k_contract(unsigned idx, const char *fam, const char *param, char **
 /* main loop                                                                 */
 /* ------------------------------------------------------------------------ */
 
+/* ---- S and R: any-subset transport commands (Product #440) ------------------------------ */
+
+static long sub_arg(const char *s)
+{
+    return strcmp(s, "-") == 0 ? -1L : strtol(s, NULL, 10);
+}
+
+/* S media closure cut_unit cut_flush err_call err_flush trace
+ * Mount side A (closure: mount writes refused exactly as Z does) and promote to completion
+ * or until the device is gone; every own-device callback is transported. */
+static void cmd_subset(char **f)
+{
+    const struct media *m = media_get(f[1]);
+    bool closure = strcmp(f[2], "1") == 0;
+    tape_result mr, r = TAPE_ERR_NOT_MOUNTED;
+    unsigned calls = 0u;
+
+    g_evn = 0u;
+    dev_load(&g_dev, "own", m, false);
+    g_dev.refuse_mount_writes = closure;
+    g_dev.sub_own = true;
+    memset(&g_sub, 0, sizeof g_sub);
+    g_sub.trace = fopen(f[7], "w");
+    if (g_sub.trace == NULL) { fprintf(stderr, "cannot open trace\n"); exit(3); }
+    g_sub.cut_unit = sub_arg(f[3]);
+    g_sub.cut_flush = sub_arg(f[4]);
+    g_sub.err_call = sub_arg(f[5]);
+    g_sub.err_flush = sub_arg(f[6]);
+    g_sub.on = true;
+    mr = inst_mount(&g_main_inst, &g_dev, TAPE_SIDE_A);
+    if (mr == TAPE_OK) r = run_promote(g_main_inst.t, &calls);
+    g_sub.on = false;
+    g_dev.sub_own = false;
+    fclose(g_sub.trace);
+    g_sub.trace = NULL;
+    g_evn = 0u;
+    printf("{\"format\":\"WP10-SUBSET-RUN-1\",\"media\":\"%s\",\"closure\":%s,\"setup_ok\":%s,"
+           "\"mount_result\":\"%s\",\"operation_result\":\"%s\",\"promote_calls\":%u,\"units\":%lu,"
+           "\"calls\":%lu,\"barriers\":%lu,\"op_units\":%lu,\"op_calls\":%lu,\"op_barriers\":%lu,"
+           "\"cut_fired\":%s,\"error_fired\":%s}\n",
+           m->name, tf(closure), tf(mr == TAPE_OK), rname(mr), mr == TAPE_OK ? rname(r) : "NOT_RUN", calls,
+           g_sub.next_id, g_sub.calls, g_sub.flushes, g_sub.op_units, g_sub.op_calls, g_sub.op_flushes,
+           tf(g_sub.cut), tf(g_sub.err_fired));
+    fflush(stdout);
+}
+
+/* R media: the existing remount-and-render facts (both sides, fresh aux engine and device
+ * from the image's bytes only) plus the raw snapshot of the image. */
+static void cmd_remount(const char *mname)
+{
+    const struct media *m = media_get(mname);
+    struct jb b;
+    jb_init(&b, g_out_mem, sizeof g_out_mem);
+    jb_printf(&b, "{\"format\":\"WP10-SUBSET-REMOUNT-1\",\"media\":\"%s\",\"image_snapshot\":", m->name);
+    jb_snapshot(&b, &m->im, m->total_chunks);
+    jb_remounts(&b, &m->im, m->total_chunks);
+    jb_printf(&b, "}\n");
+    fputs(b.p, stdout);
+    fflush(stdout);
+}
+
 static int hexval(char c)
 {
     if (c >= '0' && c <= '9') return c - '0';
@@ -1448,8 +1599,14 @@ static void cmd_media(char **f, unsigned nf)
 {
     struct media *m;
     unsigned long nb, i;
-    if (nf < 4u || g_media_n >= MAX_MEDIA) { fprintf(stderr, "bad M\n"); exit(3); }
-    m = &g_media[g_media_n++];
+    m = NULL;
+    if (nf >= 4u && strncmp(f[1], "subset:", 7u) == 0) {   /* #440 driver images: reuse the slot */
+        for (i = 0u; i < g_media_n; ++i) if (strcmp(g_media[i].name, f[1]) == 0) m = &g_media[i];
+    }
+    if (m == NULL) {
+        if (nf < 4u || g_media_n >= MAX_MEDIA) { fprintf(stderr, "bad M\n"); exit(3); }
+        m = &g_media[g_media_n++];
+    }
     memset(m, 0, sizeof *m);
     snprintf(m->name, sizeof m->name, "%s", f[1]);
     m->total_chunks = (uint32_t)strtoul(f[2], NULL, 10);
@@ -1493,6 +1650,8 @@ int main(void)
                       (unsigned)strtoul(f[5], NULL, 10), true);
             continue;
         }
+        if (strcmp(f[0], "S") == 0 && nf == 8u) { cmd_subset(f); continue; }
+        if (strcmp(f[0], "R") == 0 && nf == 2u) { cmd_remount(f[1]); continue; }
         if (strcmp(f[0], "K") == 0 && nf >= 5u) {
             k_contract((unsigned)strtoul(f[1], NULL, 10), f[2], f[3], f + 4, nf - 4u);
             continue;

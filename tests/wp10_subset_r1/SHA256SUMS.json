@@ -1,0 +1,9 @@
+{
+  "ADAPTER.md": "adba049e46f100c69d1c7faf40cc2340093fac4dceecb34aee21806f67572f0c",
+  "README.md": "efd0964051cd4a547e0702b9f1e09d551da88d8aca1fe38c55d1a6bbfa244107",
+  "audit.py": "748d0933398a3df716a4a8f360735c84de4dae1762125d6cac7ca1a66a3e049b",
+  "model.py": "aae52448dcffa3bf9c6d061f64b46fd8fe20bdf16b480b5cf26ffa372bd81fd8",
+  "sampled-masks.jsonl": "8a4387377affa27496c1b4073b310fc0696d65743272b7918086c4ca9d904d60",
+  "selftest-result.json": "a9bb147f7e296ef46db9985e8dd668a45757af4641f79ad1378f6352f324a00c",
+  "selftest.py": "23dfeede9dc07dd9414117f1e2f565a71691a142d401313dbfeb24f91dc966b6"
+}
