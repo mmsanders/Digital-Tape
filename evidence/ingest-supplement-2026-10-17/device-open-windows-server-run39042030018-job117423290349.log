@@ -1,0 +1,592 @@
+== environment ==
+Microsoft Windows Server 2025 Datacenter 10.0.26100 build 26100
+28495E642B2A465474A4EDC58380EAF8B7EE580F3FBCB4141061DEADAFE9B885  D:\a\_temp\procmon\Procmon64.exe
+Valid
+== fixture VHD ==
+fixture: \\.\PhysicalDrive2
+== standard local user for the unelevated controls ==
+== tracer 1: Process Monitor (the pinned build the Windows 11 kit uses) ==
+{"pid":7888,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-open0-transient"}
+{"pid":8824,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-openread"}
+{"pid":8604,"mode":"open0","path":"\\\\.\\PhysicalDrive99","ok":false,"win32":2,"role":"neg-failed-not-found"}
+{"pid":6372,"mode":"file","path":"D:\\a\\_temp\\ordinary.txt","ok":true,"win32":0,"role":"pos-ordinary-file"}
+{"pid":1940,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":false,"win32":5,"role":"neg-user-openread-denied"}
+{"pid":8900,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-user-open0"}
+{
+ "tracer": "procmon",
+ "csv_rows": 4098,
+ "controls": [
+  {
+   "pid": 7888,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-open0-transient",
+   "records_for_pid": 683,
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 8824,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-openread",
+   "records_for_pid": 666,
+   "device_records": [
+    {
+     "op": "CreateFile",
+     "path": "\\Device\\Harddisk2\\DR2",
+     "result": "SUCCESS"
+    },
+    {
+     "op": "CloseFile",
+     "path": "\\Device\\Harddisk2\\DR2",
+     "result": "SUCCESS"
+    },
+    {
+     "op": "IRP_MJ_CLOSE",
+     "path": "\\Device\\Harddisk2\\DR2",
+     "result": "SUCCESS"
+    }
+   ],
+   "detected": true
+  },
+  {
+   "pid": 8604,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive99",
+   "ok": false,
+   "win32": 2,
+   "role": "neg-failed-not-found",
+   "records_for_pid": 680,
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 6372,
+   "mode": "file",
+   "path": "D:\\a\\_temp\\ordinary.txt",
+   "ok": true,
+   "win32": 0,
+   "role": "pos-ordinary-file",
+   "records_for_pid": 688,
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 1940,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": false,
+   "win32": 5,
+   "role": "neg-user-openread-denied",
+   "records_for_pid": 689,
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 8900,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-user-open0",
+   "records_for_pid": 692,
+   "device_records": [],
+   "detected": false
+  }
+ ]
+}
+== tracer: WPR wpr-fileio ==
+wpr-start 0
+{"pid":5416,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-open0-transient"}
+{"pid":5752,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-openread"}
+{"pid":8932,"mode":"open0","path":"\\\\.\\PhysicalDrive99","ok":false,"win32":2,"role":"neg-failed-not-found"}
+{"pid":3428,"mode":"file","path":"D:\\a\\_temp\\ordinary.txt","ok":true,"win32":0,"role":"pos-ordinary-file"}
+{"pid":7400,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":false,"win32":5,"role":"neg-user-openread-denied"}
+{"pid":8588,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-user-open0"}
+wpr-stop wpr-fileio 0
+tracerpt wpr-fileio 0
+{
+ "tracer": "wpr-fileio.xml",
+ "events": 255740,
+ "controls": [
+  {
+   "pid": 5416,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-open0-transient",
+   "records_for_pid": 1314,
+   "events": {
+    "0/64": 86,
+    "0/0": 60,
+    "0/36": 58,
+    "0/10": 30,
+    "0/38": 48,
+    "0/40": 48,
+    "0/76": 508,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 188,
+    "0/65": 71,
+    "0/66": 68,
+    "0/2": 35,
+    "0/72": 41,
+    "0/67": 59,
+    "0/32": 2,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 5752,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-openread",
+   "records_for_pid": 1327,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 84,
+    "0/76": 521,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 188,
+    "0/65": 74,
+    "0/66": 75,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/32": 3,
+    "10/0": 1,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   },
+   "device_records": [
+    {
+     "event": "0/64",
+     "field": "OpenPath",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/64",
+     "field": "OpenPath",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/64",
+     "field": "OpenPath",
+     "value": "\\Device\\Harddisk2\\DR2"
+    }
+   ],
+   "detected": true
+  },
+  {
+   "pid": 8932,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive99",
+   "ok": false,
+   "win32": 2,
+   "role": "neg-failed-not-found",
+   "records_for_pid": 1307,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 81,
+    "0/76": 512,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 188,
+    "0/65": 71,
+    "0/66": 72,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/32": 2,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 3428,
+   "mode": "file",
+   "path": "D:\\a\\_temp\\ordinary.txt",
+   "ok": true,
+   "win32": 0,
+   "role": "pos-ordinary-file",
+   "records_for_pid": 1315,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 82,
+    "0/76": 516,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 189,
+    "0/65": 72,
+    "0/66": 73,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/32": 2,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 7400,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": false,
+   "win32": 5,
+   "role": "neg-user-openread-denied",
+   "records_for_pid": 1361,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 82,
+    "0/76": 532,
+    "0/84": 1,
+    "0/74": 193,
+    "0/70": 4,
+    "0/71": 4,
+    "0/1": 5,
+    "0/86": 1,
+    "7/0": 2,
+    "8/0": 2,
+    "0/65": 74,
+    "0/66": 72,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/32": 2,
+    "0/68": 7,
+    "0/48": 10,
+    "0/11": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 8588,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-user-open0",
+   "records_for_pid": 1313,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 82,
+    "0/76": 508,
+    "0/66": 47,
+    "0/84": 1,
+    "0/74": 193,
+    "0/70": 4,
+    "0/71": 4,
+    "0/1": 5,
+    "0/86": 1,
+    "7/0": 2,
+    "8/0": 2,
+    "0/65": 74,
+    "0/72": 41,
+    "0/67": 60,
+    "0/2": 34,
+    "0/32": 2,
+    "0/68": 7,
+    "0/48": 10,
+    "0/11": 1
+   },
+   "device_records": [],
+   "detected": false
+  }
+ ]
+}
+== tracer: WPR wpr-handle ==
+wpr-start 0
+{"pid":7980,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-open0-transient"}
+{"pid":4516,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-admin-openread"}
+{"pid":3416,"mode":"open0","path":"\\\\.\\PhysicalDrive99","ok":false,"win32":2,"role":"neg-failed-not-found"}
+{"pid":9096,"mode":"file","path":"D:\\a\\_temp\\ordinary.txt","ok":true,"win32":0,"role":"pos-ordinary-file"}
+{"pid":7972,"mode":"openread","path":"\\\\.\\PhysicalDrive2","ok":false,"win32":5,"role":"neg-user-openread-denied"}
+{"pid":3584,"mode":"open0","path":"\\\\.\\PhysicalDrive2","ok":true,"win32":0,"role":"neg-user-open0"}
+wpr-stop wpr-handle 0
+tracerpt wpr-handle 0
+{
+ "tracer": "wpr-handle.xml",
+ "events": 173224,
+ "controls": [
+  {
+   "pid": 7980,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-open0-transient",
+   "records_for_pid": 2237,
+   "events": {
+    "0/32": 425,
+    "0/33": 447,
+    "0/64": 86,
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/76": 542,
+    "0/1": 3,
+    "0/74": 245,
+    "0/65": 71,
+    "0/66": 45,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/34": 3,
+    "0/11": 1
+   },
+   "device_records": [
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    }
+   ],
+   "detected": true
+  },
+  {
+   "pid": 4516,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-admin-openread",
+   "records_for_pid": 2476,
+   "events": {
+    "0/32": 504,
+    "0/33": 526,
+    "0/0": 60,
+    "0/36": 58,
+    "0/10": 30,
+    "0/38": 48,
+    "0/40": 48,
+    "0/64": 84,
+    "0/76": 580,
+    "0/1": 3,
+    "0/74": 248,
+    "0/65": 74,
+    "0/66": 74,
+    "0/2": 35,
+    "0/72": 41,
+    "0/67": 59,
+    "0/34": 3,
+    "0/11": 1
+   },
+   "device_records": [
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/64",
+     "field": "OpenPath",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    },
+    {
+     "event": "0/64",
+     "field": "OpenPath",
+     "value": "\\Device\\Harddisk2\\DR2"
+    }
+   ],
+   "detected": true
+  },
+  {
+   "pid": 3416,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive99",
+   "ok": false,
+   "win32": 2,
+   "role": "neg-failed-not-found",
+   "records_for_pid": 2262,
+   "events": {
+    "0/32": 413,
+    "0/33": 435,
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 81,
+    "0/76": 569,
+    "0/1": 3,
+    "0/74": 245,
+    "0/65": 71,
+    "0/66": 72,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/34": 3,
+    "0/11": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 9096,
+   "mode": "file",
+   "path": "D:\\a\\_temp\\ordinary.txt",
+   "ok": true,
+   "win32": 0,
+   "role": "pos-ordinary-file",
+   "records_for_pid": 2274,
+   "events": {
+    "0/32": 414,
+    "0/33": 436,
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/64": 82,
+    "0/76": 574,
+    "0/1": 3,
+    "0/74": 247,
+    "0/65": 72,
+    "0/66": 73,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/34": 3,
+    "0/11": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 7972,
+   "mode": "openread",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": false,
+   "win32": 5,
+   "role": "neg-user-openread-denied",
+   "records_for_pid": 2349,
+   "events": {
+    "0/0": 60,
+    "0/36": 58,
+    "0/10": 30,
+    "0/38": 48,
+    "0/40": 48,
+    "0/32": 436,
+    "0/33": 438,
+    "0/64": 82,
+    "0/76": 595,
+    "0/84": 1,
+    "0/74": 255,
+    "0/1": 5,
+    "0/86": 1,
+    "0/65": 74,
+    "0/66": 72,
+    "0/2": 35,
+    "0/72": 41,
+    "0/67": 59,
+    "0/34": 3,
+    "0/68": 7,
+    "0/11": 1
+   },
+   "device_records": [],
+   "detected": false
+  },
+  {
+   "pid": 3584,
+   "mode": "open0",
+   "path": "\\\\.\\PhysicalDrive2",
+   "ok": true,
+   "win32": 0,
+   "role": "neg-user-open0",
+   "records_for_pid": 2343,
+   "events": {
+    "0/0": 58,
+    "0/36": 56,
+    "0/10": 29,
+    "0/38": 46,
+    "0/40": 46,
+    "0/32": 436,
+    "0/33": 438,
+    "0/64": 82,
+    "0/76": 597,
+    "0/66": 74,
+    "0/84": 1,
+    "0/74": 255,
+    "0/1": 5,
+    "0/86": 1,
+    "0/65": 74,
+    "0/72": 41,
+    "0/67": 59,
+    "0/2": 34,
+    "0/34": 3,
+    "0/68": 7,
+    "0/11": 1
+   },
+   "device_records": [
+    {
+     "event": "0/33",
+     "field": "ObjectName",
+     "value": "\\Device\\Harddisk2\\DR2"
+    }
+   ],
+   "detected": true
+  }
+ ]
+}
