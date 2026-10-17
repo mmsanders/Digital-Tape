@@ -1,0 +1,124 @@
+{
+  "image-baseline": {
+    "expected": "PASS",
+    "verdict": "PASS",
+    "matches": true,
+    "trace_sha256": "b729cb37a50ebad080c553b9c7804c094cebb497af5f063035f3dd280d651f94",
+    "fail": [],
+    "held": []
+  },
+  "image-stdout-write-backing-disk": {
+    "expected": "PASS",
+    "verdict": "PASS",
+    "matches": true,
+    "trace_sha256": "1cc7892b16c70477936ee26118e8c16a4620d94bbb3baf0224f76133e0917023",
+    "fail": [],
+    "held": []
+  },
+  "image-known-foreign-close-after-exit": {
+    "expected": "PASS",
+    "verdict": "PASS",
+    "matches": true,
+    "trace_sha256": "2a0a90511d96ceb79d21b3bf077d77da53cfc55d47c8bf4523971b565c3d9fea",
+    "fail": [],
+    "held": []
+  },
+  "image-target-write": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "26a5256f8257140b4cd2bd9de4033bad14de26fe33faf481731171f031102510",
+    "fail": [
+      "1 write(s) by PID 4242 reached the target"
+    ],
+    "held": []
+  },
+  "image-invalid-object-write": {
+    "expected": "NOT_PASS",
+    "verdict": "HELD",
+    "matches": true,
+    "trace_sha256": "77a763494ebead9f8d6b4a728800629519ca301211aba54cc1ac35bd8a8f905b",
+    "fail": [],
+    "held": [
+      "PID 4242 has 1 FileIo record(s) without a valid FileObject (opcode 68); its object lifetimes and write targets cannot be established"
+    ]
+  },
+  "image-unknown-key-write": {
+    "expected": "NOT_PASS",
+    "verdict": "HELD",
+    "matches": true,
+    "trace_sha256": "b3f9315e72232d5c3dd1424b6fe044ec8030ff4c7ba94aba8a6a3d1dc6b7f85b",
+    "fail": [],
+    "held": [
+      "1 write(s) by PID 4242 have an unresolved identity (no valid FileKey); they may have reached the target"
+    ]
+  },
+  "image-unknown-post-exit-write": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "a0ae349469c98cee3d26f5e0e2e4081ed7742fe1f4bd971acf4090088cd14cf3",
+    "fail": [
+      "1 record(s) come from a thread of PID 4242 outside the observed life of that thread and process; they are not attributed"
+    ],
+    "held": []
+  },
+  "image-target-post-exit-write": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "420d0b39255b9e572076935db20de95aa2663c021bb5e1885a7e45cf046864ba",
+    "fail": [
+      "1 record(s) come from a thread of PID 4242 outside the observed life of that thread and process; they are not attributed"
+    ],
+    "held": []
+  },
+  "image-target-post-exit-read": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "3ad7243daca8d00c8f1e2f40bc6545063a4d9306f4804090015eb6298a1201ec",
+    "fail": [
+      "1 record(s) come from a thread of PID 4242 outside the observed life of that thread and process; they are not attributed"
+    ],
+    "held": []
+  },
+  "image-foreign-object-target-key-write": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "3d3450773f17b37ba4f8b15d90070550a43e5bca625908aa047f1f7829295ac8",
+    "fail": [
+      "1 write(s) by PID 4242 reached the target"
+    ],
+    "held": []
+  },
+  "physical-disk-write": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "0c6d97b9f704eb6938e181d0914a32a426433f5eede841dcf809e43fefd0eb50",
+    "fail": [
+      "1 write(s) by PID 4242 reached the target"
+    ],
+    "held": []
+  },
+  "image-loss": {
+    "expected": "NOT_PASS",
+    "verdict": "FAIL",
+    "matches": true,
+    "trace_sha256": "85705290e90d7f7cb105d22dbf1723d21a1ba8d69b2f46042be02ea24bba6149",
+    "fail": [
+      "ETW: EventsLost = 1; the trace is incomplete"
+    ],
+    "held": []
+  },
+  "physical-baseline": {
+    "expected": "PASS",
+    "verdict": "PASS",
+    "matches": true,
+    "trace_sha256": "437ef24f27e54a18f5bdbba8a32a963d7784c3488890849028928285180ca396",
+    "fail": [],
+    "held": []
+  }
+}
