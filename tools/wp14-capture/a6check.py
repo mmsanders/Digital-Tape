@@ -33,8 +33,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import re
+import struct
 import sys
 import xml.etree.ElementTree as ET
 
@@ -220,51 +222,142 @@ def _irp(text):
     return n if n > 0 else None
 
 
-def parse_etw_xml(text, v):
+# Where a record's event class lives. tracerpt puts a classic NT Kernel Logger record's
+# class GUID in ExtendedTracingInfo/EventGuid, with the kernel session's provider GUID in
+# System/Provider/@Guid (Verification #146 WIN-A6-001, Michael's Windows 11 build 26200
+# export). The EventGuid is authoritative whenever present; a Provider GUID names the class
+# only when no EventGuid exists (the older single-GUID shape). A kernel-session record
+# without an EventGuid has no recoverable class: counted, and HELD, never guessed.
+G_SYSTEMTRACE = '9e814aad-3204-11d2-9a82-006008a86939'
+KNOWN = {G_DISKIO, G_FILEIO, G_THREAD, G_PROC, G_HEADER}
+
+# Raw-payload layouts (WIN-A6-002). On the Windows 11 export tracerpt could not apply its
+# schema to FileIo Read/Write and Thread Start/End/DCStart/DCEnd: it wrote
+# ProcessingErrorData/ErrorCode 15005 and the record's raw little-endian bytes as
+# EventPayload, with no EventData. These records are decoded here from their documented
+# kernel MOF classes, keyed by (class, opcode set, event Version, PointerSize), and only
+# at payload lengths actually seen; every other combination stays UNDECODED, which holds
+# the verdict. Fields are whole-record fixed layouts; nothing is zero-filled or inferred.
+#
+#   FileIo_ReadWrite v3 (opcodes 67 Read, 68 Write), 64-bit pointers:
+#     Offset u64 | IrpPtr ptr | FileObject ptr | FileKey ptr | TTID u32 | IoSize u32 | IoFlags u32
+#     = 44 bytes. Build 26200 emits 48: the documented 44 then 4 bytes with no documented
+#     field; those are reported, never interpreted. Cross-check: the decoded TTID must equal
+#     the record's System/Execution/@ThreadID (the issuing thread the kernel stamped on the
+#     record header); a mismatch means the layout is wrong and the record is UNDECODED.
+#   Thread_TypeGroup1 v3 (opcodes 1 Start, 2 End, 3 DCStart, 4 DCEnd), 64-bit pointers:
+#     ProcessId u32 | TThreadId u32 | StackBase | StackLimit | UserStackBase | UserStackLimit |
+#     Affinity | Win32StartAddr | TebBase (7 ptr) | SubProcessTag u32 | BasePriority u8 |
+#     PagePriority u8 | IoPriority u8 | ThreadFlags u8 = 72 bytes, optionally followed by a
+#     NUL-terminated UTF-16LE ThreadName (build 26200 emits 74: an empty name). Anything
+#     after the terminator, an odd tail or a missing terminator is UNDECODED.
+RAW_LAYOUTS = {
+    (G_FILEIO, 3, 8): ((67, 68), 'fileio-rw-v3-x64'),
+    (G_THREAD, 3, 8): ((1, 2, 3, 4), 'thread-v3-x64'),
+}
+# Classes and opcodes whose fields the judgment uses. An undecoded record in this set leaves
+# some process's threads, objects or request lifecycles unknown, so it holds the verdict
+# whoever issued it (its issuer is itself one of the undecoded fields).
+NEEDED = {G_FILEIO: None, G_THREAD: (1, 2, 3, 4), G_PROC: (1, 2, 3, 4),
+          G_DISKIO: (10, 11), G_HEADER: (0,)}
+
+
+def _decode_raw(cls, op, ver, ptr, hexpayload, exec_tid):
+    """Fields of one raw payload as Data-style strings, or (None, why)."""
+    lay = RAW_LAYOUTS.get((cls, ver, ptr))
+    if lay is None or op not in lay[0]:
+        return None, 'no qualified layout for class %s opcode %s version %s pointer size %s' % (
+            cls, op, ver, ptr)
     try:
-        root = ET.fromstring(text)
+        b = bytes.fromhex(hexpayload)
+    except ValueError:
+        return None, 'EventPayload is not hex'
+    if lay[1] == 'fileio-rw-v3-x64':
+        if len(b) not in (44, 48):
+            return None, 'FileIo read/write v3 payload is %d bytes, not 44 or 48' % len(b)
+        off, irp, fo, fk, ttid, size, flags = struct.unpack_from('<QQQQIII', b, 0)
+        if exec_tid is None or ttid != exec_tid:
+            return None, 'decoded TTID %d does not equal the record header ThreadID %s' % (ttid, exec_tid)
+        d = {'Offset': str(off), 'IrpPtr': hex(irp), 'FileObject': hex(fo), 'FileKey': hex(fk),
+             'TTID': str(ttid), 'IoSize': str(size), 'IoFlags': hex(flags)}
+        if len(b) == 48:
+            d['_undocumented_tail'] = b[44:].hex()
+        return d, None
+    if len(b) < 72:
+        return None, 'Thread v3 payload is %d bytes, under 72' % len(b)
+    pid, tid = struct.unpack_from('<II', b, 0)
+    tail = b[72:]
+    if tail:
+        if len(tail) % 2 or tail[-2:] != b'\0\0' or any(
+                tail[i:i + 2] == b'\0\0' for i in range(0, len(tail) - 2, 2)):
+            return None, 'Thread v3 payload tail is not one NUL-terminated UTF-16 name'
+    return {'ProcessId': str(pid), 'TThreadId': str(tid),
+            'ThreadName': tail[:-2].decode('utf-16-le', 'replace') if tail else ''}, None
+
+
+def _etw_records(source):
+    """Stream (record index, class, opcode, version, time, exec tid, provider, data, raw)
+    from an export path or XML text, holding one Event element at a time."""
+    src = io.BytesIO(source.encode('utf-8')) if isinstance(source, str) else source
+    try:
+        it = ET.iterparse(src, events=('start', 'end'))
+        root, n = None, 0
+        for kind, e in it:
+            if kind == 'start':
+                if root is None:
+                    root = e
+                continue
+            if e.tag.split('}')[-1] != 'Event':
+                continue
+            n += 1
+            prov = egid = op = ver = t = xtid = raw = None
+            err, data = False, {}
+            for c in e.iter():
+                tag = c.tag.split('}')[-1]
+                if tag == 'Provider' and c.get('Guid'):
+                    prov = c.get('Guid').strip('{}').lower()
+                elif tag == 'EventGuid' and c.text and c.text.strip():
+                    egid = c.text.strip().strip('{}').lower()
+                elif tag == 'Opcode' and c.text and c.text.strip().isdigit() and op is None:
+                    op = int(c.text)
+                elif tag == 'Version' and c.text and c.text.strip().isdigit() and ver is None:
+                    ver = int(c.text)
+                elif tag == 'TimeCreated':
+                    t = c.get('SystemTime')
+                elif tag == 'Execution' and c.get('ThreadID', '').strip().isdigit():
+                    xtid = int(c.get('ThreadID'))
+                elif tag == 'ProcessingErrorData':
+                    err = True
+                elif tag == 'EventPayload':
+                    raw = (c.text or '').strip()
+                elif tag == 'Data' and c.get('Name'):
+                    data[c.get('Name')] = (c.text or '').strip()
+            yield n, prov, egid, op, ver, t, xtid, data, (err, raw)
+            if root is not None:
+                root.clear()
     except ET.ParseError as e:
         raise InputError('not XML: %s' % e)
-    events = []
-    for e in root.iter():
-        if e.tag.split('}')[-1] != 'Event':
-            continue
-        sysd, data = {}, {}
-        for c in e.iter():
-            tag = c.tag.split('}')[-1]
-            if tag == 'Provider' and c.get('Guid'):
-                sysd['guid'] = c.get('Guid').strip('{}').lower()
-            elif tag == 'Opcode' and c.text and c.text.strip().isdigit() and 'opcode' not in sysd:
-                sysd['opcode'] = int(c.text)
-            elif tag == 'TimeCreated':
-                sysd['time'] = c.get('SystemTime')
-            elif tag == 'Data' and c.get('Name'):
-                data[c.get('Name')] = (c.text or '').strip()
-        events.append((sysd.get('guid'), sysd.get('opcode'), sysd.get('time'), data))
-    if not events:
-        raise InputError('no events in the export')
 
-    headers = [d for g, op, t, d in events if g == G_HEADER]
-    if not headers:
-        v.held.append('ETW: no EventTrace header; loss counters unknown')
-    for d in headers:
-        for k in ('EventsLost', 'BuffersLost'):
-            if k not in d:
-                v.held.append('ETW: header has no %s; completeness unknown' % k)
-            elif _int(d[k]) != 0:
-                v.fail.append('ETW: %s = %s; the trace is incomplete' % (k, d[k]))
-    times = [t for g, op, t, d in events if t]
-    if times != sorted(times):
-        v.held.append('ETW: events are not in time order; thread attribution cannot be trusted')
-    elif len(times) < len(events):
-        v.held.append('ETW: %d events have no timestamp' % (len(events) - len(times)))
 
+def parse_etw_xml(source, v, keep=None):
+    """Judge-ready records from a tracerpt XML export (a path or the XML text), streamed
+    in one pass in bounded memory. keep(record) limits what is returned; the lifetime,
+    object and IRP state still sees every record."""
+    if not isinstance(source, str) or source.lstrip().startswith('<'):
+        stream = source
+    else:
+        try:
+            stream = open(source, 'rb')
+        except OSError as e:
+            raise InputError('cannot read %s: %s' % (source, e))
+    keep = keep or (lambda r: True)
+    out = []
     # Lifetimes are replayed in time order. A record is attributed to a process only while
     # its thread is alive AND that process is alive; a record from a thread whose process
     # has ended (or was never seen starting) is unattributed and remembers the stale owner.
     # A FileObject names a path only from its Create until its Cleanup/Close; a read's
     # path is whatever its object names at that moment, never an older mapping.
-    out, threads, live_procs, ended = [], {}, {}, {}
+    threads, live_procs, ended = {}, {}, {}
     # IRP lifecycle. Each valid IrpPtr has one entry while ANY request on it is still
     # outstanding: the requests seen, how many completions are still owed, and whether the
     # lifecycle is ambiguous. A request arriving while another is outstanding (any FileIo
@@ -274,7 +367,19 @@ def parse_etw_xml(text, v):
     # one request, a read, from start to completion can supply a result, and only from an
     # OpEnd carrying both NtStatus and ExtraInfo. Missing or invalid identities never join.
     # Reuse after a lifecycle fully resolves (zero outstanding) is legitimate.
-    files, pending = {}, {}
+    # Identity (V146-WIN-R2-01). Each Create starts one object lifecycle {path, keys}: the
+    # FileKeys (file/stream identities) its records carry while it names that path. FileIo
+    # name records (0 Name, 32 FileCreate, 35 FileDelete, 36 FileRundown) name a FileKey;
+    # tracerpt calls that field FileObject. Both are kept for the judgment, which needs the
+    # whole trace (a rundown at the end names keys used much earlier).
+    files, pending, lcs, names = {}, {}, [], {}
+    st = {'n': 0, 'headers': 0, 'last': None, 'inversions': 0, 'untimed': 0, 'ptr': None,
+          'noclass': 0, 'conflict': 0, 'undecoded': {}, 'raw': {}, 'tails': {}}
+
+    def emit(e2):
+        if keep(e2):
+            out.append(e2)
+        return e2
 
     def poison(entry, irp):
         entry['ambiguous'] = True
@@ -296,7 +401,6 @@ def parse_etw_xml(text, v):
         entry['owed'] += 1
         poison(entry, irp)
 
-
     def owner(tid_text):
         if tid_text in (None, ''):
             return None, None
@@ -306,85 +410,174 @@ def parse_etw_xml(text, v):
             return pid, None
         return None, pid if pid is not None else ended.get(tid)
 
-    for g, op, t, d in events:
-        if g == G_PROC and op in (1, 3):
-            live_procs[_int(d['ProcessId'])] = d.get('ImageFileName', '')
-            out.append(ev(pid=_int(d['ProcessId']), op='exec', exe=d.get('ImageFileName', ''),
-                          path=d.get('CommandLine', ''), ret=0))
-        elif g == G_PROC and op in (2, 4):
-            gone = _int(d['ProcessId'])
-            live_procs.pop(gone, None)
-            for tid in [k for k, p in threads.items() if p == gone]:
-                ended[tid] = threads.pop(tid)
-        elif g == G_THREAD and op in (1, 3):
-            threads[_int(d['TThreadId'])] = _int(d['ProcessId'])
-            ended.pop(_int(d['TThreadId']), None)
-        elif g == G_THREAD and op in (2, 4):
-            tid = _int(d['TThreadId'])
-            if tid in threads:
-                ended[tid] = threads.pop(tid)
-        elif g == G_DISKIO and op in (10, 11):
-            pid, stale = owner(d.get('IssuingThreadId'))
-            n = _int(d['TransferSize'])
-            out.append(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
-                          fd='disk%d' % _int(d['DiskNumber']),
-                          off=_int(d['ByteOffset']), len=n, ret=None, status_src=None))
-        if g == G_FILEIO and op != 76 and _irp(d.get('FileObject')) is None:
-            # Any FileIo record of a process whose FileObject is missing or invalid leaves that
-            # process's object lifetimes and write targets unknown: it may have closed or
-            # written the target. Recorded here, judged HELD for the selected process.
-            bpid, bstale = owner(d.get('TTID'))
-            out.append(ev(pid=bpid, stale=bstale, op='badobj', exe=str(op)))
-        if g == G_FILEIO and op == 64:
-            pid, stale = owner(d.get('TTID'))
-            occupy(d.get('IrpPtr'), None)
-            fo = _irp(d.get('FileObject'))    # a FileObject must be a valid nonzero identity too
-            if fo is not None:
-                files[fo] = d.get('OpenPath', '')
-            out.append(ev(pid=pid, stale=stale, op='open', fd=fo,
-                          path=d.get('OpenPath', ''), mode=None, ret=0))
-        elif g == G_FILEIO and op in (65, 66):
-            pid, stale = owner(d.get('TTID'))
-            occupy(d.get('IrpPtr'), None)
-            fo = _irp(d.get('FileObject'))
-            if fo is not None:
-                files.pop(fo, None)
-            out.append(ev(pid=pid, stale=stale, op='close', fd=fo))
-        elif g == G_FILEIO and op in (67, 68):
-            pid, stale = owner(d.get('TTID'))
-            fo = _irp(d.get('FileObject'))
-            e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=fo,
-                    path=files.get(fo) if fo is not None else None,
-                    off=_int(d['Offset']), len=_int(d['IoSize']))
-            e2['fileio'] = True
-            if fo is None:
-                e2['why'] = 'no valid FileObject on the request'
-            occupy(d.get('IrpPtr'), e2)
-            out.append(e2)
-        elif g == G_FILEIO and op == 76:
-            irp = _irp(d.get('IrpPtr'))
-            entry = pending.get(irp) if irp is not None else None
-            if entry is None:
-                continue                      # orphan completion: joins nothing
-            entry['owed'] -= 1
-            if entry['owed'] <= 0:
-                del pending[irp]              # lifecycle fully resolved; later reuse is fresh
-            if entry['ambiguous'] or len(entry['reqs']) != 1 or entry['reqs'][0] is None:
-                continue                      # ambiguous or non-read lifecycle: no result
-            e2 = entry['reqs'][0]
-            try:
-                st, got = _int(d.get('NtStatus')), _int(d.get('ExtraInfo'))
-            except (TypeError, ValueError):
-                e2['why'] = 'its OpEnd lacks a valid NtStatus or ExtraInfo'
+    try:
+        for n, prov, egid, op, ver, t, xtid, d, (err, raw) in _etw_records(stream):
+            st['n'] = n
+            if t:
+                if st['last'] is not None and t < st['last']:
+                    st['inversions'] += 1
+                st['last'] = t
+            else:
+                st['untimed'] += 1
+            if egid:
+                g = egid
+                if prov in KNOWN and prov != egid:
+                    st['conflict'] += 1
+                    continue
+            elif prov == G_SYSTEMTRACE:
+                st['noclass'] += 1
                 continue
-            e2['ret'] = got if st == 0 else -1
-            e2['err'] = None if st == 0 else 'NTSTATUS 0x%08x' % (st & 0xFFFFFFFF)
-            e2['status_src'] = 'FileIo OpEnd NtStatus/ExtraInfo'
-        elif g == G_FILEIO and d.get('IrpPtr') is not None:
-            # Every other FileIo request class that names an IrpPtr (Info 69-71/74/75,
-            # Flush 73, DirEnum 72, DirNotify 77, and any class not listed here) occupies
-            # it like any request: it can only add ambiguity, never supply a Read result.
-            occupy(d.get('IrpPtr'), None)
+            else:
+                g = prov
+            if g not in KNOWN:
+                continue
+            if err or raw is not None:
+                want = NEEDED.get(g, ())
+                if want is None or op in want:
+                    dd, why = (None, 'no EventPayload') if not raw else _decode_raw(
+                        g, op, ver, st['ptr'], raw, xtid)
+                    key = '%s:%s v%s' % (g, op, ver)
+                    if dd is None:
+                        st['undecoded'].setdefault(key, [0, why])[0] += 1
+                        continue
+                    st['raw'][key] = st['raw'].get(key, 0) + 1
+                    if '_undocumented_tail' in dd:
+                        tl = dd.pop('_undocumented_tail')
+                        st['tails'][tl] = st['tails'].get(tl, 0) + 1
+                    d = dd
+                else:
+                    continue                  # a class/opcode the judgment never reads
+            if g == G_HEADER and op == 0:
+                st['headers'] += 1
+                for k in ('EventsLost', 'BuffersLost'):
+                    if k not in d:
+                        v.held.append('ETW: header has no %s; completeness unknown' % k)
+                    elif _int(d[k]) != 0:
+                        v.fail.append('ETW: %s = %s; the trace is incomplete' % (k, d[k]))
+                if 'PointerSize' in d:
+                    st['ptr'] = _int(d['PointerSize'])
+            elif g == G_PROC and op in (1, 3):
+                live_procs[_int(d['ProcessId'])] = d.get('ImageFileName', '')
+                emit(ev(pid=_int(d['ProcessId']), op='exec', exe=d.get('ImageFileName', ''),
+                        path=d.get('CommandLine', ''), ret=0))
+            elif g == G_PROC and op in (2, 4):
+                gone = _int(d['ProcessId'])
+                live_procs.pop(gone, None)
+                for tid in [k for k, p in threads.items() if p == gone]:
+                    ended[tid] = threads.pop(tid)
+            elif g == G_THREAD and op in (1, 3):
+                threads[_int(d['TThreadId'])] = _int(d['ProcessId'])
+                ended.pop(_int(d['TThreadId']), None)
+            elif g == G_THREAD and op in (2, 4):
+                tid = _int(d['TThreadId'])
+                if tid in threads:
+                    ended[tid] = threads.pop(tid)
+            elif g == G_DISKIO and op in (10, 11):
+                pid, stale = owner(d.get('IssuingThreadId'))
+                e2 = emit(ev(pid=pid, stale=stale, op='read' if op == 10 else 'write',
+                             fd='disk%d' % _int(d['DiskNumber']),
+                             off=_int(d['ByteOffset']), len=_int(d['TransferSize']), ret=None, status_src=None))
+                # DiskIo's FileObject field carries the FileKey of the stream the I/O is for.
+                e2.update(n=n, fk=_irp(d.get('FileObject')))
+            if g != G_FILEIO:
+                continue
+            if op in (0, 32, 35, 36):
+                k = _irp(d.get('FileObject'))
+                if k is not None:
+                    names.setdefault(k, []).append((n, op, d.get('FileName', '')))
+                continue
+            fk = _irp(d.get('FileKey'))
+            if op != 76 and fk is not None:
+                lc = files.get(_irp(d.get('FileObject')))
+                if lc is not None:
+                    lcs[lc]['keys'].add(fk)
+            if op != 76 and _irp(d.get('FileObject')) is None:
+                # Any FileIo record of a process whose FileObject is missing or invalid leaves that
+                # process's object lifetimes and write targets unknown: it may have closed or
+                # written the target. Recorded here, judged HELD for the selected process.
+                bpid, bstale = owner(d.get('TTID'))
+                emit(ev(pid=bpid, stale=bstale, op='badobj', exe=str(op)))
+            if op == 64:
+                pid, stale = owner(d.get('TTID'))
+                occupy(d.get('IrpPtr'), None)
+                fo = _irp(d.get('FileObject'))    # a FileObject must be a valid nonzero identity too
+                if fo is not None:
+                    files[fo] = len(lcs)
+                    lcs.append({'path': d.get('OpenPath', ''), 'keys': {fk} if fk is not None else set()})
+                emit(ev(pid=pid, stale=stale, op='open', fd=fo, path=d.get('OpenPath', ''), mode=None, ret=0))
+            elif op in (65, 66):
+                pid, stale = owner(d.get('TTID'))
+                occupy(d.get('IrpPtr'), None)
+                fo = _irp(d.get('FileObject'))
+                e2 = emit(ev(pid=pid, stale=stale, op='close', fd=fo))
+                e2.update(n=n, fk=fk, lc=files.get(fo) if fo is not None else None)
+                if fo is not None:
+                    files.pop(fo, None)
+            elif op in (67, 68):
+                pid, stale = owner(d.get('TTID'))
+                fo = _irp(d.get('FileObject'))
+                lc = files.get(fo) if fo is not None else None
+                e2 = ev(pid=pid, stale=stale, op='read' if op == 67 else 'write', fd=fo,
+                        path=lcs[lc]['path'] if lc is not None else None,
+                        off=_int(d['Offset']), len=_int(d['IoSize']))
+                e2.update(fileio=True, n=n, fk=fk, lc=lc)
+                if fo is None:
+                    e2['why'] = 'no valid FileObject on the request'
+                occupy(d.get('IrpPtr'), e2)
+                emit(e2)
+            elif op == 76:
+                irp = _irp(d.get('IrpPtr'))
+                entry = pending.get(irp) if irp is not None else None
+                if entry is None:
+                    continue                  # orphan completion: joins nothing
+                entry['owed'] -= 1
+                if entry['owed'] <= 0:
+                    del pending[irp]          # lifecycle fully resolved; later reuse is fresh
+                if entry['ambiguous'] or len(entry['reqs']) != 1 or entry['reqs'][0] is None:
+                    continue                  # ambiguous or non-read lifecycle: no result
+                e2 = entry['reqs'][0]
+                try:
+                    status, got = _int(d.get('NtStatus')), _int(d.get('ExtraInfo'))
+                except (TypeError, ValueError):
+                    e2['why'] = 'its OpEnd lacks a valid NtStatus or ExtraInfo'
+                    continue
+                e2['ret'] = got if status == 0 else -1
+                e2['err'] = None if status == 0 else 'NTSTATUS 0x%08x' % (status & 0xFFFFFFFF)
+                e2['status_src'] = 'FileIo OpEnd NtStatus/ExtraInfo'
+            elif d.get('IrpPtr') is not None:
+                # Every other FileIo request class that names an IrpPtr (Info 69-71/74/75,
+                # Flush 73, DirEnum 72, DirNotify 77, and any class not listed here) occupies
+                # it like any request: it can only add ambiguity, never supply a Read result.
+                occupy(d.get('IrpPtr'), None)
+    finally:
+        if stream is not source:
+            stream.close()
+
+    if not st['n']:
+        raise InputError('no events in the export')
+    if not st['headers']:
+        v.held.append('ETW: no EventTrace header; loss counters unknown')
+    if st['inversions']:
+        v.held.append('ETW: events are not in time order; thread attribution cannot be trusted')
+    elif st['untimed']:
+        v.held.append('ETW: %d events have no timestamp' % st['untimed'])
+    if st['noclass']:
+        v.held.append('ETW: %d kernel-session record(s) carry no EventGuid; their event class is '
+                      'not recorded, so header, process, thread and FileIo records may be missing'
+                      % st['noclass'])
+    if st['conflict']:
+        v.held.append('ETW: %d record(s) name one event class in Provider and another in EventGuid; '
+                      'their class is ambiguous' % st['conflict'])
+    for key, (cnt, why) in sorted(st['undecoded'].items()):
+        v.held.append('ETW: %d record(s) of %s are undecoded (%s); the issuing process, object '
+                      'and request identity of those records is unknown' % (cnt, key, why))
+    for key, cnt in sorted(st['raw'].items()):
+        v.notes.append('ETW: %d record(s) of %s decoded from raw EventPayload' % (cnt, key))
+    for tl, cnt in sorted(st['tails'].items()):
+        v.notes.append('ETW: %d FileIo read/write payload(s) end with undocumented bytes %s '
+                       '(not interpreted)' % (cnt, tl))
+    v.notes.append('ETW: %d records streamed; pointer size %s' % (st['n'], st['ptr']))
+    v.etw = {'lcs': lcs, 'names': names}
     return out
 
 
@@ -408,7 +601,11 @@ def read_text(path):
 
 def sha256(path):
     try:
-        return hashlib.sha256(open(path, 'rb').read()).hexdigest()
+        h = hashlib.sha256()
+        with open(path, 'rb') as f:
+            for blk in iter(lambda: f.read(1 << 20), b''):
+                h.update(blk)
+        return h.hexdigest()
     except OSError as e:
         raise InputError('cannot read %s: %s' % (path, e))
 
@@ -462,11 +659,97 @@ def target_matches(path, a):
     p = path.replace('/', '\\').lower() if a.format == 'etw-xml' else path
     if a.format == 'etw-xml':
         t = a.target.replace('/', '\\').lower()
-        if a.disk is not None and (re.search(r'physicaldrive%d$' % a.disk, p)
+        # A raw-disk path names the target only when the target IS that disk; for an image
+        # target the disk holds the image among unrelated files (V146-WIN-R2-01).
+        if a.disk is not None and not getattr(a, 'image', False) and (re.search(r'physicaldrive%d$' % a.disk, p)
                                    or re.search(r'\\device\\harddisk%d\\dr\d+$' % a.disk, p)):
             return True
         return p == t or p.endswith('\\' + t.lstrip('.\\'))
     return path == a.target or path.endswith('/' + a.target.lstrip('./'))
+
+
+def _norm(p):
+    return (p or '').replace('/', '\\').rstrip('\\').lower()
+
+
+class Identity:
+    """Which file a FileIo/DiskIo record's FileObject/FileKey is (V146-WIN-R2-01/02).
+    'target': the object names the target, or the key is one of the target's keys.
+    'unrelated': positively a different, named stream, with no conflicting evidence.
+    'unresolved': anything else (missing/zero key, unnamed key, conflicting object/key,
+    a key used outside its named life, or an incomplete target-key set). Unknown is never
+    treated as unrelated."""
+
+    def __init__(self, v, a):
+        self.lcs, self.names, self.a = v.etw['lcs'], v.etw['names'], a
+        tl = [lc for lc in self.lcs if target_matches(lc['path'], a)]
+        self.keys = set().union(*[lc['keys'] for lc in tl]) if tl else set()
+        self.keys |= {k for k, evs in self.names.items() if any(target_matches(nm, a) for _, _, nm in evs)}
+        # every captured target object must show its key, or a key outside this set could
+        # still be the target's
+        self.complete = all(lc['keys'] for lc in tl)
+        self.n_target_objects = len(tl)
+
+    def key_name(self, k, n):
+        """The name a FileKey has at record n, from its name records: the last one before n
+        (unless that was its FileDelete) and the first one after n (unless that was a new
+        FileCreate). Both must agree; a key deleted before n is not named.
+        -> (name, why, state): state 'named', 'missing' (no name evidence for this point) or
+        'invalid' (the key's captured history contradicts any identity here: deleted before
+        the record, or named differently around it). V146-WIN-R3-02: only 'missing' may fall
+        back to an object's Create path; 'invalid' never can."""
+        evs = self.names.get(k, [])
+        before = [x for x in evs if x[0] < n]
+        after = [x for x in evs if x[0] > n]
+        b = before[-1] if before else None
+        f = after[0] if after else None
+        if b is not None and b[1] == 35:
+            return None, 'FileKey 0x%x was deleted (FileDelete) before this record' % k, 'invalid'
+        nb = b[2] if b is not None else None
+        na = f[2] if f is not None and f[1] != 32 else None
+        if nb and na and _norm(nb) != _norm(na):
+            return None, 'FileKey 0x%x is named both %r and %r around this record' % (k, nb, na), 'invalid'
+        if not (nb or na):
+            return None, 'FileKey 0x%x has no name record for this point in the trace' % k, 'missing'
+        return nb or na, None, 'named'
+
+    def of(self, e):
+        return self.of_basis(e)[:2]
+
+    def of_basis(self, e):
+        """-> (kind, detail, basis): basis says what evidence made an 'unrelated' identity."""
+        k, d, b = self._of(e)
+        return k, d, b
+
+    def _of(self, e):
+        a, fk = self.a, e.get('fk')
+        lc = self.lcs[e['lc']] if e.get('lc') is not None else None
+        if lc is not None and target_matches(lc['path'], a):
+            return 'target', lc['path'], None
+        if fk is not None and fk in self.keys:
+            return 'target', 'FileKey 0x%x of the target' % fk, None
+        if fk is None:
+            return 'unresolved', 'no valid FileKey', None
+        if lc is not None and len(lc['keys']) > 1:
+            return 'unresolved', 'its object carried %d different FileKeys' % len(lc['keys']), None
+        kn, why, state = self.key_name(fk, e['n'])
+        if kn is not None and target_matches(kn, a):
+            return 'target', kn, None
+        if state == 'invalid':
+            # contradictory key history is never overridden by an older Create path
+            return 'unresolved', why, None
+        if lc is not None:
+            if kn is not None and _norm(kn) != _norm(lc['path']):
+                return 'unresolved', 'object names %r but FileKey 0x%x is %r' % (lc['path'], fk, kn), None
+            if kn is None and not self.complete:
+                return 'unresolved', 'the target-key set is incomplete and FileKey 0x%x is not named' % fk, None
+            return 'unrelated', lc['path'], ('object Create path and its single FileKey 0x%x, agreeing with the key\'s '
+                                             'name records' % fk if kn is not None else
+                                             'object Create path and its single FileKey 0x%x (no name record for the key; '
+                                             'complete target-key set)' % fk)
+        if kn is None:
+            return 'unresolved', 'unnamed FileObject and ' + why, None
+        return 'unrelated', kn, 'FileKey 0x%x name records around this record (unnamed object)' % fk
 
 
 def judge(a):
@@ -484,6 +767,7 @@ def judge(a):
         v.fail.append('geometry reports %d bytes, not --capacity %d' % (geo['bytes'], a.capacity))
     if geo.get('sector') not in (SECTOR,):
         v.held.append('geometry does not show 512-byte sectors (%s)' % geo.get('sector'))
+    a.image = bool(geo.get('image'))
     if a.format == 'etw-xml':
         if a.disk is None:
             raise InputError('etw-xml needs --disk N as well as --target')
@@ -523,7 +807,12 @@ def judge(a):
         else:
             v.notes.append('ETW diagnostics %s kept raw; loss is judged from the header counters' % p)
 
-    events = PARSERS[a.format](read_text(a.trace), v)
+    if a.format == 'etw-xml':
+        # Streamed from the file: a whole-machine export can be gigabytes. Only records that
+        # are, or were, the selected process's are kept; every record still drives state.
+        events = parse_etw_xml(a.trace, v, keep=lambda e: a.pid in (e['pid'], e.get('stale')))
+    else:
+        events = PARSERS[a.format](read_text(a.trace), v)
 
     # --- process binding
     tgt = [e['pid'] for e in events if e['op'] == 'target']
@@ -531,6 +820,35 @@ def judge(a):
         v.fail.append('dtrace -c target is PID %s, not --pid %d' % (tgt[0], a.pid))
     mine = [e for e in events if e['pid'] == a.pid and e['op'] != 'target']
     stale = [e for e in events if e.get('stale') == a.pid]
+    ident = Identity(v, a) if a.format == 'etw-xml' else None
+    post_exit = {'excluded': [], 'remaining': []}
+    if ident is not None:
+        # V146-WIN-R2-02: only a Cleanup/Close of a positively unrelated stream is teardown
+        # that may be set aside; every other stale record (any read or write, any target or
+        # unresolved identity) still counts. An image's backing-disk DiskIo is judged by
+        # FileKey only, as during life.
+        keep = []
+        for e in stale:
+            kind, what, basis = ident.of_basis(e) if e['op'] in ('close', 'read', 'write') else ('unresolved', e['op'], None)
+            disk_io = str(e['fd']).startswith('disk')
+            if e['op'] == 'close' and kind == 'unrelated':
+                post_exit['excluded'].append({'n': e['n'], 'op': 'close', 'stream': what, 'basis': basis})
+            elif (e['op'] == 'write' and e.get('fileio') and a.image and kind == 'unrelated'):
+                # V146-WIN-R3-01: an image target's post-exit FileIo write whose native object/key/
+                # name evidence positively proves another stream, with no contradiction. Kept with
+                # its reason; never attributed to the ended process. Reads get no such exemption,
+                # and a raw-disk target keeps its whole-disk rule.
+                post_exit['excluded'].append({'n': e['n'], 'op': 'write', 'stream': what, 'basis': basis,
+                                              'fd': hex(e['fd']) if e['fd'] else None,
+                                              'filekey': hex(e['fk']) if e.get('fk') is not None else None,
+                                              'offset': e['off'], 'bytes': e['len']})
+            elif disk_io and a.image and not (e.get('fk') is not None and e['fk'] in ident.keys):
+                post_exit['excluded'].append({'n': e['n'], 'op': 'disk-' + e['op'], 'stream': (
+                    ident.key_name(e['fk'], e['n'])[0] if e.get('fk') is not None else None)})
+            else:
+                keep.append(e)
+                post_exit['remaining'].append({'n': e.get('n'), 'op': e['op'], 'identity': kind, 'detail': what})
+        stale = keep
     if stale:
         v.fail.append('%d record(s) come from a thread of PID %d outside the observed life of that '
                       'thread and process; they are not attributed' % (len(stale), a.pid))
@@ -559,6 +877,7 @@ def judge(a):
 
     # --- target binding: opens, reads, writes
     fdmap, opens, calls = {}, [], []
+    disk_writes, wid = [], {'unrelated': {}, 'unresolved': {}}
     for e in mine:
         if e['op'] == 'open':
             hit = target_matches(e['path'], a)
@@ -571,8 +890,24 @@ def judge(a):
         elif e['op'] in ('read', 'write', 'flush'):
             if a.format == 'etw-xml':
                 # DiskIo by disk number; FileIo by the path its object names AT THIS READ.
+                if str(e['fd']).startswith('disk') and a.image:
+                    # The image's backing disk holds unrelated files: a DiskIo record is a
+                    # target write only through a target FileKey, and its disk offsets are
+                    # never mapped into the image (V146-WIN-R2-01).
+                    if e['op'] == 'write':
+                        if e.get('fk') is not None and e['fk'] in ident.keys:
+                            calls.append(e)
+                        else:
+                            disk_writes.append(e)
+                    continue
                 if e['fd'] == 'disk%d' % a.disk:
                     calls.append(e)
+                elif e.get('fileio') and e['op'] == 'write' and e['fd'] is not None:
+                    kind, what = ident.of(e)
+                    if kind == 'target':
+                        calls.append(e)
+                    else:
+                        wid[kind].setdefault(what, []).append(e['n'])
                 elif e.get('fileio') and e['fd'] is None:
                     if e['off'] is not None and e['off'] < a.capacity and e['off'] + (e['len'] or 0) > mirror:
                         v.held.append('a FileIo read by PID %d of the last sector has no valid FileObject; '
@@ -598,6 +933,25 @@ def judge(a):
     writes = [c for c in calls if c['op'] == 'write']
     if writes:
         v.fail.append('%d write(s) by PID %d reached the target' % (len(writes), a.pid))
+    for what, ns in sorted(wid['unresolved'].items()):
+        v.held.append('%d write(s) by PID %d have an unresolved identity (%s); they may have reached '
+                      'the target' % (len(ns), a.pid, what))
+    for what, ns in sorted(wid['unrelated'].items()):
+        v.notes.append('%d write(s) by PID %d are to %s, a stream other than the target' % (len(ns), a.pid, what))
+    if disk_writes:
+        v.notes.append('%d DiskIo write(s) by PID %d on the image\'s backing disk carry no target FileKey '
+                       '(streams: %s); not mapped into the image' % (len(disk_writes), a.pid, ', '.join(sorted(
+                           {str(ident.key_name(e['fk'], e['n'])[0] if e.get('fk') is not None else None)
+                            for e in disk_writes}))))
+    for x in post_exit['excluded']:
+        if x['op'] == 'close':
+            v.notes.append('post-exit close of %s set aside as unrelated teardown (record %s)' % (x['stream'], x['n']))
+        elif x['op'] == 'write':
+            v.notes.append('post-exit write to %s set aside: not the target (record %s; %s); not attributed to '
+                           'the ended process' % (x['stream'], x['n'], x['basis']))
+        else:
+            v.notes.append('post-exit %s on the image\'s backing disk carries no target FileKey (stream %s, record %s); '
+                           'backing-disk I/O is judged by FileKey only' % (x['op'], x['stream'], x['n']))
 
     # --- full last-sector coverage by successful, status-bearing, >4 GiB reads
     reads = [c for c in calls if c['op'] == 'read' and c['off'] is not None
@@ -662,6 +1016,15 @@ def judge(a):
         'last_sector_reads': [{k: c[k] for k in ('off', 'len', 'ret', 'err', 'status_src', 'why')} for c in reads],
         'open_claim': open_claim,
         'target_calls': {op: sum(1 for c in calls if c['op'] == op) for op in ('read', 'write', 'flush')},
+        'identity': None if ident is None else {
+            'target_kind': 'image' if a.image else 'disk',
+            'target_objects': ident.n_target_objects,
+            'target_keys': sorted(hex(k) for k in ident.keys),
+            'target_key_set_complete': ident.complete,
+            'writes_unrelated': {k: len(x) for k, x in sorted(wid['unrelated'].items())},
+            'writes_unresolved': {k: len(x) for k, x in sorted(wid['unresolved'].items())},
+            'backing_disk_writes': len(disk_writes),
+            'post_exit': post_exit},
         'exit': {'traced': traced[0] if traced else None, 'recorded': a.exit_code},
         'tracer_steps': steps,
         'geometry': geo,

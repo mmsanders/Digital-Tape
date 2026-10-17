@@ -10,8 +10,10 @@ Software #428; docs/WP14-NATIVE-CAPTURE.md §3. Not acceptance and not a CI gate
 Each control starts from a complete good input set and changes ONE property. A control
 passes only if the verdict matches AND the expected reason text appears in the
 reported fail/held/error lines, so a fault cannot "fail" for an unrelated reason.
-fixtures/dtrace-good and fixtures/etw-good are synthetic shapes, not captures; no
-macOS DTrace or Windows ETW output has been seen. fixtures/linux-* are real strace
+fixtures/dtrace-good and fixtures/etw-good are synthetic shapes, not captures.
+fixtures/verification-185/native-excerpt.xml is the one real Windows ETW input: five exact
+records of Michael's Windows 11 build 26200 export, as Verification #185 published them;
+win11() converts the synthetic ETW set into that shape. fixtures/linux-* are real strace
 captures of the released tapectl-linux on image files (mechanics only).
 fixtures/verification-167/ are Verification's published #167 files, byte-identical.
 """
@@ -19,7 +21,10 @@ import hashlib
 import json
 import os
 import pathlib
+import re
+import resource
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -54,11 +59,12 @@ class Case:
         p.write_bytes(text.encode() if isinstance(text, str) else text)
         return str(p)
 
-    def check(self, name, want, reason, args):
+    def check(self, name, want, reason, args, absent=()):
         self.n += 1
         rc, j = run(args)
         lines = j.get('fail', []) + j.get('held', []) + ([j['error']] if 'error' in j else [])
         ok = j.get('verdict') == want and rc == CODES[want] and (reason is None or any(reason in s for s in lines))
+        ok = ok and not any(x in s for x in absent for s in lines)
         if want == 'PASS':
             ok = ok and not lines
         print('%s %-62s %s%s' % ('ok  ' if ok else 'FAIL', name, j.get('verdict'),
@@ -66,6 +72,14 @@ class Case:
         if not ok:
             self.bad += 1
             print('     exit %d; reasons: %s' % (rc, json.dumps(lines)[:600]))
+
+
+    def direct(self, name, ok, detail):
+        self.n += 1
+        print('%s %-62s' % ('ok  ' if ok else 'FAIL', name))
+        if not ok:
+            self.bad += 1
+            print('     %s' % str(detail)[:600])
 
 
 def dtrace_set(c, trace=None, out='OK\n', diag='', exits='dtrace 0\n', geo=None, extra=(), cap=CAP):
@@ -92,6 +106,210 @@ def etw_set(c, xml=None, out='OK\r\n', exits='wpr-start 0\nwpr-stop 0\ntracerpt 
     if code is not None:
         a += ['--exit-code', code]
     return a + list(extra)
+
+
+# Windows 11 build 26200 tracerpt shape (Verification #185, WIN-A6-001/002): every classic
+# kernel record names the kernel session in Provider and its class in
+# ExtendedTracingInfo/EventGuid; FileIo Read/Write and Thread Start/End/DCStart/DCEnd carry
+# only ProcessingErrorData 15005 and the raw little-endian payload. win11() rewrites one of
+# the synthetic old-shape exports into that shape, field for field, so every older control
+# can be re-run on it.
+SYSTEMTRACE = '9e814aad-3204-11d2-9a82-006008a86939'
+_EV = re.compile(r'<Event xmlns="[^"]+"><System><Provider Guid="\{([^}]+)\}"/><Opcode>(\d+)</Opcode>'
+                 r'(<TimeCreated [^>]*/>)</System><EventData>(.*?)</EventData></Event>')
+
+
+def _num(s):
+    s = s.strip()
+    return int(s, 16) if s.lower().startswith('0x') else int(s)
+
+
+def win11(xml, eventguid=True, provider='kernel'):
+    def one(m):
+        g, op, tc, body = m.group(1).lower(), int(m.group(2)), m.group(3), m.group(4)
+        d = dict(re.findall(r'<Data Name="([^"]+)">([^<]*)</Data>', body))
+        ver, tid, payload = 2, 0, None
+        if g == '90cbdc39-4a3e-11d1-84f4-0000f80464e3':
+            ver, tid = 3, _num(d['TTID']) if 'TTID' in d else 0
+            if op in (67, 68):
+                # one FileKey per FileObject: two objects of the synthetic set are never one file
+                payload = struct.pack('<QQQQIII', _num(d['Offset']), _num(d['IrpPtr']), _num(d['FileObject']),
+                                      0xFFFF8B0000000000 | _num(d['FileObject']), tid, _num(d['IoSize']),
+                                      _num(d['IoFlags'])) + bytes(4)
+        elif g == '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c':
+            ver = 3
+            if op in (1, 2, 3, 4):
+                payload = struct.pack('<II7QIBBBB', _num(d['ProcessId']), _num(d['TThreadId']),
+                                      *([0xFFFFFE8E6ECA1000] * 7), 0, 8, 5, 2, 0) + bytes(2)
+        elif g == '68fdd900-4a3e-11d1-84f4-0000f80464e3':
+            body += '<Data Name="PointerSize">8</Data>'
+        if payload is not None:
+            body = ('<ProcessingErrorData><ErrorCode>15005</ErrorCode><DataItemName/><EventPayload>%s'
+                    '</EventPayload></ProcessingErrorData>' % payload.hex().upper())
+        else:
+            body = '<EventData>%s</EventData>' % body
+        ext = ('<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">'
+               '<EventGuid>{%s}</EventGuid></ExtendedTracingInfo>' % g) if eventguid else ''
+        return ('<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event"><System>'
+                '<Provider Guid="{%s}"/><Version>%d</Version><Opcode>%d</Opcode>%s'
+                '<Execution ProcessID="0" ThreadID="%d"/><Channel/></System>%s%s</Event>'
+                % (SYSTEMTRACE if provider == 'kernel' else g, ver, op, tc, tid, body, ext))
+    out, n = _EV.subn(one, xml)
+    assert n == xml.count('<Event '), 'win11(): an event did not convert'
+    return out
+
+
+# V146-WIN-R2-01/02 (Software-authored; Verification's own 13 controls are run separately
+# from their publication). An IMAGE target on disk 0, Windows 11 field shapes: Create has no
+# FileKey; reads, writes and Cleanup/Close carry one; FileIo name records (32 FileCreate,
+# 35 FileDelete, 36 FileRundown) name a FileKey in a field tracerpt calls FileObject; DiskIo
+# carries the stream's FileKey as FileObject. Each case changes one property of a PASS set.
+def identity_controls(c):
+    print('== Image-target write identity and post-exit teardown (synthetic, V146-WIN-R2/R3)')
+    G = {'p': '3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c', 't': '3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c',
+         'f': '90cbdc39-4a3e-11d1-84f4-0000f80464e3', 'd': '3d6fa8d4-fe05-11d0-9dda-00c04fd7ba7c',
+         'h': '68fdd900-4a3e-11d1-84f4-0000f80464e3'}
+    clock = [0]
+
+    def e(k, op, **d):
+        clock[0] += 1
+        return ('<Event><System><Provider Guid="{%s}"/><Opcode>%d</Opcode><TimeCreated SystemTime="2026-10-14T18:%02d:%02d.0Z"/>'
+                '</System><EventData>%s</EventData></Event>' % (G[k], op, clock[0] // 60, clock[0] % 60,
+                                                                ''.join('<Data Name="%s">%s</Data>' % kv for kv in d.items())))
+    IMG, VOL = 'rehearsal.img', '\\Device\\HarddiskVolume3\\rh\\'
+    TK = '0xE1'
+
+    def mk(*, pre=(), during=(), post=(), rundown=None, read_key=TK, out_create=True):
+        clock[0] = 0
+        ev = [e('h', 0, EventsLost=0, BuffersLost=0, PointerSize=8)] + [x() for x in pre]
+        ev += [e('p', 1, ProcessId=4242, ImageFileName='tapectl.exe', CommandLine='tapectl.exe verify ' + IMG),
+               e('t', 1, ProcessId=4242, TThreadId=5000)]
+        if out_create:
+            ev.append(e('f', 64, IrpPtr='0xA0', TTID=5000, FileObject='0xF2', OpenPath=VOL + 'verify-out.txt'))
+        ev += [e('f', 64, IrpPtr='0xA1', TTID=5000, FileObject='0xF1', OpenPath=VOL + IMG),
+               e('f', 67, Offset=4296015360, IrpPtr='0xB2', FileObject='0xF1', FileKey=read_key, TTID=5000, IoSize=512, IoFlags=0),
+               e('f', 76, IrpPtr='0xB2', ExtraInfo=512, NtStatus=0)]
+        ev += [x() for x in during]
+        ev += [e('t', 2, ProcessId=4242, TThreadId=5000), e('p', 2, ProcessId=4242, ImageFileName='tapectl.exe')]
+        ev += [x() for x in post]
+        for k, nm in (rundown if rundown is not None else [(TK, VOL + IMG), ('0xE2', VOL + 'verify-out.txt')]):
+            ev.append(e('f', 36, FileObject=k, FileName=nm))
+        return '<Events>' + ''.join(ev) + '</Events>'
+    wr = lambda fo='0xF2', fk='0xE2', irp='0xD1': lambda: e('f', 68, Offset=0, IrpPtr=irp, FileObject=fo, FileKey=fk, TTID=5000, IoSize=3, IoFlags=0)
+    cl = lambda fo='0xF2', fk='0xE2', op=66: lambda: e('f', op, TTID=5000, FileObject=fo, FileKey=fk)
+    disk = lambda fk=None: lambda: e('d', 11, DiskNumber=0, IrpFlags='0x60043', TransferSize=4096, ByteOffset=123456,
+                                      IssuingThreadId=5000, **({'FileObject': fk} if fk else {}))
+    name = lambda op, k, nm: lambda: e('f', op, FileObject=k, FileName=nm)
+
+    def run_(label, want, reason, xml):
+        c.check(label, want, reason, etw_set(c, xml=xml, geo='4296015872\n', disk='0', target=IMG, out='OK\n',
+                                             extra=['--capacity', '4296015872']))
+    held, tw, stale = 'unresolved identity', 'reached the target', 'outside the observed life'
+    run_('image baseline', 'PASS', None, mk())
+    run_('write to a named non-target object (its key consistent)', 'PASS', None, mk(during=[wr()]))
+    run_('write through an inherited, unnamed object; key named by FileCreate', 'PASS', None,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'verify-out.txt')], during=[wr()]))
+    run_('write through an unnamed object; key named only by the end rundown', 'PASS', None,
+         mk(out_create=False, during=[wr()]))
+    run_('backing-disk DiskIo write without a FileKey is not mapped into the image', 'PASS', None,
+         mk(during=[wr(), disk()]))
+    run_('backing-disk DiskIo write on an unrelated FileKey', 'PASS', None, mk(during=[wr(), disk('0xE2')]))
+    run_('post-exit Close of a named unrelated object is teardown', 'PASS', None, mk(post=[cl()]))
+    run_('post-exit Cleanup and Close of an unnamed object whose key is named', 'PASS', None,
+         mk(out_create=False, post=[cl(op=65), cl()]))
+    # -- must not PASS
+    run_('write through the target object', 'FAIL', tw, mk(during=[wr('0xF1', TK)]))
+    run_('foreign named object carrying the target FileKey', 'FAIL', tw, mk(during=[wr('0xF2', TK)]))
+    run_('unnamed object carrying the target FileKey', 'FAIL', tw, mk(out_create=False, during=[wr('0xF9', TK)]))
+    run_('unnamed object whose key a name record names as the target', 'FAIL', tw,
+         mk(out_create=False, during=[wr('0xF9', '0xE7')], rundown=[(TK, VOL + IMG), ('0xE7', VOL + IMG)]))
+    run_('backing-disk DiskIo write carrying the target FileKey', 'FAIL', tw, mk(during=[disk(TK)]))
+    run_('unnamed object, zero FileKey', 'HELD', held, mk(out_create=False, during=[wr('0xF9', '0')]))
+    run_('unnamed object, FileKey with no name record', 'HELD', held,
+         mk(out_create=False, during=[wr('0xF9', '0xE9')]))
+    run_('unnamed object, FileKey deleted (FileDelete) before the write', 'HELD', held,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            during=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('FileKey named differently before and after the write', 'HELD', held,
+         mk(out_create=False, pre=[name(32, '0xE2', VOL + 'a.txt')], during=[wr()]))
+    run_('named object whose FileKey a name record names as another file', 'HELD', held,
+         mk(during=[wr()], rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'other.txt')]))
+    run_('one object carrying two FileKeys', 'HELD', held, mk(during=[wr(), wr(fk='0xE8', irp='0xD2')],
+                                                             rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'verify-out.txt'),
+                                                                      ('0xE8', VOL + 'verify-out.txt')]))
+    run_('target object never shows its key; non-target write identified only by object name', 'HELD', held,
+         mk(read_key=None, during=[wr()], rundown=[]).replace('<Data Name="FileKey">None</Data>', ''))
+    # V146-WIN-R3-01: an image target's post-exit write positively proved to be another stream
+    # is set aside (not attributed); any doubt about its identity keeps it counted
+    run_('post-exit write to a named unrelated object (positively not the target)', 'PASS', None, mk(post=[wr()]))
+    run_('post-exit write through an unnamed object whose key is named', 'PASS', None,
+         mk(out_create=False, post=[wr()]))
+    run_('post-exit write, unnamed object, FileKey with no name record', 'FAIL', stale,
+         mk(out_create=False, post=[wr('0xF9', '0xE9')]))
+    run_('post-exit write to a named object whose key was deleted before it', 'FAIL', stale,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            post=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('post-exit write through the target object', 'FAIL', stale, mk(post=[wr('0xF1', TK)]))
+    run_('post-exit read of the target (no read exemption)', 'FAIL', stale,
+         mk(post=[lambda: e('f', 67, Offset=4296015360, IrpPtr='0xB9', FileObject='0xF1', FileKey=TK, TTID=5000,
+                            IoSize=512, IoFlags=0)]))
+    run_('post-exit read of an unrelated stream (no read exemption)', 'FAIL', stale,
+         mk(post=[lambda: e('f', 67, Offset=0, IrpPtr='0xB9', FileObject='0xF2', FileKey='0xE2', TTID=5000,
+                            IoSize=512, IoFlags=0)]))
+    # V146-WIN-R3-02: contradictory key history is not overridden by a named object's Create path
+    run_('named object, its FileKey deleted (FileDelete) before the write', 'HELD', held,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt'), name(35, '0xE2', VOL + 'verify-out.txt')],
+            during=[wr()], rundown=[(TK, VOL + IMG)]))
+    run_('named object, its FileKey named differently before and after the write', 'HELD', held,
+         mk(pre=[name(32, '0xE2', VOL + 'verify-out.txt')], during=[wr()],
+            rundown=[(TK, VOL + IMG), ('0xE2', VOL + 'different-stream.txt')]))
+    run_('named object, its FileKey with no name record (complete target-key set)', 'PASS', None,
+         mk(during=[wr()], rundown=[(TK, VOL + IMG)]))
+    # a raw PhysicalDrive target keeps its whole-disk rule: no post-exit write exemption
+    def run_phys(label, want, reason, xml):
+        xml = xml.replace('tapectl.exe verify ' + IMG, 'tapectl.exe verify \\\\.\\PhysicalDrive0').replace(
+            VOL + IMG, '\\Device\\Harddisk0\\DR0')
+        c.check(label, want, reason, etw_set(c, xml=xml, geo='Number : 0\nSize : 4296015872\nLogicalSectorSize : 512\n',
+                                             disk='0', target='\\\\.\\PhysicalDrive0', out='OK\n',
+                                             extra=['--capacity', '4296015872']))
+    run_phys('raw-disk target baseline', 'PASS', None, mk())
+    run_phys('raw-disk target: post-exit write to a named unrelated object still counts', 'FAIL', stale,
+             mk(post=[wr()]))
+    run_('post-exit Close of an unnamed object with an unnamed key', 'FAIL', stale,
+         mk(out_create=False, post=[cl('0xF9', '0xE9')]))
+    run_('post-exit Close of the target object', 'FAIL', stale, mk(post=[cl('0xF1', TK)]))
+    run_('post-exit Close with no FileKey', 'FAIL', stale, mk(out_create=False, post=[cl('0xF9', '0')]))
+    run_('post-exit DiskIo write carrying the target FileKey', 'FAIL', stale, mk(post=[disk(TK)]))
+
+
+def bounded_memory(c, w11, n=120000):
+    """Judge a large Win11-shape export (n foreign-thread FileIo Read + OpEnd pairs ahead of
+    the good set) in a child process; returns (peak child RSS bytes, export bytes)."""
+    lines = w11.split('\n')
+    rd = [l for l in lines if '<Opcode>67<' in l][0]
+    end = [l for l in lines if '<Opcode>76<' in l][0]
+    path = c.tmp / 'big.xml'
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines[:3]) + '\n')
+        for i in range(n):
+            irp = 0xFFFFA18600000000 + i
+            le = struct.pack('<Q', irp).hex().upper()
+            r = rd.replace('ThreadID="5000"', 'ThreadID="777"').replace('88130000', '09030000')
+            r = re.sub(r'SystemTime="[^"]+"', 'SystemTime="2026-10-14T18:00:00.5000000Z"', r)
+            f.write(re.sub(r'(<EventPayload>[0-9A-F]{16})[0-9A-F]{16}', r'\g<1>' + le, r) + '\n')
+            f.write(re.sub(r'SystemTime="[^"]+"', 'SystemTime="2026-10-14T18:00:00.5000000Z"',
+                           end.replace('0xB2', '0x%X' % irp)) + '\n')
+        f.write('\n'.join(lines[3:]))
+    size = path.stat().st_size
+    args = etw_set(c, xml=w11)
+    args[args.index('--trace') + 1] = str(path)
+    rc, j = run(args)
+    peak = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * (1 if sys.platform == 'darwin' else 1024)
+    path.unlink()
+    if j.get('verdict') != 'PASS':
+        print('     big export verdict %s: %s' % (j.get('verdict'), (j.get('fail', []) + j.get('held', []))[:3]))
+        return 1 << 62, size
+    return peak, size
 
 
 def main():
@@ -414,8 +632,14 @@ def main():
                                              ('OpenPath', '\\Device\\HarddiskVolume3\\log.txt')])
         other_wr = ev_(FIO, 68, '0001500', [('Offset', '0'), ('IrpPtr', '0xC2'), ('FileObject', '0xF6'),
                                              ('TTID', '0x1388'), ('IoSize', '512'), ('IoFlags', '0x0')])
-        c.check('a Write to a valid non-target file is not a target write', 'PASS', None,
+        # V146-WIN-R2-01: a write's absence from the target needs its FileKey; the old shape has none
+        c.check('a Write to a valid non-target file, without FileKeys', 'HELD', 'unresolved identity (no valid FileKey)',
                 etw_set(c, xml=before_read(other_cr, other_wr)))
+        keyed = lambda x, fo, k: x.replace('<Data Name="FileObject">%s</Data><Data Name="TTID">0x1388</Data><Data Name="IoSize">' % fo,
+                                           '<Data Name="FileObject">%s</Data><Data Name="FileKey">%s</Data><Data Name="TTID">0x1388</Data>'
+                                           '<Data Name="IoSize">' % (fo, k))
+        c.check('a Write to a valid non-target file, every read/write keyed', 'PASS', None,
+                etw_set(c, xml=keyed(keyed(before_read(other_cr, other_wr), '0xF6', '0xE6'), '0xF1', '0xE1')))
         bad_wr = other_wr.replace('<Data Name="FileObject">0xF6</Data>', '<Data Name="FileObject">0x0</Data>')
         c.check('a Write with an invalid FileObject may have reached the target', 'HELD',
                 'without a valid FileObject (opcode 68)', etw_set(c, xml=before_read(bad_wr)))
@@ -436,6 +660,101 @@ def main():
                              ('010', 68, 'missing'), ('011', 68, 'empty'), ('012', 68, 'zero'), ('013', 68, 'non-numeric')):
             c.check('%s-xml (opcode %d with %s FileObject)' % (n, opc, what), 'HELD',
                     'without a valid FileObject (opcode %d)' % opc, base175(n))
+
+        print('== Windows 11 build 26200 export shape (Verification #185 excerpt + synthetic conversions)')
+        v85 = FX / 'verification-185'
+        xa = ['--pid', '4596', '--capacity', '4296015872', '--target', 'a6-rehearsal.img', '--disk', '0',
+              '--geometry', c.file('g', '4296015872\n'), '--exe', str(c.exe), '--sha256', c.exe_sha,
+              '--stdout', c.file('o', 'OK\r\n'), '--diagnostics', c.file('d', ''),
+              '--tracer-log', c.file('e', 'wpr-start 0\nwpr-stop 0\ntracerpt 0\n'), '--exit-code', '0',
+              '--format', 'etw-xml']
+        excerpt = (v85 / 'native-excerpt.xml').read_text()
+        c.check('Verification excerpt: all five records decode, PID 4596 not started in it', 'FAIL',
+                'no captured record belongs to PID 4596', ['--trace', str(v85 / 'native-excerpt.xml')] + xa,
+                absent=('undecoded', 'EventGuid', 'no EventTrace header', 'EventsLost'))
+        sys.path.insert(0, str(HERE))
+        import a6check
+        vv = a6check.Verdict()
+        recs = a6check.parse_etw_xml(str(v85 / 'native-excerpt.xml'), vv)
+        rd = [r for r in recs if r['op'] == 'read']
+        want = dict(off=0, len=3496, fd=0xFFFFA1861B91AB60, stale=None, pid=None)
+        got = {k: rd[0][k] for k in want} if len(rd) == 1 else None
+        c.direct('excerpt raw FileIo Read decodes to its documented fields', got == want and not vv.held,
+                 'read %s held %s' % (got, vv.held))
+        c.direct('excerpt notes name both raw decodes and the 4-byte undocumented tail',
+                 any('90cbdc39-4a3e-11d1-84f4-0000f80464e3:67 v3 decoded' in n for n in vv.notes)
+                 and any('3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c:1 v3 decoded' in n for n in vv.notes)
+                 and any('undocumented bytes 00000000' in n for n in vv.notes), vv.notes)
+        c.check('excerpt with its EventGuids removed (misplaced class)', 'FAIL', 'carry no EventGuid',
+                ['--trace', c.file('x', re.sub(r'\s*<ExtendedTracingInfo.*?</ExtendedTracingInfo>', '', excerpt,
+                                               flags=re.S))] + xa)
+        c.check('excerpt with its Read payload cut to 36 bytes (undecoded payload)', 'FAIL',
+                'are undecoded (FileIo read/write v3 payload is 36 bytes',
+                ['--trace', c.file('x', excerpt.replace('E46A0000A80D00000009060000000000', 'E46A0000'))] + xa)
+
+        w11 = win11(gx)
+        c.check('Win11 shape of the good set: PASS', 'PASS', None, etw_set(c, xml=w11))
+        c.check('Win11 shape: only Provider GUID, no EventGuid', 'FAIL', 'carry no EventGuid',
+                etw_set(c, xml=win11(gx, eventguid=False)))
+        c.check('Win11 shape: EventGuid in a foreign element', 'FAIL', 'carry no EventGuid',
+                etw_set(c, xml=w11.replace('<EventGuid>', '<RelatedGuid>').replace('</EventGuid>', '</RelatedGuid>')))
+        c.check('Win11 shape: Provider names one class, EventGuid another', 'FAIL', 'class is ambiguous',
+                etw_set(c, xml=win11(gx, provider='class').replace(
+                    'Guid="{3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c}"', 'Guid="{3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c}"', 1)))
+        c.check('Win11 shape: Read error record without EventPayload', 'HELD', 'no EventPayload',
+                etw_set(c, xml=re.sub(r'<EventPayload>[0-9A-F]{96}</EventPayload>', '', w11)))
+        c.check('Win11 shape: Read payload truncated', 'HELD', 'payload is 40 bytes, not 44 or 48',
+                etw_set(c, xml=re.sub(r'(<EventPayload>[0-9A-F]{80})[0-9A-F]{16}<', r'\1<', w11)))
+        c.check('Win11 shape: Read event Version 2', 'HELD', 'no qualified layout',
+                etw_set(c, xml=w11.replace('<Version>3</Version><Opcode>67<', '<Version>2</Version><Opcode>67<')))
+        c.check('Win11 shape: header PointerSize 4', 'FAIL', 'pointer size 4',
+                etw_set(c, xml=w11.replace('"PointerSize">8<', '"PointerSize">4<')))
+        c.check('Win11 shape: header without PointerSize', 'FAIL', 'pointer size None',
+                etw_set(c, xml=w11.replace('<Data Name="PointerSize">8</Data>', '')))
+        c.check('Win11 shape: decoded TTID disagrees with the record header thread', 'HELD',
+                'does not equal the record header ThreadID',
+                etw_set(c, xml=w11.replace('ThreadID="5000"/><Channel/></System><ProcessingErrorData>',
+                                           'ThreadID="5001"/><Channel/></System><ProcessingErrorData>', 1)))
+        c.check('Win11 shape: Thread payload with bytes after its name', 'FAIL', 'not one NUL-terminated UTF-16 name',
+                etw_set(c, xml=re.sub(r'(<Opcode>1</Opcode>.*?<EventPayload>[0-9A-F]{148})<', r'\g<1>4100<', w11, count=1)))
+        c.check("Win11 shape: an undecoded Thread record of another process", 'HELD',
+                'are undecoded (Thread v3 payload is', etw_set(c, xml=re.sub(
+                    r'<EventPayload>22220000[0-9A-F]+</EventPayload>', '<EventPayload>2222</EventPayload>',
+                    win11(gx.replace(tend, tend + '\n' + tend.replace('0x1092', '0x2222').replace(
+                        '18:00:01.0100000', '18:00:01.0200000'))))))
+        # The prior fail-closed families, re-run in the Windows 11 shape.
+        for name, want, reason, xml in (
+                ('EventsLost 17', 'FAIL', 'EventsLost = 17', gx.replace('"EventsLost">0', '"EventsLost">17')),
+                # without the header the pointer size is unknown, so nothing raw decodes: FAIL
+                ('no EventTrace header', 'FAIL', 'no EventTrace header', gx.replace(hdr + '\n', '')),
+                ('OpEnd NtStatus failure', 'FAIL', cover, gx.replace('"NtStatus">0x0', '"NtStatus">0xC0000185')),
+                ('OpEnd returned 1 byte', 'FAIL', cover, gx.replace('"ExtraInfo">512', '"ExtraInfo">1')),
+                ('read on another file', 'FAIL', 'not the target (closed, reused or foreign object)',
+                 gx.replace('\\Device\\Harddisk1\\DR1', '\\Device\\HarddiskVolume3\\helper.img')),
+                ('issuing thread ended before the reads', 'FAIL', 'no read by PID 4242 touches', moved),
+                ('thread belongs to another process', 'FAIL', 'no read by PID 4242 touches',
+                 gx.replace('<Data Name="ProcessId">0x1092</Data><Data Name="TThreadId">',
+                            '<Data Name="ProcessId">0x1093</Data><Data Name="TThreadId">')),
+                ('no process-start record', 'FAIL', 'outside the observed life',
+                 '\n'.join(l for l in lines if '3d6fa8d0' not in l)),
+                ('process image is tapectl-test.exe', 'FAIL', 'not the shipped tapectl',
+                 gx.replace('>tapectl.exe<', '>tapectl-test.exe<')),
+                ('timestamps out of order', 'HELD', 'not in time order',
+                 gx.replace('18:00:01.0004000Z', '18:00:00.5000000Z')),
+                ('FileObject closed, then read through it', 'FAIL', 'closed, reused or foreign object',
+                 before_read(close66)),
+                ('competing request on the IrpPtr', 'HELD', 'overlapping requests in one unresolved lifecycle',
+                 before_read(unknown)),
+                ('a Write with an invalid FileObject', 'HELD', 'without a valid FileObject (opcode 68)',
+                 before_read(bad_wr)),
+                ('a Write to a valid non-target file', 'PASS', None, before_read(other_cr, other_wr))):
+            c.check('Win11 shape: ' + name, want, reason, etw_set(c, xml=win11(xml)))
+
+        identity_controls(c)
+
+        peak, size = bounded_memory(c, win11(gx))
+        c.direct('streaming: a %d MB Win11 export judged in %.0f MB peak RSS' % (size >> 20, peak / 2**20),
+                 peak < 64 * 2**20 < size, 'peak %d bytes for a %d-byte export' % (peak, size))
 
         print('== Linux strace captures of the released tapectl-linux (image mechanics only)')
         exe = os.environ.get('TAPECTL')
