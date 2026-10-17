@@ -1,11 +1,15 @@
 # WP-15 one-window app — contract APP-1
 
-**ISSUED by PM for independent preflight, 15 October 2026 PDT, ADR-182; revised ADR-183 for preflight findings P2V15-001…004 and the §3 bindings.** Package criteria are
-[WP-15](PACKAGES/WP-15.md) G1–G5. This document controls where that wording is ambiguous. Changes
-require PM issuance and paired issue updates. No engine, format or frozen-spec change is licensed.
+**ISSUED by PM for host authoring/build, 17 October 2026 PDT, ADR-185, with
+[closed interface annex APP-1A](WP15-APP-ANNEX.md).** Originally preflighted under
+ADR-182/183; Software444's Q1–Q7 are resolved by APP-1A. Package criteria are
+[WP-15](PACKAGES/WP-15.md) G1–G5. This document and its annex control ambiguities;
+APP-1A controls the amended discovery/report interfaces. No engine, format or
+frozen-spec change. Independent preflight/tests/disposition remain required.
 **Michael's taste items** (§8) carry defaults. They may change wording or defaults without a new
-round until Software starts the build. Build starts only after Verification's preflight and a
-Software issue.
+round until Software starts the build. Build starts only within a fresh Software issue; S2/S3 discovery/make implementation
+waits for independent feasibility preflight. Host report/app-shell work may overlap
+independent authoring under the existing host-tool rule.
 
 ## 1. What the app is
 
@@ -54,8 +58,8 @@ cartridge** is enabled only with a non-empty label, a successful check, and exac
 - 1 card: "Card ready (64 GB)." The size uses the OS capacity in decimal GB, rounded.
 - 2 or more: "Leave just one card in the computer."
 
-There is no card picker: one-card-at-a-time replaces a list and removes wrong-card choices. A disk
-that `tapectl` refuses is never offered.
+There is no card picker: one-card-at-a-time replaces a list and removes wrong-card choices. A disk refused by the discovery policy is never offered; a candidate may still be
+refused by make's exact elevated preflight, with zero writes.
 
 ## 3. Tool additions (host only, additive)
 
@@ -63,24 +67,21 @@ These are new host CLI surface. They need independent tests before acceptance, u
 parallel-authoring rule. Existing commands and outputs are unchanged when the new flags and commands
 are absent, so INGEST-1 Stage1 and accepted WP-14 evidence are unaffected.
 
-**`tapectl cards`.** It enumerates whole disks and runs the shipping §5 probe and policy for each.
-The erase-confirmation rule is excluded, because it is not a disk fact. It prints one JSON object
-per line for each disk with no refusal: `{"t":"card","path","bytes","provisioned"}`. `provisioned`
-is WP-14 §2's **exact** layout recognition, not the §4.1 verify-only candidate predicate. It ends
-with one `{"t":"summary","offered":N,"unprobed":M}` line, where `unprobed` counts disks whose probe
-could not complete. Refused disks are never printed beyond that count.
-- Exit 0 when enumeration ran, including N=0.
-- Exit 1, with stderr, when enumeration itself is unavailable.
-- When `unprobed` > 0 and N=0, the app says "Put a card in." and keeps polling; the count is kept
-  for **Show details**.
-
-It must run **unelevated** on Windows 11 and macOS. If either platform cannot gather a §5 fact
-unelevated, Software returns that capability fact rather than elevating the poll. It uses no
-write-mode opens, makes zero writes and adds no test seam to the shipped binary.
+**`tapectl cards`.** Unelevated, read-only candidate discovery under APP-1A §5;
+zero writes, zero write-mode opens, no unmount. It prints one JSON line per
+candidate, `{"t":"card","path":PATH,"bytes":N}`, then
+`{"t":"summary","offered":N,"unprobed":M}`. No `provisioned` field: exact on-disk
+recognition is unavailable unelevated and the app does not need that field.
+The OS partition-view candidate exception is discovery only; elevated make still
+requires exact WP14 checks before writes. Refused disk names are never printed.
+Exit0 means enumeration completed (including no candidates); exit1 means
+unavailable, exit2 usage. Unknown safety facts count unprobed, never safe.
+When none is offered the app keeps polling and records unprobed for Show details.
 
 **`tapectl make DEV --label L --length-s S --wav FILE --erase DEV`** (ADR-183, P2V15-003). One
 process runs `provision`, then `load` of FILE, then `verify`, with exactly their existing outcomes,
-order of work and exit meanings. It opens the device **once** for the whole sequence. The verify
+order of work and exit meanings. It holds **one authorized device session** across the whole sequence; preliminary
+read-only/zero-access safety query handles are permitted (APP-1A §5). The verify
 phase uses a NULL-write binding over the same open device; it does not reopen it. §5 safety runs
 first on that open, as for `provision`. **Continuity:** if the OS reports media removal or change
 on that open device, `make` stops with ID `CARD_CHANGED` and exit 1, and never continues on a
@@ -102,6 +103,7 @@ says nothing about success. The rules:
   is not the one it passed.
 - **Records.**
   - progress: `{"t":"progress","step","done","total"}`;
+  - make diagnostic stderr: `{"t":"stderr","text":S}`, never an outcome selector;
   - refusal or failure: `{"t":"refusal","id","subject",...}`;
   - for an ingest overage, also integer `total_frames`, `capacity_frames` and `excess_frames`,
     including folder gaps (P2V15-001);
@@ -119,8 +121,8 @@ With no `--report`, no file is created and every existing transaction is unchang
 preflight refusal, the report is the only file the invocation may create: no DEST, stage, WAV or
 manifest.
 
-**Closed ID lists** are an interface deliverable of the Software build issue, settled before
-Verification freezes app tests. They cover:
+**Closed IDs, payloads, precedence and progress** are issued in [APP-1A](WP15-APP-ANNEX.md),
+including:
 - per command: WP-14 §5/§7 categories, split into stable IDs for usage, label, capacity, WAV,
   `NOT_PROVISIONED` and OS I/O;
 - `verify` findings with their payload, where `READ_ERROR` carries side and frame, and the stated
@@ -128,7 +130,7 @@ Verification freezes app tests. They cover:
 - INGEST-1 reasons;
 - the closed progress-step names.
 
-PM issues them as an APP-1 annex. `subject` is the INGEST-1 logical path `ordinal/name` or a
+APP-1A also defines source/folder/boundary subjects and app fallback rules. `subject` is the INGEST-1 logical path `ordinal/name` or a
 boundary named by both neighbours. The app displays the file's basename, or for folder-level and
 gap-boundary refusals the dropped folder's own name, which it maps from the ordinal.
 
@@ -191,7 +193,10 @@ the raw stderr as copyable text for a grown-up.
 | † Elevation declined (no `make` child started) | The computer said no, so the card wasn't changed. Press Make cartridge to try again. |
 | † Card recheck mismatch (steps 1/3) | Back to Ready, with the card-line message (§2). |
 | † A tool could not be started | Something went wrong. Nothing else on your computer was changed. |
-| Any other failure | Something went wrong. Nothing else on your computer was changed. |
+| make: WAV_TRUNCATED after start | The music file changed while the cartridge was being made. Start over and drop the folder again. |
+| make: exit3 safety refusal | This card can't be used right now. Check the card and try again. |
+| Any other make failure | The cartridge wasn't finished. Start over and try again. |
+| Any other ingest/discovery failure | Something went wrong. Nothing else on your computer was changed. |
 
 NAME is the dropped folder's name or the file name. The app never shows full paths. Each G3 case
 (too long, card too small, not a card, pulled mid-write, unreadable file, DRM file) is reachable
@@ -214,7 +219,8 @@ and independently tested. "Not a card" is satisfied by non-offering plus a refus
   - report exclusivity, nonce, and no-follow;
   - a preflight refusal creates only the report;
   - an overage exact fit vs one frame over, and equal IDs with different excesses;
-  - `cards` exact-versus-candidate recognition, including a bare CRC ending `55 AA`;
+  - `cards` OS-view candidate recognition versus make exact safety recognition, including
+    byte-invalid candidates and a bare CRC ending `55 AA`;
   - stderr wording changes leave the app result unchanged.
 
 Real-card G2 waits on WP-14 physical A6 and WP-16 acceptance. App authoring and implementation may
