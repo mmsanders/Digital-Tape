@@ -6,6 +6,20 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
+## Latest independent boundary — 17 October2026 PDT (ADR-185)
+
+- Verification194 `b9f08bf6`: overall Windows441/a50a211 method/rehearsal PASS;
+  both R3 corrections closed, exact-head CI green, Software integration authorized.
+  Actual physical Windows A6 and Mac method remain separate/HELD.
+- Verification195 `65dbd21f`:443/85b7c3f V186-02 correction and585 specific contexts
+  PASS; remaining operation-row judgments/SAMPLED coverage/404 host faults held.
+- Same195:436/6126d04 available numerical/source/relations/profile/positive-native
+  receipts PASS. Actual Windows11, exact-shipping exhaustion1926 and Windows
+  zero-access-open visibility held. No overall436/443 integration authorization.
+- APP-1A closed interface issued, WP15 rung1; no full APP coverage/implementation/
+  acceptance. Phase2 6/12. Mac content-pattern feasibility supplies no native high
+  address proof; no replacement method or Mac run. No unchanged campaign replay.
+
 ## Latest host boundary — 17 October 2026 UTC (ADR-184)
 
 - Verification188 `f168a2eb`: Mac442/d360386 capability stop upheld; fs_usage aliases

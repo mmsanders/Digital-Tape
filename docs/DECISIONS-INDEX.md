@@ -166,4 +166,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-184](DECISIONS.md#adr-184--disposition-latest-returns-record-mac-a6-limitation-and-route-unblocked-host-work) | 2026-10-17 UTC | Latest return disposition / unblocked host work | Mac limitation recorded, ready441/443 to Verification, INGEST receipts192, APP annex groundwork444; WP16 coverage rung2, Phase2 5/12 |
 
-121 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-185](DECISIONS.md#adr-185--resolve-software444-q1q7-and-issue-app-1a-host-interface) | 2026-10-17 PDT | APP-1A / Software444 answers | Closed host annex; discovery hints separated from exact destructive authorization; Windows method PASS carried, host supplements/APP work routed; Phase2 6/12 |
+
+122 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
