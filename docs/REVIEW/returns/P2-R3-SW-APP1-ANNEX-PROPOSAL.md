@@ -171,7 +171,7 @@ stdout line:
 **I/O precedence (one event that is both I/O and a finding).** These apply in order, and the first
 that matches decides:
 1. **CARD_CHANGED.** The failing native call returned a media-removal or media-change error from
-   the platform list in §2.4 F3, or the phase-boundary continuity check (§2.4 F3) reports a
+   the platform list in §2.3 F3, or the phase-boundary continuity check (§2.3 F3) reports a
    change.
    - `make` stops at once and prints nothing further on stdout.
    - A verify already in progress prints no findings, so a pulled card never shows as
@@ -240,7 +240,7 @@ only from `total_frames` at exit 0.
 | † tool could not start | app event `SPAWN_FAILED` |
 | Any other failure | everything else, including: `INGEST_USAGE`, `INGEST_LENGTH_INVALID`, `INGEST_RIFF_LIMIT`, `FOLDER_UNREADABLE`, `FOLDER_NOT_FOLDER`, `FOLDER_DUPLICATE`, `JOIN_PEAK`, `JOINED_PEAK`, `DEST_*`, `IO_FOLDER`, `IO_DEST`, `IO_MEMORY`, `INTERNAL`, `cards` exit 1, make `USAGE`, `LABEL_INVALID`, `LENGTH_INVALID`, `WAV_INVALID`, `NOT_PROVISIONED`, `P2_TOO_LARGE`, `ENGINE` with any other result, every make exit 3, an unknown ID, a stale, malformed or inconsistent report, and any exit outside the tool's set (crash or signal) |
 
-**PM decisions this proposal needs.**
+**PM decisions this proposal needs (Q1–Q7).**
 - **Q1.** The `stderr` record for `make` (§1.1). The safe default is to adopt it, because without
   it Show details is empty for the elevated child on Windows.
 - **Q2.** `WAV_TRUNCATED` after the destructive start. The safe default is "Any other failure",
@@ -251,6 +251,11 @@ only from `total_frames` at exit 0.
   is for the app to dedupe drops by OS identity before ingest; the row stays "Any other".
 - **Q5.** make exit 3 after a passing recheck (a mount appeared, etc.); the default is "Any other
   failure". Zero writes holds per WP-14 §5.
+- **Q6.** `cards` and the unelevated `provisioned`/own-partition-1 question (§2.1). The default is the
+  OS-view predicate, with `make` re-checking exactly while elevated.
+- **Q7.** The Windows G1 runtime tracer (§2.5): no in-box tracer passed its negative control. The
+  default is that S6 evaluates candidates against the same control, and G1 runtime on Windows stays
+  open until one passes.
 
 ### 1.6 Examples
 
@@ -317,7 +322,242 @@ refusal is `{"t":"refusal","id":"ENGINE","subject":null,"phase":"load","result":
 
 `subject` is always present: `null` for every `tapectl` ID, since disks are never named in a report.
 
-<!-- CAPABILITY -->
+## Part 2. Capability facts (hosted, off-card)
+
+**What ran.** `.github/workflows/app-capability-probe.yml` ran `tools/app-probe/` on PR #448.
+- **Fixtures:** two 8 GiB images, A and B, each provisioned through `tapectl-test` with injected
+  "is a card" facts and different UUIDs (`aaaaaaaa…`, `bbbbbbbb…`). The shipped binary refuses
+  them as virtual media, as it must.
+- **Attachment:** macOS uses `hdiutil` raw images; Windows uses `diskpart` VHDs.
+- **Exclusions:** no physical disk, card or reader was touched.
+
+| Platform label | Runner | OS build observed | Status |
+|---|---|---|---|
+| macOS arm64 | `macos-latest` (image macos-26-arm64 20261013) | macOS 26.6.2 (25G83), arm64 VM | **SIP disabled**, passwordless sudo, GUI session present — **not ordinary security settings** |
+| Windows Server (supplementary) | `windows-latest` (windows-2025-vs2026 20261007) | Windows Server 2025 Datacenter 10.0.26100 | runner token High integrity; UAC `EnableLUA=1`, `ConsentPromptBehaviorAdmin=0` (elevates silently) — **not Windows 11** |
+| Windows 11 x64 | — | — | **unavailable**; no fact below is a Windows 11 fact |
+
+On Windows, "unelevated" is a standard local user created for the job, whose token is not an admin
+token (`IsUserAnAdmin()` false). On macOS it is the runner user, uid 501, which is in the `admin`
+group but is not root.
+
+Raw logs: `evidence/app-capability-2026-10-17/` (SHA-256 listed there), plus the per-run
+artifacts named in §2.6.
+
+### 2.1 F1 — unelevated read-only `cards` probe
+
+| §5 fact | macOS 26.6.2, unelevated | Windows Server 2025, standard user |
+|---|---|---|
+| Open the whole disk read-only | **denied**: `/dev/diskN` and `/dev/rdiskN` are `root:operator 0640`, `open(O_RDONLY)` → `EACCES` (also on `disk0`) | `CreateFile(\\.\PhysicalDriveN, 0 access)` **succeeds**; `GENERIC_READ` → **error 5** |
+| whole | DA/`diskutil`: `WholeDisk`, IOMedia `Whole` ✓ | `IOCTL_STORAGE_GET_DEVICE_NUMBER` (partition 0) ✓ on the 0-access handle |
+| removable / bus / virtual | DA `Removable`, `Ejectable`, `BusProtocol` ("Disk Image"), `VirtualOrPhysical` ✓ | `IOCTL_STORAGE_QUERY_PROPERTY`: `RemovableMedia`, `BusType` (15 = FileBackedVirtual) ✓ |
+| bytes | DA `Size` ✓ | `IOCTL_DISK_GET_LENGTH_INFO` **denied** (needs read access); `IOCTL_DISK_GET_DRIVE_GEOMETRY_EX.DiskSize` ✓, equal value |
+| holds_os | `diskutil info /` → `ParentWholeDisk`; `getmntinfo` ✓ | volume enumeration + `IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS` on 0-access volume handles ✓; system volume ✓; page files via CIM ✓ (`EnumPageFilesW` not run unelevated) |
+| mounted volumes | `getmntinfo`/`mount` ✓ (`/Volumes/DIGITALTAPE` on `diskNs1`) | `GetVolumePathNamesForVolumeNameW` ✓ (`E:\`) |
+| exact layout (`layout_ok`, `provisioned`) | **unavailable**: needs LBA 0; IOMedia gives partition `Base`/`Size`/`Content` (`Windows_FAT_16`, `0xDA`), not bytes | **unavailable**: LBA 0 read denied; `IOCTL_DISK_GET_DRIVE_LAYOUT_EX` ✓ gives signature, type, offset, length and boot flag, but not CHS bytes, raw status or bytes 0–439 |
+| Shipped probe run unelevated (`tapectl-test probe`) | runs; every fact equal to the elevated run **except `layout_ok` 0 (elevated 1)** | **fails entirely**: `cannot open … (error 5; run as Administrator)`, so every fact is refusing |
+
+**Consequences (capability facts for PM, not decisions).**
+1. **Exact recognition cannot be done unelevated** on either platform. WP-14 §2 exact recognition
+   compares LBA 0 bytes 446–511 field for field, including the CHS `FE FF FF` markers, and no
+   unelevated OS view exposes them. So `cards` cannot report APP §3's exact `provisioned` without
+   elevation. APP §3 says to return this fact rather than elevate the poll.
+2. **The §5 own-partition-1 exception depends on exact layout.** Both OSes mount partition 1 of
+   an already-made card (`/Volumes/DIGITALTAPE`, `E:\`). An unelevated policy without exact
+   layout therefore sees a foreign mount and refuses every previously made card.
+   - That means "Make another" on a used card would never be offered.
+   - **PM decision Q6.** Software's safe default proposal: `cards` evaluates the exception with an
+     OS-view predicate. It requires MBR partition style, entry 1 at LBA 2048 for 32768 sectors with
+     type 0x0E, entry 2 at LBA 34816 to the end with type 0xDA, entries 3–4 absent, and no boot
+     flag.
+   - `cards` reports `provisioned` as that OS-view predicate, named honestly as such: no longer
+     "exact".
+   - `make` re-runs the exact §5 + §2 checks elevated on its one open before any write, so safety
+     never rests on the OS view.
+   - Alternative: drop `provisioned` from `cards`, since no §2 app element uses it.
+3. **The shipped Windows probe cannot be reused as-is.** It opens `GENERIC_READ` and needs
+   `DISK_GET_LENGTH_INFO`. An unelevated `cards` on Windows needs a 0-access fact path, with
+   `GEOMETRY_EX` for size. That is new port code for S2. It does not change what `provision` or
+   `verify` accept, because they keep the existing probe.
+
+### 2.2 F2 — one elevated `make` child, one device open, NULL-write verify
+
+Elevated, on fixture A, one read-write open was held while the probe re-wrote, with the bytes they
+already held:
+- LBA 0 zeroed;
+- then partition 2, partition 1, and the MBR last, with a flush after each (provision's order);
+- then a partition-2 write after the MBR (load's pattern);
+- then reads of partitions 1 and 2 (verify's pattern).
+
+| Observation | macOS 26.6.2 | Windows Server 2025 |
+|---|---|---|
+| Prior unmount of partition 1 | `diskutil unmountDisk` ✓ (tapectl uses `DADiskUnmount`) | `FSCTL_LOCK_VOLUME` + `FSCTL_DISMOUNT_VOLUME` on the volume ✓, held to exit |
+| One RW open of the whole disk | `/dev/rdiskN` `O_RDWR` ✓ | `\\.\PhysicalDriveN` `GENERIC_READ\|GENERIC_WRITE` ✓ |
+| Writes in provision order on that one open | all ✓ | all ✓ |
+| Durable barrier on the raw device | `F_FULLFSYNC` → `ENOTTY`, the WP-14 §6 permitted fallback case; `DKIOCSYNCHRONIZECACHE` then ✓ after every write (runs 4–6) | `FlushFileBuffers` ✓ each time |
+| Did the OS remount partition 1 while the open was held? | no (none within 5 s held, none within 5 s after close) | volume stays locked/dismounted while held; mount point listed; writes into partition 1's extent after the MBR ✓ |
+| Writes and reads after the MBR on the same open | ✓ | ✓ |
+| Verify afterwards (`tapectl-test verify`, separate process) | `OK` | `OK` |
+
+**NULL-write verify on the same open** is a binding choice inside `tapectl`: verify binds a
+`tape_dev` with `write = NULL` over the same `hport`. It is not an OS capability, and no OS fact
+blocks it. **Not observed:**
+- a real `tapectl make`, which does not exist;
+- a removable reader;
+- Windows 11;
+- whether macOS remounts partition 1 *during* a long single-open make on real media.
+
+### 2.3 F3 — media change and equal-size replacement
+
+Method: one read-only descriptor was held, reading LBA 0 every 0.25 s for 12–18 s.
+- **no-change:** nothing happens;
+- **remove/reinsert:** detach A, reattach A;
+- **equal-size swap:** detach A, attach B, both 8 GiB.
+
+A fresh open of the path after each event shows which disk the path now names.
+
+| Case | macOS 26.6.2 (hdiutil images) | Windows Server 2025 (VHDs) |
+|---|---|---|
+| no-change | all reads ✓, signature constant | all reads ✓; `IOCTL_STORAGE_CHECK_VERIFY2` media-change count 0 throughout |
+| remove, descriptor held | `hdiutil detach -force` is **refused** ("Resource busy", exit 16) while a raw fd is open, so the held fd keeps reading A. Emulated removal instead: killing A's `diskimages-helper` makes the held fd fail within ≈ 0.2–0.5 s with **`ENXIO` (6, "Device not configured")**, and the BSD nodes disappear (runs 4 and 5) | the held handle fails within ≤ 0.25 s of detach with **Win32 55 `ERROR_DEV_NOT_EXIST`**, on reads and on `CHECK_VERIFY2`, and stays failed |
+| reinsert, same disk | (detach refused; same attachment) | reattached as the **same path** `\\.\PhysicalDrive2`; the old handle stays failed and never resumes |
+| equal-size swap | detach refused; B attached as a **new** node `disk8`, and the held fd still reads A | B attached at the **same path** `\\.\PhysicalDrive2`; a fresh open of the path reads B (`bbbbbbbb`); the old handle stays failed |
+| `CHECK_VERIFY2` media-change count | n/a | 0 always: a VHD is not removable media, so a reader's media-change count is **unobserved** |
+| Identity an app could compare | DA `MediaName`/`DeviceTreePath` are equal for A and B; only content differs (MBR signature) | `Get-Disk` `UniqueId` and `Signature` differ; `Size`, `BusType`, `FriendlyName` are equal |
+
+**Facts for the annex.**
+- On Windows, removal of the underlying disk surfaces as `ERROR_DEV_NOT_EXIST` (55) on the held
+  handle, and the path is reused by the next disk. "Never continue on a reopened path" is therefore
+  necessary: a reopen of `\\.\PhysicalDrive2` silently reached B.
+- Proposed `CARD_CHANGED` triggers:
+  - Windows: 55 (observed), and 1110 `ERROR_MEDIA_CHANGED`, 21 `ERROR_NOT_READY`, 1167
+    `ERROR_DEVICE_NOT_CONNECTED` and 433 `ERROR_NO_SUCH_DEVICE` (*not observed* here; documented
+    removable-media results);
+  - a change in the `CHECK_VERIFY2` count between the open and each phase boundary;
+  - macOS: `ENXIO` on the held fd (observed under emulated removal), plus `ENODEV`/`EIO` and
+    DiskArbitration disappearance of the BSD name (*not observed*).
+  - The disk-image fixture cannot emulate a removal while `tapectl` holds the fd, because
+    `hdiutil` refuses the detach. A macOS G3 "pulled" fixture therefore needs the helper-kill
+    emulation or real media.
+- **Limits to state, never claim:**
+  - **Card swap inside a reader.** Taking a card out and putting another in, with the reader still
+    present, is **unobserved on both platforms**. A reader may report no error and serve the new
+    card's sectors with a media-change count (Windows) or nothing at all.
+  - **Equal-size swap between `cards` and `make`.** This is undetectable from published facts:
+    sizes and bus are equal, and macOS gives no per-medium identity. The app's pre-launch recheck
+    covers only path and bytes, as APP §3 already states.
+
+### 2.4 F4 — elevation mechanism and prompt
+
+| | Windows 11 (proposal) | macOS (proposal) |
+|---|---|---|
+| Mechanism | `ShellExecuteExW` with verb `runas` on the bundled `tapectl.exe`, `SEE_MASK_NOCLOSEPROCESS`; exit via `GetExitCodeProcess` | `AuthorizationCreate` + `AuthorizationExecuteWithPrivileges` (deprecated but present), or `NSAppleScript` `do shell script … with administrator privileges`. Either launches the bundled `tapectl` as root. Exit status is returned; stdout is returned by the AppleScript route |
+| stdio of the elevated child | **none**: `runas` gives no pipes, so the report file is the only channel (hence Q1's `stderr` record) | AppleScript returns stdout and folds stderr into its error text; the report file stays the channel of record |
+| Prompt the user sees | Not observed. The documented UAC consent dialog for an unsigned binary is "Do you want to allow this app from an unknown publisher to make changes to your device?" with Program name `tapectl.exe` and Publisher Unknown, on the secure desktop | Not observed. The documented authorization dialog is "<App name> wants to make changes. Enter your password to allow this." |
+| Declined | `ShellExecuteExW` fails with `ERROR_CANCELLED` (1223), so no child exists → `ELEVATION_DECLINED` | `errAuthorizationCanceled` (−60006), or AppleScript error −128 → `ELEVATION_DECLINED` |
+| Observed on hosted runners? | **No.** Server's runner has `ConsentPromptBehaviorAdmin=0` and an already-elevated token, so no dialog can appear; Windows 11 is unavailable | **No.** Passwordless sudo, and a password dialog would wait forever for a human |
+
+**Bounded blocker:** the exact prompt text and the decline path need a real Windows 11 desktop with
+default UAC and a real Mac with an interactive password prompt. This is G5/G2 territory. No hosted
+probe can supply it, and this tranche asks no one for a new test.
+
+### 2.5 G1 runtime observation
+
+The G1 runtime claim is "no device opens by the app process". A tracer is fit only if a negative
+control (a process that opens a disk device) is caught and a positive one (an ordinary file open)
+is clean.
+
+| Tracer | Negative control caught? | Positive clean? | Ordinary-settings status |
+|---|---|---|---|
+| Windows: in-box WPR `FileIO` + tracerpt (Server) | **no**: a 0-access open of `\\.\PhysicalDrive3` produced no record naming `\Device\Harddisk3\DR3` or `PhysicalDrive3` | yes | in-box, admin-only |
+| Windows: `Microsoft-Windows-Kernel-File` (`FILENAME\|CREATE\|CREATE_NEW_FILE`) via logman | **no**: file-system-level provider; the raw disk open has no file-system name | yes | in-box, admin-only |
+| macOS: `fs_usage -w -f pathname` (runs 3–6) | **yes**, matched by device path: the unelevated attempt shows as `open [ 13] /dev/disk7` (EACCES) and the elevated open as `open F=3 /dev/disk7` (run 6, excerpt in evidence). Attribution must use path plus `fs_usage`'s process filter, because its trailing number is a **thread ID, not a PID** | yes: no device line for the image-file control | needs root. Observed only with **SIP disabled**; Apple documents `fs_usage` as working with SIP on, but that is **not observed** |
+| macOS: `eslogger open` (runs 3–6) | **no**: zero records naming `/dev/disk7` in 7–56 MB of output, even for the elevated open | yes | unfit as the G1 tracer |
+
+**G1 result.**
+- **macOS:** `fs_usage` is a fit runtime tracer, because it catches even a *failed* device open,
+  which matters since an unelevated app's open would fail. That is established on a SIP-disabled
+  runner only. S6 runs it with the app's process name as the filter and matches `/dev/(r)disk`
+  paths.
+- **Windows:** **no in-box tracer passed its negative control** on Server. Both WPR FileIO and
+  Kernel-File miss a raw `\\.\PhysicalDriveN` open: the negative control shows about 6 more
+  FileIo creates than the positive, but tracerpt cannot decode their names. This is a **bounded
+  blocker** for the Windows G1 runtime half.
+  - Candidates for S6, none tried here: Sysinternals Process Monitor (Microsoft-signed download);
+    sampling the app's own handle table, which catches only held handles; an API-level
+    `CreateFileW` audit inside the app's own build.
+  - The G1 static check (S4) is unaffected.
+
+
+### 2.6 Runs, artifacts and what remains unobserved
+
+| Run (PR #448) | Head | macOS job | Windows job | What it added |
+|---|---|---|---|---|
+| 39009595804 | `3f33cb1` | 117329051331 (hung in hold; timed out) | 117329051602 (script bug) | — |
+| 39009795306 | `eb4d41b` | (hung) | **117329689029** ✓ | Windows F1/F2/F3, WPR G1 |
+| 39010146686 | `176ae97` | **117330791166** ✓ | **117330791043** ✓ | macOS F1/F2/F3, bounded steps; Kernel-File G1 |
+| 39010459963 | `321ec67` | **117331716284** ✓ | **117331716537** ✓ | macOS removal by helper kill; flush fallback |
+| 39010704355 | `71abb8f` | **117332453156** ✓ | ✓ | macOS raw tracer lines |
+| 39010917815 | `44252c1` | **117333072265** ✓ | **117333072146** ✓ | macOS `fs_usage` path match (G1 control caught) |
+
+Committed logs:
+- `windows-server-run39009795306-job117329689029.log`
+- `windows-server-run39010459963-job117331716537.log`
+- `macos-run39010704355-job117332453156.log`
+- `macos-run39010917815-g1-excerpt.txt`
+
+Run 1's macOS hang is an observation, not a pass: an unbounded hold step on macOS blocked.
+Every later step has a hard time limit.
+
+**Unobserved, and not claimed:**
+- Windows 11 (all rows);
+- macOS with SIP enabled (all rows);
+- a real SD reader or card on either OS;
+- card swap inside a reader;
+- the UAC and macOS authorization prompts and their decline paths;
+- `EnumPageFilesW` unelevated;
+- a real `tapectl cards` or `make`, which do not exist yet;
+- G1 runtime on Windows.
+
+## Part 3. Implementation and test integration plan (vertical slices)
+
+Each slice follows Structural Rule 1. **Verification publishes the slice's tests first**, from the
+issued annex, under the host-tool parallel-authoring rule. Then Software returns one branch: an
+import commit byte-identical to that publication, followed by the implementation commit. No slice:
+- reimplements ingest or TAPEFS behaviour in the app;
+- adds a test switch to a shipped binary;
+- fakes a child outcome;
+- changes the engine, port semantics or format.
+
+The app is a consumer under Guardrail 12. Every child result it shows comes from a real child on
+real images.
+
+| # | Slice | Software builds | Verification-first tests it waits on | Exit of the slice |
+|---|---|---|---|---|
+| S0 | **Annex issue** | nothing | PM issues §1 (with Q1–Q5 answered); Verification freezes ID lists | annex hash in `spec/`/APP-1 |
+| S1 | **Report writer, ingest** | `--report/--report-nonce` in ingest only. A shared record writer with exclusive no-follow create, the start/progress/refusal/end grammar, and the ID for each Appendix A site | exclusivity, symlink and dangling-symlink refusal, nonce grammar, create-failure exit 1 with no other work, later-write-failure exit unchanged, preflight refusal creates only the report, exact fit vs one frame over, equal ID with different excess, every Appendix A ID reachable or listed unreachable, no-flag bytes identical to the INGEST-1 Stage1 goldens | Verification disposition of S1 tests on the exact head |
+| S2 | **`tapectl cards`** | enumeration and the shipping §5 probe/policy per disk, unelevated, RO opens only, and a report. The `provisioned` source follows the §2 capability decision (Part 2 F1) | shipped-binary absence of seams; zero write opens (strace/dtrace/ETW, the WP-14 A6 method); exact vs candidate recognition including bare CRC `55 AA`; refused disks never printed; `unprobed` count; N=0 exit 0 | same |
+| S3 | **`tapectl make`** | one open across provision → load → verify. Verify binds NULL write on the same handle. CARD_CHANGED detection per Part 2 F3; IDs and progress per §1.3/§1.4 | byte/outcome equivalence with the separate commands on images and loop devices; one-open trace; NULL-write verify binding; CARD_CHANGED on remove/reinsert and on equal-size swap where the platform reports it; a no-change positive; the stated platform limits recorded, never claimed | same |
+| S4 | **App shell + G1 static** | the Tauri project skeleton: one window, the four states with no behaviour, child-runner plumbing (spawn, args, report dir, nonce), no device APIs. The CI G1 static check over app sources and a deliberately planted device-open as its negative control | G1 static rule list; negative control goes red | static check green, control red |
+| S5 | **Common path** | drops → ingest → length bar; `cards` polling; recheck; confirm; one elevated `make`; Done. The §6 rows as a data table keyed by (tool, exit, id) | G3 drivers: each child-origin row from real child outcomes on images/loop devices; each † row by a real OS/UI event; the pulled case by a device-removal fixture with A4 zero-foreign-write | G3 + G4 checks |
+| S6 | **G1 runtime + G5** | CI jobs that trace the app process (macOS: `fs_usage` path match; Windows: the tracer chosen under Q7, §2.5) and build the per-platform artifacts | runtime trace shows no device opens by the app process, with a negative control that opens one | G1/G5 evidence on exact head; then G2 (Michael, D6) |
+
+S1–S3 are independent of each other once S0 lands. S4 can start at S0 because it touches no tool.
+S5 needs S1–S4. A slice that finds an annex gap returns it to PM; it is not settled in code.
+
+**Build choice.** **Tauri 2 is confirmed.**
+- Its Rust backend shares a toolchain with ingest, but not its code: ingest stays a child.
+- The webview is the OS one (WebView2 on Windows 11, WKWebView on macOS), with no bundled browser.
+- Its `shell`/`process` plugin spawns children with argv arrays, so no shell string is involved.
+- The G1 static check is tractable: the app's Rust and JS sources are small, and device APIs
+  (`CreateFile` on `\\.\`, `/dev/`, `DeviceIoControl`, IOKit, DiskArbitration) are enumerable.
+- Elevation (§2.4 F4) is the one native piece. On Windows it is `ShellExecuteExW` with the
+  `runas` verb on the bundled `tapectl.exe`. On macOS it is `AuthorizationCreate` plus a
+  root-capable launch of the bundled `tapectl`.
+  Both are called from a small Rust module, not from JS.
+
+The alternative recorded is Electron, rejected for its size and its bundled Chromium.
+
 
 ## Appendix A. INGEST-1 site → ID map (generated, `6126d04`)
 
