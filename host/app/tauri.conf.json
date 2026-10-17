@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Digital Tape",
+  "version": "0.1.0",
+  "identifier": "org.digitaltape.app",
+  "build": {
+    "frontendDist": "ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Digital Tape",
+        "width": 560,
+        "height": 520,
+        "resizable": false,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico", "icons/icon.png"]
+  }
+}
