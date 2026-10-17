@@ -65,6 +65,7 @@ function AsUser($name, [string[]] $argv, $exe = $Py) {
   Get-Content "$dir\$name.out", "$dir\$name.err" -ErrorAction SilentlyContinue
 }
 AsUser 'f1-user-env' @('-I', "$dir\probe.py", 'env')
+AsUser 'f1-whoami' @('/user', '/groups') 'whoami.exe'
 AsUser 'f1-unelevated' @('-I', "$dir\probe.py", 'read-facts', $A)
 AsUser 'f1-tapectl-probe-unelevated' @('probe', $A) $tt
 Log 'F1 elevated control'
@@ -114,6 +115,18 @@ $neg = (Get-Content "$Out\g1-negative.jsonl" | ConvertFrom-Json).pid
 $pos = (Get-Content "$Out\g1-positive.jsonl" | ConvertFrom-Json).pid
 & $Py -I "$Here\g1_etw.py" "$Out\g1.xml" $neg $pos | Tee-Object "$Out\g1-summary.json"
 Remove-Item "$Out\g1.etl", "$Out\g1.xml" -ErrorAction SilentlyContinue
+
+Log 'G1 runtime observation, second tracer: Microsoft-Windows-Kernel-File (FILENAME|CREATE|CREATE_NEW_FILE)'
+logman create trace dtkf -p Microsoft-Windows-Kernel-File 0x1090 0x5 -o "$Out\g1kf.etl" -ets | Out-Null; "logman-start $LASTEXITCODE" | Tee-Object -Append "$Out\g1-exits.txt"
+Probe touch $A | Tee-Object "$Out\g1kf-negative.jsonl"
+Probe touch $VA | Tee-Object "$Out\g1kf-positive.jsonl"
+Start-Sleep 2
+logman stop dtkf -ets | Out-Null; "logman-stop $LASTEXITCODE" | Tee-Object -Append "$Out\g1-exits.txt"
+tracerpt "$Out\g1kf.etl" -o "$Out\g1kf.xml" -of XML -y | Out-Null; "tracerpt-kf $LASTEXITCODE" | Tee-Object -Append "$Out\g1-exits.txt"
+$neg = (Get-Content "$Out\g1kf-negative.jsonl" | ConvertFrom-Json).pid
+$pos = (Get-Content "$Out\g1kf-positive.jsonl" | ConvertFrom-Json).pid
+& $Py -I "$Here\g1_etw.py" "$Out\g1kf.xml" $neg $pos | Tee-Object "$Out\g1kf-summary.json"
+Remove-Item "$Out\g1kf.etl", "$Out\g1kf.xml" -ErrorAction SilentlyContinue
 
 Log 'done'
 Detach $VA; Detach $VB
