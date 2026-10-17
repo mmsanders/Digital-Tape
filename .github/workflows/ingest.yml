@@ -90,6 +90,9 @@ jobs:
   # produces its packet, marked observer "none" -- never a PASS.
   stage1-packet:
     name: Stage1 observation packet (${{ matrix.os }})
+    # The APP-1A S1 report candidate (#452) reruns only its impacted scopes in
+    # app1a-s1.yml; the full Stage1 campaign belongs to the AP4 base candidate.
+    if: ${{ !startsWith(github.head_ref, 'software/p2-452-') }}
     strategy:
       fail-fast: false
       matrix:

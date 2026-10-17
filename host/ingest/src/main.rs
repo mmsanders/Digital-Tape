@@ -3,7 +3,7 @@
 //! ingest --out DEST --length SECONDS FOLDER [FOLDER ...]
 //! ingest --version
 
-use ingest::{common, convert, dsp, libs, manifest, observe, order, publish, sniff};
+use ingest::{common, convert, dsp, libs, manifest, observe, order, publish, report, sniff};
 
 use common::*;
 use ingest::{DITHER_PROFILE, GAP_FRAMES, METER_PROFILE, PROFILE_ID, RESAMPLER_PROFILE, TOOL_VERSION};
@@ -113,20 +113,17 @@ struct Source {
 fn read(p: &std::path::Path, logical: &str) -> Res<Vec<u8>> {
     use std::io::Read;
     let open = observe::io_fault("read-open").and_then(|_| fs::File::open(p));
-    let mut f = open.map_err(|e| Fail::Io(format!("{logical}: cannot open: {e}")))?;
+    let mut f = open.map_err(|e| Fail::io(IO_SOURCE, format!("{logical}: cannot open: {e}")).about(Subject::Source(logical.into())))?;
     let len = f.metadata().map(|m| m.len() as usize).unwrap_or(0);
     let mut b = alloc(len)?;
     observe::io_fault("decode-read")
         .and_then(|_| f.read_to_end(&mut b))
-        .map_err(|e| Fail::Io(format!("{logical}: cannot read: {e}")))?;
+        .map_err(|e| Fail::io(IO_SOURCE, format!("{logical}: cannot read: {e}")).about(Subject::Source(logical.into())))?;
     Ok(b)
 }
 
 fn named(logical: &str, r: Res<Decoded>) -> Res<Decoded> {
-    r.map_err(|f| match f {
-        Fail::Refuse(m) => Fail::Refuse(format!("{logical}: {m}")),
-        Fail::Io(m) => Fail::Io(format!("{logical}: {m}")),
-    })
+    r.map_err(|f| f.prefixed(logical).about(Subject::Source(logical.into())))
 }
 
 /// Segments of the joined output, for boundary true-peak checks.
@@ -140,23 +137,26 @@ fn run(a: Args) -> Res<String> {
     let capacity = a
         .seconds
         .checked_mul(dsp::OUT_RATE as u64)
-        .ok_or_else(|| Fail::Refuse("--length is too large".into()))?;
+        .ok_or_else(|| Fail::refuse(INGEST_LENGTH_INVALID, "--length is too large"))?;
 
     // Folders: distinct, listed, validated and ordered before anything is decoded.
     let mut ids: Vec<(String, usize)> = Vec::new();
     let mut sources: Vec<Source> = Vec::new();
     let mut counts = Vec::new();
     for (i, f) in a.folders.iter().enumerate() {
-        let id = order::identity(f)?;
+        let id = order::identity(f).map_err(|e| e.about(Subject::Folder(i)))?;
         if let Some((_, j)) = ids.iter().find(|x| x.0 == id) {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(FOLDER_DUPLICATE, format!(
                 "{}: folder {i} is the same folder as folder {j}; folders must be distinct",
                 f.display()
-            )));
+            ))
+            .about(Subject::Folder(i))
+            .with(Payload { same_as: Some(*j), ..Payload::default() }));
         }
         ids.push((id, i));
         let list = order::list_folder(f, i)?;
         counts.push(list.len() as u64);
+        report::progress("list", i as u64 + 1, a.folders.len() as u64);
         for e in list {
             sources.push(Source {
                 logical: e.logical,
@@ -181,7 +181,9 @@ fn run(a: Args) -> Res<String> {
     }
 
     // Pass 1: decode, validate and count every source exactly.
-    for s in sources.iter_mut() {
+    let n_sources = sources.len() as u64;
+    for (pos, s) in sources.iter_mut().enumerate() {
+        report::progress("decode", pos as u64, n_sources);
         let bytes = read(&s.path, &s.logical)?;
         s.sha = sha256_hex(&[&bytes]);
         let d = named(&s.logical, sniff::decode(&bytes))?;
@@ -194,59 +196,63 @@ fn run(a: Args) -> Res<String> {
         s.trim = d.trim.clone();
         s.effective = d.effective_frames();
         s.out_frames = dsp::output_frames(s.effective, d.rate)
-            .ok_or_else(|| Fail::Refuse(format!("{}: frame count overflows", s.logical)))?;
+            .ok_or_else(|| Fail::refuse(SOURCE_CORRUPT, format!("{}: frame count overflows", s.logical)).about(Subject::Source(s.logical.clone())))?;
         if s.out_frames == 0 {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(SOURCE_TOO_SHORT, format!(
                 "{}: too short to produce one 44.1 kHz frame ({} frames at {} Hz); the whole request is refused",
                 s.logical, s.effective, s.rate
-            )));
+            ))
+            .about(Subject::Source(s.logical.clone())));
         }
     }
+
+    report::progress("decode", n_sources, n_sources);
 
     // Exact capacity, gaps included.
     let mut total: u64 = 0;
     let mut prev_folder = None;
     for s in sources.iter_mut() {
         if prev_folder.is_some() && prev_folder != Some(s.folder) {
-            total = total.checked_add(GAP_FRAMES).ok_or_else(|| Fail::Refuse("total length overflows".into()))?;
+            total = total.checked_add(GAP_FRAMES).ok_or_else(|| Fail::refuse(INGEST_LENGTH_INVALID, "total length overflows"))?;
         }
         prev_folder = Some(s.folder);
         s.start = total;
-        total = total.checked_add(s.out_frames).ok_or_else(|| Fail::Refuse("total length overflows".into()))?;
+        total = total.checked_add(s.out_frames).ok_or_else(|| Fail::refuse(INGEST_LENGTH_INVALID, "total length overflows"))?;
     }
     if total > capacity {
         let e = total - capacity;
-        return Err(Fail::Refuse(format!(
+        return Err(Fail::refuse(INGEST_TOO_LONG, format!(
             "the sources and folder gaps total {} ({} frames), over the {} label by {} frames (rounded up {}); nothing was written",
             mmss(total.div_ceil(44100)),
             total,
             mmss(a.seconds),
             e,
             mmss(e.div_ceil(44100))
-        )));
+        ))
+        .with(Payload { frames: Some((total, capacity, e)), ..Payload::default() }));
     }
     let data_len = total.checked_mul(4).filter(|&d| d + 36 <= u32::MAX as u64);
     let Some(data_len) = data_len else {
-        return Err(Fail::Refuse("the output would exceed the canonical RIFF size limit (4 GiB)".into()));
+        return Err(Fail::refuse(INGEST_RIFF_LIMIT, "the output would exceed the canonical RIFF size limit (4 GiB)"));
     };
 
     // Pass 2: re-decode bound to the same bytes, convert each source alone.
     let tp = dsp::TruePeak::new();
     for (pos, s) in sources.iter_mut().enumerate() {
+        report::progress("convert", pos as u64, n_sources);
         let bytes = read(&s.path, &s.logical)?;
         if sha256_hex(&[&bytes]) != s.sha {
             observe::mark("source_mutation_detected");
-            return Err(Fail::Refuse(format!("{}: the file changed while ingest was running", s.logical)));
+            return Err(Fail::refuse(SOURCE_CHANGED, format!("{}: the file changed while ingest was running", s.logical))
+                .about(Subject::Source(s.logical.clone())));
         }
         let d = named(&s.logical, sniff::decode(&bytes))?;
         drop(bytes);
-        let c = convert::convert(&d, s.out_frames, &tp, pos).map_err(|f| match f {
-            Fail::Refuse(m) => Fail::Refuse(format!("{}: {m}", s.logical)),
-            Fail::Io(m) => Fail::Io(format!("{}: {m}", s.logical)),
-        })?;
+        let c = convert::convert(&d, s.out_frames, &tp, pos)
+            .map_err(|f| f.prefixed(&s.logical).about(Subject::Source(s.logical.clone())))?;
         s.silent = c.status == "digital_silence";
         if !s.silent && c.pcm.len() as u64 != s.out_frames * 2 {
-            return Err(Fail::Io(format!("{}: internal: output length disagrees", s.logical)));
+            return Err(Fail::io(INTERNAL, format!("{}: internal: output length disagrees", s.logical)));
         }
         let mut b = alloc(c.pcm.len() * 2)?;
         for v in &c.pcm {
@@ -255,6 +261,8 @@ fn run(a: Args) -> Res<String> {
         s.pcm = b;
         s.conv = Some(convert::Converted { pcm: Vec::new(), ..c });
     }
+
+    report::progress("convert", n_sources, n_sources);
 
     // Joined true peak: every boundary in the assembled stream (§3).
     let mut segs: Vec<(u64, u64, Seg)> = Vec::new();
@@ -284,6 +292,20 @@ fn run(a: Args) -> Res<String> {
     let name = |k: usize| match segs[k].2 {
         Seg::Gap => "the folder gap".to_string(),
         Seg::Src(s) => s.logical.clone(),
+    };
+    // APP-1A §2: a boundary is named by its two neighbouring sources; a join with the
+    // folder gap is named by the sources either side of that gap.
+    let boundary = |k: usize| {
+        let src = |j: usize| match segs[j].2 {
+            Seg::Src(s) => Some(s.logical.clone()),
+            Seg::Gap => None,
+        };
+        let before = (0..k).rev().find_map(src);
+        let after = (k..segs.len()).find_map(src);
+        match (before, after) {
+            (Some(a), Some(b)) => Subject::Boundary(a, b),
+            _ => Subject::None,
+        }
     };
     // The whole joined output, measured as one signal (streamed in blocks): this is
     // the reported joined true peak and the refusal decision (§3).
@@ -324,25 +346,28 @@ fn run(a: Args) -> Res<String> {
         }
         let db = dsp::dbfs(worst as f64);
         if db + convert::GUARD_DB > convert::CEILING_DBTP {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(JOIN_PEAK, format!(
                 "the join between {} and {} reaches {} dBTP, over the {} dBTP ceiling with its {} dB guard; refusing without changing gains",
                 name(k - 1),
                 name(k),
                 manifest::dec6(db),
                 convert::CEILING_DBTP,
                 convert::GUARD_DB
-            )));
+            ))
+            .about(boundary(k))
+            .with(Payload { dbtp: Some(manifest::dec6(db)), ..Payload::default() }));
         }
     }
 
     if let Some(db) = joined_dbtp {
         if db + convert::GUARD_DB > convert::CEILING_DBTP {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(JOINED_PEAK, format!(
                 "the joined output reaches {} dBTP, over the {} dBTP ceiling with its {} dB guard; refusing without changing gains",
                 manifest::dec6(db),
                 convert::CEILING_DBTP,
                 convert::GUARD_DB
-            )));
+            ))
+            .with(Payload { dbtp: Some(manifest::dec6(db)), ..Payload::default() }));
         }
     }
 
@@ -461,11 +486,13 @@ fn run(a: Args) -> Res<String> {
         let bytes = read(&s.path, &s.logical)?;
         if sha256_hex(&[&bytes]) != s.sha {
             observe::mark("source_mutation_detected");
-            return Err(Fail::Refuse(format!("{}: the file changed while ingest was running", s.logical)));
+            return Err(Fail::refuse(SOURCE_CHANGED, format!("{}: the file changed while ingest was running", s.logical))
+                .about(Subject::Source(s.logical.clone())));
         }
     }
     observe::mark("sources_revalidated");
     publish::publish(&a.out, &parts, manifest.as_bytes())?;
+    report::progress("publish", 1, 1);
     Ok(format!(
         "ingest: wrote {} ({} sources in {} folders, {} of {}); peak-limited {}, unmeasurable {}, gapless-unknown {}",
         a.out.display(),
@@ -489,6 +516,20 @@ fn main() {
     }
     observe::init_heap_limit();
     let argv: Vec<OsString> = std::env::args_os().skip(1).collect();
+    // APP-1A §1: report flags are split off first; without them argv is untouched.
+    let (argv, flags) = match report::take_flags(argv) {
+        Ok(x) => x,
+        Err(m) => {
+            eprintln!("ingest: {m}\n{USAGE}");
+            std::process::exit(2);
+        }
+    };
+    if let Some(f) = &flags {
+        if let Err(m) = report::start(f, &format!("{TOOL_VERSION} INGEST-1 arithmetic-profile {PROFILE_ID}")) {
+            eprintln!("ingest: report: {m}");
+            std::process::exit(1);
+        }
+    }
     let code = match parse(argv) {
         Ok(Cmd::Help) => {
             print!("{USAGE}");
@@ -500,6 +541,7 @@ fn main() {
         }
         Err(m) => {
             eprintln!("ingest: {m}\n{USAGE}");
+            report::refusal(&Fail::refuse(INGEST_USAGE, m));
             2
         }
         Ok(Cmd::Run(a)) => match run(a) {
@@ -509,15 +551,22 @@ fn main() {
                 observe::cut("after-publish");
                 0
             }
-            Err(Fail::Refuse(m)) => {
-                eprintln!("ingest: refused: {m}");
-                2
-            }
-            Err(Fail::Io(m)) => {
-                eprintln!("ingest: error: {m}");
-                1
+            Err(f) => {
+                let code = match f.class {
+                    Class::Refuse => {
+                        eprintln!("ingest: refused: {f}");
+                        2
+                    }
+                    Class::Io => {
+                        eprintln!("ingest: error: {f}");
+                        1
+                    }
+                };
+                report::refusal(&f);
+                code
             }
         },
     };
+    report::end(code);
     std::process::exit(code);
 }
