@@ -3755,3 +3755,256 @@ evidence for package disposition, never substituted by Windows Server.
 acceptance, WP15 and all frozen/write/batching/async/recording/firmware/hardware/media/atomicity/<30s/
 purchase holds survive. Admitting non-16 `sowt` later is an additive host-contract amendment with its
 own independent expectations; no on-card change.
+
+## ADR-181 — route the stalled Mac A6 method and Windows 11 qualification
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("check current state and assign
+new work, resolve, unblock"). Input Product main `c6ff868086e3333bb7568e60d3a2f4ec60fd3344`;
+Verification main `9587317ac4bca4e8164347f0ec62eeb719245cf7`; Software #436 head `27919af`.
+
+**State.** ADR-180 merged. Verification #169 published complete Stage1 (`40dd4b5`), then held
+Product #436 `3c7a187` (#182, `9587317`). The held list is: native macOS/Windows observers,
+dropped/truncated false-pass controls, bounded exhaustion evidence, Windows 11 qualification,
+the corrected pin-checker import and a common config identity. Software #435 is already
+executing that list directly (`68c9d27`, `27919af`). No PM ruling is pending there, and none
+is added. The 1641 cross-platform output pairs and FIR/calibration checks stand as bounded evidence.
+
+**Mac A6 (unowned since Verification #177).** The DTrace rehearsal under SIP produced only
+BEGIN/END, with no process or I/O records. A second unchanged DTrace attempt is not useful.
+Software's ingest work now has a qualified-by-selftest macOS `fs_usage` (kdebug, root)
+observer. It runs with SIP enabled and has dropped/truncated mutation controls. **Decision:**
+Software owns one bounded replacement Mac A6 method. It uses `fs_usage` and reuses the ingest
+normalizer and its false-pass controls. It must bind the exact shipped binary, the process, and
+the offset and returned bytes of the mirror-superblock read. It changes no security policy
+(SIP stays on), rebuilds nothing and injects nothing. Hosted macOS rehearsal comes first. Then
+Verification #146 reviews the method. Then Michael runs one off-card Mac rehearsal. If `fs_usage`
+cannot bind offset or returned bytes for tapectl's actual call shape, Software returns that
+capability fact with raw evidence instead of trying a third tracer. PM then chooses between a
+content-pattern method and a recorded Mac limitation. Neither is pre-approved here, because
+both touch acceptance. The Windows A6 ETW method (#176 PASS) is unaffected. Michael's Windows
+off-card rehearsal is ready now.
+
+**Windows 11 qualification.** GitHub-hosted Windows runners are Server, which stays
+supplementary and never relabelled. The Windows 11 x64 run is Michael's hands on the family
+desktop. A self-hosted runner on that PC was considered and rejected. This repository is
+public, so fork pull requests could execute code on a family computer. Software prepares one
+ready, hash-pinned Windows 11 ingest packet script once Verification accepts the observer
+method. Michael's Windows sittings are batched wherever the work is ready together.
+
+**Gate/reversal cost.** No contract, oracle, assertion, engine or format change. Rungs
+unchanged: Phase1 36/36, Phase2 4/12. WP14 physical A6, WP16 real-card/full, WP15 and all
+standing holds survive. Reversal is reassignment only.
+
+## ADR-182 — route the Q-P2-1 any-subset crash mode and issue WP-15 contract APP-1
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's request ("any possible work not blocked
+by me?"). Input as ADR-181.
+
+**Idle capacity.** Verification has no ready work: #146 waits on Michael's Windows rehearsal or
+Software #438. Software is queued with #435 and then #438. Two items are free of Michael's hands.
+
+**Q-P2-1 crash mode, routed.** Verification's Q-P2-1(a) answer (preflight 5 October, published at
+`6837102`) shows the two WP-10 crash modes, flush-required and write-through, never produce the
+state where a later block persists while an earlier one is lost. That answer specified a third
+mode, and ADR-168 requires arbitrary-persistence coverage before any write or batching change. It
+was never routed. It also bears on today's product: `tapefs` §8.1 already lets a port persist any
+subset of unflushed writes, and desktop OS caches over real cards do exactly that. **Decision:**
+Verification authors the any-subset persistence mode to its own published specification. It
+self-tests the mode, including the `(a,B)` mask, and runs it against the current pinned engine for
+the WP-10 operations. Small epochs are exhaustive; large ones use recorded seeds with stated
+bounds. A violation is a finding to PM, not an engine fix. No engine, port or batching change
+follows from this routing. PM rules Q-P2-1(b) on its result, before Phase 3 as the plan requires.
+
+**WP-15 contract APP-1 issued for preflight** (`docs/WP15-APP-CONTRACT.md`). The main choices:
+- one window with four states, and folders only;
+- `ingest` runs on each drop, so length and refusals show before the card is touched;
+- one card at a time instead of a picker, which satisfies G4 and removes wrong-card choices;
+- one erase confirmation, then provision, load and verify, with no automatic retry;
+- only the `tapectl` device children run elevated.
+
+Two additive host surfaces are named: `tapectl cards` (read-only, zero writes, refused disks never
+printed) and an opt-in `--report FILE` that writes counts-only progress and closed refusal IDs.
+Absent the new flags, existing outputs are unchanged, so INGEST-1 Stage1 and accepted WP-14
+evidence are untouched. Michael's taste items carry defaults and are not blocking: the fixed
+60-minute length, folders only, the message wording and one card at a time.
+Verification preflights APP-1 (R3) after the crash-mode work. The Software build issue follows
+that preflight, behind #435/#438. No lead is idle-assigned.
+
+**Gate/reversal cost.** Rungs unchanged: Phase1 36/36, Phase2 4/12. WP-15 stays rung 0 until
+built and disposed. All standing holds survive. Reversal is a contract amendment; nothing is built.
+
+## ADR-183 — APP-1 preflight corrections and Q-P2-1 adapter import routing
+
+**Date:** 15 October 2026 PDT. **Owner:** PM, Michael's activation ("what should they be up to?").
+Input Verification main `fe8f3bdf16c83ef8564d073e900bb1b98cf125a4` (#184, CI SUCCESS): APP-1
+preflight blob `c05963fb`; any-subset package subtree `c6cb573d` (`tests/wp10_subset_r1`).
+
+**APP-1 findings upheld; contract revised.**
+- **P2V15-001.** Overage refusals carry integer `total_frames`/`capacity_frames`/`excess_frames`
+  in the report. The bar is drawn full in its "too long" style.
+- **P2V15-002.** `--report` is a narrow, opt-in diagnostic exception to INGEST-1 §6.
+  - The file is exclusive, never follows a symlink, is per-invocation and carries a nonce.
+  - It lives in an app-owned control directory, never in DEST or its stage, and never signals
+    success.
+  - No-flag behaviour and the two-file publication are unchanged.
+- **P2V15-003.** The destructive sequence becomes one `tapectl make` process with one device
+  open: provision, load, then verify through a NULL-write binding on the same open.
+  - An OS-reported removal or change stops it with `CARD_CHANGED`.
+  - Software demonstrates detection on Windows 11 and macOS. An undetectable case is a stated
+    limitation.
+  - The pre-launch gap is covered only by the app's recheck. The contract does not claim to detect
+    a deliberate equal-size swap there.
+  - This also reduces elevation to one prompt.
+- **P2V15-004.** App-origin events are named and tested with real OS/UI controls; child-origin
+  rows use real child outcomes; no fake-outcome switch. The events are `DROP_NOT_FOLDER`,
+  `SPAWN_FAILED`, `ELEVATION_DECLINED` and `CARD_RECHECK_MISMATCH`.
+- **§3 bindings.** Closed ID lists and progress steps become the first interface deliverable of the
+  Software build issue. PM issues them as an APP-1 annex before Verification freezes app tests.
+  `cards` reports exact layout recognition, runs unelevated, and gives an `unprobed` count with exit
+  1 when enumeration is unavailable.
+
+`make` is additive. The separate commands, the engine and the format are unchanged.
+
+**Q-P2-1 execution (P2V183-EXEC-001).** The any-subset model and controls are published, but the
+existing WP-10 workers cannot express subset persistence without a Product-side binding.
+Software imports `tests/wp10_subset_r1` verbatim and binds it to the existing WP-10 adapters
+(load, commit/record, reset-b, promote, respool, dup), per its `ADAPTER.md`. The engine stays at
+A8 `d96b4245`. Verification keeps persistence selection and outcome judgment. Software queue order:
+#435, #439, #438, then this import. The import is not on the WP14 critical path; it gates Q-P2-1(b)
+before Phase 3.
+
+**Gate/reversal cost.** Rungs unchanged. All holds survive. Reversal is a contract amendment or
+reassignment; nothing has been built.
+
+
+## ADR-184 — disposition latest returns, record Mac A6 limitation and route unblocked host work
+
+**Date:** 17 October 2026 UTC (16 October PDT). **Owner:** PM, Michael's explicit movement
+review on #384. Input Product main `c6ff868086e3333bb7568e60d3a2f4ec60fd3344`;
+PM #437 `c396ba4` now merged `b72aabdf`; Verification published through #191
+`fc80e0ece3f84f8c7ad468c695cb22b3d6abd21d`. Normal PM authority, no subworkers.
+
+**Merged independent inputs:** [#188 Mac limitation](https://github.com/mmsanders/digital-tape-verification/commit/f168a2eb4dada982219772f04a0bf54f84ac3452), [#190 observer/identity findings](https://github.com/mmsanders/digital-tape-verification/commit/1a6b1be6e52d3b747cd6deb48b4131ae127f09b0), [#191 subset return](https://github.com/mmsanders/digital-tape-verification/commit/fc80e0ece3f84f8c7ad468c695cb22b3d6abd21d). Existing exact-head publication CI is SUCCESS; PM reviewed substance without routine campaign replay. New Product441/a50a211,443/85b7c3f and436/6126d04 required PR workflows are also SUCCESS, separately from acceptance.
+
+**Evidence disposition.** Published Verification #188 upholds Mac442/d360386's fs_usage
+capability stop: paired offsets differing by4GiB have identical printed offset fields.
+Record this bounded limitation now. No parser may guess upper bits; no redundant Michael
+rehearsal, third tracer, SIP change, injection or shipping rebuild is issued. Physical A6
+remains held. A content-pattern proof/causal-control feasibility proposal may be authored
+independently, but any replacement acceptance method requires a later explicit PM issuance.
+This records the limitation; it does not waive macOS or the physical criterion.
+
+Verification #190 (`1a6b1be6`) closes only the submitted hosted-Mac ingest observer defect
+at Product436/6126d04:1641 native publications,3295 flush/close pairs and8 damaged-trace
+rejections. Its restricted-SIP hosted capability is not generalized to Michael's Mac.
+Actual Windows11, full numerical/relations/native/shipping receipts and exhaustion limits
+remain distinct. Server is supplementary. Existing output-identity evidence is carried.
+
+Verification #191 closes V186-01 and the checksum finding on443/33df48e within its stated
+bounds;3995 retained runs/187486 projections replay without model/hash mismatches.
+V186-02 requires operation-relative coordinate planning while preserving setup callbacks in
+durability replay. Software's NEW443/85b7c3f fill is awaiting independent disposition.
+The issued bounded long-epoch plan stays SAMPLED; no175CPU-hour rerun, full operation-row
+acceptance, engine change or batching permission follows. Earlier repeated-LBA prose is
+corrected by191; actual traces remain the authority.
+
+Product441/a50a211's new checker PASS is a Software return, not independent acceptance.
+Verification146 disposes both R3 identity refinements on the SAME retained Windows capture
+before readiness. Positively proved unrelated image writes do not exempt target, unknown,
+deleted/reused/conflicting identity or raw-PhysicalDrive writes. No new Michael capture.
+
+**APP-1 and useful work.** ADR183 already resolves P2V15-001…004. Its closed §3 interface
+annex remains unfinished. Software444 now delivers the coherent per-command ID/payload/
+precedence/progress proposal plus native capability/elevation/continuity facts and a build
+plan. This is groundwork, not uncovered app implementation or normative issuance. PM then
+issues the annex before frozen independent APP tests and a separately assigned host build.
+No physical dependency blocks that groundwork. Verification192 finishes the ready subset
+correction and available full INGEST host receipts; missing Windows11/physical evidence
+must not idle useful independent evaluation. Windows priority stays in146. Concrete
+in-scope corrections route directly; only overall exact-head PASS plus required checks
+preauthorizes Software-owned integration. No acknowledgement-only merge round.
+
+**Rung reconciliation.** Phase1 remains36/36. WP14 remains3/4: implementation is integrated,
+physical A6 is not accepted. WP16 advances1→2: the complete independently authored Stage1
+package covers I1–I8 with1927 descriptors and no pending ruling cells on Verification main
+(original40dd4b55, portability-corrected tree609a4c81;188/190 do not themselves earn a rung).
+This is coverage publication, not candidate integration or acceptance:436 is still open.
+WP15 remains0/4 because APP-1 is issued for preflight with an unissued §3 annex; the full
+build contract has not reached its complete gate. Phase2 therefore5/12. No implementation
+or acceptance rung is awarded for issue closure, model replay or bounded observer PASS.
+
+**Fresh issue handoff (Michael’s explicit follow-up).** Close accumulated Product384/386 and Verification146 as superseded; Software435 closes at its returned stop. Current bounded PM446 finishes this publication; Software444 carries the interface groundwork, Verification193 the ready Windows disposition, Verification192 subset/INGEST receipts, and Michael447 the concise pending hands-on queue. Old threads preserve evidence with one successor link; future PM activations and corrections get fresh bounded issues, not layers of new scope in comment logs. This changes routing only; no re-execution or reacceptance.
+
+**Cleanup and stop.** PM437's existing green docs/spec issuance is merged. Software owns
+closing superseded433/stopped442 unmerged, refreshing stale candidate descriptions and
+removing only its throwaway probe branch after preserving unique evidence/restore identity.
+No pinned evidence, historical authority or broad branch deletion. PM stops after durable
+status/dashboard publication and role routing; residual physical work remains146/386.
+All frozen-engine, write/async/recording/firmware, hardware park, media/atomicity,
+Michael-reserved and target<30s holds survive. Q-P2-1(b) remains undecided pending independent
+operation evidence; no Phase3 firmware starts before that ruling. Reversal cost: contract
+issuance/reassignment; no product code is changed by this ADR.
+
+
+## ADR-185 — resolve Software444 Q1–Q7 and issue APP-1A host interface
+
+**Date:** 17 October2026 PDT. **Owner:** PM, Michael's activation449. Product input
+`7b722dc716ad296a2e0664050bb731718b75a371`; Software448 proposal
+`59a868e006390837efc03b2809b6fe2986a1e5b9` (five PR workflows SUCCESS).
+Normal PM authority, no product-code review/merge, no subworkers.
+
+**Q1–Q7 decided.** [APP-1A](WP15-APP-ANNEX.md) closes IDs, subjects, payloads,
+terminal precedence, report lifecycle/parser and progress bindings from the proposal.
+Q1 adopts diagnostic-only stderr records for elevated make. Q2 gives post-start
+WAV_TRUNCATED an accurate unfinished-card/recheck-music message, never a pulled
+card or unchanged-card claim. Q3 keeps join-peak refusal generic, details available.
+Q4 deduplicates known identical nonsymlink folder drops by OS identity, retaining
+first order and INGEST authority for unknown/invalid inputs. Q5 gives make exit3 a
+plain safe-refusal message; WP14 zero-write/zero-write-mode-open policy remains.
+
+Q6 **removes the unused provisioned discovery field**, rather than relabelling an
+OS hint as exact recognition. Unelevated cards may offer an OS-view candidate,
+including the bounded possible-own-p1 mounted case. Other mandatory safety facts
+remain required, unknowns unprobed, no writes/unmount/elevated poll. Elevated make
+retains exact WP14 safety/layout checks before writes; a visible candidate may be
+refused. One authorized session spans destructive phases; preliminary read-only
+or zero-access safety queries are permitted. Independent preflight must expose
+any capability/race conflict before discovery/make implementation, not waive it.
+
+Q7 keeps native G1 acceptance held until an ordinary-settings method catches real
+failed/transient/zero-access device-open controls. Failed in-box tracers, handle
+sampling and self-logging do not establish absence. Procmon/other methods may be
+qualified; no presumed PASS, new purchase, security change or Michael request.
+Mac hosted probes are explicitly SIP-disabled, not ordinary Mac proof. Elevation
+prompt/decline and actual Windows11 remain separate native qualification facts.
+
+**Other precision changes.** Report stderr may interleave without selecting a
+message; a short report write warns without changing the child outcome. Preserve
+already emitted stdout on terminal media failure. Progress steps are contiguous
+blocks, optional/sparse, not a mandatory1/64 callback schedule. Bind exclusive report
+creation to the actual private control directory; no ancestor substitution. Existing
+no-flag outcomes/audio/manifest/engine bytes are unchanged. APP-1 is now issued with
+its full annex: WP15 contract rung1; Phase2 **6/12** (WP14=3,WP16=2,WP15=1).
+This is issuance, not authored full app coverage, integration or acceptance.
+
+**Latest independent inputs carried.** [Verification194](https://github.com/mmsanders/digital-tape-verification/commit/b9f08bf655cd9a20f2122b5a962f3bf05315f996)
+explicitly passes exact441/a50a211 Windows method/rehearsal and preauthorizes
+Software integration with required checks; physical A6 is still held. [Verification195](https://github.com/mmsanders/digital-tape-verification/commit/65dbd21f4dfd78ef3a1165074115535701efc7b5)
+closes V186-02 at443/85b7c3f and585 specific pre-commit contexts, not all operation
+rows. All available436/6126d04 numerical/source/relations/profile/positive-native
+receipts pass; actual Windows11, exact-shipping exhaustion1926 and zero-access-open
+visibility remain held. Both merged publications' existing CI SUCCESS; PM did not
+repeat their campaigns. Mac content-only feasibility cannot prove a native high
+address, so no replacement A6 method or Mac run is issued.
+
+**Routing/stop.** Fresh Software/Verification issues carry full current directions:
+Software integrates independently cleared441, supplies the bounded shipping/native
+supplement and builds issued report/app-shell scope while Verification preflights
+APP-1A and independently authors/evaluates useful host/operation coverage. S2/S3
+wait for preflight; no physical dependency need idle S1/S4 or independent row work.
+Software alone reviews/integrates its probe/proposal448; PM issues this annex in a
+separate docs-only change. Completed tests/receipts carry by identity, no new round
+to reaccept identical bytes. Stop at durable issuance/dashboard/handoffs. Frozen
+engine/format/write/batching/async/firmware, Q-P2-1(b), target<30s, hardware park,
+media/atomicity, full-platform/physical/full-package and reserved holds survive.
+Reversal cost: interface amendment before frozen app tests; no product code changes.
