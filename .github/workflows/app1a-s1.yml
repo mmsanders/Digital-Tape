@@ -55,6 +55,13 @@ jobs:
         run: |
           (cd base/host/ingest && cargo build --release --locked)
           (cd host/ingest && cargo build --release --locked && cargo build --release --locked --features observe --target-dir target/observe)
+      - name: binary identities
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          for b in base/host/ingest/target/release/ingest$ext host/ingest/target/release/ingest$ext host/ingest/target/observe/release/ingest$ext; do
+            s=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$b")
+            echo "$s  $b"; echo "::notice title=${{ runner.os }} $b::$s"
+          done
       - name: tests
         working-directory: host/ingest
         run: cargo test --release --locked
