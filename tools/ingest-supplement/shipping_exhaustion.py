@@ -159,6 +159,8 @@ def main():
         }
         sweep.append(row)
         f = row["verdict_facts"]
+        if "setrlimit_probe" in c:
+            print(f"{p_id} {mib:4d} MiB: setrlimit probe {json.dumps(c['setrlimit_probe'], sort_keys=True)}", flush=True)
         print(f"{p_id} {mib:4d} MiB: version {v['exit']} | case exit {c['exit']} oom-diag {f['case_own_oom_diagnostic']} "
               f"clean {f['clean']} | {c['stderr'][:120]!r}", flush=True)
     res["sweep"] = sweep

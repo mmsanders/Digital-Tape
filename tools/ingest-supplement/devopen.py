@@ -46,6 +46,9 @@ def needles(disk):
     return words, [w.encode("utf-16-le").hex().upper() for w in words]
 
 
+NOT_AN_OPEN = {"CommandLine", "ImageFileName", "ImageName", "FileName_Image", "PackageFullName", "ApplicationId"}
+
+
 def controls(path):
     return [json.loads(l) for l in open(path, encoding="utf-8-sig") if l.strip().startswith("{")]
 
@@ -85,7 +88,8 @@ def scan_etw(xmlp, ctl, disk):
             key = f"{task}/{op}"
             s["events"][key] = s["events"].get(key, 0) + 1
             for d in el.iter():
-                if not d.tag.endswith("Data") or not d.text:
+                # A control's own command line names its device: process records are not opens.
+                if not d.tag.endswith("Data") or not d.text or d.get("Name") in NOT_AN_OPEN:
                     continue
                 txt, up = d.text, d.text.upper()
                 if any(w.lower() in txt.lower() for w in words) or any(h in up for h in hexes):
