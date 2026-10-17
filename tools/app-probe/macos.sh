@@ -96,7 +96,9 @@ for k in neg-unelev neg-root; do
   python3 -I "$HERE/g1_mac.py" fs_usage "$OUT/g1-fs_usage.txt" "$(pid_of "$OUT/g1-fsu-$k.jsonl")" "$(pid_of "$OUT/g1-fsu-pos.jsonl")" | sed "s/^/$k: /" | tee -a "$OUT/g1-summary.txt"
 done
 wc -l <"$OUT/g1-fs_usage.txt"
-D=$(basename "$A"); grep -nE "/dev/r?$D\b|python" "$OUT/g1-fs_usage.txt" | grep -E "$D|open" | head -40 | tee "$OUT/g1-fsu-raw-lines.txt"
+# fs_usage's trailing number is a thread ID, not a PID: match the device path itself.
+D=$(basename "$A"); echo "fs_usage lines naming /dev/(r)$D: $(grep -cE "/dev/r?$D([^0-9s]|$)" "$OUT/g1-fs_usage.txt")"
+grep -nE "/dev/r?$D([^0-9s]|$)" "$OUT/g1-fs_usage.txt" | head -20 | tee "$OUT/g1-fsu-raw-lines.txt"
 rm -f "$OUT/g1-fs_usage.txt"
 lim 30 sudo eslogger open >"$RUNNER_TEMP/g1-eslogger.json" 2>"$OUT/g1-eslogger.err" &
 ESP=$!; sleep 4; g1_round esl; sleep 2

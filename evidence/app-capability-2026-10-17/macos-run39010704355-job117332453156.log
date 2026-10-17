@@ -1,0 +1,187 @@
+== environment ==
+ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83
+Darwin sjc22-be108-d79fa214-24ed-4bb5-8a52-5a53caf1f341-6639F3753354.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:16:43 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_VMAPPLE arm64
+uid=501(runner) gid=20(staff) groups=20(staff),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),264(_webdeveloper),701(com.apple.sharepoint.group.1),33(_appstore),98(_lpadmin),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae)
+System Integrity Protection status: disabled.
+assessments enabled
+{"euid": 501, "machine": "arm64", "ok": true, "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O", "probe": "env", "python": "3.15.0", "uid": 501}
+sudo -n: passwordless (runner-specific)
+gui session: present
+== fixtures ==
+tapectl: 6 flushes via DKIOCSYNCHRONIZECACHE
+tapectl: 6 flushes via DKIOCSYNCHRONIZECACHE
+A attached as /dev/disk7
+== F1 unelevated read facts on /dev/disk7 ==
+{"gid": 5, "mode": "0o640", "ok": true, "path": "/dev/disk7", "probe": "node-mode", "uid": 0}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/disk7", "probe": "open-rdonly"}
+{"gid": 5, "mode": "0o640", "ok": true, "path": "/dev/rdisk7", "probe": "node-mode", "uid": 0}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/rdisk7", "probe": "open-rdonly"}
+{"gid": 5, "mode": "0o640", "ok": true, "path": "/dev/disk0", "probe": "node-mode", "uid": 0}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/disk0", "probe": "open-rdonly"}
+{"gid": 5, "mode": "0o640", "ok": true, "path": "/dev/rdisk0", "probe": "node-mode", "uid": 0}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/rdisk0", "probe": "open-rdonly"}
+{"err": null, "keys": {"BusProtocol": "Disk Image", "Content": "FDisk_partition_scheme", "DeviceIdentifier": "disk7", "DeviceTreePath": "IODeviceTree:/", "Ejectable": true, "IORegistryEntryName": "Apple read/write Media", "Internal": false, "MediaName": "Disk Image", "MountPoint": "", "OSInternalMedia": false, "ParentWholeDisk": "disk7", "PartitionMapPartition": false, "Removable": true, "RemovableMedia": true, "RemovableMediaOrExternalDevice": true, "SMARTStatus": "Not Supported", "Size": 8589934592, "SystemImage": false, "TotalSize": 8589934592, "VirtualOrPhysical": "Virtual", "WholeDisk": true, "Writable": true, "WritableMedia": true}, "ok": true, "probe": "diskutil-info", "rc": 0, "target": "disk7"}
+{"err": null, "keys": {"BusProtocol": "Disk Image", "Content": "Windows_FAT_16", "DeviceIdentifier": "disk7s1", "DeviceTreePath": "IODeviceTree:/", "Ejectable": true, "IORegistryEntryName": "Untitled 1", "Internal": false, "MediaName": "", "MountPoint": "/Volumes/DIGITALTAPE", "OSInternalMedia": false, "ParentWholeDisk": "disk7", "PartitionMapPartition": true, "Removable": true, "RemovableMedia": true, "RemovableMediaOrExternalDevice": true, "SMARTStatus": "Not Supported", "Size": 16777216, "SystemImage": false, "TotalSize": 16728064, "VolumeUUID": "00000000-0000-0000-0000-000000000000", "WholeDisk": false, "Writable": true, "WritableMedia": true}, "ok": true, "probe": "diskutil-info", "rc": 0, "target": "disk7s1"}
+{"err": null, "keys": {"BusProtocol": "Disk Image", "Content": "0xDA", "DeviceIdentifier": "disk7s2", "DeviceTreePath": "IODeviceTree:/", "Ejectable": true, "IORegistryEntryName": "Untitled 2", "Internal": false, "MediaName": "", "MountPoint": "", "OSInternalMedia": false, "ParentWholeDisk": "disk7", "PartitionMapPartition": true, "Removable": true, "RemovableMedia": true, "RemovableMediaOrExternalDevice": true, "SMARTStatus": "Not Supported", "Size": 8572108800, "SystemImage": false, "TotalSize": 8572108800, "WholeDisk": false, "Writable": true, "WritableMedia": true}, "ok": true, "probe": "diskutil-info", "rc": 0, "target": "disk7s2"}
+{"err": null, "keys": {"BusProtocol": "", "Content": "41504653-0000-11AA-AA11-00306543ECAC", "DeviceIdentifier": "disk2s1s1", "DeviceTreePath": "IODeviceTree:/arm-io/pcie@30000000/pci106b,1a00@6/AppleVirtIOStorageDevice", "DiskUUID": "A0A55CB3-070F-4970-AE9D-C2CFB5B9121B", "Ejectable": false, "IORegistryEntryName": "com.apple.os.update-60587424F5399FC05D957DF05B4D2F65543462495C77AEF520F790FBB57CB212", "Internal": true, "MediaName": "", "MountPoint": "/", "OSInternalMedia": false, "ParentWholeDisk": "disk2", "PartitionMapPartition": false, "Removable": false, "RemovableMedia": false, "RemovableMediaOrExternalDevice": false, "SMARTStatus": "Not Supported", "Size": 343073095680, "SystemImage": false, "TotalSize": 343073095680, "VolumeUUID": "A0A55CB3-070F-4970-AE9D-C2CFB5B9121B", "WholeDisk": false, "Writable": false, "WritableMedia": false}, "ok": true, "probe": "diskutil-info", "rc": 0, "target": "/"}
+{"err": null, "ok": true, "probe": "diskutil-list", "rc": 0, "this": [{"Content": "FDisk_partition_scheme", "DeviceIdentifier": "disk7", "OSInternal": false, "Partitions": [{"Content": "Windows_FAT_16", "DeviceIdentifier": "disk7s1", "MountPoint": "/Volumes/DIGITALTAPE", "Size": 16777216, "VolumeName": "DIGITALTAPE", "VolumeUUID": "00000000-0000-0000-0000-000000000000"}, {"Content": "0xDA", "DeviceIdentifier": "disk7s2", "Size": 8572108800}], "Size": 8589934592}], "whole": ["disk0", "disk1", "disk2", "disk3", "disk4", "disk5", "disk6", "disk7"]}
+{"err": null, "media": [{"BSD Name": "disk7", "Base": null, "Content": "FDisk_partition_scheme", "Content Hint": "", "Ejectable": true, "Leaf": false, "Partition ID": null, "Removable": true, "Size": 8589934592, "Whole": true, "Writable": true}, {"BSD Name": "disk7s1", "Base": 1048576, "Content": "Windows_FAT_16", "Content Hint": "Windows_FAT_16", "Ejectable": true, "Leaf": true, "Partition ID": 1, "Removable": true, "Size": 16777216, "Whole": false, "Writable": true}, {"BSD Name": "disk7s2", "Base": 17825792, "Content": "0xDA", "Content Hint": "0xDA", "Ejectable": true, "Leaf": true, "Partition ID": 2, "Removable": true, "Size": 8572108800, "Whole": false, "Writable": true}], "ok": true, "probe": "ioreg-iomedia", "rc": 0}
+{"ok": true, "probe": "mount-list", "rc": 0, "root": ["/dev/disk2s1s1 on / (apfs, sealed, local, read-only, journaled)"], "this": ["/dev/disk7s1 on /Volumes/DIGITALTAPE (msdos, local, nodev, nosuid, noowners, noatime, fskit)"]}
+== F1 shipped probe code unelevated (tapectl-test probe) ==
+whole=1
+removable=0
+sd_bus=0
+bytes=8589934592
+holds_os=0
+layout_ok=0
+mounted=1:/Volumes/DIGITALTAPE
+refusal=REFUSE_NOT_REMOVABLE
+== F1 the same probe elevated ==
+whole=1
+removable=0
+sd_bus=0
+bytes=8589934592
+holds_os=0
+layout_ok=1
+mounted=1:/Volumes/DIGITALTAPE
+refusal=REFUSE_NOT_REMOVABLE
+== F1 elevated read facts (control) ==
+{"ok": true, "path": "/dev/disk7", "probe": "read-lba0", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+{"ok": true, "path": "/dev/rdisk7", "probe": "read-lba0", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+{"ok": true, "path": "/dev/disk0", "probe": "read-lba0"}
+{"ok": true, "path": "/dev/rdisk0", "probe": "read-lba0"}
+== F2 elevated one open across the provision/load/verify write pattern ==
+{"msg": "Unmount of all volumes on disk7 was successful", "ok": true, "probe": "unmount-disk", "rc": 0}
+{"ok": true, "path": "/dev/rdisk7", "probe": "open-rdwr"}
+{"ok": true, "probe": "read-lba0"}
+{"flush": null, "offset": 0, "ok": true, "probe": "write-lba0-zero", "write": null}
+{"flush": null, "offset": 17825792, "ok": true, "probe": "write-p2", "write": null}
+{"flush": null, "offset": 1048576, "ok": true, "probe": "write-p1", "write": null}
+{"flush": null, "offset": 0, "ok": true, "probe": "write-mbr-last", "write": null}
+{"lines": [], "ok": true, "probe": "mounted-while-held"}
+{"flush": null, "ok": true, "probe": "write-p2-after-mbr", "write": null}
+{"ok": true, "probe": "read-p1-after"}
+{"ok": true, "probe": "read-p2-after"}
+{"lines": [], "ok": true, "probe": "mounted-after-close"}
+shipped verify exit 3 (virtual media: 3 expected)
+OK
+== F3 no-change ==
+{"ok": true, "path": "/dev/rdisk7", "probe": "hold-open", "t": 0.0}
+{"check_verify2": null, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"ok": true, "probe": "hold-end", "t": 12.22}
+== F3 remove-reinsert ==
+hdiutil: couldn't eject "disk7" - Resource busy
+{"ok": true, "path": "/dev/disk7", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+{"ok": true, "path": "/dev/rdisk7", "probe": "hold-open", "t": 0.0}
+{"check_verify2": null, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"ok": true, "probe": "hold-end", "t": 15.2}
+== F3 equal-size-swap ==
+hdiutil: couldn't eject "disk7" - Resource busy
+{"ok": true, "path": "/dev/disk8", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "bbbbbbbb"}}
+{"ok": true, "path": "/dev/rdisk7", "probe": "hold-open", "t": 0.0}
+{"check_verify2": null, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"ok": true, "probe": "hold-end", "t": 12.08}
+== F3 what DA reports for A and B (identity fields an app could compare) ==
+/Users/runner/work/_temp/app-probe/f3-info-disk3.plist
+/Users/runner/work/_temp/app-probe/f3-info-disk4.plist
+/Users/runner/work/_temp/app-probe/f3-info-disk5.plist
+/Users/runner/work/_temp/app-probe/f3-info-disk6.plist
+/Users/runner/work/_temp/app-probe/f3-info-disk7.plist
+/Users/runner/work/_temp/app-probe/f3-info-disk8.plist
+== G1 runtime observation: fs_usage and eslogger on controls ==
+{"ok": true, "path": "/dev/disk7", "pid": 3913, "probe": "touch"}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/disk7", "pid": 3891, "probe": "touch"}
+{"ok": true, "path": "/Users/runner/work/_temp/A.raw", "pid": 3927, "probe": "touch"}
+neg-unelev: {"negative": [], "negative_detected": false, "positive": [], "positive_clean": true, "tracer": "fs_usage"}
+neg-root: {"negative": [], "negative_detected": false, "positive": [], "positive_clean": true, "tracer": "fs_usage"}
+   47876
+17705:06:40:44.281901  openat            F=4        (R______________)  [3]/../../System/Volumes/Preboot/Cryptexes/OS                                                                                                                0.000012   python3.15.16212
+17707:06:40:44.281914  openat            F=6        (R______________)  [4]/System/Library/dyld                                                                                                                                      0.000007   python3.15.16212
+17718:06:40:44.281961  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/bin/python3.15                                                             0.000016   python3.15.16212
+17731:06:40:44.281997  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000018   python3.15.16212
+17735:06:40:44.282018  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000009   python3.15.16212
+17751:06:40:44.282398  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/bin/python3.15                                                             0.000012   python3.15.16212
+17774:06:40:44.283624  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000017   python3.15.16212
+17795:06:40:44.284117  open              F=3        (RW_____________)  /dev/dtracehelper                                                                                                                                            0.000024   python3.15.16212
+17808:06:40:44.285245  open              F=3        (R______________)  python3.15                                                                                                                                                   0.000022   python3.15.16212
+17814:06:40:44.285277  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/bin                                                                        0.000010   python3.15.16212
+17817:06:40:44.285283  open                   [  2] (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/bin/Info.plist                                                             0.000002   python3.15.16212
+17894:06:40:44.287989  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python                                 0.000020   Python.16216
+17899:06:40:44.288044  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000011   Python.16216
+17903:06:40:44.288056  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000007   Python.16216
+17912:06:40:44.288355  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python                                 0.000017   Python.16216
+17943:06:40:44.289553  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python                                                                     0.000018   Python.16216
+17980:06:40:44.290946  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python                                 0.000019   Python.16216
+17985:06:40:44.290978  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app                                                       0.000009   Python.16216
+17987:06:40:44.291002  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/Info.plist                                   0.000020   Python.16216
+17989:06:40:44.291076  open              F=3        (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python                                 0.000012   Python.16216
+17992:06:40:44.291083  open                   [  2] (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/XPCServices                                  0.000002   Python.16216
+18089:06:40:44.296224  open                   [  2] (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Python._pth                                                                0.000002   Python.16216
+18090:06:40:44.296227  open                   [  2] (R______________)  /opt/homebrew/bin/python3._pth                                                                                                                               0.000001   Python.16216
+18091:06:40:44.296230  open                   [  2] (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python._pth                            0.000002   Python.16216
+18092:06:40:44.296234  open                   [  2] (R______________)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/pybuilddir.txt                         0.000002   Python.16216
+18171:06:40:44.297961  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15                                                             0.000019   Python.16216
+18200:06:40:44.298203  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/encodings/__pycache__/__init__.cpython-315.pyc              0.000017   Python.16216
+18226:06:40:44.298772  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/encodings                                                   0.000018   Python.16216
+18232:06:40:44.298917  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/encodings/__pycache__/aliases.cpython-315.pyc               0.000016   Python.16216
+18242:06:40:44.299171  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/encodings/__pycache__/utf_8.cpython-315.pyc                 0.000019   Python.16216
+18280:06:40:44.301262  open              F=3        (R__________X___)  ../../../../../../lib/python3.15/site-packages                                                                                                               0.000026   Python.16216
+18286:06:40:44.301384  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/__pycache__/sitecustomize.cpython-315.pyc                   0.000021   Python.16216
+18301:06:40:44.301501  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re/__pycache__/__init__.cpython-315.pyc                     0.000018   Python.16216
+18310:06:40:44.301807  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/__pycache__/enum.cpython-315.pyc                            0.000032   Python.16216
+18322:06:40:44.302185  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/__pycache__/types.cpython-315.pyc                           0.000017   Python.16216
+18340:06:40:44.302978  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re                                                          0.000022   Python.16216
+18345:06:40:44.303069  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re/__pycache__/_compiler.cpython-315.pyc                    0.000017   Python.16216
+18367:06:40:44.303301  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re/__pycache__/_parser.cpython-315.pyc                      0.000015   Python.16216
+18372:06:40:44.303508  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re/__pycache__/_constants.cpython-315.pyc                   0.000017   Python.16216
+18379:06:40:44.303826  open              F=3        (R__________X___)  /opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/re/__pycache__/_casefix.cpython-315.pyc                     0.000021   Python.16216
+grep: stdout: Broken pipe
+{"ok": true, "path": "/dev/disk7", "pid": 4144, "probe": "touch"}
+{"err": "Permission denied", "errno": 13, "ok": false, "path": "/dev/disk7", "pid": 4142, "probe": "touch"}
+{"ok": true, "path": "/Users/runner/work/_temp/A.raw", "pid": 4145, "probe": "touch"}
+tools/app-probe/macos.sh: line 12:  4120 Hangup: 1               perl -e 'alarm shift; exec @ARGV or die "exec: $!"' "$t" "$@"
+eslogger exit 129
+ 50143147
+0
+{"thread":{"thread_id":16890},"time":"2026-10-17T06:40:47.682397496Z","seq_num":0,"schema_version":1,"process":{"signing_id":"com.apple.endpointsecurityd","session_id":98,"cdhash":"E95F1F0EC3E5D27524B050D2F9A3495E1769758D","executable":{"path":"\/usr\/libexec\/endpointsecurityd","path_truncated":false,"stat":{"st_dev":16777231,"st_ctimespec":"2026-08-13T02:51:55.000000000Z","st_gid":0,"st_rdev":0,"st_blksize":4096,"st_mtimespec":"2026-08-13T02:51:55.000000000Z","st_birthtimespec":"2026-08-13T02:51:55.000000000Z","st_blocks":168,"st_uid":0,"st_ino":1152921500312575127,"st_flags":524320,"st_atimespec":"2026-08-13T02:51:55.000000000Z","st_mode":33261,"st_gen":0,"st_size":263712,"st_nlink":1}},"tty":null,"is_es_client":false,"start_time":"2026-10-17T06:37:15.309543Z","audit_token":{"egid":0,"pid":98,"asid":100001,"ruid":0,"rgid":0,"auid":4294967295,"euid":0,"pidversion":285},"responsible_audit_token":{"egid":0,"pid":98,"asid":100001,"ruid":0,"rgid":0,"auid":4294967295,"euid":0,"pidversion":285},"original_ppid":1,"is_platform_binary":true,"ppid":1,"team_id":null,"group_id":98,"cs_validation_category":1,"codesigning_flags":637627137,"parent_audit_token":{"egid":0,"pid":1,"asid":100001,"ruid":0,"rgid":0,"auid":4294967295,"euid":0,"pidversion":7}},"version":10,"action_type":1,"action":{"result":{"result_type":1,"result":{"flags":4294967295}}},"event":{"open":{"file":{"path_truncated":false,"stat":{"st_blocks":0,"st_rdev":0,"st_blksize":4096,"st_mtimespec":"2026-08-13T02:51:55.0000000
+neg-unelev: {"negative": [], "negative_detected": false, "positive": [], "positive_clean": true, "tracer": "eslogger"}
+neg-root: {"negative": [], "negative_detected": false, "positive": [], "positive_clean": true, "tracer": "eslogger"}
+== F3b removal under a held descriptor when detach is refused: stop the disk-image I/O process ==
+image-path      : /System/Library/AssetsV2/com_apple_MobileAsset_UAF_Siri_Understanding/purpose_auto/c10eb90af2d4996616c3cd0f6bac0833eb4925fa.asset/AssetData/Restore/UC_SIRI_ASR_ASSISTANT_EN_US_EN_US_MACVM_Cryptex.dmg
+process ID      : <in-kernel>
+/dev/disk3		
+/dev/disk4	EF57347C-0000-11AA-AA11-00306543ECAC	
+/dev/disk4s1	41504653-0000-11AA-AA11-00306543ECAC	/System/Library/AssetsV2/com_apple_MobileAsset_UAF_Siri_Understanding/purpose_auto/c10eb90af2d4996616c3cd0f6bac0833eb4925fa.asset/.AssetData
+image-path      : /System/Library/AssetsV2/com_apple_MobileAsset_PKITrustStore/purpose_auto/6dd55b0d06633a00de6f57ccb910a66a5ba2409a.asset/AssetData/Restore/SECUREPKITRUSTSTOREASSETS_SECUREPKITRUSTSTORE_Cryptex.dmg
+process ID      : <in-kernel>
+/dev/disk5		
+/dev/disk6	EF57347C-0000-11AA-AA11-00306543ECAC	
+/dev/disk6s1	41504653-0000-11AA-AA11-00306543ECAC	/System/Library/AssetsV2/com_apple_MobileAsset_PKITrustStore/purpose_auto/6dd55b0d06633a00de6f57ccb910a66a5ba2409a.asset/.AssetData
+image-path      : /Users/runner/work/_temp/A.raw
+process ID      : 2501
+/dev/disk7	FDisk_partition_scheme	
+/dev/disk7s1	Windows_FAT_16	
+/dev/disk7s2	0xDA	
+image-path      : /Users/runner/work/_temp/B.raw
+process ID      : 3595
+/dev/disk8	FDisk_partition_scheme	
+/dev/disk8s1	Windows_FAT_16	
+/dev/disk8s2	0xDA	
+hdiutil: couldn't eject "disk7" - Resource busy
+detach -force exit 16
+image process IDs: <in-kernel>
+2501
+3595
+ps: Invalid process id: <in-kernel>
+ 2501 /System/Library/PrivateFrameworks/DiskImages.framework/Resources/diskimages-helper
+ 3595 /System/Library/PrivateFrameworks/DiskImages.framework/Resources/diskimages-helper
+2501 diskimages-help
+3595 diskimages-help
+killed image I/O processes at 06:41:22
+{"ok": true, "path": "/dev/rdisk7", "probe": "hold-open", "t": 0.0}
+{"check_verify2": null, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"check_verify2": null, "err": {"err": "Device not configured", "errno": 6}, "ok": false, "probe": "hold-read", "signature": null, "t": 3.46}
+{"ok": true, "probe": "hold-end", "t": 25.27}
+/dev/disk0 /dev/disk0s1 /dev/disk0s2 /dev/disk0s3 /dev/disk1 /dev/disk1s1 /dev/disk1s2 /dev/disk1s3 /dev/disk1s4 /dev/disk2 /dev/disk2s1 /dev/disk2s1s1 /dev/disk2s2 /dev/disk2s3 /dev/disk2s4 /dev/disk2s5 /dev/disk2s6 /dev/disk3 /dev/disk4 /dev/disk4s1 /dev/disk5 /dev/disk6 /dev/disk6s1 
