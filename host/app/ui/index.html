@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Tape</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="window" data-view="empty">
+  <section id="drop" aria-label="Drop folders of music here">
+    <p class="hint">Drop folders of music here</p>
+  </section>
+  <section id="length">
+    <div id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="60" aria-label="Music length against 60 minutes"><div id="fill"></div></div>
+    <p id="checking" hidden>Checking the music…</p>
+  </section>
+  <p id="message" role="status"></p>
+  <label id="labelrow">Name <input id="label" type="text" autocomplete="off" spellcheck="false" placeholder=""></label>
+  <p id="cardline"></p>
+  <div id="buttons">
+    <button id="make" disabled>Make cartridge</button>
+    <button id="startover" hidden>Start over</button>
+    <button id="details" hidden>Show details</button>
+  </div>
+  <pre id="detailtext" hidden></pre>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
