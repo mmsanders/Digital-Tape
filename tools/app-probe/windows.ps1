@@ -21,16 +21,16 @@ whoami /groups | Select-String 'Mandatory Label' | Tee-Object -Append "$Out\env.
 (Get-Service seclogon | Select Name,Status,StartType | Out-String).Trim() | Tee-Object -Append "$Out\env.txt"
 Probe env | Tee-Object "$Out\env.jsonl"
 
-function DiskPart([string[]] $lines) {
+function Invoke-DiskPart([string[]] $lines) {
   $f = New-TemporaryFile; Set-Content $f $lines -Encoding ascii
-  $r = diskpart /s $f; Remove-Item $f; return $r
+  $r = diskpart.exe /s $f; Remove-Item $f; return $r
 }
 function Attach($vhd) {
-  DiskPart @("select vdisk file=`"$vhd`"", 'attach vdisk') | Out-Null
+  Invoke-DiskPart @("select vdisk file=`"$vhd`"", 'attach vdisk') | Out-Null
   Start-Sleep 2
   return '\\.\PhysicalDrive' + (Get-DiskImage -ImagePath $vhd | Get-Disk).Number
 }
-function Detach($vhd) { DiskPart @("select vdisk file=`"$vhd`"", 'detach vdisk') | Out-Null }
+function Detach($vhd) { Invoke-DiskPart @("select vdisk file=`"$vhd`"", 'detach vdisk') | Out-Null }
 function Provision($dev, $label, $uuid) {
   $size = (& $TapectlTest probe $dev | Select-String '^bytes=').ToString().Substring(6)
   Set-Content "$Out\facts" @('whole=1', 'removable=1', 'sd_bus=0', "bytes=$size", 'holds_os=0', 'layout_ok=0') -Encoding ascii
@@ -41,7 +41,7 @@ function Provision($dev, $label, $uuid) {
 
 Log 'fixtures'
 $VA = "$env:RUNNER_TEMP\A.vhd"; $VB = "$env:RUNNER_TEMP\B.vhd"
-foreach ($v in $VA, $VB) { DiskPart @("create vdisk file=`"$v`" maximum=8192 type=expandable") | Out-Null }
+foreach ($v in $VA, $VB) { Invoke-DiskPart @("create vdisk file=`"$v`" maximum=8192 type=expandable") | Out-Null }
 $A = Attach $VA; Provision $A probeA aaaaaaaa000000000000000000000001; Detach $VA
 $B = Attach $VB; Provision $B probeB bbbbbbbb000000000000000000000002; Detach $VB
 $A = Attach $VA; Start-Sleep 3
