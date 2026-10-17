@@ -95,10 +95,15 @@ FSU=$!; sleep 3; g1_round fsu; sleep 2; sudo pkill -INT -x fs_usage 2>/dev/null;
 for k in neg-unelev neg-root; do
   python3 -I "$HERE/g1_mac.py" fs_usage "$OUT/g1-fs_usage.txt" "$(pid_of "$OUT/g1-fsu-$k.jsonl")" "$(pid_of "$OUT/g1-fsu-pos.jsonl")" | sed "s/^/$k: /" | tee -a "$OUT/g1-summary.txt"
 done
-wc -l <"$OUT/g1-fs_usage.txt"; rm -f "$OUT/g1-fs_usage.txt"
+wc -l <"$OUT/g1-fs_usage.txt"
+D=$(basename "$A"); grep -nE "/dev/r?$D\b|python" "$OUT/g1-fs_usage.txt" | grep -E "$D|open" | head -40 | tee "$OUT/g1-fsu-raw-lines.txt"
+rm -f "$OUT/g1-fs_usage.txt"
 lim 30 sudo eslogger open >"$RUNNER_TEMP/g1-eslogger.json" 2>"$OUT/g1-eslogger.err" &
 ESP=$!; sleep 4; g1_round esl; sleep 2
 sudo pkill -INT -x eslogger 2>/dev/null; wait $ESP; echo "eslogger exit $?" >>"$OUT/g1-eslogger.err"; head -c 400 "$OUT/g1-eslogger.err"
+wc -c <"$RUNNER_TEMP/g1-eslogger.json"; grep -c "/dev/$D" "$RUNNER_TEMP/g1-eslogger.json"
+grep -m 3 "/dev/$D" "$RUNNER_TEMP/g1-eslogger.json" | cut -c1-1500 | tee "$OUT/g1-esl-raw-lines.txt"
+head -c 1500 "$RUNNER_TEMP/g1-eslogger.json"; echo
 for k in neg-unelev neg-root; do
   python3 -I "$HERE/g1_mac.py" eslogger "$RUNNER_TEMP/g1-eslogger.json" "$(pid_of "$OUT/g1-esl-$k.jsonl")" "$(pid_of "$OUT/g1-esl-pos.jsonl")" | sed "s/^/$k: /" | tee -a "$OUT/g1-summary.txt"
 done
