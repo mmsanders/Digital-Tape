@@ -32,36 +32,36 @@ const BR2: [u32; 15] = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144,
 
 fn header(b: &[u8], o: usize) -> Res<Hdr> {
     if b.len() < o + 4 {
-        return refuse("MPEG audio frame header is truncated");
+        return refuse(SOURCE_CORRUPT, "MPEG audio frame header is truncated");
     }
     let h = u32be(b, o);
     if h >> 21 != 0x7FF {
-        return refuse("MPEG audio frame sync lost (corrupt data or junk between frames)");
+        return refuse(SOURCE_CORRUPT, "MPEG audio frame sync lost (corrupt data or junk between frames)");
     }
     let version = match (h >> 19) & 3 {
         0 => 25,
         2 => 2,
         3 => 1,
-        _ => return refuse("MPEG audio version is reserved (corrupt)"),
+        _ => return refuse(SOURCE_CORRUPT, "MPEG audio version is reserved (corrupt)"),
     };
     match (h >> 17) & 3 {
         1 => {}
-        2 => return refuse("MPEG Layer II audio is outside INGEST-1"),
-        3 => return refuse("MPEG Layer I audio is outside INGEST-1"),
-        _ => return refuse("MPEG audio layer is reserved (corrupt)"),
+        2 => return refuse(SOURCE_OUTSIDE_INGEST1, "MPEG Layer II audio is outside INGEST-1"),
+        3 => return refuse(SOURCE_OUTSIDE_INGEST1, "MPEG Layer I audio is outside INGEST-1"),
+        _ => return refuse(SOURCE_CORRUPT, "MPEG audio layer is reserved (corrupt)"),
     }
     let crc = (h >> 16) & 1 == 0;
     let bri = ((h >> 12) & 0xF) as usize;
     if bri == 0 {
-        return refuse("free-format MP3 is outside INGEST-1");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "free-format MP3 is outside INGEST-1");
     }
     if bri == 15 {
-        return refuse("MP3 bitrate index is invalid (corrupt)");
+        return refuse(SOURCE_CORRUPT, "MP3 bitrate index is invalid (corrupt)");
     }
     let bitrate = if version == 1 { BR1[bri] } else { BR2[bri] };
     let sri = (h >> 10) & 3;
     if sri == 3 {
-        return refuse("MP3 sample-rate index is reserved (corrupt)");
+        return refuse(SOURCE_CORRUPT, "MP3 sample-rate index is reserved (corrupt)");
     }
     let base = [44100u32, 48000, 32000][sri as usize];
     let rate = match version {
@@ -72,7 +72,7 @@ fn header(b: &[u8], o: usize) -> Res<Hdr> {
     let pad = (h >> 9) & 1 == 1;
     let mono = (h >> 6) & 3 == 3;
     if h & 3 == 2 {
-        return refuse("MP3 emphasis value is reserved (corrupt)");
+        return refuse(SOURCE_CORRUPT, "MP3 emphasis value is reserved (corrupt)");
     }
     let coef = if version == 1 { 144 } else { 72 };
     let size = (coef * bitrate * 1000 / rate) as usize + pad as usize;
@@ -118,13 +118,13 @@ pub fn skip_id3v2(b: &[u8]) -> Res<usize> {
     while b.len() >= o + 10 && &b[o..o + 3] == b"ID3" {
         let s = &b[o + 6..o + 10];
         if s.iter().any(|&x| x & 0x80 != 0) {
-            return refuse("ID3v2 tag size is invalid");
+            return refuse(SOURCE_CORRUPT, "ID3v2 tag size is invalid");
         }
         let size = ((s[0] as usize) << 21) | ((s[1] as usize) << 14) | ((s[2] as usize) << 7) | s[3] as usize;
         let footer = if b[o + 5] & 0x10 != 0 { 10 } else { 0 };
         o += 10 + size + footer;
         if o > b.len() {
-            return refuse("ID3v2 tag runs past the end of the file");
+            return refuse(SOURCE_CORRUPT, "ID3v2 tag runs past the end of the file");
         }
     }
     Ok(o)
@@ -141,7 +141,7 @@ pub fn trailing_tags(b: &[u8], start: usize) -> Res<usize> {
         let flags = u32le(b, end - 12);
         let total = size + if flags & 0x8000_0000 != 0 { 32 } else { 0 };
         if total > end - start {
-            return refuse("APEv2 tag size is invalid");
+            return refuse(SOURCE_CORRUPT, "APEv2 tag size is invalid");
         }
         end -= total;
     }
@@ -172,7 +172,7 @@ fn refuse_other_trim(b: &[u8], end: usize) -> Res<()> {
             let data = &body[(f + hdr).min(body.len())..(f + hdr + fsz).min(body.len())];
             let text_frame = matches!(id, b"TXXX" | b"COMM" | b"TXX" | b"COM");
             if text_frame && data.windows(8).any(|w| w == b"iTunSMPB") {
-                return refuse("iTunSMPB in an ID3 tag is an MP3 trim declaration INGEST-1 does not admit");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB in an ID3 tag is an MP3 trim declaration INGEST-1 does not admit");
             }
             if fsz == 0 {
                 break;
@@ -193,33 +193,33 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
     while o < end {
         let h = header(&b[..end], o)?;
         if o + h.size > end {
-            return refuse("the last MP3 frame is truncated");
+            return refuse(SOURCE_CORRUPT, "the last MP3 frame is truncated");
         }
         if let Some((_, f)) = frames.first() {
             if f.version != h.version || f.rate != h.rate {
-                return refuse("MP3 sample rate changes mid-stream");
+                return refuse(SOURCE_OUTSIDE_INGEST1, "MP3 sample rate changes mid-stream");
             }
             if f.mono != h.mono {
-                return refuse("MP3 channel count changes mid-stream");
+                return refuse(SOURCE_OUTSIDE_INGEST1, "MP3 channel count changes mid-stream");
             }
         }
         if h.crc {
             let si = side_info_len(&h);
             if o + 6 + si > o + h.size {
-                return refuse("MP3 frame is too short for its side information");
+                return refuse(SOURCE_CORRUPT, "MP3 frame is too short for its side information");
             }
             let mut d = Vec::with_capacity(2 + si);
             d.extend_from_slice(&b[o + 2..o + 4]);
             d.extend_from_slice(&b[o + 6..o + 6 + si]);
             if crc16_frame(&d) != u16be(b, o + 4) {
-                return refuse("MP3 frame CRC mismatch (corrupt)");
+                return refuse(SOURCE_CORRUPT, "MP3 frame CRC mismatch (corrupt)");
             }
         }
         frames.push((o, h));
         o += h.size;
     }
     if frames.is_empty() {
-        return refuse("the MPEG stream holds no audio frames");
+        return refuse(SOURCE_TOO_SHORT, "the MPEG stream holds no audio frames");
     }
 
     // Xing/Info (first frame only), VBRI and LAME.
@@ -229,7 +229,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
     let mut trim = Trim::unknown();
     let mut audio = &frames[..];
     if fr0.len() >= 36 + 4 && &fr0[36..40] == b"VBRI" {
-        return refuse("VBRI (Fraunhofer) gapless/duration metadata is unsupported in INGEST-1");
+        return refuse(SOURCE_TRIM_UNSUPPORTED, "VBRI (Fraunhofer) gapless/duration metadata is unsupported in INGEST-1");
     }
     if fr0.len() >= xo - f0 + 8 && (&b[xo..xo + 4] == b"Xing" || &b[xo..xo + 4] == b"Info") {
         audio = &frames[1..];
@@ -238,7 +238,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         let mut xframes: Option<u64> = None;
         let need = |p: usize, n: usize| -> Res<()> {
             if p + n > f0 + h0.size {
-                refuse("Xing/Info header is truncated")
+                refuse(SOURCE_CORRUPT, "Xing/Info header is truncated")
             } else {
                 Ok(())
             }
@@ -282,23 +282,23 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
                 crc16_arc(&z)
             });
             if lame_span != crc && fixed190 != Some(crc) {
-                return refuse("LAME tag CRC mismatch (invalid gapless metadata)");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "LAME tag CRC mismatch (invalid gapless metadata)");
             }
             let dp = &b[p + 21..p + 24];
             let delay = ((dp[0] as u64) << 4) | (dp[1] as u64 >> 4);
             let padding = (((dp[1] & 0xF) as u64) << 8) | dp[2] as u64;
             let Some(xf) = xframes else {
-                return refuse("LAME delay/padding without a Xing frame count cannot be validated");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "LAME delay/padding without a Xing frame count cannot be validated");
             };
             if xf != audio.len() as u64 {
-                return refuse(format!(
+                return refuse(SOURCE_TRIM_UNSUPPORTED, format!(
                     "Xing frame count {} disagrees with the {} audio frames in the stream",
                     xf,
                     audio.len()
                 ));
             }
             if padding < DECODER_DELAY {
-                return refuse(format!(
+                return refuse(SOURCE_TRIM_UNSUPPORTED, format!(
                     "LAME padding {padding} is smaller than the {DECODER_DELAY}-frame decoder delay (out of range)"
                 ));
             }
@@ -306,7 +306,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         }
     }
     if audio.is_empty() {
-        return refuse("the MPEG stream holds no audio frames after its Xing/Info frame");
+        return refuse(SOURCE_TOO_SHORT, "the MPEG stream holds no audio frames after its Xing/Info frame");
     }
 
     let channels = if h0.mono { 1 } else { 2 };
@@ -319,7 +319,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         )
     });
     let mut dec = symphonia_bundle_mp3::MpaDecoder::try_new(&params, &AudioDecoderOptions::default())
-        .map_err(|e| Fail::Io(format!("MP3 decoder init failed: {e}")))?;
+        .map_err(|e| Fail::io(INTERNAL, format!("MP3 decoder init failed: {e}")))?;
     let mut planes: Vec<Vec<f64>> = Vec::with_capacity(channels);
     for _ in 0..channels {
         planes.push(alloc(audio.len() * h0.spf as usize)?);
@@ -330,9 +330,9 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         vbr |= h.bitrate != audio[0].1.bitrate;
         let _ = h.pad;
         let pkt = PacketRef::new(0, Timestamp::new(i as i64 * h.spf as i64), Duration::new(h.spf), &b[*fo..*fo + h.size]);
-        let buf = dec.decode_ref(&pkt).map_err(|e| Fail::Refuse(format!("MP3 frame {i} does not decode ({e}) (corrupt)")))?;
+        let buf = dec.decode_ref(&pkt).map_err(|e| Fail::refuse(SOURCE_CORRUPT, format!("MP3 frame {i} does not decode ({e}) (corrupt)")))?;
         if buf.frames() as u64 != h.spf || buf.spec().channels().count() != channels {
-            return refuse(format!("MP3 frame {i} decoded to an unexpected length"));
+            return refuse(SOURCE_CORRUPT, format!("MP3 frame {i} decoded to an unexpected length"));
         }
         buf.copy_to_vecs_planar::<f32>(&mut tmp);
         for (p, t) in planes.iter_mut().zip(&tmp) {

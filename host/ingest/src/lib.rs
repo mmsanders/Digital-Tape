@@ -11,6 +11,7 @@ pub mod mpeg;
 pub mod observe;
 pub mod order;
 pub mod publish;
+pub mod report;
 pub mod sniff;
 pub mod wav;
 

@@ -86,37 +86,41 @@ fn check_name(name: &str) -> Result<(), String> {
 
 /// List one folder: immediate regular files only, validated and in natural order.
 pub fn list_folder(dir: &Path, ordinal: usize) -> Res<Vec<Entry>> {
+    // APP-1A §2 subjects: the folder by ordinal, or an entry by its logical path.
+    let folder = || Subject::Folder(ordinal);
+    let entry = |raw: &str| Subject::Source(format!("{ordinal}/{}", raw.nfc().collect::<String>()));
     let disp = dir.display();
-    let rd = fs::read_dir(dir).map_err(|e| Fail::Io(format!("cannot read folder {disp}: {e}")))?;
+    let rd = fs::read_dir(dir).map_err(|e| Fail::io(IO_FOLDER, format!("cannot read folder {disp}: {e}")).about(folder()))?;
     let mut items: Vec<(String, String, PathBuf)> = Vec::new();
     for ent in rd {
-        let ent = ent.map_err(|e| Fail::Io(format!("cannot read folder {disp}: {e}")))?;
+        let ent = ent.map_err(|e| Fail::io(IO_FOLDER, format!("cannot read folder {disp}: {e}")).about(folder()))?;
         let os = ent.file_name();
         let Some(raw) = os.to_str() else {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(FOLDER_NAME_NOT_UNICODE, format!(
                 "{disp}: a file name is not valid Unicode ({})",
                 os.to_string_lossy()
-            )));
+            ))
+            .about(folder()));
         };
         let raw = raw.to_string();
-        let ft = ent.file_type().map_err(|e| Fail::Io(format!("{disp}/{raw}: {e}")))?;
+        let ft = ent.file_type().map_err(|e| Fail::io(IO_FOLDER, format!("{disp}/{raw}: {e}")).about(folder()))?;
         if ft.is_symlink() {
-            return Err(Fail::Refuse(format!("{disp}/{raw}: symbolic links are not followed; refusing")));
+            return Err(Fail::refuse(ENTRY_SYMLINK, format!("{disp}/{raw}: symbolic links are not followed; refusing")).about(entry(&raw)));
         }
         if ft.is_dir() {
-            return Err(Fail::Refuse(format!("{disp}/{raw}: nested folders are not allowed; a source folder must hold only audio files")));
+            return Err(Fail::refuse(ENTRY_NESTED_FOLDER, format!("{disp}/{raw}: nested folders are not allowed; a source folder must hold only audio files")).about(entry(&raw)));
         }
         if !ft.is_file() {
-            return Err(Fail::Refuse(format!("{disp}/{raw}: not a regular file")));
+            return Err(Fail::refuse(ENTRY_NOT_REGULAR, format!("{disp}/{raw}: not a regular file")).about(entry(&raw)));
         }
         let nfc: String = raw.nfc().collect();
         if let Err(why) = check_name(&nfc) {
-            return Err(Fail::Refuse(format!("{disp}/{raw}: the name {why}")));
+            return Err(Fail::refuse(ENTRY_NAME_INVALID, format!("{disp}/{raw}: the name {why}")).about(entry(&raw)));
         }
         items.push((nfc, raw, ent.path()));
     }
     if items.is_empty() {
-        return Err(Fail::Refuse(format!("{disp}: the folder is empty")));
+        return Err(Fail::refuse(FOLDER_EMPTY, format!("{disp}: the folder is empty")).about(folder()));
     }
     // Collisions: identical NFC logical paths, or names equal under case folding (refused
     // because Windows and macOS default volumes cannot hold both).
@@ -124,10 +128,11 @@ pub fn list_folder(dir: &Path, ordinal: usize) -> Res<Vec<Entry>> {
     keys.sort();
     for w in keys.windows(2) {
         if w[0].0 == w[1].0 {
-            return Err(Fail::Refuse(format!(
+            return Err(Fail::refuse(FOLDER_NAME_COLLISION, format!(
                 "{disp}: '{}' and '{}' collide after Unicode normalization or case folding",
                 w[0].1, w[1].1
-            )));
+            ))
+            .about(folder()));
         }
     }
     items.sort_by(|a, b| natural_cmp(&a.0, &a.1, &b.0, &b.1));
@@ -142,11 +147,11 @@ pub fn identity(p: &Path) -> Res<String> {
     // A FOLDER argument that is itself a symbolic link is refused, like every other
     // symlink (contract §2: no symlink following).
     if fs::symlink_metadata(p).map(|m| m.file_type().is_symlink()).unwrap_or(false) {
-        return Err(Fail::Refuse(format!("{}: the folder is a symbolic link; symbolic links are not followed", p.display())));
+        return Err(Fail::refuse(FOLDER_SYMLINK, format!("{}: the folder is a symbolic link; symbolic links are not followed", p.display())));
     }
-    let md = fs::metadata(p).map_err(|e| Fail::Refuse(format!("{}: folder does not exist or cannot be read ({e})", p.display())))?;
+    let md = fs::metadata(p).map_err(|e| Fail::refuse(FOLDER_UNREADABLE, format!("{}: folder does not exist or cannot be read ({e})", p.display())))?;
     if !md.is_dir() {
-        return Err(Fail::Refuse(format!("{}: not a folder", p.display())));
+        return Err(Fail::refuse(FOLDER_NOT_FOLDER, format!("{}: not a folder", p.display())));
     }
     #[cfg(unix)]
     {
@@ -155,7 +160,7 @@ pub fn identity(p: &Path) -> Res<String> {
     }
     #[cfg(not(unix))]
     {
-        let c = fs::canonicalize(p).map_err(|e| Fail::Io(format!("{}: {e}", p.display())))?;
+        let c = fs::canonicalize(p).map_err(|e| Fail::io(IO_FOLDER, format!("{}: {e}", p.display())))?;
         Ok(c.to_string_lossy().to_lowercase())
     }
 }
