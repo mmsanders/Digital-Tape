@@ -1,0 +1,114 @@
+name: ingest supplements (#451)
+
+# Software's narrow observation supplements to HELD INGEST-1 candidate 6126d04 (#436),
+# stacked on it without changing it. Judges nothing; Verification disposes.
+#   exhaustion   the SHIPPING binary under bounded memory for census case 1926
+#                (resources/exhaustion): Windows runs the exact win11-kit ingest.exe of
+#                run 38948012087; Linux/macOS rebuild and compare with the packet's hash.
+#   device-open  Windows native visibility of device-open attempts, with detected-open
+#                negative controls and an ordinary-file positive (Server, supplementary).
+on:
+  pull_request:
+    paths:
+      - 'tools/ingest-supplement/**'
+      - '.github/workflows/ingest-supplement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  exhaustion:
+    name: shipping exhaustion, case 1926 (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            sha: 9218400f2d3fa99ea2713c791ca0a0a799636452e21f933c6d1cb65859e77c88
+          - os: macos-latest
+            sha: f0dc9e7a57443870ce434e9eeff109d1bbb49b445ebb7b550a2ebc875d229a38
+          - os: windows-latest
+            sha: 0e1ef2cb4f283eb876f08019222da5d3ac744ec30d49f020a2e87323f31bcac1
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: check out bytes exactly as committed
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: source pack (the package's own fetcher)
+        run: |
+          python -m pip install -r tests/wp16_ingest_stage1/requirements.txt
+          python -B tests/wp16_ingest_stage1/check_pins.py
+          python -B tests/wp16_ingest_stage1/asset.py --destination "$RUNNER_TEMP/sources"
+      - name: exact Windows shipping binary (win11-kit of run 38948012087)
+        if: runner.os == 'Windows'
+        uses: actions/download-artifact@v4
+        with:
+          name: win11-kit
+          run-id: 38948012087
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/kit
+      - name: shipping binary
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            echo "BIN=$RUNNER_TEMP/kit/ingest.exe" >> "$GITHUB_ENV"
+          else
+            (cd host/ingest && cargo build --release --locked)
+            echo "BIN=$PWD/host/ingest/target/release/ingest" >> "$GITHUB_ENV"
+          fi
+      - name: binary identity
+        run: |
+          got=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$BIN")
+          echo "shipping binary $got (packet's ${{ matrix.sha }})"
+          [ "$got" = "${{ matrix.sha }}" ] && echo "::notice title=exact shipping bytes ${{ runner.os }}::$got" \
+            || echo "::warning title=rebuilt shipping bytes differ ${{ runner.os }}::$got vs packet ${{ matrix.sha }}"
+      - name: case 1926 under bounded memory
+        run: |
+          python -B tools/ingest-supplement/shipping_exhaustion.py --package tests/wp16_ingest_stage1 \
+            --sources "$RUNNER_TEMP/sources" --bin "$BIN" --expect-sha256 ${{ matrix.sha }} --out "$RUNNER_TEMP/exh"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shipping-exhaustion-${{ runner.os }}
+          path: ${{ runner.temp }}/exh
+
+  device-open:
+    name: Windows device-open visibility (Server, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: pinned Process Monitor (the build win11_packet.ps1 pins)
+        shell: bash
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/procmon.zip" https://download.sysinternals.com/files/ProcessMonitor.zip
+          pin=$(sed -n 's/^\$ProcmonZipSha256 = "\([0-9a-f]*\)".*/\1/p' host/ingest/stage1/win11_packet.ps1)
+          got=$(sha256sum < "$RUNNER_TEMP/procmon.zip" | cut -d' ' -f1)
+          echo "ProcessMonitor.zip $got, pin $pin"
+          [ "$got" = "$pin" ] || { echo "::error::ProcessMonitor.zip changed since the pin"; exit 1; }
+          unzip -o -q "$RUNNER_TEMP/procmon.zip" -d "$RUNNER_TEMP/procmon"
+          python -m pip install procmon-parser==0.4.0
+      - name: controls under each tracer
+        shell: pwsh
+        run: tools/ingest-supplement/windows_device_open.ps1 -Procmon "$env:RUNNER_TEMP\procmon\Procmon64.exe" -Out "$env:RUNNER_TEMP\devopen"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: device-open-windows
+          path: ${{ runner.temp }}/devopen
