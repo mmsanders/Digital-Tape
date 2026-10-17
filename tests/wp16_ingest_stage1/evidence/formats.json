@@ -1,0 +1,150 @@
+[
+  {
+    "id": "aiff-scope-None-8",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-b'NONE'-8",
+    "result": "GREEN"
+  },
+  {
+    "id": "sowt-non16-8",
+    "result": "DETECTED"
+  },
+  {
+    "id": "aiff-scope-None-16",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-b'NONE'-16",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-b'sowt'-16",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-None-24",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-b'NONE'-24",
+    "result": "GREEN"
+  },
+  {
+    "id": "sowt-non16-24",
+    "result": "DETECTED"
+  },
+  {
+    "id": "aiff-scope-None-32",
+    "result": "GREEN"
+  },
+  {
+    "id": "aiff-scope-b'NONE'-32",
+    "result": "GREEN"
+  },
+  {
+    "id": "sowt-non16-32",
+    "result": "DETECTED"
+  },
+  {
+    "id": "adts-positive-1-False",
+    "result": "GREEN"
+  },
+  {
+    "id": "adts-positive-1-True",
+    "result": "GREEN"
+  },
+  {
+    "id": "adts-crc-byte-only-1",
+    "result": "DETECTED"
+  },
+  {
+    "id": "adts-multiblock-1",
+    "result": "DETECTED"
+  },
+  {
+    "id": "adts-positive-2-False",
+    "result": "GREEN"
+  },
+  {
+    "id": "adts-positive-2-True",
+    "result": "GREEN"
+  },
+  {
+    "id": "adts-crc-byte-only-2",
+    "result": "DETECTED"
+  },
+  {
+    "id": "adts-multiblock-2",
+    "result": "DETECTED"
+  },
+  {
+    "id": "tag-crc-lame.mp3",
+    "result": "GREEN"
+  },
+  {
+    "id": "tag-crc-lame.mp3-crc-corruption",
+    "result": "DETECTED"
+  },
+  {
+    "id": "tag-crc-ffmpeg.mp3",
+    "result": "GREEN"
+  },
+  {
+    "id": "tag-crc-ffmpeg.mp3-crc-corruption",
+    "result": "DETECTED"
+  },
+  {
+    "id": "short-MP3-valid-trim",
+    "result": "GREEN"
+  },
+  {
+    "id": "trim-outside.mp3",
+    "result": "DETECTED"
+  },
+  {
+    "id": "xing-count.mp3",
+    "result": "DETECTED"
+  },
+  {
+    "id": "bmff-positive-aac-44100-2.m4a",
+    "result": "GREEN"
+  },
+  {
+    "id": "bmff-positive-no-edit.m4a",
+    "result": "GREEN"
+  },
+  {
+    "id": "short-stts-alone.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "short-stts-conflict.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-negative.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-fractional.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-zero.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-outside.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-multiple.m4a",
+    "result": "DETECTED"
+  },
+  {
+    "id": "edit-rate.m4a",
+    "result": "DETECTED"
+  }
+]

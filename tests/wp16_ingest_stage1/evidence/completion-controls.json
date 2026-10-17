@@ -1,0 +1,294 @@
+[
+  {
+    "id": "ref_fir_a-independent-FIR",
+    "result": "GREEN"
+  },
+  {
+    "id": "ref_fir_a-shared-resampler-tail",
+    "result": "DETECTED",
+    "gate": "conversion"
+  },
+  {
+    "id": "ref_fir_a-missed-frame",
+    "result": "DETECTED",
+    "gate": "count"
+  },
+  {
+    "id": "ref_fir_a-extra-frame",
+    "result": "DETECTED",
+    "gate": "count"
+  },
+  {
+    "id": "ref_fir_b-independent-FIR",
+    "result": "GREEN"
+  },
+  {
+    "id": "ref_fir_b-shared-resampler-tail",
+    "result": "DETECTED",
+    "gate": "conversion"
+  },
+  {
+    "id": "ref_fir_b-missed-frame",
+    "result": "DETECTED",
+    "gate": "count"
+  },
+  {
+    "id": "ref_fir_b-extra-frame",
+    "result": "DETECTED",
+    "gate": "count"
+  },
+  {
+    "id": "meter-isolated",
+    "result": "GREEN"
+  },
+  {
+    "id": "shared-meter-history",
+    "result": "DETECTED",
+    "gate": "meter"
+  },
+  {
+    "id": "candidate-meter-qualification",
+    "result": "GREEN"
+  },
+  {
+    "id": "candidate-loudness-calibration",
+    "result": "DETECTED",
+    "gate": "calibration"
+  },
+  {
+    "id": "candidate-peak-qualification",
+    "result": "GREEN"
+  },
+  {
+    "id": "candidate-truepeak-underread",
+    "result": "DETECTED",
+    "gate": "calibration"
+  },
+  {
+    "id": "encoded-interval-fidelity",
+    "result": "GREEN"
+  },
+  {
+    "id": "guessed-trim-529-with-count-preserved",
+    "result": "DETECTED",
+    "gate": "fidelity"
+  },
+  {
+    "id": "double-trim-1105-with-count-preserved",
+    "result": "DETECTED",
+    "gate": "fidelity"
+  },
+  {
+    "id": "passband-quality",
+    "result": "GREEN"
+  },
+  {
+    "id": "bad-passband-filter",
+    "result": "DETECTED",
+    "gate": "src-quality"
+  },
+  {
+    "id": "continuous-band-certificate",
+    "result": "GREEN"
+  },
+  {
+    "id": "continuous-alias-bypass",
+    "result": "DETECTED",
+    "gate": "src-quality"
+  },
+  {
+    "id": "continuous-passband-loss",
+    "result": "DETECTED",
+    "gate": "src-quality"
+  },
+  {
+    "id": "compensated-endpoint-latency",
+    "result": "GREEN"
+  },
+  {
+    "id": "uncompensated-filter-latency",
+    "result": "DETECTED",
+    "gate": "src-latency"
+  },
+  {
+    "id": "nonzero-one-frame-quantizes-zero-admitted",
+    "result": "GREEN"
+  },
+  {
+    "id": "exact-one-ulp-above-half",
+    "result": "GREEN"
+  },
+  {
+    "id": "round-even-exact-ties",
+    "result": "GREEN"
+  },
+  {
+    "id": "round-away-at-half",
+    "result": "DETECTED",
+    "gate": "dither"
+  },
+  {
+    "id": "independent-receipt-binding",
+    "result": "GREEN"
+  },
+  {
+    "id": "unbound-review-evidence",
+    "result": "DETECTED",
+    "gate": "review"
+  },
+  {
+    "id": "software-self-certification",
+    "result": "DETECTED",
+    "gate": "review"
+  },
+  {
+    "id": "existing-DEST-preserved",
+    "result": "GREEN"
+  },
+  {
+    "id": "existing-DEST-modified",
+    "result": "DETECTED",
+    "gate": "preflight"
+  },
+  {
+    "id": "io-error-cleanup-preflight",
+    "result": "GREEN"
+  },
+  {
+    "id": "io-error-stage-leak-preflight",
+    "result": "DETECTED",
+    "gate": "cleanup"
+  },
+  {
+    "id": "io-error-cleanup-after-preflight",
+    "result": "GREEN"
+  },
+  {
+    "id": "io-error-stage-leak-after-preflight",
+    "result": "DETECTED",
+    "gate": "cleanup"
+  },
+  {
+    "id": "source-mutation-refusal",
+    "result": "GREEN"
+  },
+  {
+    "id": "mutation-published-success",
+    "result": "DETECTED",
+    "gate": "mutation"
+  },
+  {
+    "id": "kill-cut-0",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-0",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-1",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-1",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-2",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-2",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-3",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-3",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-4",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-4",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-5",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-5",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-6",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-6",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "kill-cut-7",
+    "result": "GREEN"
+  },
+  {
+    "id": "kill-half-pair-7",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "concurrent-DEST-protected",
+    "result": "GREEN"
+  },
+  {
+    "id": "concurrent-DEST-overwritten",
+    "result": "DETECTED",
+    "gate": "pair"
+  },
+  {
+    "id": "forbidden-device-open",
+    "result": "DETECTED",
+    "gate": "io-scope"
+  },
+  {
+    "id": "forbidden-preflight-scratch",
+    "result": "DETECTED",
+    "gate": "io-scope"
+  },
+  {
+    "id": "informational-no-output",
+    "result": "GREEN"
+  },
+  {
+    "id": "informational-created-stage",
+    "result": "DETECTED",
+    "gate": "preflight"
+  },
+  {
+    "id": "nonboolean-native-completeness",
+    "result": "DETECTED",
+    "gate": "trace"
+  },
+  {
+    "id": "NFC-path-baseline",
+    "result": "GREEN"
+  },
+  {
+    "id": "NFC-logical-collision",
+    "result": "DETECTED",
+    "gate": "order"
+  }
+]
