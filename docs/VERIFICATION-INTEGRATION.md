@@ -6,6 +6,23 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
+## Latest host boundary — 17 October 2026 UTC (ADR-184)
+
+- Verification188 `f168a2eb`: Mac442/d360386 capability stop upheld; fs_usage aliases
+  offsets separated by4GiB. Recorded limitation, no waiver/rehearsal/security change.
+- Verification190 `1a6b1be6`: bounded ingest observer correction PASS at436/6126d04
+  on the submitted hosted Mac only;1641 publications,3295 flush/closes,8 controls.
+  Full INGEST numerical/native/shipping receipts, Windows11 and exhaustion gaps held.
+- Verification191 `fc80e0ec`: V186-01/checksum PASS at443/33df48e;3995 retained
+  runs/187486 projections replayed. V186-02 correction443/85b7c3f awaits192.
+  Preserve SAMPLED long epochs, missing host faults and operation-row exclusions.
+- Windows441/a50a211 checker PASS is a new Software return for193, not acceptance;
+  same original capture and R3 controls. No new Michael capture.
+- Complete INGEST Stage1 I1–I8 coverage is on Verification main (1927 descriptors,
+  corrected tree609a4c81); WP16 rung2 only. Candidate436 remains unmerged/HELD.
+- APP-1 findings001…004 issued in merged437; closed §3 annex still pending. No full
+  app coverage/implementation/acceptance. Phase2 5/12; physical A6/full packages held.
+
 ## Phase 2 disposition — current navigation refreshed14October2026 (ADR-179)
 
 Verification #167 `df637f7fb962a98b8698d16a531ceb0e8365c2a6` independently accepts
