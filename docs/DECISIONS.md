@@ -3944,3 +3944,67 @@ All frozen-engine, write/async/recording/firmware, hardware park, media/atomicit
 Michael-reserved and target<30s holds survive. Q-P2-1(b) remains undecided pending independent
 operation evidence; no Phase3 firmware starts before that ruling. Reversal cost: contract
 issuance/reassignment; no product code is changed by this ADR.
+
+
+## ADR-185 — resolve Software444 Q1–Q7 and issue APP-1A host interface
+
+**Date:** 17 October2026 PDT. **Owner:** PM, Michael's activation449. Product input
+`7b722dc716ad296a2e0664050bb731718b75a371`; Software448 proposal
+`59a868e006390837efc03b2809b6fe2986a1e5b9` (five PR workflows SUCCESS).
+Normal PM authority, no product-code review/merge, no subworkers.
+
+**Q1–Q7 decided.** [APP-1A](WP15-APP-ANNEX.md) closes IDs, subjects, payloads,
+terminal precedence, report lifecycle/parser and progress bindings from the proposal.
+Q1 adopts diagnostic-only stderr records for elevated make. Q2 gives post-start
+WAV_TRUNCATED an accurate unfinished-card/recheck-music message, never a pulled
+card or unchanged-card claim. Q3 keeps join-peak refusal generic, details available.
+Q4 deduplicates known identical nonsymlink folder drops by OS identity, retaining
+first order and INGEST authority for unknown/invalid inputs. Q5 gives make exit3 a
+plain safe-refusal message; WP14 zero-write/zero-write-mode-open policy remains.
+
+Q6 **removes the unused provisioned discovery field**, rather than relabelling an
+OS hint as exact recognition. Unelevated cards may offer an OS-view candidate,
+including the bounded possible-own-p1 mounted case. Other mandatory safety facts
+remain required, unknowns unprobed, no writes/unmount/elevated poll. Elevated make
+retains exact WP14 safety/layout checks before writes; a visible candidate may be
+refused. One authorized session spans destructive phases; preliminary read-only
+or zero-access safety queries are permitted. Independent preflight must expose
+any capability/race conflict before discovery/make implementation, not waive it.
+
+Q7 keeps native G1 acceptance held until an ordinary-settings method catches real
+failed/transient/zero-access device-open controls. Failed in-box tracers, handle
+sampling and self-logging do not establish absence. Procmon/other methods may be
+qualified; no presumed PASS, new purchase, security change or Michael request.
+Mac hosted probes are explicitly SIP-disabled, not ordinary Mac proof. Elevation
+prompt/decline and actual Windows11 remain separate native qualification facts.
+
+**Other precision changes.** Report stderr may interleave without selecting a
+message; a short report write warns without changing the child outcome. Preserve
+already emitted stdout on terminal media failure. Progress steps are contiguous
+blocks, optional/sparse, not a mandatory1/64 callback schedule. Bind exclusive report
+creation to the actual private control directory; no ancestor substitution. Existing
+no-flag outcomes/audio/manifest/engine bytes are unchanged. APP-1 is now issued with
+its full annex: WP15 contract rung1; Phase2 **6/12** (WP14=3,WP16=2,WP15=1).
+This is issuance, not authored full app coverage, integration or acceptance.
+
+**Latest independent inputs carried.** [Verification194](https://github.com/mmsanders/digital-tape-verification/commit/b9f08bf655cd9a20f2122b5a962f3bf05315f996)
+explicitly passes exact441/a50a211 Windows method/rehearsal and preauthorizes
+Software integration with required checks; physical A6 is still held. [Verification195](https://github.com/mmsanders/digital-tape-verification/commit/65dbd21f4dfd78ef3a1165074115535701efc7b5)
+closes V186-02 at443/85b7c3f and585 specific pre-commit contexts, not all operation
+rows. All available436/6126d04 numerical/source/relations/profile/positive-native
+receipts pass; actual Windows11, exact-shipping exhaustion1926 and zero-access-open
+visibility remain held. Both merged publications' existing CI SUCCESS; PM did not
+repeat their campaigns. Mac content-only feasibility cannot prove a native high
+address, so no replacement A6 method or Mac run is issued.
+
+**Routing/stop.** Fresh Software/Verification issues carry full current directions:
+Software integrates independently cleared441, supplies the bounded shipping/native
+supplement and builds issued report/app-shell scope while Verification preflights
+APP-1A and independently authors/evaluates useful host/operation coverage. S2/S3
+wait for preflight; no physical dependency need idle S1/S4 or independent row work.
+Software alone reviews/integrates its probe/proposal448; PM issues this annex in a
+separate docs-only change. Completed tests/receipts carry by identity, no new round
+to reaccept identical bytes. Stop at durable issuance/dashboard/handoffs. Frozen
+engine/format/write/batching/async/firmware, Q-P2-1(b), target<30s, hardware park,
+media/atomicity, full-platform/physical/full-package and reserved holds survive.
+Reversal cost: interface amendment before frozen app tests; no product code changes.
