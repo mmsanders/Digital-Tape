@@ -58,8 +58,6 @@ jobs:
         run: python3 -B tests/wp10_subset_binding/run_promote.py --evidence "$RUNNER_TEMP/ev/promote" --jobs 4
       - name: format/dup campaign
         run: python3 -B tests/wp10_subset_binding/run_dup.py --evidence "$RUNNER_TEMP/ev/dup" --jobs 4
-      - name: host load campaign
-        run: python3 -B tests/wp10_subset_binding/run_load.py --evidence "$RUNNER_TEMP/ev/load" --jobs 4
       - name: respool_full decline (no lower run)
         run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-decline" --only no_lower_run --jobs 4
       - name: retained evidence index
@@ -74,6 +72,42 @@ jobs:
         if: always()
         with:
           name: wp10-subset-small
+          path: ${{ runner.temp }}/ev
+          if-no-files-found: error
+          retention-days: 90
+
+  # The host load campaign runs in its own sharded job: since V186-01 each remount runs
+  # verify, dump A and dump B on three fresh copies of a 32 MiB projection, each hashed before
+  # and after, which no longer fits beside everything else in one job.
+  load:
+    name: host load campaign (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: build engine and tapectl-test
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          make -s -C engine clean all
+          make -s -C host
+      - name: host load campaign
+        run: python3 -B tests/wp10_subset_binding/run_load.py --evidence "$RUNNER_TEMP/ev/load" --shard ${{ matrix.shard }}/4 --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-load-${{ matrix.shard }}
           path: ${{ runner.temp }}/ev
           if-no-files-found: error
           retention-days: 90
