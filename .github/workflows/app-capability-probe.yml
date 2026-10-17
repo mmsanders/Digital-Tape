@@ -1,0 +1,62 @@
+name: APP-1 capability probes
+
+# Product #444: native facts for the APP-1 interface proposal (tapectl cards,
+# tapectl make, media change, elevation, G1 runtime tracing). Hosted runners
+# only, against attached disk images / VHDs provisioned through tapectl-test;
+# no physical disk. Windows here is Server (supplementary), never Windows 11.
+# Raw observations only: no verdict, no acceptance.
+on:
+  pull_request:
+    paths:
+      - 'tools/app-probe/**'
+      - '.github/workflows/app-capability-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: APP-1 probes — macOS arm64 (hosted)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build tapectl-test
+        run: |
+          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+          make -C engine CC="$GCC" all
+          make -C host CC=clang test-bins
+      - name: Probes
+        run: tools/app-probe/macos.sh "$PWD/build/host/tapectl-test" "$RUNNER_TEMP/app-probe"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-probe-macos
+          path: ${{ runner.temp }}/app-probe
+
+  windows:
+    name: APP-1 probes — Windows Server (hosted, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build tapectl-test
+        shell: bash
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc test-bins
+      - name: Probes
+        shell: pwsh
+        run: tools/app-probe/windows.ps1 -TapectlTest "$PWD\build\host\tapectl-test.exe" -Out "$env:RUNNER_TEMP\app-probe"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-probe-windows
+          path: ${{ runner.temp }}/app-probe
