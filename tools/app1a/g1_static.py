@@ -15,6 +15,9 @@ The check reads the app tree (Rust, page, capabilities, config, manifest) and fa
   G1-CAP    a capability, plugin or dependency that would give the page file, shell,
             dialog or process access.
 
+Scope: the shipped app (src/, ui/, capabilities/, Cargo.toml, tauri.conf.json); unit-test
+blocks after `#[cfg(test)]` and the integration tests under tests/ are not app code.
+
 Usage: g1_static.py [--root host/app]   exit 0 clean, 1 with findings printed.
 The negative control is tools/app1a/fixtures/g1-negative (a copy of the tree with one
 planted violation per rule); CI requires the check to FAIL on it.
@@ -81,6 +84,8 @@ def check(root):
         if not p.is_file() or 'target' in p.parts or 'gen' in p.parts or p.suffix not in ('.rs', '.js', '.html', '.json', '.toml'):
             continue
         rel = p.relative_to(root).as_posix()
+        if rel.split('/')[0] == 'tests':
+            continue  # integration tests drive the real child from scratch trees; not shipped app code
         text = p.read_text(encoding='utf-8')
         code = strip_comments(text) if p.suffix in ('.rs', '.js') else text
         if p.suffix == '.rs':
