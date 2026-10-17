@@ -164,4 +164,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-183](DECISIONS.md#adr-183--app-1-preflight-corrections-and-q-p2-1-adapter-import-routing) | 2026-10-15 PDT | APP-1 P2V15-001…004 / Q-P2-1 import | One-open `tapectl make` with `CARD_CHANGED`; report diagnostic exception with nonce; exact overage frames; app-origin events; Software imports any-subset package after #438 |
 
-120 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-184](DECISIONS.md#adr-184--disposition-latest-returns-record-mac-a6-limitation-and-route-unblocked-host-work) | 2026-10-17 UTC | Latest return disposition / unblocked host work | Mac limitation recorded, ready441/443 to Verification, INGEST receipts192, APP annex groundwork444; WP16 coverage rung2, Phase2 5/12 |
+
+121 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

@@ -3875,3 +3875,70 @@ before Phase 3.
 
 **Gate/reversal cost.** Rungs unchanged. All holds survive. Reversal is a contract amendment or
 reassignment; nothing has been built.
+
+
+## ADR-184 — disposition latest returns, record Mac A6 limitation and route unblocked host work
+
+**Date:** 17 October 2026 UTC (16 October PDT). **Owner:** PM, Michael's explicit movement
+review on #384. Input Product main `c6ff868086e3333bb7568e60d3a2f4ec60fd3344`;
+PM #437 `c396ba4` now merged `b72aabdf`; Verification published through #191
+`fc80e0ece3f84f8c7ad468c695cb22b3d6abd21d`. Normal PM authority, no subworkers.
+
+**Merged independent inputs:** [#188 Mac limitation](https://github.com/mmsanders/digital-tape-verification/commit/f168a2eb4dada982219772f04a0bf54f84ac3452), [#190 observer/identity findings](https://github.com/mmsanders/digital-tape-verification/commit/1a6b1be6e52d3b747cd6deb48b4131ae127f09b0), [#191 subset return](https://github.com/mmsanders/digital-tape-verification/commit/fc80e0ece3f84f8c7ad468c695cb22b3d6abd21d). Existing exact-head publication CI is SUCCESS; PM reviewed substance without routine campaign replay. New Product441/a50a211,443/85b7c3f and436/6126d04 required PR workflows are also SUCCESS, separately from acceptance.
+
+**Evidence disposition.** Published Verification #188 upholds Mac442/d360386's fs_usage
+capability stop: paired offsets differing by4GiB have identical printed offset fields.
+Record this bounded limitation now. No parser may guess upper bits; no redundant Michael
+rehearsal, third tracer, SIP change, injection or shipping rebuild is issued. Physical A6
+remains held. A content-pattern proof/causal-control feasibility proposal may be authored
+independently, but any replacement acceptance method requires a later explicit PM issuance.
+This records the limitation; it does not waive macOS or the physical criterion.
+
+Verification #190 (`1a6b1be6`) closes only the submitted hosted-Mac ingest observer defect
+at Product436/6126d04:1641 native publications,3295 flush/close pairs and8 damaged-trace
+rejections. Its restricted-SIP hosted capability is not generalized to Michael's Mac.
+Actual Windows11, full numerical/relations/native/shipping receipts and exhaustion limits
+remain distinct. Server is supplementary. Existing output-identity evidence is carried.
+
+Verification #191 closes V186-01 and the checksum finding on443/33df48e within its stated
+bounds;3995 retained runs/187486 projections replay without model/hash mismatches.
+V186-02 requires operation-relative coordinate planning while preserving setup callbacks in
+durability replay. Software's NEW443/85b7c3f fill is awaiting independent disposition.
+The issued bounded long-epoch plan stays SAMPLED; no175CPU-hour rerun, full operation-row
+acceptance, engine change or batching permission follows. Earlier repeated-LBA prose is
+corrected by191; actual traces remain the authority.
+
+Product441/a50a211's new checker PASS is a Software return, not independent acceptance.
+Verification146 disposes both R3 identity refinements on the SAME retained Windows capture
+before readiness. Positively proved unrelated image writes do not exempt target, unknown,
+deleted/reused/conflicting identity or raw-PhysicalDrive writes. No new Michael capture.
+
+**APP-1 and useful work.** ADR183 already resolves P2V15-001…004. Its closed §3 interface
+annex remains unfinished. Software444 now delivers the coherent per-command ID/payload/
+precedence/progress proposal plus native capability/elevation/continuity facts and a build
+plan. This is groundwork, not uncovered app implementation or normative issuance. PM then
+issues the annex before frozen independent APP tests and a separately assigned host build.
+No physical dependency blocks that groundwork. Verification192 finishes the ready subset
+correction and available full INGEST host receipts; missing Windows11/physical evidence
+must not idle useful independent evaluation. Windows priority stays in146. Concrete
+in-scope corrections route directly; only overall exact-head PASS plus required checks
+preauthorizes Software-owned integration. No acknowledgement-only merge round.
+
+**Rung reconciliation.** Phase1 remains36/36. WP14 remains3/4: implementation is integrated,
+physical A6 is not accepted. WP16 advances1→2: the complete independently authored Stage1
+package covers I1–I8 with1927 descriptors and no pending ruling cells on Verification main
+(original40dd4b55, portability-corrected tree609a4c81;188/190 do not themselves earn a rung).
+This is coverage publication, not candidate integration or acceptance:436 is still open.
+WP15 remains0/4 because APP-1 is issued for preflight with an unissued §3 annex; the full
+build contract has not reached its complete gate. Phase2 therefore5/12. No implementation
+or acceptance rung is awarded for issue closure, model replay or bounded observer PASS.
+
+**Cleanup and stop.** PM437's existing green docs/spec issuance is merged. Software owns
+closing superseded433/stopped442 unmerged, refreshing stale candidate descriptions and
+removing only its throwaway probe branch after preserving unique evidence/restore identity.
+No pinned evidence, historical authority or broad branch deletion. PM stops after durable
+status/dashboard publication and role routing; residual physical work remains146/386.
+All frozen-engine, write/async/recording/firmware, hardware park, media/atomicity,
+Michael-reserved and target<30s holds survive. Q-P2-1(b) remains undecided pending independent
+operation evidence; no Phase3 firmware starts before that ruling. Reversal cost: contract
+issuance/reassignment; no product code is changed by this ADR.
