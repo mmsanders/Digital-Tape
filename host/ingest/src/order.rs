@@ -113,14 +113,14 @@ pub fn list_folder(dir: &Path, ordinal: usize) -> Res<Vec<Entry>> {
         if let Err(why) = check_name(&nfc) {
             return Err(Fail::Refuse(format!("{disp}/{raw}: the name {why}")));
         }
-        items.push((nfc, raw, ent.path()));
+        push(&mut items, (nfc, raw, ent.path()))?;
     }
     if items.is_empty() {
         return Err(Fail::Refuse(format!("{disp}: the folder is empty")));
     }
     // Collisions: identical NFC logical paths, or names equal under case folding (refused
     // because Windows and macOS default volumes cannot hold both).
-    let mut keys: Vec<(String, &str)> = items.iter().map(|(n, r, _)| (n.to_lowercase(), r.as_str())).collect();
+    let mut keys: Vec<(String, &str)> = collect(items.len(), items.iter().map(|(n, r, _)| (n.to_lowercase(), r.as_str())))?;
     keys.sort();
     for w in keys.windows(2) {
         if w[0].0 == w[1].0 {
@@ -131,10 +131,7 @@ pub fn list_folder(dir: &Path, ordinal: usize) -> Res<Vec<Entry>> {
         }
     }
     items.sort_by(|a, b| natural_cmp(&a.0, &a.1, &b.0, &b.1));
-    Ok(items
-        .into_iter()
-        .map(|(nfc, _, path)| Entry { logical: format!("{ordinal}/{nfc}"), path })
-        .collect())
+    collect(items.len(), items.into_iter().map(|(nfc, _, path)| Entry { logical: format!("{ordinal}/{nfc}"), path }))
 }
 
 /// Filesystem identity used to require distinct folders.

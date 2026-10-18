@@ -2,6 +2,7 @@
 //! insignificant whitespace, final LF. Strings escape only `"`, `\` and U+0000–U+001F
 //! (as `\u00XX`, lowercase hex); every other scalar is emitted as raw UTF-8.
 
+use crate::common::{put, Res};
 use std::collections::BTreeMap;
 
 pub enum J {
@@ -31,54 +32,55 @@ impl J {
         v.map(J::dec).unwrap_or(J::Null)
     }
 
-    fn write(&self, o: &mut String) {
+    fn write(&self, o: &mut String) -> Res<()> {
         match self {
-            J::Null => o.push_str("null"),
-            J::Bool(b) => o.push_str(if *b { "true" } else { "false" }),
-            J::Int(i) => o.push_str(&i.to_string()),
+            J::Null => put(o, "null")?,
+            J::Bool(b) => put(o, if *b { "true" } else { "false" })?,
+            J::Int(i) => put(o, &i.to_string())?,
             J::Str(s) => {
-                o.push('"');
+                put(o, "\"")?;
                 for c in s.chars() {
                     match c {
-                        '"' => o.push_str("\\\""),
-                        '\\' => o.push_str("\\\\"),
-                        c if (c as u32) < 0x20 => o.push_str(&format!("\\u{:04x}", c as u32)),
-                        c => o.push(c),
+                        '"' => put(o, "\\\"")?,
+                        '\\' => put(o, "\\\\")?,
+                        c if (c as u32) < 0x20 => put(o, &format!("\\u{:04x}", c as u32))?,
+                        c => put(o, c.encode_utf8(&mut [0; 4]))?,
                     }
                 }
-                o.push('"');
+                put(o, "\"")?;
             }
             J::Arr(a) => {
-                o.push('[');
+                put(o, "[")?;
                 for (i, v) in a.iter().enumerate() {
                     if i > 0 {
-                        o.push(',');
+                        put(o, ",")?;
                     }
-                    v.write(o);
+                    v.write(o)?;
                 }
-                o.push(']');
+                put(o, "]")?;
             }
             J::Obj(m) => {
                 // BTreeMap<String> orders by UTF-8 bytes.
-                o.push('{');
+                put(o, "{")?;
                 for (i, (k, v)) in m.iter().enumerate() {
                     if i > 0 {
-                        o.push(',');
+                        put(o, ",")?;
                     }
-                    J::Str(k.clone()).write(o);
-                    o.push(':');
-                    v.write(o);
+                    J::Str(k.clone()).write(o)?;
+                    put(o, ":")?;
+                    v.write(o)?;
                 }
-                o.push('}');
+                put(o, "}")?;
             }
         }
+        Ok(())
     }
 
-    pub fn canonical(&self) -> String {
+    pub fn canonical(&self) -> Res<String> {
         let mut s = String::new();
-        self.write(&mut s);
-        s.push('\n');
-        s
+        self.write(&mut s)?;
+        put(&mut s, "\n")?;
+        Ok(s)
     }
 }
 
@@ -105,6 +107,6 @@ mod tests {
     #[test]
     fn ordering_and_escape() {
         let j = J::obj([("b", J::Int(1)), ("a", J::s("x\"\n")), ("A", J::Null)]);
-        assert_eq!(j.canonical(), "{\"A\":null,\"a\":\"x\\\"\\u000a\",\"b\":1}\n");
+        assert_eq!(j.canonical().unwrap(), "{\"A\":null,\"a\":\"x\\\"\\u000a\",\"b\":1}\n");
     }
 }

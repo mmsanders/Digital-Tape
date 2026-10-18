@@ -215,7 +215,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
                 return refuse("MP3 frame CRC mismatch (corrupt)");
             }
         }
-        frames.push((o, h));
+        push(&mut frames, (o, h))?;
         o += h.size;
     }
     if frames.is_empty() {

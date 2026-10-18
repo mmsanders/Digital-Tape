@@ -21,6 +21,16 @@ tools/identity_run.sh OUT.txt           # cross-platform identity corpus → two
 Exit 0 only after both files are published; 2 for an input/contract refusal; 1 for an I/O or tool
 failure. Every refusal names the logical source path (`folder_ordinal/NFC_name`) or the join.
 
+**Resource exhaustion (0.1.1, #457)** exits 1 with nothing published, never through std's abort.
+Every allocation an input can size goes through the fallible helpers in `src/common.rs`
+(`alloc`, `filled`, `collect`, `push`, `extend`, `put`, `read_into`). What stable Rust cannot
+make fallible (small strings, decoder state, the error path) is covered by `src/mem.rs`: the
+process allocator serves a refused request of at most 64 KiB from a fixed 1 MiB reserve and
+latches the exhaustion, and the run fails at its next `checkpoint()`, at the latest just before
+publication. Arithmetic and audio bytes are unchanged from 0.1.0 (AP4); only the manifest's
+`tool_version` differs. `tools/ingest-exhaustion/` holds Software's gated checks and their
+negative controls.
+
 ## Arithmetic profile `INGEST1-AP4`
 
 `INGEST1-AP4` lengthens the true-peak interpolator to 256 input samples each side, Kaiser β 14,

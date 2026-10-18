@@ -18,7 +18,7 @@ fn main() {
     fs::create_dir_all(out.join("coefficients")).unwrap();
     let mut rates = String::new();
     for (i, &rate) in ingest::common::RATES.iter().filter(|&&r| r != 44100).enumerate() {
-        let f = ingest::dsp::Fir::design(rate);
+        let f = ingest::dsp::Fir::design(rate).expect("memory");
         let mut b = Vec::with_capacity(f.h.len() * 8);
         for v in &f.h {
             b.extend_from_slice(&v.to_le_bytes());

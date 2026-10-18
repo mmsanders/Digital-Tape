@@ -1,7 +1,7 @@
 //! Development aid: worst true-peak under-read of the INGEST1-AP2 meter for steady 44.1 kHz
 //! sinusoids over a grid of frequencies and phases.
 fn main() {
-    let tp = ingest::dsp::TruePeak::new();
+    let tp = ingest::dsp::TruePeak::new().expect("memory");
     for f in [20000.0, 21800.0, 21900.0, 21950.0, 22000.0, 22020.0, 22040.0] {
         let mut worst: f64 = 0.0;
         for k in 0..32 {
