@@ -69,7 +69,7 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
     let r = if mono { None } else { Some(dsp::resample(&d.planes[1][h..e], d.rate, out_frames)?) };
     let rr: &[f64] = r.as_deref().unwrap_or(&l);
     crate::observe::before(pos, &l, rr);
-    let lin = dsp::loudness(&[&l, rr]);
+    let lin = dsp::loudness(&[&l, rr])?;
     let pk = {
         let pl = tp.peak(&dsp::to_f32(&l)?);
         if mono { pl } else { pl.max(tp.peak(&dsp::to_f32(rr)?)) }
@@ -98,7 +98,7 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
             continue;
         }
         let (ql, qr) = dsp::planes_from_pcm(&pcm)?;
-        let lout = dsp::loudness(&[&ql, &qr]);
+        let lout = dsp::loudness(&[&ql, &qr])?;
         if let (Loud::Measured(_), Loud::Measured(lo)) = (lin, lout) {
             if !limited && (lo - TARGET_LUFS).abs() > 0.5 {
                 let ng = g + (TARGET_LUFS - lo);

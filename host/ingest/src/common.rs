@@ -297,8 +297,94 @@ impl Pcm {
 /// is exhausted: resource exhaustion must not abort the process (contract §6).
 pub fn alloc<T>(n: usize) -> Res<Vec<T>> {
     let mut v = Vec::new();
-    v.try_reserve_exact(n).map_err(|_| Fail::io(IO_MEMORY, format!("out of memory (needed {n} elements); nothing was written")))?;
+    v.try_reserve_exact(n).map_err(|_| oom(n))?;
     Ok(v)
+}
+
+fn oom(n: usize) -> Fail {
+    Fail::io(IO_MEMORY, format!("out of memory (needed {n} elements); nothing was written"))
+}
+
+// Fallible forms of the std allocations an input can size (crate::mem): every one
+// fails as an IO_MEMORY `Fail` (exit 1), never through std's abort.
+
+/// `vec![v; n]`.
+pub fn filled<T: Clone>(n: usize, v: T) -> Res<Vec<T>> {
+    let mut x = alloc(n)?;
+    x.resize(n, v);
+    Ok(x)
+}
+
+/// `collect()` of an iterator that yields about `n` items (more still grow fallibly).
+pub fn collect<T>(n: usize, it: impl IntoIterator<Item = T>) -> Res<Vec<T>> {
+    let mut x = alloc(n)?;
+    for v in it {
+        push(&mut x, v)?;
+    }
+    Ok(x)
+}
+
+/// `v.push(x)`.
+pub fn push<T>(v: &mut Vec<T>, x: T) -> Res<()> {
+    if v.len() == v.capacity() {
+        v.try_reserve(1).map_err(|_| oom(v.len() + 1))?;
+    }
+    v.push(x);
+    Ok(())
+}
+
+/// `v.extend_from_slice(s)`.
+pub fn extend<T: Copy>(v: &mut Vec<T>, s: &[T]) -> Res<()> {
+    v.try_reserve(s.len()).map_err(|_| oom(v.len() + s.len()))?;
+    v.extend_from_slice(s);
+    Ok(())
+}
+
+/// `s.push_str(t)`.
+pub fn put(s: &mut String, t: &str) -> Res<()> {
+    s.try_reserve(t.len()).map_err(|_| oom(s.len() + t.len()))?;
+    s.push_str(t);
+    Ok(())
+}
+
+/// `read_to_end` that grows `b` only fallibly: reads into spare capacity, then probes.
+pub fn read_into(f: &mut impl std::io::Read, b: &mut Vec<u8>) -> Res<std::io::Result<()>> {
+    use std::io::Read;
+    loop {
+        let room = (b.capacity() - b.len()) as u64;
+        if room > 0 {
+            if let Err(e) = f.by_ref().take(room).read_to_end(b) {
+                return Ok(Err(e));
+            }
+            if b.len() < b.capacity() {
+                return Ok(Ok(())); // end of file inside the spare capacity
+            }
+        }
+        let mut one = [0u8; 1];
+        let n = loop {
+            match f.read(&mut one) {
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+                r => break r,
+            }
+        };
+        match n {
+            Ok(0) => return Ok(Ok(())),
+            Ok(_) => {
+                b.try_reserve(b.len().max(1 << 16)).map_err(|_| oom(b.len() + 1))?;
+                b.push(one[0]);
+            }
+            Err(e) => return Ok(Err(e)),
+        }
+    }
+}
+
+/// The run's memory checkpoint: once the system has refused an allocation (crate::mem),
+/// the run fails here as IO_MEMORY (exit 1) instead of going on to publish.
+pub fn checkpoint() -> Res<()> {
+    if crate::mem::exhausted() {
+        return Err(Fail::io(IO_MEMORY, "out of memory (the system refused an allocation); nothing was written"));
+    }
+    Ok(())
 }
 
 pub fn deinterleave(data: &[u8], fmt: Pcm, channels: usize) -> Res<Vec<Vec<f64>>> {

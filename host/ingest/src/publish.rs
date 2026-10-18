@@ -131,6 +131,7 @@ pub fn publish(dest: &Path, wav: &[&[u8]], manifest: &[u8]) -> Res<()> {
         write_new(&stage.join("manifest.json"), &[manifest], "manifest")?;
         sync_dir(&stage)?;
         observe::cut("before-publish");
+        crate::common::checkpoint()?;
         match observe::io_fault("publish").and_then(|_| rename_noreplace(&stage, dest)) {
             Ok(()) => {
                 observe::mark("publish_dir_noreplace");

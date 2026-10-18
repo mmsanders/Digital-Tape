@@ -216,12 +216,12 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
             Some(f) if f != cfg => return refuse(SOURCE_OUTSIDE_INGEST1, "ADTS sample rate or channel configuration changes mid-stream"),
             _ => {}
         }
-        units.push(&b[o + hl..o + len]);
-        crcs.push(crc_present.then(|| {
+        push(&mut units, &b[o + hl..o + len])?;
+        push(&mut crcs, crc_present.then(|| {
             let mut hdr = [0u8; 7];
             hdr.copy_from_slice(h);
             (hdr, u16be(b, o + 7))
-        }));
+        }))?;
         o += len;
     }
     let Some((_, sfi, cc)) = first else { return refuse(SOURCE_TOO_SHORT, "the ADTS stream holds no frames") };
@@ -529,10 +529,10 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         let fixed = u32be(s, 4) as u64;
         let cnt = u32be(s, 8) as usize;
         if fixed != 0 {
-            vec![fixed; cnt]
+            filled(cnt, fixed)?
         } else {
             chk(s, 12 + cnt * 4)?;
-            (0..cnt).map(|i| u32be(s, 12 + i * 4) as u64).collect()
+            collect(cnt, (0..cnt).map(|i| u32be(s, 12 + i * 4) as u64))?
         }
     } else {
         return refuse(SOURCE_CORRUPT, "MP4 audio track has no 'stsz' sample-size table");
@@ -545,13 +545,13 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         chk(s, 8)?;
         let c = u32be(s, 4) as usize;
         chk(s, 8 + c * 4)?;
-        (0..c).map(|i| u32be(s, 8 + i * 4) as u64).collect()
+        collect(c, (0..c).map(|i| u32be(s, 8 + i * 4) as u64))?
     } else if let Some(co64) = child(&stbl, b"co64")? {
         let s = co64.body;
         chk(s, 8)?;
         let c = u32be(s, 4) as usize;
         chk(s, 8 + c * 8)?;
-        (0..c).map(|i| u64be(s, 8 + i * 8)).collect()
+        collect(c, (0..c).map(|i| u64be(s, 8 + i * 8)))?
     } else {
         return refuse(SOURCE_CORRUPT, "MP4 audio track has no chunk-offset table");
     };
@@ -559,8 +559,8 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
     chk(stsc, 8)?;
     let sc = u32be(stsc, 4) as usize;
     chk(stsc, 8 + sc * 12)?;
-    let runs: Vec<(u64, u64)> = (0..sc).map(|i| (u32be(stsc, 8 + i * 12) as u64, u32be(stsc, 12 + i * 12) as u64)).collect();
-    let mut units: Vec<&[u8]> = Vec::with_capacity(sizes.len());
+    let runs: Vec<(u64, u64)> = collect(sc, (0..sc).map(|i| (u32be(stsc, 8 + i * 12) as u64, u32be(stsc, 12 + i * 12) as u64)))?;
+    let mut units: Vec<&[u8]> = alloc(sizes.len())?;
     let mut si = 0usize;
     for (ci, &off) in offsets.iter().enumerate() {
         let chunk_no = ci as u64 + 1;
@@ -570,7 +570,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
             let Some(&sz) = sizes.get(si) else { return refuse(SOURCE_CORRUPT, "MP4 sample-to-chunk table names more samples than exist") };
             let e = p.checked_add(sz).filter(|&e| e <= b.len() as u64);
             let Some(e) = e else { return refuse(SOURCE_CORRUPT, "MP4 sample data runs past the end of the file (truncated)") };
-            units.push(&b[p as usize..e as usize]);
+            push(&mut units, &b[p as usize..e as usize])?;
             p = e;
             si += 1;
         }

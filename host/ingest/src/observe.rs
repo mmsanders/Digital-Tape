@@ -69,12 +69,19 @@ mod imp {
     pub fn before(pos: usize, l: &[f64], r: &[f64]) {
         let Some(d) = dir() else { return };
         let _ = std::fs::create_dir_all(d.join("before"));
-        let mut b = Vec::with_capacity(l.len() * 16);
-        for (a, c) in l.iter().zip(r) {
-            b.extend_from_slice(&a.to_le_bytes());
-            b.extend_from_slice(&c.to_le_bytes());
+        // Streamed through a fixed buffer: the seam must not add an allocation the
+        // bounded-memory stress would land on (an infallible one would abort).
+        let Ok(mut f) = std::fs::File::create(d.join("before").join(format!("{pos}.f64"))) else { return };
+        let mut b = [0u8; 16 * 512];
+        for (lc, rc) in l.chunks(512).zip(r.chunks(512)) {
+            for (i, (a, c)) in lc.iter().zip(rc).enumerate() {
+                b[i * 16..i * 16 + 8].copy_from_slice(&a.to_le_bytes());
+                b[i * 16 + 8..i * 16 + 16].copy_from_slice(&c.to_le_bytes());
+            }
+            if f.write_all(&b[..lc.len().min(rc.len()) * 16]).is_err() {
+                return;
+            }
         }
-        let _ = std::fs::write(d.join("before").join(format!("{pos}.f64")), b);
     }
 
     pub fn before_zero(pos: usize, frames: u64) {

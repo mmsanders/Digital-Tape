@@ -5,7 +5,7 @@ fn main() {
     let a: Vec<String> = std::env::args().collect();
     let rate: u32 = a[1].parse().unwrap();
     let out = std::path::Path::new(&a[2]);
-    let f = ingest::dsp::Fir::design(rate);
+    let f = ingest::dsp::Fir::design(rate).expect("memory");
     let mut b = Vec::new();
     for v in &f.h { b.extend_from_slice(&v.to_le_bytes()); }
     std::fs::write(out.join(format!("h{rate}.f64")), b).unwrap();

@@ -1,0 +1,131 @@
+name: ingest exhaustion correction (#457)
+
+# Software's own checks of the pinned exhaustion correction to HELD INGEST-1 candidate
+# 6126d04 (#436). Only the scopes the change touches are rerun; the full Stage1
+# campaign is skipped for this branch (ingest.yml). Judges nothing: Verification #201
+# authors the independent regression and disposes.
+#   build          tests, the shipping binary carries no observation seam, identities;
+#   shipping       the SHIPPING binary under OS memory limits, census case 1926, gated;
+#                  negative control: the uncorrected Windows kit binary must go red;
+#   heap           the TEST build under a capped allocator at every 32 KiB plus each
+#                  transition every 256 bytes, gated; negative control: 6126d04's test
+#                  build must go red;
+#   equivalence    base 6126d04 vs the correction, byte for byte on every census case
+#                  needing no seam and at most an hour (tool_version disclosed).
+on:
+  pull_request:
+    paths:
+      - 'host/ingest/**'
+      - 'tools/ingest-exhaustion/**'
+      - '.github/workflows/ingest-exhaustion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  BASE: 6126d04050133cacb9a1960a0bc13c9ee93130e5
+  # The uncorrected Windows 11 kit (run 38948012087), its ingest.exe and the 6 MiB abort.
+  KIT_RUN: '38948012087'
+  KIT_INGEST_SHA256: 0e1ef2cb4f283eb876f08019222da5d3ac744ec30d49f020a2e87323f31bcac1
+
+jobs:
+  exhaustion:
+    name: exhaustion correction (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: check out bytes exactly as committed
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE }}
+          path: base
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: source pack (the package's own fetcher)
+        run: |
+          python -m pip install -r tests/wp16_ingest_stage1/requirements.txt
+          python -B tests/wp16_ingest_stage1/check_pins.py
+          python -B tests/wp16_ingest_stage1/asset.py --destination "$RUNNER_TEMP/sources"
+      - name: build base and correction (shipping and test builds)
+        run: |
+          (cd base/host/ingest && cargo build --release --locked && cargo build --release --locked --features observe --target-dir target/observe)
+          (cd host/ingest && cargo build --release --locked && cargo build --release --locked --features observe --target-dir target/observe)
+      - name: binary identities
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          for b in base/host/ingest/target/release/ingest$ext base/host/ingest/target/observe/release/ingest$ext \
+                   host/ingest/target/release/ingest$ext host/ingest/target/observe/release/ingest$ext; do
+            s=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$b")
+            echo "$s  $b"; echo "::notice title=${{ runner.os }} $b::$s"
+          done
+          host/ingest/target/release/ingest$ext --version
+      - name: tests
+        working-directory: host/ingest
+        run: cargo test --release --locked
+      - name: shipping binary carries no observation seam
+        working-directory: host/ingest
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/check_seam.py target/release/ingest$ext target/observe/release/ingest$ext
+      - name: shipping binary under OS memory limits (gated)
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/ingest-exhaustion/shipping_exhaustion.py --package tests/wp16_ingest_stage1 \
+            --sources "$RUNNER_TEMP/sources" --bin host/ingest/target/release/ingest$ext --expect-sha256 rebuilt \
+            --out "$RUNNER_TEMP/exh/shipping" --gate
+      - name: uncorrected Windows kit binary (run 38948012087)
+        if: runner.os == 'Windows'
+        uses: actions/download-artifact@v4
+        with:
+          name: win11-kit
+          run-id: ${{ env.KIT_RUN }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/kit
+      - name: negative control - the gate goes red on the uncorrected kit binary
+        if: runner.os == 'Windows'
+        run: |
+          if python -B tools/ingest-exhaustion/shipping_exhaustion.py --package tests/wp16_ingest_stage1 \
+               --sources "$RUNNER_TEMP/sources" --bin "$RUNNER_TEMP/kit/ingest.exe" --expect-sha256 "$KIT_INGEST_SHA256" \
+               --out "$RUNNER_TEMP/exh/kit-control" --gate; then
+            echo "::error::the shipping gate stayed green on the uncorrected kit binary"; exit 1
+          fi
+          echo "negative control: gate red on the uncorrected kit binary, as required"
+      - name: test build under a capped allocator (gated)
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/ingest-exhaustion/heap_sweep.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+            --bin host/ingest/target/observe/release/ingest$ext --out "$RUNNER_TEMP/exh/heap-correction.json" --gate
+      - name: negative control - the heap gate goes red on 6126d04's test build
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          if python -B tools/ingest-exhaustion/heap_sweep.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+               --bin base/host/ingest/target/observe/release/ingest$ext --out "$RUNNER_TEMP/exh/heap-base-control.json" --gate; then
+            echo "::error::the heap gate stayed green on the uncorrected test build"; exit 1
+          fi
+          echo "negative control: heap gate red on 6126d04's test build, as required"
+      - name: equivalence with 6126d04
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/ingest-exhaustion/equivalence.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+            --base base/host/ingest/target/release/ingest$ext --new host/ingest/target/release/ingest$ext \
+            --out "$RUNNER_TEMP/exh/equivalence-${{ runner.os }}.json" --work "$RUNNER_TEMP/eqwork"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ingest-exhaustion-${{ runner.os }}
+          path: ${{ runner.temp }}/exh

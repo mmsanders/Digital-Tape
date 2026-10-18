@@ -111,14 +111,15 @@ struct Source {
 }
 
 fn read(p: &std::path::Path, logical: &str) -> Res<Vec<u8>> {
-    use std::io::Read;
     let open = observe::io_fault("read-open").and_then(|_| fs::File::open(p));
     let mut f = open.map_err(|e| Fail::io(IO_SOURCE, format!("{logical}: cannot open: {e}")).about(Subject::Source(logical.into())))?;
     let len = f.metadata().map(|m| m.len() as usize).unwrap_or(0);
     let mut b = alloc(len)?;
-    observe::io_fault("decode-read")
-        .and_then(|_| f.read_to_end(&mut b))
-        .map_err(|e| Fail::io(IO_SOURCE, format!("{logical}: cannot read: {e}")).about(Subject::Source(logical.into())))?;
+    let r = match observe::io_fault("decode-read") {
+        Ok(()) => read_into(&mut f, &mut b)?,
+        Err(e) => Err(e),
+    };
+    r.map_err(|e| Fail::io(IO_SOURCE, format!("{logical}: cannot read: {e}")).about(Subject::Source(logical.into())))?;
     Ok(b)
 }
 
@@ -153,12 +154,12 @@ fn run(a: Args) -> Res<String> {
             .about(Subject::Folder(i))
             .with(Payload { same_as: Some(*j), ..Payload::default() }));
         }
-        ids.push((id, i));
+        push(&mut ids, (id, i))?;
         let list = order::list_folder(f, i)?;
-        counts.push(list.len() as u64);
+        push(&mut counts, list.len() as u64)?;
         report::progress("list", i as u64 + 1, a.folders.len() as u64);
         for e in list {
-            sources.push(Source {
+            push(&mut sources, Source {
                 logical: e.logical,
                 path: e.path,
                 folder: i,
@@ -176,8 +177,9 @@ fn run(a: Args) -> Res<String> {
                 conv: None,
                 pcm: Vec::new(),
                 silent: false,
-            });
+            })?;
         }
+        checkpoint()?;
     }
 
     // Pass 1: decode, validate and count every source exactly.
@@ -204,6 +206,7 @@ fn run(a: Args) -> Res<String> {
             ))
             .about(Subject::Source(s.logical.clone())));
         }
+        checkpoint()?;
     }
 
     report::progress("decode", n_sources, n_sources);
@@ -237,7 +240,7 @@ fn run(a: Args) -> Res<String> {
     };
 
     // Pass 2: re-decode bound to the same bytes, convert each source alone.
-    let tp = dsp::TruePeak::new();
+    let tp = dsp::TruePeak::new()?;
     for (pos, s) in sources.iter_mut().enumerate() {
         report::progress("convert", pos as u64, n_sources);
         let bytes = read(&s.path, &s.logical)?;
@@ -260,6 +263,7 @@ fn run(a: Args) -> Res<String> {
         }
         s.pcm = b;
         s.conv = Some(convert::Converted { pcm: Vec::new(), ..c });
+        checkpoint()?;
     }
 
     report::progress("convert", n_sources, n_sources);
@@ -269,10 +273,10 @@ fn run(a: Args) -> Res<String> {
     let mut pf = None;
     for s in &sources {
         if pf.is_some() && pf != Some(s.folder) {
-            segs.push((s.start - GAP_FRAMES, GAP_FRAMES, Seg::Gap));
+            push(&mut segs, (s.start - GAP_FRAMES, GAP_FRAMES, Seg::Gap))?;
         }
         pf = Some(s.folder);
-        segs.push((s.start, s.out_frames, Seg::Src(s)));
+        push(&mut segs, (s.start, s.out_frames, Seg::Src(s)))?;
     }
     let sample = |i: i64, c: usize| -> f32 {
         if i < 0 || i as u64 >= total {
@@ -330,9 +334,11 @@ fn run(a: Args) -> Res<String> {
             }
         }
     };
-    let joined = (0..2)
-        .map(|c| tp.peak_streamed(total as i64, |start, buf| fill_channel(c, start, buf)))
-        .fold(0.0f32, f32::max);
+    let mut joined = 0.0f32;
+    for c in 0..2 {
+        joined = joined.max(tp.peak_streamed(total as i64, |start, buf| fill_channel(c, start, buf))?);
+    }
+    checkpoint()?;
     let joined_dbtp = (joined > 0.0).then(|| dsp::dbfs(joined as f64));
     observe::joined(joined_dbtp);
     let half = dsp::TP_HALF as i64;
@@ -385,25 +391,26 @@ fn run(a: Args) -> Res<String> {
     hdr.extend_from_slice(&16u16.to_le_bytes());
     hdr.extend_from_slice(b"data");
     hdr.extend_from_slice(&(data_len as u32).to_le_bytes());
-    let gap = vec![0u8; GAP_FRAMES as usize * 4];
-    let zeros = vec![0u8; 1 << 20];
-    let mut parts: Vec<&[u8]> = vec![&hdr];
+    let gap = filled(GAP_FRAMES as usize * 4, 0u8)?;
+    let zeros = filled(1 << 20, 0u8)?;
+    let mut parts: Vec<&[u8]> = alloc(1 + segs.len())?;
+    push(&mut parts, &hdr)?;
     let mut gaps = Vec::new();
     for (start, frames, seg) in &segs {
         match seg {
             Seg::Gap => {
-                parts.push(&gap);
-                gaps.push(J::obj([("frames", J::Int(*frames)), ("start_frame", J::Int(*start))]));
+                push(&mut parts, &gap)?;
+                push(&mut gaps, J::obj([("frames", J::Int(*frames)), ("start_frame", J::Int(*start))]))?;
             }
             Seg::Src(s) if s.silent => {
                 let mut left = (s.out_frames * 4) as usize;
                 while left > 0 {
                     let n = left.min(zeros.len());
-                    parts.push(&zeros[..n]);
+                    push(&mut parts, &zeros[..n])?;
                     left -= n;
                 }
             }
-            Seg::Src(s) => parts.push(&s.pcm),
+            Seg::Src(s) => push(&mut parts, &s.pcm)?,
         }
     }
     let wav_sha = sha256_hex(&parts);
@@ -476,7 +483,9 @@ fn run(a: Args) -> Res<String> {
         ("sources", srcs),
         ("gaps", J::Arr(gaps)),
     ]);
-    let manifest = m.canonical();
+    let manifest = m.canonical()?;
+    drop(m);
+    checkpoint()?;
 
     // Every decode, count, order, trim, numeric and capacity decision is made.
     observe::mark("preflight_complete");
@@ -505,10 +514,6 @@ fn run(a: Args) -> Res<String> {
         n_unknown
     ))
 }
-
-#[cfg(feature = "observe")]
-#[global_allocator]
-static HEAP: observe::CapAlloc = observe::CapAlloc;
 
 fn main() {
     if let Some(code) = observe::probe() {
