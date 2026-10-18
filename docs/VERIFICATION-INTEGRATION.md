@@ -6,6 +6,21 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
+## Current correction boundary — 17 October2026 PDT (ADR-186)
+
+- Windows441 method files carried unchanged via Software merge0b32124; nonnormative
+  proposal448 integrated35d4862. Actual physical A6 remains unaccepted.
+- Verification200 `0c1eb39e`: Windows shipping6MiB abort violates required exhaustion
+  exit1; S4 cfg(test) suffix blindness and actual parser/message misses need fixes.
+  S1 corrected same-DEST actual Linux smoke12/12PASS only; no overall clearance.
+- Corrected independent APP treebdd861b693516db2e5244660b3e99ee400d506de is published
+  with authenticated Product452 transport; import/corrections Software457 →201.
+- Verification199 `42f169f1`:63 bounded operation rows plus host-load facts PASS;
+  subset443 sampled/repeated-LBA/residue/load faults/full dup binding gaps held.
+- Original436/6126d04 receipts preserved. Michael447 old Windows INGEST kit paused
+  until corrected kit readiness; physical read-only A6 remains ready, no Mac run.
+  No unchanged campaign replay/acceptance waiver. Phase2 remains6/12.
+
 ## Latest independent boundary — 17 October2026 PDT (ADR-185)
 
 - Verification194 `b9f08bf6`: overall Windows441/a50a211 method/rehearsal PASS;
