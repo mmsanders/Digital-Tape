@@ -65,8 +65,16 @@ in `4bda3f5`. Do not use it.
 - At least 25 GB free on the work drive (the census writes two 4 GiB WAVs).
 - Internet access to github.com, codeload.github.com, raw.githubusercontent.com,
   download.sysinternals.com and PyPI.
-- No security setting is changed. `-ExecutionPolicy Bypass` on the command line
-  applies to that one PowerShell process only, as the script's own header specifies.
+- **Open for Verification: execution policy.**
+  - #461 asks for ordinary policy and no bypasses.
+  - The script's reviewed header (unchanged since 6126d04) invokes it with
+    `-ExecutionPolicy Bypass`. That flag is scoped to that one process and changes
+    no persisted setting.
+  - The Windows 11 client default policy is `Restricted`, which refuses every
+    script file, so without the flag or a policy change the script cannot start.
+  - The hosted rehearsal ran under the runner's ordinary policy with no flag.
+  - The command below keeps the header's form, pending Verification's decision.
+    Software proposes no persisted policy change.
 
 ## Proposed run (NOT READY FOR MICHAEL pending exact-kit authentication)
 
