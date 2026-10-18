@@ -382,7 +382,10 @@ def main():
     if platform.system() == "Darwin":
         m.unexecuted("R5", "memory/IO_MEMORY", "macOS enforces no ordinary-process memory limit (see #451/#457)")
     else:
-        for mib in (6, 7, 8):
+        # Limits inside each OS's measured exhaustion range for this case (ingest-exhaustion.yml
+        # on #459: Linux RLIMIT_AS exits 1 at 5-9.75 MiB, the Windows job at 2-7.75 MiB; both
+        # publish above), so every row must end IO_MEMORY.
+        for mib in ((4, 6, 7) if os.name == "nt" else (6, 7, 8)):
             w = m.case_dir()
             try:
                 one(w / "case" / "f0")
