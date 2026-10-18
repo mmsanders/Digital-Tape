@@ -170,4 +170,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-186](DECISIONS.md#adr-186--authorize-pinned-exhaustion-and-app-corrections-preserve-original-receipts) | 2026-10-17 PDT | Confirmed host/APP correction | Windows shipping exhaustion and parser/static gate fixes authorized, corrected independent import; old INGEST kit paused, physical A6 ready; rungs unchanged |
 
-123 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-187](DECISIONS.md#adr-187--prepare-the-concrete-corrected-windows-kit-before-authenticating-its-pins) | 2026-10-17 PDT | Windows kit preparation sequence | Fresh Software461 prepares/pins corrected459 kit, Verification204 authenticates before Michael readiness; old kit paused, all package holds/rungs unchanged |
+
+124 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

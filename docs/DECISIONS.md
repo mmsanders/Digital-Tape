@@ -4071,3 +4071,34 @@ ordinary-security/elevation, physical/full-package, frozen/write/async/batching/
 firmware/hardware/media/atomicity/target<30s holds survive. Stop at durable status/
 dashboard and fresh handoffs. Reversal cost: reassignment/new exact candidate;
 existing contracts and original evidence are unchanged.
+
+
+## ADR-187 — prepare the concrete corrected Windows kit before authenticating its pins
+
+**Date:** 17 October2026 PDT. **Owner:** PM460, Michael explicitly approves proceeding.
+Input main24672d37552206f1c8b1288c67161e59b108cbd5. [Verification203](https://github.com/mmsanders/digital-tape-verification/commit/9997bc1c388796283dc138d8bf6e6200e02cc390)
+is merged; exact-head normal CI39102344419 SUCCESS. Corrected459 source
+50bc4160f6da527da8c684d05264f99815aaa870 has bounded exhaustion correction PASS;
+S1/b9f430c and S4/ecca8c1 parser/static/import corrections also pass within203's
+stated scope. Full/base/native/physical/integration clearance is not supplied.
+
+**Decision:** preparation readiness and concrete-kit authentication are successive
+steps. Software may build/package/pin the corrected kit NOW; authentication cannot
+precede existence of the exact binaries/script/archive/transport. Verification then
+authenticates actual packaged bytes and clears collection. Only then do new ready
+commands supersede Michael447's paused old kit. No circular precondition remains.
+
+Closed457 remains closed. Fresh Software461 explicitly authorizes this bounded
+kit preparation/rehearsal and direct handoff to fresh Verification204 for concrete
+kit authentication/readiness publication. Exact hashes/provenance/durable transport
+are required; no use of an independent rebuild hash as the packaged executable's
+identity. Necessary source behavior changes require a newly pinned review, not a
+silent change under50bc416. No Product merge or source acceptance follows.
+
+Old6126d04 kit/instructions/evidence remain preserved and PAUSED. Read-only physical
+A6 readiness is unchanged; no Mac/security/purchase/new physical request. Prior
+correction/source/output receipts carry, no unchanged full campaign or PM relay
+round. Phase1 remains36/36, Phase2 remains6/12;203's report-fault/ID/platform/native/
+base/full-package gaps and all frozen/write/batching/async/firmware/hardware/media/
+atomicity/target<30s holds survive. Stop at fresh role handoff and durable dashboard.
+Reversal cost: cancel preparation; no contract, product code or physical act changes.

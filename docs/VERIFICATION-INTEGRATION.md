@@ -6,6 +6,15 @@ P1-R1 through P1-R24 in [the verification integration history](archive/verificat
 and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
 (original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
 
+## Latest bounded correction — 17 October2026 PDT (ADR-187)
+
+Verification203 `9997bc1c` passes corrected459/50bc416 shipping exhaustion,
+454/b9f430c receipts and455/ecca8c1 parser/static/import within published bounds.
+No overall Product/integration/base/full-package PASS. Software461 prepares the
+concrete replacement kit before Verification204 authenticates its actual pins;
+Michael447 stays paused until that clearance. Existing remaining faults/IDs/
+platform/native/physical holds and Phase2 6/12 survive. No old-campaign replay.
+
 ## Current correction boundary — 17 October2026 PDT (ADR-186)
 
 - Windows441 method files carried unchanged via Software merge0b32124; nonnormative
