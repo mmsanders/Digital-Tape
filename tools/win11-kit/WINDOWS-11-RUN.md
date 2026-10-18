@@ -10,8 +10,8 @@ unchanged. Michael #447's old kit stays PAUSED.
 
 | Item | Value |
 |---|---|
-| Candidate (source of the binaries and the transport) | `50bc4160f6da527da8c684d05264f99815aaa870` (#459, ingest 0.1.1), tree `ea0c9ae717a8478ca357fd01186f2a4d912a1193` |
-| Collection script | `host/ingest/stage1/win11_packet.ps1` at the candidate, SHA-256 `9d8506670df30bbbc547c6c5757d9370e152ed55cfa4cd8378bd9e1f1337f502` (byte-identical to the 6126d04 script) |
+| Candidate (source of the binaries, the profile and the transport files `run_packet.py`, `observers.py`, `summarize_packet.py`) | `50bc4160f6da527da8c684d05264f99815aaa870` (#459, ingest 0.1.1), tree `ea0c9ae717a8478ca357fd01186f2a4d912a1193` |
+| Collection script (its own source, **not** the candidate) | `tools/win11-kit/win11_packet.ps1` at Product commit `e1e06fc599177872b4f5d39d46f59c8952d1c108` (#463), SHA-256 `74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e`. It is the reviewed 6126d04/50bc416 script (`9d850667…`) with the two Verification #204 corrections only; every Process Monitor and transport pin is unchanged |
 | Kit | `win11-kit.zip`, 2,604,482 bytes, SHA-256 `ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865` |
 | Shipping `ingest.exe` | 848,384 bytes, SHA-256 `d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b`, `ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4` |
 | Observation `observe/ingest.exe` | 956,928 bytes, SHA-256 `d544b6f5c82e653842625080a87ac63cb52353aaeca62494dd5d08eedb844d9a`, same version line, built with `--features observe` |
@@ -46,7 +46,9 @@ in `4bda3f5`. Do not use it.
   name, size and SHA-256) and `SHA256SUMS`.
   Release assets do not expire. The run artifact `win11-kit-461` (ID 12127927028)
   is a backup copy only and expires on 2027-01-16.
-- Script: <https://raw.githubusercontent.com/mmsanders/Digital-Tape/50bc4160f6da527da8c684d05264f99815aaa870/host/ingest/stage1/win11_packet.ps1>
+- Script: <https://raw.githubusercontent.com/mmsanders/Digital-Tape/e1e06fc599177872b4f5d39d46f59c8952d1c108/tools/win11-kit/win11_packet.ps1>.
+  The original `host/ingest/stage1/win11_packet.ps1` at the candidate (`9d850667…`) is historical
+  and is not used.
 - Both downloads are anonymous; no GitHub sign-in is needed.
 
 ## Prerequisites and host scope
@@ -65,16 +67,11 @@ in `4bda3f5`. Do not use it.
 - At least 25 GB free on the work drive (the census writes two 4 GiB WAVs).
 - Internet access to github.com, codeload.github.com, raw.githubusercontent.com,
   download.sysinternals.com and PyPI.
-- **Open for Verification: execution policy.**
-  - #461 asks for ordinary policy and no bypasses.
-  - The script's reviewed header (unchanged since 6126d04) invokes it with
-    `-ExecutionPolicy Bypass`. That flag is scoped to that one process and changes
-    no persisted setting.
-  - The Windows 11 client default policy is `Restricted`, which refuses every
-    script file, so without the flag or a policy change the script cannot start.
-  - The hosted rehearsal ran under the runner's ordinary policy with no flag.
-  - The command below keeps the header's form, pending Verification's decision.
-    Software proposes no persisted policy change.
+- **Execution policy: the existing one, never overridden** (Verification #204).
+  The command runs `powershell.exe -NoProfile -File` under whatever policy the
+  machine already has. No `-ExecutionPolicy` flag, no policy change and no other
+  way of running the file's contents. If PowerShell refuses to run the file because
+  of the policy, stop there and report the exact error to Verification.
 
 ## Proposed run (NOT READY FOR MICHAEL pending exact-kit authentication)
 
@@ -87,15 +84,15 @@ $t = "win11-kit-ingest-0.1.1-50bc4160f6da-r39104751447-1"
 Invoke-WebRequest -UseBasicParsing -OutFile "$d\win11-kit.zip" `
   -Uri "https://github.com/mmsanders/Digital-Tape/releases/download/$t/win11-kit.zip"
 Invoke-WebRequest -UseBasicParsing -OutFile "$d\win11_packet.ps1" `
-  -Uri "https://raw.githubusercontent.com/mmsanders/Digital-Tape/50bc4160f6da527da8c684d05264f99815aaa870/host/ingest/stage1/win11_packet.ps1"
+  -Uri "https://raw.githubusercontent.com/mmsanders/Digital-Tape/e1e06fc599177872b4f5d39d46f59c8952d1c108/tools/win11-kit/win11_packet.ps1"
 (Get-FileHash "$d\win11-kit.zip" -Algorithm SHA256).Hash     # must be FFB0F78AC3980FA1BB130F0AFF22D53EBB100ED3323A8E50BA62A6EE1819C865
-(Get-FileHash "$d\win11_packet.ps1" -Algorithm SHA256).Hash  # must be 9D8506670DF30BBBC547C6C5757D9370E152ED55CFA4CD8378BD9E1F1337F502
+(Get-FileHash "$d\win11_packet.ps1" -Algorithm SHA256).Hash  # must be 74E1AF2CB91A3F9B418363941C48A60EEE972481A32CBB9AF22D8F3060318F9E
 ```
 
 If either hash differs, stop and report it. Otherwise:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "$d\win11_packet.ps1" `
+powershell.exe -NoProfile -File "$d\win11_packet.ps1" `
   -Candidate 50bc4160f6da527da8c684d05264f99815aaa870 -Kit "$d\win11-kit.zip" `
   -ShippingSha256 d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b `
   -ObserveSha256 d544b6f5c82e653842625080a87ac63cb52353aaeca62494dd5d08eedb844d9a
@@ -106,17 +103,23 @@ defaults to the Desktop.
 
 ## Stop behaviour and output
 
-- **Stops:** any check that fails prints `STOPPED: <reason>` in red and exits 1.
-  The checks are, in order:
+- **Guard stops** print `STOPPED: <reason>` in red and exit nonzero. In order:
   - Administrator, Windows 11 client, x64, and 25 GB free;
   - Python 3.12 present, and the work folder new;
   - the candidate's transport file hashes;
   - the shipping and observation hashes;
   - the Process Monitor hash and signature;
-  - pip, `check_pins.py`, `asset.py` and `run_packet.py`.
-
-  A stop produces no packet. Report the red line as printed and do not retry with
-  changed values.
+  - pip, `check_pins.py`, `asset.py` and `run_packet.py` (exit 1);
+  - `summarize_packet.py` reporting a missing census record, an exit that differs
+    from its descriptor, or a shipping/observation byte difference. The script
+    then exits with the summarizer's own code, after its summary lines, and makes
+    no zip; the packet stays under `-Work`.
+- **Other failures do not all say `STOPPED`.** A policy refusal, a failed
+  download or extraction, or another PowerShell error ends with PowerShell's own
+  red error and a nonzero exit.
+- **Only a run that ends with the three success lines below has produced a packet
+  to send.** Anything else is a stop: report the whole output as printed, send no
+  zip, and do not retry with changed values.
 - **Success:** the last lines are `PACKET: <Desktop>\ingest-win11-packet-50bc4160f6da.zip`,
   `SHA256: <digest>`, and "Send this zip and its SHA256 to Verification. This run is
   an observation, not a PASS."
@@ -125,13 +128,58 @@ defaults to the Desktop.
   and the printed SHA-256 to Verification. Verification judges it, and nothing in
   this run is acceptance.
 
-## Hosted rehearsal (mechanics only, not Windows 11 qualification)
+## Hosted rehearsals (mechanics only, not Windows 11 qualification)
+
+### Corrected script
+
+`win11-kit-rehearsal.yml` run 39138302218, job 117707277552, on Windows Server 2025
+Datacenter build 26100. It ran at head `e1e06fc`. The kit was **not** rebuilt; this is
+the same authenticated release as above.
+
+- It fetched the release zip (`ffb0f78a…`), the corrected script (`74e1af2c…`) and the
+  original script (`9d850667…`) anonymously by URL, and checked all three hashes.
+- **Pins unchanged:** the corrected script's Process Monitor and transport pins are
+  byte-for-byte the original's, and it carries no execution-policy override.
+- **Full run** with `powershell.exe -NoProfile -File`, no policy flag and `-Rehearsal`:
+  - child exit 0;
+  - census 1927 of 1927, 0 unavailable, 0 missing, 0 exits differing from their
+    descriptors, 0 shipping/observation byte differences;
+  - packet `ingest-win11-packet-50bc4160f6da.zip`, 212,991,256 bytes, SHA-256
+    `9485590db66f953d9bb22290accb2d0ea332d5c6fd80827c1f4cc4117dc1bb30`.
+- **Summary controls.** Each script's own tail (its `Fail`/`Sha` functions, then
+  everything from the `summarize_packet.py` call to the end) was run on that packet
+  as it stands, and on a copy with one census case
+  (`adr180/neighbour/adts-crc-mismatch-1.aac`) dropped from `INDEX.json`:
+
+  | Script | Packet | Summary | Exit | Zip | Send line |
+  |---|---|---|---|---|---|
+  | original `9d850667…` | complete | ran 1927, missing 0 | 0 | yes | yes |
+  | original `9d850667…` | missing record | ran 1926, missing 1 | **0** | **yes** | **yes** (the defect) |
+  | corrected `74e1af2c…` | complete | ran 1927, missing 0 | 0 | yes | yes |
+  | corrected `74e1af2c…` | missing record | ran 1926, missing 1 | **1** | **no** | **no** |
+
+  The corrected run printed `STOPPED: summarize_packet.py exited 1; no zip was made.`
+  The original's pass-through is the negative control: it shows the control can
+  see the defect.
+- **Wrong-pin control** (green): `STOPPED: shipping ingest.exe is d923613b…, expected
+  0000…`, exit 1, no packet.
+- **Evidence:** the packet and `summary-controls.json` are in run artifact
+  `win11-kit-461-corrected-rehearsal` (ID 12141536738, artifact zip
+  `sha256:08fc23fdbf1c002ad5dc0406de2a2ea44308304de8b5880f5aa0f2aeca6f9716`,
+  201,322,332 bytes), which expires on 2027-01-16. It is over 1 MiB, so it stays out
+  of git.
+- The packet is labelled `windows-server-serverdatacenter/x64`, so it can never stand
+  in for the Windows 11 packet. The runner's policy is not Windows 11's.
+
+The original script's rehearsal below is kept as history only.
+
+### Original script, before the corrections (historical)
 
 `win11-kit.yml` rehearsal job, run 39104751447, on Windows Server `windows-latest`:
 
 - It fetched the published kit and the script anonymously from the URLs above and
   checked both hashes.
-- It ran the unchanged script with `-Rehearsal` and no `-ExecutionPolicy` flag.
+- It ran the original script (`9d850667…`) with `-Rehearsal` and no `-ExecutionPolicy` flag.
 - It requires a wrong shipping pin to stop with `STOPPED: shipping ingest.exe is`
   before any case runs and to produce no packet.
 - **Result** (green):
