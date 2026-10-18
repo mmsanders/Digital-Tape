@@ -443,6 +443,18 @@ def fullfs(m, fs, hundred):
             finally:
                 shutil.rmtree(w, ignore_errors=True)
         (rc, pc, oc, ec), (rf, pf, of, ef) = res["control"], res["full"]
+        if not (fs / f"{name}.jsonl").exists() and b"report: cannot create" in ef:
+            # Some filesystems (macOS HFS+ when full) refuse the leaf itself: that is the
+            # specified create failure (exit 1 before other work, nothing published),
+            # not a write failure. Judge it as such; the intended row stays UNEXECUTED.
+            ok = rf["exit"] == 1 and pf is None and of == b""
+            rf["observed_as"] = "create failure (the full filesystem refused the report leaf)"
+            rf["verdict"] = "PASS" if ok else f"FAIL: create failure with exit {rf['exit']}, pair {pf}"
+            print(f"     fullfs/{name}: observed as a create failure on this filesystem: {rf['verdict']}", flush=True)
+            m.unexecuted("R5", f"fullfs/{name}", "this filesystem refuses to create the report leaf when full, so "
+                         "the write failure cannot be set up here (recorded as a create failure instead)")
+            cleanup(fs, name)
+            continue
         extra = ef.decode("utf-8", "replace").splitlines()
         base = ec.decode("utf-8", "replace").splitlines()
         warn = [x for x in extra if x not in base]
@@ -453,8 +465,16 @@ def fullfs(m, fs, hundred):
         if not all(v for k, v in facts.items() if k != "report_bytes_written"):
             rf["verdict"] = f"FAIL: {facts}"
         print(f"     fullfs/{name}: {facts}", flush=True)
-        for p in fs.iterdir():
+        cleanup(fs, name)
+
+
+def cleanup(fs, name):
+    """Remove only what this harness created (a volume keeps its own system files)."""
+    for p in (fs / "filler", fs / f"{name}.jsonl"):
+        try:
             p.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def write_census(m):
