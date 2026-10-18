@@ -153,6 +153,8 @@ jobs:
           if ($code -eq 0 -or -not (($log | Out-String) -match 'STOPPED: shipping ingest.exe is')) { throw 'a wrong shipping pin did not stop the script' }
           if (Test-Path (Join-Path $base 'work-control\packet')) { throw 'the control produced a packet' }
           Write-Host 'negative control: the wrong pin stopped the script, as required'
+          # pwsh would otherwise end the step with the child's exit code 1.
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
