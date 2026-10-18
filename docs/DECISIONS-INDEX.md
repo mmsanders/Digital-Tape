@@ -168,4 +168,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-185](DECISIONS.md#adr-185--resolve-software444-q1q7-and-issue-app-1a-host-interface) | 2026-10-17 PDT | APP-1A / Software444 answers | Closed host annex; discovery hints separated from exact destructive authorization; Windows method PASS carried, host supplements/APP work routed; Phase2 6/12 |
 
-122 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-186](DECISIONS.md#adr-186--authorize-pinned-exhaustion-and-app-corrections-preserve-original-receipts) | 2026-10-17 PDT | Confirmed host/APP correction | Windows shipping exhaustion and parser/static gate fixes authorized, corrected independent import; old INGEST kit paused, physical A6 ready; rungs unchanged |
+
+123 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

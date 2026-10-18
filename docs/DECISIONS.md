@@ -4008,3 +4008,66 @@ to reaccept identical bytes. Stop at durable issuance/dashboard/handoffs. Frozen
 engine/format/write/batching/async/firmware, Q-P2-1(b), target<30s, hardware park,
 media/atomicity, full-platform/physical/full-package and reserved holds survive.
 Reversal cost: interface amendment before frozen app tests; no product code changes.
+
+
+## ADR-186 — authorize pinned exhaustion and APP corrections, preserve original receipts
+
+**Date:** 17 October2026 PDT. **Owner:** PM456, Michael's explicit unblock.
+Input main `35d4862892b276226d0851f89436b1dcf5560f37`. Software451/452 returned
+453/23f5a18,454/ea445e1,455/8e7b39e. Independent [Verification200](https://github.com/mmsanders/digital-tape-verification/commit/0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6)
+is merged, exact publication-head CI39075021788 SUCCESS. Normal PM authority;
+no product-code implementation/review/merge or independent acceptance supplied.
+
+**Decision — correct, do not relax.** Windows shipping ingest0e1ef2cb at the held
+6126d04 baseline aborts0xC0000409 under the authenticated6MiB Job limit while
+same-limit version succeeds. Clean cleanup does not satisfy INGEST-1's required
+exhaustion exit1. Authorize Software457 to make a separately pinned host allocation/
+error-propagation correction with actual shipping/loader/adjacent-bound/unlimited
+controls and cleanup. Preserve original436/6126d04 and all submitted receipts;
+no silent replacement. Audit sibling host allocations, no exit wrapper or fake
+status. Successful AP4 arithmetic/output behavior stays unchanged; new shipping
+build/hash is required. If normal audio/manifest changes, return the concrete
+mismatch/profile question. No engine/port/format change is issued.
+
+**APP correction/import.** Verification200's static cfg-scoping blind spot and
+actual parser/message failures require correction, not spec amendments. Ordinary
+shipping functions after cfg(test) remain in gate scope; preserve ordinary-file
+positives and all three real source-mutant negatives. Validate issued report
+subjects/JSON/NFC/ordinal/path constraints and generic fallback for invalid input,
+while retaining the admitted JOINED_PEAK boundary case. Independent package is
+already published: corrected tree `bdd861b693516db2e5244660b3e99ee400d506de` at
+Verification200. Product452 has authenticated original archive plus exact single-
+file correction. Access failure is not nonpublication or permission to invent tests.
+Import verbatim, with adapters separate; no historical rewrite of lawful host work.
+
+The S1 different-DEST stdout assertion was a Verification harness defect, withdrawn;
+carry corrected12/12 actual Linux process PASS at454/ea445e1 and its exact binary
+hash94e70504. Full ADAPTER evidence/import/underlying436 holds remain. Separate
+S1/S4 corrected heads/child pins from original submissions and the exhaustion fix;
+only explicit exact-head independent PASS, required CI and accepted dependencies
+license Software integration. S2/S3 remain unissued by this bounded correction.
+
+**Current independent/merge boundary.** Software integrated the disposed441 files
+unchanged via0b32124 after up-to-date green CI;448 snapshot integrated35d4862.
+Windows A6 method readiness is not physical qualification. [Verification199](https://github.com/mmsanders/digital-tape-verification/commit/42f169f1b5448bc646a2b181ced51c14e385017c)
+passes63 bounded scenario rows plus host-load facts; no new engine defect or
+unchanged campaign rerun. Subset443 remains held on sampled/repeated-LBA/residue,
+404 host faults/command detail and full dup-source/PCM binding scope. Q-P2-1(b)
+is still a PM decision before firmware; no batching permission follows.
+
+**Readiness/routing/stop.** Software457 owns pinned host/import/parser/gate correction;
+Verification201 authors the independent exhaustion regression, then disposes fresh
+actual heads directly. Existing published oracles/valid receipts carry; no PM relay
+or wholesale unchanged numerical campaign. Pause Michael447's OLD Windows INGEST
+kit pending a corrected independently collection-ready kit, to avoid duplicate client
+runs. Preserve any already-collected old packet as useful evidence, never discard it
+or automatically demand a repeat. Physical read-only A6 instructions stay ready,
+Mac has no new run, no new physical campaign/security/purchase request.
+
+Phase1 remains36/36; Phase2 **6/12** (WP14=3,WP16=2,WP15=1). S1/S4 authored slice
+coverage/candidates do not establish full APP coverage, merged implementation or
+acceptance. Native failed-open visibility, Mac shipping exhaustion, actual Windows11,
+ordinary-security/elevation, physical/full-package, frozen/write/async/batching/
+firmware/hardware/media/atomicity/target<30s holds survive. Stop at durable status/
+dashboard and fresh handoffs. Reversal cost: reassignment/new exact candidate;
+existing contracts and original evidence are unchanged.
