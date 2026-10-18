@@ -202,7 +202,7 @@ def census_case(m, case, binary, row):
         folders = folder_args(tail)
         limit = None
         if case["id"] == "resources/exhaustion":
-            ex_ = rp.EXHAUST[rp.platform_id()[0]]
+            ex_ = rp.EXHAUST["windows" if os.name == "nt" else "macos" if sys.platform == "darwin" else "linux"]
             if ex_["method"].startswith("INGEST_HEAP_LIMIT"):
                 env = dict(env or {}, INGEST_HEAP_LIMIT=str(ex_["bytes"]))
             else:
