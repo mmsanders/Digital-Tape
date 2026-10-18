@@ -81,7 +81,7 @@ pub fn run(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Ar
     let stderr = reader.join().unwrap_or_default();
     let exit = status.code();
     let reading = match (exit, std::fs::read(&report_path)) {
-        (Some(e), Ok(b)) => report::read(&b, Tool::Ingest, &nonce, version, e),
+        (Some(e), Ok(b)) => report::read(&b, Tool::Ingest, &nonce, version, e, folders.len()),
         _ => Reading::Unusable("no report"),
     };
     // APP-1A §1: ingest exit 0 also requires its published pair.

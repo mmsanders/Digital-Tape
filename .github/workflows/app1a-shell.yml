@@ -1,15 +1,19 @@
-name: APP-1A S4 app shell (#452)
+name: APP-1A S4 app shell (#452, #457)
 
-# The one-window app shell (host/app): G1 static check with its negative control, unit
-# tests, the child binding against a REAL ingest with the APP-1A report (S1 candidate,
-# pinned below by commit), a release build per platform, and a Linux window launch.
-# Judges nothing; Verification #196 authors and runs the tests that dispose it.
+# The one-window app shell (host/app): G1 static check with its self-test, its planted
+# negative tree and Verification's own static_controls.py on every app Rust file; unit
+# tests; Verification's parser package (tests/wp15_app1a_r1, tree bdd861b6) through the
+# app's actual report parser and message choice; the child binding against a REAL
+# ingest with the APP-1A report (S1 candidate, pinned below by commit); a release build
+# per platform; and a Linux window launch.
+# Judges nothing; Verification #201 authors and runs the tests that dispose it.
 # Card discovery (S2) and make (S3) are not built; nothing here exercises them.
 on:
   pull_request:
     paths:
       - 'host/app/**'
       - 'tools/app1a/**'
+      - 'tests/wp15_app1a_r1/**'
       - '.github/workflows/app1a-shell.yml'
   workflow_dispatch:
 
@@ -17,8 +21,9 @@ permissions:
   contents: read
 
 env:
-  S1_COMMIT: c782f4e53136e3aa33301bba3b8d923fadc581f5
-  INGEST_VERSION: 0.1.0 INGEST-1 arithmetic-profile INGEST1-AP4
+  # S1 report candidate on the INGEST 0.1.1 exhaustion correction (#454 on #459).
+  S1_COMMIT: 35b23cacae886d9b3693b7104f581d8646ea5667
+  INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
 
 jobs:
   g1-static:
@@ -29,8 +34,23 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - run: python3 -B tools/app1a/g1_static.py --root host/app
+      - name: self-test (device opens in the shapes a first-marker split or line comments would hide)
+        run: python3 -B tools/app1a/g1_static.py --selftest
       - name: negative control (every rule must fire on the planted tree)
         run: python3 -B tools/app1a/g1_static.py --root tools/app1a/fixtures/g1-negative --require-rules G1-DEV,G1-FS,G1-CHILD,G1-PAGE,G1-CAP
+      - name: Verification's static_controls.py, appended to every app Rust file
+        run: |
+          mkdir -p "$RUNNER_TEMP/g1"
+          for e in $(cd host/app && ls src/*.rs examples/*.rs); do
+            echo "== $e"
+            python3 -B tests/wp15_app1a_r1/static_controls.py --out "$RUNNER_TEMP/g1/$(basename $e).json" host/app "$e" \
+              -- python3 -B "$PWD/tools/app1a/g1_static.py"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app1a-g1-static-controls
+          path: ${{ runner.temp }}/g1
 
   build:
     name: shell build and child binding (${{ matrix.os }})
@@ -63,6 +83,18 @@ jobs:
       - name: unit tests and child binding
         working-directory: host/app
         run: cargo test --locked
+      - name: Verification's parser package through the app's parser and message choice
+        run: |
+          (cd host/app && cargo build --release --locked --example parser_adapter)
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python3 -B tools/app1a/parser_binding.py --adapter host/app/target/release/examples/parser_adapter$ext \
+            --adapter-source host/app/examples/parser_adapter.rs \
+            --build-command "cargo build --release --locked --example parser_adapter" --out "$RUNNER_TEMP/parser"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app1a-parser-binding-${{ runner.os }}
+          path: ${{ runner.temp }}/parser
       - name: release build
         working-directory: host/app
         run: |

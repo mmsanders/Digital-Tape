@@ -18,10 +18,17 @@ and 12). Tauri 2 shell; the page is plain HTML/CSS/JS with no plugins.
 for independent feasibility preflight. The card line says so, and Make cartridge is
 never enabled. No native permission or elevation exists in this build.
 
-G1: `tools/app1a/g1_static.py` fails on any device name or API, any file-system call
-outside the allowed modules or with a path not derived from that module's own root,
-any process launch but the pinned child, and any page or capability access to files,
-shells or processes. Its negative control is `tools/app1a/fixtures/g1-negative`.
+G1: `tools/app1a/g1_static.py` fails on any device name or API, any non-literal
+file-system path outside the allowed modules or not derived from that module's own root
+(a literal path is judged by its device names), any process launch but the pinned
+child, and any page or capability access to files, shells or processes. `#[cfg(test)]`
+exempts only the one item it applies to; comments are stripped by a string-aware lexer.
+Its controls: `--selftest`, the planted tree `tools/app1a/fixtures/g1-negative`, and
+Verification's `tests/wp15_app1a_r1/static_controls.py` on every app Rust file.
+
+The report reader and message choice (`report::read`, `messages::choose`) are run against
+Verification's parser package by `examples/parser_adapter.rs` and
+`tools/app1a/parser_binding.py` (ingest rows; cards/make rows are S2/S3's).
 
 ```
 cargo test                    # unit tests; tests/child_binding.rs needs DT_TEST_INGEST(_VERSION)

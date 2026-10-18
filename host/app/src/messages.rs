@@ -39,44 +39,74 @@ pub fn too_long(excess_frames: u64) -> String {
     }
 }
 
-/// The ingest message for an actual exit and its report reading. `folder_name(i)` is
-/// the dropped folder's own name for ordinal i; the app never shows full paths.
+/// Which ingest message applies (APP-1A §3), before any name is filled in. Exit 0 is
+/// success only with the published pair; an unusable report or an ID without its own
+/// row is the generic failure.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Choice {
+    Success,
+    Generic,
+    /// Excess in whole seconds, rounded up.
+    Overage(u64),
+    Protected(Subject),
+    FolderNonMusic(Subject),
+    Unusable(Subject),
+}
+
+pub fn choose(exit: i32, reading: &Reading, pair: bool) -> Choice {
+    if exit == 0 {
+        return if pair { Choice::Success } else { Choice::Generic };
+    }
+    let Reading::Usable { refusal: Some(r), .. } = reading else { return Choice::Generic };
+    let s = r.subject.clone();
+    match r.id.as_str() {
+        "INGEST_TOO_LONG" => match r.payload.get("excess_frames").and_then(|v| v.as_u64()) {
+            Some(e) => Choice::Overage(e.div_ceil(44100)),
+            None => Choice::Generic,
+        },
+        "SOURCE_PROTECTED" => Choice::Protected(s),
+        "SOURCE_NOT_AUDIO" | "ENTRY_NOT_REGULAR" | "ENTRY_NESTED_FOLDER" | "ENTRY_SYMLINK" | "FOLDER_SYMLINK" | "FOLDER_EMPTY" => {
+            Choice::FolderNonMusic(s)
+        }
+        "SOURCE_CORRUPT" | "SOURCE_OUTSIDE_INGEST1" | "SOURCE_TRIM_UNSUPPORTED" | "SOURCE_LEVEL" | "SOURCE_NON_FINITE"
+        | "IO_SOURCE" | "SOURCE_TOO_SHORT" | "SOURCE_CHANGED" | "ENTRY_NAME_INVALID" | "FOLDER_NAME_COLLISION"
+        | "FOLDER_NAME_NOT_UNICODE" => Choice::Unusable(s),
+        _ => Choice::Generic,
+    }
+}
+
+/// The sentence for a nonzero ingest exit and its report reading (None for exit 0).
+/// `folder_name(i)` is the dropped folder's own name for ordinal i; the app never
+/// shows full paths.
 pub fn ingest(exit: i32, reading: &Reading, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
     if exit == 0 {
         return None;
     }
-    let Reading::Usable { refusal: Some(r), .. } = reading else { return Some(GENERIC_INGEST.into()) };
-    Some(ingest_refusal(r, folder_name).unwrap_or_else(|| GENERIC_INGEST.into()))
+    Some(render(&choose(exit, reading, false), folder_name).unwrap_or_else(|| GENERIC_INGEST.into()))
 }
 
-fn ingest_refusal(r: &Refusal, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
-    let file = || match &r.subject {
+fn render(c: &Choice, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
+    let file = |s: &Subject| match s {
         Subject::Source { name, .. } => Some(name.clone()),
         _ => None,
     };
-    let folder = || match &r.subject {
+    let folder = |s: &Subject| match s {
         Subject::Source { ordinal, .. } | Subject::Folder(ordinal) => folder_name(*ordinal),
         _ => None,
     };
-    let id = r.id.as_str();
-    Some(match id {
-        "INGEST_TOO_LONG" => format!(
+    Some(match c {
+        Choice::Success => return None,
+        Choice::Generic => GENERIC_INGEST.into(),
+        Choice::Overage(secs) => format!(
             "This music is {} too long for a 60-minute cartridge. Take some songs out and drop the folder again.",
-            too_long(r.payload["excess_frames"].as_u64()?)
+            too_long(secs * 44100)
         ),
-        "SOURCE_PROTECTED" => format!("\"{}\" is copy-protected, so it can't go on a cartridge. Take it out of the folder.", file()?),
-        "SOURCE_CORRUPT" | "SOURCE_OUTSIDE_INGEST1" | "SOURCE_TRIM_UNSUPPORTED" | "SOURCE_LEVEL" | "SOURCE_NON_FINITE"
-        | "IO_SOURCE" => format!("\"{}\" can't be used. Take it out of the folder.", file()?),
-        "SOURCE_NOT_AUDIO" | "ENTRY_NOT_REGULAR" | "ENTRY_NESTED_FOLDER" | "ENTRY_SYMLINK" | "FOLDER_SYMLINK" | "FOLDER_EMPTY" => {
-            format!("The folder \"{}\" has something in it that isn't music. Use a folder with only songs in it.", folder()?)
+        Choice::Protected(s) => format!("\"{}\" is copy-protected, so it can't go on a cartridge. Take it out of the folder.", file(s)?),
+        Choice::FolderNonMusic(s) => {
+            format!("The folder \"{}\" has something in it that isn't music. Use a folder with only songs in it.", folder(s)?)
         }
-        "SOURCE_TOO_SHORT" | "SOURCE_CHANGED" | "ENTRY_NAME_INVALID" => {
-            format!("\"{}\" can't be used. Take it out of the folder.", file()?)
-        }
-        "FOLDER_NAME_COLLISION" | "FOLDER_NAME_NOT_UNICODE" => {
-            format!("\"{}\" can't be used. Take it out of the folder.", folder()?)
-        }
-        _ => return None,
+        Choice::Unusable(s @ Subject::Source { .. }) => format!("\"{}\" can't be used. Take it out of the folder.", file(s)?),
+        Choice::Unusable(s) => format!("\"{}\" can't be used. Take it out of the folder.", folder(s)?),
     })
 }
 
@@ -116,7 +146,8 @@ mod tests {
             ingest(2, &refusal("SOURCE_NOT_AUDIO", s, json!({})), &names).unwrap(),
             "The folder \"Bedtime\" has something in it that isn't music. Use a folder with only songs in it."
         );
-        assert_eq!(ingest(2, &refusal("JOIN_PEAK", Subject::Boundary(0, 1), json!({})), &names).unwrap(), GENERIC_INGEST);
+        let b = Subject::Boundary((0, "a.wav".into()), (1, "b.wav".into()));
+        assert_eq!(ingest(2, &refusal("JOIN_PEAK", b, json!({})), &names).unwrap(), GENERIC_INGEST);
         assert_eq!(ingest(1, &Reading::Unusable("x"), &names).unwrap(), GENERIC_INGEST);
         assert_eq!(ingest(0, &Reading::Unusable("x"), &names), None);
     }

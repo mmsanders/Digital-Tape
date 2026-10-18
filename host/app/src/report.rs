@@ -3,7 +3,9 @@
 //! ID-specific message; it never turns a failure into success and never authorizes
 //! anything. Every rule that makes a report unusable falls back to the exit alone.
 
+use serde::de::{self, Deserialize, Deserializer, MapAccess, SeqAccess, Visitor};
 use serde_json::{Map, Value};
+use unicode_normalization::is_nfc;
 
 /// The bundled child a report came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,7 +60,19 @@ pub enum Subject {
     /// `ordinal/NFC_name`, split.
     Source { ordinal: usize, name: String },
     Folder(usize),
-    Boundary(usize, usize),
+    /// Two neighbouring source logical paths, as (ordinal, name) pairs.
+    Boundary((usize, String), (usize, String)),
+}
+
+impl Subject {
+    /// The subject exactly as the report wrote it (None for null or a boundary).
+    pub fn text(&self) -> Option<String> {
+        match self {
+            Subject::Source { ordinal, name } => Some(format!("{ordinal}/{name}")),
+            Subject::Folder(i) => Some(i.to_string()),
+            Subject::None | Subject::Boundary(..) => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -86,34 +100,119 @@ fn counter(v: Option<&Value>) -> Option<u64> {
     v.and_then(Value::as_u64).filter(|&n| n <= (1u64 << 53) - 1)
 }
 
-fn logical(v: &Value) -> Option<(usize, String)> {
-    let s = v.as_str()?;
-    let (o, name) = s.split_once('/')?;
-    if o.is_empty() || !o.bytes().all(|c| c.is_ascii_digit()) || name.is_empty() || (o.len() > 1 && o.starts_with('0')) {
-        return None;
-    }
-    Some((o.parse().ok()?, name.to_string()))
-}
-
-fn ordinal(v: &Value) -> Option<usize> {
-    let s = v.as_str()?;
+/// A decimal ordinal string naming one of the `folders` dropped folders.
+fn ordinal_str(s: &str, folders: usize) -> Option<usize> {
     if s.is_empty() || !s.bytes().all(|c| c.is_ascii_digit()) || (s.len() > 1 && s.starts_with('0')) {
         return None;
     }
-    s.parse().ok()
+    s.parse().ok().filter(|&i| i < folders)
+}
+
+fn ordinal(v: &Value, folders: usize) -> Option<usize> {
+    ordinal_str(v.as_str()?, folders)
+}
+
+/// An INGEST logical path `ordinal/NFC_name`: a dropped folder's ordinal and one plain
+/// NFC basename (no separator, no `.`/`..`, no NUL).
+fn logical(v: &Value, folders: usize) -> Option<(usize, String)> {
+    let (o, name) = v.as_str()?.split_once('/')?;
+    let o = ordinal_str(o, folders)?;
+    if name.is_empty() || name == "." || name == ".." || name.contains(['/', '\\', '\0']) || !is_nfc(name) {
+        return None;
+    }
+    Some((o, name.to_string()))
+}
+
+fn boundary(v: &Value, folders: usize) -> Option<Subject> {
+    let a = v.as_array().filter(|a| a.len() == 2)?;
+    Some(Subject::Boundary(logical(&a[0], folders)?, logical(&a[1], folders)?))
+}
+
+/// No insignificant whitespace: none outside string literals (APP-1A §1).
+fn compact(line: &str) -> bool {
+    let (mut quoted, mut escaped) = (false, false);
+    for c in line.chars() {
+        if quoted {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                quoted = false;
+            }
+        } else if c == '"' {
+            quoted = true;
+        } else if matches!(c, ' ' | '\t' | '\r' | '\n') {
+            return false;
+        }
+    }
+    true
+}
+
+/// A JSON value walked only to refuse a repeated key in any object (serde_json's map
+/// would silently keep the last).
+struct Unique;
+
+impl<'de> Deserialize<'de> for Unique {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        d.deserialize_any(UniqueVisitor)
+    }
+}
+
+struct UniqueVisitor;
+
+impl<'de> Visitor<'de> for UniqueVisitor {
+    type Value = Unique;
+    fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str("a JSON value")
+    }
+    fn visit_bool<E>(self, _: bool) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_i64<E>(self, _: i64) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_u64<E>(self, _: u64) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_f64<E>(self, _: f64) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_str<E>(self, _: &str) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_unit<E>(self) -> Result<Unique, E> {
+        Ok(Unique)
+    }
+    fn visit_seq<A: SeqAccess<'de>>(self, mut a: A) -> Result<Unique, A::Error> {
+        while a.next_element::<Unique>()?.is_some() {}
+        Ok(Unique)
+    }
+    fn visit_map<A: MapAccess<'de>>(self, mut a: A) -> Result<Unique, A::Error> {
+        let mut seen = std::collections::HashSet::new();
+        while let Some(k) = a.next_key::<String>()? {
+            if !seen.insert(k) {
+                return Err(de::Error::custom("duplicate key"));
+            }
+            a.next_value::<Unique>()?;
+        }
+        Ok(Unique)
+    }
 }
 
 /// Validate an ingest refusal's subject and payload against APP-1A §2.
-fn ingest_refusal(id: &str, m: &Map<String, Value>) -> Option<Refusal> {
+fn ingest_refusal(id: &str, m: &Map<String, Value>, folders: usize) -> Option<Refusal> {
     let subj = m.get("subject")?;
     let subject = if SOURCE_SUBJECT.contains(&id) {
-        let (o, n) = logical(subj)?;
+        let (o, n) = logical(subj, folders)?;
         Subject::Source { ordinal: o, name: n }
     } else if FOLDER_SUBJECT.contains(&id) {
-        Subject::Folder(ordinal(subj)?)
+        Subject::Folder(ordinal(subj, folders)?)
     } else if id == "JOIN_PEAK" {
-        let a = subj.as_array().filter(|a| a.len() == 2)?;
-        Subject::Boundary(logical(&a[0])?.0, logical(&a[1])?.0)
+        // Two different neighbouring sources.
+        boundary(subj, folders).filter(|b| matches!(b, Subject::Boundary(x, y) if x != y))?
+    } else if id == "JOINED_PEAK" && !subj.is_null() {
+        boundary(subj, folders)?
     } else if subj.is_null() {
         Subject::None
     } else {
@@ -140,7 +239,7 @@ fn ingest_refusal(id: &str, m: &Map<String, Value>) -> Option<Refusal> {
             }
         }
         "FOLDER_DUPLICATE" => {
-            let j = ordinal(m.get("same_as")?)?;
+            let j = ordinal(m.get("same_as")?, folders)?;
             if !matches!(subject, Subject::Folder(i) if j < i) {
                 return None;
             }
@@ -162,15 +261,22 @@ fn ingest_refusal(id: &str, m: &Map<String, Value>) -> Option<Refusal> {
     Some(Refusal { id: id.to_string(), subject, payload })
 }
 
-/// Read `bytes` as the report of `tool`, launched with `nonce`, whose pinned version
-/// string is `version`, and which actually exited with `exit`.
-pub fn read(bytes: &[u8], tool: Tool, nonce: &str, version: &str, exit: i32) -> Reading {
+/// Read `bytes` as the report of `tool`, launched with `nonce` over `folders` dropped
+/// folders, whose pinned version string is `version`, and which actually exited with
+/// `exit`.
+pub fn read(bytes: &[u8], tool: Tool, nonce: &str, version: &str, exit: i32, folders: usize) -> Reading {
     use Reading::Unusable as U;
     // An unterminated final line is ignored; the rest is judged.
     let Some(end) = bytes.iter().rposition(|&b| b == b'\n') else { return U("empty or unterminated") };
     let Ok(text) = std::str::from_utf8(&bytes[..end]) else { return U("not UTF-8") };
     let mut recs = Vec::new();
     for l in text.split('\n') {
+        if !compact(l) {
+            return U("insignificant whitespace");
+        }
+        if serde_json::from_str::<Unique>(l).is_err() {
+            return U("malformed record or repeated key");
+        }
         match serde_json::from_str::<Value>(l) {
             Ok(Value::Object(m)) => recs.push(m),
             _ => return U("malformed record"),
@@ -243,7 +349,7 @@ pub fn read(bytes: &[u8], tool: Tool, nonce: &str, version: &str, exit: i32) -> 
                         if !closed.contains(&id) {
                             return U("unknown ID for this exit");
                         }
-                        match ingest_refusal(id, m) {
+                        match ingest_refusal(id, m, folders) {
                             Some(r) => r,
                             None => return U("invalid subject or payload"),
                         }
@@ -272,7 +378,7 @@ mod tests {
         format!("{{\"t\":\"start\",\"tool\":\"ingest\",\"version\":\"{V}\",\"nonce\":\"{N}\"}}\n")
     }
     fn rd(body: &str, exit: i32) -> Reading {
-        read(format!("{}{body}", start()).as_bytes(), Tool::Ingest, N, V, exit)
+        read(format!("{}{body}", start()).as_bytes(), Tool::Ingest, N, V, exit, 3)
     }
 
     #[test]
@@ -289,7 +395,7 @@ mod tests {
     #[test]
     fn stale_malformed_unknown_and_mismatch() {
         let stale = format!("{{\"t\":\"start\",\"tool\":\"ingest\",\"version\":\"{V}\",\"nonce\":\"{}\"}}\n{{\"t\":\"end\",\"exit\":0}}\n", "f".repeat(32));
-        assert!(matches!(read(stale.as_bytes(), Tool::Ingest, N, V, 0), Reading::Unusable(_)));
+        assert!(matches!(read(stale.as_bytes(), Tool::Ingest, N, V, 0, 3), Reading::Unusable(_)));
         assert!(matches!(rd("not json\n{\"t\":\"end\",\"exit\":1}\n", 1), Reading::Unusable(_)));
         assert!(matches!(rd("{\"t\":\"refusal\",\"id\":\"FUTURE\",\"subject\":null}\n{\"t\":\"end\",\"exit\":2}\n", 2), Reading::Unusable(_)));
         assert!(matches!(rd("{\"t\":\"end\",\"exit\":1}\n", 0), Reading::Unusable(_)));
@@ -314,5 +420,36 @@ mod tests {
         assert!(matches!(back, Reading::Unusable(_)));
         let dup = rd("{\"t\":\"refusal\",\"id\":\"FOLDER_DUPLICATE\",\"subject\":\"2\",\"same_as\":\"0\"}\n{\"t\":\"end\",\"exit\":2}\n", 2);
         assert!(matches!(dup, Reading::Usable { refusal: Some(_), .. }));
+    }
+
+    fn refuses(id: &str, rest: &str) -> bool {
+        let r = rd(&format!("{{\"t\":\"refusal\",\"id\":\"{id}\",{rest}}}\n{{\"t\":\"end\",\"exit\":2}}\n"), 2);
+        matches!(r, Reading::Usable { refusal: Some(_), .. })
+    }
+
+    #[test]
+    fn issued_subject_grammar() {
+        // JOINED_PEAK: null or a boundary pair; JOIN_PEAK: two different sources.
+        assert!(refuses("JOINED_PEAK", "\"subject\":null,\"dbtp\":\"-0.100000\""));
+        assert!(refuses("JOINED_PEAK", "\"subject\":[\"0/a.wav\",\"1/b.wav\"],\"dbtp\":\"-0.100000\""));
+        assert!(!refuses("JOIN_PEAK", "\"subject\":[\"0/a.wav\",\"0/a.wav\"],\"dbtp\":\"-0.100000\""));
+        // Ordinals name a dropped folder (three here).
+        assert!(refuses("FOLDER_EMPTY", "\"subject\":\"2\""));
+        assert!(!refuses("FOLDER_EMPTY", "\"subject\":\"3\""));
+        assert!(!refuses("SOURCE_CORRUPT", "\"subject\":\"3/song.wav\""));
+        // A plain NFC basename only.
+        for bad in ["0/../song.wav", "0/..", "0/.", "0/a\\\\b.wav", "0/a\\u0000b", "0/e\u{301}.wav"] {
+            assert!(!refuses("SOURCE_CORRUPT", &format!("\"subject\":\"{bad}\"")), "{bad}");
+        }
+        assert!(refuses("SOURCE_CORRUPT", "\"subject\":\"0/\u{e9}.wav\""));
+    }
+
+    #[test]
+    fn repeated_keys_and_whitespace_are_unusable() {
+        assert!(!refuses("FOLDER_EMPTY", "\"subject\":\"0\",\"subject\":\"1\""));
+        let spaced = rd("{\"t\": \"end\",\"exit\":0}\n", 0);
+        assert!(matches!(spaced, Reading::Unusable(_)));
+        let in_string = rd("{\"t\":\"refusal\",\"id\":\"SOURCE_CORRUPT\",\"subject\":\"0/My Song.wav\"}\n{\"t\":\"end\",\"exit\":2}\n", 2);
+        assert!(matches!(in_string, Reading::Usable { refusal: Some(_), .. }));
     }
 }
