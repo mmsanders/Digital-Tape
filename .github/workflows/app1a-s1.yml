@@ -106,7 +106,7 @@ jobs:
           ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
           python -B tools/app1a/s1_matrix.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
             --bin host/ingest/target/release/ingest$ext --observe host/ingest/target/observe/release/ingest$ext \
-            --out "$RUNNER_TEMP/eq/s1-matrix" $FULLFS
+            --out "$RUNNER_TEMP/eq/s1-matrix" --work "$RUNNER_TEMP/s1m-work" $FULLFS
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -25,7 +25,7 @@ closed-ID census lists, for each of the 34 ingest IDs, the runs whose report car
 it, or why none did.
 
   s1_matrix.py --package DIR --sources DIR --bin SHIPPING --observe OBSERVE --out DIR
-               [--fullfs DIR] [--skip-long]
+               [--fullfs DIR] [--work DIR] [--skip-long]
 """
 import argparse, hashlib, json, os, platform, shutil, subprocess, sys, tempfile, time
 from collections import defaultdict
@@ -57,7 +57,11 @@ def inventory(d):
             if p.is_symlink():
                 out[r] = "link:" + os.readlink(p)
             elif p.is_file():
-                out[r] = sha(p.read_bytes())
+                try:
+                    out[r] = sha(p.read_bytes())
+                except PermissionError:  # a row's deliberately unreadable input
+                    st = p.stat()
+                    out[r] = f"unreadable:{oct(st.st_mode)}:{st.st_size}"
             elif p.is_dir():
                 out[r] = "dir"
             else:
@@ -167,7 +171,9 @@ class M:
         return rec
 
     def case_dir(self):
-        w = Path(tempfile.mkdtemp(prefix="s1m-"))
+        # Case trees go under --work: setup_case hard-links sources, so they must share a
+        # volume with --sources (on Windows runners the default temp is another drive).
+        w = Path(tempfile.mkdtemp(prefix="s1m-", dir=self.a.work))
         (w / "case").mkdir()
         return w
 
@@ -267,9 +273,12 @@ def main():
     ap.add_argument("--observe", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--fullfs", default=None)
+    ap.add_argument("--work", default=None)
     ap.add_argument("--skip-long", action="store_true")
     a = ap.parse_args()
     a.bin, a.observe = os.path.abspath(a.bin), os.path.abspath(a.observe)
+    if a.work:
+        os.makedirs(a.work, exist_ok=True)
     m = M(a)
     census = json.loads(Path(a.package, "CENSUS.json").read_text(encoding="utf-8"))["cases"]
     ordinary = asset(m, "ordinary.wav")
