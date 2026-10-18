@@ -1,0 +1,163 @@
+name: Windows 11 INGEST corrected transport rehearsal (#461)
+
+# Rehearses the corrected collection script (tools/win11-kit/win11_packet.ps1, Verification
+# #204 corrections) against the UNCHANGED authenticated kit release of win11-kit.yml run
+# 39104751447. Nothing is rebuilt. Server is mechanics only, never Windows 11 qualification.
+# NOT READY FOR MICHAEL pending Verification #204. Judges nothing.
+on:
+  pull_request:
+    paths:
+      - 'tools/win11-kit/win11_packet.ps1'
+      - '.github/workflows/win11-kit-rehearsal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Binary and transport-file source: the reviewed candidate. Unchanged.
+  SOURCE: 50bc4160f6da527da8c684d05264f99815aaa870
+  KIT_TAG: win11-kit-ingest-0.1.1-50bc4160f6da-r39104751447-1
+  ZIP_SHA256: ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865
+  SHIP: d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b
+  OBS: d544b6f5c82e653842625080a87ac63cb52353aaeca62494dd5d08eedb844d9a
+  # The original script at SOURCE (negative control) and the corrected one at this head.
+  ORIGINAL_SCRIPT_SHA256: 9d8506670df30bbbc547c6c5757d9370e152ed55cfa4cd8378bd9e1f1337f502
+  SCRIPT_SHA256: 74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e
+
+jobs:
+  rehearsal:
+    name: corrected script rehearsed on Windows Server (mechanics, not Windows 11)
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: fetch and authenticate the kit and both scripts
+        shell: pwsh
+        env:
+          SCRIPT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host ("execution policy: " + (Get-ExecutionPolicy -List | Out-String))
+          $base = Join-Path $env:RUNNER_TEMP 'DigitalTape-ingest-rehearsal'
+          New-Item -ItemType Directory -Path $base | Out-Null
+          function Fetch($uri, $path, $want) {
+            Invoke-WebRequest -UseBasicParsing -Uri $uri -OutFile $path
+            $got = (Get-FileHash $path -Algorithm SHA256).Hash.ToLower()
+            Write-Host "$uri -> $got ($((Get-Item $path).Length) bytes)"
+            if ($got -ne $want) { throw "$path is $got, expected $want" }
+          }
+          Fetch "https://github.com/mmsanders/Digital-Tape/releases/download/$env:KIT_TAG/win11-kit.zip" (Join-Path $base 'win11-kit.zip') $env:ZIP_SHA256
+          Fetch "https://raw.githubusercontent.com/mmsanders/Digital-Tape/$env:SCRIPT_COMMIT/tools/win11-kit/win11_packet.ps1" (Join-Path $base 'win11_packet.ps1') $env:SCRIPT_SHA256
+          Fetch "https://raw.githubusercontent.com/mmsanders/Digital-Tape/$env:SOURCE/host/ingest/stage1/win11_packet.ps1" (Join-Path $base 'original_win11_packet.ps1') $env:ORIGINAL_SCRIPT_SHA256
+          Write-Host "corrected script from $env:SCRIPT_COMMIT; binaries and transport files from $env:SOURCE"
+      - name: the corrected script keeps every pin of the original
+        shell: python
+        run: |
+          import os, re, difflib
+          from pathlib import Path
+          base = Path(os.environ["RUNNER_TEMP"], "DigitalTape-ingest-rehearsal")
+          old = (base / "original_win11_packet.ps1").read_text(encoding="utf-8")
+          new = (base / "win11_packet.ps1").read_text(encoding="utf-8")
+          pins = lambda t: re.findall(r'^\s*(?:\$ProcmonZipSha256 = "[0-9a-f]{64}"|"host/ingest/stage1/[^"]+" = "[0-9a-f]{64}")', t, re.M)
+          assert pins(old) and pins(old) == pins(new), (pins(old), pins(new))
+          assert "ExecutionPolicy" not in new, "the corrected script still documents an execution-policy override"
+          print("pins identical:", *pins(new), sep="\n  ")
+          print("".join(difflib.unified_diff(old.splitlines(True), new.splitlines(True), "original", "corrected")))
+      - name: run the corrected script end to end (normal policy, no override)
+        shell: pwsh
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'DigitalTape-ingest-rehearsal'
+          $out = Join-Path $base 'return'
+          New-Item -ItemType Directory -Path $out | Out-Null
+          & powershell.exe -NoProfile -File (Join-Path $base 'win11_packet.ps1') -Candidate $env:SOURCE `
+            -Kit (Join-Path $base 'win11-kit.zip') -ShippingSha256 $env:SHIP -ObserveSha256 $env:OBS `
+            -Work (Join-Path $base 'work') -Out $out -Rehearsal
+          $code = $LASTEXITCODE
+          Write-Host "collector child exit: $code"
+          Get-ChildItem $out | ForEach-Object { Write-Host "$($_.Name) $($_.Length) $((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())" }
+          exit $code
+      - name: summary controls - the exact script tails on a complete and a missing-record packet
+        # Each tail is the script's own bytes from the summarize_packet.py call to the end,
+        # with its Fail/Sha functions, run on the packet the run above produced (complete)
+        # and on a copy with one census case dropped from INDEX.json (missing record). The
+        # original tail must zip and offer to send the missing-record packet (the defect
+        # Verification reproduced; this proves the control can see it); the corrected tail
+        # must stop nonzero with no zip and no send line. Both must zip the complete one.
+        shell: python
+        run: |
+          import json, os, re, shutil, subprocess, sys
+          from pathlib import Path
+          base = Path(os.environ["RUNNER_TEMP"], "DigitalTape-ingest-rehearsal")
+          work = base / "work"
+          repo = next(p for p in (work / "src").iterdir() if p.is_dir())
+          packets = {"complete": base / "packet-complete", "missing": base / "packet-missing"}
+          shutil.copytree(work / "packet", packets["complete"])
+          shutil.copytree(work / "packet", packets["missing"])
+          ix_path = packets["missing"] / "INDEX.json"
+          ix = json.loads(ix_path.read_text(encoding="utf-8"))
+          dropped = sorted(ix["cases"])[0]
+          del ix["cases"][dropped]
+          ix_path.write_text(json.dumps(ix), encoding="utf-8")
+          print("missing-record packet drops", dropped)
+
+          def harness(script):
+              lines = script.read_text(encoding="utf-8").splitlines(True)
+              funcs = [l for l in lines if re.match(r"function (Fail|Sha)\(", l)]
+              start = next(i for i, l in enumerate(lines) if "summarize_packet.py" in l and l.startswith("& $python"))
+              assert len(funcs) == 2, funcs
+              pre = ("param([string]$packet, [string]$Out)\n$ErrorActionPreference = 'Stop'\n"
+                     f"$python = '{work / 'venv' / 'Scripts' / 'python.exe'}'\n$stage1 = '{repo / 'host' / 'ingest' / 'stage1'}'\n"
+                     f"$pkg = '{repo / 'tests' / 'wp16_ingest_stage1'}'\n$Candidate = '{os.environ['SOURCE']}'\n")
+              h = base / f"tail-{script.stem}.ps1"
+              h.write_text(pre + "".join(funcs) + "".join(lines[start:]), encoding="utf-8")
+              return h
+
+          results, bad = [], []
+          for name, want_stop in (("original_win11_packet", False), ("win11_packet", True)):
+              h = harness(base / f"{name}.ps1")
+              for kind, packet in packets.items():
+                  out = base / f"out-{name}-{kind}"
+                  out.mkdir()
+                  p = subprocess.run(["powershell.exe", "-NoProfile", "-File", str(h), "-packet", str(packet), "-Out", str(out)],
+                                     capture_output=True, text=True)
+                  text = p.stdout + p.stderr
+                  zips = sorted(x.name for x in out.iterdir())
+                  sent = "Send this zip" in text
+                  r = {"script": name, "packet": kind, "exit": p.returncode, "zip": zips, "send_line": sent,
+                       "stopped_line": next((l for l in text.splitlines() if l.startswith("STOPPED:")), None),
+                       "summary_census_line": next((l for l in text.splitlines() if l.startswith("census ")), None)}
+                  results.append(r)
+                  print(json.dumps(r))
+                  expect_ok = kind == "complete" or not want_stop
+                  if expect_ok and not (p.returncode == 0 and zips and sent):
+                      bad.append(f"{name}/{kind}: expected exit 0 with a zip and the send line")
+                  if not expect_ok and (p.returncode == 0 or zips or sent):
+                      bad.append(f"{name}/{kind}: expected a nonzero stop with no zip and no send line")
+          (base / "return" / "summary-controls.json").write_text(json.dumps({"dropped": dropped, "results": results}, indent=1))
+          for b in bad:
+              print("::error::" + b)
+          sys.exit(1 if bad else 0)
+      - name: negative control - a wrong shipping pin stops the corrected script before any case runs
+        shell: pwsh
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'DigitalTape-ingest-rehearsal'
+          & powershell.exe -NoProfile -File (Join-Path $base 'win11_packet.ps1') -Candidate $env:SOURCE `
+            -Kit (Join-Path $base 'win11-kit.zip') -ShippingSha256 ('0' * 64) -ObserveSha256 $env:OBS `
+            -Work (Join-Path $base 'work-control') -Out (Join-Path $base 'return-control') -Rehearsal 2>&1 | Tee-Object -Variable log
+          $code = $LASTEXITCODE
+          Write-Host "control exit: $code"
+          if ($code -eq 0 -or -not (($log | Out-String) -match 'STOPPED: shipping ingest.exe is')) { throw 'a wrong shipping pin did not stop the script' }
+          if (Test-Path (Join-Path $base 'work-control\packet')) { throw 'the control produced a packet' }
+          Write-Host 'negative control: the wrong pin stopped the script, as required'
+          # pwsh would otherwise end the step with the child's exit code 1.
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: win11-kit-461-corrected-rehearsal
+          path: ${{ runner.temp }}/DigitalTape-ingest-rehearsal/return
+          if-no-files-found: error
+          retention-days: 90
