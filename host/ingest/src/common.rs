@@ -2,29 +2,130 @@
 
 use std::fmt;
 
-/// Contract §1 exit classes. `Refuse` is an input/contract refusal (exit 2); `Io` is an
-/// I/O or tool failure (exit 1). The message is a plain sentence naming the source or
-/// boundary and the reason.
+/// Contract §1 exit classes: `Refuse` is an input/contract refusal (exit 2), `Io` an I/O
+/// or tool failure (exit 1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Class {
+    Refuse,
+    Io,
+}
+
+/// APP-1A §2 subject of a refusal: what the app may name. Request, destination and
+/// internal failures name nothing.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub enum Subject {
+    #[default]
+    None,
+    /// An INGEST-1 logical path `ordinal/NFC_name`.
+    Source(String),
+    /// A folder argument, by ordinal.
+    Folder(usize),
+    /// Two neighbouring source logical paths.
+    Boundary(String, String),
+}
+
+/// APP-1A §2 payloads; only the ID that owns a field sets it.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Payload {
+    /// INGEST_TOO_LONG: total, capacity and excess frames, gaps included.
+    pub frames: Option<(u64, u64, u64)>,
+    /// FOLDER_DUPLICATE: the earlier ordinal.
+    pub same_as: Option<usize>,
+    /// JOIN_PEAK / JOINED_PEAK: the six-decimal dBTP string.
+    pub dbtp: Option<String>,
+}
+
+/// A refusal or failure: its exit class, the plain sentence stderr prints (unchanged
+/// from INGEST-1), and the closed APP-1A ID, subject and payload a report carries. The
+/// ID is fixed where the failure is created, never derived from the sentence.
 #[derive(Debug)]
-pub enum Fail {
-    Refuse(String),
-    Io(String),
+pub struct Fail {
+    pub class: Class,
+    pub msg: String,
+    pub id: &'static str,
+    pub subject: Subject,
+    pub payload: Payload,
+}
+
+impl Fail {
+    pub fn refuse(id: &'static str, msg: impl Into<String>) -> Fail {
+        Fail { class: Class::Refuse, msg: msg.into(), id, subject: Subject::None, payload: Payload::default() }
+    }
+    pub fn io(id: &'static str, msg: impl Into<String>) -> Fail {
+        Fail { class: Class::Io, msg: msg.into(), id, subject: Subject::None, payload: Payload::default() }
+    }
+    /// Prefix the sentence (`"{p}: {msg}"`), keeping class, ID, subject and payload.
+    pub fn prefixed(mut self, p: &str) -> Fail {
+        self.msg = format!("{p}: {}", self.msg);
+        self
+    }
+    /// Name the subject unless the site already named a more specific one.
+    pub fn about(mut self, s: Subject) -> Fail {
+        if self.subject == Subject::None && !names_nothing(self.id) {
+            self.subject = s;
+        }
+        self
+    }
+    pub fn with(mut self, p: Payload) -> Fail {
+        self.payload = p;
+        self
+    }
+}
+
+/// APP-1A §2: request, destination and internal failures carry a null subject.
+pub fn names_nothing(id: &str) -> bool {
+    id.starts_with("INGEST_") || id.starts_with("DEST_") || matches!(id, IO_DEST | IO_MEMORY | INTERNAL | JOINED_PEAK)
 }
 
 impl fmt::Display for Fail {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Fail::Refuse(m) | Fail::Io(m) => f.write_str(m),
-        }
+        f.write_str(&self.msg)
     }
 }
 
 pub type Res<T> = Result<T, Fail>;
 
 /// A refusal of the source being decoded; the caller prefixes the logical path.
-pub fn refuse<T>(msg: impl Into<String>) -> Res<T> {
-    Err(Fail::Refuse(msg.into()))
+pub fn refuse<T>(id: &'static str, msg: impl Into<String>) -> Res<T> {
+    Err(Fail::refuse(id, msg))
 }
+
+// APP-1A §2 closed IDs. Exit 2:
+pub const INGEST_USAGE: &str = "INGEST_USAGE";
+pub const INGEST_LENGTH_INVALID: &str = "INGEST_LENGTH_INVALID";
+pub const INGEST_TOO_LONG: &str = "INGEST_TOO_LONG";
+pub const INGEST_RIFF_LIMIT: &str = "INGEST_RIFF_LIMIT";
+pub const FOLDER_SYMLINK: &str = "FOLDER_SYMLINK";
+pub const FOLDER_UNREADABLE: &str = "FOLDER_UNREADABLE";
+pub const FOLDER_NOT_FOLDER: &str = "FOLDER_NOT_FOLDER";
+pub const FOLDER_DUPLICATE: &str = "FOLDER_DUPLICATE";
+pub const FOLDER_EMPTY: &str = "FOLDER_EMPTY";
+pub const FOLDER_NAME_COLLISION: &str = "FOLDER_NAME_COLLISION";
+pub const FOLDER_NAME_NOT_UNICODE: &str = "FOLDER_NAME_NOT_UNICODE";
+pub const ENTRY_SYMLINK: &str = "ENTRY_SYMLINK";
+pub const ENTRY_NESTED_FOLDER: &str = "ENTRY_NESTED_FOLDER";
+pub const ENTRY_NOT_REGULAR: &str = "ENTRY_NOT_REGULAR";
+pub const ENTRY_NAME_INVALID: &str = "ENTRY_NAME_INVALID";
+pub const SOURCE_PROTECTED: &str = "SOURCE_PROTECTED";
+pub const SOURCE_NOT_AUDIO: &str = "SOURCE_NOT_AUDIO";
+pub const SOURCE_TOO_SHORT: &str = "SOURCE_TOO_SHORT";
+pub const SOURCE_CHANGED: &str = "SOURCE_CHANGED";
+pub const SOURCE_NON_FINITE: &str = "SOURCE_NON_FINITE";
+pub const SOURCE_LEVEL: &str = "SOURCE_LEVEL";
+pub const SOURCE_TRIM_UNSUPPORTED: &str = "SOURCE_TRIM_UNSUPPORTED";
+pub const SOURCE_OUTSIDE_INGEST1: &str = "SOURCE_OUTSIDE_INGEST1";
+pub const SOURCE_CORRUPT: &str = "SOURCE_CORRUPT";
+pub const JOIN_PEAK: &str = "JOIN_PEAK";
+pub const JOINED_PEAK: &str = "JOINED_PEAK";
+pub const DEST_EXISTS: &str = "DEST_EXISTS";
+pub const DEST_APPEARED: &str = "DEST_APPEARED";
+pub const DEST_NAME_INVALID: &str = "DEST_NAME_INVALID";
+// Exit 1:
+pub const IO_SOURCE: &str = "IO_SOURCE";
+pub const IO_FOLDER: &str = "IO_FOLDER";
+pub const IO_DEST: &str = "IO_DEST";
+pub const IO_MEMORY: &str = "IO_MEMORY";
+pub const INTERNAL: &str = "INTERNAL";
 
 /// Contract §2: the decoded rates INGEST-1 admits.
 pub const RATES: [u32; 15] = [
@@ -36,15 +137,15 @@ pub fn check_rate(rate: u32) -> Res<()> {
     if RATES.contains(&rate) {
         Ok(())
     } else {
-        refuse(format!("sample rate {rate} Hz is not supported by INGEST-1"))
+        refuse(SOURCE_OUTSIDE_INGEST1, format!("sample rate {rate} Hz is not supported by INGEST-1"))
     }
 }
 
 pub fn check_channels(ch: u32) -> Res<()> {
     match ch {
         1 | 2 => Ok(()),
-        0 => refuse("the stream declares zero channels"),
-        n => refuse(format!("{n} channels; INGEST-1 accepts only mono or stereo")),
+        0 => refuse(SOURCE_OUTSIDE_INGEST1, "the stream declares zero channels"),
+        n => refuse(SOURCE_OUTSIDE_INGEST1, format!("{n} channels; INGEST-1 accepts only mono or stereo")),
     }
 }
 
@@ -91,20 +192,20 @@ impl Decoded {
         check_rate(self.rate)?;
         check_channels(self.channels)?;
         if self.raw_frames == 0 {
-            return refuse("the stream decodes to zero frames");
+            return refuse(SOURCE_TOO_SHORT, "the stream decodes to zero frames");
         }
         for p in &self.planes {
             if p.len() as u64 != self.raw_frames {
-                return Err(Fail::Io("internal: decoded plane length disagrees".into()));
+                return Err(Fail::io(INTERNAL, "internal: decoded plane length disagrees"));
             }
             if p.iter().any(|v| !v.is_finite()) {
-                return refuse("the stream contains non-finite (NaN or infinite) samples");
+                return refuse(SOURCE_NON_FINITE, "the stream contains non-finite (NaN or infinite) samples");
             }
         }
         let trimmed = self.trim.head.checked_add(self.trim.tail);
         match trimmed {
             Some(t) if t < self.raw_frames => Ok(self),
-            _ => refuse(format!(
+            _ => refuse(SOURCE_TRIM_UNSUPPORTED, format!(
                 "declared trim (head {}, tail {}) leaves no frames of the {} decoded",
                 self.trim.head, self.trim.tail, self.raw_frames
             )),
@@ -201,11 +302,11 @@ pub fn alloc<T>(n: usize) -> Res<Vec<T>> {
 }
 
 fn oom(n: usize) -> Fail {
-    Fail::Io(format!("out of memory (needed {n} elements); nothing was written"))
+    Fail::io(IO_MEMORY, format!("out of memory (needed {n} elements); nothing was written"))
 }
 
 // Fallible forms of the std allocations an input can size (crate::mem): every one
-// fails as `Fail::Io`, never through std's abort.
+// fails as an IO_MEMORY `Fail` (exit 1), never through std's abort.
 
 /// `vec![v; n]`.
 pub fn filled<T: Clone>(n: usize, v: T) -> Res<Vec<T>> {
@@ -278,10 +379,10 @@ pub fn read_into(f: &mut impl std::io::Read, b: &mut Vec<u8>) -> Res<std::io::Re
 }
 
 /// The run's memory checkpoint: once the system has refused an allocation (crate::mem),
-/// the run fails here as `Fail::Io` instead of going on to publish.
+/// the run fails here as IO_MEMORY (exit 1) instead of going on to publish.
 pub fn checkpoint() -> Res<()> {
     if crate::mem::exhausted() {
-        return Err(Fail::Io("out of memory (the system refused an allocation); nothing was written".into()));
+        return Err(Fail::io(IO_MEMORY, "out of memory (the system refused an allocation); nothing was written"));
     }
     Ok(())
 }

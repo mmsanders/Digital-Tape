@@ -31,7 +31,7 @@ impl BitR<'_> {
     }
     fn get(&mut self, n: u32) -> Res<u32> {
         if self.left() < n as usize {
-            return refuse("AAC AudioSpecificConfig is truncated");
+            return refuse(SOURCE_CORRUPT, "AAC AudioSpecificConfig is truncated");
         }
         let mut v = 0u32;
         for _ in 0..n {
@@ -63,29 +63,29 @@ fn parse_asc(d: &[u8]) -> Res<Asc> {
         aot = 32 + r.get(6)?;
     }
     if aot != 2 {
-        return refuse(format!("{} is outside INGEST-1 (AAC-LC only)", object_type_name(aot)));
+        return refuse(SOURCE_OUTSIDE_INGEST1, format!("{} is outside INGEST-1 (AAC-LC only)", object_type_name(aot)));
     }
     let sfi = r.get(4)?;
     let rate = if sfi == 15 {
         r.get(24)?
     } else {
-        *SF.get(sfi as usize).ok_or_else(|| Fail::Refuse("AAC sampling-frequency index is reserved".into()))?
+        *SF.get(sfi as usize).ok_or_else(|| Fail::refuse(SOURCE_CORRUPT, "AAC sampling-frequency index is reserved"))?
     };
     let cc = r.get(4)?;
     match cc {
-        0 => return refuse("AAC with a program config element (channel config 0) is unsupported"),
+        0 => return refuse(SOURCE_OUTSIDE_INGEST1, "AAC with a program config element (channel config 0) is unsupported"),
         1 | 2 => {}
-        n => return refuse(format!("AAC channel configuration {n} is not mono or stereo")),
+        n => return refuse(SOURCE_OUTSIDE_INGEST1, format!("AAC channel configuration {n} is not mono or stereo")),
     }
     // GASpecificConfig
     if r.get(1)? == 1 {
-        return refuse("AAC 960-sample frames are unsupported");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "AAC 960-sample frames are unsupported");
     }
     if r.get(1)? == 1 {
-        return refuse("AAC dependsOnCoreCoder is unsupported");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "AAC dependsOnCoreCoder is unsupported");
     }
     if r.get(1)? == 1 {
-        return refuse("AAC GASpecificConfig extension flag is unsupported for AAC-LC");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "AAC GASpecificConfig extension flag is unsupported for AAC-LC");
     }
     // Backward-compatible explicit SBR/PS signalling.
     if r.left() >= 16 {
@@ -93,7 +93,7 @@ fn parse_asc(d: &[u8]) -> Res<Asc> {
         if sync == 0x2B7 {
             let ext = r.get(5)?;
             if ext == 5 && r.get(1)? == 1 {
-                return refuse("HE-AAC (explicit SBR signalling) is outside INGEST-1");
+                return refuse(SOURCE_OUTSIDE_INGEST1, "HE-AAC (explicit SBR signalling) is outside INGEST-1");
             }
         }
     }
@@ -143,7 +143,7 @@ fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc, crcs: Option<&[Opt
     let mut params = AudioCodecParameters::new();
     params.for_codec(CODEC_ID_AAC).with_extra_data(asc_bytes.to_vec().into_boxed_slice());
     let mut dec = symphonia_codec_aac::AacDecoder::try_new(&params, &AudioDecoderOptions::default())
-        .map_err(|e| Fail::Refuse(format!("AAC decoder refused the stream configuration ({e})")))?;
+        .map_err(|e| Fail::refuse(SOURCE_CORRUPT, format!("AAC decoder refused the stream configuration ({e})")))?;
     let ch = asc.channels as usize;
     let mut planes: Vec<Vec<f64>> = Vec::with_capacity(ch);
     for _ in 0..ch {
@@ -155,18 +155,18 @@ fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc, crcs: Option<&[Opt
         let buf = dec.decode_ref(&pkt).map_err(|e| {
             let s = e.to_string();
             if s.contains("sbr extension present") {
-                Fail::Refuse("HE-AAC (SBR data in the stream) is outside INGEST-1".into())
+                Fail::refuse(SOURCE_OUTSIDE_INGEST1, "HE-AAC (SBR data in the stream) is outside INGEST-1")
             } else {
-                Fail::Refuse(format!("AAC access unit {i} does not decode ({s}) (corrupt)"))
+                Fail::refuse(SOURCE_CORRUPT, format!("AAC access unit {i} does not decode ({s}) (corrupt)"))
             }
         })?;
         if buf.frames() != 1024 || buf.spec().channels().count() != ch {
-            return refuse(format!("AAC access unit {i} decoded to an unexpected length or layout"));
+            return refuse(SOURCE_CORRUPT, format!("AAC access unit {i} decoded to an unexpected length or layout"));
         }
         buf.copy_to_vecs_planar::<f32>(&mut tmp);
         if let Some(Some((hdr, want))) = crcs.map(|c| c[i]) {
             if adts_crc(&hdr, u, dec.crc_regions()) != want {
-                return refuse(format!("ADTS frame {i} CRC mismatch (corrupt)"));
+                return refuse(SOURCE_CORRUPT, format!("ADTS frame {i} CRC mismatch (corrupt)"));
             }
         }
         for (p, t) in planes.iter_mut().zip(&tmp) {
@@ -185,14 +185,14 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
     let mut first: Option<(u32, u32, u32)> = None;
     while o < end {
         if end - o < 7 {
-            return refuse("ADTS header is truncated");
+            return refuse(SOURCE_CORRUPT, "ADTS header is truncated");
         }
         let h = &b[o..o + 7];
         if h[0] != 0xFF || h[1] & 0xF0 != 0xF0 {
-            return refuse("ADTS sync lost (corrupt data or junk between frames)");
+            return refuse(SOURCE_CORRUPT, "ADTS sync lost (corrupt data or junk between frames)");
         }
         if (h[1] >> 1) & 3 != 0 {
-            return refuse("ADTS layer field is not zero (corrupt)");
+            return refuse(SOURCE_CORRUPT, "ADTS layer field is not zero (corrupt)");
         }
         let crc_present = h[1] & 1 == 0;
         let profile = (h[2] >> 6) as u32;
@@ -201,19 +201,19 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
         let len = (((h[3] & 3) as usize) << 11) | ((h[4] as usize) << 3) | (h[5] as usize >> 5);
         let blocks = (h[6] & 3) as u32;
         if profile != 1 {
-            return refuse(format!("{} is outside INGEST-1 (AAC-LC only)", object_type_name(profile + 1)));
+            return refuse(SOURCE_OUTSIDE_INGEST1, format!("{} is outside INGEST-1 (AAC-LC only)", object_type_name(profile + 1)));
         }
         let hl = if crc_present { 9 } else { 7 };
         if len < hl || o + len > end {
-            return refuse("ADTS frame length is invalid or the last frame is truncated");
+            return refuse(SOURCE_CORRUPT, "ADTS frame length is invalid or the last frame is truncated");
         }
         if blocks != 0 {
-            return refuse("ADTS frames with more than one raw data block are unsupported");
+            return refuse(SOURCE_OUTSIDE_INGEST1, "ADTS frames with more than one raw data block are unsupported");
         }
         let cfg = (profile, sfi, cc);
         match first {
             None => first = Some(cfg),
-            Some(f) if f != cfg => return refuse("ADTS sample rate or channel configuration changes mid-stream"),
+            Some(f) if f != cfg => return refuse(SOURCE_OUTSIDE_INGEST1, "ADTS sample rate or channel configuration changes mid-stream"),
             _ => {}
         }
         push(&mut units, &b[o + hl..o + len])?;
@@ -224,9 +224,9 @@ pub fn decode_adts(b: &[u8]) -> Res<Decoded> {
         }))?;
         o += len;
     }
-    let Some((_, sfi, cc)) = first else { return refuse("the ADTS stream holds no frames") };
+    let Some((_, sfi, cc)) = first else { return refuse(SOURCE_TOO_SHORT, "the ADTS stream holds no frames") };
     if sfi as usize >= SF.len() {
-        return refuse("ADTS sampling-frequency index is reserved");
+        return refuse(SOURCE_CORRUPT, "ADTS sampling-frequency index is reserved");
     }
     let asc_bytes = make_asc(sfi, cc);
     let asc = parse_asc(&asc_bytes)?;
@@ -256,7 +256,7 @@ fn boxes(b: &[u8], top: bool) -> Res<Vec<Boxx<'_>>> {
     let mut o = 0usize;
     while o < b.len() {
         if b.len() - o < 8 {
-            return refuse("MP4 box header is truncated");
+            return refuse(SOURCE_CORRUPT, "MP4 box header is truncated");
         }
         let size32 = u32be(b, o) as u64;
         let mut typ = [0u8; 4];
@@ -264,16 +264,16 @@ fn boxes(b: &[u8], top: bool) -> Res<Vec<Boxx<'_>>> {
         let (hl, size) = match size32 {
             1 => {
                 if b.len() - o < 16 {
-                    return refuse("MP4 box header is truncated");
+                    return refuse(SOURCE_CORRUPT, "MP4 box header is truncated");
                 }
                 (16usize, u64be(b, o + 8))
             }
             0 if top => (8, (b.len() - o) as u64),
-            0 => return refuse("MP4 nested box with size 0 is invalid"),
+            0 => return refuse(SOURCE_CORRUPT, "MP4 nested box with size 0 is invalid"),
             s => (8, s),
         };
         if size < hl as u64 || size > (b.len() - o) as u64 {
-            return refuse(format!("MP4 box '{}' runs past its parent (truncated)", String::from_utf8_lossy(&typ)));
+            return refuse(SOURCE_CORRUPT, format!("MP4 box '{}' runs past its parent (truncated)", String::from_utf8_lossy(&typ)));
         }
         out.push(Boxx { typ, body: &b[o + hl..o + size as usize] });
         o += size as usize;
@@ -285,18 +285,18 @@ fn child<'a>(list: &'a [Boxx<'a>], t: &[u8; 4]) -> Res<Option<&'a Boxx<'a>>> {
     let mut it = list.iter().filter(|x| &x.typ == t);
     let f = it.next();
     if it.next().is_some() {
-        return refuse(format!("MP4 has more than one '{}' box where one is allowed", String::from_utf8_lossy(t)));
+        return refuse(SOURCE_CORRUPT, format!("MP4 has more than one '{}' box where one is allowed", String::from_utf8_lossy(t)));
     }
     Ok(f)
 }
 
 fn need<'a>(list: &'a [Boxx<'a>], t: &[u8; 4]) -> Res<&'a Boxx<'a>> {
-    child(list, t)?.ok_or_else(|| Fail::Refuse(format!("MP4 is missing its '{}' box", String::from_utf8_lossy(t))))
+    child(list, t)?.ok_or_else(|| Fail::refuse(SOURCE_CORRUPT, format!("MP4 is missing its '{}' box", String::from_utf8_lossy(t))))
 }
 
 fn chk(b: &[u8], n: usize) -> Res<()> {
     if b.len() < n {
-        refuse("MP4 box is too short (truncated)")
+        refuse(SOURCE_CORRUPT, "MP4 box is too short (truncated)")
     } else {
         Ok(())
     }
@@ -318,7 +318,7 @@ fn descriptor(b: &[u8], o: usize) -> Res<(u8, usize, usize)> {
         }
     }
     if p + len > b.len() {
-        return refuse("MP4 esds descriptor runs past its box");
+        return refuse(SOURCE_CORRUPT, "MP4 esds descriptor runs past its box");
     }
     Ok((tag, p, p + len))
 }
@@ -327,7 +327,7 @@ fn esds_asc(e: &[u8]) -> Res<Vec<u8>> {
     chk(e, 4)?;
     let (tag, s, end) = descriptor(e, 4)?;
     if tag != 3 {
-        return refuse("MP4 esds lacks an ES_Descriptor");
+        return refuse(SOURCE_CORRUPT, "MP4 esds lacks an ES_Descriptor");
     }
     let es = &e[..end];
     chk(es, s + 3)?;
@@ -345,21 +345,21 @@ fn esds_asc(e: &[u8]) -> Res<Vec<u8>> {
     }
     let (tag, s, end) = descriptor(es, p)?;
     if tag != 4 {
-        return refuse("MP4 esds lacks a DecoderConfigDescriptor");
+        return refuse(SOURCE_CORRUPT, "MP4 esds lacks a DecoderConfigDescriptor");
     }
     let dc = &es[..end];
     chk(dc, s + 13)?;
     let oti = dc[s];
     match oti {
         0x40 | 0x67 => {}
-        0x66 => return refuse("MPEG-2 AAC Main is outside INGEST-1 (AAC-LC only)"),
-        0x68 => return refuse("MPEG-2 AAC SSR is outside INGEST-1 (AAC-LC only)"),
-        0x69 | 0x6B => return refuse("MP3 inside MP4 is outside INGEST-1"),
-        n => return refuse(format!("MP4 audio object type indication 0x{n:02X} is unsupported")),
+        0x66 => return refuse(SOURCE_OUTSIDE_INGEST1, "MPEG-2 AAC Main is outside INGEST-1 (AAC-LC only)"),
+        0x68 => return refuse(SOURCE_OUTSIDE_INGEST1, "MPEG-2 AAC SSR is outside INGEST-1 (AAC-LC only)"),
+        0x69 | 0x6B => return refuse(SOURCE_OUTSIDE_INGEST1, "MP3 inside MP4 is outside INGEST-1"),
+        n => return refuse(SOURCE_OUTSIDE_INGEST1, format!("MP4 audio object type indication 0x{n:02X} is unsupported")),
     }
     let (tag, s, end) = descriptor(dc, s + 13)?;
     if tag != 5 {
-        return refuse("MP4 esds lacks a DecoderSpecificInfo (AudioSpecificConfig)");
+        return refuse(SOURCE_CORRUPT, "MP4 esds lacks a DecoderSpecificInfo (AudioSpecificConfig)");
     }
     Ok(dc[s..end].to_vec())
 }
@@ -386,15 +386,15 @@ fn find_itunsmpb(moov: &[Boxx]) -> Res<Option<(u64, u64, u64)>> {
             continue;
         }
         let Some(data) = parts.iter().find(|x| &x.typ == b"data") else {
-            return refuse("iTunSMPB has no data (invalid metadata)");
+            return refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB has no data (invalid metadata)");
         };
         chk(data.body, 8)?;
-        let text = std::str::from_utf8(&data.body[8..]).or_else(|_| refuse("iTunSMPB is not text (invalid metadata)"))?;
+        let text = std::str::from_utf8(&data.body[8..]).or_else(|_| refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB is not text (invalid metadata)"))?;
         let f: Vec<&str> = text.split_ascii_whitespace().collect();
         let hex = |i: usize| -> Res<u64> {
             f.get(i)
                 .and_then(|s| u64::from_str_radix(s, 16).ok())
-                .ok_or_else(|| Fail::Refuse("iTunSMPB is malformed (invalid metadata)".into()))
+                .ok_or_else(|| Fail::refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB is malformed (invalid metadata)"))
         };
         return Ok(Some((hex(1)?, hex(2)?, hex(3)?)));
     }
@@ -405,26 +405,26 @@ fn find_itunsmpb(moov: &[Boxx]) -> Res<Option<(u64, u64, u64)>> {
 fn exact(v: u64, num: u64, den: u64, what: &str) -> Res<u64> {
     let p = v as u128 * num as u128;
     if den == 0 || p % den as u128 != 0 {
-        return refuse(format!("{what} is not a whole number of source frames (fractional trim interval)"));
+        return refuse(SOURCE_TRIM_UNSUPPORTED, format!("{what} is not a whole number of source frames (fractional trim interval)"));
     }
-    u64::try_from(p / den as u128).or_else(|_| refuse(format!("{what} is out of range")))
+    u64::try_from(p / den as u128).or_else(|_| refuse(SOURCE_TRIM_UNSUPPORTED, format!("{what} is out of range")))
 }
 
 pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
     let top = boxes(b, true)?;
     if top.first().map(|x| &x.typ) != Some(b"ftyp") {
-        return refuse("MP4 does not begin with an 'ftyp' box");
+        return refuse(SOURCE_CORRUPT, "MP4 does not begin with an 'ftyp' box");
     }
     if top.iter().any(|x| &x.typ == b"moof" || &x.typ == b"mvex") {
-        return refuse("fragmented MP4 is unsupported");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "fragmented MP4 is unsupported");
     }
     let moov_b = need(&top, b"moov")?;
     let moov = boxes(moov_b.body, false)?;
     if moov.iter().any(|x| &x.typ == b"pssh") {
-        return refuse("protected (encrypted) MP4 is refused");
+        return refuse(SOURCE_PROTECTED, "protected (encrypted) MP4 is refused");
     }
     if moov.iter().any(|x| &x.typ == b"mvex") {
-        return refuse("fragmented MP4 is unsupported");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "fragmented MP4 is unsupported");
     }
     let mvhd = need(&moov, b"mvhd")?.body;
     chk(mvhd, 24)?;
@@ -444,14 +444,14 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         match &hdlr[8..12] {
             b"soun" => {
                 if audio.replace(tk).is_some() {
-                    return refuse("MP4 holds more than one audio stream");
+                    return refuse(SOURCE_OUTSIDE_INGEST1, "MP4 holds more than one audio stream");
                 }
             }
-            b"vide" => return refuse("MP4 holds a video stream; INGEST-1 accepts audio-only M4A"),
+            b"vide" => return refuse(SOURCE_OUTSIDE_INGEST1, "MP4 holds a video stream; INGEST-1 accepts audio-only M4A"),
             _ => {}
         }
     }
-    let Some(tk) = audio else { return refuse("MP4 holds no audio stream") };
+    let Some(tk) = audio else { return refuse(SOURCE_OUTSIDE_INGEST1, "MP4 holds no audio stream") };
     let mdia = boxes(need(&tk, b"mdia")?.body, false)?;
     let mdhd = need(&mdia, b"mdhd")?.body;
     chk(mdhd, 24)?;
@@ -468,15 +468,15 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
     let stsd = need(&stbl, b"stsd")?.body;
     chk(stsd, 8)?;
     if u32be(stsd, 4) != 1 {
-        return refuse("MP4 audio track has more than one sample description");
+        return refuse(SOURCE_OUTSIDE_INGEST1, "MP4 audio track has more than one sample description");
     }
     let entries = boxes(&stsd[8..], false)?;
-    let entry = entries.first().ok_or_else(|| Fail::Refuse("MP4 sample description is empty".into()))?;
+    let entry = entries.first().ok_or_else(|| Fail::refuse(SOURCE_CORRUPT, "MP4 sample description is empty"))?;
     match &entry.typ {
         b"mp4a" => {}
-        b"enca" | b"drms" | b"drmi" => return refuse("protected (encrypted) AAC is refused"),
-        b"alac" => return refuse("ALAC is outside INGEST-1"),
-        t => return refuse(format!("MP4 audio codec '{}' is outside INGEST-1", String::from_utf8_lossy(t))),
+        b"enca" | b"drms" | b"drmi" => return refuse(SOURCE_PROTECTED, "protected (encrypted) AAC is refused"),
+        b"alac" => return refuse(SOURCE_OUTSIDE_INGEST1, "ALAC is outside INGEST-1"),
+        t => return refuse(SOURCE_OUTSIDE_INGEST1, format!("MP4 audio codec '{}' is outside INGEST-1", String::from_utf8_lossy(t))),
     }
     let se = entry.body;
     chk(se, 28)?;
@@ -485,7 +485,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         0 => 28,
         1 => 44,
         2 => 64,
-        _ => return refuse("MP4 sound description version is unsupported"),
+        _ => return refuse(SOURCE_OUTSIDE_INGEST1, "MP4 sound description version is unsupported"),
     };
     chk(se, ext)?;
     let mut kids = boxes(&se[ext..], false)?;
@@ -494,7 +494,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         kids = boxes(wb, false)?;
     }
     if kids.iter().any(|x| &x.typ == b"sinf") {
-        return refuse("protected (encrypted) AAC is refused");
+        return refuse(SOURCE_PROTECTED, "protected (encrypted) AAC is refused");
     }
     let esds = need(&kids, b"esds")?.body;
     let asc_bytes = esds_asc(esds)?;
@@ -517,7 +517,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         let d = u32be(stts, 12 + i * 8) as u64;
         let last_single = i + 1 == n && c == 1;
         if d != unit && !(last_single && d > 0 && d < unit) {
-            return refuse("MP4 sample durations do not describe whole 1024-frame AAC access units (unsupported trim signalling)");
+            return refuse(SOURCE_TRIM_UNSUPPORTED, "MP4 sample durations do not describe whole 1024-frame AAC access units (unsupported trim signalling)");
         }
         short_end |= d != unit;
         units_count += c;
@@ -535,10 +535,10 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
             collect(cnt, (0..cnt).map(|i| u32be(s, 12 + i * 4) as u64))?
         }
     } else {
-        return refuse("MP4 audio track has no 'stsz' sample-size table");
+        return refuse(SOURCE_CORRUPT, "MP4 audio track has no 'stsz' sample-size table");
     };
     if sizes.len() as u64 != units_count {
-        return refuse("MP4 sample-size and time-to-sample tables disagree");
+        return refuse(SOURCE_CORRUPT, "MP4 sample-size and time-to-sample tables disagree");
     }
     let offsets: Vec<u64> = if let Some(stco) = child(&stbl, b"stco")? {
         let s = stco.body;
@@ -553,7 +553,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         chk(s, 8 + c * 8)?;
         collect(c, (0..c).map(|i| u64be(s, 8 + i * 8)))?
     } else {
-        return refuse("MP4 audio track has no chunk-offset table");
+        return refuse(SOURCE_CORRUPT, "MP4 audio track has no chunk-offset table");
     };
     let stsc = need(&stbl, b"stsc")?.body;
     chk(stsc, 8)?;
@@ -567,19 +567,19 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
         let per = runs.iter().rev().find(|r| r.0 <= chunk_no).map(|r| r.1).unwrap_or(0);
         let mut p = off;
         for _ in 0..per {
-            let Some(&sz) = sizes.get(si) else { return refuse("MP4 sample-to-chunk table names more samples than exist") };
+            let Some(&sz) = sizes.get(si) else { return refuse(SOURCE_CORRUPT, "MP4 sample-to-chunk table names more samples than exist") };
             let e = p.checked_add(sz).filter(|&e| e <= b.len() as u64);
-            let Some(e) = e else { return refuse("MP4 sample data runs past the end of the file (truncated)") };
+            let Some(e) = e else { return refuse(SOURCE_CORRUPT, "MP4 sample data runs past the end of the file (truncated)") };
             push(&mut units, &b[p as usize..e as usize])?;
             p = e;
             si += 1;
         }
     }
     if units.len() != sizes.len() {
-        return refuse("MP4 sample-to-chunk table does not cover every sample");
+        return refuse(SOURCE_CORRUPT, "MP4 sample-to-chunk table does not cover every sample");
     }
     if units.is_empty() {
-        return refuse("MP4 audio track holds zero samples");
+        return refuse(SOURCE_TOO_SHORT, "MP4 audio track holds zero samples");
     }
     let raw = units.len() as u64 * 1024;
 
@@ -595,7 +595,7 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
             let w = if v1 { 20 } else { 12 };
             chk(e, 8 + cnt * w)?;
             if cnt != 1 {
-                return refuse(format!("MP4 edit list has {cnt} entries; only one contiguous presentation interval is admitted"));
+                return refuse(SOURCE_TRIM_UNSUPPORTED, format!("MP4 edit list has {cnt} entries; only one contiguous presentation interval is admitted"));
             }
             let (dur, mt, rate) = if v1 {
                 (u64be(e, 8), u64be(e, 16) as i64, u32be(e, 24))
@@ -603,33 +603,33 @@ pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {
                 (u32be(e, 8) as u64, u32be(e, 12) as i32 as i64, u32be(e, 16))
             };
             if rate != 0x0001_0000 {
-                return refuse("MP4 edit with a media rate other than 1 is unsupported");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "MP4 edit with a media rate other than 1 is unsupported");
             }
             if mt < 0 {
-                return refuse("MP4 empty edit (inserted delay) is not an admitted presentation interval");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "MP4 empty edit (inserted delay) is not an admitted presentation interval");
             }
             if dur == 0 {
-                return refuse("MP4 edit with zero duration is ambiguous");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "MP4 edit with zero duration is ambiguous");
             }
             let head = exact(mt as u64, asc.rate as u64, media_ts, "MP4 edit media time")?;
             let eff = exact(dur, asc.rate as u64, movie_ts, "MP4 edit segment duration")?;
             let Some(tail) = raw.checked_sub(head).and_then(|r| r.checked_sub(eff)) else {
-                return refuse("MP4 edit list extends past the decoded stream (out of range)");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "MP4 edit list extends past the decoded stream (out of range)");
             };
             if short_end && (mt as u128 * movie_ts as u128 + dur as u128 * media_ts as u128) != media_total * movie_ts as u128 {
-                return refuse("the MP4 shortened final sample contradicts the edit list end");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "the MP4 shortened final sample contradicts the edit list end");
             }
             trim = Trim { head, tail, evidence: "bmff_edit", known: true };
         }
     }
     if short_end && !trim.known {
-        return refuse("an MP4 shortened final sample without an edit list is unsupported trim signalling");
+        return refuse(SOURCE_TRIM_UNSUPPORTED, "an MP4 shortened final sample without an edit list is unsupported trim signalling");
     }
     match (find_itunsmpb(&moov)?, trim.known) {
-        (Some(_), false) => return refuse("iTunSMPB alone is not an admitted trim interval in INGEST-1"),
+        (Some(_), false) => return refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB alone is not an admitted trim interval in INGEST-1"),
         (Some((pri, pad, len)), true) => {
             if pri != trim.head || len != raw - trim.head - trim.tail || pad != trim.tail {
-                return refuse("iTunSMPB contradicts the MP4 edit list");
+                return refuse(SOURCE_TRIM_UNSUPPORTED, "iTunSMPB contradicts the MP4 edit list");
             }
         }
         _ => {}

@@ -90,9 +90,10 @@ jobs:
   # produces its packet, marked observer "none" -- never a PASS.
   stage1-packet:
     name: Stage1 observation packet (${{ matrix.os }})
-    # Corrections stacked on the AP4 base (#457) rerun only their impacted scopes in
-    # their own workflows; the full Stage1 campaign belongs to the AP4 base candidate.
-    if: ${{ !startsWith(github.head_ref, 'software/p2-457-') }}
+    # Candidates stacked on the AP4 base (the APP-1A S1 report, #452; the #457
+    # exhaustion correction) rerun only their impacted scopes in app1a-s1.yml and
+    # ingest-exhaustion.yml; the full Stage1 campaign belongs to the AP4 base candidate.
+    if: ${{ !startsWith(github.head_ref, 'software/p2-452-') && !startsWith(github.head_ref, 'software/p2-457-') }}
     strategy:
       fail-fast: false
       matrix:

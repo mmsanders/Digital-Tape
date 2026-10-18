@@ -16,7 +16,7 @@ impl<'a> Bits<'a> {
     fn bit(&mut self) -> Res<u32> {
         let byte = self.pos >> 3;
         if byte >= self.b.len() {
-            return refuse("FLAC frame is truncated");
+            return refuse(SOURCE_CORRUPT, "FLAC frame is truncated");
         }
         let v = (self.b[byte] >> (7 - (self.pos & 7))) & 1;
         self.pos += 1;
@@ -25,7 +25,7 @@ impl<'a> Bits<'a> {
     fn bits(&mut self, n: u32) -> Res<u64> {
         debug_assert!(n <= 64);
         if self.pos + n as usize > self.b.len() * 8 {
-            return refuse("FLAC frame is truncated");
+            return refuse(SOURCE_CORRUPT, "FLAC frame is truncated");
         }
         let mut v: u64 = 0;
         let mut left = n;
@@ -54,7 +54,7 @@ impl<'a> Bits<'a> {
         loop {
             let byte = self.pos >> 3;
             if byte >= self.b.len() {
-                return refuse("FLAC frame is truncated");
+                return refuse(SOURCE_CORRUPT, "FLAC frame is truncated");
             }
             let off = self.pos & 7;
             let rest = (self.b[byte] << off) as u32;
@@ -72,7 +72,7 @@ impl<'a> Bits<'a> {
     fn align(&mut self) -> Res<()> {
         while self.pos & 7 != 0 {
             if self.bit()? != 0 {
-                return refuse("FLAC frame padding bits are not zero");
+                return refuse(SOURCE_CORRUPT, "FLAC frame padding bits are not zero");
             }
         }
         Ok(())
@@ -115,12 +115,12 @@ fn residual(r: &mut Bits, block: usize, order: usize, out: &mut Vec<i64>) -> Res
     let pbits = match method {
         0 => 4,
         1 => 5,
-        _ => return refuse("FLAC reserved residual coding method"),
+        _ => return refuse(SOURCE_CORRUPT, "FLAC reserved residual coding method"),
     };
     let porder = r.bits(4)? as u32;
     let parts = 1usize << porder;
     if block % parts != 0 || (block >> porder) < order {
-        return refuse("FLAC residual partition order is invalid for the block");
+        return refuse(SOURCE_CORRUPT, "FLAC residual partition order is invalid for the block");
     }
     let escape = (1u64 << pbits) - 1;
     for p in 0..parts {
@@ -136,7 +136,7 @@ fn residual(r: &mut Bits, block: usize, order: usize, out: &mut Vec<i64>) -> Res
             for _ in 0..n {
                 let q = r.unary()?;
                 if q > (1u64 << 40) {
-                    return refuse("FLAC residual is out of range");
+                    return refuse(SOURCE_CORRUPT, "FLAC residual is out of range");
                 }
                 let u = (q << k) | r.bits(k)?;
                 out.push(((u >> 1) as i64) ^ -((u & 1) as i64));
@@ -148,14 +148,14 @@ fn residual(r: &mut Bits, block: usize, order: usize, out: &mut Vec<i64>) -> Res
 
 fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
     if r.bit()? != 0 {
-        return refuse("FLAC subframe padding bit is not zero");
+        return refuse(SOURCE_CORRUPT, "FLAC subframe padding bit is not zero");
     }
     let t = r.bits(6)? as u32;
     let mut wasted = 0u32;
     if r.bit()? == 1 {
         wasted = 1 + r.unary()? as u32;
         if wasted >= bps {
-            return refuse("FLAC wasted-bits count is invalid");
+            return refuse(SOURCE_CORRUPT, "FLAC wasted-bits count is invalid");
         }
     }
     let bps = bps - wasted;
@@ -173,7 +173,7 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
         8..=12 => {
             let order = (t - 8) as usize;
             if order > block {
-                return refuse("FLAC predictor order exceeds the block size");
+                return refuse(SOURCE_CORRUPT, "FLAC predictor order exceeds the block size");
             }
             for _ in 0..order {
                 s.push(r.signed(bps)?);
@@ -189,25 +189,25 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
                     3 => 3 * s[n - 1] - 3 * s[n - 2] + s[n - 3],
                     _ => 4 * s[n - 1] - 6 * s[n - 2] + 4 * s[n - 3] - s[n - 4],
                 };
-                s.push(p.checked_add(e).ok_or_else(|| Fail::Refuse("FLAC sample overflow".into()))?);
+                s.push(p.checked_add(e).ok_or_else(|| Fail::refuse(SOURCE_CORRUPT, "FLAC sample overflow"))?);
             }
         }
         32..=63 => {
             let order = (t - 31) as usize;
             if order > block {
-                return refuse("FLAC predictor order exceeds the block size");
+                return refuse(SOURCE_CORRUPT, "FLAC predictor order exceeds the block size");
             }
             for _ in 0..order {
                 s.push(r.signed(bps)?);
             }
             let prec = r.bits(4)? as u32;
             if prec == 15 {
-                return refuse("FLAC invalid LPC precision");
+                return refuse(SOURCE_CORRUPT, "FLAC invalid LPC precision");
             }
             let prec = prec + 1;
             let shift = r.signed(5)?;
             if shift < 0 {
-                return refuse("FLAC negative LPC shift");
+                return refuse(SOURCE_CORRUPT, "FLAC negative LPC shift");
             }
             let mut coef = Vec::with_capacity(order);
             for _ in 0..order {
@@ -222,15 +222,15 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
                     acc += *c as i128 * s[n - 1 - j] as i128;
                 }
                 let v = (acc >> shift) + e as i128;
-                let v = i64::try_from(v).or_else(|_| refuse("FLAC sample overflow"))?;
+                let v = i64::try_from(v).or_else(|_| refuse(SOURCE_CORRUPT, "FLAC sample overflow"))?;
                 s.push(v);
             }
         }
-        _ => return refuse("FLAC reserved subframe type"),
+        _ => return refuse(SOURCE_CORRUPT, "FLAC reserved subframe type"),
     }
     let lim = 1i64 << (bps - 1);
     if s.iter().any(|&v| v < -lim || v >= lim) {
-        return refuse("FLAC decoded sample exceeds its bit depth");
+        return refuse(SOURCE_CORRUPT, "FLAC decoded sample exceeds its bit depth");
     }
     if wasted > 0 {
         for v in s.iter_mut() {
@@ -246,12 +246,12 @@ fn coded_number(r: &mut Bits) -> Res<u64> {
     let (mut v, extra) = match first.leading_ones() {
         0 => (first as u64, 0),
         n @ 2..=7 => (((first as u32) & (0x7F >> n)) as u64, n - 1),
-        _ => return refuse("FLAC invalid coded frame number"),
+        _ => return refuse(SOURCE_CORRUPT, "FLAC invalid coded frame number"),
     };
     for _ in 0..extra {
         let b = r.bits(8)?;
         if b & 0xC0 != 0x80 {
-            return refuse("FLAC invalid coded frame number");
+            return refuse(SOURCE_CORRUPT, "FLAC invalid coded frame number");
         }
         v = (v << 6) | (b & 0x3F);
     }
@@ -264,26 +264,26 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
     let mut info: Option<Info> = None;
     loop {
         if b.len() < o + 4 {
-            return refuse("FLAC metadata is truncated");
+            return refuse(SOURCE_CORRUPT, "FLAC metadata is truncated");
         }
         let last = b[o] & 0x80 != 0;
         let typ = b[o] & 0x7F;
         let len = ((b[o + 1] as usize) << 16) | ((b[o + 2] as usize) << 8) | b[o + 3] as usize;
         o += 4;
         if b.len() < o + len {
-            return refuse("FLAC metadata block runs past the end of the file");
+            return refuse(SOURCE_CORRUPT, "FLAC metadata block runs past the end of the file");
         }
         let body = &b[o..o + len];
         if info.is_none() && typ != 0 {
-            return refuse("FLAC STREAMINFO is not the first metadata block");
+            return refuse(SOURCE_CORRUPT, "FLAC STREAMINFO is not the first metadata block");
         }
         match typ {
             0 => {
                 if info.is_some() {
-                    return refuse("FLAC has more than one STREAMINFO");
+                    return refuse(SOURCE_CORRUPT, "FLAC has more than one STREAMINFO");
                 }
                 if len != 34 {
-                    return refuse("FLAC STREAMINFO has the wrong length");
+                    return refuse(SOURCE_CORRUPT, "FLAC STREAMINFO has the wrong length");
                 }
                 let mut r = Bits::new(body, 0);
                 let _min_block = r.bits(16)?;
@@ -296,11 +296,11 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
                 let mut md5 = [0u8; 16];
                 md5.copy_from_slice(&body[18..34]);
                 if rate == 0 {
-                    return refuse("FLAC STREAMINFO sample rate is zero");
+                    return refuse(SOURCE_OUTSIDE_INGEST1, "FLAC STREAMINFO sample rate is zero");
                 }
                 info = Some(Info { rate, channels, bps, total, md5, max_block });
             }
-            127 => return refuse("FLAC metadata block type 127 is invalid"),
+            127 => return refuse(SOURCE_CORRUPT, "FLAC metadata block type 127 is invalid"),
             _ => {}
         }
         o += len;
@@ -311,7 +311,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
     let info = info.unwrap();
     check_channels(info.channels)?;
     if info.bps < 8 {
-        return refuse(format!("{}-bit FLAC is outside INGEST-1 (8–32 bits)", info.bps));
+        return refuse(SOURCE_OUTSIDE_INGEST1, format!("{}-bit FLAC is outside INGEST-1 (8–32 bits)", info.bps));
     }
     check_rate(info.rate)?;
     let ch = info.channels as usize;
@@ -330,25 +330,25 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         let start = o;
         let mut r = Bits::new(&b[..end], o);
         if r.bits(14)? != 0x3FFE {
-            return refuse("FLAC frame sync not found (corrupt or trailing data)");
+            return refuse(SOURCE_CORRUPT, "FLAC frame sync not found (corrupt or trailing data)");
         }
         if r.bit()? != 0 {
-            return refuse("FLAC frame reserved bit is set");
+            return refuse(SOURCE_CORRUPT, "FLAC frame reserved bit is set");
         }
         let strat = r.bit()?;
         if *strategy.get_or_insert(strat) != strat {
-            return refuse("FLAC blocking strategy changes mid-stream");
+            return refuse(SOURCE_OUTSIDE_INGEST1, "FLAC blocking strategy changes mid-stream");
         }
         let bs_code = r.bits(4)? as u32;
         let sr_code = r.bits(4)? as u32;
         let ch_code = r.bits(4)? as u32;
         let ss_code = r.bits(3)? as u32;
         if r.bit()? != 0 {
-            return refuse("FLAC frame reserved bit is set");
+            return refuse(SOURCE_CORRUPT, "FLAC frame reserved bit is set");
         }
         let number = coded_number(&mut r)?;
         let block = match bs_code {
-            0 => return refuse("FLAC reserved block size"),
+            0 => return refuse(SOURCE_CORRUPT, "FLAC reserved block size"),
             1 => 192,
             2..=5 => 576 << (bs_code - 2),
             6 => r.bits(8)? as usize + 1,
@@ -371,7 +371,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
             12 => r.bits(8)? as u32 * 1000,
             13 => r.bits(16)? as u32,
             14 => r.bits(16)? as u32 * 10,
-            _ => return refuse("FLAC invalid frame sample rate"),
+            _ => return refuse(SOURCE_CORRUPT, "FLAC invalid frame sample rate"),
         };
         let bps = match ss_code {
             0 => info.bps,
@@ -381,30 +381,30 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
             5 => 20,
             6 => 24,
             7 => 32,
-            _ => return refuse("FLAC reserved sample size"),
+            _ => return refuse(SOURCE_CORRUPT, "FLAC reserved sample size"),
         };
         let hdr_end = r.pos / 8;
         let crc = r.bits(8)? as u8;
         if crc8(&b[start..hdr_end]) != crc {
-            return refuse("FLAC frame header CRC-8 mismatch (corrupt)");
+            return refuse(SOURCE_CORRUPT, "FLAC frame header CRC-8 mismatch (corrupt)");
         }
         if rate != info.rate || bps != info.bps {
-            return refuse("FLAC sample rate or bit depth changes mid-stream");
+            return refuse(SOURCE_OUTSIDE_INGEST1, "FLAC sample rate or bit depth changes mid-stream");
         }
         if info.max_block != 0 && block as u32 > info.max_block {
-            return refuse("FLAC frame block exceeds the STREAMINFO maximum");
+            return refuse(SOURCE_CORRUPT, "FLAC frame block exceeds the STREAMINFO maximum");
         }
         let (fch, decor) = match ch_code {
             0..=7 => (ch_code as usize + 1, 0),
             8..=10 => (2, ch_code),
-            _ => return refuse("FLAC reserved channel assignment"),
+            _ => return refuse(SOURCE_CORRUPT, "FLAC reserved channel assignment"),
         };
         if fch != ch {
-            return refuse("FLAC channel count changes mid-stream");
+            return refuse(SOURCE_OUTSIDE_INGEST1, "FLAC channel count changes mid-stream");
         }
         let expect = if strat == 0 { next_number } else { samples };
         if number != expect {
-            return refuse("FLAC frame numbering is discontinuous (missing or duplicated frame)");
+            return refuse(SOURCE_CORRUPT, "FLAC frame numbering is discontinuous (missing or duplicated frame)");
         }
         let mut subs = Vec::with_capacity(ch);
         for c in 0..ch {
@@ -415,7 +415,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         let body_end = r.pos / 8;
         let crc = r.bits(16)? as u16;
         if crc16(&b[start..body_end]) != crc {
-            return refuse("FLAC frame CRC-16 mismatch (corrupt)");
+            return refuse(SOURCE_CORRUPT, "FLAC frame CRC-16 mismatch (corrupt)");
         }
         match decor {
             8 => {
@@ -446,7 +446,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         o = r.pos / 8;
     }
     if info.total != 0 && info.total != samples {
-        return refuse(format!(
+        return refuse(SOURCE_CORRUPT, format!(
             "FLAC STREAMINFO declares {} samples but the stream holds {} (truncated or corrupt)",
             info.total, samples
         ));
@@ -466,7 +466,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         }
         h.update(&buf);
         if h.finalize()[..] != info.md5 {
-            return refuse("FLAC audio MD5 does not match STREAMINFO (corrupt)");
+            return refuse(SOURCE_CORRUPT, "FLAC audio MD5 does not match STREAMINFO (corrupt)");
         }
     }
     let scale = 1.0 / (1u64 << (info.bps - 1)) as f64;

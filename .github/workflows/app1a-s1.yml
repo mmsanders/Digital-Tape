@@ -1,0 +1,114 @@
+name: APP-1A S1 ingest report (#452, #457)
+
+# Software's own checks of the opt-in ingest report candidate, stacked on the pinned
+# INGEST 0.1.1 exhaustion correction 50bc416 (#459), itself stacked on HELD 6126d04
+# (#436; its byte-equivalence to 6126d04 is ingest-exhaustion.yml's). Only the scopes
+# the change touches are rerun, never the full Stage1 campaign:
+#   - unit/integration tests;
+#   - the shipping binary still carries no observation seam;
+#   - no-flag equivalence: base 50bc416 vs this candidate, byte for byte, on every
+#     census case whose setup needs no test-build seam and is at most an hour long;
+#     with --report: identical outputs, and an APP-1A-shaped report;
+#   - Verification's imported package tests/wp15_app1a_r1 (tree bdd861b6): its own
+#     ingest_process.py against the actual shipping binary;
+#   - tools/app1a/s1_matrix.py: the ADAPTER.md process matrix rows 2-6 and the closed
+#     ingest-ID census, report writes failing on an actual small filesystem (Linux
+#     tmpfs, macOS disk image; Windows has none here and says so).
+# Judges nothing; Verification #201 authors and runs the tests that dispose it.
+on:
+  pull_request:
+    paths:
+      - 'host/ingest/**'
+      - 'tools/app1a/**'
+      - 'tests/wp15_app1a_r1/**'
+      - '.github/workflows/app1a-s1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  s1:
+    name: S1 report candidate (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 240
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: check out bytes exactly as committed
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: 50bc4160f6da527da8c684d05264f99815aaa870
+          path: base
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: source pack (the package's own fetcher)
+        run: |
+          python -m pip install -r tests/wp16_ingest_stage1/requirements.txt
+          python -B tests/wp16_ingest_stage1/check_pins.py
+          python -B tests/wp16_ingest_stage1/asset.py --destination "$RUNNER_TEMP/sources"
+      - name: build base and candidate (shipping and observation)
+        run: |
+          (cd base/host/ingest && cargo build --release --locked)
+          (cd host/ingest && cargo build --release --locked && cargo build --release --locked --features observe --target-dir target/observe)
+      - name: binary identities
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          for b in base/host/ingest/target/release/ingest$ext host/ingest/target/release/ingest$ext host/ingest/target/observe/release/ingest$ext; do
+            s=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$b")
+            echo "$s  $b"; echo "::notice title=${{ runner.os }} $b::$s"
+          done
+      - name: tests
+        working-directory: host/ingest
+        run: cargo test --release --locked
+      - name: shipping binary carries no observation seam
+        working-directory: host/ingest
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/check_seam.py target/release/ingest$ext target/observe/release/ingest$ext
+      - name: no-flag equivalence and report shape
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/app1a/noflag_equivalence.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+            --base base/host/ingest/target/release/ingest$ext --new host/ingest/target/release/ingest$ext \
+            --out "$RUNNER_TEMP/eq/noflag-equivalence-${{ runner.os }}.json" --work "$RUNNER_TEMP/eqwork"
+      - name: Verification's package process tests (tests/wp15_app1a_r1/ingest_process.py)
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          b=host/ingest/target/release/ingest$ext
+          sha=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$b")
+          ver=$("$b" --version | cut -d' ' -f2-)
+          python -B tests/wp15_app1a_r1/ingest_process.py --ingest "$b" --sha256 "$sha" --version "$ver" \
+            --source "$RUNNER_TEMP/sources/assets/ordinary.wav" --work "$RUNNER_TEMP/eq/ingest-process"
+      - name: an actual small filesystem for report-write failures
+        run: |
+          case "$RUNNER_OS" in
+            Linux) sudo mkdir -p /mnt/rfull && sudo mount -t tmpfs -o size=256k,mode=1777 tmpfs /mnt/rfull
+                   echo "FULLFS=--fullfs /mnt/rfull" >> "$GITHUB_ENV" ;;
+            macOS) hdiutil create -size 1m -fs HFS+ -volname rfull "$RUNNER_TEMP/rfull.dmg"
+                   hdiutil attach "$RUNNER_TEMP/rfull.dmg" -mountpoint "$RUNNER_TEMP/rfull"
+                   echo "FULLFS=--fullfs $RUNNER_TEMP/rfull" >> "$GITHUB_ENV" ;;
+            *) echo "FULLFS=" >> "$GITHUB_ENV" ;;
+          esac
+      - name: S1 process matrix and closed-ID census
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/app1a/s1_matrix.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+            --bin host/ingest/target/release/ingest$ext --observe host/ingest/target/observe/release/ingest$ext \
+            --out "$RUNNER_TEMP/eq/s1-matrix" --work "$RUNNER_TEMP/s1m-work" $FULLFS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app1a-s1-${{ runner.os }}
+          path: ${{ runner.temp }}/eq

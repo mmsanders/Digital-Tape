@@ -1,7 +1,7 @@
 //! Resource exhaustion (contract §5: exit 1, nothing published).
 //!
 //! Every allocation sized by the input goes through `common::alloc` and its siblings,
-//! which fail as an ordinary `Fail::Io`. What stable Rust cannot make fallible (small
+//! which fail as an ordinary IO_MEMORY `Fail` (exit 1). What stable Rust cannot make fallible (small
 //! strings, decoder state, the error path itself) is covered here: the process
 //! allocator wraps the system allocator, and a request of at most `SMALL` bytes that
 //! the system refuses is served from a fixed `RESERVE` while the exhaustion is latched.

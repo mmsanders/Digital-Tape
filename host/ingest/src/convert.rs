@@ -75,7 +75,7 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
         if mono { pl } else { pl.max(tp.peak(&dsp::to_f32(rr)?)) }
     };
     if !(pk > 0.0) {
-        return refuse("no valid true-peak measurement for a source that is not digital silence");
+        return refuse(SOURCE_LEVEL, "no valid true-peak measurement for a source that is not digital silence");
     }
     let p_in = dsp::dbfs(pk as f64);
     let peak_bound = CEILING_DBTP - p_in - GUARD_DB;
@@ -89,7 +89,7 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
     for _ in 0..MAX_ATTEMPTS {
         let lin_gain = libm::pow(10.0, g / 20.0);
         let Some(pcm) = dsp::quantize(&l, r.as_deref(), lin_gain)? else {
-            return refuse("16-bit quantization would overflow");
+            return refuse(SOURCE_LEVEL, "16-bit quantization would overflow");
         };
         let p_out = pcm_peak(tp, &pcm, mono)?;
         if p_out + GUARD_DB > CEILING_DBTP {
@@ -130,5 +130,5 @@ pub fn convert(d: &Decoded, out_frames: u64, tp: &TruePeak, pos: usize) -> Res<C
             reason: why,
         });
     }
-    Err(Fail::Io(format!("gain refinement did not converge in {MAX_ATTEMPTS} attempts")))
+    Err(Fail::io(INTERNAL, format!("gain refinement did not converge in {MAX_ATTEMPTS} attempts")))
 }

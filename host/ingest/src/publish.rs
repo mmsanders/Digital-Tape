@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 pub const STAGE_MARK: &str = ".ingest-stage-";
 
 fn io<T>(what: &str, p: &Path, r: std::io::Result<T>) -> Res<T> {
-    r.map_err(|e| Fail::Io(format!("{what} {}: {e}", p.display())))
+    r.map_err(|e| Fail::io(IO_DEST, format!("{what} {}: {e}", p.display())))
 }
 
 /// Create, write and flush one staged file; `which` is `audio` or `manifest` (the
@@ -20,8 +20,15 @@ fn write_new(p: &Path, parts: &[&[u8]], which: &str) -> Res<()> {
     let mut f = io("cannot create", p, OpenOptions::new().write(true).create_new(true).open(p))?;
     observe::mark("output_open");
     observe::cut(&format!("{which}-open"));
+    // APP-1A §4 `write`: stage WAV bytes written, of 44 + 4 * total_frames.
+    let total: u64 = if which == "audio" { parts.iter().map(|b| b.len() as u64).sum() } else { 0 };
+    let mut done = 0u64;
     for b in parts {
         io("cannot write", p, observe::io_fault(&format!("{which}-write")).and_then(|_| f.write_all(b)))?;
+        if which == "audio" {
+            done += b.len() as u64;
+            crate::report::progress("write", done, total);
+        }
     }
     io("cannot flush", p, observe::io_fault(&format!("{which}-flush")).and_then(|_| f.sync_all()))?;
     drop(f);
@@ -82,12 +89,12 @@ pub(crate) fn rename_noreplace(_a: &Path, _b: &Path) -> std::io::Result<()> {
 /// DEST must not exist (checked up front, and again atomically by the rename).
 pub fn check_dest(dest: &Path) -> Res<()> {
     if fs::symlink_metadata(dest).is_ok() {
-        return Err(Fail::Refuse(format!("{}: already exists; ingest never overwrites", dest.display())));
+        return Err(Fail::refuse(DEST_EXISTS, format!("{}: already exists; ingest never overwrites", dest.display())));
     }
     let parent = parent_of(dest);
     match fs::metadata(&parent) {
         Ok(m) if m.is_dir() => Ok(()),
-        _ => Err(Fail::Io(format!("{}: the parent folder does not exist", parent.display()))),
+        _ => Err(Fail::io(IO_DEST, format!("{}: the parent folder does not exist", parent.display()))),
     }
 }
 
@@ -100,7 +107,7 @@ fn parent_of(dest: &Path) -> PathBuf {
 
 pub fn publish(dest: &Path, wav: &[&[u8]], manifest: &[u8]) -> Res<()> {
     let parent = parent_of(dest);
-    let name = dest.file_name().ok_or_else(|| Fail::Refuse(format!("{}: not a usable destination name", dest.display())))?;
+    let name = dest.file_name().ok_or_else(|| Fail::refuse(DEST_NAME_INVALID, format!("{}: not a usable destination name", dest.display())))?;
     let mut stage = None;
     observe::cut("before-stage");
     for i in 0..1000u32 {
@@ -115,10 +122,10 @@ pub fn publish(dest: &Path, wav: &[&[u8]], manifest: &[u8]) -> Res<()> {
                 break;
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
-            Err(e) => return Err(Fail::Io(format!("cannot create stage {}: {e}", p.display()))),
+            Err(e) => return Err(Fail::io(IO_DEST, format!("cannot create stage {}: {e}", p.display()))),
         }
     }
-    let stage = stage.ok_or_else(|| Fail::Io("cannot create a fresh stage folder".into()))?;
+    let stage = stage.ok_or_else(|| Fail::io(IO_DEST, "cannot create a fresh stage folder"))?;
     let result = (|| -> Res<()> {
         write_new(&stage.join("audio.wav"), wav, "audio")?;
         write_new(&stage.join("manifest.json"), &[manifest], "manifest")?;
@@ -130,9 +137,9 @@ pub fn publish(dest: &Path, wav: &[&[u8]], manifest: &[u8]) -> Res<()> {
                 observe::mark("publish_dir_noreplace");
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists || fs::symlink_metadata(dest).is_ok() => {
-                return Err(Fail::Refuse(format!("{}: appeared while ingest ran; not overwritten", dest.display())))
+                return Err(Fail::refuse(DEST_APPEARED, format!("{}: appeared while ingest ran; not overwritten", dest.display())))
             }
-            Err(e) => return Err(Fail::Io(format!("cannot publish {}: {e}", dest.display()))),
+            Err(e) => return Err(Fail::io(IO_DEST, format!("cannot publish {}: {e}", dest.display()))),
         }
         sync_dir(&parent)
     })();
