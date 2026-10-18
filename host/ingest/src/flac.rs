@@ -159,7 +159,7 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
         }
     }
     let bps = bps - wasted;
-    let mut s: Vec<i64> = Vec::with_capacity(block);
+    let mut s: Vec<i64> = alloc(block)?;
     match t {
         0 => {
             let v = r.signed(bps)?;
@@ -178,7 +178,7 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
             for _ in 0..order {
                 s.push(r.signed(bps)?);
             }
-            let mut res = Vec::with_capacity(block - order);
+            let mut res = alloc(block - order)?;
             residual(r, block, order, &mut res)?;
             for (i, e) in res.into_iter().enumerate() {
                 let n = i + order;
@@ -213,7 +213,7 @@ fn subframe(r: &mut Bits, block: usize, bps: u32) -> Res<Vec<i64>> {
             for _ in 0..order {
                 coef.push(r.signed(prec)?);
             }
-            let mut res = Vec::with_capacity(block - order);
+            let mut res = alloc(block - order)?;
             residual(r, block, order, &mut res)?;
             for (i, e) in res.into_iter().enumerate() {
                 let n = i + order;
@@ -439,7 +439,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
             _ => {}
         }
         for (p, s) in planes.iter_mut().zip(subs) {
-            p.extend_from_slice(&s);
+            extend(p, &s)?;
         }
         samples += block as u64;
         next_number += 1;
@@ -454,7 +454,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
     if info.md5 != [0u8; 16] {
         let w = info.bps.div_ceil(8) as usize;
         let mut h = Md5::new();
-        let mut buf = Vec::with_capacity(4096 * ch * w);
+        let mut buf = alloc(4096 * ch * w)?;
         for i in 0..samples as usize {
             for p in &planes {
                 buf.extend_from_slice(&p[i].to_le_bytes()[..w]);
@@ -470,10 +470,7 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         }
     }
     let scale = 1.0 / (1u64 << (info.bps - 1)) as f64;
-    let planes = planes
-        .into_iter()
-        .map(|p| p.into_iter().map(|v| v as f64 * scale).collect())
-        .collect();
+    let planes = to_f64(planes, scale);
     Decoded {
         container: "flac",
         codec: "flac",
@@ -485,4 +482,24 @@ pub fn decode(b: &[u8]) -> Res<Decoded> {
         planes,
     }
     .finish()
+}
+
+/// Integer planes to float. In place: i64 and f64 share size and alignment, so std's
+/// in-place collection reuses every buffer and allocates nothing (tested below).
+fn to_f64(planes: Vec<Vec<i64>>, scale: f64) -> Vec<Vec<f64>> {
+    planes.into_iter().map(|p| p.into_iter().map(|v| v as f64 * scale).collect()).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn to_f64_allocates_nothing() {
+        let p: Vec<Vec<i64>> = vec![vec![1, -2, 3]; 2];
+        let outer = p.as_ptr() as usize;
+        let inner: Vec<usize> = p.iter().map(|v| v.as_ptr() as usize).collect();
+        let q = super::to_f64(p, 0.5);
+        assert_eq!(q, vec![vec![0.5, -1.0, 1.5]; 2]);
+        assert_eq!(q.as_ptr() as usize, outer);
+        assert_eq!(q.iter().map(|v| v.as_ptr() as usize).collect::<Vec<_>>(), inner);
+    }
 }

@@ -7,6 +7,7 @@ pub mod convert;
 pub mod dsp;
 pub mod flac;
 pub mod manifest;
+pub mod mem;
 pub mod mpeg;
 pub mod observe;
 pub mod order;

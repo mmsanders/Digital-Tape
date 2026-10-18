@@ -72,13 +72,13 @@ pub fn resample(x: &[f64], rate: u32, out_frames: u64) -> crate::common::Res<Vec
         v.extend_from_slice(x);
         return Ok(v);
     }
-    let f = Fir::design(rate);
+    let f = Fir::design(rate)?;
     let (l, m) = (f.l as i64, f.m as i64);
     let j = f.j;
     let width = (2 * j + 1) as usize;
     // Polyphase view of the one prototype: phase p, tap i weights input n0 + i - J by
     // h[first + p - (i - J)L]. Identical to upfirdn(h, x, L, M) read from `first`.
-    let mut table = vec![0.0f64; l as usize * width];
+    let mut table = crate::common::filled(l as usize * width, 0.0f64)?;
     for p in 0..l {
         for i in 0..width as i64 {
             let q = f.first as i64 + p - (i - j) * l;
@@ -127,15 +127,16 @@ pub struct Fir {
 }
 
 impl Fir {
-    pub fn design(rate: u32) -> Fir {
+    pub fn design(rate: u32) -> crate::common::Res<Fir> {
         let p = profile(rate);
         let i0b = bessel_i0(p.beta);
         let j = p.half as i64;
         let first = (j as u64 * p.l) as usize;
-        let h = (0..=2 * first)
-            .map(|q| kaiser_sinc((q as f64 - first as f64) / p.l as f64, p.cut, p.half, p.beta, i0b))
-            .collect();
-        Fir { l: p.l, m: p.m, j, first, h }
+        let h = crate::common::collect(
+            2 * first + 1,
+            (0..=2 * first).map(|q| kaiser_sinc((q as f64 - first as f64) / p.l as f64, p.cut, p.half, p.beta, i0b)),
+        )?;
+        Ok(Fir { l: p.l, m: p.m, j, first, h })
     }
 }
 
@@ -207,15 +208,16 @@ pub enum Loud {
 
 /// Integrated loudness of a 44.1 kHz stereo signal (EBU Tech 3341 gating). Incomplete
 /// final blocks are discarded; nothing is padded.
-pub fn loudness(ch: &[&[f64]]) -> Loud {
+pub fn loudness(ch: &[&[f64]]) -> crate::common::Res<Loud> {
+    use crate::common::{collect, filled};
     let n = ch[0].len();
     if n < BLOCK {
-        return Loud::TooShort;
+        return Ok(Loud::TooShort);
     }
     let (s1, s2) = k_weighting();
     // Per-hop sums of squares, summed over channels (G = 1.0 for L and R).
     let hops = n / HOP;
-    let mut e = vec![0.0f64; hops];
+    let mut e = filled(hops, 0.0f64)?;
     for c in ch {
         let mut a = State { x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0 };
         let mut b = State { x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0 };
@@ -229,19 +231,21 @@ pub fn loudness(ch: &[&[f64]]) -> Loud {
         }
     }
     let blocks = (n - BLOCK) / HOP + 1;
-    let z: Vec<f64> = (0..blocks).map(|j| (e[j] + e[j + 1] + e[j + 2] + e[j + 3]) / BLOCK as f64).collect();
+    let z: Vec<f64> = collect(blocks, (0..blocks).map(|j| (e[j] + e[j + 1] + e[j + 2] + e[j + 3]) / BLOCK as f64))?;
+    drop(e);
     let lk = |z: f64| -0.691 + 10.0 * libm::log10(z);
-    let abs: Vec<f64> = z.iter().copied().filter(|&z| z > 0.0 && lk(z) > -70.0).collect();
+    let abs: Vec<f64> = collect(z.len(), z.iter().copied().filter(|&z| z > 0.0 && lk(z) > -70.0))?;
+    drop(z);
     if abs.is_empty() {
-        return Loud::GatedOut;
+        return Ok(Loud::GatedOut);
     }
     let mean = abs.iter().sum::<f64>() / abs.len() as f64;
     let rel = lk(mean) - 10.0;
-    let gated: Vec<f64> = abs.into_iter().filter(|&z| lk(z) > rel).collect();
+    let gated: Vec<f64> = collect(abs.len(), abs.iter().copied().filter(|&z| lk(z) > rel))?;
     if gated.is_empty() {
-        return Loud::GatedOut;
+        return Ok(Loud::GatedOut);
     }
-    Loud::Measured(lk(gated.iter().sum::<f64>() / gated.len() as f64))
+    Ok(Loud::Measured(lk(gated.iter().sum::<f64>() / gated.len() as f64)))
 }
 
 // ---- True peak --------------------------------------------------------------------------
@@ -263,13 +267,13 @@ pub struct TruePeak {
 }
 
 impl TruePeak {
-    pub fn new() -> TruePeak {
+    pub fn new() -> crate::common::Res<TruePeak> {
         let w = 2 * TP_HALF;
         let beta = 14.0;
         let i0b = bessel_i0(beta);
         let cut = 0.5;
         let half = TP_HALF as f64;
-        let mut taps = vec![0.0f32; TP_PHASES * w];
+        let mut taps = crate::common::filled(TP_PHASES * w, 0.0f32)?;
         for q in 0..TP_PHASES {
             let frac = q as f64 / TP_PHASES as f64;
             for i in 0..w {
@@ -279,13 +283,13 @@ impl TruePeak {
             }
         }
         let per = TP_PHASES / TP_GRID;
-        let mut grid = vec![0.0f32; w * per];
+        let mut grid = crate::common::filled(w * per, 0.0f32)?;
         for i in 0..w {
             for p in 0..per {
                 grid[i * per + p] = taps[p * TP_GRID * w + i];
             }
         }
-        TruePeak { taps, grid }
+        Ok(TruePeak { taps, grid })
     }
 
     #[inline]
@@ -387,12 +391,12 @@ impl TruePeak {
     /// positions [-TP_HALF, n + TP_HALF) in fixed blocks of `TP_BLOCK` frames, each
     /// filled by `fill(start, buf)` with a margin covering the filter support. A block
     /// that is entirely zero contributes zero.
-    pub fn peak_streamed(&self, n: i64, mut fill: impl FnMut(i64, &mut [f32])) -> f32 {
+    pub fn peak_streamed(&self, n: i64, mut fill: impl FnMut(i64, &mut [f32])) -> crate::common::Res<f32> {
         let margin = TP_HALF as i64 + 2;
         let mut best = 0.0f32;
         let mut lo = -(TP_HALF as i64);
         let end = n + TP_HALF as i64;
-        let mut buf = vec![0.0f32; TP_BLOCK + 2 * margin as usize];
+        let mut buf = crate::common::filled(TP_BLOCK + 2 * margin as usize, 0.0f32)?;
         while lo < end {
             let hi = (lo + TP_BLOCK as i64).min(end);
             let len = (hi - lo + 2 * margin) as usize;
@@ -402,7 +406,7 @@ impl TruePeak {
             }
             lo = hi;
         }
-        best
+        Ok(best)
     }
 
     /// Whole-signal true peak (with half a filter of zero extension each side).
@@ -517,7 +521,7 @@ mod tests {
         let x: Vec<f64> = (0..n)
             .map(|i| a * libm::sin(2.0 * core::f64::consts::PI * 1000.0 * i as f64 / 44100.0))
             .collect();
-        match loudness(&[&x, &x]) {
+        match loudness(&[&x, &x]).unwrap() {
             Loud::Measured(l) => assert!((l + 23.0).abs() < 0.1, "{l}"),
             o => panic!("{o:?}"),
         }
@@ -525,7 +529,7 @@ mod tests {
 
     #[test]
     fn true_peak_tones() {
-        let tp = TruePeak::new();
+        let tp = TruePeak::new().unwrap();
         for &f in &[997.0, 5512.5, 11025.0, 15000.0, 19000.0, 20000.0] {
             for &ph in &[0.0, 0.3, 0.785, 1.2] {
                 let x: Vec<f32> = (0..44100)

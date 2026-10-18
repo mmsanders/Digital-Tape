@@ -29,7 +29,7 @@ fn chunks(body: &[u8], le: bool) -> Res<Vec<Chunk<'_>>> {
                 String::from_utf8_lossy(&id)
             ));
         };
-        out.push(Chunk { id, body: &body[start..end] });
+        push(&mut out, Chunk { id, body: &body[start..end] })?;
         o = end;
         if size % 2 == 1 {
             if o >= body.len() {
