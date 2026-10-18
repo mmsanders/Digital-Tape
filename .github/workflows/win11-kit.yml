@@ -1,0 +1,162 @@
+name: Windows 11 INGEST kit (#461)
+
+# Builds the corrected Windows 11 INGEST collection kit from the exact reviewed source
+# (#459, 50bc416), publishes it as an immutable prerelease asset (durable, retrievable
+# without signing in), and rehearses the unchanged collection script against the
+# published bytes on Windows Server. Server is mechanics only, never Windows 11
+# qualification. NOT READY FOR MICHAEL: Verification #204 authenticates the exact kit,
+# script and binaries first. Judges nothing.
+on:
+  pull_request:
+    paths:
+      - 'tools/win11-kit/build_kit.py'
+      - '.github/workflows/win11-kit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SOURCE: 50bc4160f6da527da8c684d05264f99815aaa870
+  # host/ingest/stage1/win11_packet.ps1 at SOURCE (byte-identical to the reviewed 6126d04 script).
+  SCRIPT_SHA256: 9d8506670df30bbbc547c6c5757d9370e152ed55cfa4cd8378bd9e1f1337f502
+
+jobs:
+  kit:
+    name: build and publish the kit
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      zip_sha256: ${{ steps.publish.outputs.zip_sha256 }}
+      shipping: ${{ steps.publish.outputs.shipping }}
+      observe: ${{ steps.publish.outputs.observe }}
+    steps:
+      - name: check out bytes exactly as committed
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: tools-head
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE }}
+          path: src
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: build shipping, observation and profile from the exact source
+        working-directory: src/host/ingest
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE"
+          rustc -vV; cargo -V
+          cargo build --release --locked
+          cargo build --release --locked --features observe --target-dir target/observe
+          cargo run --release --locked --quiet --example profile_file -- "$RUNNER_TEMP/profile"
+          python -B tools/check_seam.py target/release/ingest.exe target/observe/release/ingest.exe
+          python -B tools/check_win11_script.py
+          got=$(python -c "import hashlib;print(hashlib.sha256(open('stage1/win11_packet.ps1','rb').read()).hexdigest())")
+          test "$got" = "$SCRIPT_SHA256" || { echo "::error::collection script is $got, expected $SCRIPT_SHA256"; exit 1; }
+      - name: package the kit
+        run: |
+          python -B tools-head/tools/win11-kit/build_kit.py \
+            --shipping src/host/ingest/target/release/ingest.exe \
+            --observe src/host/ingest/target/observe/release/ingest.exe \
+            --profile "$RUNNER_TEMP/profile" --source-commit "$SOURCE" \
+            --source-tree "$(git -C src rev-parse HEAD^{tree})" \
+            --toolchain src/host/ingest/rust-toolchain.toml --out "$RUNNER_TEMP/kit"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win11-kit-461
+          path: ${{ runner.temp }}/kit
+          if-no-files-found: error
+          retention-days: 90
+      - name: publish the immutable prerelease (tag on the exact source commit)
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          inv="$RUNNER_TEMP/kit/KIT-INVENTORY.json"
+          zsha=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['sha256'])" "$inv")
+          ship=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['shipping_sha256'])" "$inv")
+          obs=$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['observation_sha256'])" "$inv")
+          tag="win11-kit-ingest-0.1.1-${SOURCE:0:12}-r${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          gh release create "$tag" "$RUNNER_TEMP/kit/win11-kit.zip" "$RUNNER_TEMP/kit/KIT-INVENTORY.json" \
+            "$RUNNER_TEMP/kit/SHA256SUMS" --repo "$GITHUB_REPOSITORY" --target "$SOURCE" --prerelease \
+            --title "INGEST 0.1.1 Windows 11 kit ${SOURCE:0:12} (run $GITHUB_RUN_ID) - NOT READY FOR MICHAEL" \
+            --notes "Corrected Windows 11 INGEST collection kit built by win11-kit.yml run $GITHUB_RUN_ID from exact source $SOURCE (#459). win11-kit.zip SHA-256 $zsha; shipping ingest.exe $ship; observation ingest.exe $obs. NOT READY FOR MICHAEL pending exact-kit authentication by Verification #204. Not acceptance."
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "zip_sha256=$zsha" >> "$GITHUB_OUTPUT"
+          echo "shipping=$ship" >> "$GITHUB_OUTPUT"
+          echo "observe=$obs" >> "$GITHUB_OUTPUT"
+          echo "::notice title=kit::$tag win11-kit.zip $zsha shipping $ship observation $obs"
+
+  rehearsal:
+    # The script Michael would run, end to end, against the PUBLISHED kit bytes fetched
+    # anonymously the way the instructions fetch them. No checkout; normal policy.
+    name: collection script rehearsed on Windows Server (mechanics, not Windows 11)
+    needs: kit
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: fetch, authenticate and run
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        env:
+          TAG: ${{ needs.kit.outputs.tag }}
+          ZIP_SHA256: ${{ needs.kit.outputs.zip_sha256 }}
+          SHIP: ${{ needs.kit.outputs.shipping }}
+          OBS: ${{ needs.kit.outputs.observe }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host ("execution policy: " + (Get-ExecutionPolicy -List | Out-String))
+          $base = Join-Path $env:RUNNER_TEMP 'DigitalTape-ingest-rehearsal'
+          New-Item -ItemType Directory -Path $base | Out-Null
+          $kit = Join-Path $base 'win11-kit.zip'
+          Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/mmsanders/Digital-Tape/releases/download/$env:TAG/win11-kit.zip" -OutFile $kit
+          $k = (Get-FileHash $kit -Algorithm SHA256).Hash.ToLower()
+          Write-Host "kit $k ($((Get-Item $kit).Length) bytes)"
+          if ($k -ne $env:ZIP_SHA256) { throw "published kit is $k, expected $env:ZIP_SHA256" }
+          $script = Join-Path $base 'win11_packet.ps1'
+          Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/mmsanders/Digital-Tape/$env:SOURCE/host/ingest/stage1/win11_packet.ps1" -OutFile $script
+          $s = (Get-FileHash $script -Algorithm SHA256).Hash.ToLower()
+          if ($s -ne $env:SCRIPT_SHA256) { throw "collection script is $s, expected $env:SCRIPT_SHA256" }
+          $out = Join-Path $base 'return'
+          New-Item -ItemType Directory -Path $out | Out-Null
+          & powershell.exe -NoProfile -File $script -Candidate $env:SOURCE -Kit $kit -ShippingSha256 $env:SHIP `
+            -ObserveSha256 $env:OBS -Work (Join-Path $base 'work') -Out $out -Rehearsal
+          $code = $LASTEXITCODE
+          Write-Host "collector child exit: $code"
+          Get-ChildItem $out | ForEach-Object { Write-Host "$($_.Name) $($_.Length) $((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())" }
+          if ($code -ne 0) { exit $code }
+      - name: negative control - a wrong shipping pin stops the script before any case runs
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        env:
+          OBS: ${{ needs.kit.outputs.observe }}
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'DigitalTape-ingest-rehearsal'
+          $wrong = '0' * 64
+          & powershell.exe -NoProfile -File (Join-Path $base 'win11_packet.ps1') -Candidate $env:SOURCE `
+            -Kit (Join-Path $base 'win11-kit.zip') -ShippingSha256 $wrong -ObserveSha256 $env:OBS `
+            -Work (Join-Path $base 'work-control') -Out (Join-Path $base 'return-control') -Rehearsal 2>&1 | Tee-Object -Variable log
+          $code = $LASTEXITCODE
+          Write-Host "control exit: $code"
+          if ($code -eq 0 -or -not (($log | Out-String) -match 'STOPPED: shipping ingest.exe is')) { throw 'a wrong shipping pin did not stop the script' }
+          if (Test-Path (Join-Path $base 'work-control\packet')) { throw 'the control produced a packet' }
+          Write-Host 'negative control: the wrong pin stopped the script, as required'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: win11-kit-461-rehearsal-packet
+          path: ${{ runner.temp }}/DigitalTape-ingest-rehearsal/return
+          if-no-files-found: error
+          retention-days: 90
