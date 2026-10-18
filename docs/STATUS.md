@@ -1,6 +1,6 @@
 # Project status
 
-**17 October2026 PDT · input main `35d4862` · Owner: PM (ADR-186; pinned host/APP corrections) ·**
+**17 October2026 PDT · input main `24672d3` · Owner: PM (ADR-187; corrected Windows kit handoff) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Windows method441 integrated0b32124; physical A6/full INGEST platform/native/shipping acceptance held. APP S1/S4 candidates need correction/import; no full coverage/acceptance rung.
+WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification203 bounded exhaustion/parser/static/import corrections PASS; overall/base/native/physical/full-package holds remain. Corrected concrete Windows kit not yet authenticated; old kit PAUSED.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — |441 disposed method integrated0b32124;448 nonnormative snapshot35d4862. Verification200 confirms shipping Windows OOM abort, S4 parser/static misses; S1 corrected smoke12/12PASS only. APP test treebdd861b6 published; full package/dependencies held | Software457 pinned exhaustion/import/APP fixes → Verification201 regression/disposition. Michael447 old INGEST kit PAUSED pending corrected readiness; physical read-only A6 remains ready; no Mac run |
+| Phase 2 / host tools | — | Verification203/9997bc1c bounded459/50bc416 exhaustion,454/b9f430c report and455/ecca8c1 parser/static/import PASS; no overall integration clearance. Windows method441 integrated; physical A6 remains pending | Software461 prepares/pins corrected Windows kit NOW → Verification204 authenticates actual bytes/transport → new ready commands on Michael447. Closed457/201 stay closed; old kit PAUSED, physical read-only A6 ready |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on physical A6 | Michael447 physical evidence; fresh Verification disposition on return |
 | Q-P2-1 copy call shape (#379) | — | Verification199 passes63 bounded scenario rows/host-load facts, carrying prior binding corrections; no new engine defect. Subset443 overall HELD: sampled/repeated-LBA/residue,404 host faults/command detail and full dup source/PCM binding | PM next coverage/Q-P2-1(b) decision before firmware; no unchanged full campaign, batching or write/async permission; retain A8 and <30s |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |
