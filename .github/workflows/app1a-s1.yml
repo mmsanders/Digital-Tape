@@ -1,19 +1,26 @@
-name: APP-1A S1 ingest report (#452)
+name: APP-1A S1 ingest report (#452, #457)
 
-# Software's own checks of the opt-in ingest report candidate, stacked on HELD INGEST-1
-# candidate 6126d04 (#436). Only the scopes the change touches are rerun, never the
-# full Stage1 campaign (ingest.yml's stage1-packet job is skipped for this branch):
+# Software's own checks of the opt-in ingest report candidate, stacked on the pinned
+# INGEST 0.1.1 exhaustion correction 50bc416 (#459), itself stacked on HELD 6126d04
+# (#436; its byte-equivalence to 6126d04 is ingest-exhaustion.yml's). Only the scopes
+# the change touches are rerun, never the full Stage1 campaign:
 #   - unit/integration tests;
 #   - the shipping binary still carries no observation seam;
-#   - no-flag equivalence: base 6126d04 vs this candidate, byte for byte, on every
+#   - no-flag equivalence: base 50bc416 vs this candidate, byte for byte, on every
 #     census case whose setup needs no test-build seam and is at most an hour long;
-#   - with --report: identical outputs, and an APP-1A-shaped report.
-# Judges nothing; Verification #196 authors and runs the tests that dispose it.
+#     with --report: identical outputs, and an APP-1A-shaped report;
+#   - Verification's imported package tests/wp15_app1a_r1 (tree bdd861b6): its own
+#     ingest_process.py against the actual shipping binary;
+#   - tools/app1a/s1_matrix.py: the ADAPTER.md process matrix rows 2-6 and the closed
+#     ingest-ID census, report writes failing on an actual small filesystem (Linux
+#     tmpfs, macOS disk image; Windows has none here and says so).
+# Judges nothing; Verification #201 authors and runs the tests that dispose it.
 on:
   pull_request:
     paths:
       - 'host/ingest/**'
       - 'tools/app1a/**'
+      - 'tests/wp15_app1a_r1/**'
       - '.github/workflows/app1a-s1.yml'
   workflow_dispatch:
 
@@ -28,7 +35,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 120
+    timeout-minutes: 240
     defaults:
       run:
         shell: bash
@@ -41,7 +48,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@v4
         with:
-          ref: 6126d04050133cacb9a1960a0bc13c9ee93130e5
+          ref: 50bc4160f6da527da8c684d05264f99815aaa870
           path: base
       - uses: actions/setup-python@v5
         with:
@@ -76,6 +83,30 @@ jobs:
           python -B tools/app1a/noflag_equivalence.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
             --base base/host/ingest/target/release/ingest$ext --new host/ingest/target/release/ingest$ext \
             --out "$RUNNER_TEMP/eq/noflag-equivalence-${{ runner.os }}.json" --work "$RUNNER_TEMP/eqwork"
+      - name: Verification's package process tests (tests/wp15_app1a_r1/ingest_process.py)
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          b=host/ingest/target/release/ingest$ext
+          sha=$(python -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" "$b")
+          ver=$("$b" --version | cut -d' ' -f2-)
+          python -B tests/wp15_app1a_r1/ingest_process.py --ingest "$b" --sha256 "$sha" --version "$ver" \
+            --source "$RUNNER_TEMP/sources/assets/ordinary.wav" --work "$RUNNER_TEMP/eq/ingest-process"
+      - name: an actual small filesystem for report-write failures
+        run: |
+          case "$RUNNER_OS" in
+            Linux) sudo mkdir -p /mnt/rfull && sudo mount -t tmpfs -o size=256k,mode=1777 tmpfs /mnt/rfull
+                   echo "FULLFS=--fullfs /mnt/rfull" >> "$GITHUB_ENV" ;;
+            macOS) hdiutil create -size 1m -fs HFS+ -volname rfull "$RUNNER_TEMP/rfull.dmg"
+                   hdiutil attach "$RUNNER_TEMP/rfull.dmg" -mountpoint "$RUNNER_TEMP/rfull"
+                   echo "FULLFS=--fullfs $RUNNER_TEMP/rfull" >> "$GITHUB_ENV" ;;
+            *) echo "FULLFS=" >> "$GITHUB_ENV" ;;
+          esac
+      - name: S1 process matrix and closed-ID census
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/app1a/s1_matrix.py --package tests/wp16_ingest_stage1 --sources "$RUNNER_TEMP/sources" \
+            --bin host/ingest/target/release/ingest$ext --observe host/ingest/target/observe/release/ingest$ext \
+            --out "$RUNNER_TEMP/eq/s1-matrix" $FULLFS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
