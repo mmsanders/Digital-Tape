@@ -20,26 +20,26 @@ CFLAGS  ?= -O2 -g
 ALL_CFLAGS := -std=c99 $(WARN) $(CFLAGS)
 CPPFLAGS := -I../engine/include -I. -Iport
 
-COMMON  := target.c port/hport.c port/mbr.c port/fat.c port/safety.c port/partview.c port/entropy.c
+COMMON  := target.c report.c port/discover.c port/hport.c port/mbr.c port/fat.c port/safety.c port/partview.c port/entropy.c
 
 ifeq ($(OS),Windows_NT)
   EXE      := .exe
-  PLATFORM := port/hport_win.c port/probe_win.c
+  PLATFORM := port/hport_win.c port/probe_win.c port/discover_win.c
   SYSLIBS  := -lbcrypt -lpsapi -lshell32
 else
   EXE      :=
   UNAME    := $(shell uname -s)
   ifeq ($(UNAME),Darwin)
-    PLATFORM := port/hport_posix.c port/probe_macos.c
+    PLATFORM := port/hport_posix.c port/probe_macos.c port/discover_macos.c
     SYSLIBS  := -framework CoreFoundation -framework DiskArbitration -framework IOKit -framework Security
   else
-    PLATFORM := port/hport_posix.c port/probe_linux.c
+    PLATFORM := port/hport_posix.c port/probe_linux.c port/discover_linux.c
     SYSLIBS  :=
   endif
 endif
 
 PORT_SRC  := $(COMMON) $(PLATFORM)
-PORT_HDR  := target.h port/hport.h port/layout.h port/safety.h port/entropy.h port/winutf.h port/tseam.h
+PORT_HDR  := target.h report.h port/discover.h port/hport.h port/layout.h port/safety.h port/entropy.h port/winutf.h port/tseam.h
 # The test build records its own source commit in every trace.
 HEAD_ID   := $(shell git rev-parse HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD -- . ../engine 2>/dev/null || echo -dirty)
 
@@ -62,11 +62,11 @@ $(BUILD):
 	@mkdir -p $@
 
 $(TAPECTL): tapectl.c wav.c wav.h $(PORT_SRC) $(PORT_HDR) $(LIBS) | $(BUILD)
-	$(CC) $(CPPFLAGS) $(ALL_CFLAGS) tapectl.c wav.c $(PORT_SRC) $(ENGINE)/libtape.a $(SYSLIBS) -o $@
+	$(CC) $(CPPFLAGS) -DTAPECTL_BUILD_ID='"$(HEAD_ID)"' $(ALL_CFLAGS) tapectl.c wav.c $(PORT_SRC) $(ENGINE)/libtape.a $(SYSLIBS) -o $@
 
-$(TAPECTL_T): tapectl.c wav.c wav.h $(PORT_SRC) $(PORT_HDR) port/facts_test.c port/trace_test.c $(LIBS) | $(BUILD)
-	$(CC) $(CPPFLAGS) -DTAPECTL_TEST -DTAPECTL_HEAD='"$(HEAD_ID)"' $(ALL_CFLAGS) tapectl.c wav.c $(PORT_SRC) \
-	    port/facts_test.c port/trace_test.c \
+$(TAPECTL_T): tapectl.c wav.c wav.h $(PORT_SRC) $(PORT_HDR) port/facts_test.c port/trace_test.c port/discover_test.c $(LIBS) | $(BUILD)
+	$(CC) $(CPPFLAGS) -DTAPECTL_TEST -DTAPECTL_HEAD='"$(HEAD_ID)"' -DTAPECTL_BUILD_ID='"$(HEAD_ID)"' $(ALL_CFLAGS) tapectl.c wav.c $(PORT_SRC) \
+	    port/facts_test.c port/trace_test.c port/discover_test.c \
 	    $(ENGINE)/libtape.a $(SYSLIBS) -o $@
 
 $(TEST_WAV): test_wav.c wav.c wav.h | $(BUILD)

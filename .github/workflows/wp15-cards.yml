@@ -1,0 +1,148 @@
+name: WP15 S2 tapectl cards (#465)
+
+# Software's own S2 `tapectl cards` observations for Verification #208 (APP-1A §5):
+# hosted runners only, on attached loop devices / hdiutil images / VHDs; no
+# physical disk, no reader. Windows here is Server (supplementary), never
+# Windows 11. Raw observations only: no verdict, no acceptance.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - '.github/workflows/wp15-cards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: cards — Linux loop devices (hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: sudo apt-get install -y strace >/dev/null
+      - name: Build
+        run: make -C engine all && make -C host test
+      - name: Binaries
+        run: sha256sum build/host/tapectl build/host/tapectl-test; uname -a; . /etc/os-release; echo "$PRETTY_NAME"
+      - name: Discovery on the runner's own disks (unprivileged)
+        run: build/host/tapectl-test discover; build/host/tapectl cards
+      - name: cards e2e (cards unprivileged; attach/provision via sudo)
+        run: |
+          truncate -s 512M "$RUNNER_TEMP/card.img"
+          host/cards_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img" sudo
+      - name: Linux-only observations (syscall trace, enumeration failure, 128 GiB)
+        run: sudo host/cards_linux.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/linux"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-cards-linux
+          path: |
+            ${{ runner.temp }}/e2e
+            ${{ runner.temp }}/linux
+          retention-days: 90
+
+  macos:
+    name: cards — macOS arm64 hdiutil images (hosted)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build
+        run: |
+          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+          make -C engine CC="$GCC" all
+          make -C host CC=clang test
+      - name: Binaries
+        run: shasum -a 256 build/host/tapectl build/host/tapectl-test; sw_vers; uname -a; csrutil status || true
+      - name: Discovery on the runner's own disks (unprivileged)
+        run: build/host/tapectl-test discover; build/host/tapectl cards
+      - name: cards e2e (cards unprivileged; attach/provision via sudo)
+        run: |
+          mkfile -n 512m "$RUNNER_TEMP/card.raw"
+          host/cards_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw" sudo
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-cards-macos
+          path: ${{ runner.temp }}/e2e
+          retention-days: 90
+
+  windows:
+    name: cards — Windows Server VHDs (hosted, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc test-bins
+          host/run_tests.sh ../build/host .exe
+      - name: Binaries
+        run: |
+          sha256sum build/host/tapectl.exe build/host/tapectl-test.exe
+          powershell -NoProfile -Command "\$o=Get-CimInstance Win32_OperatingSystem; \$o.Caption + ' ' + \$o.Version + ' build ' + \$o.BuildNumber"
+      - name: Discovery on the runner's own disks (elevated runner token)
+        run: build/host/tapectl-test.exe discover; build/host/tapectl.exe cards
+      - name: cards e2e (elevated runner token)
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          host/cards_e2e.sh build/host/tapectl.exe build/host/tapectl-test.exe "$RUNNER_TEMP/e2e" host/vhd_windows.sh "$RUNNER_TEMP/card.vhd"
+      - name: cards as a standard (unelevated) local user, on a fresh blank VHD
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $out = "$env:RUNNER_TEMP\unelevated"; New-Item -ItemType Directory -Force $out | Out-Null
+          $vhd = "$env:RUNNER_TEMP\blank.vhd"
+          "create vdisk file=`"$vhd`" maximum=1024 type=expandable`nselect vdisk file=`"$vhd`"`nattach vdisk" | Set-Content "$out\dp.txt"
+          diskpart /s "$out\dp.txt" | Out-Null
+          $n = (Get-DiskImage -ImagePath $vhd | Get-Disk).Number
+          $dev = "\\.\PhysicalDrive$n"; "attached $vhd as $dev"
+          $dir = 'C:\dtcards'; New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item build\host\tapectl.exe, build\host\tapectl-test.exe $dir
+          "$dev whole=1 removable_or_sd=1 virtual=0" | Set-Content -Encoding ascii "$dir\seam"
+          icacls $dir /grant 'Users:(OI)(CI)M' | Out-Null
+          $pw = 'Dt!' + [guid]::NewGuid().ToString('N').Substring(0, 16)
+          net user dtcards $pw /add /y | Out-Null
+          $cred = New-Object PSCredential('dtcards', (ConvertTo-SecureString $pw -AsPlainText -Force))
+          function AsUser($name, $cmdline) {
+            $p = Start-Process -FilePath cmd.exe -ArgumentList @('/c', $cmdline) -Credential $cred -WorkingDirectory $dir `
+              -RedirectStandardOutput "$dir\$name.out" -RedirectStandardError "$dir\$name.err" -Wait -PassThru -LoadUserProfile
+            Write-Host "== $name (exit $($p.ExitCode))"; Get-Content "$dir\$name.out", "$dir\$name.err" | ForEach-Object { Write-Host $_ }
+            Copy-Item "$dir\$name.out", "$dir\$name.err" $out
+            return $p.ExitCode
+          }
+          AsUser 'whoami' 'whoami /groups' | Out-Null
+          $rc1 = AsUser 'discover' "$dir\tapectl-test.exe discover"
+          $rc2 = AsUser 'cards-shipped' "$dir\tapectl.exe cards"
+          $rc3 = AsUser 'cards-test' "set TAPECTL_TEST_CARDS=$dir\seam&& $dir\tapectl-test.exe cards"
+          $esc = $dev.Replace('\', '\\')
+          $shipped = Get-Content "$dir\cards-shipped.out" -Raw
+          $test = Get-Content "$dir\cards-test.out" -Raw
+          $fails = 0
+          if ($rc1 -ne 0 -or $rc2 -ne 0 -or $rc3 -ne 0) { "FAIL  exits $rc1 $rc2 $rc3"; $fails++ }
+          if ($shipped -like "*`"path`":`"$esc`"*") { "FAIL  shipped cards lists the VHD unelevated"; $fails++ } else { "ok    shipped cards (unelevated) does not list the VHD" }
+          if ($test -like "*`"path`":`"$esc`",`"bytes`":1073741824}*") { "ok    test route (unelevated): blank VHD offered with its real size" } else { "FAIL  test route did not offer the VHD"; $fails++ }
+          "select vdisk file=`"$vhd`"`ndetach vdisk" | Set-Content "$out\dp2.txt"; diskpart /s "$out\dp2.txt" | Out-Null
+          exit $fails
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-cards-windows
+          path: |
+            ${{ runner.temp }}/e2e
+            ${{ runner.temp }}/unelevated
+          retention-days: 90

@@ -19,6 +19,8 @@
 #include "layout.h"
 #include "entropy.h"
 #include "tseam.h"
+#include "discover.h"
+#include "report.h"
 
 /* Engine call-site observations (test build only; no-ops when shipped). */
 #ifdef TAPECTL_TEST
@@ -41,6 +43,12 @@
 #define RENDER_MAX   128u        /* contract: render requests of at most 128 frames */
 #define FEED_FRAMES  1024u       /* contract: record requests of 1024 frames */
 #define BUDGET       1024u       /* service and long-operation block budget */
+
+/* The report's `version`: this build (APP-1A §1). */
+#ifndef TAPECTL_BUILD_ID
+#define TAPECTL_BUILD_ID "unknown"
+#endif
+#define TAPECTL_VERSION "tapectl-wp15-s2+" TAPECTL_BUILD_ID
 
 
 /* One static, caller-owned block for the instance (engine-api §4). The RAM gate
@@ -900,6 +908,77 @@ static int cmd_verify(int argc, char **argv)
     return EXIT_ENGINE;
 }
 
+/* -------------------------------------------------------------------- cards */
+
+/* APP-1A §5 / APP §3: read-only candidate discovery. No device is opened, nothing
+   is written or unmounted, and a candidate authorizes nothing. stdout carries
+   one card line per candidate, then the summary; refused disks are never named. */
+struct cards_count { unsigned long offered, unprobed; };
+
+static void cards_each(void *ctx, const struct disc_disk *found, int done, int total)
+{
+    struct cards_count *c = ctx;
+    struct disc_disk d = *found;
+    char path[160];
+#ifdef TAPECTL_TEST
+    tapectl_test_cards_seam(&d);
+#endif
+    switch (discover_policy(&d)) {
+    case DISC_OFFER:
+        report_json_string(path, sizeof path, d.path);
+        printf("{\"t\":\"card\",\"path\":%s,\"bytes\":%llu}\n", path, (unsigned long long)d.bytes);
+        c->offered++;
+        break;
+    case DISC_UNPROBED:
+        c->unprobed++;
+        break;
+    case DISC_REFUSE:
+        break;
+    }
+    report_progress("enumerate", (uint64_t)done, (uint64_t)total);
+}
+
+static int cards_usage(const char *why)
+{
+    fprintf(stderr, "tapectl: %s\nusage: tapectl cards [--report FILE --report-nonce N]\n", why);
+    return EXIT_USAGE;
+}
+
+static int cmd_cards(int argc, char **argv)
+{
+    static const char *const flags[] = {"--report", "--report-nonce", NULL};
+    const char *file, *nonce;
+    struct cards_count c = {0, 0};
+    char err[256];
+    int dup = 0;
+
+    /* Report options first: invalid ones exit 2 without creating FILE. */
+    file = opt(argc, argv, "--report", &dup);
+    nonce = opt(argc, argv, "--report-nonce", &dup);
+    if (dup || (file == NULL) != (nonce == NULL) || (nonce != NULL && !report_nonce_ok(nonce))) {
+        return cards_usage("cards: --report FILE and --report-nonce N (32 lowercase hex digits) go together, once each");
+    }
+    if (file != NULL && report_open(file, "tapectl cards", TAPECTL_VERSION, nonce) != 0) {
+        fprintf(stderr, "tapectl: report: cannot create %s (%s)\n", file, report_error());
+        return EXIT_ENGINE;
+    }
+    if (check_args(argc, argv, flags, 0)) {
+        report_refusal("USAGE");
+        report_end(EXIT_USAGE);
+        return cards_usage("cards: bad arguments");
+    }
+    if (discover_enumerate(cards_each, &c, err, sizeof err) != 0) {
+        fprintf(stderr, "tapectl: cards: cannot list disks (%s)\n", err);
+        report_refusal_os("CARDS_ENUM_UNAVAILABLE", err);
+        report_end(EXIT_ENGINE);
+        return EXIT_ENGINE;
+    }
+    printf("{\"t\":\"summary\",\"offered\":%lu,\"unprobed\":%lu}\n", c.offered, c.unprobed);
+    fflush(stdout);
+    report_end(0);
+    return 0;
+}
+
 #ifdef TAPECTL_TEST
 /* tapectl-test only: print what the real platform probe sees for DEV, in the
    facts-file format, plus the policy's verdict. The probe runs; the seam does
@@ -920,6 +999,43 @@ static int cmd_probe(int argc, char **argv)
     if (f.n_mounted > SAFETY_MAX_MOUNTS) { printf("mounted=0:(more than %d)\n", SAFETY_MAX_MOUNTS); }
     printf("refusal=%s\n", refusal_id(safety_policy(&f, 0, 0)));
     if (f.detail[0]) { printf("detail=%s\n", f.detail); }
+    return 0;
+}
+
+/* tapectl-test only: every whole disk the enumerator lists, with every fact as
+   the OS gave it (-1 unknown), the seam's replacements applied, and the policy's
+   verdict. The raw observation behind each cards line. */
+static void discover_each(void *ctx, const struct disc_disk *found, int done, int total)
+{
+    static const char *const verdict[] = {"refuse", "offer", "unprobed"};
+    struct disc_disk d = *found;
+    char path[160];
+    int i;
+    (void)ctx;
+    tapectl_test_cards_seam(&d);
+    report_json_string(path, sizeof path, d.path);
+    printf("{\"disk\":%d,\"of\":%d,\"path\":%s,\"bytes\":%llu,\"bytes_known\":%d,\"whole\":%d,"
+           "\"removable_or_sd\":%d,\"virtual\":%d,\"holds_os\":%d,\"mbr\":%d,\"n_mounted\":%d,"
+           "\"mounted_unattributed\":%d,\"n_parts\":%d,\"parts\":[",
+           done, total, path, (unsigned long long)d.bytes, d.bytes_known, d.whole, d.removable_or_sd,
+           d.is_virtual, d.holds_os, d.mbr, d.n_mounted, d.mounted_unattributed, d.n_parts);
+    for (i = 0; d.n_parts > 0 && i < d.n_parts; i++) {
+        char hint[80];
+        report_json_string(hint, sizeof hint, d.parts[i].hint);
+        printf("%s{\"index\":%d,\"type\":%d,\"hint\":%s,\"start\":%lld,\"sectors\":%lld,\"mounted\":%d}", i ? "," : "",
+               d.parts[i].index, d.parts[i].type, hint, (long long)d.parts[i].start, (long long)d.parts[i].sectors,
+               d.parts[i].mounted);
+    }
+    printf("],\"verdict\":\"%s\"}\n", verdict[discover_policy(&d)]);
+}
+
+static int cmd_discover(void)
+{
+    char err[256];
+    if (discover_enumerate(discover_each, NULL, err, sizeof err) != 0) {
+        fprintf(stderr, "tapectl: discover: %s\n", err);
+        return EXIT_ENGINE;
+    }
     return 0;
 }
 #endif
@@ -966,6 +1082,10 @@ static int tapectl_main(int argc, char **argv)
                 (unsigned long)tape_instance_size());
         return EXIT_USAGE;
     }
+    if (argc >= 2 && strcmp(argv[1], "cards") == 0) { return cmd_cards(argc - 2, argv + 2); }
+#ifdef TAPECTL_TEST
+    if (argc == 2 && strcmp(argv[1], "discover") == 0) { return cmd_discover(); }
+#endif
     if (argc < 3) { return usage("missing command or IMG"); }
     cmd = argv[1];
     argc -= 2; argv += 2;
