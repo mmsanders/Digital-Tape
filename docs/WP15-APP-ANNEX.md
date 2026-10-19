@@ -209,3 +209,35 @@ injection, shipping seam, rebuilt tapectl, purchase or new Michael test is licen
 Prompts/declines and actual Windows11/macOS family builds remain independently
 unobserved where disclosed. Host authoring/build work may proceed while these
 native acceptance gates stay held. G2 waits for accepted dependencies.
+
+## 7. S3 boundary queries and device binding — ADR-189
+
+These rules apply only to additive `tapectl make`, not existing standalone commands.
+A required initial safety, authorization or object-binding query must succeed before
+any write-mode device open or destructive work. Unknown facts never become safe.
+Known policy refusals retain WP14 exit3 and zero writes/zero write-mode opens.
+An ordinary OS failure of a query required to establish those facts stops with the
+host outcome below; it is not evidence of replacement and is not an engine error.
+
+Add the closed make exit1 ID `HOST_QUERY_FAILED`, subject=null, required payload
+`phase=safety/provision/load/commit/verify`, `op=media_query`, string `os_error`.
+Phase names the boundary where the failed query was attempted (before provision is
+safety). The app uses the existing card-interrupted row and exposes raw diagnostics.
+Do not change existing IO phase/op bindings or synthesize TAPE_ERR_* for a host query.
+
+Additional post-authorization media monitoring is optional: this decision prescribes
+no new query/callback cadence. It cannot replace required initial checks, retained
+session identity or OS-reported removal/change detection. If performed, an ordinary
+failed media query is fail-stop HOST_QUERY_FAILED, never ignore-and-continue;
+positively detected removal/change remains CARD_CHANGED. Stop subsequent work,
+retain earlier stdout/report/publication facts, never roll back an already committed
+phase or claim the card unchanged, and never reopen the path. A report-write failure
+still obeys §1 and cannot suppress the ordinary child outcome.
+
+Windows/macOS S3 device-session methods remain HELD. The tested access upgrades and
+post-path-open identity checks do not establish binding before authorized write-mode
+access; no weaker guarantee is adopted. Linux retained-inode/diskseq loop receipts
+are only bounded capability facts, not S3 acceptance or proof that an access upgrade
+cannot reach changed media. Any platform must first obtain independent method/test
+clearance under §5; other platforms need not wait for it. No speculative API-search
+campaign is issued. S2 and other issued host evidence work continue independently.

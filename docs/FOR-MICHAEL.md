@@ -5,14 +5,15 @@ Active requests and decisions for Michael live only in
 Read that queue at each round; do not reconstruct a task list from this file.
 The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
 
-## Queue state (14 October 2026 PDT)
+## Queue state (19 October 2026 PDT)
 
-Kickoff D1–D9, E-1 and D8 are settled. Michael merged #390; that action is complete.
-Windows 11 replaces the mistaken Windows 10 target (ADR-176); ten pulls are accepted
-and need no Mac or Windows repetition. Final Windows success/A9/README is accepted (#167/#168); no further load/dump/README action. The remaining physical native A6 capture is tracked
-only in [#386](https://github.com/mmsanders/Digital-Tape/issues/386); its live body
-contains the capture handoff after method correction/review. Read it for current commands; do not run #426's held recipe.
-Hardware remains parked through Phase 2; WP-38 was not taken.
+Start with **[Michael473: current Windows checklist](https://github.com/mmsanders/Digital-Tape/issues/473)**.
+It replaces447/386 as the hands-on starting point and links the exact reviewed commands.
+One read-only physical A6 capture is ready using the existing card/reader/shipping tapectl;
+then remove the card and reader for the separate corrected Windows11 INGEST run.
+Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
+No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
+The issue is the sole current brief; this file is only its locator.
 
 ## Standing decisions
 

@@ -4175,3 +4175,47 @@ Issuing queues is not coverage, implementation merge or acceptance. No promise
 that a listener is active; Michael controls activation/runtime. PM stops after
 useful fresh handoffs and durable tested status/dashboard. Reversal cost: cancel
 unstarted slices or amend issued host scope; no frozen behavior or physical act changes.
+
+
+## ADR-189 — Consolidate the current hands-on queue and resolve S3 query failures
+
+**19 October2026 PDT · PM472 · input main7c6df21.** Michael requests current-state
+review, cleanup and understandable physical-card directions. Verification215 and217
+are merged independent inputs;214 closes the bounded report-fault tranche,216 the
+source/PCM/pilot stage. Candidate218 remains unmerged at this checkpoint. Phase1
+36/36 and Phase2 6/12 do not advance from partial coverage or issue closure.
+
+**Decision.** APP-1A §7 issues the additive host-only HOST_QUERY_FAILED/exit1 mapping
+for required initial/actually performed additional make media queries, with current
+phase, op=media_query and raw OS error. Initial authorization/safety/object checks
+must complete before write-mode access. No query-error ignore-and-continue default,
+engine error fabrication or changed existing IO binding. Optional monitoring gets
+no new cadence; detected media change still stops CARD_CHANGED. Preserve partial
+publication and report-failure semantics. Verification authors the new ID/error
+controls before disposing implementation; carry unaffected earlier tests/receipts.
+
+Retain Windows/Mac S3 binding holds: tested failed upgrades/post-open checks do not
+establish pre-open object binding. Linux capability is bounded to actual loop facts;
+no zero-write-mode-open or real-reader claim follows from a successful upgrade after
+sequence change. Each platform needs independent method feasibility/tests before
+its S3 implementation. No speculative API loop, weakened safety rule, engine/port
+change or human probe is licensed. S2 correction and467/210 work remain independent.
+
+Michael473 replaces447 as the sole current hands-on brief. It separates one existing-
+card/shipping-binary Windows read-only A6 capture from the corrected INGEST collection
+with all cards/readers removed. It links exact already-reviewed immutable instructions;
+no collector or hash changed. Close447 as superseded, retaining its full history;
+correct FOR-MICHAEL's stale386 locator and463's obsolete NOT READY banner. Keep
+underlying Product candidates held; no cleanup merge of code/evidence stacks.
+
+Archive the previous integration state verbatim with its SHA256 and current-state
+pointer. Preserve all cited package/evidence identities and accepted receipts.
+Software465/Verification208 receive this ruling in their still-open bounded scopes;
+new normative coverage precedes implementation disposition. Existing three-return
+S2 stop ceiling is not reset. Closed466/209 are complete at their bounded stop, not
+full acceptance. No new task is assigned just to consume lead time.
+
+Rationale: distinguish mandatory authorization from extra monitoring without silently
+accepting unknown facts; give Michael one navigable current brief instead of comment
+archaeology. Reversal cost: amend the new host annex and dependent unaccepted tests;
+no frozen engine, physical test, shipped collector or media semantics changed.
