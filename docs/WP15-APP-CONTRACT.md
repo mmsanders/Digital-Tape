@@ -95,7 +95,9 @@ remove/reinsert, and a no-change positive. A reader or platform that cannot repo
 recorded as a stated limitation, never claimed. A change between `cards` and the start of `make`
 is covered by the app's pre-launch recheck (§4) only. A deliberate equal-size swap inside that gap
 is not detectable from published facts, and the app does not claim otherwise. Separate
-`provision`, `load` and `verify` remain available and unchanged.
+`provision`, `load` and `verify` remain available and unchanged. Required/optional
+boundary-query failure semantics and platform device-binding holds are in APP-1A §7
+(ADR-189); ordinary query failure cannot silently authorize continued work.
 
 **`--report FILE --report-nonce N`** on `ingest`, `tapectl cards` and `tapectl make`. This is a
 narrow, opt-in **diagnostic exception** to INGEST-1 §6's no-output-before-preflight rule (ADR-183,

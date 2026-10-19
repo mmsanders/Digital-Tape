@@ -1,6 +1,6 @@
 # Project status
 
-**18 October2026 PDT · input main `5d2e37d` · Owner: PM (ADR-188; independent host queues) ·**
+**19 October2026 PDT · input main `7c6df21` · Owner: PM (ADR-189; current handoff and S3 ruling) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification207 corrected Windows kit readiness PASS; Michael447 client/physical runs ready. Full/base/native/physical/package holds remain; host discovery/make/report/crash queues proceed independently.
+WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification207 corrected Windows kit readiness PASS; Michael473 current client/physical checklist ready. Full/base/native/physical/package holds remain; host discovery/make/report/crash queues proceed independently.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,9 +79,9 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — | Verification203 bounded corrections PASS;207 exact corrected-kit readiness PASS at2e7a84ef. Full underlying/native/physical acceptance remains separate. S2/S3 host slices issued, S3 gated by independent method/tests | Software465↔Verification208 cards/make;466↔209 report faults/IDs;467↔210 narrow crash evidence. Direct handoffs/fallbacks in role issues; Michael447 ready kit/A6 pins unchanged, no Mac run |
-| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on physical A6 | Michael447 physical evidence; fresh Verification disposition on return |
-| Q-P2-1 copy call shape (#379) | — | Verification199 bounded63 rows PASS; subset443 overall HELD on source/PCM/load-fault and broader persistence scope. Narrow independent supplement467↔210 issued; preserve prior evidence, no all-campaign rerun | Verification publishes bounded plan before new scenario execution;2CPU-hour/2GiB new compressed-artifact cap. PM ruling(b) before firmware; no batching/write/async permission |
+| Phase 2 / host tools | — | Verification214 bounded Linux start/middle/end report-fault PASS;209 closed with capability map. S2 final correction under208 review; S3 Windows/Mac held, host-query fail-stop issued APP-1A §7. Full/native/base acceptance separate | Software465↔Verification208 discovery/method;467↔210 bounded crash return. Michael473 single ready kit/A6 checklist; no Mac run |
+| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on physical A6 | Michael473 physical evidence; fresh Verification disposition on return |
+| Q-P2-1 copy call shape (#379) | — | Verification216 bounded source/PCM/seven-pilot/command PASS at937dee3. Stage3 exact55552ad under independent review; subset443 overall HELD, remaining coverage explicit; no all-campaign rerun | Verification publishes bounded plan before new scenario execution;2CPU-hour/2GiB new compressed-artifact cap. PM ruling(b) before firmware; no batching/write/async permission |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
 | Q-001 | closed | Closed: Michael signed the exact scoped freeze on 8 September 2026 | PM recorded approval |
