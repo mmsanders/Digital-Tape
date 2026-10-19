@@ -174,8 +174,8 @@ static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
             dp->index = (int)p->PartitionNumber;
             dp->type = p->PartitionStyle == PARTITION_STYLE_MBR ? (int)p->Mbr.PartitionType : DISC_UNKNOWN;
             if (dp->type >= 0) { snprintf(dp->hint, sizeof dp->hint, "0x%02X", (unsigned)dp->type); }
-            dp->start = p->StartingOffset.QuadPart % 512 == 0 ? (int64_t)(p->StartingOffset.QuadPart / 512) : DISC_UNKNOWN;
-            dp->sectors = p->PartitionLength.QuadPart % 512 == 0 ? (int64_t)(p->PartitionLength.QuadPart / 512) : DISC_UNKNOWN;
+            dp->start = (int64_t)p->StartingOffset.QuadPart;
+            dp->length = (int64_t)p->PartitionLength.QuadPart;
             dp->mounted = g_vol_unknown ? DISC_UNKNOWN : DISC_NO;
         }
     }
@@ -190,8 +190,8 @@ static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
         if (!g_vol[v].mounted) { continue; }
         d->n_mounted++;
         for (j = 0; g_vol[v].spans == 1 && d->n_parts > 0 && j < d->n_parts; j++) {
-            if (d->parts[j].start >= 0 && (ULONGLONG)d->parts[j].start * 512u == g_vol[v].start
-                && d->parts[j].sectors >= 0 && (ULONGLONG)d->parts[j].sectors * 512u == g_vol[v].len) {
+            if (d->parts[j].start >= 0 && (ULONGLONG)d->parts[j].start == g_vol[v].start
+                && d->parts[j].length >= 0 && (ULONGLONG)d->parts[j].length == g_vol[v].len) {
                 d->parts[j].mounted = DISC_YES;
                 attributed = 1;
             }

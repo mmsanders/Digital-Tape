@@ -248,12 +248,12 @@ static void facts(const char *disk, struct disc_disk *d)
             q = &d->parts[d->n_parts++];
             q->index = atoi(line);
             q->type = DISC_UNKNOWN;
-            q->start = q->sectors = DISC_UNKNOWN;
+            q->start = q->length = DISC_UNKNOWN;
             q->mounted = DISC_NO;
             snprintf(p, sizeof p, "%s/%s/start", sys, de->d_name);
-            if (read_line(p, line, sizeof line) == 0) { q->start = (int64_t)strtoll(line, NULL, 10); }
+            if (read_line(p, line, sizeof line) == 0) { q->start = (int64_t)strtoll(line, NULL, 10) * 512; }
             snprintf(p, sizeof p, "%s/%s/size", sys, de->d_name);
-            if (read_line(p, line, sizeof line) == 0) { q->sectors = (int64_t)strtoll(line, NULL, 10); }
+            if (read_line(p, line, sizeof line) == 0) { q->length = (int64_t)strtoll(line, NULL, 10) * 512; }
             snprintf(p, sizeof p, "%s/%s/dev", sys, de->d_name);
             if (read_line(p, pdev, sizeof pdev) == 0 && udev_prop(pdev, "ID_PART_ENTRY_TYPE", val, sizeof val) == 0) {
                 q->type = (int)strtol(val, NULL, 16);

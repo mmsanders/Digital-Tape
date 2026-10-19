@@ -26,8 +26,8 @@
 struct disc_part {
     int index;                /* MBR entry 1..4, as the OS numbers it */
     int type;                 /* MBR partition type byte, or DISC_UNKNOWN */
-    int64_t start;            /* first 512-byte sector, or DISC_UNKNOWN */
-    int64_t sectors;          /* length in 512-byte sectors, or DISC_UNKNOWN */
+    int64_t start;            /* byte offset of the partition, or DISC_UNKNOWN */
+    int64_t length;           /* length in bytes, or DISC_UNKNOWN */
     int mounted;              /* tri-state */
     char hint[32];            /* the OS's own type text, as given (observation only) */
 };
@@ -49,9 +49,10 @@ struct disc_disk {
 
 enum disc_verdict { DISC_REFUSE = 0, DISC_OFFER, DISC_UNPROBED };
 
-/* APP-1A §5. A known refusing fact refuses (the disk is never listed or
-   counted). Otherwise an unknown required fact makes the disk unprobed, never
-   safe. Otherwise it is offered. */
+/* APP-1A §5. An unknown required fact makes the disk unprobed, never safe.
+   Otherwise a refusing fact refuses (the disk is never listed or counted).
+   Otherwise it is offered. A mounted disk also needs its whole OS partition
+   view known (unprobed otherwise) and equal to the own-p1 pattern. */
 enum disc_verdict discover_policy(const struct disc_disk *d);
 
 /* The platform enumerator. Calls `each` once per whole disk the OS lists, in a
@@ -69,6 +70,9 @@ void discover_init(struct disc_disk *d);
    `PATH key=value ...` lines whose keys replace facts of that real enumerated
    disk. Compiled only into tapectl-test. */
 void tapectl_test_cards_seam(struct disc_disk *d);
+/* TAPECTL_TEST_CARDS_VECTOR: listed disks instead of the platform's. Returns 1
+   when the variable is unset (enumerate as usual), else as discover_enumerate. */
+int tapectl_test_cards_vector(disc_each each, void *ctx, char *err, size_t cap);
 #endif
 
 #endif /* HOST_DISCOVER_H */

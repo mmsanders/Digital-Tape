@@ -8,6 +8,8 @@ on:
   pull_request:
     paths:
       - 'host/**'
+      - 'tools/wp15-cards/**'
+      - 'tests/wp15_cards_make_r1/**'
       - '.github/workflows/wp15-cards.yml'
   workflow_dispatch:
 
@@ -36,6 +38,19 @@ jobs:
           host/cards_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/loop_linux.sh "$RUNNER_TEMP/card.img" sudo
       - name: Linux-only observations (syscall trace, enumeration failure, 128 GiB)
         run: sudo host/cards_linux.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/linux"
+      - name: Verification #208 bundle (unprivileged; strace observer with a positive control)
+        run: |
+          truncate -s 1M "$RUNNER_TEMP/ctl.img"
+          dev=$(sudo losetup -f --show "$RUNNER_TEMP/ctl.img"); sudo chmod a+r "$dev"
+          python3 -B tools/wp15-cards/s2_bundle.py --tapectl build/host/tapectl --tapectl-test build/host/tapectl-test \
+            --package tests/wp15_cards_make_r1 --out "$RUNNER_TEMP/bundle" --control-dev "$dev" \
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+          sudo losetup -d "$dev"
+      - name: Imported runner judges the bundle (tests/wp15_cards_make_r1, unchanged)
+        run: |
+          python3 -B tests/wp15_cards_make_r1/selftest.py > /dev/null
+          python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/bundle" --out "$RUNNER_TEMP/bundle/JUDGED.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/bundle/JUDGED.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -43,6 +58,7 @@ jobs:
           path: |
             ${{ runner.temp }}/e2e
             ${{ runner.temp }}/linux
+            ${{ runner.temp }}/bundle
           retention-days: 90
 
   macos:

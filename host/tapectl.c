@@ -950,7 +950,7 @@ static int cmd_cards(int argc, char **argv)
     const char *file, *nonce;
     struct cards_count c = {0, 0};
     char err[256];
-    int dup = 0;
+    int dup = 0, rc;
 
     /* Report options first: invalid ones exit 2 without creating FILE. */
     file = opt(argc, argv, "--report", &dup);
@@ -967,7 +967,13 @@ static int cmd_cards(int argc, char **argv)
         report_end(EXIT_USAGE);
         return cards_usage("cards: bad arguments");
     }
-    if (discover_enumerate(cards_each, &c, err, sizeof err) != 0) {
+#ifdef TAPECTL_TEST
+    rc = tapectl_test_cards_vector(cards_each, &c, err, sizeof err);
+    if (rc == 1) { rc = discover_enumerate(cards_each, &c, err, sizeof err); }
+#else
+    rc = discover_enumerate(cards_each, &c, err, sizeof err);
+#endif
+    if (rc != 0) {
         fprintf(stderr, "tapectl: cards: cannot list disks (%s)\n", err);
         report_refusal_os("CARDS_ENUM_UNAVAILABLE", err);
         report_end(EXIT_ENGINE);
@@ -1022,8 +1028,8 @@ static void discover_each(void *ctx, const struct disc_disk *found, int done, in
     for (i = 0; d.n_parts > 0 && i < d.n_parts; i++) {
         char hint[80];
         report_json_string(hint, sizeof hint, d.parts[i].hint);
-        printf("%s{\"index\":%d,\"type\":%d,\"hint\":%s,\"start\":%lld,\"sectors\":%lld,\"mounted\":%d}", i ? "," : "",
-               d.parts[i].index, d.parts[i].type, hint, (long long)d.parts[i].start, (long long)d.parts[i].sectors,
+        printf("%s{\"index\":%d,\"type\":%d,\"hint\":%s,\"start\":%lld,\"length\":%lld,\"mounted\":%d}", i ? "," : "",
+               d.parts[i].index, d.parts[i].type, hint, (long long)d.parts[i].start, (long long)d.parts[i].length,
                d.parts[i].mounted);
     }
     printf("],\"verdict\":\"%s\"}\n", verdict[discover_policy(&d)]);

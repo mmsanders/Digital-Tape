@@ -190,8 +190,8 @@ static void partitions(io_registry_entry_t whole, const char *disk, struct disc_
             snprintf(q->hint, sizeof q->hint, "%s", hint);
             q->type = hint_type(hint);       /* a name ("DOS_FAT_16") is not a type byte */
         }
-        q->start = reg_number(e, CFSTR("Base"), &base) == 0 && base % 512 == 0 ? (int64_t)(base / 512) : DISC_UNKNOWN;
-        q->sectors = reg_number(e, CFSTR("Size"), &size) == 0 && size % 512 == 0 ? (int64_t)(size / 512) : DISC_UNKNOWN;
+        q->start = reg_number(e, CFSTR("Base"), &base) == 0 && base >= 0 ? (int64_t)base : DISC_UNKNOWN;
+        q->length = reg_number(e, CFSTR("Size"), &size) == 0 && size >= 0 ? (int64_t)size : DISC_UNKNOWN;
         q->mounted = g_use_unknown ? DISC_UNKNOWN : DISC_NO;
         for (i = 0; i < g_nuse; i++) {
             if (strcmp(g_use[i].bsd, bsd) == 0) { q->mounted = DISC_YES; }
