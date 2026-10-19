@@ -147,12 +147,16 @@ static int resolve_use(const char *name, int system, int depth)
     if (access(path, F_OK) != 0) { return -1; }
     snprintf(path, sizeof path, "/sys/class/block/%s/slaves", name);
     errno = 0;
-    dir = DISC_FAULT("linux.slaves_denied") ? NULL : opendir(path);
+    if (DISC_FAULT("linux.slaves_denied")) { dir = NULL; errno = EACCES; }
+    else if (DISC_FAULT("linux.slaves_enoent")) { dir = NULL; errno = ENOENT; }
+    else { dir = opendir(path); }
     if (dir == NULL) {
-        /* Only a missing slaves directory (a partition, or a disk with nothing
-           stacked on it) means "not stacked"; any other failure leaves what is
-           beneath this device unknown. */
-        if (DISC_FAULT("linux.slaves_denied") || errno != ENOENT) { return -1; }
+        /* A missing slaves directory means "not stacked" only for a device
+           positively identified as a partition. A whole device without one,
+           and any other failure, leaves what is beneath it unknown. */
+        int e = errno;
+        snprintf(path, sizeof path, "/sys/class/block/%s/partition", name);
+        if (e != ENOENT || access(path, F_OK) != 0) { return -1; }
     } else {
         for (;;) {
             errno = 0;
