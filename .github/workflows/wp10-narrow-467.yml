@@ -20,7 +20,7 @@ jobs:
   load:
     name: host-load pilot faults, command rows and dup source/PCM rows (Linux, hosted)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,10 +29,12 @@ jobs:
         run: |
           set -eu
           python3 -B tests/wp10_narrow_supplement_r1/selftest.py
+          python3 -B tests/wp10_subset_extension_r1/selftest.py
           sudo apt-get -qq install -y libssl-dev >/dev/null
           make -s -C engine clean all
           make -s -C host
           make -s -C tests/format_dup_identity_adapter clean all mutant
+          make -s -C tests/respool_full_adapter clean all
           sha256sum build/host/tapectl build/host/tapectl-test tests/format_dup_identity_adapter/build/r29_format_dup_worker*
       - name: fetch and authenticate the retained inputs (Verification's own fetcher)
         run: |
@@ -41,15 +43,23 @@ jobs:
             --out "$RUNNER_TEMP/retained"
           cd "$RUNNER_TEMP/retained" && mkdir load0 small && (cd load0 && unzip -q ../retained-load0.zip) \
             && (cd small && unzip -q ../retained-small.zip)
+          # Stage3: the four retained load shards from #210's return release, hash-checked against its SHA256SUMS
+          B=https://github.com/mmsanders/digital-tape-verification/releases/download/evidence-210-return-2026-10-19-743f829
+          mkdir -p shards && cd shards && curl -sSfL -O "$B/SHA256SUMS"
+          for n in 0 1 2 3; do curl -sSfL -O "$B/load$n.zip"; done
+          grep -E ' load[0-3]\.zip$' SHA256SUMS | sha256sum -c -
+          mkdir all && for n in 0 1 2 3; do (cd all && unzip -q -o ../load$n.zip); done
       - name: run (Tier 2 host load, then Tier 1 duplication; one merged BUNDLE.json)
         run: |
           /usr/bin/time -v python3 -B tools/wp10-narrow/s467_load.py --retained "$RUNNER_TEMP/retained/load0" \
             --out "$RUNNER_TEMP/b467/load" 2> "$RUNNER_TEMP/time-load.txt"
           /usr/bin/time -v python3 -B tools/wp10-narrow/s467_dup.py --retained-small "$RUNNER_TEMP/retained/small" \
             --out "$RUNNER_TEMP/b467/dup" 2> "$RUNNER_TEMP/time-dup.txt"
+          /usr/bin/time -v python3 -B tools/wp10-narrow/s467_stage3.py --retained-loads "$RUNNER_TEMP/retained/shards/all" \
+            --out "$RUNNER_TEMP/b467/stage3" 2> "$RUNNER_TEMP/time-stage3.txt"
           grep -E "User time|System time|Elapsed|Maximum resident" "$RUNNER_TEMP"/time-*.txt
           cp "$RUNNER_TEMP"/time-*.txt "$RUNNER_TEMP/b467/"
-          python3 -B tools/wp10-narrow/merge_bundles.py "$RUNNER_TEMP/b467" load dup
+          python3 -B tools/wp10-narrow/merge_bundles.py "$RUNNER_TEMP/b467" load dup stage3
       - uses: actions/upload-artifact@v4
         if: always()
         with:
