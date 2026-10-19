@@ -172,4 +172,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-187](DECISIONS.md#adr-187--prepare-the-concrete-corrected-windows-kit-before-authenticating-its-pins) | 2026-10-17 PDT | Windows kit preparation sequence | Fresh Software461 prepares/pins corrected459 kit, Verification204 authenticates before Michael readiness; old kit paused, all package holds/rungs unchanged |
 
-124 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-188](DECISIONS.md#adr-188--issue-independent-phase-2-host-queues-with-direct-overnight-handoffs) | 2026-10-18 PDT | Substantial independent host queues | S2/S3 conditional host issuance465↔208; report gaps466↔209; narrow crash supplements467↔210; ready human pins fixed, direct handoffs/fallbacks; rungs unchanged |
+
+125 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

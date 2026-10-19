@@ -10,6 +10,10 @@ frozen-spec change. Independent preflight/tests/disposition remain required.
 round until Software starts the build. Build starts only within a fresh Software issue; S2/S3 discovery/make implementation
 waits for independent feasibility preflight. Host report/app-shell work may overlap
 independent authoring under the existing host-tool rule.
+ADR-188 issues S2 discovery and conditionally S3 make host slices in fresh role issues;
+S3 still requires independent retained-session/safety feasibility and relevant published
+tests before implementation. S5 common-path/elevation integration is not issued by
+that bounded tranche. Ready human-run pins and native acceptance holds are unchanged.
 
 ## 1. What the app is
 
