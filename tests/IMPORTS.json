@@ -547,6 +547,19 @@
         "-B",
         "tests/wp15_app1a_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp15_cards_make_r1",
+      "tree": "81b627b7149458c0037dda5e69eac337f40fb8bd",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "3d21c6c5e46e3456a001922d5355cf07fc8348e0",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-15 APP-1A S2 cards / S3 make independent host package (Verification #208 Stage1 against ADR-188/PM464, normative Product 5d2e37dd; pins.json binds the issued APP contract/annex and WP14). Published on Verification main as PR211 at 3d21c6c5e46e3456a001922d5355cf07fc8348e0 (author head f52e1aa91bccd9e4c087c866d1b4264627d73588, normal CI 39206714829 SUCCESS); package tree 81b627b7149458c0037dda5e69eac337f40fb8bd. Imported byte-identically by Software #465 from the authenticated release transport package-208-f52e1aa9 wp15-cards-make-r1.zip (SHA-256 2003c2e6ddc531d8e15ebd810865c0a15e0fbaea49504d9249be07d50ab0e221), whose extracted tree equals the published tree. Depends on the unchanged prior tests/wp15_app1a_r1 tree bdd861b6. The self-test is synthetic judge qualification, not actual child, native or platform outcomes. Not Product, S3 method, native, real-card, full WP15/WP14 or package acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp15_cards_make_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
