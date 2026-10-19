@@ -4102,3 +4102,76 @@ round. Phase1 remains36/36, Phase2 remains6/12;203's report-fault/ID/platform/na
 base/full-package gaps and all frozen/write/batching/async/firmware/hardware/media/
 atomicity/target<30s holds survive. Stop at fresh role handoff and durable dashboard.
 Reversal cost: cancel preparation; no contract, product code or physical act changes.
+
+
+## ADR-188 — issue independent Phase 2 host queues with direct overnight handoffs
+
+**Date:** 18 October2026 PDT. **Owner:** PM464, Michael explicitly requests enough
+useful Software/Verification work for the night while his physical/client runs wait.
+Input main `5d2e37dd4b08883e1b12ae33be72db4f83d860f4`. Normal PM authority;
+individual leads, no subworkers or Product implementation/review/merge by PM.
+
+**Authorize S2/S3 host slices, conditionally preserving feasibility gates.**
+APP-1/APP-1A already specifies cards discovery and make. Software465 now implements
+S2 unelevated read-only candidate discovery; Verification208 independently extends
+actual-command safety/report oracles, carrying the prior34 discovery and346 parser
+cases. Host build may overlap independent authoring. S3 make implementation starts
+only after208 dispositions the proposed retained-session/exact-safety method as
+feasible within the issued host boundary and publishes its relevant independent
+safety/session tests. This is conditional issuance now, not a future acknowledgement
+round. A platform/race/contract conflict stops only affected implementation, goes to
+PM, and does not idle unrelated already-issued work.
+
+Existing exact safety/refusal/no-write/no-write-mode-open criteria stay intact.
+OS-view candidates never authorize destructive access. Preliminary RO/zero-access
+queries are permitted; one authorized session spans provision/load/NULL-write verify,
+no reopen after removal. No host TAPEFS/engine fork, changed engine or accepted port
+semantics. Use existing compiled WP14 test-fact fixtures with paired shipping
+refusals; no production fact/outcome seam. Image/VHD/Server/SIP-disabled observations
+are bounded, not actual client/reader/ordinary-security qualification. S5 app common-
+path/elevation integration is not issued by these S2/S3 command slices.
+
+**Substantial independent fallbacks.** Software466/Verification209 close report
+start/middle/end-write and Windows full-filesystem/Mac-start-write evidence where
+feasible, plus actual closed-ID reachability or rigorous bounded unreachability.
+Prior valid reports/math/receipts carry. Do not force INTERNAL or invent admission
+rules, native facts or new shipping fake-ID switches. Test-build writer faults are
+not automatically shipping/native receipts. Normative contradictions return to PM.
+
+Software467/Verification210 provide narrowly missing duplication source/PCM/readonly
+bindings and host-load fault/per-command facts from existing pristine projections,
+then a published compact independent residue/mirror-candidate/repeated-LBA plan.
+Original199 map42f169f1, modelc6cb573d and A8d96b4245 remain fixed. No all-format/dup,
+old Phase1 API proof or175CPU-hour campaign rerun. New execution is capped at2 aggregate
+CPU-hours and2GiB compressed new artifacts across that supplement, not per retry/shard.
+If useful coverage needs more, publish a bounded proposal/partial map rather than
+silently call sampling exhaustive or parallelize around the cap. No engine hook,
+shipping/port-semantic/write-batching or async change.
+
+**Dependency routing.** Prioritize208 authoring to free465, then209/210 while Software
+builds; ready exact-head dispositions take priority at task boundaries. Software
+uses466/467 while465 awaits methods/tests/CI and resumes its primary slice when ready.
+Each fresh issue explicitly authorizes its complete Stage1/Stage2 and progression to
+other eligible OPEN queue issues in the same activation. Concrete in-scope correction
+loops are direct, exact-head and pre-routed; no PM paste/acknowledgement-only round.
+If cross-repo writes fail, Software returns on its own Product issue and Verification
+reads it directly at task boundaries. Independent publications supply authenticated
+usable transport to that Product issue. Do not confuse access failure with absent
+publication. Avoid premature auto-closing of pending Stage2 via publication PRs;
+close manually at the actual return/blocker stop. No idle polling or repeated work.
+
+**Preserve the ready human path.** [Verification207](https://github.com/mmsanders/digital-tape-verification/commit/2e7a84ef0979808dd46256c94f60f058fe80c88b)
+provides merged exact-kit collection readiness with green normal CI. Michael447's
+corrected206 kit/script/source hashes and existing physical read-only A6 binary/
+instructions stay unchanged. New development uses separate branches/artifacts;
+it does not invalidate the pending user run or demand a repeat/new physical task.
+No Mac run, security change, purchase, self-hosted runner or hardware work.
+
+Only explicit exact-head independent bounded PASS, required CI and accepted base
+dependencies license Software integration. Full underlying436/459/454/455, native
+G1/elevation/client/ordinary-Mac, physical A6/G2/full packages, subset443 and
+Q-P2-1(b) remain held where not disposed. Phase1 remains36/36, Phase2 **6/12**.
+Issuing queues is not coverage, implementation merge or acceptance. No promise
+that a listener is active; Michael controls activation/runtime. PM stops after
+useful fresh handoffs and durable tested status/dashboard. Reversal cost: cancel
+unstarted slices or amend issued host scope; no frozen behavior or physical act changes.
