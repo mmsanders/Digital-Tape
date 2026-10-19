@@ -163,15 +163,21 @@ class H:
     def fill(self, k):
         """Take every free cluster of FS with a filler, then free exactly k clusters."""
         filler = self.fs / "filler.bin"
-        with open(filler, "wb") as f:
+        # Unbuffered: a refused write leaves nothing pending for close() to retry.
+        fd = os.open(filler, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_BINARY", 0), 0o644)
+        try:
             for chunk in (1 << 16, self.cluster):
                 try:
-                    while True:
-                        f.write(b"\0" * chunk)
-                        f.flush()
-                        os.fsync(f.fileno())
+                    while os.write(fd, b"\0" * chunk) > 0:
+                        pass
                 except OSError:
                     pass
+            try:
+                os.fsync(fd)
+            except OSError:
+                pass
+        finally:
+            os.close(fd)
         os.truncate(filler, max(0, filler.stat().st_size - k * self.cluster))
         return {"cluster": self.cluster, "free_clusters_wanted": k, "free_bytes": shutil.disk_usage(self.fs).free,
                 "filler_bytes": filler.stat().st_size}
@@ -223,9 +229,10 @@ def main():
         picks["middle"] = (3, 44100, base, mid)
     # Short inputs first (fast); longer frame counts only shift the report by a few
     # bytes, so they are tried after every source count with the shortest.
-    for frames, n in [(f, n) for f in (4410, 22050, 44100, 88200) for n in range(4, 41)]:
+    for frames, n in [(f, n) for f in (4410, 22050) for n in range(4, 25)]:
         r = neighbour(n, frames)
         be = len(bytes.fromhex(r["report_hex"])) - len(END_LINE)
+        print(f"end search: {n} sources x {frames} frames: {be} bytes before end, {be % C} into a cluster", flush=True)
         if be % C == 0 or be % C > C - len(END_LINE):
             picks["end"] = (n, frames, r, -(-be // C))
             break
