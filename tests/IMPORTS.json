@@ -557,6 +557,19 @@
         "-B",
         "tests/wp10_narrow_supplement_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_subset_extension_r1",
+      "tree": "3a72a3cfebcea0e80bebb864f4e349dc1be02a50",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "89edcd996b33864faac203c1798188414722e628",
+      "attested_in": "Verification #210 / Product #467 / ADR-188",
+      "attestation": "Stage3 bounded extension plan (PLAN.json, orders.py) published at Verification main 937dee3c (PR216, author 89edcd99); imported byte-identically from release package-210-extension-89edcd99 wp10-subset-extension-r1.zip (sha256 392f002f86be2ee6e26b490864af9efe3a2d70b4e577d672f16b555718f912cf) before any Stage3 execution. Plan self-test only: no Product run is accepted by importing it",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_subset_extension_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

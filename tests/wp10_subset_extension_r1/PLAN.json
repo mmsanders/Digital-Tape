@@ -1,0 +1,1725 @@
+{
+  "authority": "Verification210 / ADR188 / Software467; independent Stage3 plan, no engine change",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "model_tree": "c6cb573d654d337fef2f616f11cce0cee74e8968",
+  "prior_narrow_tree": "52837b6adc2bf6f3c7a99f1ee4eccf9526526155",
+  "execution_order": [
+    "global-empty-command",
+    "next32-load-faults",
+    "atomic-residue",
+    "long-copy-repeated-LBA"
+  ],
+  "global_empty_command": "0008cb2d55e007ffece5a69c7e87290d153d9ffec2a58f295544562836ff3c88",
+  "load_faults": [
+    {
+      "kind": "write",
+      "ordinal": 1
+    },
+    {
+      "kind": "write",
+      "ordinal": 2
+    },
+    {
+      "kind": "write",
+      "ordinal": 3
+    },
+    {
+      "kind": "write",
+      "ordinal": 4
+    },
+    {
+      "kind": "write",
+      "ordinal": 5
+    },
+    {
+      "kind": "write",
+      "ordinal": 6
+    },
+    {
+      "kind": "write",
+      "ordinal": 9
+    },
+    {
+      "kind": "write",
+      "ordinal": 10
+    },
+    {
+      "kind": "write",
+      "ordinal": 11
+    },
+    {
+      "kind": "write",
+      "ordinal": 12
+    },
+    {
+      "kind": "write",
+      "ordinal": 13
+    },
+    {
+      "kind": "write",
+      "ordinal": 14
+    },
+    {
+      "kind": "write",
+      "ordinal": 15
+    },
+    {
+      "kind": "write",
+      "ordinal": 16
+    },
+    {
+      "kind": "write",
+      "ordinal": 17
+    },
+    {
+      "kind": "write",
+      "ordinal": 18
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 2
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 3
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 4
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 5
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 6
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 7
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 8
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 9
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 10
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 11
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 12
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 13
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 14
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 15
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 16
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 17
+    }
+  ],
+  "load_remaining_deferred": [
+    {
+      "kind": "write",
+      "ordinal": 19
+    },
+    {
+      "kind": "write",
+      "ordinal": 20
+    },
+    {
+      "kind": "write",
+      "ordinal": 21
+    },
+    {
+      "kind": "write",
+      "ordinal": 22
+    },
+    {
+      "kind": "write",
+      "ordinal": 23
+    },
+    {
+      "kind": "write",
+      "ordinal": 24
+    },
+    {
+      "kind": "write",
+      "ordinal": 25
+    },
+    {
+      "kind": "write",
+      "ordinal": 26
+    },
+    {
+      "kind": "write",
+      "ordinal": 27
+    },
+    {
+      "kind": "write",
+      "ordinal": 28
+    },
+    {
+      "kind": "write",
+      "ordinal": 29
+    },
+    {
+      "kind": "write",
+      "ordinal": 30
+    },
+    {
+      "kind": "write",
+      "ordinal": 31
+    },
+    {
+      "kind": "write",
+      "ordinal": 32
+    },
+    {
+      "kind": "write",
+      "ordinal": 33
+    },
+    {
+      "kind": "write",
+      "ordinal": 34
+    },
+    {
+      "kind": "write",
+      "ordinal": 35
+    },
+    {
+      "kind": "write",
+      "ordinal": 36
+    },
+    {
+      "kind": "write",
+      "ordinal": 37
+    },
+    {
+      "kind": "write",
+      "ordinal": 38
+    },
+    {
+      "kind": "write",
+      "ordinal": 39
+    },
+    {
+      "kind": "write",
+      "ordinal": 40
+    },
+    {
+      "kind": "write",
+      "ordinal": 41
+    },
+    {
+      "kind": "write",
+      "ordinal": 42
+    },
+    {
+      "kind": "write",
+      "ordinal": 43
+    },
+    {
+      "kind": "write",
+      "ordinal": 44
+    },
+    {
+      "kind": "write",
+      "ordinal": 45
+    },
+    {
+      "kind": "write",
+      "ordinal": 46
+    },
+    {
+      "kind": "write",
+      "ordinal": 47
+    },
+    {
+      "kind": "write",
+      "ordinal": 48
+    },
+    {
+      "kind": "write",
+      "ordinal": 49
+    },
+    {
+      "kind": "write",
+      "ordinal": 50
+    },
+    {
+      "kind": "write",
+      "ordinal": 51
+    },
+    {
+      "kind": "write",
+      "ordinal": 52
+    },
+    {
+      "kind": "write",
+      "ordinal": 53
+    },
+    {
+      "kind": "write",
+      "ordinal": 54
+    },
+    {
+      "kind": "write",
+      "ordinal": 55
+    },
+    {
+      "kind": "write",
+      "ordinal": 56
+    },
+    {
+      "kind": "write",
+      "ordinal": 57
+    },
+    {
+      "kind": "write",
+      "ordinal": 58
+    },
+    {
+      "kind": "write",
+      "ordinal": 59
+    },
+    {
+      "kind": "write",
+      "ordinal": 60
+    },
+    {
+      "kind": "write",
+      "ordinal": 61
+    },
+    {
+      "kind": "write",
+      "ordinal": 62
+    },
+    {
+      "kind": "write",
+      "ordinal": 63
+    },
+    {
+      "kind": "write",
+      "ordinal": 64
+    },
+    {
+      "kind": "write",
+      "ordinal": 65
+    },
+    {
+      "kind": "write",
+      "ordinal": 66
+    },
+    {
+      "kind": "write",
+      "ordinal": 67
+    },
+    {
+      "kind": "write",
+      "ordinal": 68
+    },
+    {
+      "kind": "write",
+      "ordinal": 69
+    },
+    {
+      "kind": "write",
+      "ordinal": 70
+    },
+    {
+      "kind": "write",
+      "ordinal": 71
+    },
+    {
+      "kind": "write",
+      "ordinal": 72
+    },
+    {
+      "kind": "write",
+      "ordinal": 73
+    },
+    {
+      "kind": "write",
+      "ordinal": 74
+    },
+    {
+      "kind": "write",
+      "ordinal": 75
+    },
+    {
+      "kind": "write",
+      "ordinal": 76
+    },
+    {
+      "kind": "write",
+      "ordinal": 77
+    },
+    {
+      "kind": "write",
+      "ordinal": 78
+    },
+    {
+      "kind": "write",
+      "ordinal": 79
+    },
+    {
+      "kind": "write",
+      "ordinal": 80
+    },
+    {
+      "kind": "write",
+      "ordinal": 81
+    },
+    {
+      "kind": "write",
+      "ordinal": 82
+    },
+    {
+      "kind": "write",
+      "ordinal": 83
+    },
+    {
+      "kind": "write",
+      "ordinal": 84
+    },
+    {
+      "kind": "write",
+      "ordinal": 85
+    },
+    {
+      "kind": "write",
+      "ordinal": 86
+    },
+    {
+      "kind": "write",
+      "ordinal": 87
+    },
+    {
+      "kind": "write",
+      "ordinal": 88
+    },
+    {
+      "kind": "write",
+      "ordinal": 89
+    },
+    {
+      "kind": "write",
+      "ordinal": 90
+    },
+    {
+      "kind": "write",
+      "ordinal": 91
+    },
+    {
+      "kind": "write",
+      "ordinal": 92
+    },
+    {
+      "kind": "write",
+      "ordinal": 93
+    },
+    {
+      "kind": "write",
+      "ordinal": 94
+    },
+    {
+      "kind": "write",
+      "ordinal": 95
+    },
+    {
+      "kind": "write",
+      "ordinal": 96
+    },
+    {
+      "kind": "write",
+      "ordinal": 97
+    },
+    {
+      "kind": "write",
+      "ordinal": 98
+    },
+    {
+      "kind": "write",
+      "ordinal": 99
+    },
+    {
+      "kind": "write",
+      "ordinal": 100
+    },
+    {
+      "kind": "write",
+      "ordinal": 101
+    },
+    {
+      "kind": "write",
+      "ordinal": 102
+    },
+    {
+      "kind": "write",
+      "ordinal": 103
+    },
+    {
+      "kind": "write",
+      "ordinal": 104
+    },
+    {
+      "kind": "write",
+      "ordinal": 105
+    },
+    {
+      "kind": "write",
+      "ordinal": 106
+    },
+    {
+      "kind": "write",
+      "ordinal": 107
+    },
+    {
+      "kind": "write",
+      "ordinal": 108
+    },
+    {
+      "kind": "write",
+      "ordinal": 109
+    },
+    {
+      "kind": "write",
+      "ordinal": 110
+    },
+    {
+      "kind": "write",
+      "ordinal": 111
+    },
+    {
+      "kind": "write",
+      "ordinal": 112
+    },
+    {
+      "kind": "write",
+      "ordinal": 113
+    },
+    {
+      "kind": "write",
+      "ordinal": 114
+    },
+    {
+      "kind": "write",
+      "ordinal": 115
+    },
+    {
+      "kind": "write",
+      "ordinal": 116
+    },
+    {
+      "kind": "write",
+      "ordinal": 117
+    },
+    {
+      "kind": "write",
+      "ordinal": 118
+    },
+    {
+      "kind": "write",
+      "ordinal": 119
+    },
+    {
+      "kind": "write",
+      "ordinal": 120
+    },
+    {
+      "kind": "write",
+      "ordinal": 121
+    },
+    {
+      "kind": "write",
+      "ordinal": 122
+    },
+    {
+      "kind": "write",
+      "ordinal": 123
+    },
+    {
+      "kind": "write",
+      "ordinal": 124
+    },
+    {
+      "kind": "write",
+      "ordinal": 125
+    },
+    {
+      "kind": "write",
+      "ordinal": 126
+    },
+    {
+      "kind": "write",
+      "ordinal": 127
+    },
+    {
+      "kind": "write",
+      "ordinal": 128
+    },
+    {
+      "kind": "write",
+      "ordinal": 129
+    },
+    {
+      "kind": "write",
+      "ordinal": 130
+    },
+    {
+      "kind": "write",
+      "ordinal": 131
+    },
+    {
+      "kind": "write",
+      "ordinal": 132
+    },
+    {
+      "kind": "write",
+      "ordinal": 133
+    },
+    {
+      "kind": "write",
+      "ordinal": 134
+    },
+    {
+      "kind": "write",
+      "ordinal": 135
+    },
+    {
+      "kind": "write",
+      "ordinal": 136
+    },
+    {
+      "kind": "write",
+      "ordinal": 137
+    },
+    {
+      "kind": "write",
+      "ordinal": 138
+    },
+    {
+      "kind": "write",
+      "ordinal": 139
+    },
+    {
+      "kind": "write",
+      "ordinal": 140
+    },
+    {
+      "kind": "write",
+      "ordinal": 141
+    },
+    {
+      "kind": "write",
+      "ordinal": 142
+    },
+    {
+      "kind": "write",
+      "ordinal": 143
+    },
+    {
+      "kind": "write",
+      "ordinal": 144
+    },
+    {
+      "kind": "write",
+      "ordinal": 145
+    },
+    {
+      "kind": "write",
+      "ordinal": 146
+    },
+    {
+      "kind": "write",
+      "ordinal": 147
+    },
+    {
+      "kind": "write",
+      "ordinal": 148
+    },
+    {
+      "kind": "write",
+      "ordinal": 149
+    },
+    {
+      "kind": "write",
+      "ordinal": 150
+    },
+    {
+      "kind": "write",
+      "ordinal": 151
+    },
+    {
+      "kind": "write",
+      "ordinal": 152
+    },
+    {
+      "kind": "write",
+      "ordinal": 153
+    },
+    {
+      "kind": "write",
+      "ordinal": 154
+    },
+    {
+      "kind": "write",
+      "ordinal": 155
+    },
+    {
+      "kind": "write",
+      "ordinal": 156
+    },
+    {
+      "kind": "write",
+      "ordinal": 157
+    },
+    {
+      "kind": "write",
+      "ordinal": 158
+    },
+    {
+      "kind": "write",
+      "ordinal": 159
+    },
+    {
+      "kind": "write",
+      "ordinal": 160
+    },
+    {
+      "kind": "write",
+      "ordinal": 161
+    },
+    {
+      "kind": "write",
+      "ordinal": 162
+    },
+    {
+      "kind": "write",
+      "ordinal": 163
+    },
+    {
+      "kind": "write",
+      "ordinal": 164
+    },
+    {
+      "kind": "write",
+      "ordinal": 165
+    },
+    {
+      "kind": "write",
+      "ordinal": 166
+    },
+    {
+      "kind": "write",
+      "ordinal": 167
+    },
+    {
+      "kind": "write",
+      "ordinal": 168
+    },
+    {
+      "kind": "write",
+      "ordinal": 169
+    },
+    {
+      "kind": "write",
+      "ordinal": 170
+    },
+    {
+      "kind": "write",
+      "ordinal": 171
+    },
+    {
+      "kind": "write",
+      "ordinal": 172
+    },
+    {
+      "kind": "write",
+      "ordinal": 173
+    },
+    {
+      "kind": "write",
+      "ordinal": 174
+    },
+    {
+      "kind": "write",
+      "ordinal": 175
+    },
+    {
+      "kind": "write",
+      "ordinal": 176
+    },
+    {
+      "kind": "write",
+      "ordinal": 177
+    },
+    {
+      "kind": "write",
+      "ordinal": 178
+    },
+    {
+      "kind": "write",
+      "ordinal": 179
+    },
+    {
+      "kind": "write",
+      "ordinal": 180
+    },
+    {
+      "kind": "write",
+      "ordinal": 181
+    },
+    {
+      "kind": "write",
+      "ordinal": 182
+    },
+    {
+      "kind": "write",
+      "ordinal": 183
+    },
+    {
+      "kind": "write",
+      "ordinal": 184
+    },
+    {
+      "kind": "write",
+      "ordinal": 185
+    },
+    {
+      "kind": "write",
+      "ordinal": 186
+    },
+    {
+      "kind": "write",
+      "ordinal": 187
+    },
+    {
+      "kind": "write",
+      "ordinal": 188
+    },
+    {
+      "kind": "write",
+      "ordinal": 189
+    },
+    {
+      "kind": "write",
+      "ordinal": 190
+    },
+    {
+      "kind": "write",
+      "ordinal": 191
+    },
+    {
+      "kind": "write",
+      "ordinal": 192
+    },
+    {
+      "kind": "write",
+      "ordinal": 193
+    },
+    {
+      "kind": "write",
+      "ordinal": 194
+    },
+    {
+      "kind": "write",
+      "ordinal": 195
+    },
+    {
+      "kind": "write",
+      "ordinal": 196
+    },
+    {
+      "kind": "write",
+      "ordinal": 197
+    },
+    {
+      "kind": "write",
+      "ordinal": 198
+    },
+    {
+      "kind": "write",
+      "ordinal": 199
+    },
+    {
+      "kind": "write",
+      "ordinal": 200
+    },
+    {
+      "kind": "write",
+      "ordinal": 201
+    },
+    {
+      "kind": "write",
+      "ordinal": 202
+    },
+    {
+      "kind": "write",
+      "ordinal": 203
+    },
+    {
+      "kind": "write",
+      "ordinal": 204
+    },
+    {
+      "kind": "write",
+      "ordinal": 205
+    },
+    {
+      "kind": "write",
+      "ordinal": 206
+    },
+    {
+      "kind": "write",
+      "ordinal": 207
+    },
+    {
+      "kind": "write",
+      "ordinal": 208
+    },
+    {
+      "kind": "write",
+      "ordinal": 209
+    },
+    {
+      "kind": "write",
+      "ordinal": 210
+    },
+    {
+      "kind": "write",
+      "ordinal": 211
+    },
+    {
+      "kind": "write",
+      "ordinal": 212
+    },
+    {
+      "kind": "write",
+      "ordinal": 213
+    },
+    {
+      "kind": "write",
+      "ordinal": 214
+    },
+    {
+      "kind": "write",
+      "ordinal": 215
+    },
+    {
+      "kind": "write",
+      "ordinal": 216
+    },
+    {
+      "kind": "write",
+      "ordinal": 217
+    },
+    {
+      "kind": "write",
+      "ordinal": 218
+    },
+    {
+      "kind": "write",
+      "ordinal": 219
+    },
+    {
+      "kind": "write",
+      "ordinal": 220
+    },
+    {
+      "kind": "write",
+      "ordinal": 221
+    },
+    {
+      "kind": "write",
+      "ordinal": 222
+    },
+    {
+      "kind": "write",
+      "ordinal": 223
+    },
+    {
+      "kind": "write",
+      "ordinal": 224
+    },
+    {
+      "kind": "write",
+      "ordinal": 225
+    },
+    {
+      "kind": "write",
+      "ordinal": 226
+    },
+    {
+      "kind": "write",
+      "ordinal": 227
+    },
+    {
+      "kind": "write",
+      "ordinal": 228
+    },
+    {
+      "kind": "write",
+      "ordinal": 229
+    },
+    {
+      "kind": "write",
+      "ordinal": 230
+    },
+    {
+      "kind": "write",
+      "ordinal": 231
+    },
+    {
+      "kind": "write",
+      "ordinal": 232
+    },
+    {
+      "kind": "write",
+      "ordinal": 233
+    },
+    {
+      "kind": "write",
+      "ordinal": 234
+    },
+    {
+      "kind": "write",
+      "ordinal": 235
+    },
+    {
+      "kind": "write",
+      "ordinal": 236
+    },
+    {
+      "kind": "write",
+      "ordinal": 237
+    },
+    {
+      "kind": "write",
+      "ordinal": 238
+    },
+    {
+      "kind": "write",
+      "ordinal": 239
+    },
+    {
+      "kind": "write",
+      "ordinal": 240
+    },
+    {
+      "kind": "write",
+      "ordinal": 241
+    },
+    {
+      "kind": "write",
+      "ordinal": 242
+    },
+    {
+      "kind": "write",
+      "ordinal": 243
+    },
+    {
+      "kind": "write",
+      "ordinal": 244
+    },
+    {
+      "kind": "write",
+      "ordinal": 245
+    },
+    {
+      "kind": "write",
+      "ordinal": 246
+    },
+    {
+      "kind": "write",
+      "ordinal": 247
+    },
+    {
+      "kind": "write",
+      "ordinal": 248
+    },
+    {
+      "kind": "write",
+      "ordinal": 249
+    },
+    {
+      "kind": "write",
+      "ordinal": 250
+    },
+    {
+      "kind": "write",
+      "ordinal": 251
+    },
+    {
+      "kind": "write",
+      "ordinal": 252
+    },
+    {
+      "kind": "write",
+      "ordinal": 253
+    },
+    {
+      "kind": "write",
+      "ordinal": 254
+    },
+    {
+      "kind": "write",
+      "ordinal": 255
+    },
+    {
+      "kind": "write",
+      "ordinal": 256
+    },
+    {
+      "kind": "write",
+      "ordinal": 257
+    },
+    {
+      "kind": "write",
+      "ordinal": 258
+    },
+    {
+      "kind": "write",
+      "ordinal": 259
+    },
+    {
+      "kind": "write",
+      "ordinal": 260
+    },
+    {
+      "kind": "write",
+      "ordinal": 261
+    },
+    {
+      "kind": "write",
+      "ordinal": 262
+    },
+    {
+      "kind": "write",
+      "ordinal": 263
+    },
+    {
+      "kind": "write",
+      "ordinal": 264
+    },
+    {
+      "kind": "write",
+      "ordinal": 265
+    },
+    {
+      "kind": "write",
+      "ordinal": 266
+    },
+    {
+      "kind": "write",
+      "ordinal": 267
+    },
+    {
+      "kind": "write",
+      "ordinal": 268
+    },
+    {
+      "kind": "write",
+      "ordinal": 269
+    },
+    {
+      "kind": "write",
+      "ordinal": 270
+    },
+    {
+      "kind": "write",
+      "ordinal": 271
+    },
+    {
+      "kind": "write",
+      "ordinal": 272
+    },
+    {
+      "kind": "write",
+      "ordinal": 273
+    },
+    {
+      "kind": "write",
+      "ordinal": 274
+    },
+    {
+      "kind": "write",
+      "ordinal": 275
+    },
+    {
+      "kind": "write",
+      "ordinal": 276
+    },
+    {
+      "kind": "write",
+      "ordinal": 277
+    },
+    {
+      "kind": "write",
+      "ordinal": 278
+    },
+    {
+      "kind": "write",
+      "ordinal": 279
+    },
+    {
+      "kind": "write",
+      "ordinal": 280
+    },
+    {
+      "kind": "write",
+      "ordinal": 281
+    },
+    {
+      "kind": "write",
+      "ordinal": 282
+    },
+    {
+      "kind": "write",
+      "ordinal": 283
+    },
+    {
+      "kind": "write",
+      "ordinal": 284
+    },
+    {
+      "kind": "write",
+      "ordinal": 285
+    },
+    {
+      "kind": "write",
+      "ordinal": 286
+    },
+    {
+      "kind": "write",
+      "ordinal": 287
+    },
+    {
+      "kind": "write",
+      "ordinal": 288
+    },
+    {
+      "kind": "write",
+      "ordinal": 289
+    },
+    {
+      "kind": "write",
+      "ordinal": 290
+    },
+    {
+      "kind": "write",
+      "ordinal": 291
+    },
+    {
+      "kind": "write",
+      "ordinal": 292
+    },
+    {
+      "kind": "write",
+      "ordinal": 293
+    },
+    {
+      "kind": "write",
+      "ordinal": 294
+    },
+    {
+      "kind": "write",
+      "ordinal": 295
+    },
+    {
+      "kind": "write",
+      "ordinal": 296
+    },
+    {
+      "kind": "write",
+      "ordinal": 297
+    },
+    {
+      "kind": "write",
+      "ordinal": 298
+    },
+    {
+      "kind": "write",
+      "ordinal": 299
+    },
+    {
+      "kind": "write",
+      "ordinal": 300
+    },
+    {
+      "kind": "write",
+      "ordinal": 301
+    },
+    {
+      "kind": "write",
+      "ordinal": 302
+    },
+    {
+      "kind": "write",
+      "ordinal": 303
+    },
+    {
+      "kind": "write",
+      "ordinal": 304
+    },
+    {
+      "kind": "write",
+      "ordinal": 305
+    },
+    {
+      "kind": "write",
+      "ordinal": 306
+    },
+    {
+      "kind": "write",
+      "ordinal": 307
+    },
+    {
+      "kind": "write",
+      "ordinal": 308
+    },
+    {
+      "kind": "write",
+      "ordinal": 309
+    },
+    {
+      "kind": "write",
+      "ordinal": 310
+    },
+    {
+      "kind": "write",
+      "ordinal": 311
+    },
+    {
+      "kind": "write",
+      "ordinal": 312
+    },
+    {
+      "kind": "write",
+      "ordinal": 313
+    },
+    {
+      "kind": "write",
+      "ordinal": 314
+    },
+    {
+      "kind": "write",
+      "ordinal": 315
+    },
+    {
+      "kind": "write",
+      "ordinal": 316
+    },
+    {
+      "kind": "write",
+      "ordinal": 317
+    },
+    {
+      "kind": "write",
+      "ordinal": 318
+    },
+    {
+      "kind": "write",
+      "ordinal": 319
+    },
+    {
+      "kind": "write",
+      "ordinal": 320
+    },
+    {
+      "kind": "write",
+      "ordinal": 321
+    },
+    {
+      "kind": "write",
+      "ordinal": 322
+    },
+    {
+      "kind": "write",
+      "ordinal": 323
+    },
+    {
+      "kind": "write",
+      "ordinal": 324
+    },
+    {
+      "kind": "write",
+      "ordinal": 325
+    },
+    {
+      "kind": "write",
+      "ordinal": 326
+    },
+    {
+      "kind": "write",
+      "ordinal": 327
+    },
+    {
+      "kind": "write",
+      "ordinal": 328
+    },
+    {
+      "kind": "write",
+      "ordinal": 329
+    },
+    {
+      "kind": "write",
+      "ordinal": 330
+    },
+    {
+      "kind": "write",
+      "ordinal": 331
+    },
+    {
+      "kind": "write",
+      "ordinal": 332
+    },
+    {
+      "kind": "write",
+      "ordinal": 333
+    },
+    {
+      "kind": "write",
+      "ordinal": 334
+    },
+    {
+      "kind": "write",
+      "ordinal": 335
+    },
+    {
+      "kind": "write",
+      "ordinal": 336
+    },
+    {
+      "kind": "write",
+      "ordinal": 337
+    },
+    {
+      "kind": "write",
+      "ordinal": 338
+    },
+    {
+      "kind": "write",
+      "ordinal": 339
+    },
+    {
+      "kind": "write",
+      "ordinal": 340
+    },
+    {
+      "kind": "write",
+      "ordinal": 341
+    },
+    {
+      "kind": "write",
+      "ordinal": 342
+    },
+    {
+      "kind": "write",
+      "ordinal": 343
+    },
+    {
+      "kind": "write",
+      "ordinal": 344
+    },
+    {
+      "kind": "write",
+      "ordinal": 345
+    },
+    {
+      "kind": "write",
+      "ordinal": 346
+    },
+    {
+      "kind": "write",
+      "ordinal": 347
+    },
+    {
+      "kind": "write",
+      "ordinal": 348
+    },
+    {
+      "kind": "write",
+      "ordinal": 349
+    },
+    {
+      "kind": "write",
+      "ordinal": 350
+    },
+    {
+      "kind": "write",
+      "ordinal": 351
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 18
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 19
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 20
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 21
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 22
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 23
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 24
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 25
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 27
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 28
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 29
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 30
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 31
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 32
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 33
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 34
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 35
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 36
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 37
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 38
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 39
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 40
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 41
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 42
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 43
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 44
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 45
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 46
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 47
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 48
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 49
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 50
+    }
+  ],
+  "atomic_residue": {
+    "fixture_authority": "wp10_residue_d10/plan.py EXHAUSTION_SHAPES, RESIDUE_SHAPES, BLANK_VARIANTS (pinned existing independent model)",
+    "shapes": [
+      "exhaustion_candidate",
+      "exhaustion_equal_divergent",
+      "exhaustion_mirror_only",
+      "exhaustion_mirror_candidate",
+      "b_torn_primary",
+      "b_torn_mirror",
+      "b_crc_primary",
+      "b_crc_mirror",
+      "c_foreign",
+      "d_ff",
+      "zero_device",
+      "zero_superblocks"
+    ],
+    "operations": [
+      "dup",
+      "format"
+    ],
+    "coordinates": [
+      {
+        "cut_op_unit": 1
+      },
+      {
+        "cut_op_unit": 3
+      },
+      {
+        "cut_op_barrier_entry": 0
+      },
+      {
+        "cut_op_barrier_entry": 1
+      }
+    ],
+    "preconditions": "raw crafted initial bytes only; no torn-byte write injection; successful complete control for every case"
+  },
+  "long_copy": {
+    "scenarios": [
+      [
+        "v3_003",
+        "pass1"
+      ],
+      [
+        "v3_003",
+        "pass2"
+      ],
+      [
+        "no_lower_run",
+        "pass1"
+      ]
+    ],
+    "bases": [
+      "fixture"
+    ],
+    "coordinates": [
+      {
+        "cut_op_unit": 63
+      },
+      {
+        "cut_op_unit": 64
+      },
+      {
+        "cut_op_unit": 65
+      },
+      {
+        "cut_op_unit": 127
+      },
+      {
+        "cut_op_unit": 128
+      },
+      {
+        "cut_op_unit": 129
+      }
+    ],
+    "reuse": "reconstruct retained complete histories where exact fixture/coordinate exists; no unchanged whole-operation campaign"
+  },
+  "persistence": {
+    "atomic_bytes": 512,
+    "small_epoch_limit": 8,
+    "small": "model.exhaustive: every mask and per-LBA last-winner class",
+    "large_seeds": [
+      1,
+      183,
+      3647685189
+    ],
+    "large_draws_per_seed": 64,
+    "large_records_per_seed": 67,
+    "extra_targeted_orders": [
+      "none",
+      "all-forward",
+      "all-reverse",
+      "first-per-LBA",
+      "last-per-LBA",
+      "first-last-forward",
+      "first-last-reverse",
+      "even-event-position",
+      "odd-event-position"
+    ],
+    "record": "actual event IDs, masks, full order, duplicates, resulting hashes; target orders are finite additions, not exhaustive large coverage"
+  },
+  "outcomes": {
+    "load": "unchanged wp10_narrow_supplement_r1 oracle.host_fault + raw working effects +199 load_rows.check; full raw command seams from separate pristine copies",
+    "dup_format": "unchanged DRAFT10 raw residue/step1/identity outcomes from wp10_residue_d10 and199 rows.dup_check; never reuse their torn durability calculation as an atomic subset oracle",
+    "respool": "unchanged199 rows.respool_check and respool_copy.check live-set/H/PCM/barrier predicates; no old/new-only or universal preservation rule"
+  },
+  "cap": {
+    "cpu_seconds_total": 7200,
+    "compressed_new_raw_bytes_total": 2147483648,
+    "prior_CI_measured_this_head": 5.31,
+    "earlier_CI_reported": 7.71,
+    "local_reported_estimate": 31,
+    "rule": "reconcile prior invocations and estimate before every case; stop before cap; return all unexecuted rows and justified next plan; no sampling away required classes or parallelism around cap"
+  },
+  "prohibitions": [
+    "no404 automatic fault sweep",
+    "no broad exhaustive long epoch",
+    "no new engine/port/shipping seam",
+    "no in-card/media/physical/security/human work",
+    "no443 overall integration permission"
+  ]
+}
