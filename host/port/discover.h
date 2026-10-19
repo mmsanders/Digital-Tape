@@ -73,6 +73,13 @@ void tapectl_test_cards_seam(struct disc_disk *d);
 /* TAPECTL_TEST_CARDS_VECTOR: listed disks instead of the platform's. Returns 1
    when the variable is unset (enumerate as usual), else as discover_enumerate. */
 int tapectl_test_cards_vector(disc_each each, void *ctx, char *err, size_t cap);
+/* TAPECTL_TEST_DISC_FAULT: a comma-separated list of named enumerator queries
+   (`win.volume_paths`, `mac.protocol_missing`, ...) that the real platform
+   enumerator treats as failed. Returns 1 when `point` is listed. */
+int tapectl_test_disc_fault(const char *point);
+#define DISC_FAULT(point) tapectl_test_disc_fault(point)
+#else
+#define DISC_FAULT(point) 0
 #endif
 
 #endif /* HOST_DISCOVER_H */

@@ -51,6 +51,26 @@ jobs:
           python3 -B tests/wp15_cards_make_r1/selftest.py > /dev/null
           python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/bundle" --out "$RUNNER_TEMP/bundle/JUDGED.json"
           python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/bundle/JUDGED.json"
+      - uses: actions/checkout@v4
+        with:
+          ref: ef2712c330fdbc6515bff45c0bee63210f65165a
+          path: old-s2
+      - name: S2 producer controls (#208 round 1; native dm stack, old and new producer, plus injected faults)
+        run: |
+          sudo apt-get install -y dosfstools >/dev/null
+          make -C old-s2/engine all >/dev/null && make -C old-s2/host test-bins >/dev/null
+          C="python3 -B tools/wp15-cards/s2_controls.py --tapectl-test build/host/tapectl-test --source ${{ github.event.pull_request.head.sha || github.sha }} --old old-s2/build/host/tapectl-test --old-source ef2712c330fdbc6515bff45c0bee63210f65165a --out $RUNNER_TEMP/controls"
+          $C --state plain none= stack=linux.stack_unresolved
+          truncate -s 64M "$RUNNER_TEMP/dm.img"
+          dev=$(sudo losetup -f --show -P "$RUNNER_TEMP/dm.img")
+          echo 'start=2048, size=32768, type=e' | sudo sfdisk -q "$dev"
+          sudo partx -u "$dev" || true; sudo udevadm settle
+          sudo dmsetup create s2ctl --table "0 32768 linear ${dev}p1 0"
+          sudo mkfs.vfat -n S2CTL /dev/mapper/s2ctl >/dev/null
+          sudo mkdir -p /mnt/s2ctl && sudo mount /dev/mapper/s2ctl /mnt/s2ctl
+          echo "dm stack: /dev/mapper/s2ctl -> ${dev}p1, mounted at /mnt/s2ctl"; ls -l /sys/class/block/dm-*/slaves/
+          $C --state dm-mounted none= stack=linux.stack_unresolved
+          sudo umount /mnt/s2ctl; sudo dmsetup remove s2ctl; sudo losetup -d "$dev"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -59,6 +79,7 @@ jobs:
             ${{ runner.temp }}/e2e
             ${{ runner.temp }}/linux
             ${{ runner.temp }}/bundle
+            ${{ runner.temp }}/controls
           retention-days: 90
 
   macos:
@@ -82,11 +103,20 @@ jobs:
         run: |
           mkfile -n 512m "$RUNNER_TEMP/card.raw"
           host/cards_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw" sudo
+      - name: S2 producer controls (#208 round 1; injected query failures, an attached image mounted)
+        run: |
+          hdiutil create -size 16m -fs MS-DOS -volname S2CTL "$RUNNER_TEMP/s2ctl.dmg" >/dev/null
+          hdiutil attach "$RUNNER_TEMP/s2ctl.dmg"
+          python3 -B tools/wp15-cards/s2_controls.py --tapectl-test build/host/tapectl-test --source ${{ github.event.pull_request.head.sha || github.sha }} \
+            --out "$RUNNER_TEMP/controls" --state image-mounted none= whole=mac.whole_missing removable=mac.removable_missing \
+            protocol=mac.protocol_missing mount=mac.mount_unresolved census=mac.census_changed
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: wp15-cards-macos
-          path: ${{ runner.temp }}/e2e
+          path: |
+            ${{ runner.temp }}/e2e
+            ${{ runner.temp }}/controls
           retention-days: 90
 
   windows:
@@ -154,6 +184,11 @@ jobs:
           if ($test -like "*`"path`":`"$esc`",`"bytes`":1073741824}*") { "ok    test route (unelevated): blank VHD offered with its real size" } else { "FAIL  test route did not offer the VHD"; $fails++ }
           "select vdisk file=`"$vhd`"`ndetach vdisk" | Set-Content "$out\dp2.txt"; diskpart /s "$out\dp2.txt" | Out-Null
           exit $fails
+      - name: S2 producer controls (#208 round 1; injected query failures, elevated runner token)
+        run: |
+          python -B tools/wp15-cards/s2_controls.py --tapectl-test build/host/tapectl-test.exe --source ${{ github.event.pull_request.head.sha || github.sha }} \
+            --out "$RUNNER_TEMP/controls" --state runner none= paths=win.volume_paths extents=win.volume_extents \
+            next=win.volume_next census=win.disk_census
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -161,4 +196,5 @@ jobs:
           path: |
             ${{ runner.temp }}/e2e
             ${{ runner.temp }}/unelevated
+            ${{ runner.temp }}/controls
           retention-days: 90

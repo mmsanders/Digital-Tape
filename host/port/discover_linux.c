@@ -63,8 +63,7 @@ static int udev_prop(const char *devnum, const char *key, char *out, size_t cap)
     return found;
 }
 
-/* The disk a block device `name` sits on (itself for a whole disk); -1 for a
-   stacked (dm/md) device, whose disks are not resolved here. */
+/* The disk a non-stacked block device `name` sits on (itself for a whole disk). */
 static int parent_disk(const char *name, char *out, size_t cap)
 {
     char path[PATH_MAX], real[PATH_MAX], *slash;
@@ -72,17 +71,6 @@ static int parent_disk(const char *name, char *out, size_t cap)
     if (access(path, F_OK) != 0) {
         snprintf(path, sizeof path, "/sys/block/%s", name);
         if (access(path, F_OK) != 0) { return -1; }
-        snprintf(path, sizeof path, "/sys/block/%s/slaves", name);
-        {
-            DIR *dir = opendir(path);
-            struct dirent *de;
-            int stacked = 0;
-            if (dir != NULL) {
-                while ((de = readdir(dir)) != NULL) { if (de->d_name[0] != '.') { stacked = 1; } }
-                closedir(dir);
-            }
-            if (stacked) { return -1; }
-        }
         snprintf(out, cap, "%s", name);
         return 0;
     }
@@ -136,19 +124,67 @@ struct mnt { char disk[64]; char name[64]; int system; };
 static struct mnt g_mnt[256];
 static int g_nmnt, g_mnt_unknown, g_os_unresolved;
 
-static void add_use(const char *name, int system)
+static int record_use(const char *disk, const char *name, int system)
 {
-    char disk[64];
-    if (parent_disk(name, disk, sizeof disk) != 0) {
-        /* Stacked or unresolvable: a system one makes every disk's OS use unknown. */
-        if (system) { g_os_unresolved = 1; }
-        return;
-    }
-    if (g_nmnt >= (int)(sizeof g_mnt / sizeof g_mnt[0])) { g_mnt_unknown = 1; return; }
+    if (g_nmnt >= (int)(sizeof g_mnt / sizeof g_mnt[0])) { return -1; }
     snprintf(g_mnt[g_nmnt].disk, sizeof g_mnt[0].disk, "%s", disk);
     snprintf(g_mnt[g_nmnt].name, sizeof g_mnt[0].name, "%s", name);
     g_mnt[g_nmnt].system = system;
     g_nmnt++;
+    return 0;
+}
+
+/* Record a use of block device `name` on every disk beneath it: a stacked
+   (dm/md) device's uses are its slaves', down to partitions or whole disks.
+   -1 when any link of the stack cannot be resolved or recorded. */
+static int resolve_use(const char *name, int system, int depth)
+{
+    char path[PATH_MAX], disk[64];
+    DIR *dir;
+    struct dirent *de;
+    int any = 0, bad = 0;
+    snprintf(path, sizeof path, "/sys/class/block/%s", name);
+    if (access(path, F_OK) != 0) { return -1; }
+    snprintf(path, sizeof path, "/sys/class/block/%s/slaves", name);
+    dir = opendir(path);
+    if (dir != NULL) {
+        while ((de = readdir(dir)) != NULL) {
+            if (de->d_name[0] == '.') { continue; }
+            any = 1;
+            if (depth >= 8 || DISC_FAULT("linux.stack_unresolved") || resolve_use(de->d_name, system, depth + 1) != 0) {
+                bad = 1;
+            }
+        }
+        closedir(dir);
+    }
+    if (any) { return bad ? -1 : 0; }
+    if (parent_disk(name, disk, sizeof disk) != 0) { return -1; }
+    return record_use(disk, name, system);
+}
+
+static void add_use(const char *name, int system)
+{
+    /* Unresolvable: a system use makes every disk's OS use unknown, any other
+       every disk's mount facts (it may be on any of them). */
+    if (resolve_use(name, system, 0) != 0) {
+        if (system) { g_os_unresolved = 1; }
+        g_mnt_unknown = 1;
+    }
+}
+
+/* The block device named by mountinfo's mount source, for a mount whose
+   major:minor is not one (btrfs, for instance). 1 found, 0 not a device path,
+   -1 a device path that cannot be resolved. */
+static int source_device(const char *line, char *name, size_t cap)
+{
+    const char *sep = strstr(line, " - ");
+    char src[1024];
+    struct stat st;
+    if (sep == NULL || sscanf(sep + 3, "%*s %1023s", src) != 1) { return -1; }
+    unescape_octal(src);
+    if (strncmp(src, "/dev/", 5) != 0) { return 0; }
+    if (stat(src, &st) != 0 || !S_ISBLK(st.st_mode)) { return -1; }
+    return devnum_name(major(st.st_rdev), minor(st.st_rdev), name, cap) == 0 ? 1 : -1;
 }
 
 static int gather_uses(char *err, size_t cap)
@@ -163,8 +199,16 @@ static int gather_uses(char *err, size_t cap)
         if (sscanf(line, "%*s %*s %u:%u %*s %1023s", &maj, &min, where) != 3) { continue; }
         unescape_octal(where);
         if (devnum_name(maj, min, name, sizeof name) != 0) {
-            if (is_system_mount(where)) { g_os_unresolved = 1; }
-            continue;                                /* not a block device (tmpfs, proc, ...) */
+            int found = source_device(line, name, sizeof name);
+            if (found < 0) {
+                if (is_system_mount(where)) { g_os_unresolved = 1; }
+                g_mnt_unknown = 1;
+                continue;
+            }
+            if (found == 0) {
+                if (is_system_mount(where)) { g_os_unresolved = 1; }
+                continue;                            /* not a block device (tmpfs, proc, ...) */
+            }
         }
         if (strcmp(where, "/") == 0) { root_seen = 1; }
         add_use(name, is_system_mount(where));

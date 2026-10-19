@@ -23,19 +23,31 @@
 #include <sys/mount.h>
 #include <sys/param.h>
 
-static int cf_bool(CFDictionaryRef d, CFStringRef key)
+/* A description value as a tri-state: DISC_UNKNOWN when the key is missing,
+   of another type or unreadable (or its test fault is set). */
+static int cf_bool(CFDictionaryRef d, CFStringRef key, const char *fault)
 {
     CFTypeRef v = CFDictionaryGetValue(d, key);
-    return v != NULL && CFGetTypeID(v) == CFBooleanGetTypeID() && CFBooleanGetValue((CFBooleanRef)v);
+    (void)fault;
+    if (DISC_FAULT(fault) || v == NULL || CFGetTypeID(v) != CFBooleanGetTypeID()) { return DISC_UNKNOWN; }
+    return CFBooleanGetValue((CFBooleanRef)v) ? DISC_YES : DISC_NO;
 }
 
-static int cf_string_is(CFDictionaryRef d, CFStringRef key, const char *want)
+static int cf_string_is(CFDictionaryRef d, CFStringRef key, const char *want, const char *fault)
 {
     char buf[128];
     CFTypeRef v = CFDictionaryGetValue(d, key);
-    if (v == NULL || CFGetTypeID(v) != CFStringGetTypeID()) { return 0; }
-    if (!CFStringGetCString((CFStringRef)v, buf, sizeof buf, kCFStringEncodingUTF8)) { return 0; }
-    return strcmp(buf, want) == 0;
+    (void)fault;
+    if (DISC_FAULT(fault) || v == NULL || CFGetTypeID(v) != CFStringGetTypeID()) { return DISC_UNKNOWN; }
+    if (!CFStringGetCString((CFStringRef)v, buf, sizeof buf, kCFStringEncodingUTF8)) { return DISC_UNKNOWN; }
+    return strcmp(buf, want) == 0 ? DISC_YES : DISC_NO;
+}
+
+/* YES when any fact is YES, NO when every one is NO, else unknown. */
+static int tri_any(int a, int b, int c)
+{
+    if (a == DISC_YES || b == DISC_YES || c == DISC_YES) { return DISC_YES; }
+    return (a == DISC_NO && b == DISC_NO && c == DISC_NO) ? DISC_NO : DISC_UNKNOWN;
 }
 
 static int reg_string(io_registry_entry_t e, CFStringRef key, char *out, size_t cap)
@@ -133,8 +145,12 @@ static int gather_uses(char *err, size_t cap)
         const char *from = mnts[i].f_mntfromname;
         char disk[64];
         if (strncmp(from, "/dev/disk", 9) != 0) { continue; }
-        if (whole_of(from + 5, disk, sizeof disk) != 0) {
+        if (DISC_FAULT("mac.mount_unresolved") || whole_of(from + 5, disk, sizeof disk) != 0) {
+            /* A disk mount that cannot be tied to its whole disk may be on any
+               of them: every disk's mount facts (and, for a system one, OS use)
+               become unknown. */
             if (is_system_mount(&mnts[i])) { g_os_unresolved = 1; }
+            g_use_unknown = 1;
             continue;
         }
         if (g_nuse >= (int)(sizeof g_use / sizeof g_use[0])) { g_use_unknown = 1; continue; }
@@ -218,13 +234,15 @@ static void facts(io_registry_entry_t whole, DASessionRef session, struct disc_d
         int image = ancestor_is(whole, "HDIX", "DiskImage", NULL);
         CFTypeRef v = CFDictionaryGetValue(desc, kDADiskDescriptionMediaSizeKey);
         long long sz = 0;
-        d->whole = (cf_bool(desc, kDADiskDescriptionMediaWholeKey) && synth == 0 && path_is_whole_form(d->path))
-                   ? DISC_YES : (synth < 0 ? DISC_UNKNOWN : DISC_NO);
-        d->is_virtual = (image < 0) ? DISC_UNKNOWN
-                        : (image || cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Disk Image")
-                           || cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Virtual Interface")) ? DISC_YES : DISC_NO;
-        d->removable_or_sd = (cf_bool(desc, kDADiskDescriptionMediaRemovableKey)
-                              || cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Secure Digital")) ? DISC_YES : DISC_NO;
+        int is_whole = cf_bool(desc, kDADiskDescriptionMediaWholeKey, "mac.whole_missing");
+        int removable = cf_bool(desc, kDADiskDescriptionMediaRemovableKey, "mac.removable_missing");
+        int proto_image = cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Disk Image", "mac.protocol_missing");
+        int proto_virtual = cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Virtual Interface", "mac.protocol_missing");
+        int proto_sd = cf_string_is(desc, kDADiskDescriptionDeviceProtocolKey, "Secure Digital", "mac.protocol_missing");
+        if (is_whole == DISC_YES && synth == 0) { d->whole = path_is_whole_form(d->path) ? DISC_YES : DISC_NO; }
+        else if (is_whole == DISC_NO || synth > 0) { d->whole = DISC_NO; }
+        d->is_virtual = tri_any(image < 0 ? DISC_UNKNOWN : (image ? DISC_YES : DISC_NO), proto_image, proto_virtual);
+        d->removable_or_sd = tri_any(removable, proto_sd, DISC_NO);
         if (v && CFGetTypeID(v) == CFNumberGetTypeID() && CFNumberGetValue((CFNumberRef)v, kCFNumberLongLongType, &sz) && sz >= 0) {
             d->bytes = (uint64_t)sz;
             d->bytes_known = 1;
@@ -272,16 +290,22 @@ int discover_enumerate(disc_each each, void *ctx, char *err, size_t cap)
     }
     while ((e = IOIteratorNext(it)) != IO_OBJECT_NULL) {
         if (n >= DISC_MAX_DISKS || reg_string(e, CFSTR("BSD Name"), names[n], sizeof names[0]) != 0) {
+            /* A census that drops a disk is not complete. */
             IOObjectRelease(e);
-            if (n >= DISC_MAX_DISKS) {
-                IOObjectRelease(it);
-                for (i = 0; i < n; i++) { IOObjectRelease(wholes[i]); }
-                snprintf(err, cap, "more than %d disks", DISC_MAX_DISKS);
-                return -1;
-            }
-            continue;
+            IOObjectRelease(it);
+            for (i = 0; i < n; i++) { IOObjectRelease(wholes[i]); }
+            if (n >= DISC_MAX_DISKS) { snprintf(err, cap, "more than %d disks", DISC_MAX_DISKS); }
+            else { snprintf(err, cap, "a whole IOMedia without a BSD name"); }
+            return -1;
         }
         wholes[n++] = e;
+    }
+    if (DISC_FAULT("mac.census_changed") || !IOIteratorIsValid(it)) {
+        /* The registry changed while it was being listed. */
+        IOObjectRelease(it);
+        for (i = 0; i < n; i++) { IOObjectRelease(wholes[i]); }
+        snprintf(err, cap, "the IOMedia list changed during enumeration");
+        return -1;
     }
     IOObjectRelease(it);
     /* Stable order: diskN by number. */

@@ -20,6 +20,10 @@
  * or a single line `unavailable=REASON` for a failed enumeration. The listed
  * disks then go through the same policy and printing as enumerated ones: the
  * fixed discovery vectors of Verification #208 (tests/wp15_cards_make_r1).
+ *
+ * With TAPECTL_TEST_DISC_FAULT=POINT[,POINT...] set, the real platform
+ * enumerator treats each named query as failed (DISC_FAULT in discover_<os>.c):
+ * a compiled control for an OS query failure, not a native observation.
  */
 
 #ifdef TAPECTL_TEST
@@ -29,6 +33,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+int tapectl_test_disc_fault(const char *point)
+{
+    const char *list = getenv("TAPECTL_TEST_DISC_FAULT"), *s;
+    size_t n = strlen(point);
+    if (list == NULL) { return 0; }
+    for (s = list; (s = strstr(s, point)) != NULL; s += n) {
+        if ((s == list || s[-1] == ',') && (s[n] == '\0' || s[n] == ',')) { return 1; }
+    }
+    return 0;
+}
 
 void tapectl_test_cards_seam(struct disc_disk *d)
 {

@@ -25,7 +25,7 @@ COMMON  := target.c report.c port/discover.c port/hport.c port/mbr.c port/fat.c 
 ifeq ($(OS),Windows_NT)
   EXE      := .exe
   PLATFORM := port/hport_win.c port/probe_win.c port/discover_win.c
-  SYSLIBS  := -lbcrypt -lpsapi -lshell32
+  SYSLIBS  := -lbcrypt -lpsapi -lshell32 -lsetupapi
 else
   EXE      :=
   UNAME    := $(shell uname -s)

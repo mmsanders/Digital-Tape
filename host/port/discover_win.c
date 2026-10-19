@@ -6,7 +6,9 @@
  * fails). Only FILE_ANY_ACCESS queries are issued on that handle: device
  * number, storage properties, geometry and the drive layout. Volumes are mapped
  * to disks through their extents on zero-access volume handles; the system
- * volume and the page files named in the registry decide OS use.
+ * volume and the page files named in the registry decide OS use. The disk
+ * interfaces SetupAPI lists must all be among the drives probed, or the census
+ * is incomplete and the enumeration fails rather than list part of it.
  */
 
 #if defined(_WIN32)
@@ -17,12 +19,13 @@
 
 #include <windows.h>
 #include <winioctl.h>
+#include <setupapi.h>
 #include <wctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct vol { DWORD disk; ULONGLONG start, len; int spans; int mounted; int system; };
+struct vol { DWORD disk; ULONGLONG start, len; int spans; int mounted; int system; };   /* mounted, system: tri-state */
 static struct vol g_vol[128];
 static int g_nvol, g_vol_unknown, g_os_unresolved;
 
@@ -84,10 +87,34 @@ static int system_letters(wchar_t out[27])
     return n;
 }
 
+/* The volume's mount paths into `names` (a malloc'd multi-string the caller
+   frees): DISC_YES with at least one, DISC_NO with none, DISC_UNKNOWN when the
+   query fails. */
+static int volume_paths(const wchar_t *vol, wchar_t **names)
+{
+    DWORD cap = 1024, need = 0;
+    int tries;
+    *names = NULL;
+    for (tries = 0; tries < 4; tries++) {
+        wchar_t *buf = malloc((size_t)cap * sizeof(wchar_t));
+        if (buf == NULL) { return DISC_UNKNOWN; }
+        buf[0] = L'\0';
+        if (!DISC_FAULT("win.volume_paths") && GetVolumePathNamesForVolumeNameW(vol, buf, cap, &need)) {
+            *names = buf;
+            return buf[0] != L'\0' ? DISC_YES : DISC_NO;
+        }
+        free(buf);
+        if (DISC_FAULT("win.volume_paths") || GetLastError() != ERROR_MORE_DATA || need <= cap) { return DISC_UNKNOWN; }
+        cap = need;
+    }
+    return DISC_UNKNOWN;
+}
+
 static int gather_volumes(char *err, size_t cap)
 {
     wchar_t vol[MAX_PATH], sys[27];
     HANDLE fv;
+    DWORD e;
     int nsys = system_letters(sys);
 
     g_nvol = g_vol_unknown = 0;
@@ -95,29 +122,31 @@ static int gather_volumes(char *err, size_t cap)
     fv = FindFirstVolumeW(vol, MAX_PATH);
     if (fv == INVALID_HANDLE_VALUE) { snprintf(err, cap, "FindFirstVolumeW: error %lu", (unsigned long)GetLastError()); return -1; }
     do {
-        wchar_t names[1024], novs[MAX_PATH];
-        DWORD disks[8], need = 0;
+        wchar_t novs[MAX_PATH], *names;
+        DWORD disks[8];
         ULONGLONG starts[8], lens[8];
         size_t L = wcslen(vol);
-        int n, i, mounted, system = 0;
+        int n, i, mounted, system = DISC_NO;
         if (L == 0 || L >= MAX_PATH) { continue; }
         wcscpy(novs, vol);
         if (novs[L - 1] == L'\\') { novs[L - 1] = L'\0'; }
-        names[0] = L'\0';
-        mounted = GetVolumePathNamesForVolumeNameW(vol, names, 1024, &need) && names[0] != L'\0';
-        if (mounted && nsys > 0) {
+        mounted = volume_paths(vol, &names);
+        if (mounted == DISC_UNKNOWN) {
+            system = DISC_UNKNOWN;                 /* its drive letters, if any, are unknown */
+        } else if (mounted == DISC_YES && nsys > 0) {
             const wchar_t *s;
             int j;
             for (s = names; *s; s += wcslen(s) + 1) {
-                for (j = 0; j < nsys; j++) { if (letter_volume_is(s, sys[j])) { system = 1; } }
+                for (j = 0; j < nsys; j++) { if (letter_volume_is(s, sys[j])) { system = DISC_YES; } }
             }
         }
-        n = volume_extents(novs, disks, starts, lens);
+        free(names);
+        n = DISC_FAULT("win.volume_extents") ? -1 : volume_extents(novs, disks, starts, lens);
         if (n < 0) {
-            /* A volume whose disk cannot be told: a mounted or system one makes
-               every disk's mount/OS facts unknown. */
-            if (system) { g_os_unresolved = 1; }
-            if (mounted) { g_vol_unknown = 1; }
+            /* A volume whose disk cannot be told: a mounted or system one (or
+               one that may be) makes every disk's mount/OS facts unknown. */
+            if (system != DISC_NO) { g_os_unresolved = 1; }
+            if (mounted != DISC_NO) { g_vol_unknown = 1; }
             continue;
         }
         for (i = 0; i < n; i++) {
@@ -131,8 +160,68 @@ static int gather_volumes(char *err, size_t cap)
             g_nvol++;
         }
     } while (FindNextVolumeW(fv, vol, MAX_PATH));
+    e = DISC_FAULT("win.volume_next") ? ERROR_INVALID_FUNCTION : GetLastError();
     FindVolumeClose(fv);
+    if (e != ERROR_NO_MORE_FILES) {
+        /* The volume list ended early: the mounts it did not reach are unknown. */
+        snprintf(err, cap, "FindNextVolumeW: error %lu", (unsigned long)e);
+        return -1;
+    }
     return 0;
+}
+
+/* GUID_DEVINTERFACE_DISK. */
+static const GUID disk_interface = {0x53f56307, 0xb6bf, 0x11d0, {0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b}};
+
+/* Every present disk interface must be one of the probed drives `nums`. 0, or
+   -1 with the reason when the census is incomplete or cannot be taken. */
+static int disk_census(const DWORD *nums, int n, char *err, size_t cap)
+{
+    HDEVINFO set = SetupDiGetClassDevsW(&disk_interface, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+    SP_DEVICE_INTERFACE_DATA ifd;
+    DWORD idx, e;
+    int rc = 0;
+    if (set == INVALID_HANDLE_VALUE) {
+        snprintf(err, cap, "SetupDiGetClassDevsW: error %lu", (unsigned long)GetLastError());
+        return -1;
+    }
+    for (idx = 0; rc == 0; idx++) {
+        union { SP_DEVICE_INTERFACE_DETAIL_DATA_W d; unsigned char raw[sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W) + 1024 * sizeof(wchar_t)]; } det;
+        STORAGE_DEVICE_NUMBER sdn;
+        HANDLE h;
+        DWORD got = 0;
+        int i, found = 0;
+        ifd.cbSize = sizeof ifd;
+        if (!SetupDiEnumDeviceInterfaces(set, NULL, &disk_interface, idx, &ifd)) {
+            e = GetLastError();
+            if (e != ERROR_NO_MORE_ITEMS) { snprintf(err, cap, "SetupDiEnumDeviceInterfaces: error %lu", (unsigned long)e); rc = -1; }
+            break;
+        }
+        det.d.cbSize = sizeof det.d;
+        if (!SetupDiGetDeviceInterfaceDetailW(set, &ifd, &det.d, sizeof det, NULL, NULL)) {
+            snprintf(err, cap, "disk interface %lu: no path (error %lu)", (unsigned long)idx, (unsigned long)GetLastError());
+            rc = -1;
+            break;
+        }
+        h = CreateFileW(det.d.DevicePath, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+        if (h == INVALID_HANDLE_VALUE
+            || !DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof sdn, &got, NULL)) {
+            snprintf(err, cap, "disk interface %lu: no device number (error %lu)", (unsigned long)idx, (unsigned long)GetLastError());
+            if (h != INVALID_HANDLE_VALUE) { CloseHandle(h); }
+            rc = -1;
+            break;
+        }
+        CloseHandle(h);
+        if (DISC_FAULT("win.disk_census")) { sdn.DeviceNumber = DISC_MAX_DISKS; }   /* a disk past the probed range */
+        for (i = 0; i < n; i++) { if (nums[i] == sdn.DeviceNumber) { found = 1; } }
+        if (!found) {
+            snprintf(err, cap, "disk %lu is not among the probed \\\\.\\PhysicalDrive0..%d", (unsigned long)sdn.DeviceNumber,
+                     DISC_MAX_DISKS - 1);
+            rc = -1;
+        }
+    }
+    SetupDiDestroyDeviceInfoList(set);
+    return rc;
 }
 
 static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
@@ -143,7 +232,7 @@ static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
     union { DRIVE_LAYOUT_INFORMATION_EX l; unsigned char raw[sizeof(DRIVE_LAYOUT_INFORMATION_EX) + 128 * sizeof(PARTITION_INFORMATION_EX)]; } lay;
     STORAGE_DEVICE_NUMBER sdn;
     DWORD got = 0, i;
-    int v, j;
+    int v, j, mount_unknown = 0, os_unknown = 0;
 
     if (DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof sdn, &got, NULL)) {
         d->whole = (sdn.DeviceNumber == disk && sdn.PartitionNumber == 0) ? DISC_YES : DISC_NO;
@@ -186,8 +275,10 @@ static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
     for (v = 0; v < g_nvol; v++) {
         int attributed = 0;
         if (g_vol[v].disk != disk) { continue; }
-        if (g_vol[v].system) { d->holds_os = DISC_YES; }
-        if (!g_vol[v].mounted) { continue; }
+        if (g_vol[v].system == DISC_YES) { d->holds_os = DISC_YES; }
+        if (g_vol[v].system == DISC_UNKNOWN) { os_unknown = 1; }
+        if (g_vol[v].mounted == DISC_NO) { continue; }
+        if (g_vol[v].mounted == DISC_UNKNOWN) { mount_unknown = 1; continue; }
         d->n_mounted++;
         for (j = 0; g_vol[v].spans == 1 && d->n_parts > 0 && j < d->n_parts; j++) {
             if (d->parts[j].start >= 0 && (ULONGLONG)d->parts[j].start == g_vol[v].start
@@ -198,8 +289,14 @@ static void facts(DWORD disk, HANDLE h, struct disc_disk *d)
         }
         if (!attributed) { d->mounted_unattributed = DISC_YES; }
     }
-    if (g_vol_unknown) { d->n_mounted = DISC_UNKNOWN; d->mounted_unattributed = DISC_UNKNOWN; }
-    if (g_os_unresolved && d->holds_os != DISC_YES) { d->holds_os = DISC_UNKNOWN; }
+    if (g_vol_unknown || mount_unknown) {
+        d->n_mounted = DISC_UNKNOWN;
+        d->mounted_unattributed = DISC_UNKNOWN;
+        for (j = 0; d->n_parts > 0 && j < d->n_parts; j++) {
+            if (d->parts[j].mounted != DISC_YES) { d->parts[j].mounted = DISC_UNKNOWN; }
+        }
+    }
+    if ((g_os_unresolved || os_unknown) && d->holds_os != DISC_YES) { d->holds_os = DISC_UNKNOWN; }
 }
 
 int discover_enumerate(disc_each each, void *ctx, char *err, size_t cap)
@@ -222,7 +319,7 @@ int discover_enumerate(disc_each each, void *ctx, char *err, size_t cap)
         nums[n] = k;
         hs[n++] = h;                  /* INVALID_HANDLE_VALUE: listed, every fact unknown */
     }
-    if (gather_volumes(err, cap) != 0) {
+    if (disk_census(nums, n, err, cap) != 0 || gather_volumes(err, cap) != 0) {
         for (i = 0; i < n; i++) { if (hs[i] != INVALID_HANDLE_VALUE) { CloseHandle(hs[i]); } }
         return -1;
     }
