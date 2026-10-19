@@ -238,15 +238,17 @@ def main():
                 if 0 < i < len(recs) - 1 and s < j * C < e), None)
     if mid is not None:
         picks["middle"] = (1, 3, 44100, base, mid)
-    # Each source adds ~170 report bytes and each extra dropped folder ~50 (its list
-    # record), so folders x sources reach many positions inside a cluster quickly.
-    # Short inputs only; bounded to 40 runs.
-    for folders, n in [(m, s) for m in range(2, 7) for s in range(1, 9)]:
-        r = neighbour(n, 4410, folders)
+    # The report holds only counts, so its length moves in steps of whole digits and
+    # records. An offline search with this binary (report lengths do not depend on the
+    # filesystem) found 2 folders x 6 sources x 30000 frames: 2552 bytes before the end
+    # record, 504 into a cluster. Each candidate is re-measured here before use.
+    for folders, n, frames in [(2, 6, 30000), (2, 6, 4410), (4, 8, 4410), (5, 6, 4410)]:
+        r = neighbour(n, frames, folders)
         be = len(bytes.fromhex(r["report_hex"])) - len(END_LINE)
-        print(f"end search: {folders} folders x {n} sources: {be} bytes before end, {be % C} into a cluster", flush=True)
+        print(f"end search: {folders} folders x {n} sources x {frames} frames: {be} bytes before end, "
+              f"{be % C} into a cluster", flush=True)
         if be % C == 0 or be % C > C - len(END_LINE):
-            picks["end"] = (folders, n, 4410, r, -(-be // C))
+            picks["end"] = (folders, n, frames, r, -(-be // C))
             break
 
     rows = []
