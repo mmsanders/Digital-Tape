@@ -112,12 +112,14 @@ class H:
         self.strace = a.strace
         (self.fs / "foreign.txt").write_bytes(b"a foreign file on the report volume\n")
 
-    def inputs(self, n, frames):
-        d = self.work / "inputs" / f"{n}-{frames}"
+    def inputs(self, n, frames, folders=1):
+        """`folders` dropped folders f0.., each holding n sources of `frames` frames."""
+        d = self.work / "inputs" / f"{folders}x{n}-{frames}"
         if not d.exists():
-            d.mkdir(parents=True)
-            for k in range(n):
-                wav(d / f"{k:02d}.wav", frames, k + 1)
+            for m in range(folders):
+                (d / f"f{m}").mkdir(parents=True)
+                for k in range(n):
+                    wav(d / f"f{m}" / f"{k:02d}.wav", frames, 100 * m + k + 1)
         return d
 
     def run(self, label, inputs, report, trace_writes=False):
@@ -127,13 +129,14 @@ class H:
         self.n += 1
         case = self.work / "case"
         shutil.rmtree(case, ignore_errors=True)
-        shutil.copytree(inputs, case / "f0")
+        shutil.copytree(inputs, case / "src")
+        folders = [str(case / "src" / f) for f in sorted(os.listdir(case / "src"))]
         (case / "out").mkdir()
         (case / "out" / "sentinel.txt").write_bytes(b"unrelated\n")
         foreign = lambda: {"out": inventory(case / "out", skip=("DEST",)), "fs": inventory(self.fs, skip=("filler.bin",
                                                                                                          Path(report).name))}
-        src_before, foreign_before = inventory(case / "f0"), foreign()
-        argv = [self.bin, "--out", str(case / "out" / "DEST"), "--length", "3600", str(case / "f0"),
+        src_before, foreign_before = inventory(case / "src"), foreign()
+        argv = [self.bin, "--out", str(case / "out" / "DEST"), "--length", "3600", *folders,
                 "--report", str(report), "--report-nonce", NONCE]
         trace = self.out / f"run{self.n:03d}.strace"
         traced = self.strace and trace_writes
@@ -145,7 +148,7 @@ class H:
                "os": platform.platform(), "exit": p.returncode, "stdout_hex": p.stdout.hex(), "stderr_hex": p.stderr.hex(),
                "report_hex": Path(report).read_bytes().hex() if Path(report).exists() else "",
                "pair": {k: sha((dest / k).read_bytes()) for k in ("audio.wav", "manifest.json")} if dest.is_dir() else {},
-               "sources_before": src_before, "sources_after": inventory(case / "f0"),
+               "sources_before": src_before, "sources_after": inventory(case / "src"),
                "foreign_before": foreign_before, "foreign_after": foreign(),
                "unpublished_stage_after": sorted(x.name for x in (case / "out").iterdir() if "stage" in x.name),
                "free_bytes_after": shutil.disk_usage(self.fs).free}
@@ -164,18 +167,26 @@ class H:
         """Take every free cluster of FS with a filler, then free exactly k clusters."""
         filler = self.fs / "filler.bin"
         # Unbuffered: a refused write leaves nothing pending for close() to retry.
+        # Some filesystems refuse a write while free space is still reported
+        # (allocation ahead, delayed accounting), so fill in rounds with shrinking
+        # writes and a sync between them until the volume reports nothing free or
+        # a whole round adds nothing.
         fd = os.open(filler, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_BINARY", 0), 0o644)
         try:
-            for chunk in (1 << 16, self.cluster):
-                try:
-                    while os.write(fd, b"\0" * chunk) > 0:
+            for _ in range(8):
+                before = os.fstat(fd).st_size
+                for chunk in (1 << 16, self.cluster, 1):
+                    try:
+                        while os.write(fd, b"\0" * chunk) > 0:
+                            pass
+                    except OSError:
                         pass
+                try:
+                    os.fsync(fd)
                 except OSError:
                     pass
-            try:
-                os.fsync(fd)
-            except OSError:
-                pass
+                if shutil.disk_usage(self.fs).free == 0 or os.fstat(fd).st_size == before:
+                    break
         finally:
             os.close(fd)
         os.truncate(filler, max(0, filler.stat().st_size - k * self.cluster))
@@ -211,30 +222,31 @@ def main():
     print(json.dumps(facts), flush=True)
     report = h.fs / "report.jsonl"
 
-    def neighbour(n, frames):
+    def neighbour(n, frames, folders=1):
         """No-fault run with the report on FS and every cluster it needs free (plus one)."""
         h.clear()
-        r = h.run(f"neighbour n={n} frames={frames}", h.inputs(n, frames), report)
+        r = h.run(f"neighbour folders={folders} n={n} frames={frames}", h.inputs(n, frames, folders), report)
         assert r["exit"] == 0 and r["pair"], r["stderr_hex"]
         return r
 
     picks = {}
     base = neighbour(3, 44100)
     ctl = bytes.fromhex(base["report_hex"])
-    picks["start"] = (3, 44100, base, 0)
+    picks["start"] = (1, 3, 44100, base, 0)
     recs = offsets(ctl)
     mid = next((j for j in range(1, len(ctl) // C + 1) for i, (s, e) in enumerate(recs)
                 if 0 < i < len(recs) - 1 and s < j * C < e), None)
     if mid is not None:
-        picks["middle"] = (3, 44100, base, mid)
-    # Short inputs first (fast); longer frame counts only shift the report by a few
-    # bytes, so they are tried after every source count with the shortest.
-    for frames, n in [(f, n) for f in (4410, 22050) for n in range(4, 25)]:
-        r = neighbour(n, frames)
+        picks["middle"] = (1, 3, 44100, base, mid)
+    # Each source adds ~170 report bytes and each extra dropped folder ~50 (its list
+    # record), so folders x sources reach many positions inside a cluster quickly.
+    # Short inputs only; bounded to 40 runs.
+    for folders, n in [(m, s) for m in range(2, 7) for s in range(1, 9)]:
+        r = neighbour(n, 4410, folders)
         be = len(bytes.fromhex(r["report_hex"])) - len(END_LINE)
-        print(f"end search: {n} sources x {frames} frames: {be} bytes before end, {be % C} into a cluster", flush=True)
+        print(f"end search: {folders} folders x {n} sources: {be} bytes before end, {be % C} into a cluster", flush=True)
         if be % C == 0 or be % C > C - len(END_LINE):
-            picks["end"] = (n, frames, r, -(-be // C))
+            picks["end"] = (folders, n, 4410, r, -(-be // C))
             break
 
     rows = []
@@ -243,15 +255,16 @@ def main():
             rows.append({"fault_position": pos, "row": "UNEXECUTED",
                          "reason": f"no tried input puts a {C}-byte allocation boundary inside the {pos} record"})
             continue
-        n, frames, nb, k = picks[pos]
+        folders, n, frames, nb, k = picks[pos]
         h.clear()
         free = h.fill(k)
-        r = h.run(f"{pos} k={k}", h.inputs(n, frames), report, trace_writes=True)
+        free["exact"] = free["free_bytes"] == k * C
+        r = h.run(f"{pos} k={k}", h.inputs(n, frames, folders), report, trace_writes=True)
         rec = dict(r, mechanism="actual-filesystem", shipping=True, fault_position=pos,
                    claim="shipping-native" if a.strace else "observation-only",
                    baseline_exit=nb["exit"], baseline_stdout_hex=nb["stdout_hex"], baseline_stderr_hex=nb["stderr_hex"],
                    baseline_pair=nb["pair"], baseline_run=nb["run"], baseline_report_hex=nb["report_hex"], free=free,
-                   inputs={"sources": n, "frames_each": frames})
+                   inputs={"folders": folders, "sources_per_folder": n, "frames_each": frames})
         name = f"{pos}.record.json"
         (h.out / name).write_text(json.dumps(rec, indent=1))
         (h.out / f"{pos}.neighbour.json").write_text(json.dumps(nb, indent=1))
