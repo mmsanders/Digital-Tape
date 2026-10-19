@@ -16,11 +16,12 @@ readiness are separate from overall acceptance and integration permission.
 |216 937dee3c3e98a9e04cb08d1166423104d7c62ece|Exact743f829 bounded source/PCM/seven-pilot/five-command PASS;397 host faults unexecuted at that boundary. Fixed Stage3 plan published, no overall443 clearance.|
 |217 c5e28b80a0e505a295fa71daaef7a6d2c6f411c6|Exact0918e7d failed/incomplete-query controls improved; whole-stack ENOENT exception still blocks overall S2. Final third correction1ad813d under208 review.|
 
-Verification218 Stage3 disposition is being finalized as an unchanged PM publication
-backstop after current-main carriage and normal CI. Original author6e5fd864 findings/tests
-are byte-identical; until merged they remain a candidate, not an acceptance input.
-Bounded39/404 faults,365 deferred,6 absent long coordinates, no repeated-LBA/exhaustive
-large claim; no broad repeated campaign or overall443 clearance.
+Verification218 is published at **99df7f8c67627c13b33d0d55b5ba74ae2d43d699**
+(normal CI39333286727 SUCCESS). PM backstop carried current main mechanically;
+original author6e5fd864 findings/tests are byte-identical. Exact55552ad bounded
+Stage3 PASS:39/404 faults,365 deferred,6 absent long coordinates, no repeated-LBA/
+exhaustive-large claim.210/467 and evidence471 are closed at their bounded stop;
+no broad replay or overall443 clearance.
 
 APP-1A §7 settles PM472: initial required queries fail closed before write-mode
 access; performed extra media-query failures stop with HOST_QUERY_FAILED/exit1,
@@ -39,7 +40,7 @@ and effective/scoped policy facts are requested before any new authorization.
 No Bypass, unblocking, security change, new kit or collection retry is issued.
 
 [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) preserves exact heads and
-retired envelopes453/463/470, with471 retiring after218 publication. Defective436
+retired envelopes453/463/470/471 after218 publication. Defective436
 is superseded by corrected459; its merge is not a prerequisite. No Product merge
 or acceptance follows from closing review containers. Software owns integration
 after applicable explicit exact-head independent clearance and required CI. Corrected459,
