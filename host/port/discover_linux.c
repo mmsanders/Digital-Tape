@@ -146,9 +146,22 @@ static int resolve_use(const char *name, int system, int depth)
     snprintf(path, sizeof path, "/sys/class/block/%s", name);
     if (access(path, F_OK) != 0) { return -1; }
     snprintf(path, sizeof path, "/sys/class/block/%s/slaves", name);
-    dir = opendir(path);
-    if (dir != NULL) {
-        while ((de = readdir(dir)) != NULL) {
+    errno = 0;
+    dir = DISC_FAULT("linux.slaves_denied") ? NULL : opendir(path);
+    if (dir == NULL) {
+        /* Only a missing slaves directory (a partition, or a disk with nothing
+           stacked on it) means "not stacked"; any other failure leaves what is
+           beneath this device unknown. */
+        if (DISC_FAULT("linux.slaves_denied") || errno != ENOENT) { return -1; }
+    } else {
+        for (;;) {
+            errno = 0;
+            de = (any && DISC_FAULT("linux.slaves_readdir")) ? NULL : readdir(dir);
+            if (de == NULL) {
+                /* The end of the listing, or a failed (incomplete) one. */
+                if (errno != 0 || (any && DISC_FAULT("linux.slaves_readdir"))) { bad = 1; }
+                break;
+            }
             if (de->d_name[0] == '.') { continue; }
             any = 1;
             if (depth >= 8 || DISC_FAULT("linux.stack_unresolved") || resolve_use(de->d_name, system, depth + 1) != 0) {
@@ -156,8 +169,9 @@ static int resolve_use(const char *name, int system, int depth)
             }
         }
         closedir(dir);
+        if (bad) { return -1; }
     }
-    if (any) { return bad ? -1 : 0; }
+    if (any) { return 0; }
     if (parent_disk(name, disk, sizeof disk) != 0) { return -1; }
     return record_use(disk, name, system);
 }

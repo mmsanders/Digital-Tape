@@ -60,7 +60,7 @@ jobs:
           sudo apt-get install -y dosfstools >/dev/null
           make -C old-s2/engine all >/dev/null && make -C old-s2/host test-bins >/dev/null
           C="python3 -B tools/wp15-cards/s2_controls.py --tapectl-test build/host/tapectl-test --source ${{ github.event.pull_request.head.sha || github.sha }} --old old-s2/build/host/tapectl-test --old-source ef2712c330fdbc6515bff45c0bee63210f65165a --out $RUNNER_TEMP/controls"
-          $C --state plain none= stack=linux.stack_unresolved
+          $C --state plain none= stack=linux.stack_unresolved denied=linux.slaves_denied readdir=linux.slaves_readdir
           truncate -s 64M "$RUNNER_TEMP/dm.img"
           dev=$(sudo losetup -f --show -P "$RUNNER_TEMP/dm.img")
           echo 'start=2048, size=32768, type=e' | sudo sfdisk -q "$dev"
@@ -69,7 +69,7 @@ jobs:
           sudo mkfs.vfat -n S2CTL /dev/mapper/s2ctl >/dev/null
           sudo mkdir -p /mnt/s2ctl && sudo mount /dev/mapper/s2ctl /mnt/s2ctl
           echo "dm stack: /dev/mapper/s2ctl -> ${dev}p1, mounted at /mnt/s2ctl"; ls -l /sys/class/block/dm-*/slaves/
-          $C --state dm-mounted none= stack=linux.stack_unresolved
+          $C --state dm-mounted none= stack=linux.stack_unresolved denied=linux.slaves_denied readdir=linux.slaves_readdir
           sudo umount /mnt/s2ctl; sudo dmsetup remove s2ctl; sudo losetup -d "$dev"
       - uses: actions/upload-artifact@v4
         if: always()
