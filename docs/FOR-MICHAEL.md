@@ -9,8 +9,9 @@ The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digita
 
 Start with **[Michael473: current Windows checklist](https://github.com/mmsanders/Digital-Tape/issues/473)**.
 It replaces447/386 as the hands-on starting point and links the exact reviewed commands.
-One read-only physical A6 capture is ready using the existing card/reader/shipping tapectl;
-then remove the card and reader for the separate corrected Windows11 INGEST run.
+The physical A6 capture is received; no repeat is requested. Its remaining method
+review uses saved evidence. INGEST is paused after a pre-script policy refusal;
+Verification222 requests only read-only shell/policy facts through473, no retry or override.
 Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
 No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
 The issue is the sole current brief; this file is only its locator.

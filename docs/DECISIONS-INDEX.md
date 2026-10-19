@@ -176,4 +176,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-189](DECISIONS.md#adr-189--consolidate-the-current-hands-on-queue-and-resolve-s3-query-failures) | 2026-10-19 PDT | Current hands-on queue / S3 fail-stop ruling | Michael473 supersedes447; HOST_QUERY_FAILED mapping, platform binding holds; partial overnight dispositions, rungs unchanged |
 
-126 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-190](DECISIONS.md#adr-190--close-completed-review-envelopes-and-bound-the-remaining-acceptance-work) | 2026-10-19 PDT | Phase2 closeout / distinct-disk method | Completed evidence PRs retired; defective436 superseded by459; precise remaining blockers; retained-capture223; INGEST policy facts only |
+
+127 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
