@@ -9,6 +9,10 @@ which reopens the query handle's object, not the path. The probe never writes
 to a device: each VHD file carries its marker in sector 0 before it is
 attached, and only reads identify which disk a handle reaches.
 
+Upgrade routes tried on each held query handle: ReOpenFile; NtCreateFile with
+the query handle as RootDirectory and an empty name (a relative open of the
+same object); DuplicateHandle asking for GENERIC_READ|GENERIC_WRITE.
+
 Cases:
   same     no change between query and upgrade (GENERIC_READ and zero-access query)
   swap     the VHD detached while the query handle is held and an equal-size
@@ -59,6 +63,63 @@ def open_path(path, access):
 def reopen(h, access):
     r = k32.ReOpenFile(h, access, SHARE_RW, 0)
     return (None, err()) if r in (None, INVALID) else (r, 0)
+
+
+nt = ctypes.WinDLL("ntdll")
+
+
+class UNICODE_STRING(ctypes.Structure):
+    _fields_ = [("Length", wintypes.USHORT), ("MaximumLength", wintypes.USHORT), ("Buffer", wintypes.LPWSTR)]
+
+
+class OBJECT_ATTRIBUTES(ctypes.Structure):
+    _fields_ = [("Length", wintypes.ULONG), ("RootDirectory", HANDLE), ("ObjectName", ctypes.POINTER(UNICODE_STRING)),
+                ("Attributes", wintypes.ULONG), ("SecurityDescriptor", ctypes.c_void_p),
+                ("SecurityQualityOfService", ctypes.c_void_p)]
+
+
+class IO_STATUS_BLOCK(ctypes.Structure):
+    _fields_ = [("Status", ctypes.c_void_p), ("Information", ctypes.c_void_p)]
+
+
+nt.NtCreateFile.restype = ctypes.c_long
+nt.NtCreateFile.argtypes = [ctypes.POINTER(HANDLE), wintypes.ULONG, ctypes.POINTER(OBJECT_ATTRIBUTES),
+                            ctypes.POINTER(IO_STATUS_BLOCK), ctypes.c_void_p, wintypes.ULONG, wintypes.ULONG,
+                            wintypes.ULONG, wintypes.ULONG, ctypes.c_void_p, wintypes.ULONG]
+k32.GetCurrentProcess.restype = HANDLE
+k32.DuplicateHandle.argtypes = [HANDLE, HANDLE, HANDLE, ctypes.POINTER(HANDLE), wintypes.DWORD, wintypes.BOOL,
+                                wintypes.DWORD]
+
+
+def nt_relative(h, access):
+    """NtCreateFile(RootDirectory=h, ObjectName="") with `access`: (handle, NTSTATUS hex)."""
+    out = HANDLE()
+    us = UNICODE_STRING(0, 2, "")
+    oa = OBJECT_ATTRIBUTES(ctypes.sizeof(OBJECT_ATTRIBUTES), h, ctypes.pointer(us), 0, None, None)
+    iosb = IO_STATUS_BLOCK()
+    st = nt.NtCreateFile(ctypes.byref(out), access | 0x00100000, ctypes.byref(oa), ctypes.byref(iosb), None, 0,
+                         SHARE_RW, 1, 0x20, None, 0)
+    return (out.value if st == 0 else None), "0x%08X" % (st & 0xFFFFFFFF)
+
+
+def dup(h, access):
+    out = HANDLE()
+    me = k32.GetCurrentProcess()
+    if not k32.DuplicateHandle(me, h, me, ctypes.byref(out), access, False, 0):
+        return None, err()
+    return out.value, 0
+
+
+def upgrades(hq):
+    """Each upgrade route on the held query handle: its error, and what the new handle reaches."""
+    res = {}
+    for name, fn in (("ReOpenFile", lambda: reopen(hq, GENERIC_READ | GENERIC_WRITE)),
+                     ("NtCreateFile_relative", lambda: nt_relative(hq, GENERIC_READ | GENERIC_WRITE)),
+                     ("DuplicateHandle", lambda: dup(hq, GENERIC_READ | GENERIC_WRITE))):
+        h, e = fn()
+        res[name] = {"error": e, "reaches": facts(h) if h else None}
+        close(h)
+    return res
 
 
 def devnum(h):
@@ -139,11 +200,8 @@ def main():
         row = {"path": path, "query_access": qaccess, "query_open_error": e}
         if hq:
             row["query"] = facts(hq)
-            hrw, e2 = reopen(hq, GENERIC_READ | GENERIC_WRITE)
-            row["reopen_error"] = e2
-            if hrw:
-                row["upgrade"] = facts(hrw)
-            close(hrw, hq)
+            row["upgrades"] = upgrades(hq)
+            close(hq)
         rows["cases"][qname] = row
 
     hq, e = open_path(path, GENERIC_READ)
@@ -153,13 +211,11 @@ def main():
     row["attach_b"] = rb2
     row["b_disk_number"] = nb
     row["held_query_after_swap"] = facts(hq) if hq else None
-    hrw, e2 = reopen(hq, GENERIC_READ | GENERIC_WRITE) if hq else (None, None)
-    row["reopen_error"] = e2
-    row["upgrade"] = facts(hrw) if hrw else None
+    row["upgrades"] = upgrades(hq) if hq else None
     hp, e3 = open_path(rf"\\.\PhysicalDrive{nb}", GENERIC_READ)
     row["path_open_error"] = e3
     row["path_open"] = facts(hp) if hp else None
-    close(hp, hrw, hq)
+    close(hp, hq)
     detach(b, d)
     rows["cases"]["swap"] = row
 
