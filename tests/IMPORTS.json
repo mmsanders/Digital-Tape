@@ -531,6 +531,19 @@
         "-B",
         "tests/wp14_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp15_report_faults_r1",
+      "tree": "d959f4a9b055d73964ec96ba9b691f4b6fcffe40",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "b9250f79ce08bf785066a833199052e35fdf3a0a",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-15 APP-1A S1 report-write fault / closed-ID package (Verification #209 Stage1 against ADR-188/PM464, issued Product 5d2e37dd APP-1A and INGEST-1). Published on Verification main as PR212 at b9250f79ce08bf785066a833199052e35fdf3a0a (author head 3ce4a769e57b4d37a29fe013d14d35a49b9c53b9, normal CI 39207334461 SUCCESS); package tree d959f4a9b055d73964ec96ba9b691f4b6fcffe40 as its release PROVENANCE.json (SHA-256 a0958db9b5f4c28fd974161fe56ed53e62532e11c92e1bdf3cb357ecab5d9dc3) states. Imported byte-identically by Software #466 from the authenticated release transport package-209-3ce4a769 wp15-report-faults-r1.zip (SHA-256 eefaee1e456234114fd0a569f5e580158e446c84860ccf6350906283fe147a07), whose extracted tree equals that tree. The self-test is synthetic judge qualification, not actual shipping/native report receipts. Not Product, native, full WP15/WP16 or package acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp15_report_faults_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
