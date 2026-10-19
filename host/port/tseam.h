@@ -36,6 +36,11 @@
  *   noop-flush             flush reports success and calls no OS barrier
  *   hidden-flush-error     the barrier fails in the OS; reported as success
  *   native-flush-error     the barrier fails in the OS; failure propagates
+ *   flush-error:N          only barrier N of the process (0-based, trace order)
+ *                          fails in the OS; failure propagates
+ *   write-error:N          only port write N of the process (0-based, trace
+ *                          order) is a real failed OS write; nothing of it
+ *                          lands; failure propagates
  *   nonnull-binding        read-only engine bindings get a write callback
  *   read-error:LBA         an engine read covering partition LBA fails (real
  *                          failed OS read)
@@ -64,7 +69,7 @@ void tseam_refusal(const char *id);
 
 void tseam_open(const char *path, int is_device, int writable, int ok);
 void tseam_read(uint64_t offset, size_t bytes, int ok, const char *os_error, const char *fault);
-void tseam_write(uint64_t offset, size_t bytes, const void *data, int ok);
+void tseam_write(uint64_t offset, size_t bytes, const void *data, int ok, const char *fault);
 void tseam_flush(const char *os_call, int os_success, const char *os_error, int success,
                  const char *fullfsync_unsupported, const char *fault);
 void tseam_bind(uint64_t base_lba, uint32_t blocks, int write_is_null);
@@ -80,6 +85,8 @@ void tseam_set_view_base(uint64_t base_lba);                     /* for chunk cl
 int  tseam_fault_noop_flush(void);
 int  tseam_fault_hidden_flush_error(void);
 int  tseam_fault_native_flush_error(void);
+int  tseam_fault_flush_at(void);
+int  tseam_fault_write(void);
 int  tseam_fault_nonnull_binding(void);
 int  tseam_fault_read(uint64_t partition_lba, uint32_t count);
 int  tseam_fault_target_read(uint64_t offset, size_t bytes);

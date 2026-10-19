@@ -1,0 +1,52 @@
+name: wp10 narrow supplement (#467)
+
+# Software's #467 transport for Verification #210 (tests/wp10_narrow_supplement_r1/ADAPTER.md):
+# actual selected host-load faults through the tapectl-test seam (write-error:N,
+# flush-error:N; test binary only) and per-command fresh-input rows rebuilt from the
+# authenticated retained load0 packet. Raw observations only: Verification judges.
+on:
+  pull_request:
+    paths:
+      - 'tools/wp10-narrow/**'
+      - 'tests/wp10_narrow_supplement_r1/**'
+      - 'host/**'
+      - '.github/workflows/wp10-narrow-467.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    name: host-load pilot faults and command rows (Linux, hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: build engine and tapectl-test; imported package self-test
+        run: |
+          set -eu
+          python3 -B tests/wp10_narrow_supplement_r1/selftest.py
+          make -s -C engine clean all
+          make -s -C host
+          sha256sum build/host/tapectl build/host/tapectl-test
+      - name: fetch and authenticate the retained inputs (Verification's own fetcher)
+        run: |
+          python3 -B tests/wp10_narrow_supplement_r1/fetch_inputs.py \
+            --release https://github.com/mmsanders/digital-tape-verification/releases/download/package-210-f5bd194b8a8fc45431b9a1b28f84e2c73e121c9b \
+            --out "$RUNNER_TEMP/retained"
+          cd "$RUNNER_TEMP/retained" && mkdir load0 && cd load0 && unzip -q ../retained-load0.zip
+      - name: run
+        run: |
+          /usr/bin/time -v python3 -B tools/wp10-narrow/s467_load.py --retained "$RUNNER_TEMP/retained/load0" \
+            --out "$RUNNER_TEMP/b467" 2> "$RUNNER_TEMP/time.txt"
+          grep -E "User time|System time|Elapsed|Maximum resident" "$RUNNER_TEMP/time.txt"
+          cp "$RUNNER_TEMP/time.txt" "$RUNNER_TEMP/b467/TIME.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-narrow-467-load
+          path: ${{ runner.temp }}/b467
+          retention-days: 90

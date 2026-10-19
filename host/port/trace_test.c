@@ -96,6 +96,18 @@ int tseam_fault_noop_flush(void)         { return strcmp(fault(), "noop-flush") 
 int tseam_fault_hidden_flush_error(void) { return strcmp(fault(), "hidden-flush-error") == 0; }
 int tseam_fault_native_flush_error(void) { return strcmp(fault(), "native-flush-error") == 0; }
 int tseam_fault_nonnull_binding(void)    { return strcmp(fault(), "nonnull-binding") == 0; }
+
+/* flush-error:N / write-error:N select one barrier / port write of this
+   process by its 0-based position in the trace's own order. */
+static int fault_at(const char *prefix, unsigned long long now)
+{
+    const char *f = fault();
+    size_t n = strlen(prefix);
+    return strncmp(f, prefix, n) == 0 && strtoull(f + n, NULL, 10) == now;
+}
+
+int tseam_fault_flush_at(void) { return fault_at("flush-error:", g_flushes); }
+int tseam_fault_write(void)    { return fault_at("write-error:", g_writes); }
 int tseam_fault_unmount(void)            { return strcmp(fault(), "unmount-error") == 0; }
 
 int tseam_fault_read(uint64_t partition_lba, uint32_t count)
@@ -242,7 +254,7 @@ void tseam_read(uint64_t offset, size_t bytes, int ok, const char *os_error, con
     fputc('}', g_fp);
 }
 
-void tseam_write(uint64_t offset, size_t bytes, const void *data, int ok)
+void tseam_write(uint64_t offset, size_t bytes, const void *data, int ok, const char *flt)
 {
     g_writes++;
     if (!g_fp) { return; }
@@ -256,6 +268,10 @@ void tseam_write(uint64_t offset, size_t bytes, const void *data, int ok)
         fputs(",\"data_hex\":\"", g_fp);
         for (i = 0; i < bytes; i++) { fprintf(g_fp, "%02x", b[i]); }
         fputc('"', g_fp);
+    }
+    if (flt) {
+        fprintf(g_fp, ",\"fault\":");
+        json_str(flt);
     }
     fputc('}', g_fp);
 }

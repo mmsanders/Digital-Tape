@@ -71,11 +71,21 @@ int hport_read_failing(struct hport *p, uint64_t off, void *buf, size_t len)
 
 int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 {
-    int rc = hport_os_write(p, off, buf, len);
 #ifdef TAPECTL_TEST
-    tseam_write(off, len, buf, rc == 0);
-#endif
+    int rc;
+    if (tseam_fault_write()) {                  /* control: a real failed OS write */
+        struct hport broken = *p;
+        hport_os_invalidate(&broken);
+        rc = hport_os_write(&broken, off, buf, len);
+        tseam_write(off, len, buf, rc == 0, "write-error");
+        return rc == 0 ? 0 : -1;
+    }
+    rc = hport_os_write(p, off, buf, len);
+    tseam_write(off, len, buf, rc == 0, NULL);
     return rc;
+#else
+    return hport_os_write(p, off, buf, len);
+#endif
 }
 
 int hport_flush(struct hport *p)
@@ -88,17 +98,20 @@ int hport_flush(struct hport *p)
         tseam_flush("none", 0, NULL, 1, NULL, "noop-flush");
         return 0;
     }
-    if (tseam_fault_hidden_flush_error() || tseam_fault_native_flush_error()) {
+    if (tseam_fault_hidden_flush_error() || tseam_fault_native_flush_error() || tseam_fault_flush_at()) {
         /* A real barrier call that the OS fails. hidden-flush-error then
-           reports success anyway (the control); native-flush-error propagates
-           the failure (the production behaviour under a failing OS). */
+           reports success anyway (the control); native-flush-error and
+           flush-error:N propagate the failure (the production behaviour
+           under a failing OS). */
         struct hport broken = *p;
         int hidden = tseam_fault_hidden_flush_error();
+        const char *name = hidden ? "hidden-flush-error"
+                           : tseam_fault_native_flush_error() ? "native-flush-error" : "flush-error";
         hport_os_invalidate(&broken);
         rc = hport_os_flush(&broken);
         p->flush_how = broken.flush_how;
         tseam_flush(broken.flush_how, rc == 0, rc == 0 ? NULL : hport_os_errname(), hidden ? 1 : rc == 0,
-                    broken.flush_note, hidden ? "hidden-flush-error" : "native-flush-error");
+                    broken.flush_note, name);
         return hidden ? 0 : rc;
     }
     rc = hport_os_flush(p);
