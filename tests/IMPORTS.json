@@ -544,6 +544,19 @@
         "-B",
         "tests/wp10_subset_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_narrow_supplement_r1",
+      "tree": "52837b6adc2bf6f3c7a99f1ee4eccf9526526155",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "2985db23154858c37871b0a8510bb770d79b67a5",
+      "attested_in": "Verification #210 / Product #467 / ADR-188",
+      "attestation": "Narrow duplication source/PCM and host-load fault supplement contract (ADAPTER.md, oracle.py, HOST-LOAD-PLAN.json, SELECTED-DESTINATIONS.json), published at Verification main 2985db23 (PR213, author head f5bd194b); imported byte-identically from release package-210-f5bd194b wp10-narrow-supplement-r1.zip (sha256 7bbe2c2f34248b5e50bd0cfec68ad8f9b1e8e9531643b9ccd09c3b74e77a5a33) before any #467 adapter or observation. Synthetic judge self-test only: no Product run is accepted by importing it",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_narrow_supplement_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

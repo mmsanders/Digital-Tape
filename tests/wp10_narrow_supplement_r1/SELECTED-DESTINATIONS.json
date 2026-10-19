@@ -1,0 +1,1532 @@
+{
+  "retained_artifact": 12083282421,
+  "retained_sha256": "a29c01b592604163b9c311a4638acd097aba407dfa2b14616b6393ced02baf97",
+  "selected_unique_destinations": 2,
+  "selected_contexts": 81,
+  "source_image_present": false,
+  "source_callback_trace_present": false,
+  "destinations": [
+    {
+      "projection_sha256": "6ad1afe545f3990be30337a9c7a39ad78f5a0e638f4ec15b492e2d1b5e84a94b",
+      "contexts": [
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 8,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 11
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": 8,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "initial_sha256": "f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 11
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 8,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "initial_sha256": "09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 12,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": 8,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            11
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "0",
+          "landing_order": []
+        }
+      ]
+    },
+    {
+      "projection_sha256": "e7d9d30b01219b03bd73f4cd7d3d8ea1c22166a3493a88ec2b897275793f5493",
+      "contexts": [
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "fixture",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "fixture",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "projection:1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "projection:1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "fixture",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "fixture",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "projection:567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "projection:567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "projection:6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "projection:6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-00",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "fixture",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "projection:9b44a5172f90d1b02836e3f7bcab380cb6645631e8b79f72f1d7c9c9c7cf98a3",
+          "initial_sha256": "9b44a5172f90d1b02836e3f7bcab380cb6645631e8b79f72f1d7c9c9c7cf98a3",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "projection:9b44a5172f90d1b02836e3f7bcab380cb6645631e8b79f72f1d7c9c9c7cf98a3",
+          "initial_sha256": "9b44a5172f90d1b02836e3f7bcab380cb6645631e8b79f72f1d7c9c9c7cf98a3",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "fixture",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "projection:1372eb85edf13d8d3b86559f633e2f9920ffddbb853acd1bf8089a9538792e65",
+          "initial_sha256": "1372eb85edf13d8d3b86559f633e2f9920ffddbb853acd1bf8089a9538792e65",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "projection:1372eb85edf13d8d3b86559f633e2f9920ffddbb853acd1bf8089a9538792e65",
+          "initial_sha256": "1372eb85edf13d8d3b86559f633e2f9920ffddbb853acd1bf8089a9538792e65",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "projection:2197227e503f54909d576363b2cb680b4ed4f911fc43c675f9d8b7a914b1f524",
+          "initial_sha256": "2197227e503f54909d576363b2cb680b4ed4f911fc43c675f9d8b7a914b1f524",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "projection:2197227e503f54909d576363b2cb680b4ed4f911fc43c675f9d8b7a914b1f524",
+          "initial_sha256": "2197227e503f54909d576363b2cb680b4ed4f911fc43c675f9d8b7a914b1f524",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "initial_sha256": "f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-01",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "projection:f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "initial_sha256": "f9949895b5c61bf1cc364c67241f16bb2aabb60cf050e048b2805bbc19ab2f6f",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "fixture",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "projection:ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "projection:ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "fixture",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "projection:dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "projection:dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": 9,
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_barrier_entry",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-02",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "cut_unit",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "healthy_pair"
+          ],
+          "base": "fixture",
+          "initial_sha256": "1be8c84648af6fe9b8ae845c1165c85e791ab6af9eaaa73476fa783df9c651b9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "ec70487e382a202414f409fa22f3a070c6f16dccd69aa6ce3372ca8a11f43ca9",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "projection:23d7f06f2cb3298bafb0d4711be9aa212f52798fa7ac49e784ede6f60860ef72",
+          "initial_sha256": "23d7f06f2cb3298bafb0d4711be9aa212f52798fa7ac49e784ede6f60860ef72",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "mirror_only"
+          ],
+          "base": "projection:23d7f06f2cb3298bafb0d4711be9aa212f52798fa7ac49e784ede6f60860ef72",
+          "initial_sha256": "23d7f06f2cb3298bafb0d4711be9aa212f52798fa7ac49e784ede6f60860ef72",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "generation_zero"
+          ],
+          "base": "fixture",
+          "initial_sha256": "567cf84b3a75dd9ff79820aff8b3d696186b6f3685adbfa40f49f2731ebccd95",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "fixture",
+          "initial_sha256": "dc133c8798e804eae854ac3fbd26dea532a140bdb970d59cf7d269c93e42b660",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "projection:32f697dfeef92a213a9676127901a897b434101a18b0470d236974a7391d3d0c",
+          "initial_sha256": "32f697dfeef92a213a9676127901a897b434101a18b0470d236974a7391d3d0c",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "v2_only"
+          ],
+          "base": "projection:32f697dfeef92a213a9676127901a897b434101a18b0470d236974a7391d3d0c",
+          "initial_sha256": "32f697dfeef92a213a9676127901a897b434101a18b0470d236974a7391d3d0c",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6f42940cda159b11e85b6dfb1ff27c6f8da246c5bab42865d38e61dae375a6a0",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "fixture",
+          "initial_sha256": "bc322129a79493e52b18649ef152eec9467dc9edf52bf4f7474ef3a670c32640",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": 12
+          },
+          "label": "error_write",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "initial_sha256": "09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_complete",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_candidate"
+          ],
+          "base": "projection:09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "initial_sha256": "09111c6dd227e6b75e338dd9880c37743aacac25372c9a99b03382d95e36f6e4",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": 13,
+            "error_op_barrier": "-",
+            "error_op_call": "-"
+          },
+          "label": "second_cut",
+          "mask": "0",
+          "landing_order": []
+        },
+        {
+          "part": "dup/part-000-03",
+          "scenario": [
+            "dup",
+            "exhaustion_equal_divergent"
+          ],
+          "base": "fixture",
+          "initial_sha256": "6207f8baef2b85498352c3240c43c0cde5a5321ccb71bbb042712dea23cfb66e",
+          "coordinate": {
+            "cut_op_barrier_entry": "-",
+            "cut_op_unit": "-",
+            "error_op_barrier": 9,
+            "error_op_call": "-"
+          },
+          "label": "error_barrier",
+          "mask": "1",
+          "landing_order": [
+            12
+          ]
+        }
+      ]
+    }
+  ]
+}

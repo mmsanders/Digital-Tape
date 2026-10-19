@@ -1,0 +1,55 @@
+{
+  "stage": "1+2 only; broader residue/long-copy extension NOT YET ISSUED",
+  "baseline": {
+    "op_calls": 353,
+    "op_barriers": 52,
+    "initial_sha256": "1d677f4c0e1fbeda0dd4d8c7cdb4211095f82342c4ca2b62fe7a51037bb83d8c",
+    "complete_trace_sha256": "a3fa160dd470640bc6e5d563990bcc0f28dd8f4d1053572b24325ed0554d5c43"
+  },
+  "old_missing": {
+    "write_ordinals": [
+      0,
+      352
+    ],
+    "barrier_ordinals": [
+      1,
+      51
+    ],
+    "count": 404
+  },
+  "licensed_pilot": [
+    {
+      "kind": "write",
+      "ordinal": 0
+    },
+    {
+      "kind": "write",
+      "ordinal": 7
+    },
+    {
+      "kind": "write",
+      "ordinal": 8
+    },
+    {
+      "kind": "write",
+      "ordinal": 352
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 1
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 26
+    },
+    {
+      "kind": "barrier",
+      "ordinal": 51
+    }
+  ],
+  "native_flush_zero_control": "carry or rerun only to prove selected-error route; not a new missing coordinate",
+  "new_execution_cpu_seconds_cap": 7200,
+  "new_compressed_artifact_bytes_cap": 2147483648,
+  "remaining_status": "UNEXECUTED until actual failure or precise capability proof",
+  "observation_selector": "Reuse retained corrected load rows: sort unique projection_sha256, select first per empty/empty,empty/new,new/new state plus every distinct NEEDS_REPAIR projection. Each verify/dump_A/dump_B uses separate pristine copy and cold fresh process."
+}

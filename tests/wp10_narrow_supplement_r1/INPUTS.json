@@ -1,0 +1,17 @@
+{
+  "product_candidate": "85b7c3fd0b123ae7e5d54cb9f7bb424fbc613542",
+  "engine_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+  "model_tree": "c6cb573d654d337fef2f616f11cce0cee74e8968",
+  "prior_disposition": "42f169f1b5448bc646a2b181ced51c14e385017c",
+  "residue_model_git_blob": "0981d10051b4401fab84d30b9f8d06bd504c2048",
+  "small": {
+    "artifact": 12083282421,
+    "bytes": 1468463,
+    "sha256": "a29c01b592604163b9c311a4638acd097aba407dfa2b14616b6393ced02baf97"
+  },
+  "load0": {
+    "artifact": 12085042202,
+    "bytes": 2234288,
+    "sha256": "2bfe1814312d622cb010d2571e6b977b5125fc07f7ead9301765d167a86bf6c9"
+  }
+}
