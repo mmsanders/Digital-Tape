@@ -120,8 +120,10 @@ class H:
                 wav(d / f"{k:02d}.wav", frames, k + 1)
         return d
 
-    def run(self, label, inputs, report):
-        """One ingest run at the fixed case paths; the report at `report`."""
+    def run(self, label, inputs, report, trace_writes=False):
+        """One ingest run at the fixed case paths; the report at `report`. With
+        trace_writes (and --strace), every write(2) is traced; report records are
+        far shorter than the 4096-byte capture, audio writes are cut there."""
         self.n += 1
         case = self.work / "case"
         shutil.rmtree(case, ignore_errors=True)
@@ -134,8 +136,9 @@ class H:
         argv = [self.bin, "--out", str(case / "out" / "DEST"), "--length", "3600", str(case / "f0"),
                 "--report", str(report), "--report-nonce", NONCE]
         trace = self.out / f"run{self.n:03d}.strace"
-        cmd = (["strace", "-f", "-qq", "-xx", "-s", "1048576", "-e", "trace=openat,write,close", "-o", str(trace)]
-               if self.strace else []) + argv
+        traced = self.strace and trace_writes
+        cmd = (["strace", "-f", "-qq", "-xx", "-s", "4096", "-e", "trace=openat,write,close", "-o", str(trace)]
+               if traced else []) + argv
         p = subprocess.run(cmd, capture_output=True)
         dest = case / "out" / "DEST"
         rec = {"run": self.n, "label": label, "argv": argv, "binary_sha256": self.bin_sha, "version": self.version,
@@ -146,10 +149,10 @@ class H:
                "foreign_before": foreign_before, "foreign_after": foreign(),
                "unpublished_stage_after": sorted(x.name for x in (case / "out").iterdir() if "stage" in x.name),
                "free_bytes_after": shutil.disk_usage(self.fs).free}
-        if self.strace:
+        if traced:
             rec["leaf_created_exclusive"], rec["attempts"] = attempts_from(trace, str(report))
             rec["attempt_capture_complete"] = True
-            rec["observer"] = "strace -f -xx -s 1048576 -e trace=openat,write,close"
+            rec["observer"] = "strace -f -xx -s 4096 -e trace=openat,write,close"
         else:
             rec["leaf_created_exclusive"] = None
             rec["attempts"] = []
@@ -218,14 +221,13 @@ def main():
                 if 0 < i < len(recs) - 1 and s < j * C < e), None)
     if mid is not None:
         picks["middle"] = (3, 44100, base, mid)
-    for n in range(4, 41):
-        for frames in (4410, 22050, 44100, 88200, 176400):
-            r = neighbour(n, frames)
-            be = len(bytes.fromhex(r["report_hex"])) - len(END_LINE)
-            if be % C == 0 or be % C > C - len(END_LINE):
-                picks["end"] = (n, frames, r, -(-be // C))
-                break
-        if "end" in picks:
+    # Short inputs first (fast); longer frame counts only shift the report by a few
+    # bytes, so they are tried after every source count with the shortest.
+    for frames, n in [(f, n) for f in (4410, 22050, 44100, 88200) for n in range(4, 41)]:
+        r = neighbour(n, frames)
+        be = len(bytes.fromhex(r["report_hex"])) - len(END_LINE)
+        if be % C == 0 or be % C > C - len(END_LINE):
+            picks["end"] = (n, frames, r, -(-be // C))
             break
 
     rows = []
@@ -237,7 +239,7 @@ def main():
         n, frames, nb, k = picks[pos]
         h.clear()
         free = h.fill(k)
-        r = h.run(f"{pos} k={k}", h.inputs(n, frames), report)
+        r = h.run(f"{pos} k={k}", h.inputs(n, frames), report, trace_writes=True)
         rec = dict(r, mechanism="actual-filesystem", shipping=True, fault_position=pos,
                    claim="shipping-native" if a.strace else "observation-only",
                    baseline_exit=nb["exit"], baseline_stdout_hex=nb["stdout_hex"], baseline_stderr_hex=nb["stderr_hex"],
