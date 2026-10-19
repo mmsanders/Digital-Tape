@@ -11,8 +11,14 @@ OBJ ?= build/r29_format_dup_worker.o
 CPPFLAGS := -I$(ENGINE_INC) -I$(ENGINE_SRC) -DTAPE_PUBLIC_HEADER='"tape.h"'
 LDLIBS := -lcrypto
 
-.PHONY: all clean
+.PHONY: all clean mutant
 all: $(OUT)
+
+# #467 control only: the source binding gets a write callback.
+mutant: build/r29_format_dup_worker_s467_mutant
+build/r29_format_dup_worker_s467_mutant: r29_format_dup_worker.c
+	@mkdir -p build
+	$(CC) $(CPPFLAGS) -DS467_SOURCE_WRITE_MUTANT $(CFLAGS) $< $(ENGINE_LIB) $(LDLIBS) -o $@
 
 $(OBJ): r29_format_dup_worker.c
 	@mkdir -p build

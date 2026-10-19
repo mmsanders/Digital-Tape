@@ -448,6 +448,21 @@ static int load_source_image(struct dev_ctx *ctx, const unsigned char *img)
     return 0;
 }
 
+/* Q (#467): when set, the dup's source context is named "source" (its callbacks
+   are logged), its exact bytes are saved before and after the operation into
+   this directory, and its binding's write callback is recorded as observed. */
+static const char *g_src_out;
+static bool g_src_write_null;
+static int image_save(const char *path, const struct image *img);
+
+static int save_in(const char *dir, const char *name, const struct image *img)
+{
+    char path[1024];
+    int n = snprintf(path, sizeof path, "%s/%s", dir, name);
+    if (n < 0 || (size_t)n >= sizeof path) return -1;
+    return image_save(path, img);
+}
+
 static tape_result run_operation(const char *op, struct dev_ctx *dst)
 {
     tape_dev dd;
@@ -473,6 +488,14 @@ static tape_result run_operation(const char *op, struct dev_ctx *dst)
         unsigned guard = 0u;
         if (load_source_image(&src, g_source) != 0) return TAPE_ERR_IO;
         sd.read = read_cb; sd.write = NULL; sd.flush = noop_flush; sd.ctx = &src; sd.block_count = BLOCK_COUNT;
+#ifdef S467_SOURCE_WRITE_MUTANT
+        sd.write = write_cb;        /* control build only: a source binding that can write */
+#endif
+        if (g_src_out != NULL) {
+            src.name = "source";
+            g_src_write_null = sd.write == NULL;
+            if (save_in(g_src_out, "source-before.img", &src.working) != 0) return TAPE_ERR_IO;
+        }
         mem = calloc(1u, need);
         play = calloc(1u, TAPE_PLAY_RING_MIN);
         rec = calloc(1u, TAPE_REC_RING_MIN);
@@ -490,6 +513,7 @@ static tape_result run_operation(const char *op, struct dev_ctx *dst)
             if (guard >= 10000u && r == TAPE_OK && more) r = TAPE_ERR_BUSY;
         }
         free(mem); free(play); free(rec);
+        if (g_src_out != NULL && save_in(g_src_out, "source-after.img", &src.working) != 0) return TAPE_ERR_IO;
         return r;
     }
     return TAPE_ERR_INVALID_ARG;
@@ -1392,6 +1416,46 @@ static int handle_subset(char **f)
     return 0;
 }
 
+/* Q shape dir (#467): one complete, unfaulted dup onto the shape, with every source
+   and destination callback logged; writes dir/events.jsonl and the images. */
+static int handle_source(const char *shape_name, const char *dir)
+{
+    static struct dev_ctx dst;
+    const struct fixture *shape = shape_by_name(shape_name);
+    char path[1024];
+    FILE *fp;
+    tape_result r;
+    unsigned i, nsrc = 0u, nsrc_w = 0u, ndst = 0u;
+    bool was = g_logging;
+    int n;
+    if (shape == NULL) return -1;
+    load_destination(&dst, shape);
+    dst.name = "destination";
+    if (save_in(dir, "destination-before.img", &dst.working) != 0) return -1;
+    g_evn = 0u;
+    g_logging = true;
+    g_src_out = dir;
+    r = run_operation("dup", &dst);
+    g_src_out = NULL;
+    g_logging = was;
+    if (save_in(dir, "destination-after.img", &dst.working) != 0) return -1;
+    n = snprintf(path, sizeof path, "%s/events.jsonl", dir);
+    if (n < 0 || (size_t)n >= sizeof path || (fp = fopen(path, "w")) == NULL) return -1;
+    for (i = 0u; i < g_evn; ++i) {
+        fprintf(fp, "{\"device\":\"%s\",\"op\":\"%c\",\"lba\":%u,\"count\":%u,\"rc\":%d}\n", g_ev[i].device,
+                g_ev[i].op, g_ev[i].lba, g_ev[i].count, g_ev[i].rc);
+        if (strcmp(g_ev[i].device, "source") == 0) { nsrc++; if (g_ev[i].op != 'r') nsrc_w++; }
+        else ndst++;
+    }
+    fclose(fp);
+    printf("{\"format\":\"S467-SOURCE-1\",\"shape\":\"%s\",\"operation_result\":\"%s\","
+           "\"source_write_callback_null\":%s,\"source_events\":%u,\"source_non_read_events\":%u,"
+           "\"destination_events\":%u,\"events_logged\":%u,\"events_capacity\":%u}\n",
+           shape_name, result_name(r), g_src_write_null ? "true" : "false", nsrc, nsrc_w, ndst, g_evn, MAX_EVENTS);
+    fflush(stdout);
+    return 0;
+}
+
 /* R image: the existing remount (side A, fresh instance and rings) on exactly these bytes. */
 static int handle_remount(const char *path)
 {
@@ -1469,6 +1533,10 @@ int main(int argc, char **argv)
                 if (f[n] == NULL) return 2;
             }
             if (handle_subset(f) != 0) return 2;
+        } else if (strcmp(cmd, "Q") == 0) {
+            char *shape = strtok_r(NULL, "\t\r\n", &save);
+            char *dir = strtok_r(NULL, "\t\r\n", &save);
+            if (shape == NULL || dir == NULL || handle_source(shape, dir) != 0) return 2;
         } else if (strcmp(cmd, "R") == 0) {
             char *path = strtok_r(NULL, "\t\r\n", &save);
             if (path == NULL || handle_remount(path) != 0) return 2;

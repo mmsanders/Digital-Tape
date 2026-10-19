@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   load:
-    name: host-load pilot faults and command rows (Linux, hosted)
+    name: host-load pilot faults, command rows and dup source/PCM rows (Linux, hosted)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -29,21 +29,27 @@ jobs:
         run: |
           set -eu
           python3 -B tests/wp10_narrow_supplement_r1/selftest.py
+          sudo apt-get -qq install -y libssl-dev >/dev/null
           make -s -C engine clean all
           make -s -C host
-          sha256sum build/host/tapectl build/host/tapectl-test
+          make -s -C tests/format_dup_identity_adapter clean all mutant
+          sha256sum build/host/tapectl build/host/tapectl-test tests/format_dup_identity_adapter/build/r29_format_dup_worker*
       - name: fetch and authenticate the retained inputs (Verification's own fetcher)
         run: |
           python3 -B tests/wp10_narrow_supplement_r1/fetch_inputs.py \
             --release https://github.com/mmsanders/digital-tape-verification/releases/download/package-210-f5bd194b8a8fc45431b9a1b28f84e2c73e121c9b \
             --out "$RUNNER_TEMP/retained"
-          cd "$RUNNER_TEMP/retained" && mkdir load0 && cd load0 && unzip -q ../retained-load0.zip
-      - name: run
+          cd "$RUNNER_TEMP/retained" && mkdir load0 small && (cd load0 && unzip -q ../retained-load0.zip) \
+            && (cd small && unzip -q ../retained-small.zip)
+      - name: run (Tier 2 host load, then Tier 1 duplication; one merged BUNDLE.json)
         run: |
           /usr/bin/time -v python3 -B tools/wp10-narrow/s467_load.py --retained "$RUNNER_TEMP/retained/load0" \
-            --out "$RUNNER_TEMP/b467" 2> "$RUNNER_TEMP/time.txt"
-          grep -E "User time|System time|Elapsed|Maximum resident" "$RUNNER_TEMP/time.txt"
-          cp "$RUNNER_TEMP/time.txt" "$RUNNER_TEMP/b467/TIME.txt"
+            --out "$RUNNER_TEMP/b467/load" 2> "$RUNNER_TEMP/time-load.txt"
+          /usr/bin/time -v python3 -B tools/wp10-narrow/s467_dup.py --retained-small "$RUNNER_TEMP/retained/small" \
+            --out "$RUNNER_TEMP/b467/dup" 2> "$RUNNER_TEMP/time-dup.txt"
+          grep -E "User time|System time|Elapsed|Maximum resident" "$RUNNER_TEMP"/time-*.txt
+          cp "$RUNNER_TEMP"/time-*.txt "$RUNNER_TEMP/b467/"
+          python3 -B tools/wp10-narrow/merge_bundles.py "$RUNNER_TEMP/b467" load dup
       - uses: actions/upload-artifact@v4
         if: always()
         with:
