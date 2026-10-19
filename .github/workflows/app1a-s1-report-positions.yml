@@ -1,0 +1,89 @@
+name: APP-1A S1 report-write positions (#466)
+
+# Software's own observations for Verification #209: S1 report-write failures at the
+# start, a middle and the end record, on a real full FAT volume (512-byte clusters),
+# against the UNCHANGED submitted S1 binary built from exact SOURCE (#454 head). DEST,
+# stage and sources live on the runner's normal disk. Hosted runners only; Windows is
+# Server (supplementary), never Windows 11. Raw observations; no verdict.
+on:
+  pull_request:
+    paths:
+      - 'tools/app1a/s1_report_positions.py'
+      - 'tools/app1a/judge_report_positions.py'
+      - 'tests/wp15_report_faults_r1/**'
+      - '.github/workflows/app1a-s1-report-positions.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SOURCE: b9f430c8c9b33532abf07eea0ed2653310639f2d
+
+jobs:
+  positions:
+    name: report positions — ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: tools-head
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE }}
+          path: src
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the shipping ingest from the exact submitted source
+        working-directory: src/host/ingest
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE"
+          rustc -vV; cargo build --release --locked
+          python -c "import hashlib,sys;print('ingest', hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" target/release/ingest$([ "$RUNNER_OS" = Windows ] && echo .exe)
+      - name: Small FAT volume, 512-byte clusters
+        run: |
+          case "$RUNNER_OS" in
+            Linux)
+              sudo apt-get install -y dosfstools strace >/dev/null
+              echo "TRACE=--strace" >> "$GITHUB_ENV"
+              truncate -s 4M "$RUNNER_TEMP/rpos.img"
+              mkfs.vfat -F 16 -s 1 -S 512 -n RPOS "$RUNNER_TEMP/rpos.img"
+              mkdir -p "$RUNNER_TEMP/rpos"
+              sudo mount -o loop,uid=$(id -u),gid=$(id -g) "$RUNNER_TEMP/rpos.img" "$RUNNER_TEMP/rpos"
+              echo "FS=$RUNNER_TEMP/rpos" >> "$GITHUB_ENV" ;;
+            macOS)
+              hdiutil create -size 4m -fs MS-DOS -fsargs "-c 1" -volname RPOS "$RUNNER_TEMP/rpos.dmg"
+              mkdir -p "$RUNNER_TEMP/rpos"
+              hdiutil attach "$RUNNER_TEMP/rpos.dmg" -mountpoint "$RUNNER_TEMP/rpos"
+              echo "FS=$RUNNER_TEMP/rpos" >> "$GITHUB_ENV" ;;
+            Windows)
+              v=$(cygpath -w "$RUNNER_TEMP/rpos.vhd")
+              printf 'create vdisk file="%s" maximum=16 type=fixed\nselect vdisk file="%s"\nattach vdisk\ncreate partition primary\nformat fs=fat quick unit=512 label=RPOS\nassign letter=R\n' "$v" "$v" > "$RUNNER_TEMP/dp.txt"
+              diskpart //s "$(cygpath -w "$RUNNER_TEMP/dp.txt")"
+              echo "FS=R:\\" >> "$GITHUB_ENV" ;;
+          esac
+      - name: Run
+        run: |
+          exe=; [ "$RUNNER_OS" = Windows ] && exe=.exe
+          python -B tools-head/tools/app1a/s1_report_positions.py --bin src/host/ingest/target/release/ingest$exe \
+            --fs "$FS" --work "$RUNNER_TEMP/rp-work" --out "$RUNNER_TEMP/rp-out" ${TRACE:-}
+      - name: Judge with the imported Verification #209 oracle (unchanged)
+        run: |
+          python -B tools-head/tests/wp15_report_faults_r1/selftest.py > /dev/null
+          python -B tools-head/tools/app1a/judge_report_positions.py "$RUNNER_TEMP/rp-out"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app1a-s1-report-positions-${{ runner.os }}
+          path: ${{ runner.temp }}/rp-out
+          retention-days: 90
