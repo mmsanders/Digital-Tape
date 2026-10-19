@@ -33,6 +33,9 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: check out bytes exactly as committed (the imported package pins its spec bytes)
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
