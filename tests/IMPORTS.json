@@ -531,6 +531,22 @@
         "-B",
         "tests/wp14_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp15_app1a_r1",
+      "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-15 APP-1A independent host report/parser and S4 package (Verification #196 against ADR-185, Product main 05315e2d, PM450 86e2f4c3; pins.json binds the issued contract/annex, WP14, INGEST-1 and WP-15). Corrected publication merged to Verification main as #200 at 0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6 (normal exact-head CI 39075021788 SUCCESS); corrected package tree bdd861b693516db2e5244660b3e99ee400d506de, routed by PM ADR-186 / #457. Imported byte-identically by Software #457 from that commit and cross-checked against the authenticated Product #452 transport (archive SHA-256 446e0cd961626646e35830e957f58d85db169e5e6e2977065adf9d3afdbf6c0d, original tree eb94f18ba4e47f7c7bc7e842d640d3542cfeaba6, plus the exact ingest_process.py replacement SHA-256 eaad6f08f466258f905fe021f2c68b43b8042fa4c505c72fa6ffea6c4cfefa39). The self-test is synthetic verifier checking and parser fixtures are synthetic, not child outcomes. Not Product, native, platform, real-card, full WP15/WP16 or package acceptance.",
+      "superseded_trees": [
+        "eb94f18ba4e47f7c7bc7e842d640d3542cfeaba6"
+      ],
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp15_app1a_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
@@ -637,6 +653,13 @@
         "revision": "DRAFT-10",
         "files": [
           "tapefs-v1.md",
+          "engine-api.md"
+        ]
+      },
+      {
+        "path": "tests/wp15_app1a_r1/spec",
+        "revision": "DRAFT-10",
+        "files": [
           "engine-api.md"
         ]
       }

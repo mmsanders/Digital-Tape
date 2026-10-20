@@ -57,6 +57,7 @@
 /tests/wp11_portability_r63/          @mmsanders
 /tests/wp11_ledgers_r63/              @mmsanders
 /tests/wp14_r1/                       @mmsanders
+/tests/wp15_app1a_r1/                 @mmsanders
 
 # The frozen spec bundle and its manifest.
 /spec/tapefs-v1.md     @mmsanders
