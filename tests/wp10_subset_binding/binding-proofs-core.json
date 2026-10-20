@@ -1,0 +1,75 @@
+{
+ "format": "WP10-SUBSET-BINDING-PROOFS-1",
+ "model_sha256": "aae52448dcffa3bf9c6d061f64b46fd8fe20bdf16b480b5cf26ffa372bd81fd8",
+ "proofs": [
+  {
+   "B_lba": 5129,
+   "a_lba": 5120,
+   "epoch_events": 10,
+   "image_sha256": "1624e64b73f827fd7b691fb3445e72dbb5019845363b9b18af5381f9a638522a",
+   "pass": true,
+   "proof": "P1 (a,B) in actual worker bytes"
+  },
+  {
+   "forward_image_sha256": "dda81ef799b3acce0fb5f94434f78eec7da01e190339bd973ac38af018ed3280",
+   "lba": 5120,
+   "pass": true,
+   "proof": "P2 reverse-order repeated-LBA: older version persists",
+   "reverse_image_sha256": "c604a4aad586b9dea54159de34b35e53e6dc20f04b9d8ee58427891571cba941"
+  },
+  {
+   "pass": true,
+   "proof": "P3 fresh second remount carries no state",
+   "x_result": "TAPE_OK",
+   "y_result": "TAPE_OK"
+  },
+  {
+   "coordinates": 5185,
+   "mismatches": [],
+   "pass": true,
+   "proof": "P4 all/none equal old write_through/flush_required"
+  },
+  {
+   "complete_epoch": 0,
+   "error_barriers": [
+    true,
+    false
+   ],
+   "error_epoch_ids": [
+    1
+   ],
+   "pass": true,
+   "proof": "P5 successful barrier ends the epoch; failed does not"
+  },
+  {
+   "dropped": [
+    2,
+    4
+   ],
+   "dropped_barriers": [
+    0
+   ],
+   "honest": [
+    0,
+    2
+   ],
+   "pass": true,
+   "proof": "P6 dropped barrier / early identity: index before its chunk turns the existing chunk predicate red"
+  },
+  {
+   "dropped_outside_old_new": [
+    0,
+    4
+   ],
+   "fp_old_new_differ": true,
+   "honest_outside_old_new": [
+    0,
+    2
+   ],
+   "pass": null,
+   "proof": "P7 observation: dropped in-slot barrier"
+  }
+ ],
+ "worker_exit": 0,
+ "worker_sha256": "7bff6ba7f86729ebca1715fc4a7965e3f2badc21bbecd0b203e0b0a89ade334c"
+}

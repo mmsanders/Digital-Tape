@@ -660,3 +660,173 @@ int rf_case(int target, uint32_t ordinal, int injection, uint32_t landed,
     }
     return 0;
 }
+
+/* ---- Any-subset transport (Product #440; tests/wp10_subset_r1/ADAPTER.md) ---------------
+ * rf_subset and rf_subset_remount only; rf_open/rf_case are unchanged. rf_subset mounts side
+ * B on the image at `path` and respools to completion or to the cut, transporting every
+ * callback: each 512-byte write unit (a multi-block call logs one unit per block, keeping
+ * its call number) and each barrier result goes to the trace, from mount on ("op" marks the
+ * respool calls). Persistence selection belongs to tests/wp10_subset_r1/model.py in the
+ * driver; this library keeps no durable image in this mode. A cut ends the device: the
+ * interrupted call and every later callback fail and log nothing more. */
+
+struct rf_sub_result {
+    int32_t mount_result;
+    int32_t op_result;
+    int32_t respool_calls;
+    int32_t cut_fired;
+    int32_t error_fired;
+    uint32_t units, calls, barriers;
+    uint32_t op_units, op_calls, op_barriers;
+};
+
+int rf_subset(const char *path, long cut_unit, long cut_flush, long err_call, long err_flush,
+              const char *trace_path, struct rf_sub_result *out);
+int rf_subset_remount(const char *path, struct rf_info *info, struct rf_snapshot *post,
+                      int32_t *remount_result, int32_t *remount_writes);
+
+static struct {
+    bool op, cut, err_fired;
+    FILE *trace;
+    unsigned long next_id, calls, flushes, op_units, op_calls, op_flushes;
+    long cut_unit, cut_flush, err_call, err_flush;
+} g_sub;
+
+static int sub_read(void *ctx, uint32_t lba, uint32_t count, void *dst)
+{
+    (void)ctx;
+    if (g_sub.cut) { return -1; }
+    return raw_read(g_trace_work, lba, count, dst);
+}
+
+static int sub_write(void *ctx, uint32_t lba, uint32_t count, const void *srcv)
+{
+    static const char d[] = "0123456789abcdef";
+    const unsigned char *src = srcv;
+    uint32_t i, n = count;
+    size_t k;
+    bool fail = false;
+    (void)ctx;
+    if (g_sub.cut) { return -1; }
+    if (src == NULL || count == 0u || (uint64_t)lba + count > g_blocks) { return -1; }
+    if (g_sub.op && g_sub.err_call >= 0 && g_sub.op_calls == (unsigned long)g_sub.err_call) {
+        fail = true;
+        g_sub.err_fired = true;
+    }
+    if (g_sub.op && g_sub.cut_unit >= 0 && g_sub.op_units + count > (unsigned long)g_sub.cut_unit) {
+        n = (uint32_t)((unsigned long)g_sub.cut_unit - g_sub.op_units);
+        g_sub.cut = true;
+    }
+    for (i = 0u; i < n; i++) {
+        const unsigned char *u = src + (size_t)i * RF_BLOCK;
+        bool ack = !fail && !g_sub.cut;
+        fprintf(g_sub.trace, "{\"t\":\"W\",\"id\":%lu,\"call\":%lu,\"lba\":%u,\"ack\":%s,\"phase\":\"%s\",\"hex\":\"",
+                g_sub.next_id++, g_sub.calls, lba + i, ack ? "true" : "false", g_sub.op ? "op" : "mount");
+        for (k = 0u; k < RF_BLOCK; k++) {
+            fputc(d[(u[k] >> 4) & 15u], g_sub.trace);
+            fputc(d[u[k] & 15u], g_sub.trace);
+        }
+        fputs("\"}\n", g_sub.trace);
+        if (ack) { memcpy(g_trace_work + (size_t)(lba + i) * RF_BLOCK, u, RF_BLOCK); }
+    }
+    if (g_sub.cut) {
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"unit\",\"op_unit\":%ld,\"call\":%lu,\"units_in_call\":%u}\n",
+                g_sub.cut_unit, g_sub.calls, n);
+    }
+    g_sub.calls++;
+    if (g_sub.op) {
+        g_sub.op_calls++;
+        g_sub.op_units += n;
+    }
+    return (fail || g_sub.cut) ? -1 : 0;
+}
+
+static int sub_flush(void *ctx)
+{
+    bool ok = true;
+    (void)ctx;
+    if (g_sub.cut) { return -1; }
+    if (g_sub.op && g_sub.cut_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.cut_flush) {
+        g_sub.cut = true;
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"flush_entry\",\"op_flush\":%ld}\n", g_sub.cut_flush);
+        return -1;
+    }
+    if (g_sub.op && g_sub.err_flush >= 0 && g_sub.op_flushes == (unsigned long)g_sub.err_flush) {
+        ok = false;
+        g_sub.err_fired = true;
+    }
+    fprintf(g_sub.trace, "{\"t\":\"F\",\"ord\":%lu,\"ok\":%s,\"phase\":\"%s\"}\n",
+            g_sub.flushes, ok ? "true" : "false", g_sub.op ? "op" : "mount");
+    g_sub.flushes++;
+    if (g_sub.op) { g_sub.op_flushes++; }
+    return ok ? 0 : -1;
+}
+
+int rf_subset(const char *path, long cut_unit, long cut_flush, long err_call, long err_flush,
+              const char *trace_path, struct rf_sub_result *out)
+{
+    tape *t = NULL;
+    tape_result rc;
+    bool more = false;
+    int calls = 0;
+
+    if (path == NULL || trace_path == NULL || out == NULL) { return -1; }
+    rf_close();
+    if (load_file(path) != 0) { rf_close(); return -2; }
+    memcpy(g_trace_work, g_initial, g_bytes);
+    memset(&g_sub, 0, sizeof g_sub);
+    memset(out, 0, sizeof *out);
+    g_sub.trace = fopen(trace_path, "w");
+    if (g_sub.trace == NULL) { rf_close(); return -3; }
+    g_sub.cut_unit = cut_unit;
+    g_sub.cut_flush = cut_flush;
+    g_sub.err_call = err_call;
+    g_sub.err_flush = err_flush;
+
+    rc = mount_with_callbacks(sub_read, sub_write, sub_flush, &t);
+    out->mount_result = (int32_t)rc;
+    out->op_result = -1;
+    if (rc == TAPE_OK) {
+        g_sub.op = true;
+        do {
+            more = false;
+            rc = tape_respool(t, 65535u, &more);
+            calls++;
+        } while (rc == TAPE_OK && more && calls <= 16);
+        g_sub.op = false;
+        out->op_result = (int32_t)rc;
+    }
+    fclose(g_sub.trace);
+    g_sub.trace = NULL;
+    out->respool_calls = calls;
+    out->cut_fired = g_sub.cut ? 1 : 0;
+    out->error_fired = g_sub.err_fired ? 1 : 0;
+    out->units = (uint32_t)g_sub.next_id;
+    out->calls = (uint32_t)g_sub.calls;
+    out->barriers = (uint32_t)g_sub.flushes;
+    out->op_units = (uint32_t)g_sub.op_units;
+    out->op_calls = (uint32_t)g_sub.op_calls;
+    out->op_barriers = (uint32_t)g_sub.op_flushes;
+    rf_close();
+    return 0;
+}
+
+/* The existing fresh remount (side B, fresh instance and rings, the virtual device that
+ * refuses to change the image) on exactly the bytes at `path`. */
+int rf_subset_remount(const char *path, struct rf_info *info, struct rf_snapshot *post,
+                      int32_t *remount_result, int32_t *remount_writes)
+{
+    if (path == NULL || info == NULL || post == NULL || remount_result == NULL || remount_writes == NULL) {
+        return -1;
+    }
+    rf_close();
+    if (load_file(path) != 0) { rf_close(); return -2; }
+    memcpy(g_prefix_durable, g_initial, g_bytes);
+    g_override = false;
+    memset(info, 0, sizeof *info);
+    *remount_result = (int32_t)fresh_remount(info);
+    *remount_writes = g_remount_writes;
+    snapshot_from_virtual(post);
+    rf_close();
+    return 0;
+}

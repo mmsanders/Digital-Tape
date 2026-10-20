@@ -105,6 +105,80 @@ static struct fixture g_shapes[7];
 static unsigned char g_source[SOURCE_BYTES];
 static unsigned char g_source_big[SOURCE_BYTES];
 
+/* ---- Any-subset transport (Product #440; tests/wp10_subset_r1/ADAPTER.md) ---------------
+ * Commands S and R only, destination device only. While g_sub.dst is set, every write
+ * unit (512 bytes; a multi-block call logs one unit per block, keeping its call number) and
+ * barrier result of that device is appended to the trace; the whole format/dup call is the
+ * operation. Persistence selection belongs to tests/wp10_subset_r1/model.py in the driver.
+ * A cut ends the device: the interrupted call and every later callback fail and log nothing
+ * more. B, C and K never set g_sub.dst and are unchanged. */
+static struct {
+    struct dev_ctx *dst;
+    bool cut, err_fired;
+    FILE *trace;
+    unsigned long next_id, calls, flushes;
+    long cut_unit, cut_flush, err_call, err_flush;
+} g_sub;
+
+static int set_block(struct image *img, uint32_t lba, const unsigned char *src);
+
+static int sub_write(struct dev_ctx *ctx, uint32_t lba, uint32_t count, const unsigned char *src)
+{
+    static const char d[] = "0123456789abcdef";
+    uint32_t i, n = count;
+    size_t k;
+    bool fail = false;
+    if (g_sub.cut) return -1;
+    if (src == NULL || count == 0u || (uint64_t)lba + count > BLOCK_COUNT) return -1;
+    if (g_sub.err_call >= 0 && g_sub.calls == (unsigned long)g_sub.err_call) {
+        fail = true;
+        g_sub.err_fired = true;
+    }
+    if (g_sub.cut_unit >= 0 && g_sub.next_id + count > (unsigned long)g_sub.cut_unit) {
+        n = (uint32_t)((unsigned long)g_sub.cut_unit - g_sub.next_id);
+        g_sub.cut = true;
+    }
+    for (i = 0u; i < n; i++) {
+        const unsigned char *u = src + (size_t)i * BLOCK;
+        bool ack = !fail && !g_sub.cut;
+        fprintf(g_sub.trace, "{\"t\":\"W\",\"id\":%lu,\"call\":%lu,\"lba\":%u,\"ack\":%s,\"phase\":\"op\",\"hex\":\"",
+                g_sub.next_id++, g_sub.calls, lba + i, ack ? "true" : "false");
+        for (k = 0u; k < BLOCK; k++) {
+            fputc(d[(u[k] >> 4) & 15u], g_sub.trace);
+            fputc(d[u[k] & 15u], g_sub.trace);
+        }
+        fputs("\"}\n", g_sub.trace);
+        if (ack && set_block(&ctx->working, lba + i, u) != 0) {
+            fprintf(stderr, "image capacity\n");
+            exit(3);
+        }
+    }
+    if (g_sub.cut) {
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"unit\",\"op_unit\":%ld,\"call\":%lu,\"units_in_call\":%u}\n",
+                g_sub.cut_unit, g_sub.calls, n);
+    }
+    g_sub.calls++;
+    return (fail || g_sub.cut) ? -1 : 0;
+}
+
+static int sub_flush(void)
+{
+    bool ok = true;
+    if (g_sub.cut) return -1;
+    if (g_sub.cut_flush >= 0 && g_sub.flushes == (unsigned long)g_sub.cut_flush) {
+        g_sub.cut = true;
+        fprintf(g_sub.trace, "{\"t\":\"CUT\",\"at\":\"flush_entry\",\"op_flush\":%ld}\n", g_sub.cut_flush);
+        return -1;
+    }
+    if (g_sub.err_flush >= 0 && g_sub.flushes == (unsigned long)g_sub.err_flush) {
+        ok = false;
+        g_sub.err_fired = true;
+    }
+    fprintf(g_sub.trace, "{\"t\":\"F\",\"ord\":%lu,\"ok\":%s,\"phase\":\"op\"}\n", g_sub.flushes, ok ? "true" : "false");
+    g_sub.flushes++;
+    return ok ? 0 : -1;
+}
+
 static const char *result_name(tape_result r)
 {
     switch (r) {
@@ -201,6 +275,7 @@ static int read_cb(void *v, uint32_t lba, uint32_t count, void *dst)
     struct dev_ctx *ctx = (struct dev_ctx *)v;
     unsigned char *out = (unsigned char *)dst;
     uint32_t i;
+    if (ctx == g_sub.dst && g_sub.cut) return -1;
     if (dst == NULL || count == 0u || (uint64_t)lba + count > BLOCK_COUNT) {
         log_event(ctx, 'r', lba, count, -1);
         return -1;
@@ -232,8 +307,10 @@ static int write_cb_raw(struct dev_ctx *ctx, uint32_t lba, uint32_t count, const
 static int write_cb(void *v, uint32_t lba, uint32_t count, const void *srcv)
 {
     struct dev_ctx *ctx = (struct dev_ctx *)v;
-    unsigned ord = ctx->writes_seen++;
+    unsigned ord;
     int rc;
+    if (ctx == g_sub.dst) return sub_write(ctx, lba, count, (const unsigned char *)srcv);
+    ord = ctx->writes_seen++;
     if (ctx->fail_write_ordinal >= 0 && ord == (unsigned)ctx->fail_write_ordinal) {
         log_event(ctx, 'w', lba, count, 5);
         return 5;
@@ -291,7 +368,9 @@ static int flush_cb_raw(struct dev_ctx *ctx);
 static int flush_cb(void *v)
 {
     struct dev_ctx *ctx = (struct dev_ctx *)v;
-    int rc = flush_cb_raw(ctx);
+    int rc;
+    if (ctx == g_sub.dst) return sub_flush();
+    rc = flush_cb_raw(ctx);
     log_event(ctx, 'f', 0u, 0u, rc);
     return rc;
 }
@@ -1244,6 +1323,98 @@ static int handle_contract(unsigned case_index, const char *family, const char *
     return 0;
 }
 
+/* ---- S and R: any-subset transport commands (Product #440) ------------------------------ */
+
+static long sub_arg(const char *s)
+{
+    return strcmp(s, "-") == 0 ? -1L : strtol(s, NULL, 10);
+}
+
+static int image_save(const char *path, const struct image *img)
+{
+    unsigned char b[BLOCK];
+    uint32_t lba;
+    FILE *f = fopen(path, "wb");
+    if (f == NULL) return -1;
+    for (lba = 0u; lba < BLOCK_COUNT; ++lba) {
+        get_block(img, lba, b);
+        if (fwrite(b, 1u, BLOCK, f) != BLOCK) { fclose(f); return -1; }
+    }
+    return fclose(f) == 0 ? 0 : -1;
+}
+
+static int image_load(const char *path, struct image *img)
+{
+    unsigned char b[BLOCK];
+    uint32_t lba;
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return -1;
+    memset(img, 0, sizeof *img);
+    for (lba = 0u; lba < BLOCK_COUNT; ++lba) {
+        if (fread(b, 1u, BLOCK, f) != BLOCK || set_block(img, lba, b) != 0) { fclose(f); return -1; }
+    }
+    if (fgetc(f) != EOF) { fclose(f); return -1; }
+    return fclose(f) == 0 ? 0 : -1;
+}
+
+/* S op shape base cut_unit cut_flush err_call err_flush trace initial_out
+ * base "-" is the shape's own destination; "@<path>" an image after actual recovery. */
+static int handle_subset(char **f)
+{
+    static struct dev_ctx dst;
+    const struct fixture *shape = shape_by_name(f[2]);
+    tape_result r;
+    if (shape == NULL) return -1;
+    load_destination(&dst, shape);
+    if (strcmp(f[3], "-") != 0) {
+        if (f[3][0] != '@' || image_load(f[3] + 1, &dst.working) != 0) return -1;
+        dst.durable = dst.working;
+    }
+    if (image_save(f[9], &dst.working) != 0) return -1;
+    memset(&g_sub, 0, sizeof g_sub);
+    g_sub.trace = fopen(f[8], "w");
+    if (g_sub.trace == NULL) return -1;
+    g_sub.cut_unit = sub_arg(f[4]);
+    g_sub.cut_flush = sub_arg(f[5]);
+    g_sub.err_call = sub_arg(f[6]);
+    g_sub.err_flush = sub_arg(f[7]);
+    g_sub.dst = &dst;
+    r = run_operation(f[1], &dst);
+    g_sub.dst = NULL;
+    fclose(g_sub.trace);
+    g_sub.trace = NULL;
+    printf("{\"format\":\"WP10-SUBSET-RUN-1\",\"op\":\"%s\",\"shape\":\"%s\",\"setup_ok\":true,"
+           "\"operation_result\":\"%s\",\"units\":%lu,\"calls\":%lu,\"barriers\":%lu,\"op_units\":%lu,"
+           "\"op_calls\":%lu,\"op_barriers\":%lu,\"cut_fired\":%s,\"error_fired\":%s}\n",
+           f[1], f[2], result_name(r), g_sub.next_id, g_sub.calls, g_sub.flushes, g_sub.next_id,
+           g_sub.calls, g_sub.flushes, g_sub.cut ? "true" : "false", g_sub.err_fired ? "true" : "false");
+    fflush(stdout);
+    return 0;
+}
+
+/* R image: the existing remount (side A, fresh instance and rings) on exactly these bytes. */
+static int handle_remount(const char *path)
+{
+    static struct image img;
+    tape_result r;
+    uint8_t uuid[16];
+    bool have_uuid = false;
+    if (image_load(path, &img) != 0) return -1;
+    r = remount_result(&img, uuid, &have_uuid);
+    printf("{\"format\":\"WP10-SUBSET-REMOUNT-1\",\"remount_side\":\"A\",\"actual_remount_result\":\"%s\"",
+           result_name(r));
+    if (have_uuid) {
+        printf(",\"actual_selected_uuid\":\"");
+        print_hex(uuid, 16u);
+        printf("\"");
+    }
+    printf(",\"image_snapshot\":");
+    print_snapshot(&img);
+    printf("}\n");
+    fflush(stdout);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     static const char *names[7] = {
@@ -1289,6 +1460,18 @@ int main(int argc, char **argv)
             if (handle_case((unsigned)strtoul(idx, NULL, 10), op, shape, mode, inj,
                             (unsigned)strtoul(ord, NULL, 10),
                             (unsigned)strtoul(land, NULL, 10)) != 0) return 2;
+        } else if (strcmp(cmd, "S") == 0) {
+            char *f[10];
+            unsigned n;
+            f[0] = cmd;
+            for (n = 1u; n < 10u; ++n) {
+                f[n] = strtok_r(NULL, "\t\r\n", &save);
+                if (f[n] == NULL) return 2;
+            }
+            if (handle_subset(f) != 0) return 2;
+        } else if (strcmp(cmd, "R") == 0) {
+            char *path = strtok_r(NULL, "\t\r\n", &save);
+            if (path == NULL || handle_remount(path) != 0) return 2;
         } else if (strcmp(cmd, "K") == 0) {
             char *idx = strtok_r(NULL, "\t\r\n", &save);
             char *family = strtok_r(NULL, "\t\r\n", &save);

@@ -1,0 +1,194 @@
+name: wp10 any-subset binding
+
+# Product #440 (tests/wp10_subset_r1/ADAPTER.md). The existing WP-10 workers and the host
+# load route transport actual callbacks; tests/wp10_subset_binding replays them into the
+# imported, unchanged model.py and remounts every planned projection. Raw observations only:
+# Verification judges every outcome. Not acceptance.
+#
+# Pull requests run the binding self-proofs and the complete campaign of every scenario
+# whose epochs are small. The two long chunk-copy epochs (core stage-clear respool and the
+# respool_full v3 passes, over 1000 units with no barrier) run only on dispatch, sharded,
+# on Verification #186's bounded unit-boundary plan (--unit-plan v186; every boundary would
+# be about 175 CPU-hours): SAMPLED unit coordinates, two distinct second-cut bases.
+on:
+  pull_request:
+    paths:
+      - 'tests/wp10_subset_binding/**'
+      - 'tests/wp10_subset_r1/**'
+      - 'tests/crash_core_adapter/**'
+      - 'tests/promote_adapter/**'
+      - 'tests/respool_full_adapter/**'
+      - 'tests/format_dup_identity_adapter/**'
+      - 'host/**'
+      - 'engine/**'
+      - '.github/workflows/wp10-subset.yml'
+  workflow_dispatch:
+    inputs:
+      heavy_shards:
+        description: shards for the long-epoch respool campaigns (0 = skip)
+        default: '0'
+      v186_fill:
+        description: run only the coordinates Verification #186 V186-02 found missing (operation-relative plan)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  small:
+    name: binding proofs and small-epoch campaigns
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: build engine, workers and tapectl-test
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          python3 -B tests/wp10_subset_r1/selftest.py | tail -2
+          make -s -C engine clean all
+          for d in crash_core_adapter promote_adapter respool_full_adapter format_dup_identity_adapter; do
+            make -s -C tests/$d clean all
+          done
+          make -s -C host
+      - name: binding self-proofs (core worker)
+        run: python3 -B tests/wp10_subset_binding/selftest_core.py "$RUNNER_TEMP/binding-proofs-core.json"
+      - name: core campaign (record/commit, reset-b, stage-clear arm and reset-b closures)
+        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core" --exclude stage_clear/respool --jobs 4
+      - name: promote campaign
+        run: python3 -B tests/wp10_subset_binding/run_promote.py --evidence "$RUNNER_TEMP/ev/promote" --jobs 4
+      - name: format/dup campaign
+        run: python3 -B tests/wp10_subset_binding/run_dup.py --evidence "$RUNNER_TEMP/ev/dup" --jobs 4
+      - name: respool_full decline (no lower run)
+        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-decline" --only no_lower_run --jobs 4
+      - name: retained evidence index
+        if: always()
+        run: |
+          cp "$RUNNER_TEMP/binding-proofs-core.json" "$RUNNER_TEMP/ev/" 2>/dev/null || true
+          # SHA256SUMS lists every OTHER file: it is written outside the tree and moved in
+          # last, so it never lists itself (Verification #186: its self-entry was the empty digest)
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-small
+          path: ${{ runner.temp }}/ev
+          if-no-files-found: error
+          retention-days: 90
+
+  # The host load campaign runs in its own sharded job: since V186-01 each remount runs
+  # verify, dump A and dump B on three fresh copies of a 32 MiB projection, each hashed before
+  # and after, which no longer fits beside everything else in one job.
+  load:
+    name: host load campaign (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: build engine and tapectl-test
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          make -s -C engine clean all
+          make -s -C host
+      - name: host load campaign
+        run: python3 -B tests/wp10_subset_binding/run_load.py --evidence "$RUNNER_TEMP/ev/load" --shard ${{ matrix.shard }}/4 --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-load-${{ matrix.shard }}
+          path: ${{ runner.temp }}/ev
+          if-no-files-found: error
+          retention-days: 90
+
+  # V186-02: the bounded plan now numbers only phase=op records. This fills exactly the
+  # coordinates it adds to the earlier all-records plan (recomputing the second-cut bases)
+  # and records the removed ones; the earlier authenticated heavy evidence is reused.
+  v186-fill:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.v186_fill }}
+    name: V186-02 operation-relative fill (core stage-clear respool, respool_full v3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          make -s -C engine clean all
+          make -s -C tests/crash_core_adapter clean all
+          make -s -C tests/respool_full_adapter clean all
+      - name: core stage-clear respool fill
+        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core-respool-fill" --only stage_clear/respool --unit-plan v186 --second-cut 2 --fill-v186-02 --jobs 4
+      - name: respool_full v3 fill
+        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-v3-fill" --only v3_003 --unit-plan v186 --second-cut 2 --fill-v186-02 --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-v186-fill
+          path: ${{ runner.temp }}/ev
+          if-no-files-found: error
+          retention-days: 90
+
+  heavy-plan:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.heavy_shards != '0' }}
+    runs-on: ubuntu-latest
+    outputs:
+      shards: ${{ steps.p.outputs.shards }}
+    steps:
+      - id: p
+        run: echo "shards=$(python3 -c "import json;print(json.dumps(list(range(int('${{ inputs.heavy_shards }}')))))")" >> "$GITHUB_OUTPUT"
+
+  heavy:
+    needs: heavy-plan
+    name: long-epoch respool campaigns (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.heavy-plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: |
+          set -eu
+          sudo apt-get -qq install -y libssl-dev >/dev/null
+          make -s -C engine clean all
+          make -s -C tests/crash_core_adapter clean all
+          make -s -C tests/respool_full_adapter clean all
+      - name: core stage-clear respool
+        run: python3 -B tests/wp10_subset_binding/run_core.py --evidence "$RUNNER_TEMP/ev/core-respool" --only stage_clear/respool --unit-plan v186 --second-cut 2 --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
+      - name: respool_full v3 passes
+        run: python3 -B tests/wp10_subset_binding/run_respool.py --evidence "$RUNNER_TEMP/ev/respool-v3" --only v3_003 --unit-plan v186 --second-cut 2 --shard ${{ matrix.shard }}/${{ inputs.heavy_shards }} --jobs 4
+      - name: evidence index (SHA256SUMS excludes itself)
+        if: always()
+        run: |
+          (cd "$RUNNER_TEMP/ev" && find . -type f ! -path ./SHA256SUMS | sort | xargs sha256sum > "$RUNNER_TEMP/SHA256SUMS" \
+            && mv "$RUNNER_TEMP/SHA256SUMS" SHA256SUMS && sha256sum -c --quiet SHA256SUMS && du -sh .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp10-subset-heavy-${{ matrix.shard }}
+          path: ${{ runner.temp }}/ev
+          retention-days: 90
