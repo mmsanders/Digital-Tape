@@ -1,6 +1,6 @@
 # Project status
 
-**20 October2026 PDT · input main `d5ae04d` · Owner: local PM (PM487; ADR-189/190 holds retained) ·**
+**20 October2026 PDT · input main `b8fa545` · Owner: local PM (PM490; ADR-189/190 holds retained) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification231 independently clears standalone S2/469 for current-main Software integration.230 PASSes Windows11 byte/native predicates; 233 publishes exact-artifact resource method, actual485 return pending; visibility gaps remain.229 returns A6 linkage blocker;476 closed at bounded stop, A6 HELD. No Michael task. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) records the five candidates and exact holds.
+WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. S2/469 integrated10faee5 with accepted identities/current-base CI;234 PASSes exact downloaded Windows11 shipping resource rows. Global S1/native/visibility/Mac holds remain; A6 linkage remains HELD. No Michael task. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) records four held candidates and completed S2.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — | S2/469 independently cleared231, current-main integration pending.230 accepts Windows11 observed carry/native CSV;459 full/native/exact-shipping gaps remain. S1/454,S4/455,subset443 held; no rung gain | Software484 S2 integration first;485 consumes233 exact-artifact method, actual return pending;232 Stage2 independent disposition. Closed480 map carries. No Michael task |
+| Phase 2 / host tools | — | S2 integrated10faee5; exact downloaded d923 Windows11 resource PASS234.459 visibility/Mac/full holds, S1 global proofs, S4/fullAPP and443 remain held; no rung gain | Verification235 authors off-card observer controls before Software491 single bounded run/direct disposition.484/485/232 complete. No Michael task |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held on native A6; Windows229 reproduced old FAIL and found unproved request/offset-space linkage; zero exclusions | PM capability hold; new sufficient native bridge/evidence required before fresh scope. Mac stop remains; no new physical request |
 | Q-P2-1 copy call shape (#379) | — | Verification216 bounded source/PCM/seven-pilot/command PASS at937dee3. Stage3 exact55552ad bounded review complete, published218/99df7f8;39/404 faults executed,365 deferred,6 absent cuts/no repeated-LBA; subset443 overall HELD | Verification publishes bounded plan before new scenario execution;2CPU-hour/2GiB new compressed-artifact cap. PM ruling(b) before firmware; no batching/write/async permission |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |

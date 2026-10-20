@@ -8,7 +8,7 @@ The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digita
 ## Queue state (20 October 2026 PDT)
 
 Completed return: **[Michael473: received-return locator](https://github.com/mmsanders/Digital-Tape/issues/473)**.
-Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 returned the physical linkage blocker and226 published bounded INGEST acceptance/gaps; both review envelopes are complete. Software484/485 and Verification232 carry the next technical work. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
+Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 returned the physical linkage blocker and226 published bounded INGEST acceptance/gaps; both review envelopes are complete. S2 integration and exact-shipping evidence are complete; Software491 and Verification235 carry the next off-card observer method work. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
 No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
 Michael473 is closed with both returns received. No active hands-on request remains; technical follow-up is with the leads.
 
