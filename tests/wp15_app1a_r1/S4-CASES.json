@@ -1,0 +1,22 @@
+[
+ {"id":"S4-EMPTY","action":"Fresh actual launch","expect":"one window; Empty; no label prefill; length0; Make disabled; no lists; only ingest/cards children may start unelevated"},
+ {"id":"S4-DROP-ATOMIC","action":"Real UI drop of file and mixed file/folder gesture","expect":"DROP_NOT_FOLDER; no additions and zero child calls for gesture; correct folders-only sentence"},
+ {"id":"S4-DROP-ORDER","action":"Drop two valid folders, then another gesture","expect":"ordered FOLDER argv in OS gesture/drop order; --length3600; app-owned private DEST/control dirs; check all accumulated folders"},
+ {"id":"S4-DEDUP","action":"Drop same known nonsymlink filesystem identity under two spellings","expect":"keep first order; if unchanged zero new ingest calls; symlink/unknown identities not silently discarded; underlying ingest duplicate remains authoritative"},
+ {"id":"S4-LABEL","action":"Type empty,31/32/33 ASCII bytes,16/17 two-byte scalars,8/9 four-byte scalars","expect":"1..32 UTF8-byte label guard; overflow addition rejected visibly without silent truncation; no prefill"},
+ {"id":"S4-CARDS","action":"Return actual cards observations with0/1/2 candidates and unprobed facts","expect":"one aggregate line; no picker/list/refused names; decimal capacity rounded; unknown never enables Make; polls2s when idle"},
+ {"id":"S4-READY","action":"Valid pair plus label plus exactly one current candidate","expect":"Ready; Make enabled iff all three true; manifest total_frames drives length; optional progress cannot supply readiness"},
+ {"id":"S4-STALE","action":"Rapid successive drops, delayed old check result, old nonce/version and old pair","expect":"old result cannot enable Make/change current bar; replaced DEST/control safely removed only if owned"},
+ {"id":"S4-OVERAGE","action":"Real overage and parser fixtures with1 and8467200 excess frames including folder gaps","expect":"full too-long bar; ceil seconds1 and3min12; no progress estimate; raw stderr changes do not change message"},
+ {"id":"S4-MAKING","action":"Enter Making while checking music","expect":"single nonregressing progress bar/current step; no lists; no false100percent success; sparse/absent progress valid"},
+ {"id":"S4-CANCEL","action":"Actual cancel before erase confirmation and after make start","expect":"only before destructive phase allowed; no auto retry, resume or extra child; after start no Cancel"},
+ {"id":"S4-DONE-PROBLEM","action":"Actual child success with pair, failure, crashed process, malformed/absent report","expect":"Done only actual successful child plus required pair; Problem fallback from actual exit; no report can create success"},
+ {"id":"S4-MESSAGES","action":"Drive actual closed child IDs and separate real app-origin OS/UI events","expect":"APP1/APP1A exact default copy or Michael-authorized text; NAME basename/folder only; no full path; WAV_TRUNCATED says music changed; exit3 does not claim unchanged card; join failures generic"},
+ {"id":"S4-DETAILS","action":"Actual stderr with misleading ID words and make diagnostic records","expect":"copyable details preserve order; free text/diagnostic records never select outcome"},
+ {"id":"S4-OWNERSHIP","action":"Substitute stale-temp marker/parent/leaf with foreign symlink or native reparse point","expect":"never delete or write foreign target; only own marked identity; no source-adjacent/card control storage"},
+ {"id":"S4-SPAWN","action":"Missing executable and actual launch refusal","expect":"SPAWN_FAILED actual OS event, zero child-created reports/outcomes; no fabricated shipping outcome switch"},
+ {"id":"S4-PINS","action":"Replace bundled child bytes","expect":"launch blocked/binding failure; exact child hashes/version/argv and report nonce tied to actual process; accepted AP4 base dependency still held"},
+ {"id":"S4-CLOSE","action":"Window-close during Making and forced termination/relaunch","expect":"wait sentence/refused ordinary close; forced stop never auto resumes; only own marked stale dirs cleaned"},
+ {"id":"G1-STATIC","action":"Run static_controls.py on actual Software gate","expect":"baseline/ordinary-file open clean; app-process device read/alias/partition write source mutations red; child spawn remains allowed; no engine/layout knowledge"},
+ {"id":"LATER-S2-S3","action":"Not part of issued S1/S4 build","expect":"do not fabricate cards/make/elevation readiness; exact elevated safety, actual one-session continuity and G1 native controls remain later platform witnesses"}
+]

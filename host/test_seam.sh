@@ -15,10 +15,10 @@ TEST=$2
 seam_free() {
   local found=0
   local s
-  for s in tapectl_test_facts_seam tseam_begin tseam_flush tseam_fault_noop_flush tseam_fault_read tseam_fault_nonnull_binding; do
+  for s in tapectl_test_facts_seam tapectl_test_cards_seam tapectl_test_cards_vector tapectl_test_disc_fault tseam_begin tseam_flush tseam_fault_noop_flush tseam_fault_read tseam_fault_nonnull_binding; do
     if nm "$1" 2>/dev/null | grep -q "$s"; then echo "    symbol $s"; found=1; fi
   done
-  for s in TAPECTL_TEST_FACTS TAPECTL_TEST_TRACE TAPECTL_TEST_FAULT noop-flush hidden-flush-error nonnull-binding read-error:; do
+  for s in TAPECTL_TEST_FACTS TAPECTL_TEST_CARDS TAPECTL_TEST_CARDS_VECTOR TAPECTL_TEST_DISC_FAULT TAPECTL_TEST_TRACE TAPECTL_TEST_FAULT noop-flush hidden-flush-error nonnull-binding read-error:; do
     if LC_ALL=C grep -a -q -- "$s" "$1"; then echo "    string $s"; found=1; fi
   done
   return $found
