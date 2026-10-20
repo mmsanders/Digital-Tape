@@ -1,6 +1,6 @@
 # Project status
 
-**19 October2026 PDT · input main `d09e5ba` · Owner: PM (ADR-190; closeout ledger / PM477) ·**
+**20 October2026 PDT · input main `6130c8f` · Owner: local PM (PM479; ADR-190 holds retained) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification221 physical return received; Windows A6 method review223, no new capture. INGEST paused on222 policy facts; Michael473 current brief. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) retires completed evidence reviews; corrected459 supersedes faulty436. Five implementation candidates retain exact acceptance gaps.
+WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification221 physical return received; Windows A6 method review223, no new capture. INGEST225 received/receipt verified; independent226 disposition pending. Michael473 has no hands-on task. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) retires completed evidence reviews; corrected459 supersedes faulty436. Five implementation candidates retain exact acceptance gaps.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — | Completed evidence453/463/470 retired; defective436 superseded. Corrected459, S1/454, S4/455, S2/469 and subset443 are the five remaining candidates. Full/native criteria separate; no rung gain from closure | Verification208 final S2 disposition; Michael473 policy facts for paused INGEST, no new card run; independent223 retained A6 review |
+| Phase 2 / host tools | — | Completed evidence453/463/470 retired; defective436 superseded. Corrected459, S1/454, S4/455, S2/469 and subset443 are the five remaining candidates. Full/native criteria separate; no rung gain from closure | Verification208 final S2;223 retained A6;226 retained INGEST disposition. Temporary Software480 integration/dependency map;473 no human task |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on native A6; Windows221 capture proves full final-sector reads, old checker blocked by distinct-disk post-exit records | Verification223 retained-evidence method; Mac capability stop remains, no new physical request |
 | Q-P2-1 copy call shape (#379) | — | Verification216 bounded source/PCM/seven-pilot/command PASS at937dee3. Stage3 exact55552ad bounded review complete, published218/99df7f8;39/404 faults executed,365 deferred,6 absent cuts/no repeated-LBA; subset443 overall HELD | Verification publishes bounded plan before new scenario execution;2CPU-hour/2GiB new compressed-artifact cap. PM ruling(b) before firmware; no batching/write/async permission |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |
