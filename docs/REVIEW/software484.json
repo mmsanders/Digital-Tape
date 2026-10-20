@@ -55,6 +55,12 @@
     }
   ],
   "conflicts": "none",
-  "scope": "Bounded standalone S2 host only; CI and protected merge still required",
-  "excluded": "S3/native/readers/security/full APP/G2 and all other candidates"
+  "scope": "Integrated standalone S2 host under Verification231 identity carry; all seven current-base protected checks passed",
+  "excluded": "S3/native/readers/security/full APP/G2 and all other candidates",
+  "integrated_main": "10faee593fa103fd498bbe71af375bc097a481a6",
+  "required_ci_runs": [
+    "39488175192",
+    "39488175195",
+    "39488175409"
+  ]
 }

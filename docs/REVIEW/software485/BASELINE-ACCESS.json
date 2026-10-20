@@ -1,0 +1,12 @@
+{
+  "status": "UNAVAILABLE fresh original RED: authenticated fallback contains no exact original executable; capability stop, no retry or substitute",
+  "command": "python -B method/tests/wp16_shipping_exhaustion_r1/fetch_small_baseline.py (cwd isolated inputs)",
+  "archive_url": "https://github.com/mmsanders/Digital-Tape/releases/download/win11-small-packet/packet-small.zip",
+  "archive_bytes": 205544229,
+  "archive_sha256": "9b44ebeb71e61978414791d8edbd5b9af1882696008bfd1a9b6baaae869b27c2",
+  "error": "AssertionError: Public transport lacks exact original executable: capability stop",
+  "executable_members": [],
+  "actual_baseline_executed": false,
+  "retained_prior_red": "Verification main4a1a09a0 findings/P2-201-EXHAUSTION-2026-10-18",
+  "original_packet_not_republished": true
+}

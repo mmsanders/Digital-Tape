@@ -1,0 +1,31 @@
+{
+  "artifact": "software485-exact-shipping-return.zip",
+  "bytes": 5721822,
+  "sha256": "36c12a30ab735628b248395b9e492daee638db6bc1332a2f5c00be3c6f8e2118",
+  "release_tag": "evidence-software485-2026-10-20",
+  "url": "https://github.com/mmsanders/Digital-Tape/releases/download/evidence-software485-2026-10-20/software485-exact-shipping-return.zip",
+  "actual_execution": "Local Windows11 Client build26200.9457, AMD64, Python3.12.14; no GitHub job execution claimed",
+  "producer_import_commit": "c75653be55fe15be80e6d0be551a67d402b3ea6a",
+  "candidate": "50bc4160f6da527da8c684d05264f99815aaa870",
+  "binary_sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+  "observed": {
+    "rows": 7,
+    "load_controls_exit0": 7,
+    "clean_exit1_mib": [
+      3,
+      4,
+      6
+    ],
+    "success_mib": [
+      8,
+      12,
+      64,
+      null
+    ],
+    "original_red_fresh": "UNAVAILABLE",
+    "internal_global": "UNPROVED",
+    "joined_peak_global": "UNPROVED"
+  },
+  "new_artifact_budget": "This single new compressed return; original authenticated fallback download is retained locally, not republished; no crash/audio/native campaign",
+  "no_independent_acceptance": true
+}

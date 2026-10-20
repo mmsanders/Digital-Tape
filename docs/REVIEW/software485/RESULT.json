@@ -1,0 +1,330 @@
+{
+  "scope": "actual shipping executable, full application path; Windows Server supplementary only",
+  "binary_sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+  "source_sha256": "d36663d1e4f05abaac699a6c14e0fa86724db9b4decdb8c96abe0c9d1f645821",
+  "platform": "win32",
+  "mode": "candidate",
+  "rows": [
+    {
+      "limit_mib": null,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.09399999980814755,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": null,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.5779999999795109,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": null,
+        "stdout_sha256": "3e4ed27951f298e4dea026719d8a54608e26f8ae75544e660e1eaa04e1a6944d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest: wrote C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST (1 sources in 1 folders, 00:02 of 01:00); peak-limited 0, unmeasurable 0, gapless-unknown 0\n",
+        "stderr": ""
+      },
+      "dest_exists": true,
+      "pair": {
+        "audio.wav": "0287c26be49425d0ff854017f1b19e6639e2dd3bb80ac88acc0e8a8f74b3350f",
+        "manifest.json": "b93855b727612bf02db3126572e778e92114839dfc799b7582662eacd19ae634"
+      },
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 3,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.015999999828636646,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 3,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 1,
+        "exit_hex": "0x00000001",
+        "timed_out": false,
+        "seconds": 0.01600000006146729,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 3,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "adeb1c396663fe59d171796f1ecc5c1d53bdc1bbd089184b96a5e64b58102d0f",
+        "stdout": "",
+        "stderr": "ingest: error: out of memory (needed 1411244 elements); nothing was written\n"
+      },
+      "dest_exists": false,
+      "pair": null,
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 4,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.0,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 4,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 1,
+        "exit_hex": "0x00000001",
+        "timed_out": false,
+        "seconds": 0.0,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 4,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "3a3215041567df74dd81070d6dd61c8168848c5cd9957725166e3203a3565bcb",
+        "stdout": "",
+        "stderr": "ingest: error: 0/ordinary.wav: out of memory (needed 88200 elements); nothing was written\n"
+      },
+      "dest_exists": false,
+      "pair": null,
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 6,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.014999999897554517,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 6,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 1,
+        "exit_hex": "0x00000001",
+        "timed_out": false,
+        "seconds": 0.375,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 6,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "3a3215041567df74dd81070d6dd61c8168848c5cd9957725166e3203a3565bcb",
+        "stdout": "",
+        "stderr": "ingest: error: 0/ordinary.wav: out of memory (needed 88200 elements); nothing was written\n"
+      },
+      "dest_exists": false,
+      "pair": null,
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 8,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.01500000013038516,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 8,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.578999999910593,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 8,
+        "stdout_sha256": "3e4ed27951f298e4dea026719d8a54608e26f8ae75544e660e1eaa04e1a6944d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest: wrote C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST (1 sources in 1 folders, 00:02 of 01:00); peak-limited 0, unmeasurable 0, gapless-unknown 0\n",
+        "stderr": ""
+      },
+      "dest_exists": true,
+      "pair": {
+        "audio.wav": "0287c26be49425d0ff854017f1b19e6639e2dd3bb80ac88acc0e8a8f74b3350f",
+        "manifest.json": "b93855b727612bf02db3126572e778e92114839dfc799b7582662eacd19ae634"
+      },
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 12,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.014999999897554517,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 12,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.5620000001508743,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 12,
+        "stdout_sha256": "3e4ed27951f298e4dea026719d8a54608e26f8ae75544e660e1eaa04e1a6944d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest: wrote C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST (1 sources in 1 folders, 00:02 of 01:00); peak-limited 0, unmeasurable 0, gapless-unknown 0\n",
+        "stderr": ""
+      },
+      "dest_exists": true,
+      "pair": {
+        "audio.wav": "0287c26be49425d0ff854017f1b19e6639e2dd3bb80ac88acc0e8a8f74b3350f",
+        "manifest.json": "b93855b727612bf02db3126572e778e92114839dfc799b7582662eacd19ae634"
+      },
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    },
+    {
+      "limit_mib": 64,
+      "load": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.01600000006146729,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--version"
+        ],
+        "limit_mib": 64,
+        "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+        "stderr": ""
+      },
+      "case": {
+        "exit": 0,
+        "exit_hex": "0x00000000",
+        "timed_out": false,
+        "seconds": 0.5779999999795109,
+        "method": "Windows Job PROCESS_MEMORY, suspended assignment",
+        "argv": [
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\inputs\\ingest.exe",
+          "--out",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST",
+          "--length",
+          "60",
+          "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\f0"
+        ],
+        "limit_mib": 64,
+        "stdout_sha256": "3e4ed27951f298e4dea026719d8a54608e26f8ae75544e660e1eaa04e1a6944d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout": "ingest: wrote C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\sw485-work\\candidate-result\\output\\DEST (1 sources in 1 folders, 00:02 of 01:00); peak-limited 0, unmeasurable 0, gapless-unknown 0\n",
+        "stderr": ""
+      },
+      "dest_exists": true,
+      "pair": {
+        "audio.wav": "0287c26be49425d0ff854017f1b19e6639e2dd3bb80ac88acc0e8a8f74b3350f",
+        "manifest.json": "b93855b727612bf02db3126572e778e92114839dfc799b7582662eacd19ae634"
+      },
+      "unexpected_entries": [],
+      "foreign_unchanged": true,
+      "violations": []
+    }
+  ],
+  "contract_pass": true
+}

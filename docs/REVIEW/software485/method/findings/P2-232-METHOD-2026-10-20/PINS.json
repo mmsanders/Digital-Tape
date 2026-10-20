@@ -1,0 +1,10 @@
+{
+  "verification_input": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+  "existing_judge_tree": "e8f4a02ef8b831cd31fbe26807d59e08ac2d46b8",
+  "product_assignment_input": "c617b0c012552869e2dd359e70204ae28909bed3",
+  "product_activation_main": "d5ae04d44c60a6371e3adb7c8f292bfe528e8968",
+  "authority": "PM483 / Verification232 / Product485",
+  "runtime": "Python 3.12 standard library; Windows ctypes/winreg for execution; no third-party dependencies",
+  "contract_sha256": "9990b84f20818744d731e0f334aa7d77928690dd426f0cbbc6aa2fb2daf638d1",
+  "transport": "Fetch these files at the authoring commit on Verification main; validate SHA256SUMS; fetch original judge files at verification_input and check external.py DEPS. Final PR return supplies author/merge commit and tree SHA."
+}

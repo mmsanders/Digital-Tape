@@ -1,0 +1,27 @@
+{
+  "identity": {
+    "kit_sha256": "ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865",
+    "binary_sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+    "source_sha256": "d36663d1e4f05abaac699a6c14e0fa86724db9b4decdb8c96abe0c9d1f645821",
+    "kit_member": "ingest.exe",
+    "dependencies": {
+      "runner.py": "f8bb18aaf35ed13ff4acb74591d74f83874c8267f4e4a133db795db2606161b0",
+      "windows_job.py": "76ca60dd088bbf27c9b5a035d4572cdb24c37485bc96068b08e0ef84605b16ad",
+      "selftest.py": "050a5d812a2b253483870b28b606fe310c8d5d569477651d58508305075ada42"
+    }
+  },
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "windows": {
+      "ProductName": "Windows 10 Home",
+      "EditionID": "Core",
+      "CurrentBuildNumber": "26200",
+      "UBR": 9457,
+      "InstallationType": "Client"
+    }
+  },
+  "adapter_sha256": "1dd183796ec55843c1996a32a71e66f2d903c5b8ecc86f32a7ebf11cf54969a8",
+  "scope": "actual executable and recorded host/input/seven caps only"
+}

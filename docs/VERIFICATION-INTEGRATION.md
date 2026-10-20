@@ -15,7 +15,7 @@ readiness are separate from overall acceptance and integration permission.
 |215 46c66e049a422ebfcf8a48271aeac310d0983391|S3 Windows/Mac proposed binding unavailable/withdrawn; separate bound report-file capability useful. Linux loop limits explicit. No platform S3 acceptance.|
 |216 937dee3c3e98a9e04cb08d1166423104d7c62ece|Exact743f829 bounded source/PCM/seven-pilot/five-command PASS;397 host faults unexecuted at that boundary. Fixed Stage3 plan published, no overall443 clearance.|
 |217 c5e28b80a0e505a295fa71daaef7a6d2c6f411c6|Exact0918e7d failed/incomplete-query controls improved; whole-stack ENOENT exception still blocks overall S2. Final third correction1ad813d under208 review.|
-|231 4a1a09a0e618bba4685312da8721275e9b2ce9c3|Supersedes227's unrelated base hold: exact469/1ad813d has bounded overall standalone S2 host PASS. Software484 carries unchanged source/tests onto current main for required PR CI and integration; native/readers/security/S3/fullAPP/G2 exclusions survive. See REVIEW/software484.json for identity comparison.|
+|231 4a1a09a0e618bba4685312da8721275e9b2ce9c3|Bounded overall standalone S2 host PASS integrated by Software484/PR469 at10faee593fa103fd498bbe71af375bc097a481a6. Accepted1ad813d source/engine/test/tool/workflow trees unchanged; current-base CI39488175192/195/409 and all7 protected checks PASS. Native/readers/security/S3/fullAPP/G2 exclusions survive; REVIEW/software484.json records identity/receipt.|
 
 Verification218 is published at **99df7f8c67627c13b33d0d55b5ba74ae2d43d699**
 (normal CI39333286727 SUCCESS). PM backstop carried current main mechanically;
