@@ -12,7 +12,7 @@ function Assert-Ancestor([string]$repo, [string]$ancestor, [string]$descendant) 
     if ($LASTEXITCODE -ne 0) { throw "Not an ancestor: $ancestor -> $descendant" }
 }
 $main = '5c17314af51ac22e8729d474f2a4d2edd756daef'
-$vmain = '32c6f245eaced5db063e80faf172090b2e7825f1'
+$vmain = '929c02f35aed6bad05d708d33ebff0cfb35ccc37'
 $heads = [ordered]@{
     '443' = '85b7c3fd0b123ae7e5d54cb9f7bb424fbc613542'
     '454' = 'b9f430c8c9b33532abf07eea0ed2653310639f2d'
@@ -55,7 +55,8 @@ $publications = foreach ($commit in @(
     '9997bc1c388796283dc138d8bf6e6200e02cc390',
     'e1f4bd72f2a6be75cfd8ebe8edb93ed534cfca1e',
     '937dee3', '99df7f8c67627c13b33d0d55b5ba74ae2d43d699',
-    'c5e28b80a0e505a295fa71daaef7a6d2c6f411c6', $vmain
+    'c5e28b80a0e505a295fa71daaef7a6d2c6f411c6',
+    '32c6f245eaced5db063e80faf172090b2e7825f1', $vmain
 )) {
     $full = Read-Git $verification @('rev-parse', $commit)
     Assert-Ancestor $verification $full $vmain
@@ -78,4 +79,4 @@ $result = [ordered]@{
 }
 $json = $result | ConvertTo-Json -Depth 12
 [IO.File]::WriteAllText((Join-Path $PSScriptRoot 'authentication.json'), $json + "`n")
-Write-Output 'PASS: five candidate pins, relevant import trees, seven main publications, engine identity and dependency ancestry'
+Write-Output 'PASS: five candidate pins, relevant import trees, eight main publications, engine identity and dependency ancestry'
