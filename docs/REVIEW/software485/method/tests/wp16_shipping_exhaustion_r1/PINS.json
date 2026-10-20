@@ -1,0 +1,7 @@
+{
+  "authority": "ADR186 / Product456 / Verification201",
+  "product_input": "24672d37552206f1c8b1288c67161e59b108cbd5",
+  "verification_input": "0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6",
+  "normative_resource_contract_sha256": "9990b84f20818744d731e0f334aa7d77928690dd426f0cbbc6aa2fb2daf638d1",
+  "existing_app_tree": "bdd861b693516db2e5244660b3e99ee400d506de"
+}
