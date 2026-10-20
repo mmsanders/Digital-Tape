@@ -1,6 +1,6 @@
 # Project status
 
-**20 October2026 PDT · input main `6130c8f` · Owner: local PM (PM479; ADR-190 holds retained) ·**
+**20 October2026 PDT · input main `c617b0c` · Owner: local PM (PM483; ADR-189/190 holds retained) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -15,7 +15,7 @@ Product #369 head `b61a9e9`:
 Michael merged #369 at `d93ca4e`; the tree is identical to the disposed head. Dashboard **36/36**.
 Sources are public-domain Grieg (Musopen / Czech NSO) and a CC0 sung voice (`tests/golden/SOURCES.json`).
 **Phase 2 is open (ADR-162, #381).** [The plan](PHASE2-PLAN.md) is ADOPTED: Windows 11 + current macOS (Michael correction, ADR-176);
-WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification221 physical return received; Windows A6 method review223, no new capture. INGEST225 received/receipt verified; independent226 disposition pending. Michael473 has no hands-on task. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) retires completed evidence reviews; corrected459 supersedes faulty436. Five implementation candidates retain exact acceptance gaps.
+WP-38 not taken; operations freeze declared. **P2:** WP14 3/4, WP16 2/4, WP15 contract1/4; **Phase2 6/12**. Verification231 independently clears standalone S2/469 for current-main Software integration.230 PASSes Windows11 byte/native predicates; exact shipping/visibility gaps remain.229 returns A6 linkage blocker;476 closed at bounded stop, A6 HELD. No Michael task. [Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) records the five candidates and exact holds.
 R1/D8 complete: #387 merged `47575af`; live strict ruleset has seven new contexts. Hardware stays parked.
 
 This file is a state table, not a chronicle. Round-by-round narrative through P1-R24
@@ -79,8 +79,8 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — | Completed evidence453/463/470 retired; defective436 superseded. Corrected459, S1/454, S4/455, S2/469 and subset443 are the five remaining candidates. Full/native criteria separate; no rung gain from closure | Verification208 final S2;223 retained A6;226 retained INGEST disposition. Temporary Software480 integration/dependency map;473 no human task |
-| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held only on native A6; Windows221 capture proves full final-sector reads, old checker blocked by distinct-disk post-exit records | Verification223 retained-evidence method; Mac capability stop remains, no new physical request |
+| Phase 2 / host tools | — | S2/469 independently cleared231, current-main integration pending.230 accepts Windows11 observed carry/native CSV;459 full/native/exact-shipping gaps remain. S1/454,S4/455,subset443 held; no rung gain | Software484 S2 integration;485 exact-shipping/S1 facts paired Verification232; closed480 map carries. No Michael task |
+| Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held on native A6; Windows229 reproduced old FAIL and found unproved request/offset-space linkage; zero exclusions | PM capability hold; new sufficient native bridge/evidence required before fresh scope. Mac stop remains; no new physical request |
 | Q-P2-1 copy call shape (#379) | — | Verification216 bounded source/PCM/seven-pilot/command PASS at937dee3. Stage3 exact55552ad bounded review complete, published218/99df7f8;39/404 faults executed,365 deferred,6 absent cuts/no repeated-LBA; subset443 overall HELD | Verification publishes bounded plan before new scenario execution;2CPU-hour/2GiB new compressed-artifact cap. PM ruling(b) before firmware; no batching/write/async permission |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |
 | DRAFT-10 spec revision (#308) | closed | **Issued 1 Oct** at `d8243c9` on Michael's authorization of V10-001…V10-005; docket closed | Implemented and accepted (#141) |
@@ -99,7 +99,7 @@ and `—` where the item is blocked on coverage rather than by a dated hold even
 2. **Solenoid timing is unresolved** at the actual rail and parts; timing stays PROVISIONAL and the fabrication/charging gate stays CLOSED with five blockers.
 3. **No audited mechanism or creep trial exists.** Michael's informal prints (clasps appear to work, 3 Oct) are owner observations, not trials; later WP04 owner latch prototypes431 show preferences and unresolved force/fracture/alignment; no independent mechanism qualification; CAD checks are not measurements.
 4. **Laptop acceptance is not product acceptance.** Wake latency, the 85 dB cap, C-60 copy time and firmware bit-identity on target are untested until later phases.
-5. **I/O performance (#399/#379).** A8 read-only playback accepted, target copy<30s mandatory. Mac/Windows C60 load1619.06s/1677.7328603s and155048 flushes are not target copy proof. Windows physical221 read proof present; distinct-disk method223 pending. Mac native upper-offset proof unavailable under current method. Verification199 bounded subset rows PASS, overall held;200 confirms shipping host exhaustion/gate/parser corrections. No write/batching/async/firmware/hardware qualification follows.
+5. **I/O performance (#399/#379).** A8 read-only playback accepted, target copy<30s mandatory. Mac/Windows C60 load1619.06s/1677.7328603s and155048 flushes are not target copy proof. Windows physical221 read proof carries;229 finds request-linkage method blocker. Mac native upper-offset proof unavailable under current method. Verification199 bounded subset rows PASS, overall held;200 confirms shipping host exhaustion/gate/parser corrections. No write/batching/async/firmware/hardware qualification follows.
 6. **Process debt:** six zero-parent snapshot roots (22 Sep) sit in main's history. They are harmless but confuse naive history scans (ADR-159).
 
 ## Standing boundaries
