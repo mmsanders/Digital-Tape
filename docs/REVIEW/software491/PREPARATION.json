@@ -1,0 +1,124 @@
+{
+  "status": "PREPARATION COMPLETE; WAITING FOR MERGED VERIFICATION235 METHOD; NO CONTROL/CAPTURE EXECUTION",
+  "assignment": 491,
+  "issue_updated": "2026-10-20T20:40:49Z",
+  "product_main": "5dac551313c011262aa1b6c57b3584a23fab63b1",
+  "verification_main": "aba3ce314cd31bbaad254c1d956552b56d3b91ad",
+  "independent_retained_disposition": "Verification230/e2131c8258e811d604605bded8a51eac05cdd65c",
+  "artifacts": [
+    {
+      "name": "approved kit",
+      "bytes": 2604482,
+      "sha256": "ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865",
+      "expected_sha256": "ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865",
+      "identity_equal": true
+    },
+    {
+      "name": "approved collector",
+      "bytes": 8842,
+      "sha256": "74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e",
+      "expected_sha256": "74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e",
+      "identity_equal": true
+    },
+    {
+      "name": "installed Procmon64.exe",
+      "bytes": 2237720,
+      "sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885",
+      "expected_sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885",
+      "identity_equal": true
+    },
+    {
+      "name": "retained observer transport",
+      "bytes": 67259,
+      "sha256": "560cc9a592f53e06deb0bdac44b9f56b32b608f8f32ceba558885a49190dc62b",
+      "expected_sha256": "560cc9a592f53e06deb0bdac44b9f56b32b608f8f32ceba558885a49190dc62b",
+      "identity_equal": true
+    },
+    {
+      "name": "retained packet config",
+      "bytes": 612,
+      "sha256": "0069fdecf84523bdc4b8bec742024d4f10151740c28c6de59d4ec808b351d0be",
+      "expected_sha256": "0069fdecf84523bdc4b8bec742024d4f10151740c28c6de59d4ec808b351d0be",
+      "identity_equal": true
+    }
+  ],
+  "observer": {
+    "name": "Process Monitor",
+    "file": "Procmon64.exe",
+    "file_version": "4.12",
+    "product_version": "4.12",
+    "version_source": "read existing PE VersionInfo without launching observer",
+    "filter_bytes": 296,
+    "filter_sha256": "6bc51ab36ed855ef86a903808d899ab349827122db04b7e0bb13fe285adc2f74",
+    "filter_rules_from_pinned_transport": [
+      "Process_Name is ingest.exe include",
+      "Process_Name begins_with probe- include",
+      "Event_Class is Registry exclude",
+      "Event_Class is Network exclude",
+      "Event_Class is Profiling exclude"
+    ],
+    "destructive_filter": 1
+  },
+  "retained_metadata": {
+    "platform_sha256": "1ea89385cca003d47ee17917e8b2e6c15079dba4366167b122b568abf919ae65",
+    "os": "Windows-11-10.0.26200-SP0",
+    "os_version": "10.0.26200",
+    "windows_edition": "Core",
+    "observer": "procmon",
+    "observer_version": "Process Monitor (Procmon64.exe, sha256 28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885)",
+    "csv_digest_sidefile": "a9d549fe573a5ce8e2e3baab91740b9a439fc12e009007d2ae00f2eb9570a9a0",
+    "pml_digest_sidefile": "4a870827c7e761a0dd72350b63e8d1a75f209b6ed4161dfb187494ace6141762",
+    "scope": "metadata only; no replay or independent PML correspondence check"
+  },
+  "current_host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable_sha256": "b07b03b9ba866a341a3c13ee69710fbc8d43d4ce2523dee13f6df5c25378d15b",
+    "windows": {
+      "ProductName": "Windows 10 Home",
+      "EditionID": "Core",
+      "CurrentBuildNumber": "26200",
+      "UBR": 9457,
+      "InstallationType": "Client"
+    },
+    "os_equivalence_limit": "retained metadata has no UBR; exact old/new OS equivalence is not established"
+  },
+  "build_preparation": {
+    "existing_gcc_sha256": "a20b2286ddee05f01aa5d8f0933826c4cc3dfd04f28aae7d04901565cb5783cb",
+    "existing_gcc_bytes": 995342,
+    "version_query": "UNAVAILABLE: existing gcc.exe --version and -dumpmachine both failed to launch with Illegal System DLL Relocation; no helper compiled, tool installed or repair attempted",
+    "helper_language_flags_source_binary": "UNSELECTED pending independently published235 method; no helper/control execution"
+  },
+  "isolated_fixtures": [
+    {
+      "role": "owned ordinary file",
+      "name": "owned-fixture.txt",
+      "bytes": 37,
+      "sha256": "38008ccc09c1f78c683767ed000200dd59a7365c375816c2adc6437bd2bf27ff"
+    },
+    {
+      "role": "foreign sentinel",
+      "name": "foreign-sentinel.txt",
+      "bytes": 33,
+      "sha256": "ba037d281220ac8354ae6311f9349fb2b9d416b69b21fe59bc16a8bcab5c663e"
+    }
+  ],
+  "execution": {
+    "control_calls": 0,
+    "captures": 0,
+    "observer_processes_started": 0,
+    "helper_builds": 0,
+    "observer_config_changed": false,
+    "privilege_test": "NOT ATTEMPTED; no observer launched",
+    "new_traces": false
+  },
+  "dependency": "Verification235 must publish exact six-row method/control/return contract on main and confirm adequacy before any new native control/capture",
+  "holds": [
+    "No helper flags or expected outcomes selected by Software",
+    "No independent observer/absence PASS",
+    "No inherited candidate/PML/physical absence clearance",
+    "No controls or capture while waiting; no polling/replay",
+    "491 remains OPEN pending authored stage, as explicitly directed"
+  ]
+}
