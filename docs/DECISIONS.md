@@ -4175,3 +4175,100 @@ Issuing queues is not coverage, implementation merge or acceptance. No promise
 that a listener is active; Michael controls activation/runtime. PM stops after
 useful fresh handoffs and durable tested status/dashboard. Reversal cost: cancel
 unstarted slices or amend issued host scope; no frozen behavior or physical act changes.
+
+
+## ADR-189 — Consolidate the current hands-on queue and resolve S3 query failures
+
+**19 October2026 PDT · PM472 · input main7c6df21.** Michael requests current-state
+review, cleanup and understandable physical-card directions. Verification215 and217
+are merged independent inputs;214 closes the bounded report-fault tranche,216 the
+source/PCM/pilot stage. Candidate218 remains unmerged at this checkpoint. Phase1
+36/36 and Phase2 6/12 do not advance from partial coverage or issue closure.
+
+**Decision.** APP-1A §7 issues the additive host-only HOST_QUERY_FAILED/exit1 mapping
+for required initial/actually performed additional make media queries, with current
+phase, op=media_query and raw OS error. Initial authorization/safety/object checks
+must complete before write-mode access. No query-error ignore-and-continue default,
+engine error fabrication or changed existing IO binding. Optional monitoring gets
+no new cadence; detected media change still stops CARD_CHANGED. Preserve partial
+publication and report-failure semantics. Verification authors the new ID/error
+controls before disposing implementation; carry unaffected earlier tests/receipts.
+
+Retain Windows/Mac S3 binding holds: tested failed upgrades/post-open checks do not
+establish pre-open object binding. Linux capability is bounded to actual loop facts;
+no zero-write-mode-open or real-reader claim follows from a successful upgrade after
+sequence change. Each platform needs independent method feasibility/tests before
+its S3 implementation. No speculative API loop, weakened safety rule, engine/port
+change or human probe is licensed. S2 correction and467/210 work remain independent.
+
+Michael473 replaces447 as the sole current hands-on brief. It separates one existing-
+card/shipping-binary Windows read-only A6 capture from the corrected INGEST collection
+with all cards/readers removed. It links exact already-reviewed immutable instructions;
+no collector or hash changed. Close447 as superseded, retaining its full history;
+correct FOR-MICHAEL's stale386 locator and463's obsolete NOT READY banner. Keep
+underlying Product candidates held; no cleanup merge of code/evidence stacks.
+
+Archive the previous integration state verbatim with its SHA256 and current-state
+pointer. Preserve all cited package/evidence identities and accepted receipts.
+Software465/Verification208 receive this ruling in their still-open bounded scopes;
+new normative coverage precedes implementation disposition. Existing three-return
+S2 stop ceiling is not reset. Closed466/209 are complete at their bounded stop, not
+full acceptance. No new task is assigned just to consume lead time.
+
+Rationale: distinguish mandatory authorization from extra monitoring without silently
+accepting unknown facts; give Michael one navigable current brief instead of comment
+archaeology. Reversal cost: amend the new host annex and dependent unaccepted tests;
+no frozen engine, physical test, shipped collector or media semantics changed.
+
+
+## ADR-190 — Close completed review envelopes and bound the remaining acceptance work
+
+**19 October2026 PDT · PM477 · input maind09e5ba.** Michael explicitly asks to
+finish work and reduce the open HELD PR backlog. The [closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md)
+records every exact head, merged disposition, residual condition and owner.
+
+Close completed evidence/transport envelopes453/463/470 unmerged, preserving heads,
+releases and raw receipts. Close obsolete defective436 as superseded by corrected459;
+the correction contains its ancestry, so faulty436 need not merge as a prerequisite.
+This removes an obsolete integration ordering dependency, not any acceptance criterion.
+The surviving corrected source still needs applicable explicit independent clearance
+and required CI. Stage3 evidence471 closes after Verification218's unchanged ready
+publication is merged;210/467 then reach their already-issued bounded stop. No
+Product implementation merge or new independent acceptance is supplied by PM.
+
+PM may carry current Verification main into ready218 mechanically and merge after
+normal CI as the charter's publication backstop. Preserve original findings/tests
+and all bounded exclusions:39/404 host faults executed,365 deferred, six absent long
+coordinates, no repeated-LBA or exhaustive-large claim. Overall443 remains separate.
+Closed evidence envelopes are not code integration dependencies. Do not rerun
+identical campaigns or reopen settled authoring to finish their paperwork.
+
+Five implementation candidates remain:459,454,455,469,443. Each has a concrete gap
+and owner in the ledger. Finish208's already-active final S2 review before new scope;
+its third-return ceiling stands. Bounded S2 closure need not await unimplemented S3
+or the whole-app G2 witness. No fourth loop, no forced PASS, no blanket base/native
+waiver. S3 remains unstarted on documented platform-method holds, not completed.
+Software remains undisturbed; no new Software activation or product change.
+
+For PM476, amend the Windows A6 method only as [§2.5](WP14-NATIVE-CAPTURE.md#25-positively-distinct-other-disk-writes-adr-190--pm476):
+positively proved native writes on another physical disk may be excluded from the
+selected disk's post-exit ambiguity set. A different stream on the selected disk
+is never exempt. Explicit native identity/counterpart proof, lifetime/ambiguity
+checks and causal controls precede a separate independent Verification223 result.
+Keep the old checker FAIL and all raw evidence. Full512-byte returned-result proof,
+no target writes, complete trace and all unknown-identity holds remain unchanged.
+No new physical run or Product checker implementation is authorized. This is a
+method-scope clarification, not an engine/frozen-format or production safety change.
+
+Verification222 is complete at its capability-blocker stop; unsigned INGEST launch
+is refused by current policy. Request only read-only shell/effective/scoped policy
+facts on Michael473 before a concrete policy/trust decision. No Bypass/unblocking,
+policy change, alternate-shell evasion or collection retry is issued. Separate
+physical collection is already received, not a fresh task. Rungs stay Phase1 36/36,
+Phase2 6/12. Mac A6, native/full packages, G2, media atomicity, target<30s, Q-P2-1(b),
+engine/write/batching/async/firmware/hardware and reserved approvals remain unchanged.
+
+Rationale: complete evidence work should leave the open PR queue; implementation
+acceptance must show its real remaining facts rather than inherit stale faulty-base
+or review-envelope blockers. Reversal cost: reopen preserved envelopes or amend
+unaccepted method/tests; no branch/history deletion, card change or product merge.

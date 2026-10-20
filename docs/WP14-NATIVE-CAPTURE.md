@@ -24,6 +24,17 @@ tree, oracle, workflow, ruleset or gate change.
 | `tapectl-windows.exe` (x64) | `82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9` |
 | `tapectl-linux` (rehearsal only) | `4d8c97a44f163bcd513c98c0903db6a01418001f169cfd6aa126823f6f7a785c` |
 
+## Current PM disposition — 19 October 2026 (ADR-190)
+
+The historical status above describes earlier method development. Verification194
+accepted the Windows441 method/rehearsal; Verification219 corrected collector scope.
+Michael's authorized physical return is now published in Verification221 at
+`0482c0d8c9fb7f6bd026bcc2a4d5cd1b1b35b08a`: successful complete final-sector reads,
+zero observed target writes, but the old checker FAILs on four post-exit records.
+§2.5 issues the narrow retained-evidence clarification for independent disposition;
+it does not relabel the old result. No new physical collection is requested.
+Mac A6 and full-package acceptance remain held. Michael473 controls current tasks.
+
 ## 1. What a capture can show
 
 `verify` mounts both sides, and mounting reads the TAPEFS mirror superblock in the card's
@@ -221,6 +232,34 @@ disk holds unrelated files, and that post-exit rundown is not a blanket exemptio
   **unrelated** by the rules above (V146-WIN-R3-01). Every other post-exit record still FAILs:
   any read, a target object or key, an unresolved identity, and, for a raw PhysicalDrive
   target, any write.
+
+### 2.5 Positively distinct other-disk writes (ADR-190 / PM476)
+
+The raw-disk no-write rule covers the entire **selected disk**, including every
+stream on it. Post-exit records are never attributed to an ended process/thread.
+A write may nevertheless be excluded from the selected-disk ambiguity set if
+independent native evidence positively proves a physically distinct disk:
+
+- A FileIo write needs a unique unambiguous FileKey/request identity and matching
+  native DiskIo write with an explicit disk number unequal to the witnessed target.
+  Byte count and available request/offset/time facts must agree. Audit identities
+  over the relevant lifetime; conflicting object/key/name/disk facts, key reuse or
+  ambiguous/multiple matches prevent exclusion. A DiskIo record needs its own
+  explicit other-disk identity.
+- A filename alone, a system-volume assumption, an ended thread, absent target
+  attribution, zero/missing key or an inferred correspondence is insufficient.
+  Different streams on the selected raw disk remain writes to that disk and FAIL.
+- Retain every excluded original record and the exact proof. Do not count an
+  excluded other-disk record as target read/completion evidence. Target or unknown
+  identity, ambiguous lifetimes, missing returned bytes/status, short/failed reads
+  and trace loss retain their existing non-PASS outcomes.
+
+Verification223 independently authors causal positive/negative controls, then
+judges the original complete capture using a separate verifier-owned supplement.
+The unchanged accepted checker result remains preserved alongside any new-method
+result. No Product checker/engine/port change or acceptance by PM is implied.
+If the actual fields cannot prove distinct-disk identity, publish a precise blocker
+without PASS. No physical retry is needed to answer this method question.
 
 `retained-win11.py ORIGINAL.zip --out result.json` checks the original ZIP and every member
 it uses against Verification's pins. It then runs `a6check.py` with exactly the arguments

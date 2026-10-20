@@ -1,147 +1,58 @@
 # Independent verification integration
 
-This file states the **current** integration boundary and what is independently
-accepted. It is a state table, not a chronicle. Earlier boundaries are preserved verbatim:
-P1-R1 through P1-R24 in [the verification integration history](archive/verification-integration-history.md),
-and the 25 September boundary in [its own archive](archive/verification-integration-2026-09-25.md)
-(original SHA-256 `7f19b8a8d2fcfadf9461f1b8c33748a257baedf2b7509eb40b585acd86649373`).
+## Current boundary — 19 October2026 PDT (ADR-190 / PM477)
 
-## Current host boundary — 18 October2026 PDT (ADR-188)
+Phase1 remains independently accepted36/36; Phase2 remains6/12 (WP14=3,
+WP16=2, WP15=1). Bounded evidence publication, source correction and collection
+readiness are separate from overall acceptance and integration permission.
 
-Verification203 `9997bc1c` bounded corrected459/454/455 PASS carries; no overall
-Product/integration/base/full-package acceptance. Verification207 `2e7a84ef`
-exact-kit collection readiness PASS; Michael447 Windows/client and read-only A6
-instructions ready with unchanged pins, no Mac run. Independent host queues
-465↔208 cards/make (S3 method/test gate),466↔209 report faults/IDs,467↔210 narrow
-crash supplements are issued. No new acceptance/rung: Phase2 remains6/12.
+| Publication on Verification main | Disposition / remaining boundary |
+|---|---|
+|194 b9f08bf655cd9a20f2122b5a962f3bf05315f996|Windows441 method/rehearsal PASS, carried; physical return now221. Mac high-offset method held.|
+|203 9997bc1c388796283dc138d8bf6e6200e02cc390|Bounded corrected459/454/455 exhaustion/report/parser/static PASS; underlying/full/native dependencies held.|
+|207 2e7a84ef0979808dd46256c94f60f058fe80c88b|Exact corrected Windows kit/script collection-readiness PASS; actual client observations pending.|
+|214 e1f4bd72f2a6be75cfd8ebe8edb93ed534cfca1e|Exact470/898fe96 Linux report start/middle/end faults PASS. Windows Server observations lack exact positions; Mac setup produced no fault. SOURCE_LEVEL/DEST_NAME_INVALID witnesses carry; INTERNAL/global JOINED_PEAK unproved.209 bounded stop closed; no470/base integration permission.|
+|215 46c66e049a422ebfcf8a48271aeac310d0983391|S3 Windows/Mac proposed binding unavailable/withdrawn; separate bound report-file capability useful. Linux loop limits explicit. No platform S3 acceptance.|
+|216 937dee3c3e98a9e04cb08d1166423104d7c62ece|Exact743f829 bounded source/PCM/seven-pilot/five-command PASS;397 host faults unexecuted at that boundary. Fixed Stage3 plan published, no overall443 clearance.|
+|217 c5e28b80a0e505a295fa71daaef7a6d2c6f411c6|Exact0918e7d failed/incomplete-query controls improved; whole-stack ENOENT exception still blocks overall S2. Final third correction1ad813d under208 review.|
 
-## Current correction boundary — 17 October2026 PDT (ADR-186)
+Verification218 is published at **99df7f8c67627c13b33d0d55b5ba74ae2d43d699**
+(normal CI39333286727 SUCCESS). PM backstop carried current main mechanically;
+original author6e5fd864 findings/tests are byte-identical. Exact55552ad bounded
+Stage3 PASS:39/404 faults,365 deferred,6 absent long coordinates, no repeated-LBA/
+exhaustive-large claim.210/467 and evidence471 are closed at their bounded stop;
+no broad replay or overall443 clearance.
 
-- Windows441 method files carried unchanged via Software merge0b32124; nonnormative
-  proposal448 integrated35d4862. Actual physical A6 remains unaccepted.
-- Verification200 `0c1eb39e`: Windows shipping6MiB abort violates required exhaustion
-  exit1; S4 cfg(test) suffix blindness and actual parser/message misses need fixes.
-  S1 corrected same-DEST actual Linux smoke12/12PASS only; no overall clearance.
-- Corrected independent APP treebdd861b693516db2e5244660b3e99ee400d506de is published
-  with authenticated Product452 transport; import/corrections Software457 →201.
-- Verification199 `42f169f1`:63 bounded operation rows plus host-load facts PASS;
-  subset443 sampled/repeated-LBA/residue/load faults/full dup binding gaps held.
-- Original436/6126d04 receipts preserved. Michael447 old Windows INGEST kit paused
-  until corrected kit readiness; physical read-only A6 remains ready, no Mac run.
-  No unchanged campaign replay/acceptance waiver. Phase2 remains6/12.
+APP-1A §7 settles PM472: initial required queries fail closed before write-mode
+access; performed extra media-query failures stop with HOST_QUERY_FAILED/exit1,
+phase=current boundary, op=media_query, raw os_error. Detected change remains
+CARD_CHANGED; no invented engine error or altered standalone-command semantics.
+Windows/Mac S3 remain held; Linux needs independent per-platform method clearance.
+No weaker policy-refusal zero-write/zero-write-mode-open criterion is adopted.
 
-## Latest independent boundary — 17 October2026 PDT (ADR-185)
+Michael473 is the single current hands-on checklist. Physical A6 collection is
+received and independently authenticated by221/0482c0d8c9fb7f6bd026bcc2a4d5cd1b1b35b08a:
+verify OK/exit0, two full final-sector native reads, zero observed card writes/loss.
+Old checker FAIL on four distinct-other-disk post-exit records remains;223 independently
+disposes the §2.5 clarification from retained evidence, no new physical run.
+INGEST222 review stopped at launch-policy capability blocker: only read-only shell
+and effective/scoped policy facts are requested before any new authorization.
+No Bypass, unblocking, security change, new kit or collection retry is issued.
 
-- Verification194 `b9f08bf6`: overall Windows441/a50a211 method/rehearsal PASS;
-  both R3 corrections closed, exact-head CI green, Software integration authorized.
-  Actual physical Windows A6 and Mac method remain separate/HELD.
-- Verification195 `65dbd21f`:443/85b7c3f V186-02 correction and585 specific contexts
-  PASS; remaining operation-row judgments/SAMPLED coverage/404 host faults held.
-- Same195:436/6126d04 available numerical/source/relations/profile/positive-native
-  receipts PASS. Actual Windows11, exact-shipping exhaustion1926 and Windows
-  zero-access-open visibility held. No overall436/443 integration authorization.
-- APP-1A closed interface issued, WP15 rung1; no full APP coverage/implementation/
-  acceptance. Phase2 6/12. Mac content-pattern feasibility supplies no native high
-  address proof; no replacement method or Mac run. No unchanged campaign replay.
+[Closeout ledger](REVIEW/2026-10-19-P2-CLOSEOUT.md) preserves exact heads and
+retired envelopes453/463/470/471 after218 publication. Defective436
+is superseded by corrected459; its merge is not a prerequisite. No Product merge
+or acceptance follows from closing review containers. Software owns integration
+after applicable explicit exact-head independent clearance and required CI. Corrected459,
+S1/S4/full APP, G1/native/elevation/ordinary-security/client, physical A6/G2/full
+packages and subset443/Q-P2-1 remain held where not independently disposed.
+Engine/format/port semantics, batching/async, firmware, media atomicity, target<30s
+copy and hardware/fabrication/charging holds remain unchanged.
 
-## Latest host boundary — 17 October 2026 UTC (ADR-184)
+## Preserved evidence
 
-- Verification188 `f168a2eb`: Mac442/d360386 capability stop upheld; fs_usage aliases
-  offsets separated by4GiB. Recorded limitation, no waiver/rehearsal/security change.
-- Verification190 `1a6b1be6`: bounded ingest observer correction PASS at436/6126d04
-  on the submitted hosted Mac only;1641 publications,3295 flush/closes,8 controls.
-  Full INGEST numerical/native/shipping receipts, Windows11 and exhaustion gaps held.
-- Verification191 `fc80e0ec`: V186-01/checksum PASS at443/33df48e;3995 retained
-  runs/187486 projections replayed. V186-02 correction443/85b7c3f awaits192.
-  Preserve SAMPLED long epochs, missing host faults and operation-row exclusions.
-- Windows441/a50a211 checker PASS is a new Software return for193, not acceptance;
-  same original capture and R3 controls. No new Michael capture.
-- Complete INGEST Stage1 I1–I8 coverage is on Verification main (1927 descriptors,
-  corrected tree609a4c81); WP16 rung2 only. Candidate436 remains unmerged/HELD.
-- APP-1 findings001…004 issued in merged437; closed §3 annex still pending. No full
-  app coverage/implementation/acceptance. Phase2 5/12; physical A6/full packages held.
-
-## Phase 2 disposition — current navigation refreshed14October2026 (ADR-179)
-
-Verification #167 `df637f7fb962a98b8698d16a531ceb0e8365c2a6` independently accepts
-final Windows C60 success/reinsert/verify, recorded exact A/B SHA256+length and automatic
-A9 `1677.7328603s`; no local comparison of unavailable output blobs claimed. #168
-`c1269b4e7777b7536cef4a37324154bb8420bf60` accepts actual156-byte README/CRLF.
-Full WP14 remains held on native/physical A6. Earlier #426 defects were superseded by Verification176 (`ba8b95cf46d964d4f02630d0dcabe751b1670324`): conditional method PASS for exact72e4e7c; integrated c4eb211. Only bounded off-card collection is issued; no physical/native qualification follows. Historical findings retain their original candidate identities. #166 `c690be9a5f3188333f04ef52a552fcf4c82a0030` is accepted
-planning evidence; PM issues [INGEST-1](WP16-INGEST-CONTRACT.md), not audio acceptance.
-All three merged publications have successful existing publication CI; no PM replay.
-
-## Phase 2 boundary — 13 October 2026 PDT (ADR-176)
-
-WP14 imported publication `56e25cc1`, subtree `e1ef171f`, remains unchanged.
-Verification #158 software/CI PASS disposes Product head `5e2df5a`, root `7b820408`;
-Michael's #390 merge `46b48edd` has that exact root. All 113 final PR jobs PASS.
-Verification #159 (`956d02ec`) authenticates served tested release bytes; #160
-(`7f19fc20`) disposes Mac C60 success; [#164 ten Windows 11 pulls](https://github.com/mmsanders/digital-tape-verification/blob/6899cf7b56decfbb9bf8fef6c5f2825513697c37/findings/P2-R1-WP14-PULLS-2026-10-14.md)
-(`6899cf7b`) PASS. Physical reports stay in Verification; they are not new imported oracles.
-This earlier boundary is superseded by the latest section for Windows success/A9/README; shipped-binary physical >4 GiB capture on both named OSes remains held. Windows 11 supersedes Windows 10;
-historical observation/platform identities stay unchanged. No reacceptance of identical
-#390 bytes, repeat ten-pull campaign or media/hardware qualification follows.
-
-## Historical Phase 1 boundary — close-out, 3 October 2026
-
-Every imported verifier package is declared in [tests/IMPORTS.json](../tests/IMPORTS.json)
-(37 packages at main `320d729`). The last integrated publication is verifier `cdf89f5`
-(WP-11 goldens, portability and ledgers), merged into product main through #369 at
-`d93ca4e`. Every Phase 1 package is independently accepted for laptop scope; see the table.
-Phase 1 acceptance makes no hardware, media, wake-latency, 85 dB-cap, copy-time or release claim.
-
-**Import attestations.** `tests/IMPORTS.json` names the document attesting each package
-tree. The `tests/ops_draft8` attestation (corrected complete tree `3667a2830ba8…`, imported
-test-first at product main `48cc23f…`) was recorded in this file's earlier text and is now in
-[the 25 September archive](archive/verification-integration-2026-09-25.md), verbatim.
-
-## Integration rules that do not change
-
-- Verifier package trees declared in `tests/IMPORTS.json` are imported **verbatim with modes
-  preserved** and are Verification-owned. No assertion, fixture, expected sequence, operation
-  argument, ordering, range, tolerance or exclusion is ever changed on import. Route a
-  disagreement to Verification/PM.
-- The nested `spec/` inside a package tree is an **authenticated test baseline**, not a
-  second canonical publication point. Product authority is `spec/`; those copies are
-  held in place by tamper controls (`VT8-A13`, `PB8-A01`) and must not be deduplicated.
-- Product adapters (`tests/*_adapter/`) are Software-owned and live **outside** the verifier trees.
-- Structural Rule 1 ordering is checked by CI for every IMPORTS-declared package (ADR-159);
-  see [CLAUDE.md §3](../CLAUDE.md).
-- A green run is not acceptance. Authorship, harness checks, engine execution,
-  independent disposition, merge and package acceptance are separate facts.
-
-## Coverage
-
-| Package | Independent disposition | Integrated | Outstanding |
-|---|---|---|---|
-| WP-06 block device, superblock, index commit | Verification #138 DRAFT-10 ledger: 40 rows accepted (289/289 mount, 8/8 writability, 34/34 NOT_MOUNTED, #297 sequential 38/38, #326 closure 7/7) | `8dfe543`, `230e47e` | None; 2 WP-06e rows unreachable by spec (V10-002) |
-| WP-07 chunk allocator, COW Side B | Verification PR #67: frozen 10,000-sequence allocator/COW package | Product PR #215 | None |
-| WP-08 playback, seek, scrub | Verification #95 (#287), #122 (#327), #143 ledger; L01/L14 closed by goldens + Michael #367 | `abd8481`, `523a7fd`, `d93ca4e` | None |
-| WP-09 record: overwrite, overdub, splice | Verification #96 (#288), #107 (#311), #346 gaps; L01 closed by goldens + #367 | `fa25ae0`, `66c6abc`, `d93ca4e` | None |
-| WP-10 crash-injection harness | Verification PR #69 core; #83 R29-B; #86 R29-A; #119/#120; #141 DRAFT-10 ledger 63 rows, zero open (V10-001 disposed) | `867fd4a`, `215204b`, `b05f6af`, `d1ef202` | None |
-| WP-11 CLI harness and goldens | Verification #143 PASS on exact #369 `b61a9e9`: golden 10/10, §8 differential on three configurations, mutation 7/7; Michael approved all ten references (#367) | `d93ca4e` | None |
-| WP-12 re-spool / defragment | Verification #81 (#236), #87 (#272), #123 (#328); `wp11_ledgers_r63` WP-12/12a 36 rows, zero open | `788cb76`, `e4e15a0` | None |
-| WP-13 embedded-readiness audit | Verification #83 at exact PR #241 `74f1173` (DRAFT-9, six gates); carried to DRAFT-10 by #361 | `867fd4a` | None |
-| WP-36 slot capability model | Verification PR #57: 100,000-sequence / 1,997,914-operation literal-NULL campaign | Product PR #200 | None |
-
-## Open independent findings
-
-- `P1-R23-V01` rejects Hardware PR #87's sustained-write audit method. This is card
-  characterisation, not engine coverage; it is parked with hardware (WP-05, ADR-160).
-- `P1-R29-V01` (the old #227 continuity/budget-1 evidence) is superseded by the complete
-  WP-10 and WP-12 ledgers (#141, #143). No engine finding is open.
-
-## Reproduce
-
-```
-tools/fetch-evidence.sh            # raw observations live in a release asset
-tools/ci/verify-spec-bundle.sh
-make -C tests/mount_draft8 check
-tools/ci/build.sh
-tools/ci/unit.sh
-tools/ci/run-golden.sh
-```
-
-The golden suite is green on main; a red golden run is a regression, not an expected
-failure. A missing dependency is not a passing test.
+The complete previous integration file, including all earlier phase1 package rows,
+source hashes and reproduction instructions, is relocated verbatim to
+[19 October archive](archive/verification-integration-2026-10-19.md).
+SHA256 `307247f57f2fb72a0585484bf72407d01e88d563236cf810b7ec8b5f1159a1c1`.
+The archive retains the earlier history pointers; no cited evidence was deleted.

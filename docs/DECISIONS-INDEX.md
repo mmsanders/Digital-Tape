@@ -174,4 +174,8 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-188](DECISIONS.md#adr-188--issue-independent-phase-2-host-queues-with-direct-overnight-handoffs) | 2026-10-18 PDT | Substantial independent host queues | S2/S3 conditional host issuance465↔208; report gaps466↔209; narrow crash supplements467↔210; ready human pins fixed, direct handoffs/fallbacks; rungs unchanged |
 
-125 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-189](DECISIONS.md#adr-189--consolidate-the-current-hands-on-queue-and-resolve-s3-query-failures) | 2026-10-19 PDT | Current hands-on queue / S3 fail-stop ruling | Michael473 supersedes447; HOST_QUERY_FAILED mapping, platform binding holds; partial overnight dispositions, rungs unchanged |
+
+| [ADR-190](DECISIONS.md#adr-190--close-completed-review-envelopes-and-bound-the-remaining-acceptance-work) | 2026-10-19 PDT | Phase2 closeout / distinct-disk method | Completed evidence PRs retired; defective436 superseded by459; precise remaining blockers; retained-capture223; INGEST policy facts only |
+
+127 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
