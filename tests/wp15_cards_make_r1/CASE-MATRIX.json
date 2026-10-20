@@ -1,0 +1,742 @@
+{
+  "discovery": [
+    {
+      "name": "bare-known",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-whole",
+      "facts": {
+        "whole": null,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-removable_or_sd",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": null,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-nonvirtual",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": null,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-bytes",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": null,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-not_system_boot_swap",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": null,
+        "mounts": []
+      }
+    },
+    {
+      "name": "unknown-mounts",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": null
+      }
+    },
+    {
+      "name": "refused-whole",
+      "facts": {
+        "whole": false,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "refused-removable_or_sd",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": false,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "refused-nonvirtual",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": false,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "refused-not_system_boot_swap",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": false,
+        "mounts": []
+      }
+    },
+    {
+      "name": "size-boundary",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 137438953472,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "size-too-large",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 137438953473,
+        "not_system_boot_swap": true,
+        "mounts": []
+      }
+    },
+    {
+      "name": "own-hint",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "own-hint-invalid-raw",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        },
+        "raw_layout_valid": false
+      }
+    },
+    {
+      "name": "own-hint-no-raw-fields",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        },
+        "raw_layout_valid": null
+      }
+    },
+    {
+      "name": "foreign-second-mount",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1,
+          2
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-style",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": null,
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-style",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "wrong",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p1_type",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": null,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p1_type",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 15,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p1_start",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": null,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p1_start",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2049,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p1_sectors",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": null,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p1_sectors",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32769,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p2_type",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": null,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p2_type",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 219,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p2_start",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": null,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p2_start",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34817,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p2_end_bytes",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": null,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p2_end_bytes",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000001,
+          "p3": false,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p3",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": null,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p3",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": true,
+          "p4": false
+        }
+      }
+    },
+    {
+      "name": "unknown-view-p4",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": null
+        }
+      }
+    },
+    {
+      "name": "wrong-view-p4",
+      "facts": {
+        "whole": true,
+        "removable_or_sd": true,
+        "nonvirtual": true,
+        "bytes": 64000000000,
+        "not_system_boot_swap": true,
+        "mounts": [
+          1
+        ],
+        "partition_view": {
+          "style": "MBR",
+          "p1_type": 14,
+          "p1_start": 2048,
+          "p1_sectors": 32768,
+          "p2_type": 218,
+          "p2_start": 34816,
+          "p2_end_bytes": 64000000000,
+          "p3": false,
+          "p4": true
+        }
+      }
+    }
+  ],
+  "plan": {
+    "S2": [
+      "complete-empty",
+      "complete-single",
+      "complete-many",
+      "mixed-refused-unknown-offered",
+      "enumeration-unavailable",
+      "usage",
+      "report-exclusivity-no-follow",
+      "no-report-regression"
+    ],
+    "S3-policy": [
+      "ordered-six-refusals",
+      "unknown-facts-refuse",
+      "own-p1-valid-exact",
+      "OS-own-hint-byte-invalid",
+      "bare-CRC-55AA-mounted",
+      "foreign-mount",
+      "erase-path-not-exact",
+      "raw-unmounted-positive"
+    ],
+    "S3-session": [
+      "no-change",
+      "detected-remove-load",
+      "detected-remove-commit",
+      "detected-change-verify",
+      "equal-size-change-detected",
+      "same-path-no-reopen",
+      "NULL-write-verify",
+      "query-handles-read-only"
+    ],
+    "S3-output": [
+      "equivalent-1-frame",
+      "equivalent-1023-frames",
+      "equivalent-1024-frames",
+      "equivalent-1025-frames",
+      "label-32-UTF8-bytes",
+      "label-33-UTF8-bytes",
+      "bad-WAV",
+      "WAV-truncated-after-start",
+      "geometry-before-write",
+      "commit-failure",
+      "verify-findings",
+      "CARD_CHANGED-precedence"
+    ],
+    "S3-parent": [
+      "ordinary-exclusive-report",
+      "existing-leaf",
+      "dangling-link-leaf",
+      "symlink-leaf",
+      "substituted-parent",
+      "reparse-parent",
+      "cleanup-substitution-foreign-sentinel"
+    ],
+    "native-held": [
+      "Win11-real-reader-remove-reinsert",
+      "Win11-equal-size-swap",
+      "Mac-arm64-real-reader-remove-reinsert",
+      "Mac-equal-size-swap",
+      "ordinary-security-app-runtime-G1",
+      "elevation-prompt-decline",
+      "G2"
+    ]
+  }
+}
