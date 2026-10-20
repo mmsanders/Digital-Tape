@@ -1,0 +1,60 @@
+{
+  "assignment": 484,
+  "accepted_head": "1ad813d86d094a3702a03e3b2e602c221855a9ca",
+  "integration_parent": "39207835811013955931a15f58b20703cdb3eaae",
+  "main_base": "1abb3db7c6e54a71cbd1436250226fe56a9851c6",
+  "clearance": "Verification231 / 4a1a09a0e618bba4685312da8721275e9b2ce9c3 findings/P2-208-QUERY-2026-10-20/INTEGRATION-BOUNDARY.md",
+  "identities": [
+    {
+      "path": "engine",
+      "accepted_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "integration_tree": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "identical": true
+    },
+    {
+      "path": "firmware",
+      "accepted_tree": "8f430ac35e9c20bbf167f78bfadafe75732e7f24",
+      "integration_tree": "8f430ac35e9c20bbf167f78bfadafe75732e7f24",
+      "identical": true
+    },
+    {
+      "path": "host",
+      "accepted_tree": "2d068e56fa718b63e038f7e730721a9135d938b9",
+      "integration_tree": "2d068e56fa718b63e038f7e730721a9135d938b9",
+      "identical": true
+    },
+    {
+      "path": "tests",
+      "accepted_tree": "4e0c5b509c439d3fe4b27e1f1ae528c529d95432",
+      "integration_tree": "4e0c5b509c439d3fe4b27e1f1ae528c529d95432",
+      "identical": true
+    },
+    {
+      "path": "tools",
+      "accepted_tree": "0ed2e96f58e01a380e6873c59025942034d71eb0",
+      "integration_tree": "0ed2e96f58e01a380e6873c59025942034d71eb0",
+      "identical": true
+    },
+    {
+      "path": ".github",
+      "accepted_tree": "a0207d15806e3cf0f7ceccdf5f5c80376d12efec",
+      "integration_tree": "a0207d15806e3cf0f7ceccdf5f5c80376d12efec",
+      "identical": true
+    },
+    {
+      "path": "tests/wp15_app1a_r1",
+      "accepted_tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+      "integration_tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+      "identical": true
+    },
+    {
+      "path": "tests/wp15_cards_make_r1",
+      "accepted_tree": "81b627b7149458c0037dda5e69eac337f40fb8bd",
+      "integration_tree": "81b627b7149458c0037dda5e69eac337f40fb8bd",
+      "identical": true
+    }
+  ],
+  "conflicts": "none",
+  "scope": "Bounded standalone S2 host only; CI and protected merge still required",
+  "excluded": "S3/native/readers/security/full APP/G2 and all other candidates"
+}
