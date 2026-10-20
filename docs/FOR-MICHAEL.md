@@ -5,14 +5,10 @@ Active requests and decisions for Michael live only in
 Read that queue at each round; do not reconstruct a task list from this file.
 The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
 
-## Queue state (19 October 2026 PDT)
+## Queue state (20 October 2026 PDT)
 
-Start with **[Michael473: current Windows checklist](https://github.com/mmsanders/Digital-Tape/issues/473)**.
-It replaces447/386 as the hands-on starting point and links the exact reviewed commands.
-The physical A6 capture is received; no repeat is requested. Its remaining method
-review uses saved evidence. INGEST is paused after a pre-script policy refusal;
-Verification222 requests only read-only shell/policy facts through473, no retry or override.
-Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
+Start with **[Michael473: received-return locator](https://github.com/mmsanders/Digital-Tape/issues/473)**.
+Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 reviews the retained physical method;226 independently disposes the retained INGEST packet. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
 No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
 The issue is the sole current brief; this file is only its locator.
 
