@@ -1,0 +1,64 @@
+name: Software514 revised four-coordinate tranche
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'host/fault-cost/**'
+      - '.github/workflows/software514.yml'
+permissions:
+  contents: read
+jobs:
+  fixed-four:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Existing tools, exact source and immutable methods
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/software514-work"
+          mkdir "$RUNNER_TEMP/software514-work/build-receipts" "$RUNNER_TEMP/software514-work/source"
+          cd "$GITHUB_WORKSPACE"
+          command -v strace > "$RUNNER_TEMP/software514-work/build-receipts/strace-path.txt"
+          strace --version > "$RUNNER_TEMP/software514-work/build-receipts/strace.txt"
+          uname -a > "$RUNNER_TEMP/software514-work/build-receipts/host.txt"
+          gcc --version > "$RUNNER_TEMP/software514-work/build-receipts/gcc.txt"
+          python3 --version > "$RUNNER_TEMP/software514-work/build-receipts/python.txt"
+          git rev-parse HEAD 55552ad4:engine 55552ad4:tests/wp10_subset_r1 > "$RUNNER_TEMP/software514-work/build-receipts/source-trees.txt"
+          test "$(git rev-parse 55552ad4:engine)" = d96b4245e04d74078f8938744b1394c3018516f7
+          (cd tests/fault_cost_r2 && sha256sum -c SHA256SUMS) > "$RUNNER_TEMP/software514-work/build-receipts/method-sha256.txt"
+          python3 -B tests/fault_cost_r2/selftest.py > "$RUNNER_TEMP/software514-work/build-receipts/method-selftest.txt"
+          python3 -B tests/wp10_missing_faults_r1/reproduce.py --inputs "$RUNNER_TEMP/software514-work/retained" > "$RUNNER_TEMP/software514-work/build-receipts/baseline-auth.txt"
+          git archive 55552ad4fe57e99827ab8eb016044d0486017877 engine host/Makefile host/tapectl.c host/target.c host/target.h host/wav.c host/wav.h host/test_wav.c host/test_port.c host/port tests/golden/src/voice.wav tests/wp10_subset_binding tests/wp10_subset_r1 tests/wp10_narrow_supplement_r1 tools/wp10-narrow | tar -x -C "$RUNNER_TEMP/software514-work/source"
+      - name: Ordinary exact-source build within reserved cost
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o "$RUNNER_TEMP/software514-work/build-receipts/engine-time.txt" make -s -C "$RUNNER_TEMP/software514-work/source/engine" all > "$RUNNER_TEMP/software514-work/build-receipts/engine-stdout.txt" 2> "$RUNNER_TEMP/software514-work/build-receipts/engine-stderr.txt"
+          /usr/bin/time -v -o "$RUNNER_TEMP/software514-work/build-receipts/host-time.txt" make -s -C "$RUNNER_TEMP/software514-work/source/host" HEAD_ID=55552ad4fe57e99827ab8eb016044d0486017877 test-bins > "$RUNNER_TEMP/software514-work/build-receipts/host-stdout.txt" 2> "$RUNNER_TEMP/software514-work/build-receipts/host-stderr.txt"
+          sha256sum "$RUNNER_TEMP/software514-work/source/build/host/tapectl-test" > "$RUNNER_TEMP/software514-work/build-receipts/binary.sha256"
+          python3 -B - "$RUNNER_TEMP/software514-work" <<'PY'
+          import json,pathlib,re,sys
+          root=pathlib.Path(sys.argv[1]);cpu=0
+          for n in ['engine-time.txt','host-time.txt']:
+              s=(root/'build-receipts'/n).read_text()
+              cpu+=float(re.search(r'User time \(seconds\): ([0-9.]+)',s)[1])+float(re.search(r'System time \(seconds\): ([0-9.]+)',s)[1])
+          size=sum(p.stat().st_blocks*512 for p in root.rglob('*') if p.is_file())
+          (root/'build-receipts'/'BUILD-GATE.json').write_text(json.dumps(dict(actual_cpu_seconds=cpu,actual_allocated_bytes=size,cpu_reservation=600,byte_reservation=128*1024**2))+'\n')
+          assert cpu<=540 and size<=128*1024**2,'STOP before any new fault: build/mechanics reserve exceeded'
+          PY
+      - name: New four rows only with per-command gates and original cold predicates
+        run: |
+          python3 -B host/fault-cost/run.py --source "$RUNNER_TEMP/software514-work/source" --retained "$RUNNER_TEMP/software514-work/retained" --judge "$GITHUB_WORKSPACE/host/fault-cost/independent199" --out "$RUNNER_TEMP/software514-work/raw" > "$RUNNER_TEMP/software514-work/build-receipts/driver-stdout.txt" 2> "$RUNNER_TEMP/software514-work/build-receipts/driver-stderr.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software514-exact-return
+          path: |
+            ${{ runner.temp }}/software514-work/build-receipts
+            ${{ runner.temp }}/software514-work/raw
+            ${{ runner.temp }}/software514-work/software514-exact-return.zip
+          include-hidden-files: true
+          if-no-files-found: error

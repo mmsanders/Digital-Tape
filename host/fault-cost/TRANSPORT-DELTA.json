@@ -1,0 +1,67 @@
+{
+  "original_driver_sha256": "a4abd6d21fe759da71cdd925bb3ffa241513ca77c0d9abaa7532a8ad216b2dd9",
+  "original_branch": "software/501-bounded-return",
+  "edits": [
+    {
+      "before": "PKG=ROOT/'tests/wp10_missing_faults_r1'",
+      "after": "PKG=ROOT/'tests/wp10_missing_faults_r1';NEWPKG=ROOT/'tests/fault_cost_r2'"
+    },
+    {
+      "before": "plan=json.loads((PKG/'PLAN.json').read_text());basecat=json.loads((PKG/'BASELINE.json').read_text())",
+      "after": "plan=json.loads((NEWPKG/'PLAN.json').read_text());basecat=json.loads((PKG/'BASELINE.json').read_text());\n for row in plan['rows']:\n  row['estimated_cpu_seconds']=row['reserved_cpu_seconds'];row['estimated_compressed_bytes']=row['reserved_bytes']\n plan['rows_original25']=25"
+    },
+    {
+      "before": " def reserve(seconds=5,extra=0):\n  assert cpu()+seconds<=7200,'CPU cap: stop before next invocation'\n  assert sum(p.stat().st_size for p in a.out.rglob('*') if p.is_file())+extra<2*1024**3,'conservative evidence cap'",
+      "after": " gate_index=0;active_row=None\n def allocated(root):\n  return sum(getattr(p.stat(),'st_blocks',0)*512 for p in root.rglob('*') if p.is_file())\n def reserve(seconds=10,extra=0):\n  nonlocal gate_index\n  completion_seconds=132 if active_row is not None else 60\n  completion_bytes=32*1024**2 if active_row is not None else 16*1024**2\n  used=allocated(a.out.parent);used_cpu=cpu()\n  fact=dict(index=gate_index,cpu_including_build_reserve=used_cpu,workspace_allocated_bytes=used,\n    next_seconds=seconds,next_bytes=extra,completion_seconds=completion_seconds,completion_bytes=completion_bytes,\n    active_row=active_row,max_cpu_seconds=7200,max_bytes=2*1024**3)\n  gp=a.out/'gates';gp.mkdir(exist_ok=True);(gp/(f'{gate_index:05d}.json')).write_text(json.dumps(fact,sort_keys=True)+'\\n');gate_index+=1\n  assert used_cpu+seconds+completion_seconds<=7200,'CPU cap: stop before next invocation'\n  assert used+extra+completion_bytes<2*1024**3,'all working/evidence allocated storage cap'\n"
+    },
+    {
+      "before": " proxy=a.out.parent/'tapectl501-capture';proxy.write_text('#!/bin/sh\\nexec strace -qq -yy -s 512 -e trace=openat,lseek,write,pwrite64,fsync,fdatasync -o \"$SW501_SYSCALLS\" '+shlex.quote(str(binary))+' \"$@\"\\n');proxy.chmod(0o700)\n records=[]\n def capture(args,env=None,cwd=None):\n  nonlocal counter\n  reserve();i=counter;counter+=1;rel=f'commands/{i:05d}';p=Path(args[1]);before=sha(p.read_bytes()) if p.exists() else None\n  syscall=a.out/(rel+'/syscalls.txt');syscall.parent.mkdir(parents=True,exist_ok=True)\n  e=dict(env or {},SW501_SYSCALLS=str(syscall.resolve()));rl.TAPECTL=proxy\n  try:r=original_tapectl(args,e,cwd)\n  finally:rl.TAPECTL=binary\n  trace=Path(e['TAPECTL_TEST_TRACE']) if 'TAPECTL_TEST_TRACE' in e else None\n  if trace and trace.exists():put(rel+'/seam.json',trace.read_bytes())\n  put(rel+'/stdout.bin',r.stdout.encode());put(rel+'/stderr.bin',r.stderr.encode())\n  wav=None\n  if args[0]=='dump':\n   q=Path(args[args.index('-o')+1])\n   if q.exists():wav=sha(q.read_bytes());put('pcm/'+wav+'.wav',q.read_bytes())\n  rec=dict(argv=[str(binary),*args],proxy_argv=[str(proxy),*args],environment=e,exit=r.returncode,input_before_sha256=before,input_after_sha256=sha(p.read_bytes()) if p.exists() else None,wav_sha256=wav,seam=rel+'/seam.json' if trace and trace.exists() else None,syscalls=rel+'/syscalls.txt')\n  js(rel+'/PROCESS.json',rec);records.append(rec);return r\n",
+      "after": " records=[]\n recorder=load('cleared_recorder',ROOT/'host/evidence-recorder/recorder.py')\n assert sha((ROOT/'host/evidence-recorder/recorder.py').read_bytes())=='eb3597ad4ff378d2d140e116b659be467489c03ec77d60f24a2ecb91ccec7cf2'\n source_candidate=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()\n def capture(args,env=None,cwd=None):\n  nonlocal counter\n  reserve();i=counter;counter+=1;rel=f'commands/{i:05d}';p=Path(args[1]);before=sha(p.read_bytes()) if p.exists() else None\n  target=a.out/rel;target.parent.mkdir(parents=True,exist_ok=True)\n  syscall=target/'syscalls.txt';specific=dict(env or {})\n  assert all(k.startswith('TAPECTL_') for k in specific),specific.keys()\n  argv=[str(Path(shutil.which('strace')).resolve()),'-qq','-yy','-s','512','-e','trace=openat,lseek,write,pwrite64,fsync,fdatasync','-o',str(syscall),str(binary),*args]\n  payload=dict(domain_dir=str(target),argv=argv,binary_sha256=sha(Path(argv[0]).read_bytes()),source='55552ad4fe57e99827ab8eb016044d0486017877',\n    inputs={str(binary):native_sha,**({str(p):before} if before else {})},environment=specific,cwd=str(cwd) if cwd else None)\n  payload_path=a.out/(f'request-{i:05d}.json');js(payload_path.name,payload)\n  name=f'command-{i:05d}';nonce=hashlib.sha256(os.urandom(32)).hexdigest();stage=a.out/'recorder'/'incoming'/name/'input.bin'\n  request=dict(case_id=name,argv=[str(Path(sys.executable).resolve()),'-B',str(ROOT/'host/fault-cost/adapter.py'),'--input',str(stage),'--nonce',nonce],\n    input_sha256=sha(payload_path.read_bytes()),binary_sha256=sha(Path(sys.executable).resolve().read_bytes()),helper_sha256=sha((ROOT/'host/fault-cost/adapter.py').read_bytes()),source_commit=source_candidate,nonce=nonce,mode='text')\n  js(f'recorder-request-{i:05d}.json',request)\n  recorder.record(a.out/'recorder',request,payload_path)\n  recorder.validate_case(a.out/'recorder'/'cases'/name,request)\n  code=json.loads((target/'EXIT.json').read_bytes())['code']\n  stdout=(target/'stdout.bin').read_bytes();stderr=(target/'stderr.bin').read_bytes()\n  result=subprocess.CompletedProcess([str(binary),*args],code,stdout.decode(),stderr.decode())\n  trace=Path(specific['TAPECTL_TEST_TRACE']) if 'TAPECTL_TEST_TRACE' in specific else None\n  if trace and trace.exists():put(rel+'/seam.json',trace.read_bytes())\n  wav=None\n  if args[0]=='dump':\n   q=Path(args[args.index('-o')+1])\n   if q.exists():wav=sha(q.read_bytes());put('pcm/'+wav+'.wav',q.read_bytes())\n  rec=dict(argv=[str(binary),*args],proxy_argv=argv,environment=specific,exit=code,input_before_sha256=before,input_after_sha256=sha(p.read_bytes()) if p.exists() else None,wav_sha256=wav,seam=rel+'/seam.json' if trace and trace.exists() else None,syscalls=rel+'/syscalls.txt',recorder_request=f'recorder-request-{i:05d}.json')\n  js(rel+'/PROCESS.json',rec);records.append(rec);return result\n"
+    },
+    {
+      "before": "temp=a.out.parent/'software501-private'",
+      "after": "temp=a.out.parent/'software514-private'"
+    },
+    {
+      "before": " # At most one licensed complete positive, through the unchanged route.",
+      "after": " # Actual allocated build/mechanics workspace gate; no fault if already over.\n assert allocated(a.out.parent)<=128*1024**2,'build/mechanics workspace exceeds128MiB; zero new faults'\n # At most one licensed complete positive, through the unchanged route."
+    },
+    {
+      "before": " # Carry prior selected command contexts by original projection hash; do not replay them.",
+      "after": " assert cpu()-600<=60,'positive exceeded60CPU-seconds; stop before first fault'\n assert allocated(a.out.parent)<=144*1024**2,'build/positive workspace exceeded128+16MiB; stop before first fault'\n # Carry prior selected command contexts by original projection hash; do not replay them."
+    },
+    {
+      "before": "  reserve(row['estimated_cpu_seconds'],row['estimated_compressed_bytes']);t0=cpu();files0={p for p in a.out.rglob('*') if p.is_file()};c0=len(records)",
+      "after": "  active_row=dict(kind=row['kind'],ordinal=row['ordinal']);reserve(row['reserved_cpu_seconds'],row['reserved_bytes']);t0=cpu();storage0=allocated(a.out.parent);files0={p for p in a.out.rglob('*') if p.is_file()};c0=len(records)"
+    },
+    {
+      "before": "   byhash={p['image_sha256']:p for p in unique.values()};first={};selected={}",
+      "after": "   assert len(plans)==row['model_order_class_bound'] and len(unique)<=row['projection_bound'],'actual model differs from issued two-class bound'\n   byhash={p['image_sha256']:p for p in unique.values()};first={};selected={}"
+    },
+    {
+      "before": "   if result['actual_cpu_seconds']>row['estimated_cpu_seconds'] or compressed>row['estimated_compressed_bytes']:",
+      "after": "   result['new_allocated_working_bytes']=max(0,allocated(a.out.parent)-storage0)\n   js(f'faults/{name}/COST255.json',dict(actual_cpu_seconds=result['actual_cpu_seconds'],new_allocated_working_bytes=result['new_allocated_working_bytes'],reserved_cpu_seconds=row['reserved_cpu_seconds'],reserved_bytes=row['reserved_bytes']))\n   if result['actual_cpu_seconds']>row['reserved_cpu_seconds'] or result['new_allocated_working_bytes']>row['reserved_bytes']:"
+    },
+    {
+      "before": "  finally:(a.out/'LEDGER.json').write_text(json.dumps(rows,indent=1)+'\\n')",
+      "after": "  finally:pass"
+    },
+    {
+      "before": "scheduled=25,executed=len(rows)",
+      "after": "scheduled=4,executed=len(rows)"
+    },
+    {
+      "before": "method_tree='c1e57d7848c03f3237a1e3e33b04241c4955af0e'",
+      "after": "method_tree='f9083b328dbff20fa5dfc746b9b5b87045b40f6e',recorder_clearance='87e94160f62922a06346d00dc69f4dfcda987328'"
+    },
+    {
+      "before": " js('RESULT.json',result);js('FILES.json'",
+      "after": " js('LEDGER.json',rows);js('RESULT.json',result);js('FILES.json'"
+    },
+    {
+      "before": "archive=a.out.parent/'software501-exact-return.zip'",
+      "after": "archive=a.out.parent/'software514-exact-return.zip'"
+    }
+  ],
+  "original_predicates_unchanged": true
+}
