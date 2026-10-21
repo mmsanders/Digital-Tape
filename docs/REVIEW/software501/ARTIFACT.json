@@ -1,0 +1,12 @@
+{
+  "asset": "software501-exact-return.zip",
+  "bytes": 3370251,
+  "sha256": "eb7fcf40f00e3ad0201657ccae88016b8705b6ca0877d496fe6dbf1b16730db7",
+  "release": "evidence-software501-2026-10-20",
+  "release_status": "PENDING destination-specific public upload approval; no upload attempted",
+  "existing_workflow": 39555618946,
+  "existing_artifact": 12325916869,
+  "existing_artifact_bytes": 5482797,
+  "existing_artifact_sha256": "02389ab47800f889fc5a7cc842069f6ffe19deb68e641e89bebaf8039b3bf6ed",
+  "source_head": "6c5756bffdf8ed6a0ae37c9ea68f92333afb368a"
+}

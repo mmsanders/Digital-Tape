@@ -1,0 +1,31 @@
+{
+  "cpu_with600build_reserve": 792.954608,
+  "rows": [
+    {
+      "coordinate": {
+        "kind": "write",
+        "ordinal": 19
+      },
+      "actual_cpu_seconds": 10.836652000000072,
+      "new_compressed_bytes": 143620,
+      "model_orders": 16,
+      "working_state": "empty/empty"
+    },
+    {
+      "coordinate": {
+        "kind": "write",
+        "ordinal": 63
+      },
+      "actual_cpu_seconds": 181.03561000000002,
+      "new_compressed_bytes": 1571288,
+      "model_orders": 256,
+      "working_state": "empty/empty"
+    }
+  ],
+  "stop": "actual row exceeded original conservative reservation; stop before next row and return actual cost",
+  "next_not_started": {
+    "kind": "write",
+    "ordinal": 64
+  },
+  "global_cap_exceeded": false
+}

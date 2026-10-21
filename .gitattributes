@@ -63,3 +63,5 @@ docs/REVIEW/software498/correction*/** -text
 tests/wp10_missing_faults_r1/** -text
 
 tools/software501/independent199/*.py -text
+
+docs/REVIEW/software501/** -text
