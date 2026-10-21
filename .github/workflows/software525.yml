@@ -1,0 +1,35 @@
+name: Software525 frozen harmless budget controller experiment
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'host/budget-controller/**'
+      - 'tests/budget_gate_r1/**'
+      - '.github/workflows/software525.yml'
+permissions:
+  contents: read
+jobs:
+  frozen38:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Authenticate exact method and syntax
+        run: |
+          mkdir -p "$RUNNER_TEMP/software525-task/build"
+          git rev-parse HEAD > "$RUNNER_TEMP/software525-task/build/source.txt"
+          python3 --version > "$RUNNER_TEMP/software525-task/build/python.txt"
+          (cd tests/budget_gate_r1 && sha256sum -c SHA256SUMS) > "$RUNNER_TEMP/software525-task/build/method-sha256.txt"
+          python3 -B tests/budget_gate_r1/selftest.py > "$RUNNER_TEMP/software525-task/build/method-selftest.txt"
+          python3 -B -c "import ast,pathlib; [ast.parse(p.read_bytes()) for p in pathlib.Path('host/budget-controller').glob('*.py')]"
+      - name: Frozen harmless38 once and separate real sensors
+        run: |
+          python3 -B host/budget-controller/run_method.py --source "$(git rev-parse HEAD)" --out "$RUNNER_TEMP/software525-task/return" > "$RUNNER_TEMP/software525-task/build/stdout.txt" 2> "$RUNNER_TEMP/software525-task/build/stderr.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software525-exact-return
+          path: ${{ runner.temp }}/software525-task
+          if-no-files-found: error
