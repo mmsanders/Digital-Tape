@@ -1,0 +1,50 @@
+name: Software501 fixed missing host faults
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'tools/software501/**'
+      - '.github/workflows/software501.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  faults:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Existing tool availability and source identities
+        run: |
+          mkdir -p fault-build "$RUNNER_TEMP/source501"
+          if ! command -v strace > fault-build/strace-path.txt; then
+            echo 'STOP: existing strace unavailable; zero new fault executions; no installation or tool hunt' > fault-build/STOP.txt
+          fi
+          git archive 55552ad4fe57e99827ab8eb016044d0486017877 engine host tests/golden/src/voice.wav tests/wp10_subset_binding tests/wp10_subset_r1 tests/wp10_narrow_supplement_r1 tools/wp10-narrow | tar -x -C "$RUNNER_TEMP/source501"
+          git rev-parse 55552ad4:engine 55552ad4:tests/wp10_subset_r1 > fault-build/source-trees.txt
+          uname -a > fault-build/host.txt
+          gcc --version >> fault-build/host.txt
+          strace --version >> fault-build/host.txt 2>&1 || true
+      - name: Authenticate original retained baseline without new Product execution
+        run: python3 -B tests/wp10_missing_faults_r1/reproduce.py --inputs "$RUNNER_TEMP/retained501"
+      - name: Existing normal engine and owned test binary build
+        run: |
+          if test -f fault-build/STOP.txt; then exit 0; fi
+          /usr/bin/time -v -o fault-build/build-time.txt make -s -C "$RUNNER_TEMP/source501/engine" all > fault-build/engine-stdout.txt 2> fault-build/engine-stderr.txt
+          /usr/bin/time -v -o fault-build/host-build-time.txt make -s -C "$RUNNER_TEMP/source501/host" HEAD_ID=55552ad4fe57e99827ab8eb016044d0486017877 test-bins > fault-build/host-stdout.txt 2> fault-build/host-stderr.txt
+          sha256sum "$RUNNER_TEMP/source501/build/host/tapectl-test" > fault-build/binary.sha256
+      - name: Frozen25 coordinates under original cost stops
+        run: |
+          if test -f fault-build/STOP.txt; then exit 0; fi
+          python3 -B tools/software501/run.py --source "$RUNNER_TEMP/source501" --retained "$RUNNER_TEMP/retained501" --judge "$PWD/tools/software501/independent199" --out "$RUNNER_TEMP/software501-raw" > fault-build/summary.txt 2> fault-build/driver-stderr.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software501-exact-return
+          path: |
+            ${{ runner.temp }}/software501-exact-return.zip
+            ${{ runner.temp }}/software501-raw
+            fault-build
