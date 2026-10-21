@@ -1,0 +1,10 @@
+{
+  "independent_finding": "de697a14487c1b377e3285b468625d7136b9a6d9 / Verification238 correction1of2",
+  "changed_path": "actual public messages::ingest now requires pair and renders choose(exit,reading,pair); transport passes actual operand",
+  "missing_pair_rows": 21,
+  "all_21_render_generic": true,
+  "actual_source_run": "39538436099",
+  "original_failures_preserved": "run2 unchanged",
+  "scope": "676 fixed parser reports only; no new case/native/audio campaign",
+  "integration_permission": false
+}

@@ -1,0 +1,627 @@
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"IO_SOURCE\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"IO_FOLDER\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"IO_DEST\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"IO_MEMORY\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"INTERNAL\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_USAGE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_LENGTH_INVALID\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["overage",1],"rendered":"This music is 1 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_TOO_LONG\", subject: None, payload: {\"total_frames\": Number(158760001), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(1)} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_RIFF_LIMIT\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_SYMLINK\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_UNREADABLE\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_NOT_FOLDER\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_DUPLICATE\", subject: Folder(1), payload: {\"same_as\": String(\"0\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_EMPTY\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0"],"rendered":"\"Music\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_NAME_COLLISION\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0"],"rendered":"\"Music\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"FOLDER_NAME_NOT_UNICODE\", subject: Folder(0), payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0/song.wav"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"ENTRY_SYMLINK\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0/song.wav"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"ENTRY_NESTED_FOLDER\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0/song.wav"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"ENTRY_NOT_REGULAR\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"ENTRY_NAME_INVALID\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["protected","0/song.wav"],"rendered":"\"song.wav\" is copy-protected, so it can't go on a cartridge. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_PROTECTED\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["folder-nonmusic","0/song.wav"],"rendered":"The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_NOT_AUDIO\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_TOO_SHORT\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_CHANGED\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_NON_FINITE\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_LEVEL\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_TRIM_UNSUPPORTED\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_OUTSIDE_INGEST1\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/song.wav"],"rendered":"\"song.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_CORRUPT\", subject: Source { ordinal: 0, name: \"song.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"JOIN_PEAK\", subject: Boundary((0, \"a.wav\"), (1, \"b.wav\")), payload: {\"dbtp\": String(\"-0.100000\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"JOINED_PEAK\", subject: Boundary((0, \"a.wav\"), (1, \"b.wav\")), payload: {\"dbtp\": String(\"-0.100000\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"DEST_EXISTS\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"DEST_APPEARED\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"DEST_NAME_INVALID\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown ID for this exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["card-small",null],"rendered":"This card is too small. Use a bigger card.","reading":"Usable { refusal: Some(Refusal { id: \"ENGINE\", subject: None, payload: {\"phase\": String(\"provision\"), \"result\": String(\"TAPE_ERR_GEOMETRY\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"verify\"), \"op\": String(\"read_lba0\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["verify-finding",null],"rendered":"Something went wrong writing this card. Press Make cartridge to try again.","reading":"Usable { refusal: Some(Refusal { id: \"VERIFY_FINDINGS\", subject: None, payload: {\"findings\": Array [Object {\"f\": String(\"READ_ERROR\"), \"side\": String(\"A\"), \"frame\": Number(0)}]} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"load\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"USAGE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"LABEL_INVALID\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"LENGTH_INVALID\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"riff\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"DEVICE_OPEN_FAILED\", subject: None, payload: {\"os_error\": String(\"native error\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-small",null],"rendered":"This card is too small. Use a bigger card.","reading":"Usable { refusal: Some(Refusal { id: \"TOO_LONG\", subject: None, payload: {\"total_frames\": Number(158760001), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(1)} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["music-changed",null],"rendered":"The music file changed while the cartridge was being made. Start over and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_TRUNCATED\", subject: None, payload: {\"phase\": String(\"load\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"NOT_PROVISIONED\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"P2_TOO_LARGE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_NOT_WHOLE_DEVICE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_NOT_REMOVABLE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_TOO_LARGE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_SYSTEM_DISK\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_FOREIGN_MOUNT\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["card-refused",null],"rendered":"This card can't be used right now. Check the card and try again.","reading":"Usable { refusal: Some(Refusal { id: \"REFUSE_ERASE_NOT_CONFIRMED\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"CARDS_ENUM_UNAVAILABLE\", subject: None, payload: {\"os_error\": String(\"native error\")} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: Some(Refusal { id: \"USAGE\", subject: None, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"version differs from the bundled child\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"missing end\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"end differs from the actual exit\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"insignificant whitespace\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"not UTF-8\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"empty or unterminated\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"publish\", 0, 0)) }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"done exceeds total\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress went backwards\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"list\", 1, 2)) }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"progress step order\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"version differs from the bundled child\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"missing end\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"end differs from the actual exit\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"insignificant whitespace\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"not UTF-8\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"empty or unterminated\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"enumerate\", 0, 0)) }"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"done exceeds total\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"enumerate\", 1, 2)) }"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"version differs from the bundled child\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"stale or foreign report (tool or nonce)\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"missing end\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"end differs from the actual exit\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"malformed record or repeated key\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"insignificant whitespace\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"not UTF-8\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"empty or unterminated\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"verify_b\", 0, 0)) }"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"done exceeds total\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress counters\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress went backwards\")"}
+{"valid":true,"message":["success",null],"rendered":null,"reading":"Usable { refusal: None, stderr: [], last_progress: Some((\"safety\", 1, 2)) }"}
+{"valid":false,"message":["success",null],"rendered":null,"reading":"Unusable(\"progress step order\")"}
+{"valid":true,"message":["overage",1],"rendered":"This music is 1 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_TOO_LONG\", subject: None, payload: {\"total_frames\": Number(158760001), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(1)} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["overage",1],"rendered":"This music is 1 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_TOO_LONG\", subject: None, payload: {\"total_frames\": Number(158804100), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(44100)} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["overage",2],"rendered":"This music is 2 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_TOO_LONG\", subject: None, payload: {\"total_frames\": Number(158804101), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(44101)} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["overage",192],"rendered":"This music is 3 min 12 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"INGEST_TOO_LONG\", subject: None, payload: {\"total_frames\": Number(167227200), \"capacity_frames\": Number(158760000), \"excess_frames\": Number(8467200)} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":true,"message":["unusable","0/é.wav"],"rendered":"\"é.wav\" can't be used. Take it out of the folder.","reading":"Usable { refusal: Some(Refusal { id: \"SOURCE_CORRUPT\", subject: Source { ordinal: 0, name: \"é.wav\" }, payload: {} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":true,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Usable { refusal: None, stderr: [], last_progress: None }"}
+{"valid":true,"message":["music-changed",null],"rendered":"The music file changed while the cartridge was being made. Start over and drop the folder again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_TRUNCATED\", subject: None, payload: {\"phase\": String(\"load\")} }), stderr: [\"CARD_CHANGED REFUSE_SYSTEM_DISK\", \"different words\"], last_progress: None }"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"open\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"riff\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"fmt\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"pcm\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"channels\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"rate\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"bits\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"align\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"data\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"WAV_INVALID\", subject: None, payload: {\"reason\": String(\"chunk\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"safety\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"provision\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"load\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"commit\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"CARD_CHANGED\", subject: None, payload: {\"phase\": String(\"verify\"), \"os_error\": String(\"native media change\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"ENGINE\", subject: None, payload: {\"phase\": String(\"provision\"), \"result\": String(\"TAPE_ERR_IO\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"ENGINE\", subject: None, payload: {\"phase\": String(\"capacity\"), \"result\": String(\"TAPE_ERR_IO\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"ENGINE\", subject: None, payload: {\"phase\": String(\"load\"), \"result\": String(\"TAPE_ERR_IO\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"ENGINE\", subject: None, payload: {\"phase\": String(\"commit\"), \"result\": String(\"TAPE_ERR_IO\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"entropy\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"read_lba0\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"clear_lba0\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"write_p1\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"build_mbr\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["card-interrupted",null],"rendered":"The card was taken out before it was finished. Put it back in and press Make cartridge again.","reading":"Usable { refusal: Some(Refusal { id: \"IO\", subject: None, payload: {\"phase\": String(\"provision\"), \"op\": String(\"write_mbr\")} }), stderr: [], last_progress: None }"}
+{"valid":true,"message":["verify-finding",null],"rendered":"Something went wrong writing this card. Press Make cartridge to try again.","reading":"Usable { refusal: Some(Refusal { id: \"VERIFY_FINDINGS\", subject: None, payload: {\"findings\": Array [Object {\"f\": String(\"MBR_LAYOUT\")}, Object {\"f\": String(\"PARTITION_TYPE\")}, Object {\"f\": String(\"PARTITION_TRUNCATED\")}, Object {\"f\": String(\"MOUNT\"), \"side\": String(\"B\"), \"result\": String(\"TAPE_ERR_CRC\")}, Object {\"f\": String(\"NEEDS_REPAIR\")}, Object {\"f\": String(\"SIDE_B_DEGRADED\")}, Object {\"f\": String(\"READ_ERROR\"), \"side\": String(\"A\"), \"frame\": Number(1)}]} }), stderr: [], last_progress: None }"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"invalid subject or payload\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["generic",null],"rendered":"Something went wrong. Nothing else on your computer was changed.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"unknown or misplaced record\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"refusal keys\")"}
+{"valid":false,"message":["make-generic",null],"rendered":"The cartridge wasn't finished. Start over and try again.","reading":"Unusable(\"invalid tapectl ID, subject or payload\")"}

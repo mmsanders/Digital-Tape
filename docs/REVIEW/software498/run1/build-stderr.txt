@@ -1,0 +1,63 @@
+    Updating crates.io index
+     Locking 17 packages to highest compatible versions
+      Adding unicode-normalization v0.1.25 (available: v0.1.26)
+ Downloading crates ...
+  Downloaded equivalent v1.0.3
+  Downloaded foldhash v0.2.0
+  Downloaded itoa v1.0.18
+  Downloaded quote v1.0.47
+  Downloaded zmij v1.0.23
+  Downloaded unicode-ident v1.0.27
+  Downloaded proc-macro2 v1.0.107
+  Downloaded serde_derive v1.0.229
+  Downloaded tinyvec v1.13.3
+  Downloaded serde_core v1.0.229
+  Downloaded indexmap v2.14.2
+  Downloaded memchr v2.8.3
+  Downloaded serde v1.0.229
+  Downloaded unicode-normalization v0.1.25
+  Downloaded hashbrown v0.17.1
+  Downloaded serde_json v1.0.154
+  Downloaded syn v3.0.9
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling serde_json v1.0.154
+   Compiling indexmap v2.14.2
+   Compiling syn v3.0.9
+   Compiling foldhash v0.2.0
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling tinyvec v1.13.3
+   Compiling unicode-normalization v0.1.25
+   Compiling serde_derive v1.0.229
+   Compiling dtapp-parser-component v0.1.0 (/home/runner/work/Digital-Tape/Digital-Tape/host/app/parser-component)
+warning: unused import: `Refusal`
+ --> src/../../src/messages.rs:5:30
+  |
+5 | use crate::report::{Reading, Refusal, Subject};
+  |                              ^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: enum `AppEvent` is never used
+  --> src/../../src/messages.rs:50:10
+   |
+50 | pub enum AppEvent {
+   |          ^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `app_event` is never used
+  --> src/../../src/messages.rs:57:8
+   |
+57 | pub fn app_event(e: AppEvent) -> String {
+   |        ^^^^^^^^^
+
+warning: `dtapp-parser-component` (bin "dtapp-parser-component") generated 3 warnings (run `cargo fix --bin "dtapp-parser-component" -p dtapp-parser-component` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.66s

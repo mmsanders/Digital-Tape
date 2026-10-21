@@ -1,0 +1,28 @@
+{
+  "source_commit": "09b3ffec242e9c6b9abb550c4298b64f7923f646",
+  "sources": {
+    "host/app/src/report.rs": "a19147e8088f456586e6c218470005b70dce48d25c85bdcb89360ac525e0f1c7",
+    "host/app/src/messages.rs": "6af01fd09ebc896493b81ccbede1df3e863e0d9ccece7e9c61085b439c8f20e2",
+    "host/app/parser-component/src/main.rs": "92deb8c2a63dd197f441573146ed1875632e4218e2a3c8784e72ecafd3d9759f",
+    "host/app/parser-component/Cargo.toml": "790072537bcda45f413d37d1e677ff5a54d8675cc765337e73b26021835a8329",
+    "host/app/parser-component/Cargo.lock": "332ec537bcc36ec1980273bd77b7be586a804f5c7170fcde89efd070dc0fa06b",
+    "tools/app1a/parser_component.py": "85f018a6ed44d246e881900b737d3eee232a5c4ec71f9f1159d058d0c20eaf5c"
+  },
+  "adapter_sha256": "e91a9cbe274175ea4d68bc8abb796c90f405c33d719125d0b3bbdcc1be367d7a",
+  "counts": {
+    "app": {
+      "inputs": 627,
+      "outputs": 627,
+      "exit": 0
+    },
+    "query-report": {
+      "inputs": 49,
+      "outputs": 49,
+      "exit": 0
+    }
+  },
+  "failures": [],
+  "result": "PASS",
+  "scope": "627 synthetic APP parser reports (281 ingest +346 cards/make) and49 query report schemas/fallbacks only; zero actual query/native/child/S3 evidence",
+  "execution_wall_seconds": 0.1113273260000085
+}
