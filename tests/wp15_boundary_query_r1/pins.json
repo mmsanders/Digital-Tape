@@ -1,0 +1,8 @@
+{
+  "status": "AUTHORED_ONLY",
+  "required_prior_oracle_sha256": "66ff0af2fe60d9aff50c68376eb0b0fe0a0cbfc40711f8ef9899c124f46d3aa3",
+  "authored_rows": 49,
+  "authority_commit": "d09e5ba772729cb9b3d1c9b38b9052c4cbf77c6e",
+  "detecting_controls": 23,
+  "annex_sha256": "e01a897ce316f8c54d55fd0ccddd9c5fb52805c3ff16c41078bb34b72001baed"
+}

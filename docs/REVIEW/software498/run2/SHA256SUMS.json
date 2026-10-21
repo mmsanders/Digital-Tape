@@ -1,0 +1,17 @@
+{
+  "build-stderr.txt": "a326418aab2e0b18a1d6b826df44145684a99daba4b15d3a6643168a67b36a30",
+  "query-report-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "cargo-metadata.json": "4c46da7f901b53088417ec68c69f75fae9ad8ebb7afd0b01541f921885dcb319",
+  "app-stdin.jsonl": "ee58de6d08d4a6ceaafe8effa33dca87246af036df49a3e4ff49761ea5166c07",
+  "app-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "query-report-stdout.jsonl": "3241ea5e07e71d6b1cd36e684e1472da78307e473eed21fde291b9ab3a79bb47",
+  "rustc.txt": "b569b0c98ea3133c7252b4b8ea6b39b7b353813df0dd5f5c412c355691424112",
+  "host.txt": "10fd39edd26e3e2485685bfd3a811d2a6aad4a62e4532299aabb339b2633f8a6",
+  "app-stdout.jsonl": "04440408f03ba58a559ea44c6157e3a8cbb5521bcf431baa17dd28958f26de62",
+  "RESULT.json": "a84b16ee04d6582689dd7912fc50e3ecae491f698872ec3aeee3c143d8e145a5",
+  "build-time.txt": "8c1356abec63f75fe7c2d2f07d47217fabbb78f39f8168599f03acc29601a9a1",
+  "Cargo.lock": "332ec537bcc36ec1980273bd77b7be586a804f5c7170fcde89efd070dc0fa06b",
+  "query-report-stdin.jsonl": "26d38a276b4277803a4b9743837829ed50ccc1a3352f8354a73a0a525d113f26",
+  "cargo.txt": "1f88eaf7fe1aaec83184752cf4c944cd22f00184136ff36a3e4c318cc60ef566",
+  "build-stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
