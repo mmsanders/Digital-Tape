@@ -1,0 +1,875 @@
+[
+  {
+    "name": "endpoint-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "fa0f253668c42e587d91bb6968ee83f5fe966b682910ec7327b3ceeda634e773",
+        "bytes": 46,
+        "frames": 1,
+        "channels": 1,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 1,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "endpoint-2",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "ce0a26c875ec62a09c38e3faf784cdf3816d2fd1fef04670085a05527543dded",
+        "bytes": 52,
+        "frames": 2,
+        "channels": 2,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 2,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "endpoint-255",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "de4c859540b7560a655a3ee3b07b43e751e6edd99e6c8a3d6aba946487aca0b9",
+        "bytes": 554,
+        "frames": 255,
+        "channels": 1,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 255,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "endpoint-257",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "80daafc21eed547a40a6ae671622e97eba1cfc57e44b5097396307f9ac55a197",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 257,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "join-2048-0",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+        "bytes": 554,
+        "frames": 255,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "0/source02.wav",
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 255
+      }
+    ],
+    "gaps": [],
+    "total_frames": 512,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "join-2048-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "fb8c007a28fde58a8254ab9d0117ba9f7e6854109c032401294cb7481acb4c3a",
+        "bytes": 556,
+        "frames": 256,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "0/source02.wav",
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 256
+      }
+    ],
+    "gaps": [],
+    "total_frames": 513,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "join-29000-0",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "66cf54534f90e7ba5b75425a193071d2da96a1be6ec885cb7086c24cfaf8df70",
+        "bytes": 554,
+        "frames": 255,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "0/source02.wav",
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 255
+      }
+    ],
+    "gaps": [],
+    "total_frames": 512,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "join-29000-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "091937d26b945fb19176101eca59d84c5ed2b5c32dbe7f124497898e4fca831a",
+        "bytes": 556,
+        "frames": 256,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "0/source02.wav",
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 256
+      }
+    ],
+    "gaps": [],
+    "total_frames": 513,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "gap-0",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+        "bytes": 554,
+        "frames": 255,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "0/source02.wav",
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 255
+      }
+    ],
+    "gaps": [],
+    "total_frames": 512,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "gap-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+        "bytes": 554,
+        "frames": 255,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "1/source01.wav",
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+        "bytes": 558,
+        "frames": 257,
+        "channels": 1,
+        "start_frame": 88455
+      }
+    ],
+    "gaps": [
+      {
+        "start_frame": 255,
+        "frames": 88200
+      }
+    ],
+    "total_frames": 88712,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "threshold-channel-0",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "523cae87e0667b607cc84acb40cf1fbb01682511175f5090ce5661ec3fce3ba6",
+        "bytes": 46,
+        "frames": 1,
+        "channels": 1,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 1,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "threshold-channel-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "38c1cf17c8f29de7bebcab8cfb2881c330043b3248593882af55f0d6a02d8056",
+        "bytes": 48,
+        "frames": 2,
+        "channels": 1,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 2,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "threshold-channel-2",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "80ac908a0ff958c71185e30b26b45cb62827eb554ab99e9b398c53f1625d0272",
+        "bytes": 56,
+        "frames": 3,
+        "channels": 2,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 3,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "threshold-channel-3",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "bac72f309290c35ed83586850758d49340189ec25560aa719bf3afb689c030d8",
+        "bytes": 60,
+        "frames": 4,
+        "channels": 2,
+        "start_frame": 0
+      }
+    ],
+    "gaps": [],
+    "total_frames": 4,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "block-end--1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "1/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 94700
+      },
+      {
+        "path": "2/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 189400
+      },
+      {
+        "path": "3/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 284100
+      },
+      {
+        "path": "4/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 378800
+      },
+      {
+        "path": "5/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 473500
+      },
+      {
+        "path": "6/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 568200
+      },
+      {
+        "path": "7/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 662900
+      },
+      {
+        "path": "8/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 757600
+      },
+      {
+        "path": "9/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 852300
+      },
+      {
+        "path": "10/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 947000
+      },
+      {
+        "path": "11/source01.wav",
+        "sha256": "28dc6a8b49c778ad3abf4db2f2647915888b11b57a8bde9863d126d5d2afc073",
+        "bytes": 13794,
+        "frames": 6875,
+        "channels": 1,
+        "start_frame": 1041700
+      }
+    ],
+    "gaps": [
+      {
+        "start_frame": 6500,
+        "frames": 88200
+      },
+      {
+        "start_frame": 101200,
+        "frames": 88200
+      },
+      {
+        "start_frame": 195900,
+        "frames": 88200
+      },
+      {
+        "start_frame": 290600,
+        "frames": 88200
+      },
+      {
+        "start_frame": 385300,
+        "frames": 88200
+      },
+      {
+        "start_frame": 480000,
+        "frames": 88200
+      },
+      {
+        "start_frame": 574700,
+        "frames": 88200
+      },
+      {
+        "start_frame": 669400,
+        "frames": 88200
+      },
+      {
+        "start_frame": 764100,
+        "frames": 88200
+      },
+      {
+        "start_frame": 858800,
+        "frames": 88200
+      },
+      {
+        "start_frame": 953500,
+        "frames": 88200
+      }
+    ],
+    "total_frames": 1048575,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "block-end-0",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "1/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 94700
+      },
+      {
+        "path": "2/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 189400
+      },
+      {
+        "path": "3/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 284100
+      },
+      {
+        "path": "4/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 378800
+      },
+      {
+        "path": "5/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 473500
+      },
+      {
+        "path": "6/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 568200
+      },
+      {
+        "path": "7/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 662900
+      },
+      {
+        "path": "8/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 757600
+      },
+      {
+        "path": "9/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 852300
+      },
+      {
+        "path": "10/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 947000
+      },
+      {
+        "path": "11/source01.wav",
+        "sha256": "f0fd7feb7d3dead100b19433cdf393bfe9fac1c7caa7f8fe1ee432b4dd17b06b",
+        "bytes": 13796,
+        "frames": 6876,
+        "channels": 1,
+        "start_frame": 1041700
+      }
+    ],
+    "gaps": [
+      {
+        "start_frame": 6500,
+        "frames": 88200
+      },
+      {
+        "start_frame": 101200,
+        "frames": 88200
+      },
+      {
+        "start_frame": 195900,
+        "frames": 88200
+      },
+      {
+        "start_frame": 290600,
+        "frames": 88200
+      },
+      {
+        "start_frame": 385300,
+        "frames": 88200
+      },
+      {
+        "start_frame": 480000,
+        "frames": 88200
+      },
+      {
+        "start_frame": 574700,
+        "frames": 88200
+      },
+      {
+        "start_frame": 669400,
+        "frames": 88200
+      },
+      {
+        "start_frame": 764100,
+        "frames": 88200
+      },
+      {
+        "start_frame": 858800,
+        "frames": 88200
+      },
+      {
+        "start_frame": 953500,
+        "frames": 88200
+      }
+    ],
+    "total_frames": 1048576,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "block-end-1",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "1/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 94700
+      },
+      {
+        "path": "2/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 189400
+      },
+      {
+        "path": "3/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 284100
+      },
+      {
+        "path": "4/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 378800
+      },
+      {
+        "path": "5/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 473500
+      },
+      {
+        "path": "6/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 568200
+      },
+      {
+        "path": "7/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 662900
+      },
+      {
+        "path": "8/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 757600
+      },
+      {
+        "path": "9/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 852300
+      },
+      {
+        "path": "10/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 947000
+      },
+      {
+        "path": "11/source01.wav",
+        "sha256": "95d8852f2200f420b064779f190468bceba4e913deb2ad616cabb41487d301b0",
+        "bytes": 13798,
+        "frames": 6877,
+        "channels": 1,
+        "start_frame": 1041700
+      }
+    ],
+    "gaps": [
+      {
+        "start_frame": 6500,
+        "frames": 88200
+      },
+      {
+        "start_frame": 101200,
+        "frames": 88200
+      },
+      {
+        "start_frame": 195900,
+        "frames": 88200
+      },
+      {
+        "start_frame": 290600,
+        "frames": 88200
+      },
+      {
+        "start_frame": 385300,
+        "frames": 88200
+      },
+      {
+        "start_frame": 480000,
+        "frames": 88200
+      },
+      {
+        "start_frame": 574700,
+        "frames": 88200
+      },
+      {
+        "start_frame": 669400,
+        "frames": 88200
+      },
+      {
+        "start_frame": 764100,
+        "frames": 88200
+      },
+      {
+        "start_frame": 858800,
+        "frames": 88200
+      },
+      {
+        "start_frame": 953500,
+        "frames": 88200
+      }
+    ],
+    "total_frames": 1048577,
+    "capacity_frames": 1323000
+  },
+  {
+    "name": "block-end-2",
+    "sources": [
+      {
+        "path": "0/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 0
+      },
+      {
+        "path": "1/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 94700
+      },
+      {
+        "path": "2/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 189400
+      },
+      {
+        "path": "3/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 284100
+      },
+      {
+        "path": "4/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 378800
+      },
+      {
+        "path": "5/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 473500
+      },
+      {
+        "path": "6/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 568200
+      },
+      {
+        "path": "7/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 662900
+      },
+      {
+        "path": "8/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 757600
+      },
+      {
+        "path": "9/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 852300
+      },
+      {
+        "path": "10/source01.wav",
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+        "bytes": 13044,
+        "frames": 6500,
+        "channels": 1,
+        "start_frame": 947000
+      },
+      {
+        "path": "11/source01.wav",
+        "sha256": "b9670ddb614b19fdc1a7924414102e2134fd5c3a445ca83497a7305f7956abd0",
+        "bytes": 13800,
+        "frames": 6878,
+        "channels": 1,
+        "start_frame": 1041700
+      }
+    ],
+    "gaps": [
+      {
+        "start_frame": 6500,
+        "frames": 88200
+      },
+      {
+        "start_frame": 101200,
+        "frames": 88200
+      },
+      {
+        "start_frame": 195900,
+        "frames": 88200
+      },
+      {
+        "start_frame": 290600,
+        "frames": 88200
+      },
+      {
+        "start_frame": 385300,
+        "frames": 88200
+      },
+      {
+        "start_frame": 480000,
+        "frames": 88200
+      },
+      {
+        "start_frame": 574700,
+        "frames": 88200
+      },
+      {
+        "start_frame": 669400,
+        "frames": 88200
+      },
+      {
+        "start_frame": 764100,
+        "frames": 88200
+      },
+      {
+        "start_frame": 858800,
+        "frames": 88200
+      },
+      {
+        "start_frame": 953500,
+        "frames": 88200
+      }
+    ],
+    "total_frames": 1048578,
+    "capacity_frames": 1323000
+  }
+]

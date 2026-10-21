@@ -1,0 +1,246 @@
+joins	Set up job	﻿2026-10-21T06:15:12.2340119Z Current runner version: '2.337.0'
+joins	Set up job	2026-10-21T06:15:12.2374883Z ##[group]Runner Image Provisioner
+joins	Set up job	2026-10-21T06:15:12.2376244Z Hosted Compute Agent
+joins	Set up job	2026-10-21T06:15:12.2377398Z Version: 20261012.601
+joins	Set up job	2026-10-21T06:15:12.2378411Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+joins	Set up job	2026-10-21T06:15:12.2379654Z Build Date: 2026-10-12T17:48:21Z
+joins	Set up job	2026-10-21T06:15:12.2380812Z Worker ID: {337a438e-73a3-41c1-a2c6-6d9508e492fc}
+joins	Set up job	2026-10-21T06:15:12.2382255Z Region: eastus
+joins	Set up job	2026-10-21T06:15:12.2383283Z Cloud: Azure
+joins	Set up job	2026-10-21T06:15:12.2384179Z ##[endgroup]
+joins	Set up job	2026-10-21T06:15:12.2386466Z ##[group]Operating System
+joins	Set up job	2026-10-21T06:15:12.2387590Z Ubuntu
+joins	Set up job	2026-10-21T06:15:12.2388457Z 24.04.5
+joins	Set up job	2026-10-21T06:15:12.2389394Z LTS
+joins	Set up job	2026-10-21T06:15:12.2390261Z ##[endgroup]
+joins	Set up job	2026-10-21T06:15:12.2391768Z ##[group]Runner Image
+joins	Set up job	2026-10-21T06:15:12.2392851Z Image: ubuntu-24.04
+joins	Set up job	2026-10-21T06:15:12.2393845Z Version: 20261012.334.1
+joins	Set up job	2026-10-21T06:15:12.2395770Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+joins	Set up job	2026-10-21T06:15:12.2398745Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+joins	Set up job	2026-10-21T06:15:12.2400448Z ##[endgroup]
+joins	Set up job	2026-10-21T06:15:12.2402612Z ##[group]GITHUB_TOKEN Permissions
+joins	Set up job	2026-10-21T06:15:12.2405218Z Contents: read
+joins	Set up job	2026-10-21T06:15:12.2406252Z Metadata: read
+joins	Set up job	2026-10-21T06:15:12.2407144Z ##[endgroup]
+joins	Set up job	2026-10-21T06:15:12.2410193Z Secret source: Actions
+joins	Set up job	2026-10-21T06:15:12.2412137Z Cache mode: write
+joins	Set up job	2026-10-21T06:15:12.2413276Z Prepare workflow directory
+joins	Set up job	2026-10-21T06:15:12.2884354Z Prepare all required actions
+joins	Set up job	2026-10-21T06:15:12.2955504Z Getting action download info
+joins	Set up job	2026-10-21T06:15:12.5082047Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+joins	Set up job	2026-10-21T06:15:12.6224884Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+joins	Set up job	2026-10-21T06:15:12.8354374Z Complete job name: joins
+joins	Run actions/checkout@v4	﻿2026-10-21T06:15:12.9147212Z ##[group]Run actions/checkout@v4
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9148125Z with:
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9148567Z   fetch-depth: 0
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9149085Z   ref: 04f369a55808318a832474c5a31138f4abedfae4
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9149728Z   repository: mmsanders/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9154004Z   token: ***
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9154447Z   ssh-strict: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9154889Z   ssh-user: git
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9155340Z   persist-credentials: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9155831Z   clean: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9156292Z   sparse-checkout-cone-mode: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9156819Z   fetch-tags: false
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9157259Z   show-progress: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9157707Z   lfs: false
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9158117Z   submodules: false
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9158568Z   set-safe-directory: true
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9159080Z   allow-unsafe-pr-checkout: false
+joins	Run actions/checkout@v4	2026-10-21T06:15:12.9159856Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0185899Z Syncing repository: mmsanders/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0188712Z ##[group]Getting Git version info
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0190005Z Working directory is '/home/runner/work/Digital-Tape/Digital-Tape'
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0191999Z [command]/usr/bin/git version
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0313412Z git version 2.55.0
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0335299Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0358727Z Temporarily overriding HOME='/home/runner/work/_temp/6f22b1c2-a0ab-47b2-a421-16a2d2f3b17b' before making global git config changes
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0361782Z Adding repository directory to the temporary git global config as a safe directory
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0364167Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Digital-Tape/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0423865Z Deleting the contents of '/home/runner/work/Digital-Tape/Digital-Tape'
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0430117Z ##[group]Initializing the repository
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0435854Z [command]/usr/bin/git init /home/runner/work/Digital-Tape/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0569331Z hint: Using 'master' as the name for the initial branch. This default branch name
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0571754Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0574301Z hint: to use in all of your new repositories, which will suppress this warning,
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0575567Z hint: call:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0576209Z hint:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0577018Z hint: 	git config --global init.defaultBranch <name>
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0578007Z hint:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0578988Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0580612Z hint: 'development'. The just-created branch can be renamed via this command:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0582062Z hint:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0582722Z hint: 	git branch -m <name>
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0583510Z hint:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0584559Z hint: Disable this message with "git config set advice.defaultBranchName false"
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0586497Z Initialized empty Git repository in /home/runner/work/Digital-Tape/Digital-Tape/.git/
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0593323Z [command]/usr/bin/git remote add origin https://github.com/mmsanders/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0659808Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0661712Z ##[group]Disabling automatic garbage collection
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0663113Z [command]/usr/bin/git config --local gc.auto 0
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0688409Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0689234Z ##[group]Setting up auth
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0696842Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.0739428Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1132316Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1168968Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1395920Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1430568Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1656918Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1697774Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1698638Z ##[group]Fetching the repository
+joins	Run actions/checkout@v4	2026-10-21T06:15:13.1708340Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0800777Z From https://github.com/mmsanders/Digital-Tape
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0803193Z  * [new branch]      agent-bus-state            -> origin/agent-bus-state
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0805421Z  * [new branch]      archive/agent-signaling-and-dashboard -> origin/archive/agent-signaling-and-dashboard
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0807865Z  * [new branch]      gh-pages                   -> origin/gh-pages
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0809610Z  * [new branch]      main                       -> origin/main
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0811648Z  * [new branch]      pm/draft-10                -> origin/pm/draft-10
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0813707Z  * [new branch]      pm/p2-r1-contract-resolution -> origin/pm/p2-r1-contract-resolution
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0816037Z  * [new branch]      software/392-tested-release -> origin/software/392-tested-release
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0818469Z  * [new branch]      software/405-performance-design -> origin/software/405-performance-design
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0821072Z  * [new branch]      software/409-playback-recovery -> origin/software/409-playback-recovery
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0843572Z  * [new branch]      software/412-read1-authority -> origin/software/412-read1-authority
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0845560Z  * [new branch]      software/417-pin-control-fix -> origin/software/417-pin-control-fix
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0847510Z  * [new branch]      software/498-parser-component -> origin/software/498-parser-component
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0849876Z  * [new branch]      software/499-bounded-return -> origin/software/499-bounded-return
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0851980Z  * [new branch]      software/500-bounded-return -> origin/software/500-bounded-return
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0854182Z  * [new branch]      software/502-ingest-current-base -> origin/software/502-ingest-current-base
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0856278Z  * [new branch]      software/p2-451-ingest-supplement -> origin/software/p2-451-ingest-supplement
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0858219Z  * [new branch]      software/p2-452-app-shell  -> origin/software/p2-452-app-shell
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0860142Z  * [new branch]      software/p2-452-ingest-report -> origin/software/p2-452-ingest-report
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0863369Z  * [new branch]      software/p2-457-ingest-exhaustion -> origin/software/p2-457-ingest-exhaustion
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0865392Z  * [new branch]      software/p2-461-win11-kit  -> origin/software/p2-461-win11-kit
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0867547Z  * [new branch]      software/p2-466-report-positions -> origin/software/p2-466-report-positions
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0869497Z  * [new branch]      software/p2-467-narrow     -> origin/software/p2-467-narrow
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0871502Z  * [new branch]      software/p2-r1-qp21-counts -> origin/software/p2-r1-qp21-counts
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0873509Z  * [new branch]      software/p2-r1-wp14-a6-mac-fsusage -> origin/software/p2-r1-wp14-a6-mac-fsusage
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0876038Z  * [new branch]      software/p2-r2-ingest1     -> origin/software/p2-r2-ingest1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0878161Z  * [new branch]      software/p2-r2-ingest1-stage2 -> origin/software/p2-r2-ingest1-stage2
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0880618Z  * [new branch]      software/p2-r2-ingest1-stage2-wip -> origin/software/p2-r2-ingest1-stage2-wip
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0883371Z  * [new branch]      software/p2-wp10-subset-binding -> origin/software/p2-wp10-subset-binding
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0885575Z  * [new tag]         evidence-2026-09           -> evidence-2026-09
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0887505Z  * [new tag]         evidence-p1-r55-wp10-final -> evidence-p1-r55-wp10-final
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0889215Z  * [new tag]         evidence-p1-r60-wp10-residue -> evidence-p1-r60-wp10-residue
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0892172Z  * [new tag]         evidence-read1-dfe426d4569a53c64558ca84e24cb41881521821 -> evidence-read1-dfe426d4569a53c64558ca84e24cb41881521821
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0895585Z  * [new tag]         evidence-readopt-415-557728ac548ddc13bf745ff1df9002d3f390f498 -> evidence-readopt-415-557728ac548ddc13bf745ff1df9002d3f390f498
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0899345Z  * [new tag]         evidence-readopt-415-7d0f67629214cc5a41d24725d6c28cffdc59f031-37867831170-1 -> evidence-readopt-415-7d0f67629214cc5a41d24725d6c28cffdc59f031-37867831170-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0905132Z  * [new tag]         evidence-readopt-415-7d0f67629214cc5a41d24725d6c28cffdc59f031-37867835001-1 -> evidence-readopt-415-7d0f67629214cc5a41d24725d6c28cffdc59f031-37867835001-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0909923Z  * [new tag]         evidence-readopt-415-9c8de4259db8a6337140df4504d9b22fa37acea0-37854169214-1 -> evidence-readopt-415-9c8de4259db8a6337140df4504d9b22fa37acea0-37854169214-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0914650Z  * [new tag]         evidence-readopt-415-9c8de4259db8a6337140df4504d9b22fa37acea0-37854213506-1 -> evidence-readopt-415-9c8de4259db8a6337140df4504d9b22fa37acea0-37854213506-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0917831Z  * [new tag]         evidence-software485-2026-10-20 -> evidence-software485-2026-10-20
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0920202Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39103616467-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39103616467-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0923259Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39104751447-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39104751447-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0925931Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39106115046-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39106115046-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0928923Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39106140585-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39106140585-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0931877Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39138302167-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39138302167-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0934824Z  * [new tag]         win11-kit-ingest-0.1.1-50bc4160f6da-r39140437655-1 -> win11-kit-ingest-0.1.1-50bc4160f6da-r39140437655-1
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0936891Z  * [new tag]         win11-small-packet         -> win11-small-packet
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0938431Z  * [new tag]         wp14-a6-win-rehearsal      -> wp14-a6-win-rehearsal
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0939994Z  * [new tag]         wp14-tapectl-5e2df5aaf23e  -> wp14-tapectl-5e2df5aaf23e
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0943480Z [command]/usr/bin/git rev-parse --verify --quiet 04f369a55808318a832474c5a31138f4abedfae4^{object}
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0945161Z 04f369a55808318a832474c5a31138f4abedfae4
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0947693Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0949141Z ##[group]Determining the checkout info
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0950706Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0951904Z [command]/usr/bin/git sparse-checkout disable
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0954812Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0959508Z ##[group]Checking out the ref
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.0962503Z [command]/usr/bin/git checkout --progress --force 04f369a55808318a832474c5a31138f4abedfae4
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3155833Z Note: switching to '04f369a55808318a832474c5a31138f4abedfae4'.
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3156970Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3157777Z You are in 'detached HEAD' state. You can look around, make experimental
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3159663Z changes and commit them, and you can discard any commits you make in this
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3161824Z state without impacting any branches by switching back to a branch.
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3162922Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3163672Z If you want to create a new branch to retain commits you create, you may
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3165933Z do so (now or later) by using -c with the switch command. Example:
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3167090Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3167497Z   git switch -c <new-branch-name>
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3168071Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3168427Z Or undo this operation with:
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3168951Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3169270Z   git switch -
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3169717Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3170498Z Turn off this advice by setting config variable advice.detachedHead to false
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3171950Z 
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3173623Z HEAD is now at 04f369a Software500: execute fixed18 shipping join inputs once with authentic raw returns
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3178885Z ##[endgroup]
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3222559Z [command]/usr/bin/git log -1 --format=%H
+joins	Run actions/checkout@v4	2026-10-21T06:15:14.3250405Z 04f369a55808318a832474c5a31138f4abedfae4
+joins	Exact unmodified shipping source	﻿2026-10-21T06:15:14.3514727Z ##[group]Run mkdir -p "$RUNNER_TEMP/source500" shipping-build
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3516691Z ^[[36;1mmkdir -p "$RUNNER_TEMP/source500" shipping-build^[[0m
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3519366Z ^[[36;1mgit archive b9f430c8c9b33532abf07eea0ed2653310639f2d host/ingest | tar -x -C "$RUNNER_TEMP/source500"^[[0m
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3522141Z ^[[36;1muname -a > shipping-build/host.txt^[[0m
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3523713Z ^[[36;1mcat /etc/os-release >> shipping-build/host.txt^[[0m
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3820339Z shell: /usr/bin/bash -e {0}
+joins	Exact unmodified shipping source	2026-10-21T06:15:14.3822118Z ##[endgroup]
+joins	Normal locked release build	﻿2026-10-21T06:15:14.4303075Z ##[group]Run rustc -Vv > "$GITHUB_WORKSPACE/shipping-build/rustc.txt"
+joins	Normal locked release build	2026-10-21T06:15:14.4305183Z ^[[36;1mrustc -Vv > "$GITHUB_WORKSPACE/shipping-build/rustc.txt"^[[0m
+joins	Normal locked release build	2026-10-21T06:15:14.4307094Z ^[[36;1mcargo -V >> "$GITHUB_WORKSPACE/shipping-build/rustc.txt"^[[0m
+joins	Normal locked release build	2026-10-21T06:15:14.4311790Z ^[[36;1m/usr/bin/time -v -o "$GITHUB_WORKSPACE/shipping-build/build-time.txt" cargo build --locked --release --bin ingest > "$GITHUB_WORKSPACE/shipping-build/build-stdout.txt" 2> "$GITHUB_WORKSPACE/shipping-build/build-stderr.txt"^[[0m
+joins	Normal locked release build	2026-10-21T06:15:14.4316335Z ^[[36;1mcp Cargo.lock "$GITHUB_WORKSPACE/shipping-build/Cargo.lock"^[[0m
+joins	Normal locked release build	2026-10-21T06:15:14.4384440Z shell: /usr/bin/bash -e {0}
+joins	Normal locked release build	2026-10-21T06:15:14.4385549Z ##[endgroup]
+joins	Normal locked release build	2026-10-21T06:15:14.4876320Z info: syncing channel updates for 1.97.0-x86_64-unknown-linux-gnu
+joins	Normal locked release build	2026-10-21T06:15:14.6086513Z info: latest update on 2026-07-09 for version 1.97.0 (2d8144b78 2026-07-07)
+joins	Normal locked release build	2026-10-21T06:15:14.6090262Z info: downloading 3 components
+joins	Normal locked release build	2026-10-21T06:15:22.0262852Z warn: the missing active toolchain `1.97.0-x86_64-unknown-linux-gnu` has been auto-installed
+joins	Normal locked release build	2026-10-21T06:15:22.0264027Z warn: this might cause rustup commands to take longer time to finish than expected
+joins	Normal locked release build	2026-10-21T06:15:22.0264860Z info: you may opt out with `RUSTUP_AUTO_INSTALL=0` or `rustup set auto-install disable`
+joins	Eighteen fixed commands once only	﻿2026-10-21T06:15:34.0589628Z ##[group]Run python3 -B tools/software500/run.py --binary "$RUNNER_TEMP/source500/host/ingest/target/release/ingest" --out "$RUNNER_TEMP/software500-raw" | tee shipping-build/summary.txt
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.0591024Z ^[[36;1mpython3 -B tools/software500/run.py --binary "$RUNNER_TEMP/source500/host/ingest/target/release/ingest" --out "$RUNNER_TEMP/software500-raw" | tee shipping-build/summary.txt^[[0m
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.0657817Z shell: /usr/bin/bash -e {0}
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.0658091Z ##[endgroup]
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2667312Z Traceback (most recent call last):
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2668540Z   File "/home/runner/work/Digital-Tape/Digital-Tape/tools/software500/run.py", line 74, in <module>
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2669482Z     if __name__=='__main__':main()
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2674957Z                             ^^^^^^
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2676237Z   File "/home/runner/work/Digital-Tape/Digital-Tape/tools/software500/run.py", line 51, in main
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2677982Z     assert o['applied_gain_db']<=0 and o['loudness_status']=='unmeasurable' and o['loudness_reason']=='too_short'
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2679212Z            ^^^^^^^^^^^^^^^^^^^^^^^
+joins	Eighteen fixed commands once only	2026-10-21T06:15:34.2680124Z TypeError: '<=' not supported between instances of 'str' and 'int'
+joins	Run actions/upload-artifact@v4	﻿2026-10-21T06:15:34.2881460Z ##[group]Run actions/upload-artifact@v4
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2881802Z with:
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2882024Z   name: software500-exact-return
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2882413Z   path: /home/runner/work/_temp/software500-exact-return.zip
+joins	Run actions/upload-artifact@v4	shipping-build
+joins	Run actions/upload-artifact@v4	
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2882825Z   if-no-files-found: warn
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2883061Z   compression-level: 6
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2883278Z   overwrite: false
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2883490Z   include-hidden-files: false
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.2883727Z ##[endgroup]
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4530113Z (node:2829) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4531701Z (Use `node --trace-deprecation ...` to show where the warning was created)
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4626701Z Multiple search paths detected. Calculating the least common ancestor of all paths
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4630531Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4631652Z With the provided path, there will be 7 files uploaded
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4650948Z Artifact name is valid!
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.4651889Z Root directory input is valid!
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.6807811Z Beginning upload of artifact content to blob storage
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.7095240Z (node:2829) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.7337452Z Uploaded bytes 5309
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.7483669Z Finished uploading artifact content to blob storage!
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.7485085Z SHA256 digest of uploaded artifact zip is cdafad4e0569ec34bac5d9b42802cd88296ea7f792242784b8e4d62bfb806fde
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.7487336Z Finalizing artifact upload
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.9988045Z Artifact software500-exact-return.zip successfully finalized. Artifact ID 12324827394
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.9989604Z Artifact software500-exact-return has been successfully uploaded! Final size is 5309 bytes. Artifact ID is 12324827394
+joins	Run actions/upload-artifact@v4	2026-10-21T06:15:34.9996534Z Artifact download URL: https://github.com/mmsanders/Digital-Tape/actions/runs/39554269518/artifacts/12324827394
+joins	Post Run actions/checkout@v4	﻿2026-10-21T06:15:35.0212615Z Post job cleanup.
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1047235Z [command]/usr/bin/git version
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1090809Z git version 2.55.0
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1129174Z Temporarily overriding HOME='/home/runner/work/_temp/587abc0d-4666-42a4-b039-ba316aee08bb' before making global git config changes
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1130541Z Adding repository directory to the temporary git global config as a safe directory
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1136357Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Digital-Tape/Digital-Tape
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1175301Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1210638Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1479708Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1510621Z http.https://github.com/.extraheader
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1524575Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1561803Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1827129Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+joins	Post Run actions/checkout@v4	2026-10-21T06:15:35.1865782Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+joins	Complete job	﻿2026-10-21T06:15:35.2266027Z Cleaning up orphan processes
+joins	Complete job	2026-10-21T06:15:35.2563710Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

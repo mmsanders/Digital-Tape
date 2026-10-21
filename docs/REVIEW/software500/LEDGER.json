@@ -1,0 +1,1535 @@
+[
+  {
+    "name": "endpoint-2",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/endpoint-2/report.jsonl",
+      "--report-nonce",
+      "14811d6ecfe57b0eb13f7e2d513fd383",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/endpoint-2/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/endpoint-2/folder0"
+    ],
+    "nonce": "14811d6ecfe57b0eb13f7e2d513fd383",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.06030508599999962,
+    "cpu_seconds": 0.042463999999999995,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 52,
+        "sha256": "ce0a26c875ec62a09c38e3faf784cdf3816d2fd1fef04670085a05527543dded"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 52,
+        "sha256": "ce0a26c875ec62a09c38e3faf784cdf3816d2fd1fef04670085a05527543dded"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 52,
+        "sha256": "ce0a26c875ec62a09c38e3faf784cdf3816d2fd1fef04670085a05527543dded"
+      },
+      "published/manifest.json": {
+        "bytes": 3444,
+        "sha256": "133d615986e045d1b71d3da6b79e54c6d703b426a98c6826eb8ae5d6fefe315d"
+      },
+      "report.jsonl": {
+        "bytes": 571,
+        "sha256": "0f7e156a93db4ca19b76484e38a25fe8c42b2a2f440309e52a4bd2738f46c541"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 167,
+        "sha256": "d06674202f6bb34e15918f15aeb4bd44c93da8e4b2a1b79bb7452efaf25989f9"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "endpoint-255",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/endpoint-255/report.jsonl",
+      "--report-nonce",
+      "cff76d4e71a90a0246bed4dbbe5053a2",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/endpoint-255/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/endpoint-255/folder0"
+    ],
+    "nonce": "cff76d4e71a90a0246bed4dbbe5053a2",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.037382531999995194,
+    "cpu_seconds": 0.036660999999999985,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "de4c859540b7560a655a3ee3b07b43e751e6edd99e6c8a3d6aba946487aca0b9"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "de4c859540b7560a655a3ee3b07b43e751e6edd99e6c8a3d6aba946487aca0b9"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 1064,
+        "sha256": "b30c842648986ff0eccd58d1584684e43bb6f78961e4ff71cbfe576ed63e617e"
+      },
+      "published/manifest.json": {
+        "bytes": 3452,
+        "sha256": "a55f59407474d69f8ec20f9f16acb0b82874f1139fc1506462c4e715d74f876d"
+      },
+      "report.jsonl": {
+        "bytes": 577,
+        "sha256": "ffa2c86a0e4f6ec687c48656c180116be235460c5f491ad12c5d9d3245b990ba"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 169,
+        "sha256": "c9eaf53cbb61e482eb67aee378d842524df8d39a0d5145cbb392828f828b1d6c"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "endpoint-257",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/endpoint-257/report.jsonl",
+      "--report-nonce",
+      "a7a5eae42890774f98914dee893d9e72",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/endpoint-257/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/endpoint-257/folder0"
+    ],
+    "nonce": "a7a5eae42890774f98914dee893d9e72",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.03760401100000621,
+    "cpu_seconds": 0.03672100000000003,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 558,
+        "sha256": "80daafc21eed547a40a6ae671622e97eba1cfc57e44b5097396307f9ac55a197"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 558,
+        "sha256": "80daafc21eed547a40a6ae671622e97eba1cfc57e44b5097396307f9ac55a197"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 1072,
+        "sha256": "e010facc59776799500ddaf10bee2e8312320e482c6a6c442338dbf61c8b501e"
+      },
+      "published/manifest.json": {
+        "bytes": 3452,
+        "sha256": "c759bb2ce3cda9a031780fcefc8fd77af969ad1d959b1b22640f6b3d0f058235"
+      },
+      "report.jsonl": {
+        "bytes": 577,
+        "sha256": "ee9827b07b1c7dce9e2e71a0c335f3157c9f557e99b4586ccf443555494dca62"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 169,
+        "sha256": "6391bc352b079551973ed6e20c793944d5d9b147a4019f96f1750adf1aec1842"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "join-2048-0",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/join-2048-0/report.jsonl",
+      "--report-nonce",
+      "a990cdc4292320f070aedfb8f898e97b",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/join-2048-0/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/join-2048-0/folder0"
+    ],
+    "nonce": "a990cdc4292320f070aedfb8f898e97b",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.07281261500000369,
+    "cpu_seconds": 0.07200699999999999,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 2092,
+        "sha256": "99a7f022edc14fc0952c4adb1ab21dce3c5434ffc8e04a43fefc4fa3310b5581"
+      },
+      "published/manifest.json": {
+        "bytes": 4050,
+        "sha256": "c0c390b4b54d8eb02577b5860756d47428ad5d600f6fe8cfd9a9688d69ab1a23"
+      },
+      "report.jsonl": {
+        "bytes": 739,
+        "sha256": "a1514ceeeddc652ae3650d901b2e038cf0a06ff4f7de55cafd13052bd5698886"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 168,
+        "sha256": "74ae87845d789327663147e55ad5130b523e8ba60957f6820b2b2874699ea17d"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "join-2048-1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/join-2048-1/report.jsonl",
+      "--report-nonce",
+      "07d1997715239545d83997acf476e405",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/join-2048-1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/join-2048-1/folder0"
+    ],
+    "nonce": "07d1997715239545d83997acf476e405",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.07185467299999715,
+    "cpu_seconds": 0.07097200000000001,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 556,
+        "sha256": "fb8c007a28fde58a8254ab9d0117ba9f7e6854109c032401294cb7481acb4c3a"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 556,
+        "sha256": "fb8c007a28fde58a8254ab9d0117ba9f7e6854109c032401294cb7481acb4c3a"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 2096,
+        "sha256": "037bbc41a38b5c76cd2c33f3274f042b3dff93a38ffb2d5cd6f51a9420914920"
+      },
+      "published/manifest.json": {
+        "bytes": 4050,
+        "sha256": "36b31965a30e2f5bb0d28c58df08127449fde0136d088ac9e4278dbc3f5d2a32"
+      },
+      "report.jsonl": {
+        "bytes": 739,
+        "sha256": "00e6847f18814616c9da34e70c1afcbb345ccec756b12ca0d2f446971a42c233"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 168,
+        "sha256": "7373b8d9dadd4e683cb8e27ed2245acf7540b8f94775b6b947e5ac93e85e685d"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "join-29000-0",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/join-29000-0/report.jsonl",
+      "--report-nonce",
+      "166ace10b577af175ff90b87a04f5aaf",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/join-29000-0/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/join-29000-0/folder0"
+    ],
+    "nonce": "166ace10b577af175ff90b87a04f5aaf",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.08218930600000363,
+    "cpu_seconds": 0.08135299999999995,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "66cf54534f90e7ba5b75425a193071d2da96a1be6ec885cb7086c24cfaf8df70"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "66cf54534f90e7ba5b75425a193071d2da96a1be6ec885cb7086c24cfaf8df70"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 2092,
+        "sha256": "8bea77a042efa500e07ca813ef65a514d955f745a9d3fda8349cbee3efc3ece0"
+      },
+      "published/manifest.json": {
+        "bytes": 4046,
+        "sha256": "19b04e3115fafe4b596b06f617f3776b2992af0ba9219ab1683002ff007c3e94"
+      },
+      "report.jsonl": {
+        "bytes": 739,
+        "sha256": "6411ef4d4a1d59fa0768ab2548efbf4ebc27c05cb0e9c0b063b5372f44857855"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 169,
+        "sha256": "c3a863a708d0acf1aac9d8919e8fb599d79192f30d4db3c3949a46a799e7fd6f"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "join-29000-1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/join-29000-1/report.jsonl",
+      "--report-nonce",
+      "d9154959b02712a54350f73dfb0d45e5",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/join-29000-1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/join-29000-1/folder0"
+    ],
+    "nonce": "d9154959b02712a54350f73dfb0d45e5",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.09004839100000339,
+    "cpu_seconds": 0.08921999999999997,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 556,
+        "sha256": "091937d26b945fb19176101eca59d84c5ed2b5c32dbe7f124497898e4fca831a"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 556,
+        "sha256": "091937d26b945fb19176101eca59d84c5ed2b5c32dbe7f124497898e4fca831a"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 2096,
+        "sha256": "6b0f83284db71f855b42a9e195f5615d27b946dd16bd5745cfef2a0d373691da"
+      },
+      "published/manifest.json": {
+        "bytes": 4046,
+        "sha256": "fb9b68a7c509f73f4214cb9a8c051f99ce1f9ef771c5efae021407157c1a6dfa"
+      },
+      "report.jsonl": {
+        "bytes": 739,
+        "sha256": "8c4d947ba736ec92dd0ded8ea04d316589ac9a3820e390f3bbc930d0a824d220"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 169,
+        "sha256": "95d93847b75376b81479812539c309bb4910fac0b681cb447c5b320806a50266"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "gap-0",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/gap-0/report.jsonl",
+      "--report-nonce",
+      "ccc30af7c85e8f1b1736c2b63d0b53b0",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/gap-0/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/gap-0/folder0"
+    ],
+    "nonce": "ccc30af7c85e8f1b1736c2b63d0b53b0",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.07343960000000038,
+    "cpu_seconds": 0.07278100000000004,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder0/source02.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 2092,
+        "sha256": "99a7f022edc14fc0952c4adb1ab21dce3c5434ffc8e04a43fefc4fa3310b5581"
+      },
+      "published/manifest.json": {
+        "bytes": 4050,
+        "sha256": "c0c390b4b54d8eb02577b5860756d47428ad5d600f6fe8cfd9a9688d69ab1a23"
+      },
+      "report.jsonl": {
+        "bytes": 739,
+        "sha256": "d4533d74a70914a8b70f553b887e1841e923ee1c1f83f3157f734c922d282d22"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 162,
+        "sha256": "bca6aab54eef4c6fcb27fcbbe02a4b0455a879785ab3bcbc858245a3ed66c9f0"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "gap-1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/gap-1/report.jsonl",
+      "--report-nonce",
+      "0e552db46a5c9c1e1c8c9fa00a470105",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/gap-1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/gap-1/folder0",
+      "/home/runner/work/_temp/software500-raw/gap-1/folder1"
+    ],
+    "nonce": "0e552db46a5c9c1e1c8c9fa00a470105",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.13705815000000143,
+    "cpu_seconds": 0.13625900000000002,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder1/source01.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 554,
+        "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930"
+      },
+      "folder1/source01.wav": {
+        "bytes": 558,
+        "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 354892,
+        "sha256": "0bde51e41b110da9b1aa09c96f8269d84cf6a488660102ca707005d063972d38"
+      },
+      "published/manifest.json": {
+        "bytes": 4119,
+        "sha256": "3ce534cc79cf4b6f084e602de9fe78c61c54021005febc7eed5bfc6eb6a070e5"
+      },
+      "report.jsonl": {
+        "bytes": 799,
+        "sha256": "d1d823a2f3555c004ad4cb5eba9aee0c529e7c4bf498f6929058f5ab808ee12e"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 162,
+        "sha256": "7bc1526ccb0b5c7c5cb417d593be209c3ff9174b53d32060d9a6ff05c3495b0b"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "threshold-channel-0",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-0/report.jsonl",
+      "--report-nonce",
+      "33e807d9a094ae942c70a519a7bc2399",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-0/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-0/folder0"
+    ],
+    "nonce": "33e807d9a094ae942c70a519a7bc2399",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.03926341899999386,
+    "cpu_seconds": 0.03847500000000015,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 46,
+        "sha256": "523cae87e0667b607cc84acb40cf1fbb01682511175f5090ce5661ec3fce3ba6"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 46,
+        "sha256": "523cae87e0667b607cc84acb40cf1fbb01682511175f5090ce5661ec3fce3ba6"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 48,
+        "sha256": "1de6c9c6f1706ab24ac97212e959f234cfad4d6e3625a3a4e6d36474fe7c831a"
+      },
+      "published/manifest.json": {
+        "bytes": 3442,
+        "sha256": "f320d606dc685fef77ddadd147cbe0aab322ba1de32986af6babee6b1bc6589a"
+      },
+      "report.jsonl": {
+        "bytes": 571,
+        "sha256": "1dd5a7fb3828a5118006e7dcf2f3f677c03d23dbdec9ccd4293ec9d71f88b6a8"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 176,
+        "sha256": "fa04f359bed6f227bbc44d670c8fcb810b1bb3636e714a5a40eab561732445ce"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "threshold-channel-1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-1/report.jsonl",
+      "--report-nonce",
+      "a1af2b829b93d1e085eb95aef2718d9c",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-1/folder0"
+    ],
+    "nonce": "a1af2b829b93d1e085eb95aef2718d9c",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.03827833600000474,
+    "cpu_seconds": 0.0375049999999999,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 48,
+        "sha256": "38c1cf17c8f29de7bebcab8cfb2881c330043b3248593882af55f0d6a02d8056"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 48,
+        "sha256": "38c1cf17c8f29de7bebcab8cfb2881c330043b3248593882af55f0d6a02d8056"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 52,
+        "sha256": "6df23383180aca5797ce8cd9040ba971637d1d5239ddf157e06d3e1730bbc96b"
+      },
+      "published/manifest.json": {
+        "bytes": 3442,
+        "sha256": "397a80621a076d4cb1277533150f01c4d2f8bb8820d443229d109ab84d3591f6"
+      },
+      "report.jsonl": {
+        "bytes": 571,
+        "sha256": "f34a0c51a759f597d5f14bba5b137614119c3de98541ae67fe5957cfe23434c5"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 176,
+        "sha256": "52b9ef74ee0c3679f451583fe938af5ea1d12b0fabd0dcdc2b01d781fa5580d0"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "threshold-channel-2",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-2/report.jsonl",
+      "--report-nonce",
+      "0d442086c7ff5040de75e218e3b6558f",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-2/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-2/folder0"
+    ],
+    "nonce": "0d442086c7ff5040de75e218e3b6558f",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.057942497999995624,
+    "cpu_seconds": 0.057170000000000054,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 56,
+        "sha256": "80ac908a0ff958c71185e30b26b45cb62827eb554ab99e9b398c53f1625d0272"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 56,
+        "sha256": "80ac908a0ff958c71185e30b26b45cb62827eb554ab99e9b398c53f1625d0272"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 56,
+        "sha256": "e51dfa5864532b4eb20c371ebaabd393175c4eb4952d9ef40fb6cad13e058fde"
+      },
+      "published/manifest.json": {
+        "bytes": 3442,
+        "sha256": "430aa239c6eb05a1bc87e9e40ca8ff98021bb09a23fb025f8825d50be0eac68b"
+      },
+      "report.jsonl": {
+        "bytes": 571,
+        "sha256": "1485883bc8b79d83f1cae1dd11e51d418612c276f8f3ace7275b861c04a49fa8"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 176,
+        "sha256": "1e09cbd01f72da878c3dc5a51d507e683285b3e00376faaaa4f050c084338a0d"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "threshold-channel-3",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-3/report.jsonl",
+      "--report-nonce",
+      "727a83db4f251652f329534d23e1860c",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-3/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/threshold-channel-3/folder0"
+    ],
+    "nonce": "727a83db4f251652f329534d23e1860c",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 0.06550413900000507,
+    "cpu_seconds": 0.057199,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 60,
+        "sha256": "bac72f309290c35ed83586850758d49340189ec25560aa719bf3afb689c030d8"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 60,
+        "sha256": "bac72f309290c35ed83586850758d49340189ec25560aa719bf3afb689c030d8"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 60,
+        "sha256": "8e22fb89627999f0c60b44327528a0f2d123cf5e9a79eff0017a966811617e3d"
+      },
+      "published/manifest.json": {
+        "bytes": 3442,
+        "sha256": "062108cc5a1e8784d5c8da275a26d0dc336820abc020bf4e17b8e5dc30f127a7"
+      },
+      "report.jsonl": {
+        "bytes": 571,
+        "sha256": "a602928716e39792b0f902d9fc50321983527b7c70f50d6cb2ee72437f562e85"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 176,
+        "sha256": "b2cb8b87fe7897674e47ee773dbabf6e9c731503a870ea83a0b19db8fcbdb033"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "block-end--1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/block-end--1/report.jsonl",
+      "--report-nonce",
+      "1f093dc86edbe3f3510b2dda2513ff0f",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/block-end--1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder0",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder1",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder2",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder3",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder4",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder5",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder6",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder7",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder8",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder9",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder10",
+      "/home/runner/work/_temp/software500-raw/block-end--1/folder11"
+    ],
+    "nonce": "1f093dc86edbe3f3510b2dda2513ff0f",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 1.051689042999996,
+    "cpu_seconds": 1.0089650000000001,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13794,
+        "sha256": "28dc6a8b49c778ad3abf4db2f2647915888b11b57a8bde9863d126d5d2afc073"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13794,
+        "sha256": "28dc6a8b49c778ad3abf4db2f2647915888b11b57a8bde9863d126d5d2afc073"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 4194344,
+        "sha256": "10c6a7d733e06dc2adc5c197b9d0eaaf77a991812018fb90585e25ccce837b57"
+      },
+      "published/manifest.json": {
+        "bytes": 10861,
+        "sha256": "4bbd4eb9d4f9e0845c51e9c80a26a65c88afccef1aef3f824862de7caa7938ce"
+      },
+      "report.jsonl": {
+        "bytes": 3280,
+        "sha256": "707b8fd93acc2346080bb86a08ba2efd3032e70c403399b29d29649dc3acc418"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 172,
+        "sha256": "899e65b4d4e6d838c6b69c129d0fa2f73a2b399f8555988a35e5aa960c671349"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "block-end-0",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/block-end-0/report.jsonl",
+      "--report-nonce",
+      "552ee79bc1f162444611476fff679b70",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/block-end-0/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder0",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder1",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder2",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder3",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder4",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder5",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder6",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder7",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder8",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder9",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder10",
+      "/home/runner/work/_temp/software500-raw/block-end-0/folder11"
+    ],
+    "nonce": "552ee79bc1f162444611476fff679b70",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 1.0725114189999942,
+    "cpu_seconds": 1.055812,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13796,
+        "sha256": "f0fd7feb7d3dead100b19433cdf393bfe9fac1c7caa7f8fe1ee432b4dd17b06b"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13796,
+        "sha256": "f0fd7feb7d3dead100b19433cdf393bfe9fac1c7caa7f8fe1ee432b4dd17b06b"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 4194348,
+        "sha256": "a6bc3fb6160cc6c0a798968f9a5765a3be505d312db6b3174ecb80396f8d7376"
+      },
+      "published/manifest.json": {
+        "bytes": 10861,
+        "sha256": "b940f04c70912e5166c91a4af8c82a3ad58069995eaf89de40092171c8c05e9f"
+      },
+      "report.jsonl": {
+        "bytes": 3280,
+        "sha256": "3d4e8ca3945ea07219216543abf583a68dd4e2860172a227e94f6322693b6177"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 171,
+        "sha256": "3a936ac8af21fcb85f11260219cf36a89be86540f3f0d1964e9f46dbaf954236"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "block-end-1",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/block-end-1/report.jsonl",
+      "--report-nonce",
+      "408aae8a3f900cf2aa220755e8aaaba7",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/block-end-1/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder0",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder1",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder2",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder3",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder4",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder5",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder6",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder7",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder8",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder9",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder10",
+      "/home/runner/work/_temp/software500-raw/block-end-1/folder11"
+    ],
+    "nonce": "408aae8a3f900cf2aa220755e8aaaba7",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 1.052445087999999,
+    "cpu_seconds": 1.034891,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13798,
+        "sha256": "95d8852f2200f420b064779f190468bceba4e913deb2ad616cabb41487d301b0"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13798,
+        "sha256": "95d8852f2200f420b064779f190468bceba4e913deb2ad616cabb41487d301b0"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 4194352,
+        "sha256": "8bcb14377ac6515eb6151bbf6b6bad34b4f32f627a462ccccc365c787844a10a"
+      },
+      "published/manifest.json": {
+        "bytes": 10861,
+        "sha256": "9e8903931da076e8234131e58bcfa4560a4300ac08980283ae1ff8e5013dfe5a"
+      },
+      "report.jsonl": {
+        "bytes": 3280,
+        "sha256": "b5fbc3ccac2c8c65f932fd7e37c54e13eba6cd8c24034e2886fcc0d0c3a946b8"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 171,
+        "sha256": "21202074289f09058e7f187aae613dc1cbc6901e4a69b498260634571968d9f3"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  },
+  {
+    "name": "block-end-2",
+    "argv": [
+      "/home/runner/work/_temp/source500/host/ingest/target/release/ingest",
+      "--report",
+      "/home/runner/work/_temp/software500-raw/block-end-2/report.jsonl",
+      "--report-nonce",
+      "051664a9b6056571422987fc1934dcbd",
+      "--out",
+      "/home/runner/work/_temp/software500-raw/block-end-2/published",
+      "--length",
+      "30",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder0",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder1",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder2",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder3",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder4",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder5",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder6",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder7",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder8",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder9",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder10",
+      "/home/runner/work/_temp/software500-raw/block-end-2/folder11"
+    ],
+    "nonce": "051664a9b6056571422987fc1934dcbd",
+    "exit": 0,
+    "reported_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "refusal": null,
+    "wall_seconds": 1.034849040999994,
+    "cpu_seconds": 1.014672,
+    "before": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13800,
+        "sha256": "b9670ddb614b19fdc1a7924414102e2134fd5c3a445ca83497a7305f7956abd0"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      }
+    },
+    "after": {
+      "folder0/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder1/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder10/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder11/source01.wav": {
+        "bytes": 13800,
+        "sha256": "b9670ddb614b19fdc1a7924414102e2134fd5c3a445ca83497a7305f7956abd0"
+      },
+      "folder2/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder3/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder4/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder5/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder6/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder7/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder8/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "folder9/source01.wav": {
+        "bytes": 13044,
+        "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a"
+      },
+      "foreign-sentinel.txt": {
+        "bytes": 52,
+        "sha256": "294af30c5f109dba767a033b6d86955e2309ad579c692938f9b3c7a1e90c03f7"
+      },
+      "published/audio.wav": {
+        "bytes": 4194356,
+        "sha256": "08f743326d5918b3944e3a8aa38fc41e65f7ec90a424fda03f5dd71495d675d5"
+      },
+      "published/manifest.json": {
+        "bytes": 10861,
+        "sha256": "bd013ec8259294c980905d0aa483b2b907f382de777b6201268a6cb05c2103ba"
+      },
+      "report.jsonl": {
+        "bytes": 3280,
+        "sha256": "e26643052a4d8a1f177f585aa7db71c2339eccd17f5a54432e6b2e9677ad11d9"
+      },
+      "stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.bin": {
+        "bytes": 171,
+        "sha256": "8a72af8b47f93a07677776cd31e9b2f5f776170ea54c36f12076b0cf007eaef5"
+      }
+    },
+    "stages": [],
+    "success_checks": "canonical pair/header/hash/source order/trim/count/gap/mono/manifest no-boost and unmeasurable fields bound",
+    "limits": "No instrumented full-precision gain/local/global meter receipt; source guard order plus actual shipping success only. Rounded manifest gain does not certify sample-exact gain reproduction or a global meter theorem."
+  }
+]
