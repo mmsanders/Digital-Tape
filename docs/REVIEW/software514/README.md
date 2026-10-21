@@ -55,7 +55,9 @@ Software-local retention envelope software514-positive-stop-return.zip is1014923
 bytes SHA25678fed87f002b8c76fbaf05481087454245c7320ffffa6d3adf4089fefb5654e8,
 134 closed members. It preserves the downloaded originals and adds an explicitly
 local retention inventory, NOT a reconstructed original producer final ZIP.
-The exact new public release destination is awaiting Michael's specific archive
-approval; existing authenticated Actions transport is already usable for replay.
+Michael explicitly approved this exact archive/destination in this chat. Release
+evidence-software514-2026-10-21 retains the original closed envelope unchanged;
+PUBLICATION.json records authenticated public transport when available. Existing
+authenticated Actions transport is also usable for replay.
 No private-machine capture trace is present. No broader443/HOST/native/physical/
 integration acceptance or permission follows from this return.
