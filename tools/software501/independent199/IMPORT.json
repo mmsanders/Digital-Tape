@@ -1,0 +1,12 @@
+{
+  "rows.py": {
+    "source_commit": "42f169f1b5448bc646a2b181ced51c14e385017c",
+    "source_path": "findings/P2-SUBSET-ROWS-2026-10-17/rows.py",
+    "sha256": "d22328f736b03038655e80e939183e5a76367c1d5eaa01c732a3bdb3924557c5"
+  },
+  "load_rows.py": {
+    "source_commit": "42f169f1b5448bc646a2b181ced51c14e385017c",
+    "source_path": "findings/P2-SUBSET-ROWS-2026-10-17/load_rows.py",
+    "sha256": "6d0fc32e3055dfa529bf02ca4c98c5353f7f1c8d12d5497e5d25a53d843c1e97"
+  }
+}
