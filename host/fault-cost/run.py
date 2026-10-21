@@ -22,6 +22,7 @@ def main():
  gate_index=0;active_row=None
  def allocated(root):
   return sum(getattr(p.stat(),'st_blocks',0)*512 for p in root.rglob('*') if p.is_file())
+ phase='mechanics';phase_cpu=cpu();phase_bytes=allocated(a.out.parent)
  def reserve(seconds=10,extra=0):
   nonlocal gate_index
   completion_seconds=132 if active_row is not None else 60
@@ -30,7 +31,11 @@ def main():
   fact=dict(index=gate_index,cpu_including_build_reserve=used_cpu,workspace_allocated_bytes=used,
     next_seconds=seconds,next_bytes=extra,completion_seconds=completion_seconds,completion_bytes=completion_bytes,
     active_row=active_row,max_cpu_seconds=7200,max_bytes=2*1024**3)
+  cap_cpu=600 if phase=='mechanics' else 60 if phase=='positive' else 132
+  cap_bytes=(128 if phase=='mechanics' else 16 if phase=='positive' else 32)*1024**2
+  fact.update(phase=phase,phase_actual_cpu_seconds=used_cpu-phase_cpu,phase_actual_allocated_bytes=max(0,used-phase_bytes),phase_cpu_reservation=cap_cpu,phase_byte_reservation=cap_bytes)
   gp=a.out/'gates';gp.mkdir(exist_ok=True);(gp/(f'{gate_index:05d}.json')).write_text(json.dumps(fact,sort_keys=True)+'\n');gate_index+=1
+  assert used_cpu-phase_cpu<=cap_cpu and max(0,used-phase_bytes)<=cap_bytes,'phase reservation exceeded; STOP before next invocation, no slack spending'
   assert used_cpu+seconds+completion_seconds<=7200,'CPU cap: stop before next invocation'
   assert used+extra+completion_bytes<2*1024**3,'all working/evidence allocated storage cap'
 
@@ -98,6 +103,7 @@ def main():
  # Actual allocated build/mechanics workspace gate; no fault if already over.
  assert allocated(a.out.parent)<=128*1024**2,'build/mechanics workspace exceeds128MiB; zero new faults'
  # At most one licensed complete positive, through the unchanged route.
+ phase='positive';phase_cpu=cpu();phase_bytes=allocated(a.out.parent)
  reserve(60,16*1024**2);_,pos=L.run_fault(o,w,temp,'none',None,pristine,sha(voice))
  positive=json.loads((a.out/'faults/none/seam-trace.json').read_text());assert normalize(positive)==baseline
  assert judge.check(pos['post_failure_remount'])=='new/new'
@@ -110,6 +116,7 @@ def main():
    if n.startswith('stage3/commands/') and n.endswith('/original-remount.json'):
     q=json.loads(z.read(n));normal_cache[q['projection_sha256']]=dict(observation=q,state=judge.check(q),carried=True,origin=n)
  for row in plan['rows']:
+  phase='row';phase_cpu=cpu();phase_bytes=allocated(a.out.parent)
   active_row=dict(kind=row['kind'],ordinal=row['ordinal']);reserve(row['reserved_cpu_seconds'],row['reserved_bytes']);t0=cpu();storage0=allocated(a.out.parent);files0={p for p in a.out.rglob('*') if p.is_file()};c0=len(records)
   try:
    name,rec=L.run_fault(o,w,temp,row['kind'],row['ordinal'],pristine,sha(voice));original_oracle.host_fault(rec)

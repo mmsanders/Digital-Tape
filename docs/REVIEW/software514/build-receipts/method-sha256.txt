@@ -1,0 +1,4 @@
+oracle.py: OK
+PLAN.json: OK
+README.md: OK
+selftest.py: OK

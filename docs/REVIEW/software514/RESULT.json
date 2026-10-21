@@ -1,0 +1,38 @@
+{
+  "tested": "78a2b27c076f0055aaef2c437a5a99a8c7cd2c70",
+  "run": 39638776425,
+  "workflow_conclusion": "failure",
+  "artifact": 12364255907,
+  "artifact_bytes": 1007943,
+  "artifact_provider_digest": "cd24bedaab55ffe18e8c78acf62b230390b35f3db3281365f670f6e43a5f8107",
+  "new_fault_coordinates": 0,
+  "remaining": [
+    [
+      "write",
+      64
+    ],
+    [
+      "write",
+      346
+    ],
+    [
+      "write",
+      351
+    ],
+    [
+      "barrier",
+      50
+    ]
+  ],
+  "complete_recorded_native_calls": 5,
+  "positive_complete_events": 405,
+  "gate_defect": "Per-command total cap enforced, per-positive phase cap missing until post-positive assertion. Final positive dumpB invoked after gate5 showed181616640 allocated bytes >150994944 combined reservation. No fault executed. No retry.",
+  "gate_fix": "Source only pre-phase budget check added after failure; NEVER executed",
+  "archive_name": "software514-positive-stop-return.zip",
+  "archive_bytes": 1014923,
+  "archive_sha256": "78fed87f002b8c76fbaf05481087454245c7320ffffa6d3adf4089fefb5654e8",
+  "archive_members": 134,
+  "archive_provenance": "Software-local closed retention envelope of original downloaded Actions members, NOT an original producer ZIP; original driver stopped before its own ZIP/final ledger",
+  "missing": "Exact final working allocation and final cumulative CPU were not serialized at assertion. Retain lower-bound gate values/CPU pass; no reconstruction.",
+  "native_call_replay": false
+}
