@@ -1,0 +1,18 @@
+{
+  "authority": "PM497 / Verification240 / Software500",
+  "product_input": "14cad0b637ecf45b61406a987767fda770ea73bd",
+  "verification_input": "046b3f2c930efeb9bdb50d175164d2c4cbdb705b",
+  "s1": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "source_assessment": "aba3ce314cd31bbaad254c1d956552b56d3b91ad",
+  "existing_reference": "tests/wp16_ingest_stage1/numerics.py at046b3f2c",
+  "reference_scope": "declared independent16-phase double reference; no Product meter/continuous/f32-rounding theorem",
+  "cases": 18,
+  "max_cases": 24,
+  "max_input_pcm_bytes": 33554432,
+  "source_rate": 44100,
+  "target_seconds": 30,
+  "cpu_seconds_limit": 7200,
+  "evidence_bytes_limit": 536870912,
+  "author_reference_cpu_seconds": 3.515625,
+  "stage": "authoring only, no Product execution or global witness"
+}

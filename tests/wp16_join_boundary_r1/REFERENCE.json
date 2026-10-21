@@ -1,0 +1,1911 @@
+[
+  {
+    "assembled": {
+      "coordinate": [
+        0,
+        0,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.06268205583578312,
+      "sampled_peak_amplitude": 0.06250000037815033,
+      "sampled_peak_dbtp": -24.082399600565342
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "endpoint-1",
+      "sources": [
+        {
+          "bytes": 46,
+          "channels": 1,
+          "frames": 1,
+          "path": "0/source01.wav",
+          "sha256": "fa0f253668c42e587d91bb6968ee83f5fe966b682910ec7327b3ceeda634e773",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 1
+    },
+    "name": "endpoint-1",
+    "sources": [
+      {
+        "coordinate": [
+          0,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        -1,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.07975747991754752,
+      "sampled_peak_amplitude": 0.0682538213841604,
+      "sampled_peak_dbtp": -23.31746056791428
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "endpoint-2",
+      "sources": [
+        {
+          "bytes": 52,
+          "channels": 2,
+          "frames": 2,
+          "path": "0/source01.wav",
+          "sha256": "ce0a26c875ec62a09c38e3faf784cdf3816d2fd1fef04670085a05527543dded",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 2
+    },
+    "name": "endpoint-2",
+    "sources": [
+      {
+        "coordinate": [
+          -1,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.07975747991754752,
+        "sampled_peak_amplitude": 0.0682538213841604,
+        "sampled_peak_dbtp": -23.31746056791428
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        0,
+        0,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.06268205583578312,
+      "sampled_peak_amplitude": 0.06250000037815033,
+      "sampled_peak_dbtp": -24.082399600565342
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "endpoint-255",
+      "sources": [
+        {
+          "bytes": 554,
+          "channels": 1,
+          "frames": 255,
+          "path": "0/source01.wav",
+          "sha256": "de4c859540b7560a655a3ee3b07b43e751e6edd99e6c8a3d6aba946487aca0b9",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 255
+    },
+    "name": "endpoint-255",
+    "sources": [
+      {
+        "coordinate": [
+          0,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        0,
+        0,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.06268205583578312,
+      "sampled_peak_amplitude": 0.06250000037815033,
+      "sampled_peak_dbtp": -24.082399600565342
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "endpoint-257",
+      "sources": [
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source01.wav",
+          "sha256": "80daafc21eed547a40a6ae671622e97eba1cfc57e44b5097396307f9ac55a197",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 257
+    },
+    "name": "endpoint-257",
+    "sources": [
+      {
+        "coordinate": [
+          0,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        252,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.07975747991754752,
+      "sampled_peak_amplitude": 0.0682538213841604,
+      "sampled_peak_dbtp": -23.31746056791428
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "join-2048-0",
+      "sources": [
+        {
+          "bytes": 554,
+          "channels": 1,
+          "frames": 255,
+          "path": "0/source01.wav",
+          "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source02.wav",
+          "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+          "start_frame": 255
+        }
+      ],
+      "total_frames": 512
+    },
+    "name": "join-2048-0",
+    "sources": [
+      {
+        "coordinate": [
+          252,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.07975747991754752,
+        "sampled_peak_amplitude": 0.0682538213841604,
+        "sampled_peak_dbtp": -23.31746056791428
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        253,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.07975747991754752,
+      "sampled_peak_amplitude": 0.0682538213841604,
+      "sampled_peak_dbtp": -23.31746056791428
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "join-2048-1",
+      "sources": [
+        {
+          "bytes": 556,
+          "channels": 1,
+          "frames": 256,
+          "path": "0/source01.wav",
+          "sha256": "fb8c007a28fde58a8254ab9d0117ba9f7e6854109c032401294cb7481acb4c3a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source02.wav",
+          "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+          "start_frame": 256
+        }
+      ],
+      "total_frames": 513
+    },
+    "name": "join-2048-1",
+    "sources": [
+      {
+        "coordinate": [
+          253,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.07975747991754752,
+        "sampled_peak_amplitude": 0.0682538213841604,
+        "sampled_peak_dbtp": -23.31746056791428
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        252,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "join-29000-0",
+      "sources": [
+        {
+          "bytes": 554,
+          "channels": 1,
+          "frames": 255,
+          "path": "0/source01.wav",
+          "sha256": "66cf54534f90e7ba5b75425a193071d2da96a1be6ec885cb7086c24cfaf8df70",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source02.wav",
+          "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee",
+          "start_frame": 255
+        }
+      ],
+      "total_frames": 512
+    },
+    "name": "join-29000-0",
+    "sources": [
+      {
+        "coordinate": [
+          252,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.8851918264373005,
+        "sampled_peak_amplitude": 0.8850097709796678,
+        "sampled_peak_dbtp": -1.061038688662084
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        253,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "join-29000-1",
+      "sources": [
+        {
+          "bytes": 556,
+          "channels": 1,
+          "frames": 256,
+          "path": "0/source01.wav",
+          "sha256": "091937d26b945fb19176101eca59d84c5ed2b5c32dbe7f124497898e4fca831a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source02.wav",
+          "sha256": "1378508575564d3706f214c5824b5fb8c3e7b4950a9cffac6fbd5e60f70cc7ee",
+          "start_frame": 256
+        }
+      ],
+      "total_frames": 513
+    },
+    "name": "join-29000-1",
+    "sources": [
+      {
+        "coordinate": [
+          253,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.8851918264373005,
+        "sampled_peak_amplitude": 0.8850097709796678,
+        "sampled_peak_dbtp": -1.061038688662084
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        252,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.07975747991754752,
+      "sampled_peak_amplitude": 0.0682538213841604,
+      "sampled_peak_dbtp": -23.31746056791428
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "gap-0",
+      "sources": [
+        {
+          "bytes": 554,
+          "channels": 1,
+          "frames": 255,
+          "path": "0/source01.wav",
+          "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "0/source02.wav",
+          "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+          "start_frame": 255
+        }
+      ],
+      "total_frames": 512
+    },
+    "name": "gap-0",
+    "sources": [
+      {
+        "coordinate": [
+          252,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.07975747991754752,
+        "sampled_peak_amplitude": 0.0682538213841604,
+        "sampled_peak_dbtp": -23.31746056791428
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        252,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.07975747991754752,
+      "sampled_peak_amplitude": 0.0682538213841604,
+      "sampled_peak_dbtp": -23.31746056791428
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [
+        {
+          "frames": 88200,
+          "start_frame": 255
+        }
+      ],
+      "name": "gap-1",
+      "sources": [
+        {
+          "bytes": 554,
+          "channels": 1,
+          "frames": 255,
+          "path": "0/source01.wav",
+          "sha256": "c71be91340326f8cc202a2eab8ffb5249b8e4b3b01ebb64354016b476c9de930",
+          "start_frame": 0
+        },
+        {
+          "bytes": 558,
+          "channels": 1,
+          "frames": 257,
+          "path": "1/source01.wav",
+          "sha256": "d6a0816577f64387bdf0069ded930d60cc9b7c5cdde7ad2d1fc1af8ed75ee1ad",
+          "start_frame": 88455
+        }
+      ],
+      "total_frames": 88712
+    },
+    "name": "gap-1",
+    "sources": [
+      {
+        "coordinate": [
+          252,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.07975747991754752,
+        "sampled_peak_amplitude": 0.0682538213841604,
+        "sampled_peak_dbtp": -23.31746056791428
+      },
+      {
+        "coordinate": [
+          256,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        0,
+        0,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 0.8851918264373005,
+      "sampled_peak_amplitude": 0.8850097709796678,
+      "sampled_peak_dbtp": -1.061038688662084
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "threshold-channel-0",
+      "sources": [
+        {
+          "bytes": 46,
+          "channels": 1,
+          "frames": 1,
+          "path": "0/source01.wav",
+          "sha256": "523cae87e0667b607cc84acb40cf1fbb01682511175f5090ce5661ec3fce3ba6",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 1
+    },
+    "name": "threshold-channel-0",
+    "sources": [
+      {
+        "coordinate": [
+          0,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.8851918264373005,
+        "sampled_peak_amplitude": 0.8850097709796678,
+        "sampled_peak_dbtp": -1.061038688662084
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        -1,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1270213546578218,
+      "sampled_peak_amplitude": 0.9665181025205254,
+      "sampled_peak_dbtp": -0.29580014773913277
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "threshold-channel-1",
+      "sources": [
+        {
+          "bytes": 48,
+          "channels": 1,
+          "frames": 2,
+          "path": "0/source01.wav",
+          "sha256": "38c1cf17c8f29de7bebcab8cfb2881c330043b3248593882af55f0d6a02d8056",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 2
+    },
+    "name": "threshold-channel-1",
+    "sources": [
+      {
+        "coordinate": [
+          -1,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1270213546578218,
+        "sampled_peak_amplitude": 0.9665181025205254,
+        "sampled_peak_dbtp": -0.29580014773913277
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        0,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "threshold-channel-2",
+      "sources": [
+        {
+          "bytes": 56,
+          "channels": 2,
+          "frames": 3,
+          "path": "0/source01.wav",
+          "sha256": "80ac908a0ff958c71185e30b26b45cb62827eb554ab99e9b398c53f1625d0272",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 3
+    },
+    "name": "threshold-channel-2",
+    "sources": [
+      {
+        "coordinate": [
+          0,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        1,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1270213546578218,
+      "sampled_peak_amplitude": 0.9665181025205254,
+      "sampled_peak_dbtp": -0.29580014773913277
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [],
+      "name": "threshold-channel-3",
+      "sources": [
+        {
+          "bytes": 60,
+          "channels": 2,
+          "frames": 4,
+          "path": "0/source01.wav",
+          "sha256": "bac72f309290c35ed83586850758d49340189ec25560aa719bf3afb689c030d8",
+          "start_frame": 0
+        }
+      ],
+      "total_frames": 4
+    },
+    "name": "threshold-channel-3",
+    "sources": [
+      {
+        "coordinate": [
+          1,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1270213546578218,
+        "sampled_peak_amplitude": 0.9665181025205254,
+        "sampled_peak_dbtp": -0.29580014773913277
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        1048572,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [
+        {
+          "frames": 88200,
+          "start_frame": 6500
+        },
+        {
+          "frames": 88200,
+          "start_frame": 101200
+        },
+        {
+          "frames": 88200,
+          "start_frame": 195900
+        },
+        {
+          "frames": 88200,
+          "start_frame": 290600
+        },
+        {
+          "frames": 88200,
+          "start_frame": 385300
+        },
+        {
+          "frames": 88200,
+          "start_frame": 480000
+        },
+        {
+          "frames": 88200,
+          "start_frame": 574700
+        },
+        {
+          "frames": 88200,
+          "start_frame": 669400
+        },
+        {
+          "frames": 88200,
+          "start_frame": 764100
+        },
+        {
+          "frames": 88200,
+          "start_frame": 858800
+        },
+        {
+          "frames": 88200,
+          "start_frame": 953500
+        }
+      ],
+      "name": "block-end--1",
+      "sources": [
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "0/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "1/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 94700
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "2/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 189400
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "3/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 284100
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "4/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 378800
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "5/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 473500
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "6/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 568200
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "7/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 662900
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "8/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 757600
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "9/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 852300
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "10/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 947000
+        },
+        {
+          "bytes": 13794,
+          "channels": 1,
+          "frames": 6875,
+          "path": "11/source01.wav",
+          "sha256": "28dc6a8b49c778ad3abf4db2f2647915888b11b57a8bde9863d126d5d2afc073",
+          "start_frame": 1041700
+        }
+      ],
+      "total_frames": 1048575
+    },
+    "name": "block-end--1",
+    "sources": [
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6872,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        1048573,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [
+        {
+          "frames": 88200,
+          "start_frame": 6500
+        },
+        {
+          "frames": 88200,
+          "start_frame": 101200
+        },
+        {
+          "frames": 88200,
+          "start_frame": 195900
+        },
+        {
+          "frames": 88200,
+          "start_frame": 290600
+        },
+        {
+          "frames": 88200,
+          "start_frame": 385300
+        },
+        {
+          "frames": 88200,
+          "start_frame": 480000
+        },
+        {
+          "frames": 88200,
+          "start_frame": 574700
+        },
+        {
+          "frames": 88200,
+          "start_frame": 669400
+        },
+        {
+          "frames": 88200,
+          "start_frame": 764100
+        },
+        {
+          "frames": 88200,
+          "start_frame": 858800
+        },
+        {
+          "frames": 88200,
+          "start_frame": 953500
+        }
+      ],
+      "name": "block-end-0",
+      "sources": [
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "0/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "1/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 94700
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "2/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 189400
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "3/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 284100
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "4/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 378800
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "5/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 473500
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "6/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 568200
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "7/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 662900
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "8/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 757600
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "9/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 852300
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "10/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 947000
+        },
+        {
+          "bytes": 13796,
+          "channels": 1,
+          "frames": 6876,
+          "path": "11/source01.wav",
+          "sha256": "f0fd7feb7d3dead100b19433cdf393bfe9fac1c7caa7f8fe1ee432b4dd17b06b",
+          "start_frame": 1041700
+        }
+      ],
+      "total_frames": 1048576
+    },
+    "name": "block-end-0",
+    "sources": [
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6873,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        1048574,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [
+        {
+          "frames": 88200,
+          "start_frame": 6500
+        },
+        {
+          "frames": 88200,
+          "start_frame": 101200
+        },
+        {
+          "frames": 88200,
+          "start_frame": 195900
+        },
+        {
+          "frames": 88200,
+          "start_frame": 290600
+        },
+        {
+          "frames": 88200,
+          "start_frame": 385300
+        },
+        {
+          "frames": 88200,
+          "start_frame": 480000
+        },
+        {
+          "frames": 88200,
+          "start_frame": 574700
+        },
+        {
+          "frames": 88200,
+          "start_frame": 669400
+        },
+        {
+          "frames": 88200,
+          "start_frame": 764100
+        },
+        {
+          "frames": 88200,
+          "start_frame": 858800
+        },
+        {
+          "frames": 88200,
+          "start_frame": 953500
+        }
+      ],
+      "name": "block-end-1",
+      "sources": [
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "0/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "1/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 94700
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "2/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 189400
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "3/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 284100
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "4/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 378800
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "5/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 473500
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "6/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 568200
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "7/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 662900
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "8/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 757600
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "9/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 852300
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "10/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 947000
+        },
+        {
+          "bytes": 13798,
+          "channels": 1,
+          "frames": 6877,
+          "path": "11/source01.wav",
+          "sha256": "95d8852f2200f420b064779f190468bceba4e913deb2ad616cabb41487d301b0",
+          "start_frame": 1041700
+        }
+      ],
+      "total_frames": 1048577
+    },
+    "name": "block-end-1",
+    "sources": [
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6874,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      }
+    ]
+  },
+  {
+    "assembled": {
+      "coordinate": [
+        1048575,
+        13,
+        0
+      ],
+      "l1": 3.9770403118076345,
+      "no_boost_quantized_reference_upper": 1.1269824994700972,
+      "sampled_peak_amplitude": 0.9664847754593027,
+      "sampled_peak_dbtp": -0.29609965601102195
+    },
+    "facts": {
+      "capacity_frames": 1323000,
+      "gaps": [
+        {
+          "frames": 88200,
+          "start_frame": 6500
+        },
+        {
+          "frames": 88200,
+          "start_frame": 101200
+        },
+        {
+          "frames": 88200,
+          "start_frame": 195900
+        },
+        {
+          "frames": 88200,
+          "start_frame": 290600
+        },
+        {
+          "frames": 88200,
+          "start_frame": 385300
+        },
+        {
+          "frames": 88200,
+          "start_frame": 480000
+        },
+        {
+          "frames": 88200,
+          "start_frame": 574700
+        },
+        {
+          "frames": 88200,
+          "start_frame": 669400
+        },
+        {
+          "frames": 88200,
+          "start_frame": 764100
+        },
+        {
+          "frames": 88200,
+          "start_frame": 858800
+        },
+        {
+          "frames": 88200,
+          "start_frame": 953500
+        }
+      ],
+      "name": "block-end-2",
+      "sources": [
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "0/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 0
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "1/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 94700
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "2/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 189400
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "3/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 284100
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "4/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 378800
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "5/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 473500
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "6/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 568200
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "7/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 662900
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "8/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 757600
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "9/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 852300
+        },
+        {
+          "bytes": 13044,
+          "channels": 1,
+          "frames": 6500,
+          "path": "10/source01.wav",
+          "sha256": "a1d0d03aac6e7931849f53867f14e9eef0d584105640d06bda73764ccbb3508a",
+          "start_frame": 947000
+        },
+        {
+          "bytes": 13800,
+          "channels": 1,
+          "frames": 6878,
+          "path": "11/source01.wav",
+          "sha256": "b9670ddb614b19fdc1a7924414102e2134fd5c3a445ca83497a7305f7956abd0",
+          "start_frame": 1041700
+        }
+      ],
+      "total_frames": 1048578
+    },
+    "name": "block-end-2",
+    "sources": [
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6499,
+          0,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 0.06268205583578312,
+        "sampled_peak_amplitude": 0.06250000037815033,
+        "sampled_peak_dbtp": -24.082399600565342
+      },
+      {
+        "coordinate": [
+          6875,
+          13,
+          0
+        ],
+        "l1": 3.9770403118076345,
+        "no_boost_quantized_reference_upper": 1.1269824994700972,
+        "sampled_peak_amplitude": 0.9664847754593027,
+        "sampled_peak_dbtp": -0.29609965601102195
+      }
+    ]
+  }
+]
