@@ -1,0 +1,28 @@
+{
+  "archive_bytes": 356916,
+  "archive_sha256": "2033b2292db4c9a4ae1ebf1873eb274b9319284459d1648b3883999009c1ef5d",
+  "closed_members": 422,
+  "inventory_entries": 421,
+  "actual": {
+    "actual_helper_calls": 13,
+    "allocated_highwater": 4382720,
+    "build_supervision_reserve_ns": 60000000000,
+    "cases": 38,
+    "cpu_ns": 3739517000,
+    "failed_probe_separate_from_task_census": true,
+    "final_complete_namespace_scan": true,
+    "hard_overshoot_guarantee": false,
+    "method": "00dd03edde05deacfc4935f61018ca8de43b9b6e",
+    "mutations": 6,
+    "product_calls": 0,
+    "source": "f8080f2189bf7c8355adb81c4cfd2488fc955b4b",
+    "wall_ns": 4664823897
+  },
+  "final_cpu_ns_including_reserve": 63875797000,
+  "final_allocated_bytes": 5263360,
+  "final_accounting_reserve_bytes": 65536,
+  "source_identity_authenticated": true,
+  "original_requests_and_raw_authenticated": true,
+  "independent_disposition": "PENDING; actual facts only, no self-PASS",
+  "offline_authentication_product_or_helper_calls": 0
+}
