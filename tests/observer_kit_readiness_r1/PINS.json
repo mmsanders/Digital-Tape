@@ -1,0 +1,10 @@
+{
+  "actual_native_cases_executed": 0,
+  "authority": "PM510 / Verification256 / Software515",
+  "filter_sha256": "6bc51ab36ed855ef86a903808d899ab349827122db04b7e0bb13fe285adc2f74",
+  "method236_merge": "9991eded2ca2892f436088241848a55de4d31b88",
+  "method236_tree": "944df7d2fc9946c62214829d8c67d7f7c4b0b62e",
+  "observer_sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885",
+  "scope": "PREPARATION ONLY; actual helper image/runtime identity pending Software kit",
+  "stop237_merge": "046b3f2c930efeb9bdb50d175164d2c4cbdb705b"
+}
