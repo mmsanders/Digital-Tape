@@ -155,4 +155,27 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-180](DECISIONS.md#adr-180--resolve-p2v16-002-aifc-sowt-and-software-429-interpretations) | 2026-10-14 PDT | P2V16-002 sowt / #429 (a)–(e) | AIFC sowt 16-bit only, non-16 refuses by name; ADTS one raw block, CRC verified when present; lossless gapless_known; LAME/FFmpeg tag CRC; stts agreement |
 
-117 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+
+| [ADR-181](DECISIONS.md#adr-181--route-the-stalled-mac-a6-method-and-windows-11-qualification) | 2026-10-15 PDT | Mac A6 owner / Windows 11 route | Mac A6 moves from DTrace to fs_usage (Software, after #435); Windows 11 is Michael's hands, batched; self-hosted runner rejected (public repo) |
+
+
+| [ADR-182](DECISIONS.md#adr-182--route-the-q-p2-1-any-subset-crash-mode-and-issue-wp-15-contract-app-1) | 2026-10-15 PDT | Q-P2-1 crash mode / WP-15 APP-1 | Verification authors the any-subset persistence mode and runs current engine; WP-15 contract issued for preflight with `tapectl cards` and `--report` additions |
+
+
+| [ADR-183](DECISIONS.md#adr-183--app-1-preflight-corrections-and-q-p2-1-adapter-import-routing) | 2026-10-15 PDT | APP-1 P2V15-001…004 / Q-P2-1 import | One-open `tapectl make` with `CARD_CHANGED`; report diagnostic exception with nonce; exact overage frames; app-origin events; Software imports any-subset package after #438 |
+
+| [ADR-184](DECISIONS.md#adr-184--disposition-latest-returns-record-mac-a6-limitation-and-route-unblocked-host-work) | 2026-10-17 UTC | Latest return disposition / unblocked host work | Mac limitation recorded, ready441/443 to Verification, INGEST receipts192, APP annex groundwork444; WP16 coverage rung2, Phase2 5/12 |
+
+| [ADR-185](DECISIONS.md#adr-185--resolve-software444-q1q7-and-issue-app-1a-host-interface) | 2026-10-17 PDT | APP-1A / Software444 answers | Closed host annex; discovery hints separated from exact destructive authorization; Windows method PASS carried, host supplements/APP work routed; Phase2 6/12 |
+
+| [ADR-186](DECISIONS.md#adr-186--authorize-pinned-exhaustion-and-app-corrections-preserve-original-receipts) | 2026-10-17 PDT | Confirmed host/APP correction | Windows shipping exhaustion and parser/static gate fixes authorized, corrected independent import; old INGEST kit paused, physical A6 ready; rungs unchanged |
+
+| [ADR-187](DECISIONS.md#adr-187--prepare-the-concrete-corrected-windows-kit-before-authenticating-its-pins) | 2026-10-17 PDT | Windows kit preparation sequence | Fresh Software461 prepares/pins corrected459 kit, Verification204 authenticates before Michael readiness; old kit paused, all package holds/rungs unchanged |
+
+| [ADR-188](DECISIONS.md#adr-188--issue-independent-phase-2-host-queues-with-direct-overnight-handoffs) | 2026-10-18 PDT | Substantial independent host queues | S2/S3 conditional host issuance465↔208; report gaps466↔209; narrow crash supplements467↔210; ready human pins fixed, direct handoffs/fallbacks; rungs unchanged |
+
+| [ADR-189](DECISIONS.md#adr-189--consolidate-the-current-hands-on-queue-and-resolve-s3-query-failures) | 2026-10-19 PDT | Current hands-on queue / S3 fail-stop ruling | Michael473 supersedes447; HOST_QUERY_FAILED mapping, platform binding holds; partial overnight dispositions, rungs unchanged |
+
+| [ADR-190](DECISIONS.md#adr-190--close-completed-review-envelopes-and-bound-the-remaining-acceptance-work) | 2026-10-19 PDT | Phase2 closeout / distinct-disk method | Completed evidence PRs retired; defective436 superseded by459; precise remaining blockers; retained-capture223; INGEST policy facts only |
+
+127 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

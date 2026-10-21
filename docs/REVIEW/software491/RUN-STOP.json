@@ -1,0 +1,94 @@
+{
+  "disposition": "CAPABILITY STOP BEFORE OBSERVER OR TARGET-CALL EXECUTION; not observer absence or independent acceptance",
+  "assignment": 491,
+  "scope_amendment": "PM494; method dependency satisfied",
+  "current_product_input": "968b6d37d5508e7a9bd10dfb9e44a1431b1d6dbe",
+  "method_publication": "9991eded2ca2892f436088241848a55de4d31b88",
+  "method_tree": "944df7d2fc9946c62214829d8c67d7f7c4b0b62e",
+  "import_commit": "b92f6f8e4ce0274c0b78762ab0a8135609b99333",
+  "method_checks": "six synthetic neighbours and27 detecting mutations passed; no native capability execution",
+  "privilege_checks": [
+    {
+      "process_id": 24908,
+      "pointer_bits": 64,
+      "administrative_token": false,
+      "context": "sandboxed PowerShell process"
+    },
+    {
+      "process_id": 16492,
+      "pointer_bits": 64,
+      "administrative_token": false,
+      "context": "existing unsandboxed PowerShell process; no Windows elevation/UAC requested"
+    }
+  ],
+  "privilege_command": "$principal=[Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent(); $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)",
+  "observer": {
+    "file": "Procmon64.exe",
+    "bytes": 2237720,
+    "sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885",
+    "version": "4.12",
+    "embedded_manifest_execution_level": "asInvoker",
+    "embedded_requirement_messages": [
+      {
+        "text": "Capture requires Administrators group membership",
+        "encoding": "UTF-16LE",
+        "file_offset": 1200448,
+        "bytes": 96,
+        "sha256": "14f0796c208698b8dd5296607d74ed8e4f86d769aabbd531c91f7eb158255e5f"
+      },
+      {
+        "text": "Process Monitor must be run from an administrator account.",
+        "encoding": "UTF-16LE",
+        "file_offset": 1210880,
+        "bytes": 116,
+        "sha256": "ec6529f8b236a8304ddd56d0aa3437d71b976a65813d5e599c877ccb4a52111c"
+      }
+    ],
+    "tool_not_launched": true
+  },
+  "reasoning": "Existing ordinary unsandboxed token lacks Administrators membership required by authenticated Procmon capture. asInvoker manifest does not grant membership. No launch is attempted to solicit elevation or test bypasses. This is a preflight limitation, not an observed capture-start exit or unseen-control result.",
+  "python_route": {
+    "runtime": "Python3.12.14 existing native-FFI route authorized conditionally by PM494",
+    "helper_image": "probe-235.exe required by method",
+    "status": "NOT IMPLEMENTED OR TESTED: separate observer-privilege prerequisite already fails",
+    "incapable_runtime_claim": false,
+    "no_gcc_retry": true,
+    "no_install_or_tool_hunt": true
+  },
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "windows": {
+      "ProductName": "Windows 10 Home",
+      "EditionID": "Core",
+      "CurrentBuildNumber": "26200",
+      "UBR": 9457,
+      "InstallationType": "Client"
+    }
+  },
+  "execution": {
+    "helper_builds": 0,
+    "helper_launches": 0,
+    "target_CreateFileW_calls": 0,
+    "target_QueryDosDeviceW_calls": 0,
+    "capture_start_attempts": 0,
+    "observer_launches": 0,
+    "privilege_changes": 0,
+    "new_trace_bytes": 0
+  },
+  "evidence": {
+    "raw_capture_exists": false,
+    "actual_six_case_native_rows_exist": false,
+    "normalized_oracle_input_generated": false,
+    "synthetic_fixture_used_as_actual": false,
+    "retained_artifacts_changed": false
+  },
+  "next_condition": "Existing authorized administrator capture context must be available before any fresh execution scope; no request for human elevation, security change, installation, workaround or retry is issued. Verification235 independently disposes this precise prerequisite stop; PM494 schedules any later authorized continuation.",
+  "holds": [
+    "No failed/zero-access absence clearance",
+    "No retained-candidate/PML/physical-device proof",
+    "No universal Python-route incapability claim",
+    "No S3/G2/full-package or other-candidate integration"
+  ]
+}

@@ -1,0 +1,368 @@
+== environment ==
+Microsoft Windows Server 2025 Datacenter 10.0.26100 build 26100
+EnableLUA=1 ConsentPromptBehaviorAdmin=0 PromptOnSecureDesktop=1 FilterAdministratorToken=
+
+Mandatory Label\High Mandatory Level                          Label            S-1-16-12288                            
+                                    
+Name      Status StartType
+----      ------ ---------
+seclogon Stopped    Manual
+{"is_admin_token": true, "machine": "AMD64", "ok": true, "platform": "Windows-2025Server-10.0.26100-SP0", "probe": "env", "python": "3.12.10", "user": "runneradmin"}
+== fixtures ==
+tapectl: 6 flushes via FlushFileBuffers
+tapectl: 6 flushes via FlushFileBuffers
+A attached as \\.\PhysicalDrive2
+
+Number BusType                     Size PartitionStyle IsSystem IsBoot
+------ -------                     ---- -------------- -------- ------
+     2 File Backed Virtual   8589934592 MBR               False  False
+     0 SAS                 161061273600 GPT                True   True
+     1 SAS                 161061273600 MBR               False  False
+
+
+== F1 unelevated: a standard local user ==
+{"is_admin_token": false, "machine": "AMD64", "ok": true, "platform": "Windows-2025Server-10.0.26100-SP0", "probe": "env", "python": "3.12.10", "user": "runneradmin"}
+exit 0
+
+USER INFORMATION
+----------------
+
+User Name             SID                                          
+===================== =============================================
+runnervm0xl3a\dtprobe S-1-5-21-4239583824-265399229-1323058055-1003
+
+
+GROUP INFORMATION
+-----------------
+
+Group Name                             Type             SID          Attributes                                        
+====================================== ================ ============ ==================================================
+Everyone                               Well-known group S-1-1-0      Mandatory group, Enabled by default, Enabled group
+BUILTIN\Users                          Alias            S-1-5-32-545 Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\INTERACTIVE               Well-known group S-1-5-4      Mandatory group, Enabled by default, Enabled group
+CONSOLE LOGON                          Well-known group S-1-2-1      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Authenticated Users       Well-known group S-1-5-11     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\This Organization         Well-known group S-1-5-15     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Local account             Well-known group S-1-5-113    Mandatory group, Enabled by default, Enabled group
+LOCAL                                  Well-known group S-1-2-0      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
+Mandatory Label\Medium Mandatory Level Label            S-1-16-8192                                                    
+exit 0
+{"access": "none", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "open"}
+{"access": "none", "ioctl": "STORAGE_GET_DEVICE_NUMBER", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"device_number": 2, "device_type": 7, "partition_number": 0}}
+{"access": "none", "ioctl": "STORAGE_QUERY_PROPERTY", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"bus_type": 15, "product": "Virtual Disk", "removable_media": 0, "serial": "", "vendor": "Msft"}}
+{"access": "none", "ioctl": "DISK_GET_DRIVE_GEOMETRY_EX", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"bytes_per_sector": 512, "disk_size": 8589934592, "media_type": 12}}
+{"access": "none", "ioctl": "DISK_GET_DRIVE_LAYOUT_EX", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"count": 4, "mbr_signature": "aaaaaaaa", "parts": [{"boot": 0, "hidden_sectors": 2048, "length": 16777216, "number": 1, "offset": 1048576, "recognized": 1, "type": 14}, {"boot": 0, "hidden_sectors": 34816, "length": 8572108800, "number": 2, "offset": 17825792, "recognized": 1, "type": 218}], "style": 0}}
+{"access": "none", "err": "Access is denied.", "ioctl": "DISK_GET_LENGTH_INFO", "ok": false, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "win32": 5}
+{"access": "none", "ioctl": "STORAGE_CHECK_VERIFY2", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"media_change_count": 0}}
+{"access": "none", "err": "Access is denied.", "ioctl": "STORAGE_CHECK_VERIFY", "ok": false, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "win32": 5}
+{"access": "none", "ioctl": "STORAGE_GET_HOTPLUG_INFO", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "ioctl", "value": {"device_hotplug": 0, "media_hotplug": 0, "media_removable": 0}}
+{"access": "none", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive2", "probe": "read-lba0", "win32": 5}
+{"access": "GENERIC_READ", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive2", "probe": "open", "win32": 5}
+{"access": "none", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "open"}
+{"access": "none", "ioctl": "STORAGE_GET_DEVICE_NUMBER", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"device_number": 0, "device_type": 7, "partition_number": 0}}
+{"access": "none", "ioctl": "STORAGE_QUERY_PROPERTY", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"bus_type": 10, "product": "Virtual Disk", "removable_media": 0, "serial": "", "vendor": "Msft"}}
+{"access": "none", "ioctl": "DISK_GET_DRIVE_GEOMETRY_EX", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"bytes_per_sector": 512, "disk_size": 161061273600, "media_type": 12}}
+{"access": "none", "ioctl": "DISK_GET_DRIVE_LAYOUT_EX", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"count": 4, "mbr_signature": "e3abaec6", "parts": [{"boot": 227, "hidden_sectors": 1303907164, "length": 16777216, "number": 1, "offset": 1048576, "recognized": 201, "type": 22}, {"boot": 187, "hidden_sectors": 1296041681, "length": 471859200, "number": 2, "offset": 17825792, "recognized": 148, "type": 164}, {"boot": 115, "hidden_sectors": 299038751, "length": 103809024, "number": 3, "offset": 489684992, "recognized": 42, "type": 40}, {"boot": 160, "hidden_sectors": 1144240613, "length": 160467762688, "number": 4, "offset": 593494016, "recognized": 208, "type": 162}], "style": 1}}
+{"access": "none", "err": "Access is denied.", "ioctl": "DISK_GET_LENGTH_INFO", "ok": false, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "win32": 5}
+{"access": "none", "ioctl": "STORAGE_CHECK_VERIFY2", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"media_change_count": 0}}
+{"access": "none", "err": "Access is denied.", "ioctl": "STORAGE_CHECK_VERIFY", "ok": false, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "win32": 5}
+{"access": "none", "ioctl": "STORAGE_GET_HOTPLUG_INFO", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "ioctl", "value": {"device_hotplug": 0, "media_hotplug": 0, "media_removable": 0}}
+{"access": "none", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive0", "probe": "read-lba0", "win32": 5}
+{"access": "GENERIC_READ", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive0", "probe": "open", "win32": 5}
+{"disk": 2, "ok": true, "probe": "volumes-on-disk", "volumes": [{"extents": [{"disk": 2, "length": 16777216, "offset": 1048576}], "mount_points": ["E:\\"], "open0": null, "volume": "\\\\?\\Volume{aaaaaaaa-0000-0000-0000-100000000000}\\"}]}
+{"ok": true, "probe": "system-volume", "volumes": [{"extents": [{"disk": 0, "length": 160467762688, "offset": 593494016}], "mount_points": ["C:\\"], "open0": null, "volume": "\\\\?\\Volume{6f146b24-4f0e-4ba2-97d1-29ea630e5753}\\"}], "windir": "C:\\Windows"}
+{"err": "", "ok": true, "probe": "get-disk", "rc": 0, "value": "{\"Number\":2,\"BusType\":\"File Backed Virtual\",\"IsSystem\":false,\"IsBoot\":false,\"Size\":8589934592,\"PartitionStyle\":\"MBR\",\"IsOffline\":false}"}
+{"err": "", "ok": true, "probe": "pagefiles-cim", "rc": 0, "value": "{\"Name\":\"D:\\\\pagefile.sys\"}"}
+exit 0
+whole=0
+removable=0
+sd_bus=0
+bytes=0
+holds_os=1
+layout_ok=0
+refusal=REFUSE_NOT_WHOLE_DEVICE
+detail=cannot open \\.\PhysicalDrive2 (error 5; run as Administrator)
+exit 0
+== F1 elevated control ==
+{"access": "none", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "open"}
+{"access": "none", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive2", "probe": "read-lba0", 
+"win32": 5}
+{"access": "GENERIC_READ", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "open"}
+{"access": "GENERIC_READ", "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "read-lba0", "table": {"entries": 
+[{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": 
+"feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", 
+"chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", 
+"lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+{"access": "none", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "open"}
+{"access": "none", "err": "Access is denied.", "ok": false, "path": "\\\\.\\PhysicalDrive0", "probe": "read-lba0", 
+"win32": 5}
+{"access": "GENERIC_READ", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "open"}
+{"access": "GENERIC_READ", "ok": true, "path": "\\\\.\\PhysicalDrive0", "probe": "read-lba0"}
+whole=1
+removable=0
+sd_bus=0
+bytes=8589934592
+holds_os=0
+layout_ok=1
+mounted=1:\\?\Volume{aaaaaaaa-0000-0000-0000-100000000000}
+refusal=REFUSE_NOT_REMOVABLE
+== F2 elevated one open across the provision/load/verify write pattern ==
+{"dismount": null, "extents": [{"disk": 2, "length": 16777216, "offset": 1048576}], "lock": null, "ok": true, "probe": "lock-dismount", "volume": "\\\\?\\Volume{aaaaaaaa-0000-0000-0000-100000000000}\\"}
+{"ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "open-rdwr"}
+{"ok": true, "probe": "read-lba0"}
+{"flush": null, "offset": 0, "ok": true, "probe": "write-lba0-zero", "write": null}
+{"flush": null, "offset": 17825792, "ok": true, "probe": "write-p2", "write": null}
+{"flush": null, "offset": 1048576, "ok": true, "probe": "write-p1", "write": null}
+{"flush": null, "offset": 0, "ok": true, "probe": "write-mbr-last", "write": null}
+{"ok": true, "probe": "volumes-while-held", "volumes": [{"extents": [{"disk": 2, "length": 16777216, "offset": 1048576}], "mount_points": ["E:\\"], "open0": null, "volume": "\\\\?\\Volume{aaaaaaaa-0000-0000-0000-100000000000}\\"}]}
+{"flush": null, "ok": true, "probe": "write-p2-after-mbr", "write": null}
+{"ok": true, "probe": "write-p1-after-mbr", "write": null}
+{"ok": true, "probe": "read-p1-after"}
+{"ok": true, "probe": "read-p2-after"}
+{"ok": true, "probe": "volumes-after-close", "volumes": [{"extents": [{"disk": 2, "length": 16777216, "offset": 1048576}], "mount_points": ["E:\\"], "open0": null, "volume": "\\\\?\\Volume{aaaaaaaa-0000-0000-0000-100000000000}\\"}]}
+OK
+== F3 no-change ==
+{"check_verify2": {"media_change_count": 0}, "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "hold-open", "t": 0.0}
+{"check_verify2": {"media_change_count": 0}, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.01}
+{"ok": true, "probe": "hold-end", "t": 12.05}
+== F3 remove-reinsert ==
+{"ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+{"check_verify2": {"media_change_count": 0}, "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "hold-open", "t": 0.0}
+{"check_verify2": {"media_change_count": 0}, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"check_verify2": {"err": "The specified network resource or device is no longer available.", "win32": 55}, "err": {"err": "The specified network resource or device is no longer available.", "win32": 55}, "ok": false, "probe": "hold-read", "signature": null, "t": 4.27}
+{"ok": true, "probe": "hold-end", "t": 18.05}
+== F3 equal-size-swap ==
+{"ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "bbbbbbbb"}}
+{"check_verify2": {"media_change_count": 0}, "ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "hold-open", "t": 0.0}
+{"check_verify2": {"media_change_count": 0}, "err": null, "ok": true, "probe": "hold-read", "signature": "aaaaaaaa", "t": 0.0}
+{"check_verify2": {"err": "The specified network resource or device is no longer available.", "win32": 55}, "err": {"err": "The specified network resource or device is no longer available.", "win32": 55}, "ok": false, "probe": "hold-read", "signature": null, "t": 4.27}
+{"ok": true, "probe": "hold-end", "t": 15.03}
+detach \\.\PhysicalDrive2
+reattach A as \\.\PhysicalDrive2
+{"ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "aaaaaaaa"}}
+detach \\.\PhysicalDrive2, attach B
+B attached as \\.\PhysicalDrive2
+{"ok": true, "path": "\\\\.\\PhysicalDrive2", "probe": "fresh-open", "table": {"entries": [{"chs_end": "feffff", "chs_start": "feffff", "lba": 2048, "sectors": 32768, "status": 0, "type": 14}, {"chs_end": "feffff", "chs_start": "feffff", "lba": 34816, "sectors": 16742400, "status": 0, "type": 218}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}, {"chs_end": "000000", "chs_start": "000000", "lba": 0, "sectors": 0, "status": 0, "type": 0}], "magic": "55aa", "signature": "bbbbbbbb"}}
+== F3 identity fields an app could compare (A vs B) ==
+{"Number":3,"UniqueId":"600224801EF643109A2B25C1597F18D4","Guid":null,"Signature":2863311530,"SerialNumber":null,"Size":8589934592,"BusType":"File Backed Virtual","FriendlyName":"Msft Virtual Disk","Location":"D:\\a\\_temp\\A.vhd"}
+{"Number":2,"UniqueId":"600224805D743505786A5FF4E7D6BBA2","Guid":null,"Signature":3149642683,"SerialNumber":null,"Size":8589934592,"BusType":"File Backed Virtual","FriendlyName":"Msft Virtual Disk","Location":"D:\\a\\_temp\\B.vhd"}
+== G1 runtime observation: WPR FileIO on a control that opens a disk and one that does not ==
+wpr-start 0
+{"ok": true, "path": "\\\\.\\PhysicalDrive3", "pid": 2836, "probe": "touch"}
+{"ok": true, "path": "D:\\a\\_temp\\A.vhd", "pid": 1896, "probe": "touch"}
+wpr-stop 0
+tracerpt 0
+{
+ "events": 261808,
+ "controls": {
+  "negative": {
+   "records": 1560,
+   "device_names": [],
+   "other_names": [
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ntdll.dll",
+    "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape\\",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\kernel32.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\KernelBase.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ucrtbase.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python312.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VCRUNTIME140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\vcruntime140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ws2_32.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\VERSION.dll"
+   ],
+   "all": 102,
+   "events": {
+    "0/64": 107,
+    "0/0": 66,
+    "0/36": 64,
+    "0/10": 33,
+    "0/38": 52,
+    "0/40": 52,
+    "0/76": 617,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 232,
+    "0/65": 87,
+    "0/66": 56,
+    "0/2": 38,
+    "0/67": 101,
+    "0/72": 41,
+    "0/32": 2,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   },
+   "unnamed": [
+    {
+     "event": "0/64",
+     "data": {
+      "null": "00A00100A715F56770007900740068006F006E002E00650078006500000050007900740068006F006E00000033002E00310032002E0031003000000033002E00310032002E00310030003100350030002E00310030003100330000003000000050007900740068006F006E00000050007900740068006F006E00200053006F00660074007700610072006500200046006F0075006E0064006100740069006F006E00000033002E00310032002E0031003000000000000000"
+     }
+    },
+    {
+     "event": "0/0",
+     "data": {
+      "null": "00008F34F67F000000A0010000000000140B0000A715F56770007900740068006F006E002E006500780065000000"
+     }
+    },
+    {
+     "event": "0/0",
+     "data": {
+      "null": "0000B6ACFD7F00000040260000000000140B0000C80BD6DC6E00740064006C006C002E0064006C006C000000"
+     }
+    },
+    {
+     "event": "0/0",
+     "data": {
+      "null": "000045ABFD7F000000900C0000000000140B00004B45FCFB6B00650072006E0065006C00330032002E0064006C006C000000"
+     }
+    },
+    {
+     "event": "0/0",
+     "data": {
+      "null": "0000E2A9FD7F000000E03E0000000000140B0000D396E7AC4B00650072006E0065006C0062006100730065002E0064006C006C000000"
+     }
+    },
+    {
+     "event": "0/0",
+     "data": {
+      "null": "000022AAFD7F000000B0140000000000140B0000F9DE0123750063007200740062006100730065002E0064006C006C000000"
+     }
+    }
+   ]
+  },
+  "positive": {
+   "records": 1569,
+   "device_names": [],
+   "other_names": [
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ntdll.dll",
+    "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape\\",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\kernel32.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\KernelBase.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ucrtbase.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VCRUNTIME140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python312.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\vcruntime140.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\ws2_32.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\VERSION.dll"
+   ],
+   "all": 103,
+   "events": {
+    "0/0": 64,
+    "0/36": 62,
+    "0/10": 32,
+    "0/38": 50,
+    "0/40": 50,
+    "0/64": 101,
+    "0/76": 630,
+    "0/70": 3,
+    "0/71": 3,
+    "0/1": 3,
+    "0/74": 232,
+    "0/65": 88,
+    "0/66": 91,
+    "0/72": 41,
+    "0/67": 77,
+    "0/2": 37,
+    "0/32": 2,
+    "0/11": 1,
+    "8/0": 1,
+    "7/0": 1
+   }
+  }
+ },
+ "negative_only_names": [
+  "\"C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe\" -I D:\\a\\Digital-Tape\\Digital-Tape\\tools\\app-probe\\probe.py touch \\\\.\\PhysicalDrive3"
+ ],
+ "negative_detected": false,
+ "positive_clean": true
+}
+== G1 runtime observation, second tracer: Microsoft-Windows-Kernel-File (FILENAME|CREATE|CREATE_NEW_FILE) ==
+logman-start 0
+{"ok": true, "path": "\\\\.\\PhysicalDrive3", "pid": 2148, "probe": "touch"}
+{"ok": true, "path": "D:\\a\\_temp\\A.vhd", "pid": 9032, "probe": "touch"}
+logman-stop 0
+tracerpt-kf 0
+{
+ "events": 463,
+ "controls": {
+  "negative": {
+   "records": 160,
+   "device_names": [],
+   "other_names": [
+    "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape\\",
+    "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VCRUNTIME140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python312.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\vcruntime140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\version.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\bcrypt.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\bcrypt.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\System32\\bcrypt.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\pyvenv.cfg"
+   ],
+   "all": 93,
+   "events": {
+    "12/0": 100,
+    "10/0": 60
+   },
+   "unnamed": []
+  },
+  "positive": {
+   "records": 102,
+   "device_names": [],
+   "other_names": [
+    "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape\\",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python312.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VCRUNTIME140.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\VERSION.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\bcrypt.dll",
+    "\\Device\\HarddiskVolume4\\Windows\\SYSTEM32\\bcrypt.dll",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\pyvenv.cfg",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\pyvenv.cfg",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python312._pth",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python._pth",
+    "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\pybuilddir.txt"
+   ],
+   "all": 74,
+   "events": {
+    "12/0": 101,
+    "10/0": 1
+   }
+  }
+ },
+ "negative_only_names": [
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\bcrypt.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\en-US\\KernelBase.dll.mui",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\en-US\\tzres.dll.mui",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\imm32.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\kernel.appcore.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\ole32.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\propsys.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\tzres.dll",
+  "\\Device\\HarddiskVolume4\\Windows\\System32\\version.dll",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib\\ctypes",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib\\encodings",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib\\json",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib\\re",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Lib\\site-packages",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python3.dll",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\vcruntime140.dll",
+  "\\Device\\HarddiskVolume4\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\vcruntime140_1.dll",
+  "\\Device\\HarddiskVolume5\\a\\Digital-Tape\\Digital-Tape"
+ ],
+ "negative_detected": false,
+ "positive_clean": true
+}
+== done ==

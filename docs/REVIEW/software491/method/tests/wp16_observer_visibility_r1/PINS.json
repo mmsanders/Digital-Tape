@@ -1,0 +1,33 @@
+{
+  "authority": "PM490 / Verification235 / Software491",
+  "product_issued_input": "b8fa545bbef5a95766ca2da36ed66b82ee13a79c",
+  "product_activation_main": "5dac551313c011262aa1b6c57b3584a23fab63b1",
+  "verification_input": "aba3ce314cd31bbaad254c1d956552b56d3b91ad",
+  "retained_packet": {
+    "bytes": 198343663,
+    "sha256": "e6d3f2b9e60e93bc90a7516e66418da301c4c0dc3a306dfea3e1394a81731ff3",
+    "config_sha256": "0069fdecf84523bdc4b8bec742024d4f10151740c28c6de59d4ec808b351d0be",
+    "platform_sha256": "1ea89385cca003d47ee17917e8b2e6c15079dba4366167b122b568abf919ae65",
+    "csv_sha256": "a9d549fe573a5ce8e2e3baab91740b9a439fc12e009007d2ae00f2eb9570a9a0",
+    "pml_sha256": "4a870827c7e761a0dd72350b63e8d1a75f209b6ed4161dfb187494ace6141762",
+    "csv_rows": 595954
+  },
+  "collector": {
+    "bytes": 8842,
+    "sha256": "74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e"
+  },
+  "observer": {
+    "version": "4.12",
+    "bytes": 2237720,
+    "sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885"
+  },
+  "filter": {
+    "bytes": 296,
+    "sha256": "6bc51ab36ed855ef86a903808d899ab349827122db04b7e0bb13fe285adc2f74"
+  },
+  "observers_py": {
+    "bytes": 67259,
+    "sha256": "560cc9a592f53e06deb0bdac44b9f56b32b608f8f32ceba558885a49190dc62b"
+  },
+  "runtime": "Python 3.12 standard library only; authoring code does not call native APIs"
+}

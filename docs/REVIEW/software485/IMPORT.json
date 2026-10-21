@@ -1,0 +1,81 @@
+{
+  "scope": "Verbatim independent method and unchanged judge; no Product implementation",
+  "verification_repository": "mmsanders/digital-tape-verification",
+  "method_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+  "judge_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+  "judge_tree": "e8f4a02ef8b831cd31fbe26807d59e08ac2d46b8",
+  "files": [
+    {
+      "path": "findings/P2-232-METHOD-2026-10-20/PINS.json",
+      "source_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+      "bytes": 781,
+      "sha256": "aef98d9508b38e0d0d8f69582e3e32271ca23345ed0207a3dbbd8078007e57de"
+    },
+    {
+      "path": "findings/P2-232-METHOD-2026-10-20/README.md",
+      "source_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+      "bytes": 12458,
+      "sha256": "5bac5bdfc33190ca623bf48985f6da7997f3867e37cc50df08d87dcde1afcbe6"
+    },
+    {
+      "path": "findings/P2-232-METHOD-2026-10-20/SHA256SUMS",
+      "source_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+      "bytes": 308,
+      "sha256": "b93a452e65042584d4df60cc984bb52f3056574dd9ed8f9989a7487eb45a7bd3"
+    },
+    {
+      "path": "findings/P2-232-METHOD-2026-10-20/external.py",
+      "source_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+      "bytes": 3674,
+      "sha256": "1dd183796ec55843c1996a32a71e66f2d903c5b8ecc86f32a7ebf11cf54969a8"
+    },
+    {
+      "path": "findings/P2-232-METHOD-2026-10-20/selftest.py",
+      "source_commit": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+      "bytes": 1529,
+      "sha256": "48f28dcfb719084e332f8d5f465f7d7dfb6e1d7855ed924686a73231a35606e0"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/PINS.json",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 365,
+      "sha256": "050fdd3fa90870f0d57c535be9c558c883d68d149c3d86e7bc1b6405f6c1d9c5"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/README.md",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 3520,
+      "sha256": "69c163a1386aefef3f5ceecb3b93d9c011968bac73a4b95f9c8990795fbedf18"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/ci_baseline.py",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 593,
+      "sha256": "1e2665d71cdf00c597a084293105aa9de60d8d65debf166ddcc5274df1a511f7"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/fetch_small_baseline.py",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 1000,
+      "sha256": "1ae702e217770ec94aaab231680fc36c84e32983e37d3ead23a7e6beb2b4196b"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/runner.py",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 5999,
+      "sha256": "f8bb18aaf35ed13ff4acb74591d74f83874c8267f4e4a133db795db2606161b0"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/selftest.py",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 1379,
+      "sha256": "050a5d812a2b253483870b28b606fe310c8d5d569477651d58508305075ada42"
+    },
+    {
+      "path": "tests/wp16_shipping_exhaustion_r1/windows_job.py",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "bytes": 3951,
+      "sha256": "76ca60dd088bbf27c9b5a035d4572cdb24c37485bc96068b08e0ef84605b16ad"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+<Events>
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	<System>
+		<Provider Guid="{9e814aad-3204-11d2-9a82-006008a86939}" />
+		<EventID>0</EventID>
+		<Version>2</Version>
+		<Level>0</Level>
+		<Task>0</Task>
+		<Opcode>0</Opcode>
+		<Keywords>0x0</Keywords>
+		<TimeCreated SystemTime="2026-10-15T13:30:32.421706000-07:00" />
+		<Correlation ActivityID="{00000000-0000-0000-0000-000000000000}" />
+		<Execution ProcessID="16496" ThreadID="27056" ProcessorID="0" KernelTime="765" UserTime="90" />
+		<Channel />
+		<Computer />
+	</System>
+	<EventData>
+		<Data Name="BufferSize"> 1048576</Data>
+		<Data Name="Version">83951626</Data>
+		<Data Name="ProviderVersion">   26200</Data>
+		<Data Name="NumberOfProcessors">      16</Data>
+		<Data Name="EndTime">134365698577685744</Data>
+		<Data Name="TimerResolution">  156250</Data>
+		<Data Name="MaxFileSize">       0</Data>
+		<Data Name="LogFileMode">0x10001</Data>
+		<Data Name="BuffersWritten">     266</Data>
+		<Data Name="StartBuffers">       1</Data>
+		<Data Name="PointerSize">       8</Data>
+		<Data Name="EventsLost">       0</Data>
+		<Data Name="CPUSpeed">    2895</Data>
+		<Data Name="LoggerName">0x0</Data>
+		<Data Name="LogFileName">0x0</Data>
+		<Data Name="BootTime">134351083845727458</Data>
+		<Data Name="PerfFreq">10000000</Data>
+		<Data Name="StartTime">134365698324217060</Data>
+		<Data Name="ReservedFlags">0x1</Data>
+		<Data Name="BuffersLost">       0</Data>
+		<Data Name="SessionNameString">Relogger</Data>
+		<Data Name="LogFileNameString">[multiple files]</Data>
+	</EventData>
+	<RenderingInfo Culture="en-US">
+		<Opcode>Header</Opcode>
+		<Provider>MSNT_SystemTrace</Provider>
+		<EventName xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">EventTrace</EventName>
+	</RenderingInfo>
+	<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">
+		<EventGuid>{68fdd900-4a3e-11d1-84f4-0000f80464e3}</EventGuid>
+	</ExtendedTracingInfo>
+</Event>
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	<System>
+		<Provider Guid="{9e814aad-3204-11d2-9a82-006008a86939}" />
+		<EventID>0</EventID>
+		<Version>3</Version>
+		<Level>0</Level>
+		<Task>0</Task>
+		<Opcode>76</Opcode>
+		<Keywords>0x0</Keywords>
+		<TimeCreated SystemTime="2026-10-15T13:30:33.413615200-07:00" />
+		<Correlation ActivityID="{00000000-0000-0000-0000-000000000000}" />
+		<Execution ProcessID="4596" ThreadID="27364" ProcessorID="4" KernelTime="0" UserTime="0" />
+		<Channel />
+		<Computer />
+	</System>
+	<EventData>
+		<Data Name="IrpPtr">0xFFFFA186338BF0F8</Data>
+		<Data Name="ExtraInfo">0x1</Data>
+		<Data Name="NtStatus">       0</Data>
+	</EventData>
+	<RenderingInfo Culture="en-US">
+		<Opcode>OperationEnd</Opcode>
+		<Provider>MSNT_SystemTrace</Provider>
+		<EventName xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">FileIo</EventName>
+	</RenderingInfo>
+	<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">
+		<EventGuid>{90cbdc39-4a3e-11d1-84f4-0000f80464e3}</EventGuid>
+	</ExtendedTracingInfo>
+</Event>
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	<System>
+		<Provider Guid="{9e814aad-3204-11d2-9a82-006008a86939}" />
+		<EventID>0</EventID>
+		<Version>3</Version>
+		<Level>0</Level>
+		<Task>0</Task>
+		<Opcode>67</Opcode>
+		<Keywords>0x0</Keywords>
+		<TimeCreated SystemTime="2026-10-15T13:30:33.413766300-07:00" />
+		<Correlation ActivityID="{00000000-0000-0000-0000-000000000000}" />
+		<Execution ProcessID="4596" ThreadID="27364" ProcessorID="4" KernelTime="0" UserTime="0" />
+		<Channel />
+		<Computer />
+	</System>
+	<ProcessingErrorData>
+		<ErrorCode>15005</ErrorCode>
+		<DataItemName />
+		<EventPayload>0000000000000000F8F08B3386A1FFFF60AB911B86A1FFFFB0EA6026028BFFFFE46A0000A80D00000009060000000000</EventPayload>
+	</ProcessingErrorData>
+	<RenderingInfo Culture="en-US">
+		<Opcode>Read</Opcode>
+		<Provider>MSNT_SystemTrace</Provider>
+		<EventName xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">FileIo</EventName>
+	</RenderingInfo>
+	<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">
+		<EventGuid>{90cbdc39-4a3e-11d1-84f4-0000f80464e3}</EventGuid>
+	</ExtendedTracingInfo>
+</Event>
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	<System>
+		<Provider Guid="{9e814aad-3204-11d2-9a82-006008a86939}" />
+		<EventID>0</EventID>
+		<Version>3</Version>
+		<Level>0</Level>
+		<Task>0</Task>
+		<Opcode>64</Opcode>
+		<Keywords>0x0</Keywords>
+		<TimeCreated SystemTime="2026-10-15T13:30:33.415122400-07:00" />
+		<Correlation ActivityID="{00000000-0000-0000-0000-000000000000}" />
+		<Execution ProcessID="4" ThreadID="15768" ProcessorID="0" KernelTime="225" UserTime="0" />
+		<Channel />
+		<Computer />
+	</System>
+	<EventData>
+		<Data Name="IrpPtr">0xFFFFA1861F832988</Data>
+		<Data Name="FileObject">0xFFFFA18627061170</Data>
+		<Data Name="TTID">   15768</Data>
+		<Data Name="CreateOptions">16777536</Data>
+		<Data Name="FileAttributes">     128</Data>
+		<Data Name="ShareAccess">       7</Data>
+		<Data Name="OpenPath">\Device\HarddiskVolume3\A6-REHEARSAL\A6-RH-WIN-A00D8C054A0D41CCB1E026D735F97DBC\REHEARSAL.IMG</Data>
+	</EventData>
+	<RenderingInfo Culture="en-US">
+		<Opcode>Create</Opcode>
+		<Provider>MSNT_SystemTrace</Provider>
+		<EventName xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">FileIo</EventName>
+	</RenderingInfo>
+	<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">
+		<EventGuid>{90cbdc39-4a3e-11d1-84f4-0000f80464e3}</EventGuid>
+	</ExtendedTracingInfo>
+</Event>
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	<System>
+		<Provider Guid="{9e814aad-3204-11d2-9a82-006008a86939}" />
+		<EventID>0</EventID>
+		<Version>3</Version>
+		<Level>0</Level>
+		<Task>0</Task>
+		<Opcode>1</Opcode>
+		<Keywords>0x0</Keywords>
+		<TimeCreated SystemTime="2026-10-15T13:30:33.419512000-07:00" />
+		<Correlation ActivityID="{00000000-0000-0000-0000-000000000000}" />
+		<Execution ProcessID="4596" ThreadID="27364" ProcessorID="6" KernelTime="0" UserTime="15" />
+		<Channel />
+		<Computer />
+	</System>
+	<ProcessingErrorData>
+		<ErrorCode>15005</ErrorCode>
+		<DataItemName />
+		<EventPayload>F4110000D06300000010CA6E8EFEFFFF00B0C96E8EFEFFFF000060780700000000F05F7807000000FFFF000000000000E0A20B51F87F000000101F780700000000000000080502000000</EventPayload>
+	</ProcessingErrorData>
+	<RenderingInfo Culture="en-US">
+		<Opcode>Start</Opcode>
+		<Provider>MSNT_SystemTrace</Provider>
+		<EventName xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">Thread</EventName>
+	</RenderingInfo>
+	<ExtendedTracingInfo xmlns="http://schemas.microsoft.com/win/2004/08/events/trace">
+		<EventGuid>{3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c}</EventGuid>
+	</ExtendedTracingInfo>
+</Event>
+</Events>

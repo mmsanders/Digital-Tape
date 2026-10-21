@@ -24,6 +24,17 @@ tree, oracle, workflow, ruleset or gate change.
 | `tapectl-windows.exe` (x64) | `82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9` |
 | `tapectl-linux` (rehearsal only) | `4d8c97a44f163bcd513c98c0903db6a01418001f169cfd6aa126823f6f7a785c` |
 
+## Current PM disposition — 19 October 2026 (ADR-190)
+
+The historical status above describes earlier method development. Verification194
+accepted the Windows441 method/rehearsal; Verification219 corrected collector scope.
+Michael's authorized physical return is now published in Verification221 at
+`0482c0d8c9fb7f6bd026bcc2a4d5cd1b1b35b08a`: successful complete final-sector reads,
+zero observed target writes, but the old checker FAILs on four post-exit records.
+§2.5 issues the narrow retained-evidence clarification for independent disposition;
+it does not relabel the old result. No new physical collection is requested.
+Mac A6 and full-package acceptance remain held. Michael473 controls current tasks.
+
 ## 1. What a capture can show
 
 `verify` mounts both sides, and mounting reads the TAPEFS mirror superblock in the card's
@@ -34,9 +45,9 @@ every reason, and is PASS only when all of the following hold for the bound proc
 | Property | How it is bound | Missing → | Contradicted → |
 |---|---|---|---|
 | Executable | `--exe` hashes to `--sha256`; the traced process is `tapectl` (DTrace `execname`, strace `execve`, ETW Process image) and not `tapectl-test` | HELD | FAIL |
-| Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs | — | FAIL |
+| Process | every record is for `--pid`; DTrace `-c` target equals it. ETW reads are attributed only through `IssuingThreadId`/`TTID` while that thread **and** its process are both alive (Process/Thread Start…End replayed in time order). A record from a thread outside that observed life is unattributed and FAILs, except a Cleanup/Close of a positively unrelated stream (§2.4) | — | FAIL |
 | Result join (ETW) | a FileIo read gets a native result only from the OpEnd with the **same valid, nonzero `IrpPtr`**, only if it was the sole request pending on that `IrpPtr`, and only if the OpEnd carries both `NtStatus` and `ExtraInfo`. Missing, empty, zero or non-numeric identities never join. A request of any type that arrives while another is outstanding on the same `IrpPtr` makes that lifecycle ambiguous, and it stays ambiguous until **every** outstanding request has completed; requests added meanwhile are ambiguous too. Reuse only after the lifecycle fully resolves is legitimate. **Every** FileIo request class that carries an `IrpPtr` takes part: Create/Cleanup/Close/Read/Write (64–68), Info (69–71, 74, 75), Flush (73), DirEnum/DirNotify (72, 77), and any class not listed. Such a request can only add ambiguity; it never supplies a Read result | HELD | — |
-| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read. **Any** FileIo record of the selected process with such a key (Create, Cleanup, Close, Read, Write or any other class) is HELD: it may have closed or written the target, so object lifetimes and the no-write claim cannot be established. A Close or Write on a valid non-target object stays harmless. A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
+| Object (ETW) | a `FileObject` must be a valid, nonzero identity like `IrpPtr`; a missing, empty, zero or non-numeric key never names a path or binds a read. **Any** FileIo record of the selected process with such a key (Create, Cleanup, Close, Read, Write or any other class) is HELD: it may have closed or written the target, so object lifetimes and the no-write claim cannot be established. A Close on a valid non-target object stays harmless. A Write is not a target write only when its FileKey identity is positively another stream (§2.4); an unresolved identity is HELD. A FileIo read's path is what its FileObject names **at that read** (Create until Cleanup/Close). A closed, reused or foreign object never counts as the target, whatever an earlier mapping said | — | FAIL |
 | Device | `--geometry` (diskutil info / Get-Disk / byte count) equals `--capacity`, shows 512-byte sectors and names `--target` (and `--disk`); ETW command line names `\\.\PhysicalDriveN` | HELD | FAIL |
 | Full last sector | the union of bytes that successful reads **returned**, from calls whose offset is above 4,294,967,295, covers all 512 bytes contiguously; each call's **native result** is captured | HELD (no native result) | FAIL (one byte, short, failed, gap, below 2³²) |
 | No writes | no write of any kind by the process reaches the target | — | FAIL |
@@ -152,12 +163,114 @@ PartitionStyle` as geometry and `'verify', '\\.\PhysicalDriveN'`. The ETL holds 
 process's file and disk activity during the window: close other applications first, and
 keep the ETL beside the XML.
 
+### 2.3 The actual Windows 11 export shape (Software #439, Verification #185)
+
+Michael's off-card rehearsal on Windows 11 Home build 26200 (1,232,801 events, zero lost)
+showed two shapes the first parser did not handle. Both are now decoded in `a6check.py`,
+and any other shape is HELD or FAIL, never PASS:
+
+- **Event class location (WIN-A6-001).** Classic kernel records carry the kernel-session
+  GUID `9e814aad…` in `System/Provider/@Guid` and their class in
+  `ExtendedTracingInfo/EventGuid`. The EventGuid is authoritative whenever present. A
+  kernel-session record with no EventGuid, or a Provider that names a different known class
+  than the EventGuid, is counted and HELD.
+- **Undecoded payloads (WIN-A6-002).** tracerpt wrote `ProcessingErrorData` 15005 and the
+  raw `EventPayload` (no `EventData`) for FileIo Read/Write (67/68) and Thread 1–4. These are
+  decoded from the raw little-endian bytes with documented kernel MOF layouts. Each layout is
+  keyed by class, opcode, event `Version` and the header's `PointerSize`, and accepted only
+  at payload lengths actually seen:
+  FileIo_ReadWrite v3 x64 = Offset u64, IrpPtr, FileObject, FileKey, TTID u32, IoSize u32,
+  IoFlags u32 (44 bytes; build 26200 emits 48, and the 4 trailing bytes are reported but not
+  interpreted). The decoded TTID must equal the record header's `Execution/@ThreadID`,
+  otherwise the layout is wrong for that record.
+  Thread_TypeGroup1 v3 x64 = ProcessId, TThreadId, seven pointers, SubProcessTag u32, four
+  priority/flag bytes (72 bytes), then optionally one NUL-terminated UTF-16 name (build
+  26200: an empty name, 74 bytes).
+  Any other version, pointer size, length, missing payload or failed cross-check leaves the
+  record UNDECODED. An undecoded record in a class the judgment reads (FileIo, Thread 1–4,
+  Process 1–4, DiskIo 10/11, header) HOLDS the verdict whoever issued it, because the issuer
+  is one of the fields that could not be decoded. No field is zero-filled, and
+  `System/Execution/@ProcessID` never stands in for thread/process lifetime attribution.
+- **Why raw payloads and not a re-export.** The raw bytes are already in the retained XML,
+  and their layout is fixed and documented. Verification called `tracerpt -lr` unqualified.
+- **Bounded memory.** The XML is streamed one `Event` at a time, and only records of (or
+  stale for) `--pid` are kept. The selftest judges a 145 MB export at about 20 MB peak RSS.
+
+### 2.4 Target class, write identity and post-exit teardown (Software #439, V146-WIN-R2-01/02)
+
+Verification #146 (findings `P2-R1-WP14-A6-RETURNS-2026-10-16`) ruled that an image's backing
+disk holds unrelated files, and that post-exit rundown is not a blanket exemption.
+`a6check.py` now judges identity by FileKey as well as FileObject:
+
+- **Target class.** `--geometry` as a bare byte count means an image target. A raw-disk path
+  (`\Device\HarddiskN\DRn`, `PhysicalDriveN`) names the target only for a raw-disk target.
+  For an image, DiskIo on the backing disk is never mapped into the image's offsets. It
+  supplies no read coverage, and a DiskIo write is a target write only when its FileObject
+  field (the stream's FileKey) is a target key. For a raw `PhysicalDriveN` target, every
+  DiskIo write on that disk still FAILs.
+- **Target keys.** Every Create that names the target starts an object lifecycle. The FileKeys
+  that object's records carry, plus any FileKey that a FileIo name record (32 FileCreate,
+  35 FileDelete, 36 FileRundown, 0 Name) names as the target, form the target-key set. The
+  set is complete only if every target object showed its key.
+- **A FileIo write is one of three things.**
+  - **target** (FAIL): its object names the target, its key is a target key, or a name
+    record names its key as the target.
+  - **unrelated** (noted): its key is positively another stream, from the object's Create
+    path with a consistent key, or from the key's name records at that point in the trace.
+    The name records must be the last one before the write (not a FileDelete) and the first
+    one after it (not a new FileCreate), and the two must agree.
+  - **unresolved** (HELD): anything else. That covers a missing or zero key; an unnamed
+    object whose key has no name at that point; a key deleted before the write; names that
+    disagree; an object with two keys; or an object-name-only identity while the target-key
+    set is incomplete. A key deleted before the write, or named differently around it, stays
+    unresolved even when its object has a Create path (V146-WIN-R3-02): only an absent name
+    record may fall back to the Create path.
+- **Post-exit records.** A record from a thread or process after its end record is still never
+  attributed. Set aside, each with its full record and the evidence that identified it:
+  a Cleanup/Close (65/66) of an **unrelated** stream; image backing-disk DiskIo without a
+  target key; and, for an IMAGE target only, a FileIo write whose identity is positively
+  **unrelated** by the rules above (V146-WIN-R3-01). Every other post-exit record still FAILs:
+  any read, a target object or key, an unresolved identity, and, for a raw PhysicalDrive
+  target, any write.
+
+### 2.5 Positively distinct other-disk writes (ADR-190 / PM476)
+
+The raw-disk no-write rule covers the entire **selected disk**, including every
+stream on it. Post-exit records are never attributed to an ended process/thread.
+A write may nevertheless be excluded from the selected-disk ambiguity set if
+independent native evidence positively proves a physically distinct disk:
+
+- A FileIo write needs a unique unambiguous FileKey/request identity and matching
+  native DiskIo write with an explicit disk number unequal to the witnessed target.
+  Byte count and available request/offset/time facts must agree. Audit identities
+  over the relevant lifetime; conflicting object/key/name/disk facts, key reuse or
+  ambiguous/multiple matches prevent exclusion. A DiskIo record needs its own
+  explicit other-disk identity.
+- A filename alone, a system-volume assumption, an ended thread, absent target
+  attribution, zero/missing key or an inferred correspondence is insufficient.
+  Different streams on the selected raw disk remain writes to that disk and FAIL.
+- Retain every excluded original record and the exact proof. Do not count an
+  excluded other-disk record as target read/completion evidence. Target or unknown
+  identity, ambiguous lifetimes, missing returned bytes/status, short/failed reads
+  and trace loss retain their existing non-PASS outcomes.
+
+Verification223 independently authors causal positive/negative controls, then
+judges the original complete capture using a separate verifier-owned supplement.
+The unchanged accepted checker result remains preserved alongside any new-method
+result. No Product checker/engine/port change or acceptance by PM is implied.
+If the actual fields cannot prove distinct-disk identity, publish a precise blocker
+without PASS. No physical retry is needed to answer this method question.
+
+`retained-win11.py ORIGINAL.zip --out result.json` checks the original ZIP and every member
+it uses against Verification's pins. It then runs `a6check.py` with exactly the arguments
+Verification's own replay gave the unchanged parser. No Windows binary is executed.
+
 ## 3. Validation actually performed: Linux x86_64 container only
 
 No Mac and no Windows host was available, so this round validates **no native macOS or
 Windows format**. `a6-macos.d` has not been compiled or run, and real tracerpt XML has not
 been seen. The synthetic fixtures check the parser's logic only.
-`python3 tools/wp14-capture/selftest.py` (130 cases; 124 without `TAPECTL`) repeats everything below. Add
+`python3 tools/wp14-capture/selftest.py` (199 cases; 193 without `TAPECTL`) repeats everything below. Add
 `TAPECTL=<released tapectl-linux>` to include the real captures.
 
 | Input | Kind | Result |
@@ -172,6 +285,8 @@ been seen. The synthetic fixtures check the parser's logic only.
 | Verification #174's files, byte-identical with their own side files (`fixtures/verification-174/`) | Verification's controls | their baseline → PASS; competing request classes 69, 70, 71, 72, 73, 74, 75, 77 → HELD (overlapping lifecycle); FileObject missing/empty/zero/non-numeric → HELD (no valid FileObject). Their 70-case `lifecycle_controls.py` generator also passes 70/70 against this checker (run from a scratch copy, not committed) |
 | Verification #175's files, byte-identical (`fixtures/verification-175/`; all run with their published 001 side files) | Verification's controls | their baseline → PASS; Cleanup (65), Close (66) and Write (68) each with missing/empty/zero/non-numeric FileObject → HELD (12 cases) |
 | `fixtures/dtrace-good`, `fixtures/etw-good`: 83 cases (14 positives, 69 single-property faults) | **Synthetic** shapes | Each gives its stated verdict *and* its stated reason. The variants cover range, result, exit, stdout, tracer occurrences, loss, PID, process/thread lifetime, FileObject close/cleanup/reuse/reopen, IRP correlation (missing, empty, zero, invalid, orphan, competing, overlapping lifecycles with partial and full completion, reuse before and after resolution, unlisted request classes, name records without `IrpPtr`, object identity on Create/Read/Close), process image, device, geometry, writes and timestamp order |
+| Verification #185's exact five-record Windows 11 excerpt, byte-identical (`fixtures/verification-185/`, SHA-256 `28a02766…6dcb`) | **Real** native records, excerpt only | all five decode (header PointerSize 8, raw Read 67 v3 = Offset 0, IoSize 3496, FileObject `0xFFFFA1861B91AB60`, raw Thread Start v3); FAIL only because the excerpt has no tapectl process start. EventGuids removed → FAIL with "carry no EventGuid"; Read payload cut to 36 bytes → FAIL with "undecoded" |
+| `win11()` conversion of `fixtures/etw-good` to the build 26200 shape: 27 cases | **Synthetic** in the real shape | converted good set → PASS. Missing/foreign EventGuid, Provider/EventGuid conflict, missing payload, truncated payload, Version 2, PointerSize 4 or absent, TTID ≠ header ThreadID, Thread name tail garbage, undecoded record of another process → HELD/FAIL. 14 earlier families (loss, header, status, coverage, foreign object, lifetimes, image, order, close, competing IRP, invalid-object write, harmless write) give their old verdicts in the new shape. Streaming: 145 MB export at about 20 MB peak RSS |
 
 ## 4. #423 bounded diagnosis
 

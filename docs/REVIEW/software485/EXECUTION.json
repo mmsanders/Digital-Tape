@@ -1,0 +1,9 @@
+{
+  "producer_import_commit": "c75653b",
+  "exit": 0,
+  "elapsed_seconds": 3.7035697,
+  "logical_processors": 16,
+  "cpu_upper_bound_seconds": 59.2571152,
+  "command": "external.py --kit inputs/approved-kit.zip --binary inputs/ingest.exe --source inputs/ordinary.wav --out candidate-result",
+  "scope": "Local isolated ordinary-file Windows Job execution; no human action or card access"
+}

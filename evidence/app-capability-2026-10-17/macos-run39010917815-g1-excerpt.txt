@@ -1,0 +1,7 @@
+# macOS 26.6.2 run 39010917815 job 117333072265 (head 44252c1), G1 step, verbatim excerpt.
+# Controls: pid 21261 = elevated open of /dev/disk7 (ok); pid 21259 = unelevated open (EACCES);
+# pid 21262 = positive control opening the image file. fs_usage prints thread IDs, not PIDs.
+fs_usage lines naming /dev/(r)disk7: 2
+1145:06:44:57.351771  open                   [ 13] (R__________X___)  /dev/disk7    0.000043   Python.57146
+1779:06:44:57.465885  open              F=3        (R__________X___)  /dev/disk7    0.000117   Python.57152
+# eslogger open (30 s, 7 343 933 bytes): lines naming /dev/disk7: 0

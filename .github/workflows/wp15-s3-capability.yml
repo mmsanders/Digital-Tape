@@ -1,0 +1,57 @@
+name: WP15 S3 method capability probes (#465)
+
+# Software's S3 method capability observations for Verification #208 (method
+# gaps 1 and 3): disposable loop devices and VHDs, and a scratch directory, on
+# hosted runners only. These probes are not tapectl and not S3 code, and never
+# write to a device. Windows here is Server (supplementary), never Windows 11.
+# Raw observations only: no verdict, no acceptance.
+on:
+  pull_request:
+    paths:
+      - 'tools/wp15-cards/s3_*.py'
+      - '.github/workflows/wp15-s3-capability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: S3 binding probe — Linux loop devices (hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: uname -a; . /etc/os-release; echo "$PRETTY_NAME"
+      - name: Query -> /proc/self/fd upgrade, diskseq
+        run: sudo python3 -B tools/wp15-cards/s3_bind_linux.py --dir "$RUNNER_TEMP/s3"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-s3-capability-linux
+          path: ${{ runner.temp }}/s3/PROBE-linux.json
+          retention-days: 90
+
+  windows:
+    name: S3 binding and report-ancestor probes — Windows Server (hosted, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - run: (Get-CimInstance Win32_OperatingSystem) | ForEach-Object { $_.Caption + ' ' + $_.Version + ' build ' + $_.BuildNumber }
+      - name: Query -> ReOpenFile upgrade, VHD swap
+        run: python -B tools/wp15-cards/s3_bind_windows.py --dir "${{ runner.temp }}\s3"
+      - name: Elevated report route, held ancestors
+        run: python -B tools/wp15-cards/s3_ancestor_windows.py --dir "${{ runner.temp }}\s3anc"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-s3-capability-windows
+          path: |
+            ${{ runner.temp }}/s3/PROBE-windows.json
+            ${{ runner.temp }}/s3anc/PROBE-ancestor.json
+          retention-days: 90

@@ -1,0 +1,10 @@
+{
+  "normative_product": "5d2e37dd4b08883e1b12ae33be72db4f83d860f4",
+  "files": {
+    "WP15-APP-CONTRACT.md": "777fc37016e1a73e0d6f76da7f05e536e85b5aaafcffc1b62e7869fe2218a6d4",
+    "WP15-APP-ANNEX.md": "7bdd49a25e8c72d8239af45eeca8d8aae5977b6bf97f98d37c940885dbb427f3",
+    "WP14-CLI-CONTRACT.md": "49c35c3a0d979729cbb91cddf099a2308d572bfd227a2f0f723fbf037c3eec05"
+  },
+  "prior_app_tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+  "wp14_accepted_engine": "d96b4245e04d74078f8938744b1394c3018516f7"
+}

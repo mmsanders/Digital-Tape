@@ -1,0 +1,204 @@
+== DTrace shape (synthetic)
+ok   good                                                           PASS
+ok   benign SIP notice in dtrace stderr                             PASS
+ok   last sector read as two contiguous 256-byte reads              PASS
+ok   one-byte read of the last sector                               FAIL  [do not cover all 512 bytes]
+ok   short read (ret 100 of 512)                                    FAIL  [do not cover all 512 bytes]
+ok   gap between two partial reads                                  FAIL  [do not cover all 512 bytes]
+ok   failed read (ret -1 errno 5)                                   FAIL  [do not cover all 512 bytes]
+ok   offset truncated to 32 bits                                    FAIL  [no read by PID 4242 touches]
+ok   traced exit status 1                                           FAIL  [traced exit status 1]
+ok   no traced exit status                                          HELD  [no exit status recorded]
+ok   saved exit code contradicts traced status                      INPUT-ERROR  [contradicts]
+ok   verify stdout NEEDS_REPAIR                                     FAIL  [not exactly OK]
+ok   verify stdout empty                                            FAIL  [not exactly OK]
+ok   dtrace drops in its stderr                                     FAIL  [dtrace reported a problem]
+ok   dtrace error in its stderr                                     FAIL  [dtrace reported a problem]
+ok   unrecognised dtrace message                                    HELD  [unrecognised dtrace message]
+ok   dtrace exit 1                                                  FAIL  [tracer step 'dtrace' exited 1]
+ok   dtrace exit not recorded                                       HELD  [no exit code for step 'dtrace']
+ok   no "A6 end" completeness marker                                HELD  [no "A6 end"]
+ok   wrong PID                                                      FAIL  [no captured record belongs to PID]
+ok   records are not from the dtrace -c target                      FAIL  [dtrace -c target is PID 4243]
+ok   plain write(2) to the target fd                                FAIL  [write(s) by PID 4242]
+ok   stdout write(2) is not a target write                          PASS
+ok   process is not tapectl                                         FAIL  [not tapectl]
+ok   target opened for writing                                      FAIL  [opened for writing]
+ok   a write reaches the target                                     FAIL  [write(s) by PID 4242]
+ok   reads are on another file                                      FAIL  [never opened /dev/rdisk4]
+ok   executable hash mismatch                                       FAIL  [hashes to]
+ok   geometry size differs from --capacity                          FAIL  [geometry reports]
+ok   geometry is another disk                                       FAIL  [geometry is for /dev/disk5]
+ok   capacity of exactly 4 GiB (last sector below 2^32)             FAIL  [not above 4294967295]
+== Verification #167 published files, byte-identical
+ok   good-dtrace.trace (pre-#428 shape: no exe=, no end)            HELD  [no "A6 end"]
+ok   one-byte-mirror.trace                                          FAIL  [do not cover all 512 bytes]
+ok   nonzero-exit.trace                                             FAIL  [traced exit status 1]
+ok   tracer-error-ignored.trace                                     FAIL  [dtrace reported a problem (trace file): dtrace: 100 drops]
+ok   good-etw.xml (no loss counters, DiskIo only)                   HELD  [has no EventsLost]
+ok   etw-lost-events.xml                                            FAIL  [EventsLost = 17]
+== ETW shape (synthetic; real tracerpt XML never seen)
+ok   good: FileIo read with OpEnd status, zero loss                 PASS
+ok   EventsLost 17                                                  FAIL  [EventsLost = 17]
+ok   BuffersLost 1                                                  FAIL  [BuffersLost = 1]
+ok   header without loss counters                                   HELD  [has no EventsLost]
+ok   no EventTrace header                                           HELD  [no EventTrace header]
+ok   DiskIo only: no native result                                  HELD  [carry no native result]
+ok   OpEnd NtStatus failure                                         FAIL  [do not cover all 512 bytes]
+ok   OpEnd returned 1 byte                                          FAIL  [do not cover all 512 bytes]
+ok   FileIo status record is for another file                       FAIL  [not the target (closed, reused or foreign object)]
+ok   issuing thread ended before the reads                          FAIL  [no read by PID 4242 touches]
+ok   thread belongs to another process                              FAIL  [no read by PID 4242 touches]
+ok   process image is powershell.exe                                FAIL  [not the shipped tapectl]
+ok   process image is tapectl-test.exe                              FAIL  [not the shipped tapectl]
+ok   no process-start record (its thread cannot be attributed)      FAIL  [outside the observed life]
+ok   command line names another drive                               FAIL  [does not name]
+ok   --disk disagrees with geometry Number                          FAIL  [geometry is for disk 1]
+ok   --target is not PhysicalDrive<disk>                            FAIL  [is not]
+ok   a disk write by tapectl                                        FAIL  [write(s) by PID 4242]
+ok   timestamps out of order                                        HELD  [not in time order]
+ok   wpr-stop exit 1                                                FAIL  [tracer step 'wpr-stop' exited 1]
+ok   tracerpt exit missing                                          HELD  [no exit code for step 'tracerpt']
+ok   saved process exit missing                                     HELD  [--exit-code (the saved process exit) is required]
+ok   saved process exit 1                                           FAIL  [recorded exit code 1]
+ok   geometry not 512-byte sectors                                  HELD  [512-byte sectors]
+== Verification #171 published files, byte-identical, with their own side files
+ok   good-etw.xml (their positive baseline)                         PASS
+ok   process-ended.xml                                              FAIL  [outside the observed life]
+ok   foreign-fileobject-reuse.xml                                   FAIL  [which names 'C:\helper.img' at that point]
+ok   duplicate-exit-log.txt (wpr-start 1 then 0)                    FAIL  ['wpr-start' exited 1 (occurrence 1 of 2)]
+== ETW lifetime and object binding (synthetic)
+ok   target reopened on a new FileObject before the read            PASS
+ok   FileObject closed, then read through it                        FAIL  [closed, reused or foreign object]
+ok   FileObject cleaned up, then read through it                    FAIL  [closed, reused or foreign object]
+ok   process ended (no thread end) before the read                  FAIL  [outside the observed life]
+ok   a step recorded twice, both 0                                  HELD  [ambiguous]
+ok   a step failed after an earlier success                         FAIL  ['tracerpt' exited 2 (occurrence 2 of 2)]
+== Verification #172 published files, byte-identical, with their own side files
+ok   001-xml (their positive baseline)                              PASS
+ok   002-xml (IrpPtr removed from Read and OpEnd)                   HELD  [no valid IrpPtr on the request]
+== ETW request/completion correlation (synthetic)
+ok   IrpPtr missing on the read only                                HELD  [no valid IrpPtr on the request]
+ok   IrpPtr missing on the OpEnd only (orphan completion)           HELD  [carry no native result]
+ok   IrpPtr empty on both                                           HELD  [no valid IrpPtr on the request]
+ok   IrpPtr zero on both                                            HELD  [no valid IrpPtr on the request]
+ok   IrpPtr not a number on both                                    HELD  [no valid IrpPtr on the request]
+ok   OpEnd matches but lacks ExtraInfo                              HELD  [lacks a valid NtStatus or ExtraInfo]
+ok   OpEnd matches but lacks NtStatus                               HELD  [lacks a valid NtStatus or ExtraInfo]
+ok   competing Close on the same IrpPtr while the read is pending   HELD  [overlapping requests in one unresolved lifecycle]
+ok   second read on the same IrpPtr while the first is pending      HELD  [overlapping requests in one unresolved lifecycle]
+ok   IrpPtr reused only after its earlier request completed         PASS
+== Verification #173 published files, byte-identical, with their own side files
+ok   001-xml (their positive baseline)                              PASS
+ok   002-xml (reuse after one of two completions)                   HELD  [overlapping requests in one unresolved lifecycle]
+ok   003-xml (missing IrpPtr, as #172)                              HELD  [no valid IrpPtr on the request]
+== ETW IRP lifecycle across multiple requests and completions (synthetic)
+ok   two reads overlap, both complete, then the mirror read reuses the IrpPtr PASS
+ok   two reads overlap, one completes, mirror read reuses, two more completions HELD  [overlapping requests in one unresolved lifecycle]
+ok   Create and Cleanup overlap, one completes, mirror read reuses  HELD  [overlapping requests in one unresolved lifecycle]
+ok   Create and Cleanup overlap, both complete, then mirror read reuses PASS
+ok   extra orphan completion before the mirror read is harmless     PASS
+== Verification #174 published files, byte-identical, with their own side files
+ok   001-xml (their positive baseline)                              PASS
+ok   002-xml (competing FileIo request class 69 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   003-xml (competing FileIo request class 70 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   004-xml (competing FileIo request class 71 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   005-xml (competing FileIo request class 72 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   006-xml (competing FileIo request class 73 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   007-xml (competing FileIo request class 74 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   008-xml (competing FileIo request class 75 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   013-xml (competing FileIo request class 77 on the IrpPtr)      HELD  [overlapping requests in one unresolved lifecycle]
+ok   009-xml (FileObject missing on Create and Read)                HELD  [has no valid FileObject]
+ok   010-xml (FileObject empty on Create and Read)                  HELD  [has no valid FileObject]
+ok   011-xml (FileObject zero on Create and Read)                   HELD  [has no valid FileObject]
+ok   012-xml (FileObject non-numeric on Create and Read)            HELD  [has no valid FileObject]
+== ETW request-class census and object identity (synthetic)
+ok   an unlisted FileIo class carrying the same IrpPtr              HELD  [overlapping requests in one unresolved lifecycle]
+ok   a FileIo name record without an IrpPtr adds no ambiguity       PASS
+ok   valid FileObject on Create, missing on the Read                HELD  [has no valid FileObject]
+ok   a Close with an invalid FileObject leaves object lifetime unknown HELD  [without a valid FileObject (opcode 66)]
+ok   a Close of a valid non-target FileObject is harmless           PASS
+ok   a Write to a valid non-target file, without FileKeys           HELD  [unresolved identity (no valid FileKey)]
+ok   a Write to a valid non-target file, every read/write keyed     PASS
+ok   a Write with an invalid FileObject may have reached the target HELD  [without a valid FileObject (opcode 68)]
+== Verification #175 published files, byte-identical (all run with their 001 side files)
+ok   001-xml (their positive baseline)                              PASS
+ok   002-xml (opcode 65 with missing FileObject)                    HELD  [without a valid FileObject (opcode 65)]
+ok   003-xml (opcode 65 with empty FileObject)                      HELD  [without a valid FileObject (opcode 65)]
+ok   004-xml (opcode 65 with zero FileObject)                       HELD  [without a valid FileObject (opcode 65)]
+ok   005-xml (opcode 65 with non-numeric FileObject)                HELD  [without a valid FileObject (opcode 65)]
+ok   006-xml (opcode 66 with missing FileObject)                    HELD  [without a valid FileObject (opcode 66)]
+ok   007-xml (opcode 66 with empty FileObject)                      HELD  [without a valid FileObject (opcode 66)]
+ok   008-xml (opcode 66 with zero FileObject)                       HELD  [without a valid FileObject (opcode 66)]
+ok   009-xml (opcode 66 with non-numeric FileObject)                HELD  [without a valid FileObject (opcode 66)]
+ok   010-xml (opcode 68 with missing FileObject)                    HELD  [without a valid FileObject (opcode 68)]
+ok   011-xml (opcode 68 with empty FileObject)                      HELD  [without a valid FileObject (opcode 68)]
+ok   012-xml (opcode 68 with zero FileObject)                       HELD  [without a valid FileObject (opcode 68)]
+ok   013-xml (opcode 68 with non-numeric FileObject)                HELD  [without a valid FileObject (opcode 68)]
+== Windows 11 build 26200 export shape (Verification #185 excerpt + synthetic conversions)
+ok   Verification excerpt: all five records decode, PID 4596 not started in it FAIL  [no captured record belongs to PID 4596]
+ok   excerpt raw FileIo Read decodes to its documented fields      
+ok   excerpt notes name both raw decodes and the 4-byte undocumented tail
+ok   excerpt with its EventGuids removed (misplaced class)          FAIL  [carry no EventGuid]
+ok   excerpt with its Read payload cut to 36 bytes (undecoded payload) FAIL  [are undecoded (FileIo read/write v3 payload is 36 bytes]
+ok   Win11 shape of the good set: PASS                              PASS
+ok   Win11 shape: only Provider GUID, no EventGuid                  FAIL  [carry no EventGuid]
+ok   Win11 shape: EventGuid in a foreign element                    FAIL  [carry no EventGuid]
+ok   Win11 shape: Provider names one class, EventGuid another       FAIL  [class is ambiguous]
+ok   Win11 shape: Read error record without EventPayload            HELD  [no EventPayload]
+ok   Win11 shape: Read payload truncated                            HELD  [payload is 40 bytes, not 44 or 48]
+ok   Win11 shape: Read event Version 2                              HELD  [no qualified layout]
+ok   Win11 shape: header PointerSize 4                              FAIL  [pointer size 4]
+ok   Win11 shape: header without PointerSize                        FAIL  [pointer size None]
+ok   Win11 shape: decoded TTID disagrees with the record header thread HELD  [does not equal the record header ThreadID]
+ok   Win11 shape: Thread payload with bytes after its name          FAIL  [not one NUL-terminated UTF-16 name]
+ok   Win11 shape: an undecoded Thread record of another process     HELD  [are undecoded (Thread v3 payload is]
+ok   Win11 shape: EventsLost 17                                     FAIL  [EventsLost = 17]
+ok   Win11 shape: no EventTrace header                              FAIL  [no EventTrace header]
+ok   Win11 shape: OpEnd NtStatus failure                            FAIL  [do not cover all 512 bytes]
+ok   Win11 shape: OpEnd returned 1 byte                             FAIL  [do not cover all 512 bytes]
+ok   Win11 shape: read on another file                              FAIL  [not the target (closed, reused or foreign object)]
+ok   Win11 shape: issuing thread ended before the reads             FAIL  [no read by PID 4242 touches]
+ok   Win11 shape: thread belongs to another process                 FAIL  [no read by PID 4242 touches]
+ok   Win11 shape: no process-start record                           FAIL  [outside the observed life]
+ok   Win11 shape: process image is tapectl-test.exe                 FAIL  [not the shipped tapectl]
+ok   Win11 shape: timestamps out of order                           HELD  [not in time order]
+ok   Win11 shape: FileObject closed, then read through it           FAIL  [closed, reused or foreign object]
+ok   Win11 shape: competing request on the IrpPtr                   HELD  [overlapping requests in one unresolved lifecycle]
+ok   Win11 shape: a Write with an invalid FileObject                HELD  [without a valid FileObject (opcode 68)]
+ok   Win11 shape: a Write to a valid non-target file                PASS
+== Image-target write identity and post-exit teardown (synthetic, V146-WIN-R2)
+ok   image baseline                                                 PASS
+ok   write to a named non-target object (its key consistent)        PASS
+ok   write through an inherited, unnamed object; key named by FileCreate PASS
+ok   write through an unnamed object; key named only by the end rundown PASS
+ok   backing-disk DiskIo write without a FileKey is not mapped into the image PASS
+ok   backing-disk DiskIo write on an unrelated FileKey              PASS
+ok   post-exit Close of a named unrelated object is teardown        PASS
+ok   post-exit Cleanup and Close of an unnamed object whose key is named PASS
+ok   write through the target object                                FAIL  [reached the target]
+ok   foreign named object carrying the target FileKey               FAIL  [reached the target]
+ok   unnamed object carrying the target FileKey                     FAIL  [reached the target]
+ok   unnamed object whose key a name record names as the target     FAIL  [reached the target]
+ok   backing-disk DiskIo write carrying the target FileKey          FAIL  [reached the target]
+ok   unnamed object, zero FileKey                                   HELD  [unresolved identity]
+ok   unnamed object, FileKey with no name record                    HELD  [unresolved identity]
+ok   unnamed object, FileKey deleted (FileDelete) before the write  HELD  [unresolved identity]
+ok   FileKey named differently before and after the write           HELD  [unresolved identity]
+ok   named object whose FileKey a name record names as another file HELD  [unresolved identity]
+ok   one object carrying two FileKeys                               HELD  [unresolved identity]
+ok   target object never shows its key; non-target write identified only by object name HELD  [unresolved identity]
+ok   post-exit write to a named unrelated object (writes are never teardown) FAIL  [outside the observed life]
+ok   post-exit Close of an unnamed object with an unnamed key       FAIL  [outside the observed life]
+ok   post-exit Close of the target object                           FAIL  [outside the observed life]
+ok   post-exit Close with no FileKey                                FAIL  [outside the observed life]
+ok   post-exit DiskIo write carrying the target FileKey             FAIL  [outside the observed life]
+ok   streaming: a 145 MB Win11 export judged in 24 MB peak RSS     
+== Linux strace captures of the released tapectl-linux (image mechanics only)
+ok   4 GiB + 1 MiB image: real capture                              PASS
+ok   real capture, wrong PID                                        FAIL  [no captured record belongs]
+ok   real capture, last-sector read truncated to 100 bytes          FAIL  [do not cover all 512 bytes]
+ok   real capture, process killed instead of exiting                FAIL  [process was killed]
+ok   real capture, strace diagnostic present                        FAIL  [strace diagnostic]
+ok   #425 62.5 GB capture (no execve traced)                        HELD  [no process-start record]
+selftest: 188 cases, 0 unexpected

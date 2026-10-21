@@ -1,0 +1,209 @@
+{
+  "product_main": "5c17314af51ac22e8729d474f2a4d2edd756daef",
+  "verification_main": "929c02f35aed6bad05d708d33ebff0cfb35ccc37",
+  "scope": "Git object/ancestry/import and saved GitHub check authentication only; no Product execution or independent acceptance",
+  "candidates": [
+    {
+      "pr": 443,
+      "head": "85b7c3fd0b123ae7e5d54cb9f7bb424fbc613542",
+      "tree": "9479e82f0126d3d7bacba1a48c6908a655f5a145",
+      "engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "merge_base": "c6ff868086e3333bb7568e60d3a2f4ec60fd3344",
+      "main_head_counts": "40\t8",
+      "imports": [
+        {
+          "path": "tests/wp10_subset_r1",
+          "tree": "c6cb573d654d337fef2f616f11cce0cee74e8968",
+          "publication": "fe8f3bdf16c83ef8564d073e900bb1b98cf125a4"
+        }
+      ],
+      "checks": [
+        {
+          "conclusion": "SKIPPED",
+          "count": 3
+        },
+        {
+          "conclusion": "SUCCESS",
+          "count": 118
+        }
+      ]
+    },
+    {
+      "pr": 454,
+      "head": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+      "tree": "a5453d32335f22face90bb4efd72c8817d21f485",
+      "engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "merge_base": "c6ff868086e3333bb7568e60d3a2f4ec60fd3344",
+      "main_head_counts": "40\t40",
+      "imports": [
+        {
+          "path": "tests/wp16_ingest_stage1",
+          "tree": "609a4c819076a2b85b26cc4f3cd254b92caef6de",
+          "publication": "9587317ac4bca4e8164347f0ec62eeb719245cf7"
+        },
+        {
+          "path": "tests/wp15_app1a_r1",
+          "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+          "publication": "0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6"
+        }
+      ],
+      "checks": [
+        {
+          "conclusion": "SKIPPED",
+          "count": 2
+        },
+        {
+          "conclusion": "SUCCESS",
+          "count": 124
+        }
+      ]
+    },
+    {
+      "pr": 455,
+      "head": "ecca8c1304ba9511d78791e92ed35fac494f2a27",
+      "tree": "8022791bb336adbebb9f03fb5cec28f3cd8acd71",
+      "engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "merge_base": "24672d37552206f1c8b1288c67161e59b108cbd5",
+      "main_head_counts": "11\t6",
+      "imports": [
+        {
+          "path": "tests/wp15_app1a_r1",
+          "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+          "publication": "0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6"
+        }
+      ],
+      "checks": [
+        {
+          "conclusion": "SUCCESS",
+          "count": 117
+        }
+      ]
+    },
+    {
+      "pr": 459,
+      "head": "50bc4160f6da527da8c684d05264f99815aaa870",
+      "tree": "ea0c9ae717a8478ca357fd01186f2a4d912a1193",
+      "engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "merge_base": "c6ff868086e3333bb7568e60d3a2f4ec60fd3344",
+      "main_head_counts": "40\t29",
+      "imports": [
+        {
+          "path": "tests/wp16_ingest_stage1",
+          "tree": "609a4c819076a2b85b26cc4f3cd254b92caef6de",
+          "publication": "9587317ac4bca4e8164347f0ec62eeb719245cf7"
+        }
+      ],
+      "checks": [
+        {
+          "conclusion": "SKIPPED",
+          "count": 2
+        },
+        {
+          "conclusion": "SUCCESS",
+          "count": 121
+        }
+      ]
+    },
+    {
+      "pr": 469,
+      "head": "1ad813d86d094a3702a03e3b2e602c221855a9ca",
+      "tree": "5ed8324f4f60bd54bef9b7808bd8b971696ffcfe",
+      "engine": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "merge_base": "7c6df21f62bd59fbc63226e35804dcac8ed05d2d",
+      "main_head_counts": "7\t9",
+      "imports": [
+        {
+          "path": "tests/wp15_app1a_r1",
+          "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
+          "publication": "0c1eb39e6bd13c70de702f9e3926a9b7b39c03e6"
+        },
+        {
+          "path": "tests/wp15_cards_make_r1",
+          "tree": "81b627b7149458c0037dda5e69eac337f40fb8bd",
+          "publication": "3d21c6c5e46e3456a001922d5355cf07fc8348e0"
+        }
+      ],
+      "checks": [
+        {
+          "conclusion": "SUCCESS",
+          "count": 118
+        }
+      ]
+    }
+  ],
+  "publications": [
+    {
+      "commit": "42f169f1b5448bc646a2b181ced51c14e385017c",
+      "tree": "1da0b10a179a81b0eab64fbf8056629e5422991f",
+      "on_verification_main": true
+    },
+    {
+      "commit": "9997bc1c388796283dc138d8bf6e6200e02cc390",
+      "tree": "f43fe83c556215c916542364e73ac80af636bc25",
+      "on_verification_main": true
+    },
+    {
+      "commit": "e1f4bd72f2a6be75cfd8ebe8edb93ed534cfca1e",
+      "tree": "5e377e085622119de5b780a512f348ce8a2a6a79",
+      "on_verification_main": true
+    },
+    {
+      "commit": "937dee3c3e98a9e04cb08d1166423104d7c62ece",
+      "tree": "4e74a45ed8e3e0ae1ad19eac471041912645a6f0",
+      "on_verification_main": true
+    },
+    {
+      "commit": "99df7f8c67627c13b33d0d55b5ba74ae2d43d699",
+      "tree": "0af74c9c7772d14df15d27acd99b1f79481901ad",
+      "on_verification_main": true
+    },
+    {
+      "commit": "c5e28b80a0e505a295fa71daaef7a6d2c6f411c6",
+      "tree": "36759f45ce56ba0465cc34c516376ea31916673d",
+      "on_verification_main": true
+    },
+    {
+      "commit": "32c6f245eaced5db063e80faf172090b2e7825f1",
+      "tree": "8cee73e4dd1bdafdcdb236844a27ad1d5a5e926c",
+      "on_verification_main": true
+    },
+    {
+      "commit": "929c02f35aed6bad05d708d33ebff0cfb35ccc37",
+      "tree": "c0d6fc55e629596d193629d720b752e7725817c6",
+      "on_verification_main": true
+    }
+  ],
+  "normative": [
+    {
+      "path": "spec/VERSION.md",
+      "blob": "40372391ac226125b85fafe3b268349d9c8bc70b"
+    },
+    {
+      "path": "spec/tapefs-v1.md",
+      "blob": "466f39628ae91ab975d1d3c819a33e692b8f9ca7"
+    },
+    {
+      "path": "spec/engine-api.md",
+      "blob": "383339f90a5904dd31b1ae04c3e7326cc1e9e50a"
+    },
+    {
+      "path": "spec/acceptance.md",
+      "blob": "242f6a05f2a08698830fb266da583fdd90961e77"
+    },
+    {
+      "path": "docs/WP14-CLI-CONTRACT.md",
+      "blob": "8c8e6d33fcc98ee54fab25f04b7a5f5c10eb0295"
+    },
+    {
+      "path": "docs/WP15-APP-CONTRACT.md",
+      "blob": "3d3fd3458d74178acf1f64a252c010ff97b4ffcc"
+    },
+    {
+      "path": "docs/WP15-APP-ANNEX.md",
+      "blob": "c10258e3e1c26937fd06466167d983231eff7e76"
+    }
+  ],
+  "s4_child_pin_and_s1_ingest_tree": "835078995d4e9cc2424f9ea8d6f11304b45f783f",
+  "corrected459_contains_obsolete436": true,
+  "s1_contains_corrected459": true
+}
