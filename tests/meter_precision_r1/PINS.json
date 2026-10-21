@@ -1,0 +1,10 @@
+{
+  "cases": 3,
+  "cpu_seconds_limit": 7200,
+  "dsp_path": "host/ingest/src/dsp.rs",
+  "dsp_sha256": "fb77778e7f271f2acb1c385ee9e8235e0752f3f1318caf3e7fddcc410a230ffc",
+  "evidence_bytes_limit": 536870912,
+  "gate": "A252 independent recorder clearance AND C254 method merge",
+  "prior_review": "659b0e43a70dfbd6db3d4b52747ad087c7fac201",
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+}
