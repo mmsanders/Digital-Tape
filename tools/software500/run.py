@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Once-only fixed ordinary-file shipping experiment; never generates a verdict ID."""
 import argparse,hashlib,json,os,resource,struct,subprocess,sys,time,zipfile
+from decimal import Decimal
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2];PKG=ROOT/'tests/wp16_join_boundary_r1';sys.path.insert(0,str(PKG))
 import cases
@@ -10,12 +11,13 @@ def census(p):return {x.relative_to(p).as_posix():dict(bytes=x.stat().st_size,sh
 def cpu():
  r=resource.getrusage(resource.RUSAGE_CHILDREN);s=resource.getrusage(resource.RUSAGE_SELF);return r.ru_utime+r.ru_stime+s.ru_utime+s.ru_stime
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--binary',type=Path,required=True);ap.add_argument('--out',type=Path,required=True);a=ap.parse_args();assert not a.out.exists(),'refuse repeat/overwrite';a.out.mkdir(parents=True)
+ ap=argparse.ArgumentParser();ap.add_argument('--binary',type=Path,required=True);ap.add_argument('--out',type=Path,required=True);ap.add_argument('--skip-first-lost',action='store_true');a=ap.parse_args();assert not a.out.exists(),'refuse repeat/overwrite';a.out.mkdir(parents=True)
  rows=cases.corpus();frozen=json.loads((PKG/'MANIFEST.json').read_text());assert [cases.facts(c) for c in rows]==frozen
  version=subprocess.run([str(a.binary),'--version'],capture_output=True,check=True);(a.out/'version.stdout').write_bytes(version.stdout);(a.out/'version.stderr').write_bytes(version.stderr)
  input_pcm=sum(s['frames']*s['channels']*2 for c in rows for f in c['folders'] for s in f);assert input_pcm==634228
  ledger=[];failures=[];start=time.monotonic();used0=cpu()
  for c,facts in zip(rows,frozen):
+  if a.skip_first_lost and c['name']=='endpoint-1':continue
   # Upper bound remaining single-thread execution by wall timeout; total workflow
   # timeout also bounds the four-core runner under the two-CPU-hour cap.
   if cpu()-used0+180>7200:break
@@ -48,7 +50,7 @@ def main():
     for s,o in zip(facts['sources'],m['sources']):
      assert o['logical_path']==s['path'] and o['source_sha256']==s['sha256'] and o['input_rate']==44100 and o['input_channels']==s['channels']
      assert o['raw_frames']==o['effective_frames']==o['output_frames']==s['frames'] and o['trim_head']==o['trim_tail']==0 and o['start_frame']==s['start_frame']
-     assert o['applied_gain_db']<=0 and o['loudness_status']=='unmeasurable' and o['loudness_reason']=='too_short'
+     assert Decimal(o['applied_gain_db'])<=0 and o['loudness_status']=='unmeasurable' and o['loudness_reason']=='too_short'
      block=pcm[s['start_frame']*4:(s['start_frame']+s['frames'])*4];(d/('converted-'+s['path'].replace('/','-')+'.pcm')).write_bytes(block)
      if s['channels']==1:assert all(block[i:i+2]==block[i+2:i+4] for i in range(0,len(block),4))
     for g in m['gaps']:assert not any(pcm[g['start_frame']*4:(g['start_frame']+g['frames'])*4])
@@ -58,11 +60,11 @@ def main():
     assert p.returncode==2 and len(terminal)==1 and not dest.exists()
     assert terminal[0]['id'] in ('JOIN_PEAK','JOINED_PEAK','SOURCE_LEVEL')
     row['limits']='Original earlier guard/refusal retained; no source-safe global witness invented. Exact meter qualification remains independent.'
-  except AssertionError as e:failures.append(dict(name=c['name'],error=str(e)))
+  except Exception as e:failures.append(dict(name=c['name'],error=repr(e)))
   ledger.append(row);(d/'PROCESS.json').write_text(json.dumps(row,indent=2)+'\n')
   (a.out/'LEDGER.json').write_text(json.dumps(ledger,indent=2)+'\n')
   if failures:break # stop affected fixed experiment on first discrepancy; no tuning/retry
- result=dict(source=S1,source_ingest_tree='835078995d4e9cc2424f9ea8d6f11304b45f783f',shipping_binary_sha256=sha(a.binary),input_pcm_bytes=input_pcm,scheduled=18,executed=len(ledger),remaining=[c['name'] for c in rows[len(ledger):]],failures=failures,cpu_seconds=cpu()-used0,wall_seconds=time.monotonic()-start,outcomes={str(k):sum(r['exit']==k for r in ledger) for k in {r['exit'] for r in ledger}},global_internal_or_joined_absence_proved=False,global_witness_claimed=False)
+ result=dict(source=S1,source_ingest_tree='835078995d4e9cc2424f9ea8d6f11304b45f783f',shipping_binary_sha256=sha(a.binary),input_pcm_bytes=input_pcm,scheduled=18,executed=len(ledger),remaining=[c['name'] for c in rows if c['name'] not in {r['name'] for r in ledger}],lost_prior_case='endpoint-1: first command completed, result-reader TypeError; original raw unavailable; not rerun or credited' if a.skip_first_lost else None,failures=failures,cpu_seconds=cpu()-used0,wall_seconds=time.monotonic()-start,outcomes={str(k):sum(r['exit']==k for r in ledger) for k in {r['exit'] for r in ledger}},global_internal_or_joined_absence_proved=False,global_witness_claimed=False)
  (a.out/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n');(a.out/'MANIFEST.json').write_bytes((PKG/'MANIFEST.json').read_bytes());(a.out/'REFERENCE.json').write_bytes((PKG/'REFERENCE.json').read_bytes())
  (a.out/'FILES.json').write_text(json.dumps(census(a.out),indent=2)+'\n')
  archive=a.out.parent/'software500-exact-return.zip'

@@ -32,11 +32,13 @@ jobs:
           cp Cargo.lock "$GITHUB_WORKSPACE/shipping-build/Cargo.lock"
       - name: Eighteen fixed commands once only
         run: |
-          python3 -B tools/software500/run.py --binary "$RUNNER_TEMP/source500/host/ingest/target/release/ingest" --out "$RUNNER_TEMP/software500-raw" | tee shipping-build/summary.txt
+          set -o pipefail
+          python3 -B tools/software500/run.py --skip-first-lost --binary "$RUNNER_TEMP/source500/host/ingest/target/release/ingest" --out "$RUNNER_TEMP/software500-raw" | tee shipping-build/summary.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: software500-exact-return
           path: |
             ${{ runner.temp }}/software500-exact-return.zip
+            ${{ runner.temp }}/software500-raw
             shipping-build
