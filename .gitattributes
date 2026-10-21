@@ -57,3 +57,5 @@ tests/wp15_boundary_query_r1/**        -text
 
 docs/REVIEW/software498/run*/** -text
 host/app/parser-component/Cargo.lock -text
+
+docs/REVIEW/software498/correction*/** -text
