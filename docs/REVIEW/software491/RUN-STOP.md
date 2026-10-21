@@ -13,7 +13,8 @@ Verification236 publication `9991eded2ca2892f436088241848a55de4d31b88`, author
 `method/tests/wp16_observer_visibility_r1` with byte-identical SHA256SUMS and an
 exact Git subtree match. Product import commit
 `b92f6f8e4ce0274c0b78762ab0a8135609b99333` precedes this stop report; no helper
-implementation followed it. [METHOD-IMPORT.json](METHOD-IMPORT.json) records modes,+source blobs and file hashes. Six synthetic neighbours/27 detecting controls
+implementation followed it. [METHOD-IMPORT.json](METHOD-IMPORT.json) records modes,
+source blobs and file hashes. Six synthetic neighbours/27 detecting controls
 passed using the unchanged package; this is not actual observer capability.
 
 ## Existing execution context and primary tool requirement
