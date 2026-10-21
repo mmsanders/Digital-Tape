@@ -23,7 +23,9 @@ jobs:
           mkdir -p parser-evidence
           rustc -Vv > parser-evidence/rustc.txt
           cargo -V > parser-evidence/cargo.txt
-          /usr/bin/time -v -o parser-evidence/build-time.txt cargo build --manifest-path host/app/parser-component/Cargo.toml > parser-evidence/build-stdout.txt 2> parser-evidence/build-stderr.txt
+          uname -a > parser-evidence/host.txt
+          cat /etc/os-release >> parser-evidence/host.txt
+          /usr/bin/time -v -o parser-evidence/build-time.txt cargo build --locked --manifest-path host/app/parser-component/Cargo.toml > parser-evidence/build-stdout.txt 2> parser-evidence/build-stderr.txt
           cp host/app/parser-component/Cargo.lock parser-evidence/Cargo.lock
           cargo metadata --manifest-path host/app/parser-component/Cargo.toml --locked --format-version 1 > parser-evidence/cargo-metadata.json
       - name: Published corpus through actual parser and messages

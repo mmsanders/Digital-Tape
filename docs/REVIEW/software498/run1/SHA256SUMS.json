@@ -1,0 +1,16 @@
+{
+  "cargo.txt": "c35608815f43d0b8788a9b826fad2bb17384f49fb328dc4fe64da9db5f5ef4d6",
+  "app-stdout.jsonl": "04440408f03ba58a559ea44c6157e3a8cbb5521bcf431baa17dd28958f26de62",
+  "build-stderr.txt": "3f8793740423040ec6c64da13cd3171232260dad28026d438beb974af317027b",
+  "Cargo.lock": "332ec537bcc36ec1980273bd77b7be586a804f5c7170fcde89efd070dc0fa06b",
+  "app-stdin.jsonl": "ee58de6d08d4a6ceaafe8effa33dca87246af036df49a3e4ff49761ea5166c07",
+  "query-report-stdin.jsonl": "26d38a276b4277803a4b9743837829ed50ccc1a3352f8354a73a0a525d113f26",
+  "RESULT.json": "6af8d3e6dfe49f627060771ddc55614c36f7b82b8d3d6c2b9bcce80c888c0989",
+  "app-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build-stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "cargo-metadata.json": "4c46da7f901b53088417ec68c69f75fae9ad8ebb7afd0b01541f921885dcb319",
+  "query-report-stdout.jsonl": "3241ea5e07e71d6b1cd36e684e1472da78307e473eed21fde291b9ab3a79bb47",
+  "query-report-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "rustc.txt": "f22d5e4e9ced367e774ce5bc140d9e6b1235c1882fec80d011044851f3ae6369",
+  "build-time.txt": "33a90e1b6abee46894e2d31ebd1802b0f7c6f86c986f45751307319ceed9fd57"
+}

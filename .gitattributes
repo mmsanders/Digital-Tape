@@ -54,3 +54,6 @@ tests/playback_readonly_r1/**          -text
 tests/playback_regression_epoch/**          -text
 tests/wp14_r1/**                       -text
 tests/wp15_boundary_query_r1/**        -text
+
+docs/REVIEW/software498/run*/** -text
+host/app/parser-component/Cargo.lock -text
