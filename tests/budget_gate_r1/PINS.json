@@ -1,0 +1,11 @@
+{
+  "authority": "PM524/Verification268/Software525",
+  "input_product": "4ea89e8abd49ed93074132580512eaddaaa76cc3",
+  "input_verification": "bd77e942f172fd064c1b36e47fac2f2ee1b39e98",
+  "prior_failure": "90a5666166b3946ecb87c239cff21d7737231499",
+  "recorder_clearance": "87e94160f62922a06346d00dc69f4dfcda987328",
+  "controller_new_cases": 38,
+  "focused_cpu_seconds": 7200,
+  "focused_bytes": 536870912,
+  "product_invocations": 0
+}

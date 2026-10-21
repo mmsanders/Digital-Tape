@@ -586,6 +586,19 @@
         "-B",
         "tests/evidence_recorder_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/budget_gate_r1",
+      "tree": "26ac65c74926f8b607f37412cc0ff026f231b76e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "00dd03edde05deacfc4935f61018ca8de43b9b6e",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/525",
+      "attestation": "Exact independently merged PM524 Verification268 method issued for bounded Software525; no acceptance by import.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/budget_gate_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
