@@ -1,0 +1,49 @@
+{
+  "publication": "9991eded2ca2892f436088241848a55de4d31b88",
+  "author": "e0eeb0d6b98b13a1ad7d98ef42dca92729ceb91a",
+  "source_tree": "944df7d2fc9946c62214829d8c67d7f7c4b0b62e",
+  "files": [
+    {
+      "path": "tests/wp16_observer_visibility_r1/PINS.json",
+      "mode": "100644",
+      "blob": "1b077387606be6c575b8272454924675444d9b58",
+      "bytes": 1384,
+      "sha256": "92b91d5118df4a036d5bfb38aee5215d26c46450182318fde4ee36ef6da828c1"
+    },
+    {
+      "path": "tests/wp16_observer_visibility_r1/README.md",
+      "mode": "100644",
+      "blob": "5895fb9768a8335c83f313141ad457d4cfba7647",
+      "bytes": 14943,
+      "sha256": "ba42c880876da05513febfc319ab963d0140980c96f04eb088f50c91d6a725b4"
+    },
+    {
+      "path": "tests/wp16_observer_visibility_r1/SHA256SUMS",
+      "mode": "100644",
+      "blob": "fef252d54efe26b9611bbb42e7f35cd6c0ecc51f",
+      "bytes": 383,
+      "sha256": "e3edb633ae9a1c7abfe524b9fb9c1501c8a22ae11015cda93f825dcafa73b0ad"
+    },
+    {
+      "path": "tests/wp16_observer_visibility_r1/oracle.py",
+      "mode": "100644",
+      "blob": "38c5b51b886133ad47bcf588d25c6132fc342d2b",
+      "bytes": 6933,
+      "sha256": "e273bdc62c6ca68148b96e558fce2a15bfff41d64c2271e33074741b85b435d8"
+    },
+    {
+      "path": "tests/wp16_observer_visibility_r1/publish.sh",
+      "mode": "100644",
+      "blob": "055e4a10229fa6b8365b834c3568449bf26609ba",
+      "bytes": 1175,
+      "sha256": "72a389f5f3e3a7c6ed07e31b9f4616e10dfe0e00872c37292a04d1e735e4d81e"
+    },
+    {
+      "path": "tests/wp16_observer_visibility_r1/selftest.py",
+      "mode": "100644",
+      "blob": "9b15de26ab3f9c9fc949008e259fdd212680db48",
+      "bytes": 4687,
+      "sha256": "1586c3917c65ce955498f1b2f7889427396853f39b7f7c7cb9efef4041255c0f"
+    }
+  ]
+}

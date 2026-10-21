@@ -1,4 +1,10 @@
-# Software491 — observer preparation, awaiting independent method
+# Software491 — historical preparation and current capability stop
+
+**Current continuation:** Verification236's method is imported verbatim; the
+authored dependency is satisfied. [RUN-STOP.md](RUN-STOP.md) records the subsequent
+existing-privilege prerequisite failure. No helper or capture was launched.
+The preparation below preserves the earlier intake state, not a current claim
+that the independent method remains unpublished.
 
 20 October2026 PDT. Product main `5dac551313c011262aa1b6c57b3584a23fab63b1`;
 Verification main `aba3ce314cd31bbaad254c1d956552b56d3b91ad`.
