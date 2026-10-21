@@ -586,6 +586,19 @@
         "-B",
         "tests/evidence_recorder_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/codec_cardinality_r2",
+      "tree": "32bf7ed27b0384da6d08531ec0aef958f5df0973",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "4c84472d1c7b474a3a9e6ec679889e0d89a9a6fc",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/526",
+      "attestation": "Exact independently merged PM524 Verification269 source-proof method issued for Software526; no acceptance by import.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/codec_cardinality_r2/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

@@ -1,0 +1,9 @@
+{
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "ingest_tree": "835078995d4e9cc2424f9ea8d6f11304b45f783f",
+  "prior_conditional_review": "fd2fafaacefbbcf6053def6225917adf6d9a932e",
+  "old_function_cap_superseded": true,
+  "new_decoder_runs": 0,
+  "max_focused_cpu_seconds": 7200,
+  "max_focused_bytes": 536870912
+}
