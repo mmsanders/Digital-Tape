@@ -61,3 +61,5 @@ host/app/parser-component/Cargo.lock -text
 docs/REVIEW/software498/correction*/** -text
 
 tests/evidence_recorder_r1/** -text
+
+docs/REVIEW/software511/** -text

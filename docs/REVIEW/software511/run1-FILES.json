@@ -1,0 +1,46 @@
+{
+  "ARCHIVE-MANIFEST.json": {
+    "bytes": 60871,
+    "sha256": "fdf12a968845b375857a879cfb004bd0d931fa2d780aeda66e59e2a77e64ffbe"
+  },
+  "IMPORT.json": {
+    "bytes": 1093,
+    "sha256": "7a350962bb1824b0d8b089938510f10b3eb461ecd0ff8793315c46a9184da104"
+  },
+  "OBSERVATIONS.json": {
+    "bytes": 8965,
+    "sha256": "a9c1678d4c6bd4171471971475607b315eac871b8bcf4f79cb9da12b5e36edf8"
+  },
+  "RUNTIME.json": {
+    "bytes": 853,
+    "sha256": "73fbc93b135d3dac7fdb8e9c63a4e2fd9ffc355ec7576ba95bb0bcc6ef9d3484"
+  },
+  "software511-exact-return.zip": {
+    "bytes": 219659,
+    "sha256": "88638342e902089ccd0e704487d90170655fcd7109af138911dfac1165b4110e"
+  },
+  "build-receipts/method-selftest.txt": {
+    "bytes": 560,
+    "sha256": "a26d630647d018d44e68186de7daf0c64d43146b2ef67e5d1e0306ec8eca025d"
+  },
+  "build-receipts/method-sha256.txt": {
+    "bytes": 114,
+    "sha256": "c5dd8ae85f22bf619900ac3f1827b4906955988c7bcea3013fd4c3521955b5c4"
+  },
+  "build-receipts/python.txt": {
+    "bytes": 14,
+    "sha256": "5b3e43dc38ca01e3f5a7854ba50d4330864b0c1e0f646650b2c78cf072acc366"
+  },
+  "build-receipts/run-stderr.txt": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "build-receipts/run-stdout.txt": {
+    "bytes": 213,
+    "sha256": "337f14c19019b680d820318e8210e5dec8869c0be92e9127a454716143d566e8"
+  },
+  "build-receipts/source.txt": {
+    "bytes": 41,
+    "sha256": "face6dd7e028099dd88d8ea240ea62595f5af5fdaaa3de186c42608cbc408bf8"
+  }
+}
