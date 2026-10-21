@@ -1,0 +1,8 @@
+{
+  "build_time_receipt": "separate GNU time receipt, included in600 reservation; gate before every native command",
+  "host_cpus": 4,
+  "reserve_cpu_seconds": 600,
+  "used_children_seconds": 2.350344,
+  "used_parent_seconds": 1.452647497,
+  "wall_ns": 4810475874
+}

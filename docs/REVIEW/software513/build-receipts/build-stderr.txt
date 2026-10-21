@@ -1,0 +1,467 @@
+ Downloading crates ...
+  Downloaded libm v0.2.16
+   Compiling libm v0.2.16
+   Compiling meter-precision-513 v0.0.0 (/home/runner/work/_temp/software513-work/crate)
+warning: variants `Source`, `Folder`, and `Boundary` are never constructed
+  --> src/common.rs:20:5
+   |
+16 | pub enum Subject {
+   |          ------- variants in this enum
+...
+20 |     Source(String),
+   |     ^^^^^^
+21 |     /// A folder argument, by ordinal.
+22 |     Folder(usize),
+   |     ^^^^^^
+23 |     /// Two neighbouring source logical paths.
+24 |     Boundary(String, String),
+   |     ^^^^^^^^
+   |
+   = note: `Subject` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `class`, `id`, `subject`, and `payload` are never read
+  --> src/common.rs:43:9
+   |
+42 | pub struct Fail {
+   |            ---- fields in this struct
+43 |     pub class: Class,
+   |         ^^^^^
+44 |     pub msg: String,
+45 |     pub id: &'static str,
+   |         ^^
+46 |     pub subject: Subject,
+   |         ^^^^^^^
+47 |     pub payload: Payload,
+   |         ^^^^^^^
+   |
+   = note: `Fail` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: methods `prefixed`, `about`, and `with` are never used
+  --> src/common.rs:58:12
+   |
+50 | impl Fail {
+   | --------- methods in this implementation
+...
+58 |     pub fn prefixed(mut self, p: &str) -> Fail {
+   |            ^^^^^^^^
+...
+63 |     pub fn about(mut self, s: Subject) -> Fail {
+   |            ^^^^^
+...
+69 |     pub fn with(mut self, p: Payload) -> Fail {
+   |            ^^^^
+
+warning: function `names_nothing` is never used
+  --> src/common.rs:76:8
+   |
+76 | pub fn names_nothing(id: &str) -> bool {
+   |        ^^^^^^^^^^^^^
+
+warning: constant `INGEST_USAGE` is never used
+  --> src/common.rs:94:11
+   |
+94 | pub const INGEST_USAGE: &str = "INGEST_USAGE";
+   |           ^^^^^^^^^^^^
+
+warning: constant `INGEST_LENGTH_INVALID` is never used
+  --> src/common.rs:95:11
+   |
+95 | pub const INGEST_LENGTH_INVALID: &str = "INGEST_LENGTH_INVALID";
+   |           ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `INGEST_TOO_LONG` is never used
+  --> src/common.rs:96:11
+   |
+96 | pub const INGEST_TOO_LONG: &str = "INGEST_TOO_LONG";
+   |           ^^^^^^^^^^^^^^^
+
+warning: constant `INGEST_RIFF_LIMIT` is never used
+  --> src/common.rs:97:11
+   |
+97 | pub const INGEST_RIFF_LIMIT: &str = "INGEST_RIFF_LIMIT";
+   |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_SYMLINK` is never used
+  --> src/common.rs:98:11
+   |
+98 | pub const FOLDER_SYMLINK: &str = "FOLDER_SYMLINK";
+   |           ^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_UNREADABLE` is never used
+  --> src/common.rs:99:11
+   |
+99 | pub const FOLDER_UNREADABLE: &str = "FOLDER_UNREADABLE";
+   |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_NOT_FOLDER` is never used
+   --> src/common.rs:100:11
+    |
+100 | pub const FOLDER_NOT_FOLDER: &str = "FOLDER_NOT_FOLDER";
+    |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_DUPLICATE` is never used
+   --> src/common.rs:101:11
+    |
+101 | pub const FOLDER_DUPLICATE: &str = "FOLDER_DUPLICATE";
+    |           ^^^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_EMPTY` is never used
+   --> src/common.rs:102:11
+    |
+102 | pub const FOLDER_EMPTY: &str = "FOLDER_EMPTY";
+    |           ^^^^^^^^^^^^
+
+warning: constant `FOLDER_NAME_COLLISION` is never used
+   --> src/common.rs:103:11
+    |
+103 | pub const FOLDER_NAME_COLLISION: &str = "FOLDER_NAME_COLLISION";
+    |           ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `FOLDER_NAME_NOT_UNICODE` is never used
+   --> src/common.rs:104:11
+    |
+104 | pub const FOLDER_NAME_NOT_UNICODE: &str = "FOLDER_NAME_NOT_UNICODE";
+    |           ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `ENTRY_SYMLINK` is never used
+   --> src/common.rs:105:11
+    |
+105 | pub const ENTRY_SYMLINK: &str = "ENTRY_SYMLINK";
+    |           ^^^^^^^^^^^^^
+
+warning: constant `ENTRY_NESTED_FOLDER` is never used
+   --> src/common.rs:106:11
+    |
+106 | pub const ENTRY_NESTED_FOLDER: &str = "ENTRY_NESTED_FOLDER";
+    |           ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `ENTRY_NOT_REGULAR` is never used
+   --> src/common.rs:107:11
+    |
+107 | pub const ENTRY_NOT_REGULAR: &str = "ENTRY_NOT_REGULAR";
+    |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `ENTRY_NAME_INVALID` is never used
+   --> src/common.rs:108:11
+    |
+108 | pub const ENTRY_NAME_INVALID: &str = "ENTRY_NAME_INVALID";
+    |           ^^^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_PROTECTED` is never used
+   --> src/common.rs:109:11
+    |
+109 | pub const SOURCE_PROTECTED: &str = "SOURCE_PROTECTED";
+    |           ^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_NOT_AUDIO` is never used
+   --> src/common.rs:110:11
+    |
+110 | pub const SOURCE_NOT_AUDIO: &str = "SOURCE_NOT_AUDIO";
+    |           ^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_TOO_SHORT` is never used
+   --> src/common.rs:111:11
+    |
+111 | pub const SOURCE_TOO_SHORT: &str = "SOURCE_TOO_SHORT";
+    |           ^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_CHANGED` is never used
+   --> src/common.rs:112:11
+    |
+112 | pub const SOURCE_CHANGED: &str = "SOURCE_CHANGED";
+    |           ^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_NON_FINITE` is never used
+   --> src/common.rs:113:11
+    |
+113 | pub const SOURCE_NON_FINITE: &str = "SOURCE_NON_FINITE";
+    |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_TRIM_UNSUPPORTED` is never used
+   --> src/common.rs:115:11
+    |
+115 | pub const SOURCE_TRIM_UNSUPPORTED: &str = "SOURCE_TRIM_UNSUPPORTED";
+    |           ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_OUTSIDE_INGEST1` is never used
+   --> src/common.rs:116:11
+    |
+116 | pub const SOURCE_OUTSIDE_INGEST1: &str = "SOURCE_OUTSIDE_INGEST1";
+    |           ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `SOURCE_CORRUPT` is never used
+   --> src/common.rs:117:11
+    |
+117 | pub const SOURCE_CORRUPT: &str = "SOURCE_CORRUPT";
+    |           ^^^^^^^^^^^^^^
+
+warning: constant `JOIN_PEAK` is never used
+   --> src/common.rs:118:11
+    |
+118 | pub const JOIN_PEAK: &str = "JOIN_PEAK";
+    |           ^^^^^^^^^
+
+warning: constant `JOINED_PEAK` is never used
+   --> src/common.rs:119:11
+    |
+119 | pub const JOINED_PEAK: &str = "JOINED_PEAK";
+    |           ^^^^^^^^^^^
+
+warning: constant `DEST_EXISTS` is never used
+   --> src/common.rs:120:11
+    |
+120 | pub const DEST_EXISTS: &str = "DEST_EXISTS";
+    |           ^^^^^^^^^^^
+
+warning: constant `DEST_APPEARED` is never used
+   --> src/common.rs:121:11
+    |
+121 | pub const DEST_APPEARED: &str = "DEST_APPEARED";
+    |           ^^^^^^^^^^^^^
+
+warning: constant `DEST_NAME_INVALID` is never used
+   --> src/common.rs:122:11
+    |
+122 | pub const DEST_NAME_INVALID: &str = "DEST_NAME_INVALID";
+    |           ^^^^^^^^^^^^^^^^^
+
+warning: constant `IO_SOURCE` is never used
+   --> src/common.rs:124:11
+    |
+124 | pub const IO_SOURCE: &str = "IO_SOURCE";
+    |           ^^^^^^^^^
+
+warning: constant `IO_FOLDER` is never used
+   --> src/common.rs:125:11
+    |
+125 | pub const IO_FOLDER: &str = "IO_FOLDER";
+    |           ^^^^^^^^^
+
+warning: constant `IO_DEST` is never used
+   --> src/common.rs:126:11
+    |
+126 | pub const IO_DEST: &str = "IO_DEST";
+    |           ^^^^^^^
+
+warning: constant `RATES` is never used
+   --> src/common.rs:131:11
+    |
+131 | pub const RATES: [u32; 15] = [
+    |           ^^^^^
+
+warning: function `check_rate` is never used
+   --> src/common.rs:136:8
+    |
+136 | pub fn check_rate(rate: u32) -> Res<()> {
+    |        ^^^^^^^^^^
+
+warning: function `check_channels` is never used
+   --> src/common.rs:144:8
+    |
+144 | pub fn check_channels(ch: u32) -> Res<()> {
+    |        ^^^^^^^^^^^^^^
+
+warning: associated function `unknown` is never used
+   --> src/common.rs:167:12
+    |
+161 | impl Trim {
+    | --------- associated function in this implementation
+...
+167 |     pub fn unknown() -> Trim {
+    |            ^^^^^^^
+
+warning: fields `container`, `codec`, and `codec_profile` are never read
+   --> src/common.rs:175:9
+    |
+174 | pub struct Decoded {
+    |            ------- fields in this struct
+175 |     pub container: &'static str,
+    |         ^^^^^^^^^
+176 |     pub codec: &'static str,
+    |         ^^^^^
+177 |     pub codec_profile: String,
+    |         ^^^^^^^^^^^^^
+
+warning: method `finish` is never used
+   --> src/common.rs:191:12
+    |
+185 | impl Decoded {
+    | ------------ method in this implementation
+...
+191 |     pub fn finish(self) -> Res<Decoded> {
+    |            ^^^^^^
+
+warning: function `u16le` is never used
+   --> src/common.rs:217:8
+    |
+217 | pub fn u16le(b: &[u8], o: usize) -> u16 {
+    |        ^^^^^
+
+warning: function `u32le` is never used
+   --> src/common.rs:220:8
+    |
+220 | pub fn u32le(b: &[u8], o: usize) -> u32 {
+    |        ^^^^^
+
+warning: function `u16be` is never used
+   --> src/common.rs:223:8
+    |
+223 | pub fn u16be(b: &[u8], o: usize) -> u16 {
+    |        ^^^^^
+
+warning: function `u32be` is never used
+   --> src/common.rs:226:8
+    |
+226 | pub fn u32be(b: &[u8], o: usize) -> u32 {
+    |        ^^^^^
+
+warning: function `u64be` is never used
+   --> src/common.rs:229:8
+    |
+229 | pub fn u64be(b: &[u8], o: usize) -> u64 {
+    |        ^^^^^
+
+warning: multiple variants are never constructed
+   --> src/common.rs:238:5
+    |
+237 | pub enum Pcm {
+    |          --- variants in this enum
+238 |     U8,
+    |     ^^
+239 |     S8,
+    |     ^^
+240 |     S16Le,
+241 |     S24Le,
+    |     ^^^^^
+242 |     S32Le,
+    |     ^^^^^
+243 |     S16Be,
+    |     ^^^^^
+244 |     S24Be,
+    |     ^^^^^
+245 |     S32Be,
+    |     ^^^^^
+246 |     F32Le,
+    |     ^^^^^
+247 |     F64Le,
+    |     ^^^^^
+    |
+    = note: `Pcm` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `name` is never used
+   --> src/common.rs:261:12
+    |
+250 | impl Pcm {
+    | -------- method in this implementation
+...
+261 |     pub fn name(self) -> &'static str {
+    |            ^^^^
+
+warning: function `extend` is never used
+   --> src/common.rs:337:8
+    |
+337 | pub fn extend<T: Copy>(v: &mut Vec<T>, s: &[T]) -> Res<()> {
+    |        ^^^^^^
+
+warning: function `put` is never used
+   --> src/common.rs:344:8
+    |
+344 | pub fn put(s: &mut String, t: &str) -> Res<()> {
+    |        ^^^
+
+warning: function `read_into` is never used
+   --> src/common.rs:351:8
+    |
+351 | pub fn read_into(f: &mut impl std::io::Read, b: &mut Vec<u8>) -> Res<std::io::Result<()>> {
+    |        ^^^^^^^^^
+
+warning: function `checkpoint` is never used
+   --> src/common.rs:383:8
+    |
+383 | pub fn checkpoint() -> Res<()> {
+    |        ^^^^^^^^^^
+
+warning: function `output_frames` is never used
+   --> src/dsp.rs:144:8
+    |
+144 | pub fn output_frames(n: u64, rate: u32) -> Option<u64> {
+    |        ^^^^^^^^^^^^^
+
+warning: fields `input_lufs`, `input_dbtp`, `output_lufs`, `output_dbtp`, `target_gain_db`, and `reason` are never read
+  --> src/convert.rs:9:9
+   |
+ 7 | pub struct Converted {
+   |            --------- fields in this struct
+ 8 |     pub pcm: Vec<i16>, // interleaved stereo, exactly output_frames frames
+ 9 |     pub input_lufs: Option<f64>,
+   |         ^^^^^^^^^^
+10 |     pub input_dbtp: Option<f64>,
+   |         ^^^^^^^^^^
+11 |     pub output_lufs: Option<f64>,
+   |         ^^^^^^^^^^^
+12 |     pub output_dbtp: Option<f64>,
+   |         ^^^^^^^^^^^
+13 |     /// `-16 - input_lufs`; undefined (null) when input loudness is undefined (§6).
+14 |     pub target_gain_db: Option<f64>,
+   |         ^^^^^^^^^^^^^^
+...
+18 |     pub reason: Option<&'static str>,
+   |         ^^^^^^
+
+warning: function `mark` is never used
+   --> src/observe.rs:205:8
+    |
+205 | pub fn mark(op: &str) {
+    |        ^^^^
+
+warning: function `io_fault` is never used
+   --> src/observe.rs:210:8
+    |
+210 | pub fn io_fault(op: &str) -> std::io::Result<()> {
+    |        ^^^^^^^^
+
+warning: function `mark_with` is never used
+   --> src/observe.rs:182:12
+    |
+182 |     pub fn mark_with(_op: &str, _extra: &str) {}
+    |            ^^^^^^^^^
+
+warning: function `cut` is never used
+   --> src/observe.rs:184:12
+    |
+184 |     pub fn cut(_name: &str) {}
+    |            ^^^
+
+warning: function `fault` is never used
+   --> src/observe.rs:186:12
+    |
+186 |     pub fn fault(_op: &str) -> bool {
+    |            ^^^^^
+
+warning: function `joined` is never used
+   --> src/observe.rs:194:12
+    |
+194 |     pub fn joined(_db: Option<f64>) {}
+    |            ^^^^^^
+
+warning: function `init_heap_limit` is never used
+   --> src/observe.rs:196:12
+    |
+196 |     pub fn init_heap_limit() {}
+    |            ^^^^^^^^^^^^^^^
+
+warning: function `probe` is never used
+   --> src/observe.rs:198:12
+    |
+198 |     pub fn probe() -> Option<i32> {
+    |            ^^^^^
+
+warning: function `exhausted` is never used
+  --> src/mem.rs:46:8
+   |
+46 | pub fn exhausted() -> bool {
+   |        ^^^^^^^^^
+
+warning: `meter-precision-513` (bin "meter-precision-513") generated 63 warnings
+    Finished `release` profile [optimized] target(s) in 18.65s

@@ -1,0 +1,222 @@
+[
+  {
+    "attempts": 2,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "4eb5e18a034447c471ae946a8cae8829693590c2f1ea0e0fb7880cfb77675ada",
+    "events": 1163,
+    "gain_bits": "bd1af5b9902aed3f",
+    "independent_quantizer_equal": true,
+    "name": "join-29000-1-source-0",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "faf8fb796f5ef74bebe46e59394a02610b1c8260b3e0737cbb9c018ba0f331e8",
+    "events": 709,
+    "gain_bits": "27ba2d1f56dbef3f",
+    "independent_quantizer_equal": true,
+    "name": "join-29000-1-source-1",
+    "original_pcm_equal": true
+  },
+  {
+    "domain_manifest": "623b69af7409477f967359cd16473dfae901268f063ece1a2351bd649478fbda",
+    "events": 291,
+    "name": "join-29000-1-channel-0"
+  },
+  {
+    "domain_manifest": "5220241040d59c6617d46c1e254a73184d20a5145246bba9a0c355391fe25de6",
+    "events": 291,
+    "name": "join-29000-1-channel-1"
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "09fb7c85d3c69ee722e27e88744edb8e968d2c556250b6ea6c16643872c6ea5e",
+    "events": 654,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "gap-1-source-0",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "8c8d46cfeee77f63042e05562d4efad398b3ea93252bd784d03c398145f23044",
+    "events": 637,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "gap-1-source-1",
+    "original_pcm_equal": true
+  },
+  {
+    "domain_manifest": "95d7657e2dff7a76b9a5256f3854b4d84a9b233cd722b84630b5af6777e8449c",
+    "events": 429,
+    "name": "gap-1-channel-0"
+  },
+  {
+    "domain_manifest": "378b1d3e7777fe43d3860f8ab9684ddc214da12e0090ef06741197b831f3feac",
+    "events": 429,
+    "name": "gap-1-channel-1"
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "a319f1d23e961fe8acde6394d862a0a617b301c259312efcdf8f350cf3326c5d",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-0",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "0bc6abda0f9e8b93efd28f0f26ba214e233814e9ff9bcc284c8505148bf30369",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-1",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "c31e141e37c8ad023c53b07e6ed4ecc0cc9f243f5aacfb436406396b20b87d2b",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-2",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "21ab92b73593b855ed1042889960581046fbe9fda68907e59970064b3685d5f1",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-3",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "a44f3352ff6d26305746cf186419394dd2aa47e259a53f2a238c78b5dfb32c5b",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-4",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "ff281aea6e41a6df2568b8a5bed882dcf6d799a3c7e892594e27c9558569841f",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-5",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "11ec005c89e2175377cc229576189cbd8ceff12fc02336cf7ed9c791ff1852a2",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-6",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "63c9804b00736c3aae40f1e0880cd28beccc1775ab4f31949feeedc1eea38959",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-7",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "832d02123368e963b8aa2e56d5a14bd970ce30d103383be506d23be807134b20",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-8",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "2a8a542bf3cf0060334a948d8739a09591825dabb61d2d75e9ae4a20a89799da",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-9",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 1,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "61e31ad8c5f529ef9974219deffc6eccf327f42b71cc90abb2b1c27624e8329f",
+    "events": 650,
+    "gain_bits": "000000000000f03f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-10",
+    "original_pcm_equal": true
+  },
+  {
+    "attempts": 2,
+    "dither_reset": "original quantize calls Xorshift::new per source/attempt; seed6d2b79f5; no shared state",
+    "domain_manifest": "994d18a2f3d07a82887bfb55fed6993ad54e431a2bb38b20eeab57c0adeaeb58",
+    "events": 1201,
+    "gain_bits": "9eda8cb5972aed3f",
+    "independent_quantizer_equal": true,
+    "name": "block-end-1-source-11",
+    "original_pcm_equal": true
+  },
+  {
+    "domain_manifest": "69748f18ae69dc6efe1a4baac475b86363a077786dfe41ac3f92398cb081014b",
+    "events": 2875,
+    "name": "block-end-1-channel-0"
+  },
+  {
+    "domain_manifest": "3e62c1c6a2f68af2c60c5ceddd3c78fe44f4c222b0d5f0cd19f95b7fe9e45163",
+    "events": 2875,
+    "name": "block-end-1-channel-1"
+  },
+  {
+    "domain_manifest": "2690697480438a55e5669f85ba857c32dbecd6af0bbf2e67224048ec8d7c02e0",
+    "events": 742,
+    "name": "join-29000-1-stream-0"
+  },
+  {
+    "domain_manifest": "9b2f2ef39417ffb39ce047e8a1f5dc04f748877af600433181c2c31f111d39f5",
+    "events": 742,
+    "name": "join-29000-1-stream-1"
+  },
+  {
+    "domain_manifest": "7e2e6791712d7b8b9d07f39fe2222e40de0e1a183d3fd6c811fe4c0b2abab06b",
+    "events": 820,
+    "name": "gap-1-stream-0"
+  },
+  {
+    "domain_manifest": "9ab223737bc28a338e81b4114a0df7f8569fd5dba0ae3f0fcead16d5bf2ca7ed",
+    "events": 820,
+    "name": "gap-1-stream-1"
+  },
+  {
+    "domain_manifest": "f7c25bb47d9016a48216b58eeaf2f91450a9f417e7c59d18c14da294470d36d8",
+    "events": 3476,
+    "name": "block-end-1-stream-0"
+  },
+  {
+    "domain_manifest": "17e3f1862c9d9dd1cb3169fd6fac4e1d4dd32cdc06027c91534644b77701207b",
+    "events": 3476,
+    "name": "block-end-1-stream-1"
+  }
+]

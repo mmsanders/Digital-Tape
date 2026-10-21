@@ -1,0 +1,100 @@
+[
+  {
+    "mutation": "q",
+    "observation": {
+      "at_le": "00000000",
+      "block_lo": -256,
+      "buffer_local": 0,
+      "case": "join-29000-1",
+      "channel": 0,
+      "global_sample": -514,
+      "n0": -514,
+      "q": 194,
+      "signed_phase": -131391,
+      "source_local": -514,
+      "source_start": 0,
+      "support": [
+        -769,
+        -258
+      ],
+      "support_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+    },
+    "rejected": true,
+    "sha256": "8748b57f05058e041aa5be84b131d652c68f97b1e803b616147369ee8956c705"
+  },
+  {
+    "mutation": "support",
+    "observation": {
+      "at_le": "00000000",
+      "block_lo": -256,
+      "buffer_local": 0,
+      "case": "join-29000-1",
+      "channel": 0,
+      "global_sample": -514,
+      "n0": -514,
+      "q": 193,
+      "signed_phase": -131391,
+      "source_local": -514,
+      "source_start": 0,
+      "support": [
+        -768,
+        -258
+      ],
+      "support_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+    },
+    "rejected": true,
+    "sha256": "d5fb508e41899c8e28597cf628e75ca1d6a89698375e2940daadeb31107c31df"
+  },
+  {
+    "mutation": "global_sample",
+    "observation": {
+      "at_le": "00000000",
+      "block_lo": -256,
+      "buffer_local": 0,
+      "case": "join-29000-1",
+      "channel": 0,
+      "global_sample": -513,
+      "n0": -514,
+      "q": 193,
+      "signed_phase": -131391,
+      "source_local": -514,
+      "source_start": 0,
+      "support": [
+        -769,
+        -258
+      ],
+      "support_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+    },
+    "rejected": true,
+    "sha256": "93820ab0c8c4c71b3694fb5dab35a540a12fcd04af0e2374d2166fc7131c640d"
+  },
+  {
+    "mutation": "block_lo",
+    "observation": {
+      "at_le": "00000000",
+      "block_lo": -255,
+      "buffer_local": 0,
+      "case": "join-29000-1",
+      "channel": 0,
+      "global_sample": -514,
+      "n0": -514,
+      "q": 193,
+      "signed_phase": -131391,
+      "source_local": -514,
+      "source_start": 0,
+      "support": [
+        -769,
+        -258
+      ],
+      "support_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+    },
+    "rejected": true,
+    "sha256": "b3adfa18175fca6461a9fc23afae689b05867a6da5a5f06059aaca700e57996a"
+  },
+  {
+    "mutation": "rounded-gain",
+    "observation": "923d42cd902aed3f",
+    "original": "bd1af5b9902aed3f",
+    "rejected": true
+  }
+]

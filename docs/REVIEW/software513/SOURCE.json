@@ -1,0 +1,55 @@
+{
+  "compiled": {
+    "common.rs": {
+      "bytes": 13729,
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0"
+    },
+    "convert.rs": {
+      "bytes": 5368,
+      "sha256": "1a9438dcc8721fe2acd422f3ba9e07532258c4c6f63579331f89749334ff915c"
+    },
+    "dsp.rs": {
+      "bytes": 22157,
+      "sha256": "26f32e439e085182dcb8017bf630cfd568608e6f59badb6ed24af7319506c265"
+    },
+    "main.rs": {
+      "bytes": 2819,
+      "sha256": "a70ff5b137a463b9c13452839dfafbbbed0bc45f622503ee51ca1d779152b72d"
+    },
+    "mem.rs": {
+      "bytes": 6125,
+      "sha256": "76a801430c2abeb0f204baae6113ac9edbe2f292984514f3b01ec8775bc71cb3"
+    },
+    "observe.rs": {
+      "bytes": 8847,
+      "sha256": "361426be3b310600392d5be94de4b60814c7b1bbee7d3dcd0e9f8fde41022f9d"
+    }
+  },
+  "observation_edits": [
+    [
+      "        if hi <= lo {",
+      "        crate::trace(format!(\"{{\\\"kind\\\":\\\"range\\\",\\\"length\\\":{},\\\"lo\\\":{lo},\\\"hi\\\":{hi}}}\",x.len()));\n        if hi <= lo {"
+    ],
+    [
+      "                gmax = gmax.max(v);",
+      "                let old_gmax = gmax;\n                gmax = gmax.max(v);"
+    ],
+    [
+      "                if v > 0.0 && v >= gmax * 0.90 && v >= prev && v >= next {",
+      "                let decision = v > 0.0 && v >= gmax * 0.90 && v >= prev && v >= next;\n                if old_gmax != gmax || decision { crate::trace(format!(\"{{\\\"kind\\\":\\\"history\\\",\\\"n0\\\":{n0},\\\"lane\\\":{p},\\\"v_le\\\":\\\"{}\\\",\\\"prev_le\\\":\\\"{}\\\",\\\"next_le\\\":\\\"{}\\\",\\\"gmax_le\\\":\\\"{}\\\",\\\"refine\\\":{decision}}}\",s513hex(&v.to_le_bytes()),s513hex(&prev.to_le_bytes()),s513hex(&next.to_le_bytes()),s513hex(&gmax.to_le_bytes()))); }\n                if decision {"
+    ],
+    [
+      "        best\n    }",
+      "        crate::trace(format!(\"{{\\\"kind\\\":\\\"range-result\\\",\\\"peak_le\\\":\\\"{}\\\"}}\",s513hex(&best.to_le_bytes())));\n        best\n    }"
+    ]
+  ],
+  "original_modules": {
+    "common": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0",
+    "convert": "ad945d0e325a2c4066e5716b88a553d1cc927fc456ca14f631a69adc96dac021",
+    "dsp": "fb77778e7f271f2acb1c385ee9e8235e0752f3f1318caf3e7fddcc410a230ffc",
+    "mem": "76a801430c2abeb0f204baae6113ac9edbe2f292984514f3b01ec8775bc71cb3",
+    "observe": "361426be3b310600392d5be94de4b60814c7b1bbee7d3dcd0e9f8fde41022f9d"
+  },
+  "scope": "test-only modules, no shipping decoder/CLI/publish/engine",
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+}

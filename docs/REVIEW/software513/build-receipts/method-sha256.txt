@@ -1,0 +1,5 @@
+oracle.py: OK
+PINS.json: OK
+README.md: OK
+SELECTED.json: OK
+selftest.py: OK

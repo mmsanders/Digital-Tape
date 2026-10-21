@@ -1,0 +1,10 @@
+{
+  "cpu_reserve_seconds": 600,
+  "limit_bytes": 536870912,
+  "limit_cpu": 7200,
+  "method": "79890e243c387ef0663a1278276c3c6792f29073",
+  "production_source": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "recorder_clearance": "87e94160f62922a06346d00dc69f4dfcda987328",
+  "source": "b61da399ec97dcc9892398f522091c32f215ad14",
+  "start_unix_ns": 1792601052762476954
+}

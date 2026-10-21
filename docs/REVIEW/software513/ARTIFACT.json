@@ -1,0 +1,16 @@
+{
+  "bytes": 1454205,
+  "sha256": "617b66e29f0679eac60436ffa94edda4f3041ec141c08514d656345ccedca071",
+  "members": 591,
+  "native_calls": 28,
+  "complete_recorded_cases": 28,
+  "source_occurrences": 16,
+  "source_quantizer_and_original_equal": 16,
+  "finite_evaluations": 7184,
+  "mutants": 5,
+  "task_cpu_conservative": 603.802991497,
+  "tested": "b61da399ec97dcc9892398f522091c32f215ad14",
+  "run": 39637360493,
+  "transport": "Public release evidence-software513-2026-10-21 asset663165916; anonymous original-byte and complete member authentication",
+  "workflow_artifact": 12362345836
+}
