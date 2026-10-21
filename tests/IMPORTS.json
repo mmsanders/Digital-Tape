@@ -560,6 +560,19 @@
         "-B",
         "tests/wp15_cards_make_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp10_missing_faults_r1",
+      "tree": "c1e57d7848c03f3237a1e3e33b04241c4955af0e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "76724f20260746c2057bfaa784b3763c687f220b",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/501",
+      "attestation": "Exact independently merged PM497 method issued for bounded Software501 work; no acceptance by import.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_missing_faults_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
