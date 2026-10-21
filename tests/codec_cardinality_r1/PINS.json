@@ -1,0 +1,42 @@
+{
+  "cpu_seconds_limit": 7200,
+  "evidence_bytes_limit": 536870912,
+  "ingest_tree": "835078995d4e9cc2424f9ea8d6f11304b45f783f",
+  "max_known_fixture_bindings": 8,
+  "max_new_vendor_functions": 6,
+  "old_reviewed_files": [
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "bytes": 25880,
+      "path": "host/ingest/src/aac.rs",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907"
+    },
+    {
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "bytes": 14500,
+      "path": "host/ingest/src/mpeg.rs",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0"
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "bytes": 22795,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322"
+    },
+    {
+      "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "bytes": 36962,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381"
+    },
+    {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "bytes": 22434,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04"
+    }
+  ],
+  "prior_method_merge": "a294ea88ca6bbe6d7a3dc0b660df3d6a7ae0faaa",
+  "prior_review_merge": "25b20d951e5340cc2ed42a76f717e852252b7061",
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+}

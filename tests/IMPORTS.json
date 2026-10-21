@@ -573,6 +573,19 @@
         "-B",
         "tests/wp15_boundary_query_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/codec_cardinality_r1",
+      "tree": "23c8366a43cfd29ea4d3de837ed4845b68b35cf0",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "4227a8393a8f34919e766a6c573ab088aeb24f39",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/512",
+      "attestation": "Exact independently merged PM497 method issued for bounded Software512 work; no acceptance by import.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/codec_cardinality_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [

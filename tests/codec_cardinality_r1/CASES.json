@@ -1,0 +1,320 @@
+[
+  {
+    "expected": "FINITE_PREMISES_HOLD_NOT_SOURCE_PROOF",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "stereo-capacity-not-length"
+  },
+  {
+    "expected": "FINITE_PREMISES_HOLD_NOT_SOURCE_PROOF",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3
+      ],
+      "frames": 3,
+      "host_c": 1,
+      "planes": 1,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 1,
+      "success": true
+    },
+    "name": "mono"
+  },
+  {
+    "expected": "FINITE_PREMISES_HOLD_NOT_SOURCE_PROOF",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        0,
+        0
+      ],
+      "frames": 0,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "zero-frames-two-planes"
+  },
+  {
+    "expected": "UNADMITTED_MODEL_ONLY",
+    "input": {
+      "admitted": false,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 0,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "empty-plane-invalid-model"
+  },
+  {
+    "expected": "SHAPE_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 0,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "admitted-empty-plane"
+  },
+  {
+    "expected": "SHAPE_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 1,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "metadata-disagreement"
+  },
+  {
+    "expected": "SHAPE_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 3,
+      "success": true
+    },
+    "name": "mask-as-count"
+  },
+  {
+    "expected": "SHAPE_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 6,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "capacity-as-valid-frames"
+  },
+  {
+    "expected": "COPY_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "zip-shortened-outer"
+  },
+  {
+    "expected": "COPY_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        2
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "one-short-plane"
+  },
+  {
+    "expected": "COPY_PREMISE_FALSE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        5,
+        5
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "copied-capacity"
+  },
+  {
+    "expected": "TRANSITION_UNPROVED",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": true,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "changed-unproved"
+  },
+  {
+    "expected": "FINITE_PREMISES_HOLD_NOT_SOURCE_PROOF",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": true,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": true,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "changed-reestablished"
+  },
+  {
+    "expected": "OUTSIDE_SUCCESS_DOMAIN",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": true,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": false
+    },
+    "name": "changed-refused"
+  },
+  {
+    "expected": "UNBOUND",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": 2,
+      "reestablished": false,
+      "source_bound": false,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "wrong-source"
+  },
+  {
+    "expected": "BAD_TYPE",
+    "input": {
+      "admitted": true,
+      "capacity": 5,
+      "changed": false,
+      "copy_lengths": [
+        3,
+        3
+      ],
+      "frames": 3,
+      "host_c": 2,
+      "planes": true,
+      "reestablished": false,
+      "source_bound": true,
+      "spec_c": 2,
+      "success": true
+    },
+    "name": "bool-not-count"
+  }
+]
