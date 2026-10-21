@@ -575,6 +575,19 @@
       ]
     },
     {
+      "path": "tests/evidence_recorder_r1",
+      "tree": "c370a4e975fe506d884abaacca493cf417e09c5d",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "8fbd72c9294178e5017c9dd0ac1a121e4d30ffe5",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/511",
+      "attestation": "Exact independently merged PM497 method issued for bounded Software511 work; no acceptance by import.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/evidence_recorder_r1/selftest.py"
+      ]
+    },
+    {
       "path": "tests/meter_precision_r1",
       "tree": "c4d05389bdc7e7c386646208f893422652c3498a",
       "source_repo": "mmsanders/digital-tape-verification",

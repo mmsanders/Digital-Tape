@@ -1,0 +1,8 @@
+CASES.json: OK
+cases.py: OK
+helper.py: OK
+oracle.py: OK
+PINS.json: OK
+README.md: OK
+RETURN.md: OK
+selftest.py: OK
