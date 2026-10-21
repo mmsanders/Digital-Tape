@@ -1,0 +1,62 @@
+name: Software513 bounded exact precision observations
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'host/meter-precision/**'
+      - 'tests/meter_precision_r1/**'
+      - '.github/workflows/software513.yml'
+permissions:
+  contents: read
+jobs:
+  selected-three:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Authenticate issued method and original inputs; prepare test-only source
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/software513-receipts"
+          git rev-parse HEAD > "$RUNNER_TEMP/software513-receipts/source.txt"
+          rustc -Vv > "$RUNNER_TEMP/software513-receipts/rustc.txt"
+          cargo -V > "$RUNNER_TEMP/software513-receipts/cargo.txt"
+          python3 --version > "$RUNNER_TEMP/software513-receipts/python.txt"
+          (cd tests/meter_precision_r1 && sha256sum -c SHA256SUMS) > "$RUNNER_TEMP/software513-receipts/method-sha256.txt"
+          python3 -B tests/meter_precision_r1/selftest.py > "$RUNNER_TEMP/software513-receipts/method-selftest.txt"
+          curl --fail --location --output "$RUNNER_TEMP/software500-approved.zip" https://github.com/mmsanders/Digital-Tape/releases/download/evidence-software500-2026-10-20/software500-exact-return.zip
+          echo "108ad9bfe7036605e0405e52c46f9065fb6028244bb953b276f694d3faa0476c  $RUNNER_TEMP/software500-approved.zip" | sha256sum -c -
+          python3 -B host/meter-precision/run.py prepare --work "$RUNNER_TEMP/software513-work"
+      - name: Build minimal instrumented exact-function crate
+        run: |
+          set -euo pipefail
+          cargo generate-lockfile --manifest-path "$RUNNER_TEMP/software513-work/crate/Cargo.toml"
+          /usr/bin/time -v -o "$RUNNER_TEMP/software513-receipts/build-time.txt" cargo build --locked --release --manifest-path "$RUNNER_TEMP/software513-work/crate/Cargo.toml" > "$RUNNER_TEMP/software513-receipts/build-stdout.txt" 2> "$RUNNER_TEMP/software513-receipts/build-stderr.txt"
+          python3 -B - "$RUNNER_TEMP/software513-receipts/build-time.txt" "$RUNNER_TEMP/software513-work" <<'PY'
+          import pathlib,re,sys
+          s=pathlib.Path(sys.argv[1]).read_text()
+          user=float(re.search(r'User time \(seconds\): ([0-9.]+)',s)[1]);system=float(re.search(r'System time \(seconds\): ([0-9.]+)',s)[1])
+          assert user+system<540,'build used task reserve; stop before domain execution'
+          assert sum(p.stat().st_size for p in pathlib.Path(sys.argv[2]).rglob('*') if p.is_file())<400*1024*1024,'workspace leaves insufficient bounded evidence reserve'
+          PY
+      - name: Actual selected observations once, stop on first failure
+        run: |
+          python3 -B host/meter-precision/run.py run --work "$RUNNER_TEMP/software513-work" --archive "$RUNNER_TEMP/software500-approved.zip" > "$RUNNER_TEMP/software513-receipts/run-stdout.txt" 2> "$RUNNER_TEMP/software513-receipts/run-stderr.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software513-exact-return
+          path: |
+            ${{ runner.temp }}/software513-receipts
+            ${{ runner.temp }}/software513-work/SOURCE.json
+            ${{ runner.temp }}/software513-work/production-Cargo.lock
+            ${{ runner.temp }}/software513-work/pinned-independent-model.py
+            ${{ runner.temp }}/software513-work/crate/Cargo.lock
+            ${{ runner.temp }}/software513-work/crate/src
+            ${{ runner.temp }}/software513-work/return
+            ${{ runner.temp }}/software513-work/software513-exact-return.zip
+          include-hidden-files: true
+          if-no-files-found: error
