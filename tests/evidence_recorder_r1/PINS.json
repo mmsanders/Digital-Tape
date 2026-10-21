@@ -1,0 +1,8 @@
+{
+  "frozen_cases": 32,
+  "product_main": "192fed8cf1f367899db3c9ed967f5c4d1d898dec",
+  "scope": "standalone recorder, Stage1 only",
+  "software_issue": 511,
+  "verification_issue": 252,
+  "verification_main": "e6bc7b87dab9d3620c3a018125cb7b404bca8c31"
+}

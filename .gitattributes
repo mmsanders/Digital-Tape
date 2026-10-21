@@ -60,6 +60,9 @@ host/app/parser-component/Cargo.lock -text
 
 docs/REVIEW/software498/correction*/** -text
 
-tests/fault_cost_r2/** -text
+tests/evidence_recorder_r1/** -text
 
+docs/REVIEW/software511/** -text
+
+tests/fault_cost_r2/** -text
 tests/wp10_missing_faults_r1/** -text

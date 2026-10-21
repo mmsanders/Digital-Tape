@@ -1,0 +1,162 @@
+[
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-text"
+  },
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-binary"
+  },
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-empty"
+  },
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-exit7"
+  },
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-unicode-input"
+  },
+  {
+    "expected": "COMPLETE_EVIDENCE",
+    "kind": "actual-helper",
+    "name": "complete-second-case"
+  },
+  {
+    "expected": "INCOMPLETE_RAW_RETAINED",
+    "kind": "actual-interruption",
+    "name": "producer-killed-after-ready"
+  },
+  {
+    "expected": "INCOMPLETE_RAW_RETAINED",
+    "kind": "actual-interruption",
+    "name": "recorder-killed-after-ready"
+  },
+  {
+    "expected": "INCOMPLETE_RAW_RETAINED",
+    "kind": "actual-interruption",
+    "name": "parser-raises"
+  },
+  {
+    "expected": "INCOMPLETE_RAW_RETAINED",
+    "kind": "actual-interruption",
+    "name": "cleanup-raises"
+  },
+  {
+    "expected": "REFUSED_UNCHANGED",
+    "kind": "actual-exclusive-path",
+    "name": "duplicate-id"
+  },
+  {
+    "expected": "REFUSED_UNCHANGED",
+    "kind": "actual-exclusive-path",
+    "name": "existing-case-path"
+  },
+  {
+    "expected": "REFUSED_UNCHANGED",
+    "kind": "actual-exclusive-path",
+    "name": "path-traversal"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "changed-stdout"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "truncated-stderr"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "missing-exit"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "missing-input"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "stale-timing-checksum"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-argv"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-binary"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-source"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-input-identity"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-nonce"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-pid"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "unlisted-case-file"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "incomplete-promoted"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "wrong-stream-count"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-copy-corruption",
+    "name": "negative-timing"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-archive-corruption",
+    "name": "archive-extra"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-archive-corruption",
+    "name": "archive-duplicate"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-archive-corruption",
+    "name": "archive-traversal"
+  },
+  {
+    "expected": "REJECTED",
+    "kind": "actual-positive-archive-corruption",
+    "name": "archive-truncated"
+  }
+]

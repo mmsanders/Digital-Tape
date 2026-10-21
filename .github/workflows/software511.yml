@@ -1,0 +1,38 @@
+name: Software511 frozen recorder experiment
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'host/evidence-recorder/**'
+      - 'tests/evidence_recorder_r1/**'
+      - '.github/workflows/software511.yml'
+permissions:
+  contents: read
+jobs:
+  frozen32:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Authenticate method and record build identity
+        run: |
+          mkdir -p "$RUNNER_TEMP/software511-build"
+          git rev-parse HEAD > "$RUNNER_TEMP/software511-build/source.txt"
+          python3 --version > "$RUNNER_TEMP/software511-build/python.txt"
+          (cd tests/evidence_recorder_r1 && sha256sum -c SHA256SUMS) > "$RUNNER_TEMP/software511-build/method-sha256.txt"
+          python3 -B tests/evidence_recorder_r1/selftest.py > "$RUNNER_TEMP/software511-build/method-selftest.txt"
+      - name: Actual frozen32 once, with original raw retained on failure
+        run: |
+          set -o pipefail
+          python3 -B host/evidence-recorder/run_method.py --source "$(git rev-parse HEAD)" --out "$RUNNER_TEMP/software511-return" > "$RUNNER_TEMP/software511-build/run-stdout.txt" 2> "$RUNNER_TEMP/software511-build/run-stderr.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software511-exact-return
+          path: |
+            ${{ runner.temp }}/software511-build
+            ${{ runner.temp }}/software511-return
+            ${{ runner.temp }}/software511-exact-return.zip
+          if-no-files-found: error
