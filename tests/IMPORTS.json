@@ -580,11 +580,24 @@
       "source_repo": "mmsanders/digital-tape-verification",
       "source_commit": "008a9fb929a57933f07b4ada7c95fb7b04483b1d",
       "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/514",
-      "attestation": "Exact independently merged PM497 method issued for bounded Software514 work; no acceptance by import.",
+      "attestation": "Exact independently merged PM510 method issued for bounded Software514 work; no acceptance by import.",
       "selftest": [
         "python3",
         "-B",
         "tests/fault_cost_r2/selftest.py"
+      ]
+    },
+    {
+      "path": "tests/wp10_missing_faults_r1",
+      "tree": "c1e57d7848c03f3237a1e3e33b04241c4955af0e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "76724f20260746c2057bfaa784b3763c687f220b",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/514",
+      "attestation": "Unchanged published original baseline dependency for PM510 revised fault-cost method; no old execution authorized.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp10_missing_faults_r1/selftest.py"
       ]
     }
   ],
