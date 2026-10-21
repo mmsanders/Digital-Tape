@@ -5,11 +5,11 @@ Active requests and decisions for Michael live only in
 Read that queue at each round; do not reconstruct a task list from this file.
 The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
 
-## Queue state (20 October 2026 PDT)
+## Queue state (21 October 2026 PDT)
 
 Completed return: **[Michael473: received-return locator](https://github.com/mmsanders/Digital-Tape/issues/473)**.
-Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 returned the physical linkage blocker and226 published bounded INGEST acceptance/gaps; both review envelopes are complete. S2 integration and exact-shipping evidence are complete; Observer491/235 stopped at an unavailable capture-privilege prerequisite; no retry or elevation task is requested. Software498–502 and Verification238–242 carry a sustained nonprivileged Phase2 queue. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
-No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
+Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 returned the physical linkage blocker and226 published bounded INGEST acceptance/gaps; both review envelopes are complete. S2 integration and exact-shipping evidence are complete; Observer491/235 stopped at an unavailable capture-privilege prerequisite; no retry or elevation task is requested. Software498–502 and Verification238–242 are complete. PM510 issued Software511–515 / Verification252–256; observer kit work is preparation-only, no execution authorization. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
+No Windows physical test is ready or waiting on Michael. The observer prerequisite is an off-card Administrator context; a concrete kit is being prepared for independent readiness review, with any actual capture requiring separate fresh authorization. No Mac run is ready. Hardware remains parked through Phase2; WP-38 was not taken.
 Michael473 is closed with both returns received. No active hands-on request remains; technical follow-up is with the leads.
 
 ## Standing decisions
