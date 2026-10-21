@@ -60,6 +60,9 @@ host/app/parser-component/Cargo.lock -text
 
 docs/REVIEW/software498/correction*/** -text
 
-tests/observer_kit_readiness_r1/** -text
+tests/evidence_recorder_r1/** -text
 
+docs/REVIEW/software511/** -text
+
+tests/observer_kit_readiness_r1/** -text
 docs/REVIEW/software515/** -text
