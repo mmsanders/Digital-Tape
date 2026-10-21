@@ -1,0 +1,69 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded crypto-common v0.1.7
+  Downloaded cfg-if v1.0.5
+  Downloaded block-buffer v0.10.4
+  Downloaded bitflags v2.13.2
+  Downloaded bytemuck v1.25.2
+  Downloaded generic-array v0.14.7
+  Downloaded autocfg v1.5.1
+  Downloaded smallvec v1.16.3
+  Downloaded md-5 v0.10.6
+  Downloaded num-traits v0.2.19
+  Downloaded cpufeatures v0.2.17
+  Downloaded lazy_static v1.5.1
+  Downloaded sha2 v0.10.9
+  Downloaded unicode-normalization v0.1.25
+  Downloaded tinyvec v1.13.3
+  Downloaded digest v0.10.7
+  Downloaded version_check v0.9.5
+  Downloaded log v0.4.34
+  Downloaded num-complex v0.4.6
+  Downloaded typenum v1.20.1
+  Downloaded libm v0.2.16
+  Downloaded symphonia-metadata v0.6.1
+  Downloaded regex-lite v0.1.9
+  Downloaded libc v0.2.177
+   Compiling version_check v0.9.5
+   Compiling autocfg v1.5.1
+   Compiling typenum v1.20.1
+   Compiling libm v0.2.16
+   Compiling generic-array v0.14.7
+   Compiling num-traits v0.2.19
+   Compiling lazy_static v1.5.1
+   Compiling smallvec v1.16.3
+   Compiling bitflags v2.13.2
+   Compiling log v0.4.34
+   Compiling bytemuck v1.25.2
+   Compiling cfg-if v1.0.5
+   Compiling regex-lite v0.1.9
+   Compiling num-complex v0.4.6
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling symphonia-core v0.6.1 (/home/runner/work/_temp/source499/host/ingest/vendor/symphonia-core)
+   Compiling libc v0.2.177
+   Compiling tinyvec v1.13.3
+   Compiling ingest v0.1.1 (/home/runner/work/_temp/source499/host/ingest)
+   Compiling unicode-normalization v0.1.25
+   Compiling md-5 v0.10.6
+   Compiling symphonia-metadata v0.6.1
+   Compiling symphonia-bundle-mp3 v0.6.1 (/home/runner/work/_temp/source499/host/ingest/vendor/symphonia-bundle-mp3)
+   Compiling symphonia-common v0.6.1 (/home/runner/work/_temp/source499/host/ingest/vendor/symphonia-common)
+warning: field `bitrate` is never read
+   --> vendor/symphonia-bundle-mp3/src/common.rs:102:9
+    |
+ 99 | pub struct FrameHeader {
+    |            ----------- field in this struct
+...
+102 |     pub bitrate: u32,
+    |         ^^^^^^^
+    |
+    = note: `FrameHeader` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling symphonia-codec-aac v0.6.1 (/home/runner/work/_temp/source499/host/ingest/vendor/symphonia-codec-aac)
+warning: `symphonia-bundle-mp3` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.09s

@@ -1,0 +1,504 @@
+{
+  "cases": 25,
+  "scope": "finite arithmetic and induction-premise discriminators only",
+  "global_internal_proved": false,
+  "actual_admitted_witness": false,
+  "source_bindings": [
+    {
+      "path": "docs/WP16-INGEST-CONTRACT.md",
+      "sha256": "9990b84f20818744d731e0f334aa7d77928690dd426f0cbbc6aa2fb2daf638d1"
+    },
+    {
+      "path": "host/ingest/Cargo.lock",
+      "sha256": "6e8d14c97dc59d4e627e68f37d6647c45e7f6d52de5e3c51653239993ad0f864"
+    },
+    {
+      "path": "host/ingest/Cargo.toml",
+      "sha256": "078a384c20752b085de96217a45143fbb3f47f16d87c92aa1a14f8178c2963c7"
+    },
+    {
+      "path": "host/ingest/rust-toolchain.toml",
+      "sha256": "e1e35601df56bce6ac4edfc8f7b1abeed0a5b931f1c6f5d157b1433b6875f6aa"
+    },
+    {
+      "path": "host/ingest/src/aac.rs",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907"
+    },
+    {
+      "path": "host/ingest/src/common.rs",
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0"
+    },
+    {
+      "path": "host/ingest/src/convert.rs",
+      "sha256": "ad945d0e325a2c4066e5716b88a553d1cc927fc456ca14f631a69adc96dac021"
+    },
+    {
+      "path": "host/ingest/src/dsp.rs",
+      "sha256": "fb77778e7f271f2acb1c385ee9e8235e0752f3f1318caf3e7fddcc410a230ffc"
+    },
+    {
+      "path": "host/ingest/src/flac.rs",
+      "sha256": "c97dae1ed2dce55a636c7e254a25b340ae6a69d7c562b383175376c1b0b0a5d7"
+    },
+    {
+      "path": "host/ingest/src/lib.rs",
+      "sha256": "5f143376fe93f8748de2c5ce0134a076c14be0efaea7a73ea07e448ac05ce0bd"
+    },
+    {
+      "path": "host/ingest/src/main.rs",
+      "sha256": "4de9f5f42e4ce407cea14b2e6832c8db48ef58fa980bb4b0dfd39fc90f378951"
+    },
+    {
+      "path": "host/ingest/src/manifest.rs",
+      "sha256": "7db2a1e70f6fc434d4186e0283d265ebdebea9e5fa7a7fd6107800c89255428b"
+    },
+    {
+      "path": "host/ingest/src/mem.rs",
+      "sha256": "76a801430c2abeb0f204baae6113ac9edbe2f292984514f3b01ec8775bc71cb3"
+    },
+    {
+      "path": "host/ingest/src/mpeg.rs",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0"
+    },
+    {
+      "path": "host/ingest/src/observe.rs",
+      "sha256": "361426be3b310600392d5be94de4b60814c7b1bbee7d3dcd0e9f8fde41022f9d"
+    },
+    {
+      "path": "host/ingest/src/order.rs",
+      "sha256": "6aaf9f29cba424d343593904a8f2ddea30941f59dfaa0ca9e45a6fda6418a6fa"
+    },
+    {
+      "path": "host/ingest/src/publish.rs",
+      "sha256": "0dc80f42eaefd905e06ccdb84e728b4b15ea9f846ff5e33b2646729c7f31fe61"
+    },
+    {
+      "path": "host/ingest/src/report.rs",
+      "sha256": "52de80b7253eacbdef53d67ea862c62d0c4c6b4d7151a4d0b4da8be328bb4831"
+    },
+    {
+      "path": "host/ingest/src/sniff.rs",
+      "sha256": "6907bcd60e0e1d78b618d19b9b6ca0be28a5ae7fe9848d18a26ef5f8e70270c7"
+    },
+    {
+      "path": "host/ingest/src/wav.rs",
+      "sha256": "740f100623f0f4709f0475c923bd229749e8d13f4cbd61a22c610a38c64f7fd4"
+    },
+    {
+      "path": "host/ingest/vendor/PATCHES.md",
+      "sha256": "6b04a92e2bf3379d04e4d72166f59f7ba05683ca1aa3f781822c3bd39199efc0"
+    },
+    {
+      "path": "host/ingest/vendor/PATCHES.sha256",
+      "sha256": "eccdf1304e4049a658c66b95313bd467699cc8d7c3feeb9883509fc513887f74"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/.cargo-ok",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/Cargo.toml",
+      "sha256": "449a8f3dfaaeb9f076710ac27df9324cee655a2edc1f30335acdbe50c9795a5b"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/LICENSE",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/README.md",
+      "sha256": "14e6871135106e54155000fdecb130f50ca5cabfdac1215ff36b483fb8091c39"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/common.rs",
+      "sha256": "38f787c30465cfc77f93078252ed298070d1d249eb5e88f5d2579e3f65adbcab"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/demuxer.rs",
+      "sha256": "18f8db244957e4eb1a4c4ba97bdc41ae4e9669044db55f212f435f9e51cbb519"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/header.rs",
+      "sha256": "59e870a43bc73fef45c3f492bd2c1b5fd33fd0aab7f9be72e20850f262a4573a"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer1/mod.rs",
+      "sha256": "a7b2c2d71deaebd39dc20c528b2d9af39af610a308cd9ae70323a197cd894a93"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer12.rs",
+      "sha256": "011406e03533ac30263f19fd4c122402587d5cdd33c889ecac35535f1d077274"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer2/mod.rs",
+      "sha256": "6fbf4e90e8348666a6c67e295375557cf5a956e1c9562c1646b1c822cfe08e09"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/bitstream.rs",
+      "sha256": "9afd74ba5c4506a8b7c6c28d56d0e41036a1fc11bf8046c52ebb4fee3e800f8f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/codebooks.rs",
+      "sha256": "92a9b7e157853a3c2cb0bced2557d8f19c00c23e22e46f351245cd17786e815f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/common.rs",
+      "sha256": "89ef31c9361c1831e61c8b33168ae1e580b5b7a960e2f54d4b229f00ddcc36d2"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/hybrid_synthesis.rs",
+      "sha256": "a55ed3f584c1fd0150c010fc3a24181f434ca2d99e2a4922d01393215742e70e"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/mod.rs",
+      "sha256": "443981d884138491b613dce1a49c0859b986f9b855b828c287ed50c14ffe7844"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/requantize.rs",
+      "sha256": "35ed53068649e29d5df9a1c615a52c29200673836fcaf43e44bf3a2fc209cb04"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/stereo.rs",
+      "sha256": "e2418e8535b2c0529978316a85fe32d705c841cb737079d5f80f14a37dc87f9d"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/lib.rs",
+      "sha256": "e13d7932a2c97b9c0c02a42ca1adb90e1131b3bf9e118988219def771c94219f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/synthesis.rs",
+      "sha256": "825199b309a34173416681637698b81d02f1e01507a10c901b0585b89561c3d1"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/.cargo-ok",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/Cargo.toml",
+      "sha256": "d5db40acde7f48542f68b8f4484856818fd69361030e71fa0793ea9d30836e90"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/LICENSE",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/README.md",
+      "sha256": "fab901d364aed1c92619c86775791ee8e8062839cc080ddb175d4b0dbc88ff95"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/codebooks.rs",
+      "sha256": "1a5e0903324c1230b0f81e7f1d76f2980db9dc568ca2fde1b4d6481a8686c9b2"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/common.rs",
+      "sha256": "3d6c8a3f323a106a3abc30aa0534916877dcebf5a934e0a5f58e82ac24e7e071"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/cpe.rs",
+      "sha256": "0d65b4750e486ff4dc3c6cea4ce1d13ce80dce8a6233006b533f8fce6cc20f36"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/dsp.rs",
+      "sha256": "3a2e8a80b397a7392d018dc7a02e02b824017f5fb1d3c149ad8c8b198fd68700"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/gain.rs",
+      "sha256": "6e76149f750b56d645c6da78aecbfaef1816f58d78dd011b5a348e87d85f992a"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/ltp.rs",
+      "sha256": "1d0429e1944db1951acea746d730747eba8274f007f674549f0d48ab1b5377cc"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/mod.rs",
+      "sha256": "db5804e05007e58f793cd878cfadabfce119429b5eca04f12abd3559225d9e46"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/pulse.rs",
+      "sha256": "6a79aaf9fcf9817a4adf2e3530d786e5b8f115fe9c9d0393435dcca8c2ab7915"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/tns.rs",
+      "sha256": "cb8f31d061c94145b360238a6848c15905d9d419066d095fd04eed7cd933a811"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/window.rs",
+      "sha256": "786276e526cd2813c9f236b6294d1de4455ba5015648c0816449674502e9b4ea"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/adts.rs",
+      "sha256": "2229acd395236bb481b6499a40567fa9acc5ce74f041c448b5b46ae9b55829cd"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/lib.rs",
+      "sha256": "93ca226f96532d5756ad00a0f92ab306e74169d4ac4a6d70915742b18bb786d6"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/tests/tests.rs",
+      "sha256": "dbfca40ef48f7bcf0f081801634691b498c155289c3f048afdec11ef043a69e5"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/.cargo-ok",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/Cargo.toml",
+      "sha256": "b36fc9126169de57a173d77010c7ff60d8e3268eec515b9f34c9689ebb4243a3"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/LICENSE",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/README.md",
+      "sha256": "4ac2e99c0c5ac9080b06b1e4358dbcc685fcbc6cd5707685ed143af0ff8b94c9"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/audio/alac.rs",
+      "sha256": "2b67d96730d85684e0a72a26bd7b5f2a5f6cf94a57bfd1b032c083140e56e384"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/audio/mod.rs",
+      "sha256": "204c9a81ee6a246abf0a94fc8fe005a501d0073fb79605bdc95db87dfa7b75af"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/mod.rs",
+      "sha256": "294297353f4989a726ebb18c8f6cedb84195cf6c55db060b617404924a1ade03"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/lib.rs",
+      "sha256": "9837de3ab60d6ba8fc9540085b44ff424724aaca767446787ef634600ae2d2a7"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/audio/mod.rs",
+      "sha256": "505d5b4fd474359f3fd788487976449177c4dd4d5b40c8f4322374fb9514e676"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/formats/mod.rs",
+      "sha256": "80a1122f7f99e10540fdab95eaa3589e7b255302e3a2b2953f5880056200a7c6"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/mod.rs",
+      "sha256": "151f1218b1183c9f896e49ff7e937fa7850d5ce068c00c23126da1615810da7c"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/video/mod.rs",
+      "sha256": "e2ea37b715949401712013145d4182055a7f8cfafa403a4bd73e1d749141b4ef"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/flac/mod.rs",
+      "sha256": "00d4135f1b400005529e46eee651d66f2018aef9c4c6d73248e7d2a2cce911f6"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/mod.rs",
+      "sha256": "44d1b2c799943927082d5f5b5374f5ee13bbdd80fd020259a6584947cc67fd3e"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/opus/mod.rs",
+      "sha256": "f910323e9963f047ccf189083323257258423d8581a551089575ed5e0574cf5d"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/vorbis/mod.rs",
+      "sha256": "c6a9a89f4df832d882b6699ab6f1e2793d540981671a4d698b20309d019767c9"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/mod.rs",
+      "sha256": "92534bb7321194903f5e5ce3c2d3504f3db0a9f62bca60b61b9895c839abbf41"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/.cargo-ok",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/Cargo.toml",
+      "sha256": "e1d2bec5889b8072dd7578c427e0d0b612d500a3be84f21a5a927dfb9cbeabeb"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/LICENSE",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/README.md",
+      "sha256": "3e9ea3549c9b02eda1c213b94cc801649f5c69794e7a31208993d43b0e8cfbf6"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/channels.rs",
+      "sha256": "9974f6b0f7ab3c1548c94e73dc9a29cad99d2d6e0abbef31bf3889c763b97e8f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/conv.rs",
+      "sha256": "88ecab16169f7f0a9c4298e9aab00f9cc12301822ddcfc75f8304ac6d608cb72"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/sample.rs",
+      "sha256": "ddd69bc53caaadb61bea495e6d0a9fcee1794fb47ce5f4f1982f7485dc136207"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/slice.rs",
+      "sha256": "33a14fc29e44c8edb2c446164c6ecf4e49b47b3e9cb6cd7d976de975068bd4a8"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/util.rs",
+      "sha256": "df43726e2755dd88e9939f00f441b0498bc36770b7e8e689640aa82986a4415b"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc16.rs",
+      "sha256": "4d126b45d645079796199e65f9226078a0922044c02a03ff227fcd8297fd117f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc32.rs",
+      "sha256": "42530fb72a161a22285604c1f0b3bcc41a0e2c1ca0fa8b3cbb11bd2da7e69fe4"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc8.rs",
+      "sha256": "e47833e0de27b2404ddab8b98f08400f87ae860b304a720cb69a3d823c0b9052"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/md5.rs",
+      "sha256": "d82457e979e71d1085b5bea6edb7109ae15a98d5c894e0423def6bb4f545a9bb"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/mod.rs",
+      "sha256": "cca2fb9d839f9c5eadda2bf35a6ffb0b8d4d42dac1dee09c920615acf5c793b8"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/audio.rs",
+      "sha256": "6ed8c1fa3fa0f0153a9f1ffee319f46283d35095cf301a86e67745da4eb3eafa"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/mod.rs",
+      "sha256": "65ef1a33e2b5ab7ba2a28bb9307e53f9df71f2da61d24185c5724238026113a3"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/registry.rs",
+      "sha256": "b42f50e251343595eb8ca5d6b5bbe7f252d51e67f597bceae57bcd7c92da219f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/subtitle.rs",
+      "sha256": "804c615229861050a5092129dce88f18366ce62accf57f73b2719c8a64255d32"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/video.rs",
+      "sha256": "78105cbcc058070624c600e007cd461006c4a147251a9e5c93a73a3f93c932f5"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/common.rs",
+      "sha256": "0bb7347e5ddf9b9f96d9cd27d427b3e6ac03b1f7c93eaeed7166e90502df20f2"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/mod.rs",
+      "sha256": "01d4950f56e2ba8bfeed9a2d195a70cb21bb589c43d67ed3d656b02317c43fe1"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/no_simd.rs",
+      "sha256": "e32bed9b46115be9f6cefaea9ba5671a477e042a4cac95a2c7b782f06c64cd33"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/simd.rs",
+      "sha256": "2b11efda759b04136ee824bc7d79d93689f6f35a3288d80bc1665c2b688fd7b8"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/mdct.rs",
+      "sha256": "bc8ad9f746b1f25393319c4118018ca669cc33fa6fb537b3f66970a4bd7bcb37"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/mod.rs",
+      "sha256": "48cb9398064d2c45c9b55785a64f157e306ed275b773cc97f701fea284a523c5"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/errors.rs",
+      "sha256": "410253bd9bd6d2574b8cd712e3480c37ca5638318c932df18804b856861e4899"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/mod.rs",
+      "sha256": "eef1db0eccbc8e75e733ac86093072c3635053a177ce98b8d143de4b9f952a93"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/probe.rs",
+      "sha256": "11266217cea0022a3695ae68c63d02debe40af4f19d8035a4a66a0d0bbe40637"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/util.rs",
+      "sha256": "4baced4c70b649bcb7226cf26f361b22bf561b279dd25517d2c66c08e5f717fe"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/bit.rs",
+      "sha256": "3db202d1a62a50059d410c7b96acc784d52d41e7ee738e654c88cfd42707c827"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/buf_reader.rs",
+      "sha256": "9dbcd43f37898cad2367aae5c728ce1657d89df8e4102ad265f648132d140c58"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/media_source_stream.rs",
+      "sha256": "0b314be7c3a6709d75529a73191c39911bd4b3f4988bb46545588d402939c027"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/mod.rs",
+      "sha256": "2495fb5cae753c8d017053d9f9ada449a11a0a381e415dad0c15c609c1dd3c88"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/monitor_stream.rs",
+      "sha256": "4843c63830e1ef5b48093d1274226b53d3a8c17f4290cabf05faf6f5ef36d9d2"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/scoped_stream.rs",
+      "sha256": "1f3d5fa941ac67a64ecb5472326096efc0d34ebe4a7b8e824588daa7d227260a"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/lib.rs",
+      "sha256": "c05fd0843120451d26b4ec70be2d92e0df90c70a07871f6296b284f78325f53c"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/meta.rs",
+      "sha256": "a44aebc5aa68ba85db8d07914a740a25de08e9f22ce7dadf53de790af631a9cd"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/packet.rs",
+      "sha256": "5dbe02799f8fc58f5ed8736081ef59cda1522966c9bdf12bca895704632970d5"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/subtitle/mod.rs",
+      "sha256": "60a49e35bdf34cf16c7bc7b8843186b15f4e3b91aee5c38c75d61f3503a73856"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/units.rs",
+      "sha256": "84de229767d2f8ee54fea5d8d718b140b3764dfda83e3421a719043564a85c71"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/util.rs",
+      "sha256": "6dbec0b948a729a269c1e2bfb84472b3436477f6bc622efaf42f2ef93f52965f"
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/video/mod.rs",
+      "sha256": "7f4d6f6a63930bc99ebcc1c02393ffe236b1f5c5ce79b60c7aa0bb5e1fef6ce9"
+    }
+  ],
+  "actual_function_rows": 5,
+  "guard_or_shape_discriminators": 11,
+  "model_rows": 9,
+  "induction_coefficient_checks": 3,
+  "admitted_production_witness": false,
+  "global_theorem": false,
+  "wall_seconds": 0.020707780999998704,
+  "adapter_sha256": "ffc0fb2ba11a31ce479c8db01b829d17d75f45efb7984af258352ab2f0de5219"
+}

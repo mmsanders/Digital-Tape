@@ -1,0 +1,336 @@
+[
+  {
+    "name": "mono-u8",
+    "op": "pcm_count",
+    "args": {
+      "bytes": 3,
+      "channels": 1,
+      "width": 1
+    },
+    "expected": 3
+  },
+  {
+    "name": "stereo-i16",
+    "op": "pcm_count",
+    "args": {
+      "bytes": 12,
+      "channels": 2,
+      "width": 2
+    },
+    "expected": 3
+  },
+  {
+    "name": "mono-i24",
+    "op": "pcm_count",
+    "args": {
+      "bytes": 15,
+      "channels": 1,
+      "width": 3
+    },
+    "expected": 5
+  },
+  {
+    "name": "stereo-f64",
+    "op": "pcm_count",
+    "args": {
+      "bytes": 32,
+      "channels": 2,
+      "width": 8
+    },
+    "expected": 2
+  },
+  {
+    "name": "partial-frame",
+    "op": "pcm_count",
+    "args": {
+      "bytes": 11,
+      "channels": 2,
+      "width": 2
+    },
+    "expected": null
+  },
+  {
+    "name": "mono-blocks",
+    "op": "append",
+    "args": {
+      "channels": 1,
+      "blocks": [
+        [
+          3
+        ],
+        [
+          2
+        ]
+      ],
+      "raw": 5,
+      "planes": [
+        5
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "stereo-blocks",
+    "op": "append",
+    "args": {
+      "channels": 2,
+      "blocks": [
+        [
+          3,
+          3
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "raw": 5,
+      "planes": [
+        5,
+        5
+      ]
+    },
+    "expected": true
+  },
+  {
+    "name": "missing-raw-update",
+    "op": "append",
+    "args": {
+      "channels": 2,
+      "blocks": [
+        [
+          3,
+          3
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "raw": 3,
+      "planes": [
+        5,
+        5
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "short-plane",
+    "op": "append",
+    "args": {
+      "channels": 2,
+      "blocks": [
+        [
+          3,
+          3
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "raw": 5,
+      "planes": [
+        5,
+        4
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "missing-channel",
+    "op": "append",
+    "args": {
+      "channels": 2,
+      "blocks": [
+        [
+          3
+        ],
+        [
+          2
+        ]
+      ],
+      "raw": 5,
+      "planes": [
+        5
+      ]
+    },
+    "expected": false
+  },
+  {
+    "name": "trim-middle",
+    "op": "trim",
+    "args": {
+      "raw": 10,
+      "head": 2,
+      "tail": 3
+    },
+    "expected": 5
+  },
+  {
+    "name": "trim-all",
+    "op": "trim",
+    "args": {
+      "raw": 3,
+      "head": 1,
+      "tail": 2
+    },
+    "expected": null
+  },
+  {
+    "name": "trim-overflow",
+    "op": "trim",
+    "args": {
+      "raw": 18446744073709551615,
+      "head": 18446744073709551615,
+      "tail": 1
+    },
+    "expected": null
+  },
+  {
+    "name": "trim-one",
+    "op": "trim",
+    "args": {
+      "raw": 1,
+      "head": 0,
+      "tail": 0
+    },
+    "expected": 1
+  },
+  {
+    "name": "round-zero",
+    "op": "frames",
+    "args": {
+      "effective": 2,
+      "rate": 192000
+    },
+    "expected": 0
+  },
+  {
+    "name": "round-one",
+    "op": "frames",
+    "args": {
+      "effective": 3,
+      "rate": 192000
+    },
+    "expected": 1
+  },
+  {
+    "name": "identity-count",
+    "op": "frames",
+    "args": {
+      "effective": 3,
+      "rate": 44100
+    },
+    "expected": 3
+  },
+  {
+    "name": "wide-intermediate-valid",
+    "op": "frames",
+    "args": {
+      "effective": 18446744073709551615,
+      "rate": 192000
+    },
+    "expected": 4236986529430162637
+  },
+  {
+    "name": "output-overflow",
+    "op": "frames",
+    "args": {
+      "effective": 18446744073709551615,
+      "rate": 7350
+    },
+    "expected": null
+  },
+  {
+    "name": "same-pass",
+    "op": "pass_premise",
+    "args": {
+      "same_bytes": true,
+      "same_metadata": true
+    },
+    "expected": true
+  },
+  {
+    "name": "mutated-source",
+    "op": "pass_premise",
+    "args": {
+      "same_bytes": false,
+      "same_metadata": true
+    },
+    "expected": false
+  },
+  {
+    "name": "changed-decode-state",
+    "op": "pass_premise",
+    "args": {
+      "same_bytes": true,
+      "same_metadata": false
+    },
+    "expected": false
+  },
+  {
+    "name": "mono-duplication",
+    "op": "channels",
+    "args": {
+      "left": 3,
+      "right": null,
+      "output_samples": 6
+    },
+    "expected": true
+  },
+  {
+    "name": "stereo-zip-short",
+    "op": "channels",
+    "args": {
+      "left": 3,
+      "right": 2,
+      "output_samples": 4
+    },
+    "expected": false
+  },
+  {
+    "name": "32-continues-no-ranking",
+    "op": "convergence",
+    "args": {
+      "attempts": [
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue",
+        "continue"
+      ],
+      "claimed_global": true,
+      "complete_rank_argument": false
+    },
+    "expected": false
+  }
+]

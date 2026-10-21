@@ -1,0 +1,181 @@
+[
+  {
+    "name": "mono-u8",
+    "value": 3,
+    "actual_planes": 1,
+    "actual_plane_lengths": [
+      3
+    ],
+    "label": "actual deinterleave on valid block plus extracted WAV caller divisibility discriminator"
+  },
+  {
+    "name": "stereo-i16",
+    "value": 3,
+    "actual_planes": 2,
+    "actual_plane_lengths": [
+      3,
+      3
+    ],
+    "label": "actual deinterleave on valid block plus extracted WAV caller divisibility discriminator"
+  },
+  {
+    "name": "mono-i24",
+    "value": 5,
+    "actual_planes": 1,
+    "actual_plane_lengths": [
+      5
+    ],
+    "label": "actual deinterleave on valid block plus extracted WAV caller divisibility discriminator"
+  },
+  {
+    "name": "stereo-f64",
+    "value": 2,
+    "actual_planes": 2,
+    "actual_plane_lengths": [
+      2,
+      2
+    ],
+    "label": "actual deinterleave on valid block plus extracted WAV caller divisibility discriminator"
+  },
+  {
+    "name": "partial-frame",
+    "value": null,
+    "caller_divisibility_refusal": true,
+    "label": "actual deinterleave on valid block plus extracted WAV caller divisibility discriminator"
+  },
+  {
+    "name": "mono-blocks",
+    "value": true,
+    "label": "proof-model only: block shape/append/raw recurrence",
+    "computed_raw": 5,
+    "computed_lengths": [
+      5
+    ]
+  },
+  {
+    "name": "stereo-blocks",
+    "value": true,
+    "label": "proof-model only: block shape/append/raw recurrence",
+    "computed_raw": 5,
+    "computed_lengths": [
+      5,
+      5
+    ]
+  },
+  {
+    "name": "missing-raw-update",
+    "value": false,
+    "label": "proof-model only: block shape/append/raw recurrence",
+    "computed_raw": 5,
+    "computed_lengths": [
+      5,
+      5
+    ]
+  },
+  {
+    "name": "short-plane",
+    "value": false,
+    "label": "proof-model only: block shape/append/raw recurrence",
+    "computed_raw": 3,
+    "computed_lengths": [
+      3,
+      3
+    ]
+  },
+  {
+    "name": "missing-channel",
+    "value": false,
+    "label": "proof-model only: block shape/append/raw recurrence",
+    "computed_raw": 0,
+    "computed_lengths": [
+      0,
+      0
+    ]
+  },
+  {
+    "name": "trim-middle",
+    "value": 5,
+    "constructed_empty_planes": true,
+    "label": "actual Decoded::finish guard, impossible empty-plane constructor; not production admission"
+  },
+  {
+    "name": "trim-all",
+    "value": null,
+    "error_id": "SOURCE_TRIM_UNSUPPORTED",
+    "constructed_empty_planes": true,
+    "label": "actual Decoded::finish guard, impossible empty-plane constructor; not production admission"
+  },
+  {
+    "name": "trim-overflow",
+    "value": null,
+    "error_id": "SOURCE_TRIM_UNSUPPORTED",
+    "constructed_empty_planes": true,
+    "label": "actual Decoded::finish guard, impossible empty-plane constructor; not production admission"
+  },
+  {
+    "name": "trim-one",
+    "value": 1,
+    "constructed_empty_planes": true,
+    "label": "actual Decoded::finish guard, impossible empty-plane constructor; not production admission"
+  },
+  {
+    "name": "round-zero",
+    "value": 0,
+    "label": "actual production dsp::output_frames"
+  },
+  {
+    "name": "round-one",
+    "value": 1,
+    "label": "actual production dsp::output_frames"
+  },
+  {
+    "name": "identity-count",
+    "value": 3,
+    "label": "actual production dsp::output_frames"
+  },
+  {
+    "name": "wide-intermediate-valid",
+    "value": 4236986529430162637,
+    "label": "actual production dsp::output_frames"
+  },
+  {
+    "name": "output-overflow",
+    "value": null,
+    "label": "actual production dsp::output_frames"
+  },
+  {
+    "name": "same-pass",
+    "value": true,
+    "label": "proof-model only: two explicit deterministic pass premises"
+  },
+  {
+    "name": "mutated-source",
+    "value": false,
+    "label": "proof-model only: two explicit deterministic pass premises"
+  },
+  {
+    "name": "changed-decode-state",
+    "value": false,
+    "label": "proof-model only: two explicit deterministic pass premises"
+  },
+  {
+    "name": "mono-duplication",
+    "value": true,
+    "actual_samples": 6,
+    "right_equals_left": true,
+    "label": "actual quantize plus explicit equal-plane/output-count premise discriminator"
+  },
+  {
+    "name": "stereo-zip-short",
+    "value": false,
+    "actual_samples": 4,
+    "right_equals_left": false,
+    "label": "actual quantize plus explicit equal-plane/output-count premise discriminator"
+  },
+  {
+    "name": "32-continues-no-ranking",
+    "value": false,
+    "label": "proof-model only: 32 continuing steps are no ranking certificate",
+    "unresolved": "No bound on finite-precision peak contraction/gated feedback for all admitted sources; abstract trace is not a production witness"
+  }
+]
