@@ -1,0 +1,704 @@
+[
+  {
+    "codec": "MP3",
+    "obligation": "ADMISSION",
+    "predicate": "For an admitted successful host packet, buffer spec channel count equals host mono/stereo C and frame count equals the required unit size.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/mpeg.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+        "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+        "lines": 364,
+        "start_line": 312,
+        "end_line": 347
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 85,
+        "end_line": 108
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Host initializes C empty append vectors from its admitted count; after decode_ref, an explicit if rejects mismatched frames or spec count BEFORE copy/append. Therefore successful passage of that guard establishes spec C=host C without treating a channel mask value as a count. Constructor header/ASC admission and dispatch reachability are not discharged merely by this guard.",
+    "falsification_controls": [
+      "metadata-disagreement",
+      "mask-as-count",
+      "changed-refused"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "MpaDecoder::decode_inner passes &mut self.buf into the uncovered Layer3::decode call; a return of Ok does not prove that callee preserves private plane/spec state through its available APIs. Complete header/ASC/configuration and dispatch admission evidence is not derivationally closed within this six-function return."
+  },
+  {
+    "codec": "MP3",
+    "obligation": "ALLOCATION",
+    "predicate": "A successful AudioBuffer::new(spec,capacity) creates exactly spec.channels().count() planes and stores that same spec; num_frames starts0.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+        "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+        "lines": 614,
+        "start_line": 80,
+        "end_line": 94
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 95,
+        "end_line": 108
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Let C be spec.channels().count() at construction. resize_with(C) produces C inner vectors of capacity samples; moving the same spec and planes into AudioBuffer changes neither. num_frames=0 is a valid empty logical buffer with C planes, not0 planes. For mono/stereo and f32, size multiplication/index assumptions are representable; allocation/panic/abort is not a successful constructor return. This is a direct conditional constructor step, not preservation through the whole decoder.",
+    "falsification_controls": [
+      "zero-frames-two-planes",
+      "empty-plane-invalid-model",
+      "admitted-empty-plane"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "PROVED",
+    "residual": "Production reachability/admission and later mutation remain RESIDUAL in the other rows; this row assumes stable count for the same owned spec and the pinned SmallVec resize_with contract."
+  },
+  {
+    "codec": "MP3",
+    "obligation": "RENDER",
+    "predicate": "Every successful buffer mutation preserves P=spec C and0<=num_frames<=capacity; returned planes slice exactly0..num_frames.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/mpeg.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+        "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+        "lines": 364,
+        "start_line": 312,
+        "end_line": 347
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 110,
+        "end_line": 135
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Prior239 binds frames()/num_planes()/plane slicing and concrete copy under P=C; the newly inspected decoder entry delegates mutable work. A borrowed &mut AudioBuffer does not by itself establish a frame or cardinality invariant. No missing callee body is silently treated as a no-op.",
+    "falsification_controls": [
+      "capacity-as-valid-frames",
+      "copied-capacity",
+      "one-short-plane"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "MpaDecoder::decode_inner passes &mut self.buf into the uncovered Layer3::decode call; a return of Ok does not prove that callee preserves private plane/spec state through its available APIs."
+  },
+  {
+    "codec": "MP3",
+    "obligation": "TRANSITION",
+    "predicate": "Every successful packet, reset/reuse or replacement preserves or reestablishes buffer plane/spec cardinality, including mutable callees.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/mpeg.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+        "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+        "lines": 364,
+        "start_line": 312,
+        "end_line": 347
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 95,
+        "end_line": 108
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "MP3 visibly reconstructs an unused buffer and rejects differing header spec on the non-unused path; AAC retains its constructor buffer in this entry point. These local edges do not enumerate every successful writer reachable through mutable decode/reset or generic conversion.",
+    "falsification_controls": [
+      "changed-unproved",
+      "changed-reestablished",
+      "changed-refused"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "MpaDecoder::decode_inner passes &mut self.buf into the uncovered Layer3::decode call; a return of Ok does not prove that callee preserves private plane/spec state through its available APIs. Reset/reuse coverage needs separate scoped body accounting, not inferred whole-file review."
+  },
+  {
+    "codec": "MP3",
+    "obligation": "COPY",
+    "predicate": "Concrete returned f32 buffer plus prior239 copy bridge implies C vectors of frames length only after constructor/preservation premise closes.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/mpeg.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+        "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+        "lines": 364,
+        "start_line": 312,
+        "end_line": 347
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+        "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+        "lines": 614,
+        "start_line": 433,
+        "end_line": 466
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Carry239 generic/concrete copy bridge: outer resize uses num_planes; every inner vector uses samples_planar=frames; buffer planes slice0..num_frames. With the unclosed P=spec C premise this would establish outer C and per-plane frames. Both decoder fields are AudioBuffer<f32>; exact reference/conversion dispatch still requires its carried binding or an uncovered function census entry.",
+    "falsification_controls": [
+      "zip-shortened-outer",
+      "one-short-plane",
+      "wrong-source"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "Conditional bridge is unchanged, but MpaDecoder::decode_inner passes &mut self.buf into the uncovered Layer3::decode call; a return of Ok does not prove that callee preserves private plane/spec state through its available APIs."
+  },
+  {
+    "codec": "MP3",
+    "obligation": "CALLER",
+    "predicate": "Copied C equals admitted host C before zip/append/finish, so there is no successful zip-shortening from a missing plane.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/mpeg.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+        "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+        "lines": 364,
+        "start_line": 312,
+        "end_line": 347
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "The host checks metadata before copy, then appends via zip. If tmp has fewer vectors than C, zip can silently skip an append; finish validates existing plane lengths but does not supply the missing constructor outer-cardinality premise. Conditional append arithmetic carries from239; it cannot discharge missing P=C.",
+    "falsification_controls": [
+      "zip-shortened-outer",
+      "metadata-disagreement",
+      "bool-not-count"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "The host guard proves spec C=host C but not P=spec C. MpaDecoder::decode_inner passes &mut self.buf into the uncovered Layer3::decode call; a return of Ok does not prove that callee preserves private plane/spec state through its available APIs."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "ADMISSION",
+    "predicate": "For an admitted successful host packet, buffer spec channel count equals host mono/stereo C and frame count equals the required unit size.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/aac.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+        "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+        "lines": 654,
+        "start_line": 140,
+        "end_line": 178
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 62,
+        "end_line": 118
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Host initializes C empty append vectors from its admitted count; after decode_ref, an explicit if rejects mismatched frames or spec count BEFORE copy/append. Therefore successful passage of that guard establishes spec C=host C without treating a channel mask value as a count. Constructor header/ASC admission and dispatch reachability are not discharged merely by this guard.",
+    "falsification_controls": [
+      "metadata-disagreement",
+      "mask-as-count",
+      "changed-refused"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "AacDecoder::decode_inner calls uncovered clear/render_uninit and decode_ga(&mut self); metadata/storage preservation through these callees is not supplied by reading only decode_inner. Complete header/ASC/configuration and dispatch admission evidence is not derivationally closed within this six-function return."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "ALLOCATION",
+    "predicate": "A successful AudioBuffer::new(spec,capacity) creates exactly spec.channels().count() planes and stores that same spec; num_frames starts0.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+        "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+        "lines": 614,
+        "start_line": 80,
+        "end_line": 94
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 95,
+        "end_line": 118
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Let C be spec.channels().count() at construction. resize_with(C) produces C inner vectors of capacity samples; moving the same spec and planes into AudioBuffer changes neither. num_frames=0 is a valid empty logical buffer with C planes, not0 planes. For mono/stereo and f32, size multiplication/index assumptions are representable; allocation/panic/abort is not a successful constructor return. This is a direct conditional constructor step, not preservation through the whole decoder.",
+    "falsification_controls": [
+      "zero-frames-two-planes",
+      "empty-plane-invalid-model",
+      "admitted-empty-plane"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "PROVED",
+    "residual": "Production reachability/admission and later mutation remain RESIDUAL in the other rows; this row assumes stable count for the same owned spec and the pinned SmallVec resize_with contract."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "RENDER",
+    "predicate": "Every successful buffer mutation preserves P=spec C and0<=num_frames<=capacity; returned planes slice exactly0..num_frames.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/aac.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+        "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+        "lines": 654,
+        "start_line": 140,
+        "end_line": 178
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 251,
+        "end_line": 264
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Prior239 binds frames()/num_planes()/plane slicing and concrete copy under P=C; the newly inspected decoder entry delegates mutable work. A borrowed &mut AudioBuffer does not by itself establish a frame or cardinality invariant. No missing callee body is silently treated as a no-op.",
+    "falsification_controls": [
+      "capacity-as-valid-frames",
+      "copied-capacity",
+      "one-short-plane"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "AacDecoder::decode_inner calls uncovered clear/render_uninit and decode_ga(&mut self); metadata/storage preservation through these callees is not supplied by reading only decode_inner."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "TRANSITION",
+    "predicate": "Every successful packet, reset/reuse or replacement preserves or reestablishes buffer plane/spec cardinality, including mutable callees.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/aac.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+        "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+        "lines": 654,
+        "start_line": 140,
+        "end_line": 178
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 251,
+        "end_line": 264
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "MP3 visibly reconstructs an unused buffer and rejects differing header spec on the non-unused path; AAC retains its constructor buffer in this entry point. These local edges do not enumerate every successful writer reachable through mutable decode/reset or generic conversion.",
+    "falsification_controls": [
+      "changed-unproved",
+      "changed-reestablished",
+      "changed-refused"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "AacDecoder::decode_inner calls uncovered clear/render_uninit and decode_ga(&mut self); metadata/storage preservation through these callees is not supplied by reading only decode_inner. Reset/reuse coverage needs separate scoped body accounting, not inferred whole-file review."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "COPY",
+    "predicate": "Concrete returned f32 buffer plus prior239 copy bridge implies C vectors of frames length only after constructor/preservation premise closes.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/aac.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+        "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+        "lines": 654,
+        "start_line": 140,
+        "end_line": 178
+      },
+      {
+        "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+        "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+        "lines": 614,
+        "start_line": 433,
+        "end_line": 466
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "Carry239 generic/concrete copy bridge: outer resize uses num_planes; every inner vector uses samples_planar=frames; buffer planes slice0..num_frames. With the unclosed P=spec C premise this would establish outer C and per-plane frames. Both decoder fields are AudioBuffer<f32>; exact reference/conversion dispatch still requires its carried binding or an uncovered function census entry.",
+    "falsification_controls": [
+      "zip-shortened-outer",
+      "one-short-plane",
+      "wrong-source"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "Conditional bridge is unchanged, but AacDecoder::decode_inner calls uncovered clear/render_uninit and decode_ga(&mut self); metadata/storage preservation through these callees is not supplied by reading only decode_inner."
+  },
+  {
+    "codec": "AAC",
+    "obligation": "CALLER",
+    "predicate": "Copied C equals admitted host C before zip/append/finish, so there is no successful zip-shortening from a missing plane.",
+    "assumptions": [
+      "Exact S1/vendor source pins and prior239 conditional copy/PCM/FLAC review unchanged",
+      "Successful checked allocation/index/return domain only; panic/abort/Err not proved absent",
+      "usize host counts and f32 sample storage; no mask-as-count assumption"
+    ],
+    "types": {
+      "storage": "AudioBuffer<f32>",
+      "planes": "SmallVec<[Vec<f32>;3]>",
+      "frame_count": "usize",
+      "capacity": "usize",
+      "host_channels": "usize"
+    },
+    "sources": [
+      {
+        "path": "host/ingest/src/aac.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+        "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+        "lines": 654,
+        "start_line": 140,
+        "end_line": 178
+      }
+    ],
+    "necessary_call_field_edges": [
+      {
+        "from_": "decode_ref success",
+        "to": "host frame/spec guard"
+      },
+      {
+        "from_": "copy_to_vecs_planar",
+        "to": "zip append"
+      },
+      {
+        "from_": "AudioBuffer::new",
+        "to": "private spec/planes/num_frames/capacity"
+      }
+    ],
+    "derivation": "The host checks metadata before copy, then appends via zip. If tmp has fewer vectors than C, zip can silently skip an append; finish validates existing plane lengths but does not supply the missing constructor outer-cardinality premise. Conditional append arithmetic carries from239; it cannot discharge missing P=C.",
+    "falsification_controls": [
+      "zip-shortened-outer",
+      "metadata-disagreement",
+      "bool-not-count"
+    ],
+    "control_scope": "Published16 abstract logical controls only; not actual decoder witnesses",
+    "verdict": "RESIDUAL",
+    "residual": "The host guard proves spec C=host C but not P=spec C. AacDecoder::decode_inner calls uncovered clear/render_uninit and decode_ga(&mut self); metadata/storage preservation through these callees is not supplied by reading only decode_inner."
+  }
+]

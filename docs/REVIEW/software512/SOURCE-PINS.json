@@ -1,0 +1,51 @@
+{
+  "buffer": {
+    "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+    "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+    "lines": 614
+  },
+  "mp3": {
+    "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+    "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+    "lines": 197
+  },
+  "aac": {
+    "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+    "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+    "lines": 324
+  },
+  "mp3-caller": {
+    "path": "host/ingest/src/mpeg.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+    "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+    "lines": 364
+  },
+  "aac-caller": {
+    "path": "host/ingest/src/aac.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+    "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+    "lines": 654
+  },
+  "copy": {
+    "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+    "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+    "lines": 649
+  },
+  "dispatch": {
+    "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+    "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+    "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+    "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381",
+    "lines": 985
+  }
+}

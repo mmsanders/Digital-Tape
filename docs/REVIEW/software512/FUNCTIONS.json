@@ -1,0 +1,91 @@
+{
+  "new_functions": [
+    {
+      "name": "AudioBuffer::new",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+        "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+        "lines": 614,
+        "start_line": 80,
+        "end_line": 94
+      }
+    },
+    {
+      "name": "MpaDecoder::decode_inner",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 85,
+        "end_line": 135
+      }
+    },
+    {
+      "name": "MpaDecoder::decode_ref",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+        "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+        "lines": 197,
+        "start_line": 157,
+        "end_line": 166
+      }
+    },
+    {
+      "name": "AacDecoder::try_new",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 62,
+        "end_line": 118
+      }
+    },
+    {
+      "name": "AacDecoder::decode_inner",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 251,
+        "end_line": 265
+      }
+    },
+    {
+      "name": "AacDecoder::decode_ref",
+      "source": {
+        "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+        "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+        "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+        "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+        "lines": 324,
+        "start_line": 284,
+        "end_line": 293
+      }
+    }
+  ],
+  "new_body_count": 6,
+  "limit": 6,
+  "carried_old_functions": [
+    "GenericAudioBufferRef::copy_to_vecs_planar dispatch",
+    "Audio::copy_to_vecs_planar",
+    "AudioBuffer::frames/num_planes/plane",
+    "Host mpeg.rs/aac.rs copy/append/finish paths"
+  ],
+  "old_review": "Verification239 merge25b20d951e5340cc2ed42a76f717e852252b7061",
+  "unreviewed_needed": [
+    "MP3 Layer3::decode mutable buffer escape",
+    "AAC decode_ga mutable self escape",
+    "AudioBuffer::clear/render_uninit/is_unused and reset/dispatch/header/ASC bodies as required by a future exact scope"
+  ],
+  "stop": "Further uncovered transitive bodies exceed the issued six-function boundary; no seventh body used to close a premise."
+}
