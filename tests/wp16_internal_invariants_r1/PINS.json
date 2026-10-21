@@ -1,0 +1,747 @@
+{
+  "candidate": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "ingest_tree": "835078995d4e9cc2424f9ea8d6f11304b45f783f",
+  "files": [
+    {
+      "path": "docs/WP16-INGEST-CONTRACT.md",
+      "blob": "712a0696917672afb639475960609b6367c1c7d4",
+      "sha256": "9990b84f20818744d731e0f334aa7d77928690dd426f0cbbc6aa2fb2daf638d1",
+      "bytes": 17983
+    },
+    {
+      "path": "host/ingest/Cargo.lock",
+      "blob": "2dbae7c375dbe3d7f890f2bfdbc481140a671c33",
+      "sha256": "6e8d14c97dc59d4e627e68f37d6647c45e7f6d52de5e3c51653239993ad0f864",
+      "bytes": 8345
+    },
+    {
+      "path": "host/ingest/Cargo.toml",
+      "blob": "b68795852f9db3c3b9ccba1c1b39caaf4e1353cc",
+      "sha256": "078a384c20752b085de96217a45143fbb3f47f16d87c92aa1a14f8178c2963c7",
+      "bytes": 1755
+    },
+    {
+      "path": "host/ingest/rust-toolchain.toml",
+      "blob": "e975e69a301af6dc8da74bd7ca94840325ca1df9",
+      "sha256": "e1e35601df56bce6ac4edfc8f7b1abeed0a5b931f1c6f5d157b1433b6875f6aa",
+      "bytes": 51
+    },
+    {
+      "path": "host/ingest/src/aac.rs",
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "bytes": 25880
+    },
+    {
+      "path": "host/ingest/src/common.rs",
+      "blob": "9902dcb41e2004124304008b3c1b50be0d4389bc",
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0",
+      "bytes": 13729
+    },
+    {
+      "path": "host/ingest/src/convert.rs",
+      "blob": "c47431f4ff9f2639e77a9e89f3141277d233cecf",
+      "sha256": "ad945d0e325a2c4066e5716b88a553d1cc927fc456ca14f631a69adc96dac021",
+      "bytes": 5170
+    },
+    {
+      "path": "host/ingest/src/dsp.rs",
+      "blob": "05bf9fb4e61cce977194eb33ca09550abbbe035a",
+      "sha256": "fb77778e7f271f2acb1c385ee9e8235e0752f3f1318caf3e7fddcc410a230ffc",
+      "bytes": 20464
+    },
+    {
+      "path": "host/ingest/src/flac.rs",
+      "blob": "189e61caf6054c1cbfbe1afac8b725d55db1a673",
+      "sha256": "c97dae1ed2dce55a636c7e254a25b340ae6a69d7c562b383175376c1b0b0a5d7",
+      "bytes": 17207
+    },
+    {
+      "path": "host/ingest/src/lib.rs",
+      "blob": "1cee428a75d5c87aa1754e00b99c6b187ea7801d",
+      "sha256": "5f143376fe93f8748de2c5ce0134a076c14be0efaea7a73ea07e448ac05ce0bd",
+      "bytes": 1905
+    },
+    {
+      "path": "host/ingest/src/main.rs",
+      "blob": "ce2035c1ca9afc73deaef956dcdc97ee7d86bce8",
+      "sha256": "4de9f5f42e4ce407cea14b2e6832c8db48ef58fa980bb4b0dfd39fc90f378951",
+      "bytes": 22146
+    },
+    {
+      "path": "host/ingest/src/manifest.rs",
+      "blob": "27b44339ce1f7eabe5313ef8a6bf380552549944",
+      "sha256": "7db2a1e70f6fc434d4186e0283d265ebdebea9e5fa7a7fd6107800c89255428b",
+      "bytes": 3618
+    },
+    {
+      "path": "host/ingest/src/mem.rs",
+      "blob": "642c27c544a2019e72d379714e4697b5ad8a44c0",
+      "sha256": "76a801430c2abeb0f204baae6113ac9edbe2f292984514f3b01ec8775bc71cb3",
+      "bytes": 6125
+    },
+    {
+      "path": "host/ingest/src/mpeg.rs",
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+      "bytes": 14500
+    },
+    {
+      "path": "host/ingest/src/observe.rs",
+      "blob": "bb05689d9717b2b5afa4771c7c2c0723c3df414d",
+      "sha256": "361426be3b310600392d5be94de4b60814c7b1bbee7d3dcd0e9f8fde41022f9d",
+      "bytes": 8847
+    },
+    {
+      "path": "host/ingest/src/order.rs",
+      "blob": "e07e05e240bec7f8ff5ae1f3d258caebecb9fe84",
+      "sha256": "6aaf9f29cba424d343593904a8f2ddea30941f59dfaa0ca9e45a6fda6418a6fa",
+      "bytes": 7760
+    },
+    {
+      "path": "host/ingest/src/publish.rs",
+      "blob": "7919cebec8e7eb69423ee0c2078abf3d20bbf2e8",
+      "sha256": "0dc80f42eaefd905e06ccdb84e728b4b15ea9f846ff5e33b2646729c7f31fe61",
+      "bytes": 6561
+    },
+    {
+      "path": "host/ingest/src/report.rs",
+      "blob": "619abbdbd4c9a05b70df61380bda1387f5665a1f",
+      "sha256": "52de80b7253eacbdef53d67ea862c62d0c4c6b4d7151a4d0b4da8be328bb4831",
+      "bytes": 9298
+    },
+    {
+      "path": "host/ingest/src/sniff.rs",
+      "blob": "7e25432123cb7695ebd5557e28e3e285a8e84a35",
+      "sha256": "6907bcd60e0e1d78b618d19b9b6ca0be28a5ae7fe9848d18a26ef5f8e70270c7",
+      "bytes": 1933
+    },
+    {
+      "path": "host/ingest/src/wav.rs",
+      "blob": "b64d3c084334f1b1527b643f5195a6762d670622",
+      "sha256": "740f100623f0f4709f0475c923bd229749e8d13f4cbd61a22c610a38c64f7fd4",
+      "bytes": 10370
+    },
+    {
+      "path": "host/ingest/vendor/PATCHES.md",
+      "blob": "adcabaf8f3a72104caf0255cc5f0c71c6f04e460",
+      "sha256": "6b04a92e2bf3379d04e4d72166f59f7ba05683ca1aa3f781822c3bd39199efc0",
+      "bytes": 2652
+    },
+    {
+      "path": "host/ingest/vendor/PATCHES.sha256",
+      "blob": "d863f108c048421c1a8b8184e1804b14a385c765",
+      "sha256": "eccdf1304e4049a658c66b95313bd467699cc8d7c3feeb9883509fc513887f74",
+      "bytes": 337
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/.cargo-ok",
+      "blob": "5f8b795830acbab5961c1a28c76a7916c9631493",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91",
+      "bytes": 7
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/Cargo.toml",
+      "blob": "a9895bdb7b9e585fa90d3d47090ae3036cde43c5",
+      "sha256": "449a8f3dfaaeb9f076710ac27df9324cee655a2edc1f30335acdbe50c9795a5b",
+      "bytes": 1616
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/LICENSE",
+      "blob": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
+      "bytes": 16725
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/README.md",
+      "blob": "c691916e2e2ed974e24a6279e9cc4cc7b54e5213",
+      "sha256": "14e6871135106e54155000fdecb130f50ca5cabfdac1215ff36b483fb8091c39",
+      "bytes": 1031
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/common.rs",
+      "blob": "0a601883e80be1a70cca3dea01848271c20be5dc",
+      "sha256": "38f787c30465cfc77f93078252ed298070d1d249eb5e88f5d2579e3f65adbcab",
+      "bytes": 6213
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "bytes": 6447
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/demuxer.rs",
+      "blob": "b720d1bcb048e105d2d6af09e1297561bb017e40",
+      "sha256": "18f8db244957e4eb1a4c4ba97bdc41ae4e9669044db55f212f435f9e51cbb519",
+      "bytes": 41063
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/header.rs",
+      "blob": "412308127c25cd9c6f97eb7411b0c29c69a5ac9d",
+      "sha256": "59e870a43bc73fef45c3f492bd2c1b5fd33fd0aab7f9be72e20850f262a4573a",
+      "bytes": 9263
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer1/mod.rs",
+      "blob": "cda383c2b699445c5ee66af7e1b870fc2f4a6da3",
+      "sha256": "a7b2c2d71deaebd39dc20c528b2d9af39af610a308cd9ae70323a197cd894a93",
+      "bytes": 6672
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer12.rs",
+      "blob": "83c7b505e5f40e9e8fb8bd98b736445b11794b72",
+      "sha256": "011406e03533ac30263f19fd4c122402587d5cdd33c889ecac35535f1d077274",
+      "bytes": 2011
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer2/mod.rs",
+      "blob": "a3de12e07534994979ec2a22b9d5c6fe61e5febe",
+      "sha256": "6fbf4e90e8348666a6c67e295375557cf5a956e1c9562c1646b1c822cfe08e09",
+      "bytes": 14865
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/bitstream.rs",
+      "blob": "cbf3de4bd95460e729e877b84172513c83e0f020",
+      "sha256": "9afd74ba5c4506a8b7c6c28d56d0e41036a1fc11bf8046c52ebb4fee3e800f8f",
+      "bytes": 16790
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/codebooks.rs",
+      "blob": "462468758a32ace9682be0d595263f6820b59de7",
+      "sha256": "92a9b7e157853a3c2cb0bced2557d8f19c00c23e22e46f351245cd17786e815f",
+      "bytes": 24494
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/common.rs",
+      "blob": "4a86d993be5ffe4bed7029eeaccbeb1a77fc913e",
+      "sha256": "89ef31c9361c1831e61c8b33168ae1e580b5b7a960e2f54d4b229f00ddcc36d2",
+      "bytes": 7360
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/hybrid_synthesis.rs",
+      "blob": "27e511252ac4da9514a09f63036d712124269a3b",
+      "sha256": "a55ed3f584c1fd0150c010fc3a24181f434ca2d99e2a4922d01393215742e70e",
+      "bytes": 30205
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/mod.rs",
+      "blob": "67567b6f9f62b662d7fc14d8d19e14ddd6da3a28",
+      "sha256": "443981d884138491b613dce1a49c0859b986f9b855b828c287ed50c14ffe7844",
+      "bytes": 19467
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/requantize.rs",
+      "blob": "dc5d371fd764d6c2c7625e6ab4da5ff45d8be649",
+      "sha256": "35ed53068649e29d5df9a1c615a52c29200673836fcaf43e44bf3a2fc209cb04",
+      "bytes": 14924
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/stereo.rs",
+      "blob": "716f621dbc96a06f580a779fc7674ed2a489a70d",
+      "sha256": "e2418e8535b2c0529978316a85fe32d705c841cb737079d5f80f14a37dc87f9d",
+      "bytes": 21202
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/lib.rs",
+      "blob": "b2e475d6884b2ffd97bbe83ccf0c415ab4a9c8ee",
+      "sha256": "e13d7932a2c97b9c0c02a42ca1adb90e1131b3bf9e118988219def771c94219f",
+      "bytes": 1535
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/synthesis.rs",
+      "blob": "66edcd42afc521e8232ad9ead06173c081ce88d4",
+      "sha256": "825199b309a34173416681637698b81d02f1e01507a10c901b0585b89561c3d1",
+      "bytes": 35331
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/.cargo-ok",
+      "blob": "5f8b795830acbab5961c1a28c76a7916c9631493",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91",
+      "bytes": 7
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/Cargo.toml",
+      "blob": "551a9fccc00e4502157e95ec2a88b752094449c4",
+      "sha256": "d5db40acde7f48542f68b8f4484856818fd69361030e71fa0793ea9d30836e90",
+      "bytes": 1658
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/LICENSE",
+      "blob": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
+      "bytes": 16725
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/README.md",
+      "blob": "fa50f9a86069ad34d533f40d7362ed89f9c9b638",
+      "sha256": "fab901d364aed1c92619c86775791ee8e8062839cc080ddb175d4b0dbc88ff95",
+      "bytes": 1055
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/codebooks.rs",
+      "blob": "e3a1755153e76e60e799b77e549150cadd484c40",
+      "sha256": "1a5e0903324c1230b0f81e7f1d76f2980db9dc568ca2fde1b4d6481a8686c9b2",
+      "bytes": 26486
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/common.rs",
+      "blob": "4b671e30b492b23ad75e1629e74eabb4df6ed6ae",
+      "sha256": "3d6c8a3f323a106a3abc30aa0534916877dcebf5a934e0a5f58e82ac24e7e071",
+      "bytes": 6412
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/cpe.rs",
+      "blob": "86dbf0b9d32f18108fd015ef024339c5e34610f6",
+      "sha256": "0d65b4750e486ff4dc3c6cea4ce1d13ce80dce8a6233006b533f8fce6cc20f36",
+      "bytes": 6483
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/dsp.rs",
+      "blob": "7297fa47b8cca27b579856a98991165f3897d88b",
+      "sha256": "3a2e8a80b397a7392d018dc7a02e02b824017f5fb1d3c149ad8c8b198fd68700",
+      "bytes": 5648
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/gain.rs",
+      "blob": "1438af1c96e7a76663232c75d570565f4ff5354f",
+      "sha256": "6e76149f750b56d645c6da78aecbfaef1816f58d78dd011b5a348e87d85f992a",
+      "bytes": 1213
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/ltp.rs",
+      "blob": "f6fbd21dff369fa5f25f968d94796469a1b8212c",
+      "sha256": "1d0429e1944db1951acea746d730747eba8274f007f674549f0d48ab1b5377cc",
+      "bytes": 1748
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/mod.rs",
+      "blob": "8937d9a22359ac2d66e07d930cf00daa6a62e48b",
+      "sha256": "db5804e05007e58f793cd878cfadabfce119429b5eca04f12abd3559225d9e46",
+      "bytes": 20926
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/pulse.rs",
+      "blob": "19ea0093ccf023c1738a67737201199a220d39e7",
+      "sha256": "6a79aaf9fcf9817a4adf2e3530d786e5b8f115fe9c9d0393435dcca8c2ab7915",
+      "bytes": 2861
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/tns.rs",
+      "blob": "1d79a34c2e053788227e2a17c0a3467e5955749a",
+      "sha256": "cb8f31d061c94145b360238a6848c15905d9d419066d095fd04eed7cd933a811",
+      "bytes": 6057
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "bytes": 11850
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/window.rs",
+      "blob": "dda84d14a50f89c0e059c66b566a23e9486b2312",
+      "sha256": "786276e526cd2813c9f236b6294d1de4455ba5015648c0816449674502e9b4ea",
+      "bytes": 2067
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/adts.rs",
+      "blob": "172fe83f063d6f4a49d3f843dd6ed61ef849df4b",
+      "sha256": "2229acd395236bb481b6499a40567fa9acc5ce74f041c448b5b46ae9b55829cd",
+      "bytes": 17257
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/lib.rs",
+      "blob": "b6c10fbd5bb369ba192ce2c16743965d67bc3a84",
+      "sha256": "93ca226f96532d5756ad00a0f92ab306e74169d4ac4a6d70915742b18bb786d6",
+      "bytes": 744
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-codec-aac/tests/tests.rs",
+      "blob": "9cfdac1578307cce164f068da08260cfa498e499",
+      "sha256": "dbfca40ef48f7bcf0f081801634691b498c155289c3f048afdec11ef043a69e5",
+      "bytes": 1207
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/.cargo-ok",
+      "blob": "5f8b795830acbab5961c1a28c76a7916c9631493",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91",
+      "bytes": 7
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/Cargo.toml",
+      "blob": "17b4fc1a436ec9d033ccc3089f9aec988ef28ed6",
+      "sha256": "b36fc9126169de57a173d77010c7ff60d8e3268eec515b9f34c9689ebb4243a3",
+      "bytes": 1473
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/LICENSE",
+      "blob": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
+      "bytes": 16725
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/README.md",
+      "blob": "f2ee8cada900dae03bac7864c5e1ff816a3b8729",
+      "sha256": "4ac2e99c0c5ac9080b06b1e4358dbcc685fcbc6cd5707685ed143af0ff8b94c9",
+      "bytes": 770
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/audio/alac.rs",
+      "blob": "28838f65abbd352e78cde30970b26da0f6a96b70",
+      "sha256": "2b67d96730d85684e0a72a26bd7b5f2a5f6cf94a57bfd1b032c083140e56e384",
+      "bytes": 6900
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/audio/mod.rs",
+      "blob": "a110775fcd08f61cf6c922b513ab007d728418d1",
+      "sha256": "204c9a81ee6a246abf0a94fc8fe005a501d0073fb79605bdc95db87dfa7b75af",
+      "bytes": 295
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/apple/mod.rs",
+      "blob": "49a2b4a0c1c974661e638d07f0682990a9691cb4",
+      "sha256": "294297353f4989a726ebb18c8f6cedb84195cf6c55db060b617404924a1ade03",
+      "bytes": 296
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/lib.rs",
+      "blob": "880b7b62d0944f9ce27f402b1cc9158c481035e7",
+      "sha256": "9837de3ab60d6ba8fc9540085b44ff424724aaca767446787ef634600ae2d2a7",
+      "bytes": 583
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/audio/mod.rs",
+      "blob": "0e6e011dc53b51e4e6850b76e78dfc382349ebba",
+      "sha256": "505d5b4fd474359f3fd788487976449177c4dd4d5b40c8f4322374fb9514e676",
+      "bytes": 16106
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/formats/mod.rs",
+      "blob": "9592888ad8e4fc990108065881fc631a6a98219e",
+      "sha256": "80a1122f7f99e10540fdab95eaa3589e7b255302e3a2b2953f5880056200a7c6",
+      "bytes": 12791
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/mod.rs",
+      "blob": "08b0bdc89f193cfdcf8c956af8261540dfdac5f1",
+      "sha256": "151f1218b1183c9f896e49ff7e937fa7850d5ce068c00c23126da1615810da7c",
+      "bytes": 587
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/video/mod.rs",
+      "blob": "108c0922de6ce2f310624ccc6f0212643dd9b7f9",
+      "sha256": "e2ea37b715949401712013145d4182055a7f8cfafa403a4bd73e1d749141b4ef",
+      "bytes": 3912
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/flac/mod.rs",
+      "blob": "dc1ed95e3d5a932dbd5d3e4efe5718a5fb081bc4",
+      "sha256": "00d4135f1b400005529e46eee651d66f2018aef9c4c6d73248e7d2a2cce911f6",
+      "bytes": 7706
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/mod.rs",
+      "blob": "4288f35dd2801efb4035aa7767e1be480146b079",
+      "sha256": "44d1b2c799943927082d5f5b5374f5ee13bbdd80fd020259a6584947cc67fd3e",
+      "bytes": 584
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/opus/mod.rs",
+      "blob": "e8a5f6ec664871620efb762e1b2c78e14d3f9ef8",
+      "sha256": "f910323e9963f047ccf189083323257258423d8581a551089575ed5e0574cf5d",
+      "bytes": 4670
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/audio/vorbis/mod.rs",
+      "blob": "4b914004a3288e05928e3a07d5676523cd071c5a",
+      "sha256": "c6a9a89f4df832d882b6699ab6f1e2793d540981671a4d698b20309d019767c9",
+      "bytes": 6987
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-common/src/xiph/mod.rs",
+      "blob": "9d52f6f79254cb1ce7322f567af2b2b3ed05c5ce",
+      "sha256": "92534bb7321194903f5e5ce3c2d3504f3db0a9f62bca60b61b9895c839abbf41",
+      "bytes": 555
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/.cargo-ok",
+      "blob": "5f8b795830acbab5961c1a28c76a7916c9631493",
+      "sha256": "afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91",
+      "bytes": 7
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/Cargo.toml",
+      "blob": "b3a45a1b575b0df0013bc4ff181d249eeb9f57fb",
+      "sha256": "e1d2bec5889b8072dd7578c427e0d0b612d500a3be84f21a5a927dfb9cbeabeb",
+      "bytes": 2021
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/LICENSE",
+      "blob": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "sha256": "c76f740d1521b9bed9ca7a04ad526c310493c62621b1341d623b431736533b30",
+      "bytes": 16725
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/README.md",
+      "blob": "c3c9c16929465bd901e2bb3972c991fc6e64cb44",
+      "sha256": "3e9ea3549c9b02eda1c213b94cc801649f5c69794e7a31208993d43b0e8cfbf6",
+      "bytes": 760
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "bytes": 22795
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/channels.rs",
+      "blob": "173c07c27a57bfb25a21d2c336028ebf423c4894",
+      "sha256": "9974f6b0f7ab3c1548c94e73dc9a29cad99d2d6e0abbef31bf3889c763b97e8f",
+      "bytes": 39153
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/conv.rs",
+      "blob": "f46c999c832ef73b6bdf995f6b39e5674f4eb514",
+      "sha256": "88ecab16169f7f0a9c4298e9aab00f9cc12301822ddcfc75f8304ac6d608cb72",
+      "bytes": 41557
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+      "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381",
+      "bytes": 36962
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+      "bytes": 22434
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/sample.rs",
+      "blob": "6c72214fad0467b921452be9d543c7faa4b82a6f",
+      "sha256": "ddd69bc53caaadb61bea495e6d0a9fcee1794fb47ce5f4f1982f7485dc136207",
+      "bytes": 18356
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/slice.rs",
+      "blob": "2e6e8346c5d274204766af0f012a1e9a3c425508",
+      "sha256": "33a14fc29e44c8edb2c446164c6ecf4e49b47b3e9cb6cd7d976de975068bd4a8",
+      "bytes": 8496
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/audio/util.rs",
+      "blob": "47d947878d7a5f766ae660a4185f36c1545650fa",
+      "sha256": "df43726e2755dd88e9939f00f441b0498bc36770b7e8e689640aa82986a4415b",
+      "bytes": 11238
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc16.rs",
+      "blob": "09618c8d82a8a91f3a9dfe36775d18ba90c8bf8a",
+      "sha256": "4d126b45d645079796199e65f9226078a0922044c02a03ff227fcd8297fd117f",
+      "bytes": 25341
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc32.rs",
+      "blob": "df3fdfc535191983e7c75dfdfeae539797fd4614",
+      "sha256": "42530fb72a161a22285604c1f0b3bcc41a0e2c1ca0fa8b3cbb11bd2da7e69fe4",
+      "bytes": 31952
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/crc8.rs",
+      "blob": "ba06d8e4d599abbf65430ef09863a6c38e00616e",
+      "sha256": "e47833e0de27b2404ddab8b98f08400f87ae860b304a720cb69a3d823c0b9052",
+      "bytes": 2806
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/md5.rs",
+      "blob": "14aadf992f5f7fe9d250ab0016ff1982e1dd71fa",
+      "sha256": "d82457e979e71d1085b5bea6edb7109ae15a98d5c894e0423def6bb4f545a9bb",
+      "bytes": 12665
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/checksum/mod.rs",
+      "blob": "024b24efa8664df89fb3a9c545492d7baee28a31",
+      "sha256": "cca2fb9d839f9c5eadda2bf35a6ffb0b8d4d42dac1dee09c920615acf5c793b8",
+      "bytes": 541
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/audio.rs",
+      "blob": "aebb3a0cee93d74f4d9d110a3d8edbeb4cc74d9f",
+      "sha256": "6ed8c1fa3fa0f0153a9f1ffee319f46283d35095cf301a86e67745da4eb3eafa",
+      "bytes": 20855
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/mod.rs",
+      "blob": "2d0aadc472933b203dbfd8f8edb213db16b8927c",
+      "sha256": "65ef1a33e2b5ab7ba2a28bb9307e53f9df71f2da61d24185c5724238026113a3",
+      "bytes": 6743
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/registry.rs",
+      "blob": "c4e46bfd12fd95f0b05612d34b60bec2ff04dcaf",
+      "sha256": "b42f50e251343595eb8ca5d6b5bbe7f252d51e67f597bceae57bcd7c92da219f",
+      "bytes": 16765
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/subtitle.rs",
+      "blob": "019c9ae22ff1effe27bb2d48897b37a7843ea561",
+      "sha256": "804c615229861050a5092129dce88f18366ce62accf57f73b2719c8a64255d32",
+      "bytes": 6886
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/codecs/video.rs",
+      "blob": "f3dc54bcc40283d709c1b28c190bb9f269f45af2",
+      "sha256": "78105cbcc058070624c600e007cd461006c4a147251a9e5c93a73a3f93c932f5",
+      "bytes": 15560
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/common.rs",
+      "blob": "af401b2c6cb5be0c0fc7ff8e00fa551580488ac7",
+      "sha256": "0bb7347e5ddf9b9f96d9cd27d427b3e6ac03b1f7c93eaeed7166e90502df20f2",
+      "bytes": 3147
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/mod.rs",
+      "blob": "4f13d80680113666a8d08023fa8ae098ac5dd5e0",
+      "sha256": "01d4950f56e2ba8bfeed9a2d195a70cb21bb589c43d67ed3d656b02317c43fe1",
+      "bytes": 8610
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/no_simd.rs",
+      "blob": "a9b2ade1a0c5349562a141e542ea65b482387448",
+      "sha256": "e32bed9b46115be9f6cefaea9ba5671a477e042a4cac95a2c7b782f06c64cd33",
+      "bytes": 14133
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/fft/simd.rs",
+      "blob": "aabb573004918a129bdd53fd17d55ac24a3867f0",
+      "sha256": "2b11efda759b04136ee824bc7d79d93689f6f35a3288d80bc1665c2b688fd7b8",
+      "bytes": 3653
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/mdct.rs",
+      "blob": "6f46d4050542d4578780dcc14006d29fd68154d8",
+      "sha256": "bc8ad9f746b1f25393319c4118018ca669cc33fa6fb537b3f66970a4bd7bcb37",
+      "bytes": 7786
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/dsp/mod.rs",
+      "blob": "7dcf4ff5b5e83825e3838fb0b5c2a962b606b149",
+      "sha256": "48cb9398064d2c45c9b55785a64f157e306ed275b773cc97f701fea284a523c5",
+      "bytes": 438
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/errors.rs",
+      "blob": "ea5aa53de3868ff0cf97fa701a512939a706b4fb",
+      "sha256": "410253bd9bd6d2574b8cd712e3480c37ca5638318c932df18804b856861e4899",
+      "bytes": 4034
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/mod.rs",
+      "blob": "d8b9629b29ffcd9abbf0ebdbfed4c70e9ec45d37",
+      "sha256": "eef1db0eccbc8e75e733ac86093072c3635053a177ce98b8d143de4b9f952a93",
+      "bytes": 29116
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/probe.rs",
+      "blob": "51d2b25cc3a36f0a77570bd85f84346b53705014",
+      "sha256": "11266217cea0022a3695ae68c63d02debe40af4f19d8035a4a66a0d0bbe40637",
+      "bytes": 29163
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/formats/util.rs",
+      "blob": "4e3433c3eb354bb75872533b8b290575ae61738a",
+      "sha256": "4baced4c70b649bcb7226cf26f361b22bf561b279dd25517d2c66c08e5f717fe",
+      "bytes": 9016
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/bit.rs",
+      "blob": "1f5a9a5a413ee12802bf07bcb701ef80bb2d17f8",
+      "sha256": "3db202d1a62a50059d410c7b96acc784d52d41e7ee738e654c88cfd42707c827",
+      "bytes": 71558
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/buf_reader.rs",
+      "blob": "b4342c4c13b11180edd778821cc46aefb55a0e5e",
+      "sha256": "9dbcd43f37898cad2367aae5c728ce1657d89df8e4102ad265f648132d140c58",
+      "bytes": 8936
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/media_source_stream.rs",
+      "blob": "64c0634dc11cef81d42154665db1dfba59f227c4",
+      "sha256": "0b314be7c3a6709d75529a73191c39911bd4b3f4988bb46545588d402939c027",
+      "bytes": 24812
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/mod.rs",
+      "blob": "b69fbeffb6cfda340e8ba2543f10cd47848863a1",
+      "sha256": "2495fb5cae753c8d017053d9f9ada449a11a0a381e415dad0c15c609c1dd3c88",
+      "bytes": 22413
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/monitor_stream.rs",
+      "blob": "cc4dd15c49afa108e7ecf6b661528016a4404b33",
+      "sha256": "4843c63830e1ef5b48093d1274226b53d3a8c17f4290cabf05faf6f5ef36d9d2",
+      "bytes": 4012
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/io/scoped_stream.rs",
+      "blob": "91aae218ca7118d3b717bdbae02988c74e64b45b",
+      "sha256": "1f3d5fa941ac67a64ecb5472326096efc0d34ebe4a7b8e824588daa7d227260a",
+      "bytes": 6169
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/lib.rs",
+      "blob": "ba2ee615a8b8c2f8387d37157733f8cdb605b814",
+      "sha256": "c05fd0843120451d26b4ec70be2d92e0df90c70a07871f6296b284f78325f53c",
+      "bytes": 778
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/meta.rs",
+      "blob": "c8db5b8da925a8938d98e7f32f203f8e7bb4a6c0",
+      "sha256": "a44aebc5aa68ba85db8d07914a740a25de08e9f22ce7dadf53de790af631a9cd",
+      "bytes": 31783
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/packet.rs",
+      "blob": "5332436bb3475f3b89f478d8813dd4a90a86dc34",
+      "sha256": "5dbe02799f8fc58f5ed8736081ef59cda1522966c9bdf12bca895704632970d5",
+      "bytes": 17643
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/subtitle/mod.rs",
+      "blob": "6f3cbb8a4dde12fcf5f73dd934b0a06b7e54edd1",
+      "sha256": "60a49e35bdf34cf16c7bc7b8843186b15f4e3b91aee5c38c75d61f3503a73856",
+      "bytes": 792
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/units.rs",
+      "blob": "833ee37a3a96d5fcc3b427b34f1e602b7c233243",
+      "sha256": "84de229767d2f8ee54fea5d8d718b140b3764dfda83e3421a719043564a85c71",
+      "bytes": 54064
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/util.rs",
+      "blob": "f88238adf1146ced1409d63545249bf828c49517",
+      "sha256": "6dbec0b948a729a269c1e2bfb84472b3436477f6bc622efaf42f2ef93f52965f",
+      "bytes": 23683
+    },
+    {
+      "path": "host/ingest/vendor/symphonia-core/src/video/mod.rs",
+      "blob": "65305dbbcc982edce9ff9937779bff6201b352cb",
+      "sha256": "7f4d6f6a63930bc99ebcc1c02393ffe236b1f5c5ce79b60c7aa0bb5e1fef6ce9",
+      "bytes": 589
+    }
+  ],
+  "authority": "PM497 / Verification239 / Software499",
+  "product_input": "14cad0b637ecf45b61406a987767fda770ea73bd",
+  "verification_input": "046b3f2c930efeb9bdb50d175164d2c4cbdb705b",
+  "reviewed_source_assessment_merge": "aba3ce314cd31bbaad254c1d956552b56d3b91ad",
+  "prior_proof_method_merge": "6c0c4835be336b28313cad0f06f6ab1509d99489",
+  "case_limit": 25,
+  "cpu_seconds_limit": 7200,
+  "evidence_bytes_limit": 536870912,
+  "scope": "authored proof-model challenges; no production execution or global proof"
+}
