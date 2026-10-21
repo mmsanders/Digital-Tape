@@ -1,0 +1,36 @@
+name: WP15 pure parser component
+on:
+  pull_request:
+    paths:
+      - 'host/app/src/report.rs'
+      - 'host/app/src/messages.rs'
+      - 'host/app/parser-component/**'
+      - 'tools/app1a/parser_component.py'
+      - '.github/workflows/wp15-parser-component.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  parser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build actual modules and retain identity
+        run: |
+          mkdir -p parser-evidence
+          rustc -Vv > parser-evidence/rustc.txt
+          cargo -V > parser-evidence/cargo.txt
+          /usr/bin/time -v -o parser-evidence/build-time.txt cargo build --manifest-path host/app/parser-component/Cargo.toml > parser-evidence/build-stdout.txt 2> parser-evidence/build-stderr.txt
+          cp host/app/parser-component/Cargo.lock parser-evidence/Cargo.lock
+          cargo metadata --manifest-path host/app/parser-component/Cargo.toml --locked --format-version 1 > parser-evidence/cargo-metadata.json
+      - name: Published corpus through actual parser and messages
+        run: |
+          python3 -B tools/app1a/parser_component.py --adapter host/app/parser-component/target/debug/dtapp-parser-component --out parser-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software498-parser
+          path: parser-evidence
