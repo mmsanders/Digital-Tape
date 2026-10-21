@@ -1,0 +1,28 @@
+{
+  "issue": 502,
+  "current_base": "8f65b3d336727eec70fb6fe6d4dee6aafb7e0136",
+  "corrected459": "50bc4160f6da527da8c684d05264f99815aaa870",
+  "candidate_merge": "ad21b383e6b6f3a271265198ac3f7535f7899e0e",
+  "identity": {
+    "host/ingest": {
+      "corrected459": "b4907b2f209080f3ff730f8af0f6da298c13fbeb",
+      "candidate": "b4907b2f209080f3ff730f8af0f6da298c13fbeb"
+    },
+    "tests/wp16_ingest_stage1": {
+      "corrected459": "609a4c819076a2b85b26cc4f3cd254b92caef6de",
+      "candidate": "609a4c819076a2b85b26cc4f3cd254b92caef6de"
+    },
+    "engine": {
+      "corrected459": "d96b4245e04d74078f8938744b1394c3018516f7",
+      "candidate": "d96b4245e04d74078f8938744b1394c3018516f7"
+    }
+  },
+  "conflicts": [
+    "tests/IMPORTS.json: additive package union, per-entry byte-equivalent values",
+    "CODEOWNERS: additive union of owners"
+  ],
+  "source_changes": [],
+  "engine_changes": [],
+  "new_numerical_audio_resource_execution": 0,
+  "clearance": "PENDING independent Verification242; no merge permission inferred"
+}
