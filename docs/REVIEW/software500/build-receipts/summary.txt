@@ -1,0 +1,21 @@
+{
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "source_ingest_tree": "835078995d4e9cc2424f9ea8d6f11304b45f783f",
+  "shipping_binary_sha256": "44b87f75463767538928876f9179c269f67aa383de89ebb6914779ac2ca21237",
+  "input_pcm_bytes": 634228,
+  "scheduled": 18,
+  "executed": 17,
+  "remaining": [
+    "endpoint-1"
+  ],
+  "lost_prior_case": "endpoint-1: first command completed, result-reader TypeError; original raw unavailable; not rerun or credited",
+  "failures": [],
+  "cpu_seconds": 5.067305999999999,
+  "wall_seconds": 5.202438356999998,
+  "outcomes": {
+    "0": 17
+  },
+  "global_internal_or_joined_absence_proved": false,
+  "global_witness_claimed": false
+}
+ARCHIVE 297029 108ad9bfe7036605e0405e52c46f9065fb6028244bb953b276f694d3faa0476c
