@@ -27,27 +27,61 @@ The future runner must additionally bind complete root/case paths and absence of
 missing.bin without opening any unissued target; offline validation supplies none
 of these actual facts. Record original setup argv/stdout/stderr/exit/timing/census.
 
-Future private capture (AFTER independently bound ownership and clock/nonce setup):
+Future runtime binding BEFORE the single absence query (AFTER separate authority):
+prepend ONLY $RuntimeRoot to child PATH, set PYTHONHOME to that same known runtime,
+remove PYTHONPATH; verify all inventoried runtime/source/image bytes before launch.
+The independently bound authorized-session.json must name this fresh session_instance,
+nonce, source/image hashes, actual filesystem identities and session_start_qpc.
+No JSON boolean grants scope. No token check or alternate runtime search is added.
+
+Future ONE exact generated-name query BEFORE capture and before ALL six opens:
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-query --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:absence-query" --facts "$OwnedRoot\absence-query-facts.jsonl" > "$Session\absence-query.json"
+if ($LASTEXITCODE -ne 0) { throw 'STOP before capture; original failed query facts retained' }
+The source issues exactly ONE QueryDosDeviceW for DTVerify235_<nonce>,4096 WCHARs,
+retains count/immediate failure error before postcall clock/formatting, and requires
+zero/error2. A mapping, other error, clock failure or incomplete facts means STOP.
+No second query, retry, namespace enumeration or target open occurs on this path.
+Keep original stdout/stderr/exit plus immutable absence-query-facts.jsonl; the query
+process has its own image/PID/nonce/time/instance facts, outside the capture period.
+
+Future private capture (AFTER the original absence receipt passes):
+Bind SHA256 of the ORIGINAL absence-query.json into a NEW capture-session.json,
+preserving authorized-session.json unchanged. Bind the same session_instance,
+nonce, source/image hashes and session_start_qpc; record actual capture_start_qpc
+before observer launch in the same QPC domain/frequency. On Windows the authorized
+runner can obtain [Diagnostics.Stopwatch]::GetTimestamp()/Frequency; require its
+actual frequency equals the query's native qpc_frequency, or STOP. Preserve that
+runner's original clock/argv/time receipts; no synthetic values are admissible.
+Use fresh CreateNew output for capture-session.json, never replace old receipts.
+Require session_start_qpc <= query.before.qpc <= query.after.qpc < capture_start_qpc.
+This exact nonce/name/time/instance/hash query receipt is reused, never requeried.
 & "$Observer" /AcceptEula /Quiet /Minimized /LoadConfig "$Filter" /BackingFile "$Session\capture.pml"
 & "$Observer" /WaitForIdle
 Retain actual observer PID/parent/image/start/nonce/session instance; any existing
 unrelated observer, unknown ownership, timeout or privilege mismatch means STOP.
 No token reprobe/elevation/install workaround is part of this preparation plan.
 
-Future runtime binding: prepend ONLY $RuntimeRoot to child PATH, set PYTHONHOME to
-$RuntimeRoot, remove PYTHONPATH; verify all recorded runtime files before launch.
+Future case children keep the SAME already authenticated runtime binding.
 Each following command is sequential with actual <nonce>:<case> identity, fresh
 child PID/lifetime/time uncertainty and exact source/binary/runtime hash binding.
 Case-request JSON numeric fields must match the six immutable236 rows and nonce.
 authorized-session.json is an actual future evidence binding, NOT authorization
 granted by a JSON boolean. Fresh human/scope authorization is a separate prerequisite.
 
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-zero"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\missing-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:missing-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-zero"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:absent-dos-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-read.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-read" --facts "$OwnedRoot\file-read-facts.jsonl" --query-receipt "$Session\absence-query.json"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-zero.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-zero" --facts "$OwnedRoot\file-zero-facts.jsonl" --query-receipt "$Session\absence-query.json"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\missing-read.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:missing-read" --facts "$OwnedRoot\missing-read-facts.jsonl" --query-receipt "$Session\absence-query.json"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-zero.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-zero" --facts "$OwnedRoot\nul-zero-facts.jsonl" --query-receipt "$Session\absence-query.json"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-read.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-read" --facts "$OwnedRoot\nul-read-facts.jsonl" --query-receipt "$Session\absence-query.json"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\capture-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:absent-dos-zero" --facts "$OwnedRoot\absent-dos-zero-facts.jsonl" --query-receipt "$Session\absence-query.json"
+EVERY case child validates the ORIGINAL receipt against capture-session's
+external SHA/nonce/name/source/image/instance/time bounds and performs NO query.
+All children create a fresh owned facts file before the target call, append and
+flush original return/error/handle/identity facts BEFORE postcall clocks or close,
+then append separate clock/cleanup/incomplete diagnostics. Original native lines
+survive those later failures; valid-owned close is attempted exactly once in
+finally, never for INVALID_HANDLE_VALUE. A facts-write failure itself cannot
+guarantee durable storage and is a STOP with best-effort owned cleanup, no retry.
 Future supervisor must retain each original stream/exit and immediate native error,
 UTF16 target/parameters, pointer-width raw handle, exact-name absence query,
 FILETIME/QPC/frequency, PID/TID/instance and source/launch receipts. One target

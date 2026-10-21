@@ -1,0 +1,23 @@
+{
+  "capture_launches": 0,
+  "child_relaunches": 0,
+  "final_query_mutants": 10,
+  "final_retention_controls": 6,
+  "final_sources": {
+    "source/NOT_AUTHORIZED_TO_RUN.txt": "7a16f06831c656f1a3fba1366a62728bae489bb818bea213fe68801574d487a8",
+    "source/correction_controls.py": "c77797a0861a05f7a7339ea7600dfb3831a5bfcfbbdd9c3b0d5932729b979023",
+    "source/probe.py": "884940e96310424dc3141833079689a913525489cb6ee182820ff5e52fa7d56a"
+  },
+  "native_calls": 0,
+  "normalization": "CRLF to LF only after initial offline controls; original intermediate package preserved unchanged, final controls bind final LF source",
+  "original_image_receipts_apply_only_to": "417652fb7accc056c57a9dcb3966814df1d84c5f",
+  "prior_source_sha256": {
+    "NOT_AUTHORIZED_TO_RUN.txt": "dd3f2abc46bb47af7b3314d8d3c7ebee1530bbd92e391362f43f8cac8ac5af86",
+    "correction_controls.py": "c77797a0861a05f7a7339ea7600dfb3831a5bfcfbbdd9c3b0d5932729b979023",
+    "prepare.py": "404dbe3f599291b16a17a7904885d3f952950e18cdce0d7b81e3fd05dcf94505",
+    "probe.py": "f866572d4dcc00fbe61a68bdde9c61b17a7007160ef7beda2de7b26b398586b5"
+  },
+  "query_calls": 0,
+  "scope": "SOURCE/PLAN/SYNTHETIC correction1/2, no native or image execution",
+  "token_probes": 0
+}

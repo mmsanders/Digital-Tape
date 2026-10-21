@@ -1,0 +1,8 @@
+{
+  "bytes": 143924,
+  "sha256": "987533e621528af5aa4a153afb29bf670bf03e22e882a03645a2ffea3b4d6c79",
+  "members": 9,
+  "original_zip_unchanged": true,
+  "new_native_image_execution": false,
+  "scope": "consolidated correction1/2 SOURCE/PLAN/OFFLINE controls only"
+}

@@ -1,0 +1,32 @@
+{
+  "scope": "PREPARATION ONLY correction1 to published256 d2dd16d9; no new native/image child",
+  "original_zip_sha256": "85a6f19ddb3be91374bb00e700e5786d450edf7911d9c869360cfa3ea8629ede",
+  "original_zip_bytes": 134295,
+  "original_image_source": "417652fb7accc056c57a9dcb3966814df1d84c5f",
+  "native_calls": 0,
+  "query_calls": 0,
+  "child_relaunches": 0,
+  "token_probes": 0,
+  "capture_launches": 0,
+  "new_synthetic_retention_controls": 6,
+  "new_synthetic_query_rejections": 10,
+  "new_dry_image_run": false,
+  "static_query_count": 1,
+  "static_case_commands": 6,
+  "static_order_pass": true,
+  "source_inventory": {
+    "correction_controls.py": {
+      "bytes": 4697,
+      "sha256": "c77797a0861a05f7a7339ea7600dfb3831a5bfcfbbdd9c3b0d5932729b979023"
+    },
+    "NOT_AUTHORIZED_TO_RUN.txt": {
+      "bytes": 9957,
+      "sha256": "dd3f2abc46bb47af7b3314d8d3c7ebee1530bbd92e391362f43f8cac8ac5af86"
+    },
+    "probe.py": {
+      "bytes": 16331,
+      "sha256": "f866572d4dcc00fbe61a68bdde9c61b17a7007160ef7beda2de7b26b398586b5"
+    }
+  },
+  "prior_synthetic_iteration": "First interim synthetic controls retained separately; no native/image execution in either iteration. New final session nonce binding then rechecked; only final source is returned for disposition."
+}

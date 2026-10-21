@@ -60,7 +60,59 @@ def future_target(case, root, nonce):
     return kind
 
 
-def future_native_payload(case, root, nonce, authorized_session):
+def retain_call(operation, clocks, close, sink, identity):
+    """Shared pure retention sequencing, also exercised with NO-NATIVE callbacks.
+
+    operation captures any immediate error BEFORE returning. The first subsequent
+    sink preserves those original facts. Later clock/close failures append their
+    own incomplete diagnostics; they never replace the native event or retry close.
+    """
+    before=clocks()
+    native=operation()
+    result=dict(identity=identity,before=before,native=native,status='incomplete')
+    try:
+        sink(dict(kind='native-original',identity=identity,before=before,native=native))
+        try:
+            result['after']=clocks()
+            sink(dict(kind='post-clock',after=result['after']))
+            result['status']='complete'
+        except Exception as error:
+            result['clock_error']=str(error)
+            sink(dict(kind='incomplete-clock',error=str(error)))
+    finally:
+        if native.get('valid_owned_handle') is True:
+            try:
+                result['close']=close(native['handle_raw'])
+                sink(dict(kind='close-original',fact=result['close']))
+                if not result['close']['success']:result['status']='incomplete'
+            except Exception as error:
+                result['status']='incomplete';result['close_error']=str(error)
+                sink(dict(kind='incomplete-close',error=str(error),close_attempts=1))
+    sink(dict(kind='completion',status=result['status']))
+    return result
+
+
+def validate_query_receipt(receipt, session, nonce, receipt_sha256):
+    """Pure binding/order check. Actual evidence is required by the future runner."""
+    if receipt_sha256!=session.get('query_receipt_sha256'):raise ValueError('unbound query receipt hash')
+    identity=receipt['identity'];native=receipt['native']
+    if receipt.get('status')!='complete' or identity.get('operation')!='absence-query':raise ValueError('incomplete/wrong query')
+    if identity.get('nonce')!=nonce or session.get('nonce')!=nonce or identity.get('session_instance')!=session.get('session_instance'):
+        raise ValueError('stale nonce/session query')
+    if identity.get('source_sha256')!=session.get('payload_source_sha256') or identity.get('image_sha256')!=session.get('probe_image_sha256'):
+        raise ValueError('unbound query payload/image')
+    if native.get('name')!='DTVerify235_'+nonce or native.get('buffer_wchars')!=4096 or native.get('returned')!=0 or native.get('immediate_error')!=2:
+        raise ValueError('exact one-name absence not established')
+    before=receipt['before']['qpc'];after=receipt['after']['qpc']
+    if not session['session_start_qpc']<=before<=after<session['capture_start_qpc']:
+        raise ValueError('query stale or not before capture')
+    if identity.get('qpc_frequency')!=session.get('qpc_frequency') or identity['qpc_frequency']<=0:
+        raise ValueError('query clock frequency mismatch')
+    return receipt
+
+
+def future_native_payload(case, root, nonce, authorized_session, facts_path, query_receipt=None,
+                          query_receipt_sha256=None, query_only=False):
     """NOT CALLED by this kit. Requires separately issued future integration.
 
     Source is auditable ABI preparation; this dormant routine alone is not an
@@ -93,41 +145,55 @@ def future_native_payload(case, root, nonce, authorized_session):
     kernel.GetSystemTimePreciseAsFileTime.restype=None
     if ctypes.sizeof(DWORD)!=4 or ctypes.sizeof(BOOL)!=4 or ctypes.sizeof(HANDLE)*8 not in (32,64):
         raise ValueError('ABI width mismatch')
+    # Opening this fresh ordinary owned facts stream precedes any target/query.
+    # The separately issued runner must authenticate non-reparse filesystem facts.
+    if ntpath.dirname(str(facts_path))!=root:raise ValueError('facts must be fresh within actual bound owned root')
     query=None
-    if kind=='absent':
-        name='DTVerify235_'+nonce
-        buffer=ctypes.create_unicode_buffer(4096)
-        count=kernel.QueryDosDeviceW(name,buffer,4096)  # One exact non-NULL name, no retry/enumeration.
-        query_error=ctypes.get_last_error() if count==0 else None  # IMMEDIATE failure capture.
-        query=dict(name=name,buffer_wchars=4096,returned=count,immediate_error=query_error)
-        if count!=0 or query_error!=2:raise RuntimeError('exact generated-name absence not established: '+json.dumps(query))
+    if not query_only:
+        query=validate_query_receipt(query_receipt,authorized_session,nonce,query_receipt_sha256)
     frequency=ctypes.c_int64();tid=kernel.GetCurrentThreadId()
     if not kernel.QueryPerformanceFrequency(ctypes.byref(frequency)) or frequency.value<=0:raise RuntimeError('QPC frequency unavailable')
     def clocks():
         ft=FileTime();qpc=ctypes.c_int64()
         kernel.GetSystemTimePreciseAsFileTime(ctypes.byref(ft))
-        if not kernel.QueryPerformanceCounter(ctypes.byref(qpc)):raise RuntimeError('QPC unavailable')
+        if not kernel.QueryPerformanceCounter(ctypes.byref(qpc)):
+            error=ctypes.get_last_error()  # Original clock failure diagnostic before later work.
+            raise RuntimeError('QPC unavailable; immediate_error='+str(error))
         return dict(filetime=(ft.high<<32)|ft.low,qpc=qpc.value)
-    before=clocks()
-    handle=kernel.CreateFileW(case['path'],case['access'],7,None,3,128,None)
     invalid=(1<<(ctypes.sizeof(HANDLE)*8))-1
-    raw=int(handle) if handle is not None else 0
-    error=ctypes.get_last_error() if raw==invalid else None  # No clock/log/native call before this.
-    closed=None
-    close_error=None
-    try:
-        after=clocks()
-    finally:
-        if raw!=invalid:
-            closed=bool(kernel.CloseHandle(HANDLE(raw)))  # Exactly once, never invalid handle.
-            close_error=ctypes.get_last_error() if not closed else None
-    return dict(case=case,nonce=nonce,marker=nonce+':'+case['id'],pid=os.getpid(),parent_pid=os.getppid(),tid=tid,
-                before=before,after=after,qpc_frequency=frequency.value,
-                target_utf16le=case['path'].encode('utf-16le').hex(),handle_bits=ctypes.sizeof(HANDLE)*8,
-                handle_raw=raw,invalid_handle=raw==invalid,immediate_error=error,closed_once=closed,
-                close_error=close_error,absence_query=query,filetime_unit_ns=100,
-                qpc_tick_seconds=1/frequency.value,
-                utc_offset_seconds=-(time.altzone if time.daylight and time.localtime().tm_isdst else time.timezone))
+    image=Path(sys.executable).resolve()
+    identity=dict(case=case,nonce=nonce,marker=nonce+':'+('absence-query' if query_only else case['id']),
+        operation='absence-query' if query_only else 'CreateFileW',session_instance=authorized_session['session_instance'],
+        pid=os.getpid(),parent_pid=os.getppid(),tid=tid,qpc_frequency=frequency.value,
+        source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),image=str(image),
+        image_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),
+        target_utf16le=case['path'].encode('utf-16le').hex(),handle_bits=ctypes.sizeof(HANDLE)*8,
+        absence_query=query,query_receipt_sha256=query_receipt_sha256,filetime_unit_ns=100,
+        qpc_tick_seconds=1/frequency.value,
+        utc_offset_seconds=-(time.altzone if time.daylight and time.localtime().tm_isdst else time.timezone))
+    def operation():
+        if query_only:
+            if kind!='absent':raise ValueError('only issued generated absent name can be queried')
+            name='DTVerify235_'+nonce;buffer=ctypes.create_unicode_buffer(4096)
+            count=kernel.QueryDosDeviceW(name,buffer,4096)  # ONE pre-capture query only.
+            error=ctypes.get_last_error() if count==0 else None  # IMMEDIATE, before clock/log/close.
+            return dict(name=name,buffer_wchars=4096,returned=count,immediate_error=error,valid_owned_handle=False)
+        handle=kernel.CreateFileW(case['path'],case['access'],7,None,3,128,None)
+        raw=int(handle) if handle is not None else 0
+        error=ctypes.get_last_error() if raw==invalid else None  # IMMEDIATE failure capture.
+        return dict(handle_raw=raw,invalid_handle=raw==invalid,immediate_error=error,valid_owned_handle=raw!=invalid)
+    def close(raw):
+        success=bool(kernel.CloseHandle(HANDLE(raw)))  # Exactly once and valid only.
+        error=ctypes.get_last_error() if not success else None  # IMMEDIATE close failure capture.
+        return dict(success=success,immediate_error=error,attempts=1)
+    with Path(facts_path).open('x',encoding='utf-8') as stream:
+        def sink(event):
+            stream.write(json.dumps(event,sort_keys=True)+'\n');stream.flush()
+        result=retain_call(operation,clocks,close,sink,identity)
+    if result['status']!='complete':raise RuntimeError('incomplete native facts retained at '+str(facts_path))
+    if query_only and (result['native']['returned']!=0 or result['native']['immediate_error']!=2):
+        raise RuntimeError('query failed absence prerequisite; original facts retained, stop before capture')
+    return result
 
 
 def main():
@@ -136,20 +202,28 @@ def main():
     p.add_argument('--validate',type=Path)
     p.add_argument('--nonce',default='a'*32)
     p.add_argument('--future-execute',action='store_true',help='NOT AUTHORIZED in preparation; future separately issued scope only')
+    p.add_argument('--future-query',action='store_true',help='NOT AUTHORIZED now; one exact future absence query BEFORE capture')
+    p.add_argument('--query-receipt',type=Path)
+    p.add_argument('--facts',type=Path)
     p.add_argument('--case-request',type=Path)
     p.add_argument('--authorized-session',type=Path)
     p.add_argument('--owned-root')
     p.add_argument('--marker')
     a=p.parse_args()
-    if a.future_execute:
-        if a.dry_run or a.validate or not all((a.case_request,a.authorized_session,a.owned_root)):
+    if a.future_execute or a.future_query:
+        if a.future_execute and a.future_query:p.error('query and case are separate future invocations')
+        if a.future_execute and not a.query_receipt:p.error('original before-capture query receipt required for every case')
+        if a.dry_run or a.validate or not all((a.case_request,a.authorized_session,a.owned_root,a.facts)):
             p.error('separate future scope/session and exact case request required')
         # File flags are operational prerequisites, not a grant of authority.
         # This branch must never be called by current preparation or dry-run tests.
         case=json.loads(a.case_request.read_bytes())
         session=json.loads(a.authorized_session.read_bytes())
-        if a.marker!=a.nonce+':'+case['id']:p.error('exact nonce:case marker required')
-        result=future_native_payload(case,a.owned_root,a.nonce,session)
+        if a.marker!=a.nonce+':'+('absence-query' if a.future_query else case['id']):p.error('exact nonce:operation marker required')
+        query_bytes=a.query_receipt.read_bytes() if a.query_receipt else None
+        result=future_native_payload(case,a.owned_root,a.nonce,session,a.facts,
+            json.loads(query_bytes) if query_bytes else None,
+            hashlib.sha256(query_bytes).hexdigest() if query_bytes else None,query_only=a.future_query)
         image=Path(sys.executable).resolve()
         result.update(image=str(image),image_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),
                       source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

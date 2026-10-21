@@ -66,3 +66,7 @@ docs/REVIEW/software511/** -text
 
 tests/observer_kit_readiness_r1/** -text
 docs/REVIEW/software515/** -text
+
+host/observer-kit/probe.py -text
+host/observer-kit/NOT_AUTHORIZED_TO_RUN.txt -text
+host/observer-kit/correction_controls.py -text
