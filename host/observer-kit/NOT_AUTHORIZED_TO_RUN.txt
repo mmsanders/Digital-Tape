@@ -19,7 +19,7 @@ substitution is not current execution permission. Exact package/runtime/source a
 probe image SHA256 come from this candidate's PAYLOAD/RUNTIME inventories.
 
 Future owned setup/census (AFTER separate authorization):
-New-Item -ItemType Directory -LiteralPath "$OwnedRoot"
+[IO.Directory]::CreateDirectory("$OwnedRoot")
 [IO.File]::WriteAllBytes("$OwnedRoot\fixture.bin",[Text.Encoding]::UTF8.GetBytes("owned236 fixture`n"))
 [IO.File]::WriteAllBytes("$OwnedRoot\foreign-sentinel.bin",[Text.Encoding]::UTF8.GetBytes("preserve236 sentinel`n"))
 Get-FileHash -LiteralPath "$OwnedRoot\fixture.bin","$OwnedRoot\foreign-sentinel.bin" -Algorithm SHA256
@@ -42,12 +42,12 @@ Case-request JSON numeric fields must match the six immutable236 rows and nonce.
 authorized-session.json is an actual future evidence binding, NOT authorization
 granted by a JSON boolean. Fresh human/scope authorization is a separate prerequisite.
 
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":file-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":file-zero"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\missing-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":missing-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":nul-zero"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":nul-read"
-& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":absent-dos-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:file-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\missing-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:missing-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:nul-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker "${Nonce}:absent-dos-zero"
 Future supervisor must retain each original stream/exit and immediate native error,
 UTF16 target/parameters, pointer-width raw handle, exact-name absence query,
 FILETIME/QPC/frequency, PID/TID/instance and source/launch receipts. One target

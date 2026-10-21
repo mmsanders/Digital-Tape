@@ -1,0 +1,177 @@
+{
+  "scope": "ACTUAL OFFLINE VALIDATOR on clearly SYNTHETIC inputs",
+  "positive": true,
+  "rejected": [
+    {
+      "name": "helper_image",
+      "recipe": "negative-00.json",
+      "rejected": true,
+      "error": "helper image/pointer width mismatch"
+    },
+    {
+      "name": "pointer_bits",
+      "recipe": "negative-01.json",
+      "rejected": true,
+      "error": "helper image/pointer width mismatch"
+    },
+    {
+      "name": "observer_sha256",
+      "recipe": "negative-02.json",
+      "rejected": true,
+      "error": "observer/filter must remain pinned"
+    },
+    {
+      "name": "filter_sha256",
+      "recipe": "negative-03.json",
+      "rejected": true,
+      "error": "observer/filter must remain pinned"
+    },
+    {
+      "name": "native_calls",
+      "recipe": "negative-04.json",
+      "rejected": true,
+      "error": "nonzero native_calls"
+    },
+    {
+      "name": "token_probes",
+      "recipe": "negative-05.json",
+      "rejected": true,
+      "error": "nonzero token_probes"
+    },
+    {
+      "name": "capture_launches",
+      "recipe": "negative-06.json",
+      "rejected": true,
+      "error": "nonzero capture_launches"
+    },
+    {
+      "name": "synthetic",
+      "recipe": "negative-07.json",
+      "rejected": true,
+      "error": "preparation/synthetic labels required"
+    },
+    {
+      "name": "nonce",
+      "recipe": "negative-08.json",
+      "rejected": true,
+      "error": "nonce"
+    },
+    {
+      "name": "source_bound",
+      "recipe": "negative-09.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "runtime_bound",
+      "recipe": "negative-10.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "abi_windows_unicode_pointer_correct",
+      "recipe": "negative-11.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "immediate_error",
+      "recipe": "negative-12.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "success_error_ignored",
+      "recipe": "negative-13.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "clock_pid_nonce_contract",
+      "recipe": "negative-14.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "owned_cleanup_only",
+      "recipe": "negative-15.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "private_archive_contract",
+      "recipe": "negative-16.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "future_commands_not_authorized",
+      "recipe": "negative-17.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "fresh_authorization_required",
+      "recipe": "negative-18.json",
+      "rejected": true,
+      "error": "missing provenance/stop obligation"
+    },
+    {
+      "name": "case-path",
+      "recipe": "negative-19.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-path",
+      "recipe": "negative-20.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-path",
+      "recipe": "negative-21.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-path",
+      "recipe": "negative-22.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-access",
+      "recipe": "negative-23.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-share",
+      "recipe": "negative-24.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-disposition",
+      "recipe": "negative-25.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-flags",
+      "recipe": "negative-26.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    },
+    {
+      "name": "case-attempts",
+      "recipe": "negative-27.json",
+      "rejected": true,
+      "error": "exact six-template allowlist mismatch"
+    }
+  ],
+  "native_calls": 0,
+  "capture_launches": 0,
+  "token_probes": 0
+}

@@ -16,11 +16,14 @@ import probe
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--source',required=True)
-    a=p.parse_args();out=a.out.resolve();out.mkdir()
+    p.add_argument('--validate-retained',action='store_true',help='Finish offline checks from original child receipts; NEVER relaunch')
+    a=p.parse_args();out=Path(os.path.abspath(a.out))
+    if not a.validate_retained:out.mkdir()
     runtime=Path(sys.executable).resolve().parent
     image=out/'probe-235.exe'
-    shutil.copyfile(sys.executable,image)
-    shutil.copyfile(Path(__file__).with_name('probe.py'),out/'probe.py')
+    if not a.validate_retained:
+        shutil.copyfile(sys.executable,image)
+        shutil.copyfile(Path(__file__).with_name('probe.py'),out/'probe.py')
     def sha(b):return hashlib.sha256(b).hexdigest()
     def js(name,obj):(out/name).write_text(json.dumps(obj,indent=2)+'\n',encoding='utf-8')
     required=[runtime/'python312.dll']
@@ -34,23 +37,33 @@ def main():
         if base.is_dir():
             known.extend(x for x in base.rglob('*') if x.is_file() and 'site-packages' not in x.parts and '__pycache__' not in x.parts and x.suffix in ('.py','.pyd','.dll','.zip'))
     inventory={x.relative_to(runtime).as_posix():dict(bytes=x.stat().st_size,sha256=sha(x.read_bytes())) for x in sorted(set(known))}
-    js('RUNTIME-INVENTORY.json',inventory)
+    if a.validate_retained:
+        assert json.loads((out/'RUNTIME-INVENTORY.json').read_bytes())==inventory,'existing runtime identity changed'
+    else:js('RUNTIME-INVENTORY.json',inventory)
     env=os.environ.copy();env['PYTHONHOME']=str(runtime);env['PATH']=str(runtime)+os.pathsep+env.get('PATH','');env.pop('PYTHONPATH',None)
-    nonce=os.urandom(16).hex()
-    argv=[str(image),'-S','-B',str(out/'probe.py'),'--dry-run','--nonce',nonce]
-    start=time.monotonic_ns();cpu=time.process_time_ns()
-    with (out/'dry-stdout.bin').open('xb') as stdout,(out/'dry-stderr.bin').open('xb') as stderr:
-        child=subprocess.Popen(argv,env=env,stdout=stdout,stderr=stderr)
-        code=child.wait(timeout=5)
-    end=time.monotonic_ns()
-    js('LAUNCH.json',dict(argv=argv,pid=child.pid,parent_pid=os.getpid(),exit=code,source=a.source,
-       image_sha256=sha(image.read_bytes()),runtime_root=str(runtime),environment_overrides=dict(PYTHONHOME=str(runtime),PATH_prefix=str(runtime),PYTHONPATH='removed'),
-       start_ns=start,end_ns=end,duration_ns=end-start,parent_cpu_ns=time.process_time_ns()-cpu,
-       cpu_accounting='parent CPU measured; child included in conservative600CPU-second reservation, no wall/CPU substitution'))
-    assert code==0,'known copied-image route failed; retain logs, no repair/provider hunt'
+    if a.validate_retained:
+        launch=json.loads((out/'LAUNCH.json').read_bytes())
+        assert launch['source']==a.source and launch['exit']==0
+        nonce=launch['argv'][-1]
+        assert launch['image_sha256']==sha(image.read_bytes())
+    else:
+        nonce=os.urandom(16).hex()
+        argv=[str(image),'-S','-B',str(out/'probe.py'),'--dry-run','--nonce',nonce]
+        start=time.monotonic_ns();cpu=time.process_time_ns()
+        with (out/'dry-stdout.bin').open('xb') as stdout,(out/'dry-stderr.bin').open('xb') as stderr:
+            child=subprocess.Popen(argv,env=env,stdout=stdout,stderr=stderr)
+            code=child.wait(timeout=5)
+        end=time.monotonic_ns()
+        launch=dict(argv=argv,pid=child.pid,parent_pid=os.getpid(),exit=code,source=a.source,
+           image_sha256=sha(image.read_bytes()),runtime_root=str(runtime),environment_overrides=dict(PYTHONHOME=str(runtime),PATH_prefix=str(runtime),PYTHONPATH='removed'),
+           start_ns=start,end_ns=end,duration_ns=end-start,parent_cpu_ns=time.process_time_ns()-cpu,
+           cpu_accounting='parent CPU measured; child included in conservative600CPU-second reservation, no wall/CPU substitution')
+        js('LAUNCH.json',launch)
+        assert code==0,'known copied-image route failed; retain logs, no repair/provider hunt'
     actual=json.loads((out/'dry-stdout.bin').read_bytes())
-    assert actual['pid']==child.pid and actual['parent_pid']==os.getpid() and actual['nonce']==nonce
-    assert actual['image_name']=='probe-235.exe' and Path(actual['image'])==image
+    assert actual['pid']==launch['pid'] and actual['parent_pid']==launch['parent_pid'] and actual['nonce']==nonce
+    normalize=lambda path:os.path.normcase(os.path.abspath(path))
+    assert actual['image_name']=='probe-235.exe' and normalize(actual['image'])==normalize(image)
     assert actual['image_sha256']==sha(image.read_bytes()) and actual['pointer_bits']==struct.calcsize('P')*8
     assert not actual['ctypes_imported'] and actual['native_target_calls']==actual['token_probes']==actual['capture_launches']==0
     js('DRY-RUN.json',actual)

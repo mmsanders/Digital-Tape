@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\Digital-Tape\\..\\software515-preparation-attempt1\\probe-235.exe",
+    "-S",
+    "-B",
+    "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\Digital-Tape\\..\\software515-preparation-attempt1\\probe.py",
+    "--dry-run",
+    "--nonce",
+    "597932b5f40b757a056108193a60d4b5"
+  ],
+  "pid": 24672,
+  "parent_pid": 15376,
+  "exit": 0,
+  "source": "417652fb7accc056c57a9dcb3966814df1d84c5f",
+  "image_sha256": "b07b03b9ba866a341a3c13ee69710fbc8d43d4ce2523dee13f6df5c25378d15b",
+  "runtime_root": "C:\\Users\\mrtro\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python",
+  "environment_overrides": {
+    "PYTHONHOME": "C:\\Users\\mrtro\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python",
+    "PATH_prefix": "C:\\Users\\mrtro\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python",
+    "PYTHONPATH": "removed"
+  },
+  "start_ns": 1876990843000000,
+  "end_ns": 1876991375000000,
+  "duration_ns": 532000000,
+  "parent_cpu_ns": 31250000,
+  "cpu_accounting": "parent CPU measured; child included in conservative600CPU-second reservation, no wall/CPU substitution"
+}

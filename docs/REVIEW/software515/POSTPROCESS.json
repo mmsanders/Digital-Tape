@@ -1,0 +1,17 @@
+{
+  "original_tested_source": "417652fb7accc056c57a9dcb3966814df1d84c5f",
+  "child_attempts": 1,
+  "child_exit": 0,
+  "child_native_target_calls": 0,
+  "child_token_probes": 0,
+  "child_capture_launches": 0,
+  "original_packaging_result": "Post-child assertion failed because the launch path contained literal .. whereas child sys.executable was canonical. Actual image_name was probe-235.exe; this was not a runtime identity failure.",
+  "correction": "Normalize absolute paths in offline authentication. --validate-retained reuses immutable original LAUNCH/stdout/stderr/runtime inventory, never relaunches child.",
+  "original_raw_overwritten": false,
+  "offline_validator_rejected": 28,
+  "synthetic_inputs_labelled": true,
+  "conservative_total_cpu_seconds": 600,
+  "accounting": "Conservative600-second total packaging/supervision reserve includes original runtime hashing, one532ms wall child and offline validation; child CPU not reported as measured wall time.",
+  "native_future_entry_executed": false,
+  "readiness": "pending independent256, not actual capability/authorization"
+}

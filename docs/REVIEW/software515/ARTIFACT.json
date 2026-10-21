@@ -1,0 +1,12 @@
+{
+  "bytes": 134295,
+  "sha256": "85a6f19ddb3be91374bb00e700e5786d450edf7911d9c869360cfa3ea8629ede",
+  "member_count": 42,
+  "source": "417652fb7accc056c57a9dcb3966814df1d84c5f",
+  "method_merge": "5c3ccf25fffcfdb63e6cc625938df8c1511a4de9",
+  "method_tree": "13ac0194835b6b1058225ccf46e3780b0cc169a4",
+  "import_commit": "418f12e5618159624bf7f367d18486037c61b038",
+  "native_calls": 0,
+  "capture_launches": 0,
+  "token_probes": 0
+}
