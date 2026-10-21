@@ -169,7 +169,11 @@ def record(root, request, source_input, seam=None):
                 if not ready.exists():
                     raise RuntimeError('helper readiness unavailable within five seconds')
                 if seam == 'kill-producer':
-                    emit(root.parent / (name + '-kill.json'), dict(action='Popen.kill', target_pid=child.pid, supervisor_pid=os.getpid()))
+                    emit(root.parent / (name + '-kill.json'), dict(action='Popen.kill', target_pid=child.pid,
+                         supervisor_pid=os.getpid(), ready_sha256=digest(ready.read_bytes()),
+                         before_kill=inventory(files_under(stage)),
+                         observed_stdout_hex=(stage/'stdout.bin').read_bytes().hex(),
+                         observed_stderr_hex=(stage/'stderr.bin').read_bytes().hex()))
                     child.kill()
             try:
                 code = child.wait(timeout=5)
