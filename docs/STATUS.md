@@ -1,6 +1,6 @@
 # Project status
 
-**20 October2026 PDT · input main `14cad0b` · Owner: local PM (PM497; ADR-189/190 holds retained) ·**
+**21 October2026 PDT · input main `c1c9527` · Owner: local PM (PM510; ADR-189/190 holds retained) ·**
 **Phase 1 exit criteria are met.** All nine Phase 1 engine packages (WP-06…WP-13, WP-36) are complete
 and independently accepted, and the golden suite is green on main. The milestone, a voice spliced into
 the middle of a song on a laptop, is heard and approved.
@@ -79,7 +79,7 @@ operation token remain PM rulings (ADR-156), not independently accepted engine b
 | Work | Held since | State | Next owner |
 |---|---|---|---|
 | Operations freeze | closed | **Declared** 5 Oct (ADR-162); DRAFT-10 hashes unchanged | Spec revision only |
-| Phase 2 / host tools | — | S2 integrated10faee5; d923 Windows11 resource PASS234; pure parser504 integratedd4f1ce6. Queue498–502 bounded results disposed:239 scalar/premise PASS,24017 usable shipping cases,241 two new fault rows;242 own-HOST HOLD. FullAPP/459/S1-global/443 held; no rung gain | [Queue results](REVIEW/software497/RESULTS.md). Software retains two raw archives pending existing specific public-upload approvals; PM owns any fresh method/scope. Observer491/235 privilege stop remains absolute |
+| Phase 2 / host tools | — | S2 integrated10faee5; d923 Windows11 resource PASS234; pure parser504 integratedd4f1ce6. Queue498–502 bounded results disposed:239 scalar/premise PASS,24017 usable shipping cases,241 two new fault rows;242 own-HOST HOLD. FullAPP/459/S1-global/443 held; no rung gain | [Queue results](REVIEW/software497/RESULTS.md). Both approved raw archives are durable with matching release digests; evidence PR506–508 closed unmerged with exact heads retained. Fresh paired owner issues Software511–515 / Verification252–256. Observer491/235 privilege stop remains;256 is preparation-only |
 | Erratum E-1 | — | Michael approved FAT16 default; [overlay/manifest](SPEC-ERRATA.md) preserve DRAFT-10 bytes. Exact overlay confirmed by Verification `ce60d34`; Mac/Windows final README bytes PASS (#160/#168); full package held on native A6; Windows229 reproduced old FAIL and found unproved request/offset-space linkage; zero exclusions | PM capability hold; new sufficient native bridge/evidence required before fresh scope. Mac stop remains; no new physical request |
 | Q-P2-1 copy call shape (#379) | — | Verification216 bounded source/PCM/seven-pilot/command PASS at937dee3;218/99df7f8 original39 retained. Independent241/e6bc7b87 passes new write19/63:41/404 accepted,363 unexecuted,6 absent cuts/no repeated-LBA; subset443 overall HELD | Mandatory stop before write64 after row63 exceeded120CPU-second estimate. PM owns fresh costed method;2CPU-hour/2GiB cap retained. No batching/write/async/firmware permission |
 | Hardware | 2026-09-18 | **PARKED through Phase 2** (#309; extended 3 Oct, ADR-160). Held PRs #87, #92, #120, #197, #198, #296 closed unmerged; heads and restore commands in [the parked hardware PR record](PACKAGES/README.md#parked-hardware-pr-record). Timing PROVISIONAL; fabrication/charging CLOSED with five blockers | Owner prototypes [431](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) filed/parked; resumes Phase3 or explicit request; prior #87/#92 method holds survive |
