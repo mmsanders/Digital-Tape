@@ -560,6 +560,19 @@
         "-B",
         "tests/wp15_cards_make_r1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/wp15_boundary_query_r1",
+      "tree": "7e3d9c2b2991bd5be15189ce5ece76904c454c8e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "4a1a09a0e618bba4685312da8721275e9b2ce9c3",
+      "attested_in": "https://github.com/mmsanders/Digital-Tape/issues/498",
+      "attestation": "PM497/Software498 expressly issues exact query package import. Pure report/parser use only; 49 synthetic report inputs are not query/device/native evidence.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp15_boundary_query_r1/selftest.py"
+      ]
     }
   ],
   "evidence_bundles": [
