@@ -1,0 +1,77 @@
+NOT AUTHORIZED TO RUN — FUTURE COMMAND PLAN ONLY. NO CURRENT COLLECTION REQUEST.
+
+Prerequisites before ANY future command: fresh explicit user/scope authorization,
+already-available authorized Administrator capture context, independently reviewed
+kit/method, private approved session/return paths, known process-instance ownership,
+actual ordinary-root/fixture/sentinel non-reparse identity/absence checks, exact
+runtime/source/observer/filter/kit inventories. Missing prerequisite means STOP.
+This file is documentation, never an automatic launcher or elevation instruction.
+
+Bindings: $Session is a future owned canonical absolute local directory, no reparse,
+UNC, volume/card/reader/device paths. $Nonce is32 lowercase random hex; $OwnedRoot
+is $Session\owned. $RuntimeRoot is the SAME existing runtime bound by all paths,
+sizes and SHA256 in RUNTIME-INVENTORY.json; no replacement/discovery/install.
+$Kit is the authenticated package directory, $Observer the existing exact4.12
+Procmon64.exe (2237720bytes SHA28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885),
+$Filter the unchanged296byte filter.pmc (SHA6bc51ab36ed855ef86a903808d899ab349827122db04b7e0bb13fe285adc2f74).
+All variable paths/IDs/hashes must be supplied and bound by that future scope;
+substitution is not current execution permission. Exact package/runtime/source and
+probe image SHA256 come from this candidate's PAYLOAD/RUNTIME inventories.
+
+Future owned setup/census (AFTER separate authorization):
+New-Item -ItemType Directory -LiteralPath "$OwnedRoot"
+[IO.File]::WriteAllBytes("$OwnedRoot\fixture.bin",[Text.Encoding]::UTF8.GetBytes("owned236 fixture`n"))
+[IO.File]::WriteAllBytes("$OwnedRoot\foreign-sentinel.bin",[Text.Encoding]::UTF8.GetBytes("preserve236 sentinel`n"))
+Get-FileHash -LiteralPath "$OwnedRoot\fixture.bin","$OwnedRoot\foreign-sentinel.bin" -Algorithm SHA256
+The future runner must additionally bind complete root/case paths and absence of
+missing.bin without opening any unissued target; offline validation supplies none
+of these actual facts. Record original setup argv/stdout/stderr/exit/timing/census.
+
+Future private capture (AFTER independently bound ownership and clock/nonce setup):
+& "$Observer" /AcceptEula /Quiet /Minimized /LoadConfig "$Filter" /BackingFile "$Session\capture.pml"
+& "$Observer" /WaitForIdle
+Retain actual observer PID/parent/image/start/nonce/session instance; any existing
+unrelated observer, unknown ownership, timeout or privilege mismatch means STOP.
+No token reprobe/elevation/install workaround is part of this preparation plan.
+
+Future runtime binding: prepend ONLY $RuntimeRoot to child PATH, set PYTHONHOME to
+$RuntimeRoot, remove PYTHONPATH; verify all recorded runtime files before launch.
+Each following command is sequential with actual <nonce>:<case> identity, fresh
+child PID/lifetime/time uncertainty and exact source/binary/runtime hash binding.
+Case-request JSON numeric fields must match the six immutable236 rows and nonce.
+authorized-session.json is an actual future evidence binding, NOT authorization
+granted by a JSON boolean. Fresh human/scope authorization is a separate prerequisite.
+
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":file-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\file-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":file-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\missing-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":missing-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":nul-zero"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\nul-read.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":nul-read"
+& "$Kit\probe-235.exe" -S -B "$Kit\probe.py" --future-execute --case-request "$Session\absent-dos-zero.json" --authorized-session "$Session\authorized-session.json" --owned-root "$OwnedRoot" --nonce "$Nonce" --marker ":absent-dos-zero"
+Future supervisor must retain each original stream/exit and immediate native error,
+UTF16 target/parameters, pointer-width raw handle, exact-name absence query,
+FILETIME/QPC/frequency, PID/TID/instance and source/launch receipts. One target
+CreateFileW per child, no ReadFile/WriteFile, retries or target expansion. Stop at
+first unexpected native result, absent-name query other than zero/error2, PID reuse,
+clock/correlation mismatch or incomplete/lost raw. Never rerun to obtain a neighbour.
+
+Future owned-session stop/export (ONLY after verifying exact live ownership):
+& "$Observer" /Terminate
+& "$Observer" /OpenLog "$Session\capture.pml" /SaveAs "$Session\capture.csv"
+Procmon's global termination spelling is permissible ONLY for the actually owned
+sole observer session. If ownership cannot be established, do not issue it; retain
+partial raw and return exact stop. Never terminate by basename or unrelated PID.
+Retain original complete CSV row indices/hashes, whole owned-process row census,
+loss counters and original236 native-to-event detail/DesiredAccess/error/time
+mapping. Empty/filtered trace never proves absence. No PML decoder is invented.
+
+Future cleanup/archive/private return:
+Close each valid owned native handle exactly once; never INVALID_HANDLE_VALUE.
+Do not delete fixture/sentinel/failed/partial raw or overwrite prior archives.
+Recheck fixture/sentinel and full owned census, bind source/tool/runtime/commands,
+each raw PML/CSV/stdout/stderr/exit/timing by closed SHA256/size inventory, create a
+fresh immutable private ZIP and authenticate duplicate-free safe member census and
+all bytes AFTER final close. Preserve incomplete outputs on every failure.
+Return only through a private destination approved by the separately issued future
+scope, after external archive SHA256 authentication. NO public machine-trace upload.
+Source/command plan/schema alone is not original236 correspondence or acceptance.
