@@ -1,0 +1,42 @@
+name: Software500 fixed shipping joins
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - 'tools/software500/**'
+      - '.github/workflows/software500.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  joins:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact unmodified shipping source
+        run: |
+          mkdir -p "$RUNNER_TEMP/source500" shipping-build
+          git archive b9f430c8c9b33532abf07eea0ed2653310639f2d host/ingest | tar -x -C "$RUNNER_TEMP/source500"
+          uname -a > shipping-build/host.txt
+          cat /etc/os-release >> shipping-build/host.txt
+      - name: Normal locked release build
+        working-directory: ${{ runner.temp }}/source500/host/ingest
+        run: |
+          rustc -Vv > "$GITHUB_WORKSPACE/shipping-build/rustc.txt"
+          cargo -V >> "$GITHUB_WORKSPACE/shipping-build/rustc.txt"
+          /usr/bin/time -v -o "$GITHUB_WORKSPACE/shipping-build/build-time.txt" cargo build --locked --release --bin ingest > "$GITHUB_WORKSPACE/shipping-build/build-stdout.txt" 2> "$GITHUB_WORKSPACE/shipping-build/build-stderr.txt"
+          cp Cargo.lock "$GITHUB_WORKSPACE/shipping-build/Cargo.lock"
+      - name: Eighteen fixed commands once only
+        run: |
+          python3 -B tools/software500/run.py --binary "$RUNNER_TEMP/source500/host/ingest/target/release/ingest" --out "$RUNNER_TEMP/software500-raw" | tee shipping-build/summary.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software500-exact-return
+          path: |
+            ${{ runner.temp }}/software500-exact-return.zip
+            shipping-build
