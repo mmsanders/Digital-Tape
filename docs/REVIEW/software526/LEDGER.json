@@ -1,0 +1,1353 @@
+{
+  "assumptions": [
+    "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+    "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+    "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+    "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+    "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+  ],
+  "codecs": {
+    "AAC": {
+      "admission": {
+        "argument": "Host ASC admits LC/config1/2/1024; constructor independently rejects nonAAC, unknown channels, nonLC/SBR/>2 or non1024. Successful host frames additionally guard actual specC=host ch, so disagreement refuses before append.",
+        "nodes": [
+          "ANEW"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "clear_trim_render": {
+        "argument": "clear/render/truncate/shift write frame count or existing samples only. trim composes truncate+shift; no spec or outer length mutation, including zero frames.",
+        "nodes": [
+          "BTRIM"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "constructor": {
+        "argument": "Constructor count equals resize_with length and stores same owned spec; valid allocation and stable container contracts are named, zero frames does not change P.",
+        "nodes": [
+          "BNEW"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "dispatch": {
+        "argument": "Only LC decode_ga branch can return Ok under constructor. Unsupported element/coupling/PCE/SBR paths refuse; no alternate codec engine can be returned by direct AacDecoder constructor.",
+        "nodes": [
+          "AINNER"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "host_copy_finish": {
+        "argument": "Host spec-count guard gives bufferC=hostC; constructor+mutator induction gives P=bufferC. Copy outer resize=P and host outer construction=C make zip exhaustive. finish validates lengths but cannot supply missing outer-count premise by itself.",
+        "nodes": [
+          "HFIN"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "mutable_decode": {
+        "argument": "decode_ga changes pair/ICS/CRC state then synth_audio. set_pair validates indices; synth_audio passes only plane_mut slices into ICS/DSP. No buffer/spec/outer-vector replacement exists in its source.",
+        "nodes": [
+          "AGA"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "ownership_alias": {
+        "argument": "Private AudioBuffer owns spec and SmallVec; decoder owns buffer; public spec is immutable and plane_mut yields only a slice. No mutable spec/outer-plane alias escapes in the capability census.",
+        "nodes": [
+          "BPMUT"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "replacement_transition": {
+        "argument": "ASC/spec/buffer are owned at constructor. No subsequent assignment to buf/spec/planes/ASC channels exists in reachable AAC methods. New ADTS/MP4 host stream constructs fresh decoder; host guards actual channel correspondence each returned unit.",
+        "nodes": [
+          "ANEW"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "returned_frame": {
+        "argument": "Successful decode_ref returns generated F32 borrow of exact owned buffer. Generic macro dispatch and concrete num_planes/frames/plane slicing preserve correspondence.",
+        "nodes": [
+          "GCOPY"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "reuse_reset": {
+        "argument": "Reset mutates pair state only. Error path clear leaves buffer P/spec unchanged; failed set_pair may leave pair state but later success revalidates indices, and even invalid pair panic cannot become successful frame.",
+        "nodes": [
+          "ARESET"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "spec_count": {
+        "argument": "Channels::count uses popcount for positioned mask, not raw bitmask; admitted mono/stereo count1/2. Owned cloned representation remains stable.",
+        "nodes": [
+          "COUNT"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "success_error": {
+        "argument": "decode_inner may render before a later error; decode_ref error clears only valid frames and returns Err. P/spec were preserved by all capability-carrying edges, so a later successful reuse remains valid.",
+        "nodes": [
+          "AREF"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      }
+    },
+    "MP3": {
+      "admission": {
+        "argument": "Host HHDR only LayerIII; frame walk rejects version/rate/mono change; fresh MP3-coded decoder uses same units. Bit parsing success and bounds errors remain error/refusal exits.",
+        "nodes": [
+          "HMP3"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "clear_trim_render": {
+        "argument": "clear/render/truncate/shift write frame count or existing samples only. trim composes truncate+shift; no spec or outer length mutation, including zero frames.",
+        "nodes": [
+          "BTRIM"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "constructor": {
+        "argument": "Constructor count equals resize_with length and stores same owned spec; valid allocation and stable container contracts are named, zero frames does not change P.",
+        "nodes": [
+          "BNEW"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "dispatch": {
+        "argument": "CODEC_ID_MP3 selects Layer3. decode_inner additionally matches Layer3 header; host refuses LayerI/II. Other constructors/registry entry points are not used in this admitted path.",
+        "nodes": [
+          "MSTATE"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "host_copy_finish": {
+        "argument": "Host spec-count guard gives bufferC=hostC; constructor+mutator induction gives P=bufferC. Copy outer resize=P and host outer construction=C make zip exhaustive. finish validates lengths but cannot supply missing outer-count premise by itself.",
+        "nodes": [
+          "HFIN"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "mutable_decode": {
+        "argument": "Clear then Layer3 may render valid frames and synthesize through fixed slices only. Body passes no output buffer into bitstream/requantization/stereo/hybrid callees; no output metadata capability crosses those calls.",
+        "nodes": [
+          "LDECODE"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "ownership_alias": {
+        "argument": "Private AudioBuffer owns spec and SmallVec; decoder owns buffer; public spec is immutable and plane_mut yields only a slice. No mutable spec/outer-plane alias escapes in the capability census.",
+        "nodes": [
+          "BPMUT"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "replacement_transition": {
+        "argument": "Default buffer is never returned as successful frame before unused branch constructs fresh AudioBuffer from header spec. Later differing spec rejects before decode; whole replacement reestablishes invariant, not transfer by name. New host stream creates new decoder.",
+        "nodes": [
+          "MINNER"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "returned_frame": {
+        "argument": "Successful decode_ref returns generated F32 borrow of exact owned buffer. Generic macro dispatch and concrete num_planes/frames/plane slicing preserve correspondence.",
+        "nodes": [
+          "GCOPY"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "reuse_reset": {
+        "argument": "Reset replaces separate codec state, retaining invariant buffer. Error decode_ref clear preserves P/spec, so later reuse starts valid even if reservoir/internal numerical state was corrupted.",
+        "nodes": [
+          "MRESET"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "spec_count": {
+        "argument": "Channels::count uses popcount for positioned mask, not raw bitmask; admitted mono/stereo count1/2. Owned cloned representation remains stable.",
+        "nodes": [
+          "COUNT"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      },
+      "success_error": {
+        "argument": "Every decode error clears frames then returns Err; no successful frame is inferred from error/panic. Partial sample/frame mutations before error do not mutate P/spec and clear restores zero valid frames.",
+        "nodes": [
+          "MREF"
+        ],
+        "premises": [
+          "Rust type/privacy/borrow/memory safety and no UB outside safe contracts",
+          "Successful valid allocation; SmallVec/Vec length, clone, iteration and slice contracts at locked dependency versions",
+          "Owned stable AudioSpec/channel representation; no foreign mutation/unsafe fabricated private states",
+          "Successful admitted host packet/frame path only; integer/count arithmetic representable in mono/stereo valid allocations",
+          "Carried239 exact copy/count/PCM/FLAC bridges remain conditional at their original scope"
+        ],
+        "verdict": "PROVED_CONDITIONAL"
+      }
+    }
+  },
+  "fixture_outcomes_prove_universal": false,
+  "global_internal": "UNPROVED",
+  "graph_interpretation": "Complete owner/spec/outer-plane capability closure; sample-only arithmetic graph cut has explicit safe-type argument, not numerical audit.",
+  "graph_roots": [
+    "HMP3",
+    "HADTS",
+    "HMP4"
+  ],
+  "lemmas": {
+    "AAC": "PROVED_CONDITIONAL",
+    "MP3": "PROVED_CONDITIONAL"
+  },
+  "library_assumptions_explicit": true,
+  "new_decoder_runs": 0,
+  "nodes": [
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        },
+        {
+          "argument": "Pinned SmallVec/Vec resize_with/move/clone contracts: successful resize gives requested length, allocation/panic not successful return.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "c160980b8371b2964ff810d1091e33c914d5ff5a"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 78,
+      "function": "new",
+      "id": "BNEW",
+      "last_line": 98,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "C=count(owned spec); resize_with(C) builds C vectors of capacity; same moved spec, num_frames0. Valid allocation and nonzero admitted C assumed."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 99,
+      "function": "is_unused",
+      "id": "BUNUSED",
+      "last_line": 104,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Only capacity/count read; no state write."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 110,
+      "function": "clear",
+      "id": "BCLEAR",
+      "last_line": 118,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Only num_frames=0; P and spec unchanged, including error cleanup."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 389,
+      "function": "render_uninit",
+      "id": "BRENDER",
+      "last_line": 403,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Asserts num_frames+new<=capacity, advances count only; spec/planes unchanged."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BCLEAR"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 404,
+      "function": "shift",
+      "id": "BSHIFT",
+      "last_line": 418,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Clear if shift>=frames; otherwise copy_within each EXISTING plane and decrease frames only."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 419,
+      "function": "truncate",
+      "id": "BTRUNC",
+      "last_line": 425,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Only decreases num_frames."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BTRUNC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BSHIFT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BFRAMES"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 426,
+      "function": "trim",
+      "id": "BTRIM",
+      "last_line": 436,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "truncate then shift; no plane removal or spec mutation."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "SPECCHAN"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 437,
+      "function": "spec",
+      "id": "BSPEC",
+      "last_line": 440,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Returns immutable &owned spec."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 441,
+      "function": "num_planes",
+      "id": "BPLANES",
+      "last_line": 444,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Returns outer SmallVec len, not valid frames or bitmask."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 449,
+      "function": "frames",
+      "id": "BFRAMES",
+      "last_line": 452,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Returns valid num_frames, independent of P."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 453,
+      "function": "plane",
+      "id": "BPLANE",
+      "last_line": 456,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Returns &plane[0..num_frames], no outer mutation."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [
+        {
+          "argument": "Rust safe slice borrow cannot access private owner fields or resize parent outer storage; compiler/container memory safety is an explicit conditional premise.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "c160980b8371b2964ff810d1091e33c914d5ff5a"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 480,
+      "function": "plane_mut",
+      "id": "BPMUT",
+      "last_line": 483,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Returns only mutable sample slice selected by index; no outer-plane/spec capability escapes."
+    },
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 461,
+      "function": "iter_planes",
+      "id": "BITER",
+      "last_line": 464,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "review": "AUDITED",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "success_effect": "Read-only iterator over existing planes and valid frame range."
+    },
+    {
+      "blob": "173c07c27a57bfb25a21d2c336028ebf423c4894",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 310,
+      "function": "count",
+      "id": "COUNT",
+      "last_line": 324,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/channels.rs",
+      "review": "AUDITED",
+      "sha256": "9974f6b0f7ab3c1548c94e73dc9a29cad99d2d6e0abbef31bf3889c763b97e8f",
+      "success_effect": "Positioned=count_ones(bits); Discrete=u16 count; Ambisonic=(1+order)^2; Custom=len; None0. Admitted1/2 avoids overflow."
+    },
+    {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 59,
+      "function": "new",
+      "id": "SPECNEW",
+      "last_line": 63,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "review": "AUDITED",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+      "success_effect": "Owned AudioSpec moves channel representation and rate."
+    },
+    {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 69,
+      "function": "channels",
+      "id": "SPECCHAN",
+      "last_line": 80,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "review": "AUDITED",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+      "success_effect": "Only immutable channel reference returned."
+    },
+    {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BPLANES"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BFRAMES"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BITER"
+        },
+        {
+          "argument": "Standard resize/zip/slice iteration and conversion contracts; carried239 per-plane copy bridge, no additional outer-plane mutation.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 307,
+      "function": "copy_to_vecs_planar",
+      "id": "ACOPY",
+      "last_line": 325,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "review": "AUDITED",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+      "success_effect": "Resizes destination OUTER vector to num_planes P, each destination to valid samples_planar then copies every plane."
+    },
+    {
+      "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "ACOPY"
+        },
+        {
+          "argument": "Generic dispatch macro maps F32 to concrete f32 borrow, AsGenericAudioBufferRef generated implementation is same object reference.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "9933ad8582c00516a0fe7cf7e20c5535442fc089"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 514,
+      "function": "copy_to_vecs_planar",
+      "id": "GCOPY",
+      "last_line": 524,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+      "review": "AUDITED",
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381",
+      "success_effect": "Macro dispatch borrows concrete buffer unchanged; F32 arm invokes concrete Audio trait copy."
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "edges": [
+        {
+          "argument": "Layer1/2 decoding branches are compiled alternatives but host HHDR rejects their frame layer and HMP3 creates CODEC_ID_MP3 state. No registry-based alternative constructor is used by this host path.",
+          "kind": "PROVED_UNREACHABLE",
+          "source_pin": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 45,
+      "function": "new",
+      "id": "MSTATE",
+      "last_line": 66,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "review": "AUDITED",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "success_effect": "Codec ID match constructs Layer3 only for CODEC_ID_MP3; no audio buffer receives this state."
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "MSTATE"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 67,
+      "function": "try_new",
+      "id": "MNEW",
+      "last_line": 84,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "review": "AUDITED",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "success_effect": "Checks codec membership, owns params clone/state, starts default empty buffer, no frame returned yet."
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "MHDR"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BUNUSED"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BNEW"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "MSPEC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BSPEC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BCLEAR"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "LDECODE"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BTRIM"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 85,
+      "function": "decode_inner",
+      "id": "MINNER",
+      "last_line": 138,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "review": "AUDITED",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "success_effect": "Header length check; unused buffer REPLACED by newly constructed same header spec; otherwise rejects different spec. Clear, layer match, trim, success."
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "edges": [
+        {
+          "argument": "State reset cannot mutate disjoint private audio buffer under safe exclusive Rust ownership.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "f9f4aeda3961290243adcf8963cfa027308d9bd1"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 152,
+      "function": "reset",
+      "id": "MRESET",
+      "last_line": 156,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "review": "AUDITED",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "success_effect": "Replaces codec state only; existing audio buffer identity/spec/planes retained."
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "MINNER"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BCLEAR"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 157,
+      "function": "decode_ref",
+      "id": "MREF",
+      "last_line": 166,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "review": "AUDITED",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "success_effect": "Err clears frames and returns Err; successful branch borrows same self.buf via GenericAudioBufferRef F32."
+    },
+    {
+      "blob": "0a601883e80be1a70cca3dea01848271c20be5dc",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "MNCHAN"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "SPECNEW"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 144,
+      "function": "spec",
+      "id": "MSPEC",
+      "last_line": 154,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/common.rs",
+      "review": "AUDITED",
+      "sha256": "38f787c30465cfc77f93078252ed298070d1d249eb5e88f5d2579e3f65adbcab",
+      "success_effect": "Header n_channels selects MONO/STEREO positioned layouts (counts1/2), AudioSpec new with same sample rate."
+    },
+    {
+      "blob": "0a601883e80be1a70cca3dea01848271c20be5dc",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 182,
+      "function": "n_channels",
+      "id": "MNCHAN",
+      "last_line": 188,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/common.rs",
+      "review": "AUDITED",
+      "sha256": "38f787c30465cfc77f93078252ed298070d1d249eb5e88f5d2579e3f65adbcab",
+      "success_effect": "Delegates channel_mode.count(), no output state capability."
+    },
+    {
+      "blob": "412308127c25cd9c6f97eb7411b0c29c69a5ac9d",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 241,
+      "function": "read_frame_header",
+      "id": "MHDR",
+      "last_line": 248,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/header.rs",
+      "review": "AUDITED",
+      "sha256": "59e870a43bc73fef45c3f492bd2c1b5fd33fd0aab7f9be72e20850f262a4573a",
+      "success_effect": "Parses header into owned value; only reader reference, cannot mutate decoder buffer."
+    },
+    {
+      "blob": "67567b6f9f62b662d7fc14d8d19e14ddd6da3a28",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BRENDER"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BPMUT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "LSYNTH"
+        },
+        {
+          "argument": "Cardinality write through arithmetic-only callees without owner/spec/container capability: explicit arguments are separate codec state, immutable header/data or fixed sample slices. Safe-code module forbids unsafe; no static owner alias. Numerical output/callee arithmetic is outside this invariant, not assumed numerically correct.",
+          "kind": "PROVED_UNREACHABLE",
+          "source_pin": "67567b6f9f62b662d7fc14d8d19e14ddd6da3a28"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 380,
+      "function": "decode",
+      "id": "LDECODE",
+      "last_line": 487,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/mod.rs",
+      "review": "AUDITED",
+      "sha256": "443981d884138491b613dce1a49c0859b986f9b855b828c287ed50c14ffe7844",
+      "success_effect": "Only out mutations: render_uninit(Some576), then plane_mut(ch) to synthesis sample slice. Other callees receive self state/header/frame-data, never out."
+    },
+    {
+      "blob": "66edcd42afc521e8232ad9ead06173c081ce88d4",
+      "edges": [
+        {
+          "argument": "Cooperating Rust safe fixed-slice operations preserve owner metadata by capability separation, irrespective of sample arithmetic.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "66edcd42afc521e8232ad9ead06173c081ce88d4"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 158,
+      "function": "synthesis",
+      "id": "LSYNTH",
+      "last_line": 347,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/synthesis.rs",
+      "review": "AUDITED",
+      "sha256": "825199b309a34173416681637698b81d02f1e01507a10c901b0585b89561c3d1",
+      "success_effect": "Mutable destination is fixed-length [f32] slice; cannot replace AudioBuffer/spec/outer planes."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "ASC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "SPECNEW"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BNEW"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 62,
+      "function": "try_new",
+      "id": "ANEW",
+      "last_line": 119,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "AAC/LC/noSBR/<=2/1024 admission; reads/clones ASC channels into owned spec, buffer created from same C, no sharing."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 120,
+      "function": "set_pair",
+      "id": "ASETPAIR",
+      "last_line": 134,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "Mutates pairs vector only; validates channel/is_pair on reuse and channel bound against owned asc count before Ok."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "ASETPAIR"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "ASYNTH"
+        },
+        {
+          "argument": "Cardinality write through arithmetic-only callees without owner/spec/container capability: explicit arguments are separate codec state, immutable header/data or fixed sample slices. Safe-code module forbids unsafe; no static owner alias. Numerical output/callee arithmetic is outside this invariant, not assumed numerically correct.",
+          "kind": "PROVED_UNREACHABLE",
+          "source_pin": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 135,
+      "function": "decode_ga",
+      "id": "AGA",
+      "last_line": 243,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "Decode element IDs into pair/ICS state; rejects unsupported. set_pair bounds; synth loop only via ChannelPair::synth_audio(&mut buf). ASC/spec not reassigned."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BCLEAR"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BRENDER"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "AGA"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 251,
+      "function": "decode_inner",
+      "id": "AINNER",
+      "last_line": 268,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "Clear frames, render capacity via render_uninit(None), only LC dispatch decode_ga, then Ok."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "argument": "Pair reset has no buffer/spec reference and no retained mutable alias to private buffer; see source structs/lifetimes.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 269,
+      "function": "reset",
+      "id": "ARESET",
+      "last_line": 274,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "Resets pair internal ICS state only; buf/spec/planes unchanged."
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "AINNER"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "BCLEAR"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 284,
+      "function": "decode_ref",
+      "id": "AREF",
+      "last_line": 293,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "review": "AUDITED",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "success_effect": "Error clears only frames and returns Err; success borrows same owned f32 buffer."
+    },
+    {
+      "blob": "86dbf0b9d32f18108fd015ef024339c5e34610f6",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "BPMUT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "ICS"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 165,
+      "function": "synth_audio",
+      "id": "ASYNTH",
+      "last_line": 185,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/cpe.rs",
+      "review": "AUDITED",
+      "sha256": "0d65b4750e486ff4dc3c6cea4ce1d13ce80dce8a6233006b533f8fce6cc20f36",
+      "success_effect": "Only plane_mut(channel/channel+1) -> expect -> ICS synth_channel on returned slice. No whole-buffer replacement or spec write."
+    },
+    {
+      "blob": "8937d9a22359ac2d66e07d930cf00daa6a62e48b",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "DSP"
+        },
+        {
+          "argument": "Cardinality write through arithmetic-only callees without owner/spec/container capability: explicit arguments are separate codec state, immutable header/data or fixed sample slices. Safe-code module forbids unsafe; no static owner alias. Numerical output/callee arithmetic is outside this invariant, not assumed numerically correct.",
+          "kind": "PROVED_UNREACHABLE",
+          "source_pin": "8937d9a22359ac2d66e07d930cf00daa6a62e48b"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 449,
+      "function": "synth_channel",
+      "id": "ICS",
+      "last_line": 471,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/mod.rs",
+      "review": "AUDITED",
+      "sha256": "db5804e05007e58f793cd878cfadabfce119429b5eca04f12abd3559225d9e46",
+      "success_effect": "Receives only &mut[f32] destination; pulse/TNS touch coefficient arrays, DSP receives same fixed slice."
+    },
+    {
+      "blob": "7297fa47b8cca27b579856a98991165f3897d88b",
+      "edges": [
+        {
+          "argument": "Cooperating Rust safe fixed-slice operations preserve owner metadata; no numerical-quality or no-panic theorem.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "7297fa47b8cca27b579856a98991165f3897d88b"
+        },
+        {
+          "argument": "Cardinality write through arithmetic-only callees without owner/spec/container capability: explicit arguments are separate codec state, immutable header/data or fixed sample slices. Safe-code module forbids unsafe; no static owner alias. Numerical output/callee arithmetic is outside this invariant, not assumed numerically correct.",
+          "kind": "PROVED_UNREACHABLE",
+          "source_pin": "7297fa47b8cca27b579856a98991165f3897d88b"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 57,
+      "function": "synth",
+      "id": "DSP",
+      "last_line": 159,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/dsp.rs",
+      "review": "AUDITED",
+      "sha256": "3a2e8a80b397a7392d018dc7a02e02b824017f5fb1d3c149ad8c8b198fd68700",
+      "success_effect": "Sample-array/delay/fixed-slice writes; no AudioBuffer/spec/plane-container authority."
+    },
+    {
+      "blob": "0e6e011dc53b51e4e6850b76e78dfc382349ebba",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 231,
+      "function": "read",
+      "id": "ASC",
+      "last_line": 429,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/vendor/symphonia-common/src/mpeg/audio/mod.rs",
+      "review": "AUDITED",
+      "sha256": "505d5b4fd474359f3fd788487976449177c4dd4d5b40c8f4322374fb9514e676",
+      "success_effect": "Owned configuration parse; no output-buffer argument; constructor later owns spec derived from channels."
+    },
+    {
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "HHDR"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "MNEW"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "MREF"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "GCOPY"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HALLOC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HFIN"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 187,
+      "function": "decode",
+      "id": "HMP3",
+      "last_line": 361,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/mpeg.rs",
+      "review": "AUDITED",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+      "success_effect": "Host admits LayerIII only; stable mono/rate frame walk, fresh decoder. Each successful frame checks actual spec count==C BEFORE copy; C allocated host vectors append all P=C vectors; finish."
+    },
+    {
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 33,
+      "function": "header",
+      "id": "HHDR",
+      "last_line": 81,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/mpeg.rs",
+      "review": "AUDITED",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+      "success_effect": "Refuses LayerI/II/reserved; mono field from mode bits; stable version/rate/channel guards in decode."
+    },
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 59,
+      "function": "parse_asc",
+      "id": "HASC",
+      "last_line": 102,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/aac.rs",
+      "review": "AUDITED",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "success_effect": "Host accepts LC, config1/2,1024, no core/unsupported extensions; owned Asc channel scalar."
+    },
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "ANEW"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "AREF"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "COUNT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "GCOPY"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HALLOC"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 142,
+      "function": "decode_units",
+      "id": "HUNIT",
+      "last_line": 178,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/aac.rs",
+      "review": "AUDITED",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "success_effect": "Fresh AAC decoder; each successful return checks actual spec count==host ch and1024 frames, copy then C-vector append, CRC failure returns before append."
+    },
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "HASC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HUNIT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HFIN"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 179,
+      "function": "decode_adts",
+      "id": "HADTS",
+      "last_line": 253,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/aac.rs",
+      "review": "AUDITED",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "success_effect": "Validated ADTS units with consistent configuration -> decode_units -> Decoded.finish; no decoder object escape."
+    },
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "edges": [
+        {
+          "kind": "AUDITED",
+          "target": "HASC"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HUNIT"
+        },
+        {
+          "kind": "AUDITED",
+          "target": "HFIN"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 413,
+      "function": "decode_mp4",
+      "id": "HMP4",
+      "last_line": 651,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/aac.rs",
+      "review": "AUDITED",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "success_effect": "MP4/esds ASC and units -> same decode_units -> finish; new decoder per stream, no cross-stream alias."
+    },
+    {
+      "blob": "9902dcb41e2004124304008b3c1b50be0d4389bc",
+      "edges": [],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 298,
+      "function": "alloc",
+      "id": "HALLOC",
+      "last_line": 303,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/common.rs",
+      "review": "AUDITED",
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0",
+      "success_effect": "try_reserve_exact returns empty Vec with CAPACITY only; host outer loop pushes exactly C entries; allocation failure is not success."
+    },
+    {
+      "blob": "9902dcb41e2004124304008b3c1b50be0d4389bc",
+      "edges": [
+        {
+          "argument": "Safe Vec push/extend/zip lengths with valid allocation, ordinary integer representability and carried239 bridge. finish alone is NOT P=C proof.",
+          "kind": "NAMED_CONTRACT",
+          "source_pin": "9902dcb41e2004124304008b3c1b50be0d4389bc"
+        }
+      ],
+      "error_effect": "Error/panic is not a successful frame; no outer plane/spec mutation is introduced.",
+      "first_line": 191,
+      "function": "finish",
+      "id": "HFIN",
+      "last_line": 216,
+      "ownership": "Safe Rust owned/private buffer state; borrowed slices cannot resize outer Vec/SmallVec or mutate privately owned AudioSpec.",
+      "path": "host/ingest/src/common.rs",
+      "review": "AUDITED",
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0",
+      "success_effect": "Validates declared channels/rate, per-plane raw length/finite/trim. It does NOT check outer-plane count; caller inductive construction provides that premise."
+    }
+  ],
+  "scope": "CARDINALITY_ONLY",
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+}

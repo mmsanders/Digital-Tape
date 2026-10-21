@@ -1,0 +1,225 @@
+{
+  "files": {
+    "host/ingest/Cargo.lock": {
+      "blob": "2dbae7c375dbe3d7f890f2bfdbc481140a671c33",
+      "bytes": 8345,
+      "sha256": "6e8d14c97dc59d4e627e68f37d6647c45e7f6d52de5e3c51653239993ad0f864"
+    },
+    "host/ingest/src/aac.rs": {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "bytes": 25880,
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907"
+    },
+    "host/ingest/src/common.rs": {
+      "blob": "9902dcb41e2004124304008b3c1b50be0d4389bc",
+      "bytes": 13729,
+      "sha256": "06ffa83c903d0bd9f8c3a912843b0445564a716bee3c6d3f1688e6331514f5e0"
+    },
+    "host/ingest/src/lib.rs": {
+      "blob": "1cee428a75d5c87aa1754e00b99c6b187ea7801d",
+      "bytes": 1905,
+      "sha256": "5f143376fe93f8748de2c5ce0134a076c14be0efaea7a73ea07e448ac05ce0bd"
+    },
+    "host/ingest/src/mpeg.rs": {
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "bytes": 14500,
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/common.rs": {
+      "blob": "0a601883e80be1a70cca3dea01848271c20be5dc",
+      "bytes": 6213,
+      "sha256": "38f787c30465cfc77f93078252ed298070d1d249eb5e88f5d2579e3f65adbcab"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs": {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "bytes": 6447,
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/demuxer.rs": {
+      "blob": "b720d1bcb048e105d2d6af09e1297561bb017e40",
+      "bytes": 41063,
+      "sha256": "18f8db244957e4eb1a4c4ba97bdc41ae4e9669044db55f212f435f9e51cbb519"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/header.rs": {
+      "blob": "412308127c25cd9c6f97eb7411b0c29c69a5ac9d",
+      "bytes": 9263,
+      "sha256": "59e870a43bc73fef45c3f492bd2c1b5fd33fd0aab7f9be72e20850f262a4573a"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer1/mod.rs": {
+      "blob": "cda383c2b699445c5ee66af7e1b870fc2f4a6da3",
+      "bytes": 6672,
+      "sha256": "a7b2c2d71deaebd39dc20c528b2d9af39af610a308cd9ae70323a197cd894a93"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer12.rs": {
+      "blob": "83c7b505e5f40e9e8fb8bd98b736445b11794b72",
+      "bytes": 2011,
+      "sha256": "011406e03533ac30263f19fd4c122402587d5cdd33c889ecac35535f1d077274"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer2/mod.rs": {
+      "blob": "a3de12e07534994979ec2a22b9d5c6fe61e5febe",
+      "bytes": 14865,
+      "sha256": "6fbf4e90e8348666a6c67e295375557cf5a956e1c9562c1646b1c822cfe08e09"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/bitstream.rs": {
+      "blob": "cbf3de4bd95460e729e877b84172513c83e0f020",
+      "bytes": 16790,
+      "sha256": "9afd74ba5c4506a8b7c6c28d56d0e41036a1fc11bf8046c52ebb4fee3e800f8f"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/codebooks.rs": {
+      "blob": "462468758a32ace9682be0d595263f6820b59de7",
+      "bytes": 24494,
+      "sha256": "92a9b7e157853a3c2cb0bced2557d8f19c00c23e22e46f351245cd17786e815f"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/common.rs": {
+      "blob": "4a86d993be5ffe4bed7029eeaccbeb1a77fc913e",
+      "bytes": 7360,
+      "sha256": "89ef31c9361c1831e61c8b33168ae1e580b5b7a960e2f54d4b229f00ddcc36d2"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/hybrid_synthesis.rs": {
+      "blob": "27e511252ac4da9514a09f63036d712124269a3b",
+      "bytes": 30205,
+      "sha256": "a55ed3f584c1fd0150c010fc3a24181f434ca2d99e2a4922d01393215742e70e"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/mod.rs": {
+      "blob": "67567b6f9f62b662d7fc14d8d19e14ddd6da3a28",
+      "bytes": 19467,
+      "sha256": "443981d884138491b613dce1a49c0859b986f9b855b828c287ed50c14ffe7844"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/requantize.rs": {
+      "blob": "dc5d371fd764d6c2c7625e6ab4da5ff45d8be649",
+      "bytes": 14924,
+      "sha256": "35ed53068649e29d5df9a1c615a52c29200673836fcaf43e44bf3a2fc209cb04"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/stereo.rs": {
+      "blob": "716f621dbc96a06f580a779fc7674ed2a489a70d",
+      "bytes": 21202,
+      "sha256": "e2418e8535b2c0529978316a85fe32d705c841cb737079d5f80f14a37dc87f9d"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/lib.rs": {
+      "blob": "b2e475d6884b2ffd97bbe83ccf0c415ab4a9c8ee",
+      "bytes": 1535,
+      "sha256": "e13d7932a2c97b9c0c02a42ca1adb90e1131b3bf9e118988219def771c94219f"
+    },
+    "host/ingest/vendor/symphonia-bundle-mp3/src/synthesis.rs": {
+      "blob": "66edcd42afc521e8232ad9ead06173c081ce88d4",
+      "bytes": 35331,
+      "sha256": "825199b309a34173416681637698b81d02f1e01507a10c901b0585b89561c3d1"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/codebooks.rs": {
+      "blob": "e3a1755153e76e60e799b77e549150cadd484c40",
+      "bytes": 26486,
+      "sha256": "1a5e0903324c1230b0f81e7f1d76f2980db9dc568ca2fde1b4d6481a8686c9b2"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/common.rs": {
+      "blob": "4b671e30b492b23ad75e1629e74eabb4df6ed6ae",
+      "bytes": 6412,
+      "sha256": "3d6c8a3f323a106a3abc30aa0534916877dcebf5a934e0a5f58e82ac24e7e071"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/cpe.rs": {
+      "blob": "86dbf0b9d32f18108fd015ef024339c5e34610f6",
+      "bytes": 6483,
+      "sha256": "0d65b4750e486ff4dc3c6cea4ce1d13ce80dce8a6233006b533f8fce6cc20f36"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/dsp.rs": {
+      "blob": "7297fa47b8cca27b579856a98991165f3897d88b",
+      "bytes": 5648,
+      "sha256": "3a2e8a80b397a7392d018dc7a02e02b824017f5fb1d3c149ad8c8b198fd68700"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/gain.rs": {
+      "blob": "1438af1c96e7a76663232c75d570565f4ff5354f",
+      "bytes": 1213,
+      "sha256": "6e76149f750b56d645c6da78aecbfaef1816f58d78dd011b5a348e87d85f992a"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/ltp.rs": {
+      "blob": "f6fbd21dff369fa5f25f968d94796469a1b8212c",
+      "bytes": 1748,
+      "sha256": "1d0429e1944db1951acea746d730747eba8274f007f674549f0d48ab1b5377cc"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/mod.rs": {
+      "blob": "8937d9a22359ac2d66e07d930cf00daa6a62e48b",
+      "bytes": 20926,
+      "sha256": "db5804e05007e58f793cd878cfadabfce119429b5eca04f12abd3559225d9e46"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/pulse.rs": {
+      "blob": "19ea0093ccf023c1738a67737201199a220d39e7",
+      "bytes": 2861,
+      "sha256": "6a79aaf9fcf9817a4adf2e3530d786e5b8f115fe9c9d0393435dcca8c2ab7915"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/ics/tns.rs": {
+      "blob": "1d79a34c2e053788227e2a17c0a3467e5955749a",
+      "bytes": 6057,
+      "sha256": "cb8f31d061c94145b360238a6848c15905d9d419066d095fd04eed7cd933a811"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs": {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "bytes": 11850,
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/aac/window.rs": {
+      "blob": "dda84d14a50f89c0e059c66b566a23e9486b2312",
+      "bytes": 2067,
+      "sha256": "786276e526cd2813c9f236b6294d1de4455ba5015648c0816449674502e9b4ea"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/adts.rs": {
+      "blob": "172fe83f063d6f4a49d3f843dd6ed61ef849df4b",
+      "bytes": 17257,
+      "sha256": "2229acd395236bb481b6499a40567fa9acc5ce74f041c448b5b46ae9b55829cd"
+    },
+    "host/ingest/vendor/symphonia-codec-aac/src/lib.rs": {
+      "blob": "b6c10fbd5bb369ba192ce2c16743965d67bc3a84",
+      "bytes": 744,
+      "sha256": "93ca226f96532d5756ad00a0f92ab306e74169d4ac4a6d70915742b18bb786d6"
+    },
+    "host/ingest/vendor/symphonia-common/src/mpeg/audio/mod.rs": {
+      "blob": "0e6e011dc53b51e4e6850b76e78dfc382349ebba",
+      "bytes": 16106,
+      "sha256": "505d5b4fd474359f3fd788487976449177c4dd4d5b40c8f4322374fb9514e676"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/buf.rs": {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "bytes": 22795,
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/channels.rs": {
+      "blob": "173c07c27a57bfb25a21d2c336028ebf423c4894",
+      "bytes": 39153,
+      "sha256": "9974f6b0f7ab3c1548c94e73dc9a29cad99d2d6e0abbef31bf3889c763b97e8f"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/conv.rs": {
+      "blob": "f46c999c832ef73b6bdf995f6b39e5674f4eb514",
+      "bytes": 41557,
+      "sha256": "88ecab16169f7f0a9c4298e9aab00f9cc12301822ddcfc75f8304ac6d608cb72"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/generic.rs": {
+      "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "bytes": 36962,
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/mod.rs": {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "bytes": 22434,
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/sample.rs": {
+      "blob": "6c72214fad0467b921452be9d543c7faa4b82a6f",
+      "bytes": 18356,
+      "sha256": "ddd69bc53caaadb61bea495e6d0a9fcee1794fb47ce5f4f1982f7485dc136207"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/slice.rs": {
+      "blob": "2e6e8346c5d274204766af0f012a1e9a3c425508",
+      "bytes": 8496,
+      "sha256": "33a14fc29e44c8edb2c446164c6ecf4e49b47b3e9cb6cd7d976de975068bd4a8"
+    },
+    "host/ingest/vendor/symphonia-core/src/audio/util.rs": {
+      "blob": "47d947878d7a5f766ae660a4185f36c1545650fa",
+      "bytes": 11238,
+      "sha256": "df43726e2755dd88e9939f00f441b0498bc36770b7e8e689640aa82986a4415b"
+    },
+    "host/ingest/vendor/symphonia-core/src/lib.rs": {
+      "blob": "ba2ee615a8b8c2f8387d37157733f8cdb605b814",
+      "bytes": 778,
+      "sha256": "c05fd0843120451d26b4ec70be2d92e0df90c70a07871f6296b284f78325f53c"
+    }
+  },
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+}

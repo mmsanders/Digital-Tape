@@ -65,3 +65,7 @@ tests/evidence_recorder_r1/** -text
 docs/REVIEW/software511/** -text
 
 tests/codec_cardinality_r2/** -text
+
+docs/REVIEW/software526/** -text
+host/codec-cardinality/** -text
+docs/REVIEW/software526/*.json -text whitespace=cr-at-eol

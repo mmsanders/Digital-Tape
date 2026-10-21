@@ -1,0 +1,22 @@
+{
+  "child_git_cpu_not_individually_measured": true,
+  "conservative_total_cpu_reserve_seconds": 600,
+  "independent_disposition": "PENDING",
+  "method": "4c84472d1c7b474a3a9e6ec679889e0d89a9a6fc",
+  "new_codec_builds": 0,
+  "new_decoder_runs": 0,
+  "nodes": 46,
+  "parent": 20544,
+  "parent_cpu_ns": 953125000,
+  "pid": 5224,
+  "premise_falsifiers": 16,
+  "shape": "LEDGER_SHAPE_ONLY_NOT_SOURCE_PROOF",
+  "software_lemmas": {
+    "AAC": "PROVED_CONDITIONAL",
+    "MP3": "PROVED_CONDITIONAL"
+  },
+  "source": "b9f430c8c9b33532abf07eea0ed2653310639f2d",
+  "source_files": 44,
+  "source_helper_sha256": "8b3c85d273c862c64f1c6d9c8569ca4a64ac07869512241af75b6a1defa79029",
+  "wall_ns": 5938000000
+}
