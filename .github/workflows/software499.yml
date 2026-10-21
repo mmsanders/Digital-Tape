@@ -1,0 +1,39 @@
+name: Software499 fixed invariant subproofs
+on:
+  pull_request:
+    paths:
+      - 'tools/software499/**'
+      - '.github/workflows/software499.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source and test-only plumbing
+        run: |
+          mkdir -p "$RUNNER_TEMP/source499" proof-evidence
+          git archive b9f430c8c9b33532abf07eea0ed2653310639f2d host/ingest docs/WP16-INGEST-CONTRACT.md | tar -x -C "$RUNNER_TEMP/source499"
+          cp tools/software499/challenges.rs "$RUNNER_TEMP/source499/host/ingest/examples/invariant_challenges.rs"
+          uname -a > proof-evidence/host.txt
+          python3 --version >> proof-evidence/host.txt
+      - name: Locked pinned production library and scalar adapter
+        working-directory: ${{ runner.temp }}/source499/host/ingest
+        run: |
+          rustc -Vv > "$GITHUB_WORKSPACE/proof-evidence/rustc.txt"
+          cargo -V >> "$GITHUB_WORKSPACE/proof-evidence/rustc.txt"
+          /usr/bin/time -v -o "$GITHUB_WORKSPACE/proof-evidence/build-time.txt" cargo build --locked --example invariant_challenges > "$GITHUB_WORKSPACE/proof-evidence/build-stdout.txt" 2> "$GITHUB_WORKSPACE/proof-evidence/build-stderr.txt"
+      - name: Frozen challenges and conditional induction certificate
+        run: |
+          /usr/bin/time -v -o proof-evidence/run-time.txt python3 -B tools/software499/run.py --source "$RUNNER_TEMP/source499" --binary "$RUNNER_TEMP/source499/host/ingest/target/debug/examples/invariant_challenges" --out proof-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software499-invariants
+          path: proof-evidence
