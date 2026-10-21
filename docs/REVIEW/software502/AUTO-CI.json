@@ -1,0 +1,94 @@
+{
+  "reason": "Preparation PR505 automatically triggered optional historical workflows because main contributes their paths. Routing error detected; cancellation requested. No new capability judgment, no closed observer491 restart, no physical device or local privilege change.",
+  "candidate": "eb9a3b3394a888dfd9d453139c5fab9b3b499482",
+  "preparation_pr": 505,
+  "pr_state": "CLOSED unmerged; source branch retained; required CI left unchanged",
+  "runs": {
+    "39533170560": {
+      "status": "completed",
+      "conclusion": "cancelled",
+      "jobs": [
+        {
+          "name": "APP-1 probes \u2014 macOS arm64 (hosted)",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "startedAt": "2026-10-21T02:28:11Z",
+          "completedAt": "2026-10-21T02:29:45Z"
+        },
+        {
+          "name": "APP-1 probes \u2014 Windows Server (hosted, supplementary)",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "startedAt": "2026-10-21T02:28:07Z",
+          "completedAt": "2026-10-21T02:29:36Z"
+        }
+      ]
+    },
+    "39533170512": {
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "S3 binding probe \u2014 Linux loop devices (hosted)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-21T02:28:07Z",
+          "completedAt": "2026-10-21T02:28:14Z"
+        },
+        {
+          "name": "S3 binding and report-ancestor probes \u2014 Windows Server (hosted, supplementary)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-21T02:28:07Z",
+          "completedAt": "2026-10-21T02:28:42Z"
+        }
+      ]
+    },
+    "39533170528": {
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "cards \u2014 Linux loop devices (hosted)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-21T02:28:07Z",
+          "completedAt": "2026-10-21T02:28:39Z"
+        },
+        {
+          "name": "cards \u2014 Windows Server VHDs (hosted, supplementary)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-21T02:28:07Z",
+          "completedAt": "2026-10-21T02:29:52Z"
+        },
+        {
+          "name": "cards \u2014 macOS arm64 hdiutil images (hosted)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-21T02:28:19Z",
+          "completedAt": "2026-10-21T02:29:09Z"
+        }
+      ]
+    }
+  },
+  "retained_local_artifact_inventory": {
+    "workflow.log": {
+      "bytes": 113236,
+      "sha256": "9bd84083c647ec8f36bf3600f761a1a0d100684b53809f29a262c16574015fc5"
+    },
+    "wp15-s3-capability-linux/PROBE-linux.json": {
+      "bytes": 3175,
+      "sha256": "8af2e021dd68d9ca9e4e669325677b6a4074f223f10577a1f00bf78f61c4545b"
+    },
+    "wp15-s3-capability-windows/s3/PROBE-windows.json": {
+      "bytes": 3691,
+      "sha256": "10a225ba0ec4b77f68bea2f999d0557b3b6210290705dc8370a44869436b2ae9"
+    },
+    "wp15-s3-capability-windows/s3anc/PROBE-ancestor.json": {
+      "bytes": 4982,
+      "sha256": "75811a4c49abb4f31a60ec7d9e2695baff193e7b160fd930fb278ace53d42d92"
+    }
+  },
+  "limits": "Hosted supplemental S3 workflow completed before cancellation. APP probe workflow cancelled after probes started; S2 completed before cancellation. No raw-machine files republished; original workflow artifacts/logs retained at GitHub and downloaded S3 inventory pinned here. These runs do not discharge any gate. No unchanged INGEST/audio/resource campaign launched."
+}
