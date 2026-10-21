@@ -3,6 +3,8 @@
   "sha256": "108ad9bfe7036605e0405e52c46f9065fb6028244bb953b276f694d3faa0476c",
   "asset": "software500-exact-return.zip",
   "release": "evidence-software500-2026-10-20",
-  "source_head": "55d1bdde",
-  "run": 39554447369
+  "source_head": "55d1bdde94d0e14abcc82e62628b8c344e609c5d",
+  "run": 39554447369,
+  "public_release_status": "PENDING explicit destination-specific user approval; no upload attempted after rejection",
+  "existing_workflow_url": "https://github.com/mmsanders/Digital-Tape/actions/runs/39554447369"
 }
