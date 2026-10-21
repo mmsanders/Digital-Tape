@@ -45,7 +45,7 @@ it calls actual ingest/make/cards render functions. It does not read fixture nam
 validity/message expectations or stderr to choose a message. Folder names passed to
 the real rendering callback are preserved in original stdin. Reading debug output
 preserves parsed payloads, diagnostics and progress. Runtime is hosted Linux x86_64,
-Rust1.99.1; exact details are in run2. The binary is hashed in RESULT.json and built
+Rust1.99.0; exact details are in run2. The binary is hashed in RESULT.json and built
 by the linked workflow. Locked reproduction is documented beside the Cargo target.
 
 No file exceeds1MiB (each run about0.64MiB total). New focused runs are below the

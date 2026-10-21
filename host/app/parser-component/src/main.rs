@@ -29,7 +29,7 @@ fn main() {
                     FolderNonMusic(s) => ("folder-nonmusic", json!(s.text())),
                     Unusable(s) => ("unusable", json!(s.text())),
                 };
-                (cat, fact, messages::ingest(exit, &r, &names))
+                (cat, fact, messages::ingest(exit, &r, c["pair"].as_bool().unwrap(), &names))
             }
             report::Tool::Make => {
                 use messages::MakeChoice::*;

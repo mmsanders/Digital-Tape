@@ -116,14 +116,12 @@ pub fn choose(exit: i32, reading: &Reading, pair: bool) -> Choice {
     }
 }
 
-/// The sentence for a nonzero ingest exit and its report reading (None for exit 0).
+/// The actual ingest result sentence. Exit 0 is success only with the published
+/// pair; a missing pair uses the same generic failure selector and display.
 /// `folder_name(i)` is the dropped folder's own name for ordinal i; the app never
 /// shows full paths.
-pub fn ingest(exit: i32, reading: &Reading, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
-    if exit == 0 {
-        return None;
-    }
-    Some(render(&choose(exit, reading, false), folder_name).unwrap_or_else(|| GENERIC_INGEST.into()))
+pub fn ingest(exit: i32, reading: &Reading, pair: bool, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
+    render(&choose(exit, reading, pair), folder_name)
 }
 
 fn render(c: &Choice, folder_name: &dyn Fn(usize) -> Option<String>) -> Option<String> {
@@ -172,7 +170,7 @@ mod tests {
         assert_eq!(too_long(1), "1 s");
         assert_eq!(too_long(8_467_200), "3 min 12 s");
         assert_eq!(too_long(44100 * 120), "2 min");
-        let m = ingest(2, &refusal("INGEST_TOO_LONG", Subject::None, json!({"excess_frames": 1})), &names).unwrap();
+        let m = ingest(2, &refusal("INGEST_TOO_LONG", Subject::None, json!({"excess_frames": 1})), false, &names).unwrap();
         assert_eq!(m, "This music is 1 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.");
     }
 
@@ -180,16 +178,16 @@ mod tests {
     fn rows_name_file_or_folder_never_paths() {
         let s = Subject::Source { ordinal: 1, name: "Song 3.m4a".into() };
         assert_eq!(
-            ingest(2, &refusal("SOURCE_PROTECTED", s.clone(), json!({})), &names).unwrap(),
+            ingest(2, &refusal("SOURCE_PROTECTED", s.clone(), json!({})), false, &names).unwrap(),
             "\"Song 3.m4a\" is copy-protected, so it can't go on a cartridge. Take it out of the folder."
         );
         assert_eq!(
-            ingest(2, &refusal("SOURCE_NOT_AUDIO", s, json!({})), &names).unwrap(),
+            ingest(2, &refusal("SOURCE_NOT_AUDIO", s, json!({})), false, &names).unwrap(),
             "The folder \"Bedtime\" has something in it that isn't music. Use a folder with only songs in it."
         );
         let b = Subject::Boundary((0, "a.wav".into()), (1, "b.wav".into()));
-        assert_eq!(ingest(2, &refusal("JOIN_PEAK", b, json!({})), &names).unwrap(), GENERIC_INGEST);
-        assert_eq!(ingest(1, &Reading::Unusable("x"), &names).unwrap(), GENERIC_INGEST);
-        assert_eq!(ingest(0, &Reading::Unusable("x"), &names), None);
+        assert_eq!(ingest(2, &refusal("JOIN_PEAK", b, json!({})), false, &names).unwrap(), GENERIC_INGEST);
+        assert_eq!(ingest(1, &Reading::Unusable("x"), true, &names).unwrap(), GENERIC_INGEST);
+        assert_eq!(ingest(0, &Reading::Unusable("x"), true, &names), None);
     }
 }
