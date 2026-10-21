@@ -1,0 +1,243 @@
+{
+  "archive_bytes": 1014923,
+  "archive_sha256": "78fed87f002b8c76fbaf05481087454245c7320ffffa6d3adf4089fefb5654e8",
+  "commands": [
+    {
+      "argv": [
+        "/home/runner/work/_temp/software514-work/source/build/host/tapectl-test",
+        "provision",
+        "/home/runner/work/_temp/software514-work/software514-private/provisioned.img",
+        "--label",
+        "SUBSET",
+        "--length-s",
+        "5",
+        "--uuid",
+        "00112233445566778899aabbccddeeff",
+        "--epoch",
+        "1760000000",
+        "--image-bytes",
+        "33554432"
+      ],
+      "exit": 0,
+      "member": "raw/commands/00000/PROCESS.json",
+      "sha256": "597f155eeb85e295966ea1bfbe7fb3f28bbee67cddd89e532227fb69cfb717ba"
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/software514-work/source/build/host/tapectl-test",
+        "load",
+        "/home/runner/work/_temp/software514-work/software514-private/load.img",
+        "/home/runner/work/_temp/software514-work/source/tests/golden/src/voice.wav"
+      ],
+      "exit": 0,
+      "member": "raw/commands/00001/PROCESS.json",
+      "sha256": "88ce621c34093f8ee3a9e48bce20769fc5770eb4214257b49d3e689f3a77d4a0"
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/software514-work/source/build/host/tapectl-test",
+        "verify",
+        "/home/runner/work/_temp/software514-work/software514-private/remount-verify.img"
+      ],
+      "exit": 0,
+      "member": "raw/commands/00002/PROCESS.json",
+      "sha256": "2ff50f1f18b35035b74e667f55ea2d916d28dafb1f0646a7b69de5948c64c976"
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/software514-work/source/build/host/tapectl-test",
+        "dump",
+        "/home/runner/work/_temp/software514-work/software514-private/remount-dump_A.img",
+        "--side",
+        "A",
+        "-o",
+        "/home/runner/work/_temp/software514-work/software514-private/dump_A.wav"
+      ],
+      "exit": 0,
+      "member": "raw/commands/00003/PROCESS.json",
+      "sha256": "ce85bb28ac3652b2518636d4d1c44f7cd582e28c62ae4c7c08e8f3db46ef0c2f"
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/software514-work/source/build/host/tapectl-test",
+        "dump",
+        "/home/runner/work/_temp/software514-work/software514-private/remount-dump_B.img",
+        "--side",
+        "B",
+        "-o",
+        "/home/runner/work/_temp/software514-work/software514-private/dump_B.wav"
+      ],
+      "exit": 0,
+      "member": "raw/commands/00004/PROCESS.json",
+      "sha256": "dfae070469e88d7ca3393dc0d7054047dadb6d3afa1330f4affd02032b8cee4e"
+    }
+  ],
+  "compressed_member_bytes": 995195,
+  "expanded_member_bytes": 2808766,
+  "gates": [
+    {
+      "member": "raw/gates/00000.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 600.086666,
+        "index": 0,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 0,
+        "next_seconds": 10,
+        "workspace_allocated_bytes": 10219520
+      },
+      "sha256": "1a60708ce96721fc7e05fd32e1d1cf1d2ed543d2298475065fa85b4bf0713f5d"
+    },
+    {
+      "member": "raw/gates/00001.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 600.412083,
+        "index": 1,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 16777216,
+        "next_seconds": 60,
+        "workspace_allocated_bytes": 11128832
+      },
+      "sha256": "5e13fe407d024d9115eb56fbe1b3460e6fe745fb15f14527ad53fb6c0d4ec1ad"
+    },
+    {
+      "member": "raw/gates/00002.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 600.475358,
+        "index": 2,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 0,
+        "next_seconds": 10,
+        "workspace_allocated_bytes": 78241792
+      },
+      "sha256": "e0f2e067c45ae38d2f4e2e3b75053d3d0c7cf944657e7af521bf3c792c121f73"
+    },
+    {
+      "member": "raw/gates/00003.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 600.961659,
+        "index": 3,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 0,
+        "next_seconds": 10,
+        "workspace_allocated_bytes": 113909760
+      },
+      "sha256": "5307a6829bb1768e22eaef7c554712932a32171ba38993e0519ef8416cd31864"
+    },
+    {
+      "member": "raw/gates/00004.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 601.272291,
+        "index": 4,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 0,
+        "next_seconds": 10,
+        "workspace_allocated_bytes": 147550208
+      },
+      "sha256": "c5761e44b18c79f758e78e9a72b694b307e28b4a370bb20e44803ec95401411a"
+    },
+    {
+      "member": "raw/gates/00005.json",
+      "receipt": {
+        "active_row": null,
+        "completion_bytes": 16777216,
+        "completion_seconds": 60,
+        "cpu_including_build_reserve": 601.584185,
+        "index": 5,
+        "max_bytes": 2147483648,
+        "max_cpu_seconds": 7200,
+        "next_bytes": 0,
+        "next_seconds": 10,
+        "workspace_allocated_bytes": 181616640
+      },
+      "sha256": "ebe9971a0dfba2001192c8486a3d48a645866316e98a60445ed292393953fe84"
+    }
+  ],
+  "largest_members": [
+    {
+      "bytes": 640970,
+      "member": "raw/commands/00001/native/syscalls.txt"
+    },
+    {
+      "bytes": 411957,
+      "member": "raw/commands/00001/seam.json"
+    },
+    {
+      "bytes": 411957,
+      "member": "raw/faults/none/seam-trace.json"
+    },
+    {
+      "bytes": 394854,
+      "member": "raw/original-baseline.jsonl"
+    },
+    {
+      "bytes": 176444,
+      "member": "raw/pcm/ee38bd19bcaa50ac1e42da7a9e630e65706793767814d3afabe9dca992decfc4.wav"
+    },
+    {
+      "bytes": 176444,
+      "member": "raw/source.wav"
+    },
+    {
+      "bytes": 153609,
+      "member": "raw/faults/none/image-after.img.gz"
+    },
+    {
+      "bytes": 128149,
+      "member": "raw/commands/00000/native/syscalls.txt"
+    },
+    {
+      "bytes": 72632,
+      "member": "raw/commands/00003/native/syscalls.txt"
+    },
+    {
+      "bytes": 72632,
+      "member": "raw/commands/00004/native/syscalls.txt"
+    },
+    {
+      "bytes": 51914,
+      "member": "raw/faults/none/record.json"
+    },
+    {
+      "bytes": 33215,
+      "member": "raw/initial.img.gz"
+    },
+    {
+      "bytes": 19641,
+      "member": "RETENTION-FILES.json"
+    },
+    {
+      "bytes": 3993,
+      "member": "raw/commands/00002/seam.json"
+    },
+    {
+      "bytes": 2573,
+      "member": "raw/commands/00003/seam.json"
+    }
+  ],
+  "limitations": [
+    "Expanded logical bytes are not Linux allocated blocks or measured simultaneous workspace peak.",
+    "Original final allocation/CPU/producer archive was absent and remains absent.",
+    "No Product execution, projection enumeration or new positive control performed."
+  ],
+  "members": 134
+}

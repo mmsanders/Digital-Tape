@@ -1,0 +1,721 @@
+{
+  "files": [
+    {
+      "blob": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "candidate_locations": [
+        {
+          "line": 78,
+          "text": "pub fn new(spec: AudioSpec, capacity: usize) -> Self {"
+        },
+        {
+          "line": 99,
+          "text": "pub fn is_unused(&self) -> bool {"
+        },
+        {
+          "line": 110,
+          "text": "pub fn clear(&mut self) {"
+        },
+        {
+          "line": 273,
+          "text": "pub fn render(&mut self, num_frames: Option<usize>, frame: &[S]) -> usize {"
+        },
+        {
+          "line": 318,
+          "text": "pub fn render_with<F>(&mut self, num_frames: Option<usize>, mut f: F) -> Result<usize>"
+        },
+        {
+          "line": 357,
+          "text": "pub fn render_silence(&mut self, num_frames: Option<usize>) -> usize {"
+        },
+        {
+          "line": 389,
+          "text": "pub fn render_uninit(&mut self, num_frames: Option<usize>) -> usize {"
+        },
+        {
+          "line": 426,
+          "text": "pub fn trim(&mut self, start: usize, end: usize) {"
+        },
+        {
+          "line": 437,
+          "text": "fn spec(&self) -> &AudioSpec {"
+        },
+        {
+          "line": 441,
+          "text": "fn num_planes(&self) -> usize {"
+        },
+        {
+          "line": 449,
+          "text": "fn frames(&self) -> usize {"
+        },
+        {
+          "line": 453,
+          "text": "fn plane(&self, idx: usize) -> Option<&[S]> {"
+        },
+        {
+          "line": 457,
+          "text": "fn plane_pair(&self, idx0: usize, idx1: usize) -> Option<(&[S], &[S])> {"
+        },
+        {
+          "line": 469,
+          "text": "fn copy_to_slice_interleaved<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 480,
+          "text": "fn plane_mut(&mut self, idx: usize) -> Option<&mut [S]> {"
+        },
+        {
+          "line": 484,
+          "text": "fn plane_pair_mut(&mut self, idx0: usize, idx1: usize) -> Option<(&mut [S], &mut [S])> {"
+        },
+        {
+          "line": 492,
+          "text": "fn copy_from_slice_interleaved<Sin, Src>(&mut self, src: &Src)"
+        },
+        {
+          "line": 504,
+          "text": "fn copy_bytes_interleaved_as<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 513,
+          "text": "fn copy_bytes_planar_as<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 522,
+          "text": "fn copy_bytes_interleaved<Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 530,
+          "text": "fn copy_bytes_planar<Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 588,
+          "text": "fn new<Src>(src: &'a mut [Src], bound: Range<usize>) -> Self"
+        }
+      ],
+      "lines": 614,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/buf.rs",
+      "sha256": "9af515ffb34ba043bc261ee524d39be6a87d1c606b4316d9d248c4f5410f1322",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "173c07c27a57bfb25a21d2c336028ebf423c4894",
+      "candidate_locations": [],
+      "lines": 1257,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/channels.rs",
+      "sha256": "9974f6b0f7ab3c1548c94e73dc9a29cad99d2d6e0abbef31bf3889c763b97e8f",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "candidate_locations": [
+        {
+          "line": 80,
+          "text": "pub fn new(format: SampleFormat, spec: AudioSpec, capacity: usize) -> Self {"
+        },
+        {
+          "line": 96,
+          "text": "pub fn spec(&self) -> &AudioSpec {"
+        },
+        {
+          "line": 97,
+          "text": "impl_generic_func!(self, buf, buf.spec())"
+        },
+        {
+          "line": 101,
+          "text": "pub fn num_planes(&self) -> usize {"
+        },
+        {
+          "line": 102,
+          "text": "impl_generic_func!(self, buf, buf.num_planes())"
+        },
+        {
+          "line": 111,
+          "text": "pub fn frames(&self) -> usize {"
+        },
+        {
+          "line": 118,
+          "text": "pub fn is_unused(&self) -> bool {"
+        },
+        {
+          "line": 129,
+          "text": "pub fn clear(&mut self) {"
+        },
+        {
+          "line": 130,
+          "text": "impl_generic_func!(self, buf, buf.clear());"
+        },
+        {
+          "line": 160,
+          "text": "pub fn render_silence(&mut self, num_frames: Option<usize>) -> usize {"
+        },
+        {
+          "line": 161,
+          "text": "impl_generic_func!(self, buf, buf.render_silence(num_frames))"
+        },
+        {
+          "line": 167,
+          "text": "pub fn render_uninit(&mut self, num_frames: Option<usize>) -> usize {"
+        },
+        {
+          "line": 168,
+          "text": "impl_generic_func!(self, buf, buf.render_uninit(num_frames))"
+        },
+        {
+          "line": 189,
+          "text": "pub fn trim(&mut self, start: usize, end: usize) {"
+        },
+        {
+          "line": 190,
+          "text": "impl_generic_func!(self, buf, buf.trim(start, end))"
+        },
+        {
+          "line": 204,
+          "text": "pub fn copy_to<Sout, Dst>(&self, dst: &mut Dst)"
+        },
+        {
+          "line": 215,
+          "text": "pub fn copy_to_slice_interleaved<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 226,
+          "text": "pub fn copy_to_slice_planar<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 237,
+          "text": "pub fn copy_to_vec_interleaved<Sout>(&self, dst: &mut Vec<Sout>)"
+        },
+        {
+          "line": 247,
+          "text": "pub fn copy_to_vecs_planar<Sout>(&self, dst: &mut Vec<Vec<Sout>>)"
+        },
+        {
+          "line": 258,
+          "text": "pub fn copy_bytes_interleaved_as<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 270,
+          "text": "pub fn copy_bytes_planar_as<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 281,
+          "text": "pub fn copy_bytes_interleaved<Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 291,
+          "text": "pub fn copy_bytes_planar<Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 301,
+          "text": "pub fn copy_bytes_to_vec_interleaved(&self, dst: &mut Vec<u8>) {"
+        },
+        {
+          "line": 309,
+          "text": "pub fn copy_bytes_to_vec_interleaved_as<Sout>(&self, dst: &mut Vec<u8>)"
+        },
+        {
+          "line": 319,
+          "text": "pub fn copy_bytes_to_vecs_planar(&self, dst: &mut Vec<Vec<u8>>) {"
+        },
+        {
+          "line": 327,
+          "text": "pub fn copy_bytes_to_vecs_planar_as<Sout>(&self, dst: &mut Vec<Vec<u8>>)"
+        },
+        {
+          "line": 423,
+          "text": "pub fn spec(&self) -> &AudioSpec {"
+        },
+        {
+          "line": 424,
+          "text": "impl_generic_ref_func!(self, buf, buf.spec())"
+        },
+        {
+          "line": 428,
+          "text": "pub fn num_planes(&self) -> usize {"
+        },
+        {
+          "line": 429,
+          "text": "impl_generic_ref_func!(self, buf, buf.num_planes())"
+        },
+        {
+          "line": 438,
+          "text": "pub fn frames(&self) -> usize {"
+        },
+        {
+          "line": 445,
+          "text": "pub fn is_unused(&self) -> bool {"
+        },
+        {
+          "line": 471,
+          "text": "pub fn copy_to<Sout, Dst>(&self, dst: &mut Dst)"
+        },
+        {
+          "line": 482,
+          "text": "pub fn copy_to_slice_interleaved<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 493,
+          "text": "pub fn copy_to_slice_planar<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 504,
+          "text": "pub fn copy_to_vec_interleaved<Sout>(&self, dst: &mut Vec<Sout>)"
+        },
+        {
+          "line": 514,
+          "text": "pub fn copy_to_vecs_planar<Sout>(&self, dst: &mut Vec<Vec<Sout>>)"
+        },
+        {
+          "line": 525,
+          "text": "pub fn copy_bytes_interleaved_as<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 537,
+          "text": "pub fn copy_bytes_planar_as<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 548,
+          "text": "pub fn copy_bytes_interleaved<Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 558,
+          "text": "pub fn copy_bytes_planar<Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 568,
+          "text": "pub fn copy_bytes_to_vec_interleaved(&self, dst: &mut Vec<u8>) {"
+        },
+        {
+          "line": 576,
+          "text": "pub fn copy_bytes_to_vec_interleaved_as<Sout>(&self, dst: &mut Vec<u8>)"
+        },
+        {
+          "line": 586,
+          "text": "pub fn copy_bytes_to_vecs_planar(&self, dst: &mut Vec<Vec<u8>>) {"
+        },
+        {
+          "line": 594,
+          "text": "pub fn copy_bytes_to_vecs_planar_as<Sout>(&self, dst: &mut Vec<Vec<u8>>)"
+        },
+        {
+          "line": 780,
+          "text": "pub fn spec(&self) -> &AudioSpec {"
+        },
+        {
+          "line": 785,
+          "text": "pub fn num_planes(&self) -> usize {"
+        },
+        {
+          "line": 795,
+          "text": "pub fn frames(&self) -> usize {"
+        },
+        {
+          "line": 815,
+          "text": "pub fn copy_to<Sout, Dst>(&self, dst: &mut Dst)"
+        },
+        {
+          "line": 826,
+          "text": "pub fn copy_to_slice_interleaved<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 837,
+          "text": "pub fn copy_to_slice_planar<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 848,
+          "text": "pub fn copy_to_vec_interleaved<Sout>(&self, dst: &mut Vec<Sout>)"
+        },
+        {
+          "line": 858,
+          "text": "pub fn copy_to_vecs_planar<Sout>(&self, dst: &mut Vec<Vec<Sout>>)"
+        },
+        {
+          "line": 869,
+          "text": "pub fn copy_bytes_interleaved_as<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 881,
+          "text": "pub fn copy_bytes_planar_as<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 892,
+          "text": "pub fn copy_bytes_interleaved<Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 902,
+          "text": "pub fn copy_bytes_planar<Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 912,
+          "text": "pub fn copy_bytes_to_vec_interleaved(&self, dst: &mut Vec<u8>) {"
+        },
+        {
+          "line": 920,
+          "text": "pub fn copy_bytes_to_vec_interleaved_as<Sout>(&self, dst: &mut Vec<u8>)"
+        },
+        {
+          "line": 930,
+          "text": "pub fn copy_bytes_to_vecs_planar(&self, dst: &mut Vec<Vec<u8>>) {"
+        },
+        {
+          "line": 938,
+          "text": "pub fn copy_bytes_to_vecs_planar_as<Sout>(&self, dst: &mut Vec<Vec<u8>>)"
+        }
+      ],
+      "lines": 985,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/generic.rs",
+      "sha256": "01c9f8b0a5e3049e76926a1ae353276608d88647a76cb5289ba27a091c72e381",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "candidate_locations": [
+        {
+          "line": 59,
+          "text": "pub fn new(rate: u32, channels: Channels) -> Self {"
+        },
+        {
+          "line": 81,
+          "text": "fn new(planes: &'a [Vec<S>], bound: Range<usize>) -> Self {"
+        },
+        {
+          "line": 107,
+          "text": "fn new(planes: &'a mut [Vec<S>], bound: Range<usize>) -> Self {"
+        },
+        {
+          "line": 135,
+          "text": "fn new(planes: &[Vec<S>], bound: Range<usize>) -> Interleaved<'_, S> {"
+        },
+        {
+          "line": 165,
+          "text": "fn spec(&self) -> &AudioSpec;"
+        },
+        {
+          "line": 168,
+          "text": "fn num_planes(&self) -> usize;"
+        },
+        {
+          "line": 174,
+          "text": "fn frames(&self) -> usize;"
+        },
+        {
+          "line": 177,
+          "text": "fn plane(&self, idx: usize) -> Option<&[S]>;"
+        },
+        {
+          "line": 184,
+          "text": "fn plane_by_position(&self, pos: Position) -> Option<&[S]> {"
+        },
+        {
+          "line": 197,
+          "text": "fn plane_pair(&self, idx0: usize, idx1: usize) -> Option<(&[S], &[S])>;"
+        },
+        {
+          "line": 204,
+          "text": "fn plane_pair_by_position(&self, pos0: Position, pos1: Position) -> Option<(&[S], &[S])> {"
+        },
+        {
+          "line": 241,
+          "text": "fn copy_to_slice_interleaved<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 255,
+          "text": "fn copy_to_slice_planar<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 284,
+          "text": "fn copy_to_vec_interleaved<Sout>(&self, dst: &mut Vec<Sout>)"
+        },
+        {
+          "line": 307,
+          "text": "fn copy_to_vecs_planar<Sout>(&self, dst: &mut Vec<Vec<Sout>>)"
+        },
+        {
+          "line": 326,
+          "text": "fn plane_mut(&mut self, idx: usize) -> Option<&mut [S]>;"
+        },
+        {
+          "line": 333,
+          "text": "fn plane_by_position_mut(&mut self, pos: Position) -> Option<&mut [S]> {"
+        },
+        {
+          "line": 346,
+          "text": "fn plane_pair_mut(&mut self, idx0: usize, idx1: usize) -> Option<(&mut [S], &mut [S])>;"
+        },
+        {
+          "line": 353,
+          "text": "fn plane_pair_by_position_mut("
+        },
+        {
+          "line": 393,
+          "text": "fn copy_from<Sin, Src>(&mut self, src: &Src)"
+        },
+        {
+          "line": 415,
+          "text": "fn copy_from_slice_planar<Sin, Src>(&mut self, src: &[Src])"
+        },
+        {
+          "line": 430,
+          "text": "fn copy_from_slice_interleaved<Sin, Src>(&mut self, src: &Src)"
+        },
+        {
+          "line": 474,
+          "text": "fn copy_bytes_interleaved_as<Sout, Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 492,
+          "text": "fn copy_bytes_planar_as<Sout, Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 520,
+          "text": "fn copy_bytes_interleaved<Dst>(&self, dst: Dst)"
+        },
+        {
+          "line": 536,
+          "text": "fn copy_bytes_planar<Dst>(&self, dst: &mut [Dst])"
+        },
+        {
+          "line": 549,
+          "text": "fn copy_bytes_to_vec_interleaved(&self, dst: &mut Vec<u8>) {"
+        },
+        {
+          "line": 565,
+          "text": "fn copy_bytes_to_vec_interleaved_as<Sout>(&self, dst: &mut Vec<u8>)"
+        },
+        {
+          "line": 585,
+          "text": "fn copy_bytes_to_vecs_planar(&self, dst: &mut Vec<Vec<u8>>) {"
+        },
+        {
+          "line": 609,
+          "text": "fn copy_bytes_to_vecs_planar_as<Sout>(&self, dst: &mut Vec<Vec<u8>>)"
+        }
+      ],
+      "lines": 649,
+      "path": "host/ingest/vendor/symphonia-core/src/audio/mod.rs",
+      "sha256": "9f8d2cf59ecd7180f13036d3b3369cd99c837ea7d94b862c3ff0c2df5100fb04",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "candidate_locations": [
+        {
+          "line": 45,
+          "text": "fn new(codec: AudioCodecId) -> Self {"
+        },
+        {
+          "line": 67,
+          "text": "pub fn try_new(params: &AudioCodecParameters, opts: &AudioDecoderOptions) -> Result<Self> {"
+        },
+        {
+          "line": 85,
+          "text": "fn decode_inner(&mut self, packet: &PacketRef<'_>) -> Result<()> {"
+        },
+        {
+          "line": 97,
+          "text": "self.buf = AudioBuffer::new(header.spec(), 1152);"
+        },
+        {
+          "line": 104,
+          "text": "if self.buf.spec() != &header.spec() {"
+        },
+        {
+          "line": 110,
+          "text": "self.buf.clear();"
+        },
+        {
+          "line": 131,
+          "text": "self.buf.trim(packet.trim_start.get() as usize, packet.trim_end.get() as usize);"
+        },
+        {
+          "line": 152,
+          "text": "fn reset(&mut self) {"
+        },
+        {
+          "line": 157,
+          "text": "fn decode_ref(&mut self, packet: &PacketRef<'_>) -> Result<GenericAudioBufferRef<'_>> {"
+        },
+        {
+          "line": 159,
+          "text": "self.buf.clear();"
+        }
+      ],
+      "lines": 197,
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/decoder.rs",
+      "sha256": "b4bdfac4dad94a746912df3a665d4337b47b95ace6d80d0bab04aefa574f382a",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "412308127c25cd9c6f97eb7411b0c29c69a5ac9d",
+      "candidate_locations": [],
+      "lines": 251,
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/header.rs",
+      "sha256": "59e870a43bc73fef45c3f492bd2c1b5fd33fd0aab7f9be72e20850f262a4573a",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "67567b6f9f62b662d7fc14d8d19e14ddd6da3a28",
+      "candidate_locations": [
+        {
+          "line": 38,
+          "text": "pub fn new() -> Self {"
+        },
+        {
+          "line": 110,
+          "text": "pub fn clear(&mut self) {"
+        },
+        {
+          "line": 268,
+          "text": "pub fn new() -> Self {"
+        },
+        {
+          "line": 380,
+          "text": "fn decode("
+        }
+      ],
+      "lines": 487,
+      "path": "host/ingest/vendor/symphonia-bundle-mp3/src/layer3/mod.rs",
+      "sha256": "443981d884138491b613dce1a49c0859b986f9b855b828c287ed50c14ffe7844",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "8fe201d5aeeda34b206d9606bf1068fb2ae82e98",
+      "candidate_locations": [
+        {
+          "line": 62,
+          "text": "pub fn try_new(params: &AudioCodecParameters, _opts: &AudioDecoderOptions) -> Result<Self> {"
+        },
+        {
+          "line": 120,
+          "text": "fn set_pair(&mut self, pair_no: usize, channel: usize, pair: bool) -> Result<()> {"
+        },
+        {
+          "line": 135,
+          "text": "fn decode_ga<B: ReadBitsLtr + FiniteBitStream>(&mut self, bs: &mut B) -> Result<()> {"
+        },
+        {
+          "line": 251,
+          "text": "fn decode_inner(&mut self, packet: &PacketRef<'_>) -> Result<()> {"
+        },
+        {
+          "line": 253,
+          "text": "self.buf.clear();"
+        },
+        {
+          "line": 254,
+          "text": "self.buf.render_uninit(None);"
+        },
+        {
+          "line": 269,
+          "text": "fn reset(&mut self) {"
+        },
+        {
+          "line": 284,
+          "text": "fn decode_ref(&mut self, packet: &PacketRef<'_>) -> Result<GenericAudioBufferRef<'_>> {"
+        },
+        {
+          "line": 286,
+          "text": "self.buf.clear();"
+        }
+      ],
+      "lines": 324,
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/mod.rs",
+      "sha256": "63f33ae26e788919744f92feb44a24a046a59284e64314757fed49eeb0694ff4",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "86dbf0b9d32f18108fd015ef024339c5e34610f6",
+      "candidate_locations": [
+        {
+          "line": 36,
+          "text": "pub fn new(is_pair: bool, channel: usize, sbinfo: GASubbandInfo) -> Self {"
+        },
+        {
+          "line": 48,
+          "text": "pub fn reset(&mut self) {"
+        },
+        {
+          "line": 53,
+          "text": "pub fn decode_ga_sce<B: ReadBitsLtr>("
+        },
+        {
+          "line": 64,
+          "text": "pub fn decode_ga_cpe<B: ReadBitsLtr + FiniteBitStream>("
+        },
+        {
+          "line": 165,
+          "text": "pub fn synth_audio("
+        }
+      ],
+      "lines": 185,
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/cpe.rs",
+      "sha256": "0d65b4750e486ff4dc3c6cea4ce1d13ce80dce8a6233006b533f8fce6cc20f36",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "7297fa47b8cca27b579856a98991165f3897d88b",
+      "candidate_locations": [
+        {
+          "line": 34,
+          "text": "pub fn new() -> Self {"
+        }
+      ],
+      "lines": 159,
+      "path": "host/ingest/vendor/symphonia-codec-aac/src/aac/dsp.rs",
+      "sha256": "3a2e8a80b397a7392d018dc7a02e02b824017f5fb1d3c149ad8c8b198fd68700",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "2f9dbd0af36b8dff72dec703b1ec4f36b138a6ef",
+      "candidate_locations": [
+        {
+          "line": 187,
+          "text": "pub fn decode(b: &[u8]) -> Res<Decoded> {"
+        },
+        {
+          "line": 334,
+          "text": "if buf.frames() as u64 != h.spf || buf.spec().channels().count() != channels {"
+        }
+      ],
+      "lines": 364,
+      "path": "host/ingest/src/mpeg.rs",
+      "sha256": "e8ed7bc5486799cb0e9b29531b07771cac8c389e5334690f7dc0b1dc1740c4a0",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "b78102f57aede497b090131dcb33baf6cdfaed7e",
+      "candidate_locations": [
+        {
+          "line": 142,
+          "text": "fn decode_units(units: &[&[u8]], asc_bytes: &[u8], asc: &Asc, crcs: Option<&[Option<AdtsCrc>]>) -> Res<Vec<Vec<f64>>> {"
+        },
+        {
+          "line": 163,
+          "text": "if buf.frames() != 1024 || buf.spec().channels().count() != ch {"
+        },
+        {
+          "line": 179,
+          "text": "pub fn decode_adts(b: &[u8]) -> Res<Decoded> {"
+        },
+        {
+          "line": 413,
+          "text": "pub fn decode_mp4(b: &[u8]) -> Res<Decoded> {"
+        }
+      ],
+      "lines": 654,
+      "path": "host/ingest/src/aac.rs",
+      "sha256": "7929bdc982fac53a94498cbe397377f86b51471d0c5073d30cff6eea40e1d907",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    },
+    {
+      "blob": "2dbae7c375dbe3d7f890f2bfdbc481140a671c33",
+      "candidate_locations": [],
+      "lines": 322,
+      "path": "host/ingest/Cargo.lock",
+      "sha256": "6e8d14c97dc59d4e627e68f37d6647c45e7f6d52de5e3c51653239993ad0f864",
+      "source_commit": "b9f430c8c9b33532abf07eea0ed2653310639f2d"
+    }
+  ],
+  "new_decoder_runs": 0,
+  "new_logical_control_runs": 0,
+  "status": "READ-ONLY LOCATOR, NOT COMPLETE MUTATOR CENSUS OR PROOF"
+}
