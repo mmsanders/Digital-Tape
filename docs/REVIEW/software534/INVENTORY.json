@@ -1,0 +1,66 @@
+{
+  "scope": "Software534 current read-only inventory, not execution",
+  "product_main": "75f867712138b8e436b2cb30ba82e5590cb584ee",
+  "files": [
+    {
+      "name": "kit/ingest.exe",
+      "bytes": 848384,
+      "sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "kit/KIT.json",
+      "bytes": 1038,
+      "sha256": "26aeec3cfc657470d3bdcfee25458acc2e237705d3ee17ff41e3964b27fd020f",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "procmon/Procmon64.exe",
+      "bytes": 2237720,
+      "sha256": "28495e642b2a465474a4edc58380eaf8b7ee580f3fbcb4141061deadafe9b885",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "observer-session/filter.pmc",
+      "bytes": 296,
+      "sha256": "6bc51ab36ed855ef86a903808d899ab349827122db04b7e0bb13fe285adc2f74",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "packet/config.json",
+      "bytes": 612,
+      "sha256": "0069fdecf84523bdc4b8bec742024d4f10151740c28c6de59d4ec808b351d0be",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "packet/platform.json",
+      "bytes": 877,
+      "sha256": "1ea89385cca003d47ee17917e8b2e6c15079dba4366167b122b568abf919ae65",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "Scripts/python.exe",
+      "bytes": 274424,
+      "sha256": "0b471133e110cfb53a061cad528ce8e517d7b9ac41a0a396c39ad795a487fc14",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "bin/gcc.exe",
+      "bytes": 995342,
+      "sha256": "a20b2286ddee05f01aa5d8f0933826c4cc3dfd04f28aae7d04901565cb5783cb",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "DigitalTape-ingest-206/win11-kit.zip",
+      "bytes": 2604482,
+      "sha256": "ffb0f78ac3980fa1bb130f0aff22d53ebb100ed3323a8e50ba62a6ee1819c865",
+      "scope": "inventory only; no execution"
+    },
+    {
+      "name": "DigitalTape-ingest-206/win11_packet.ps1",
+      "bytes": 8842,
+      "sha256": "74e1af2cb91a3f9b418363941c48a60eee972481a32cbb9af22d8f3060318f9e",
+      "scope": "inventory only; no execution"
+    }
+  ]
+}
