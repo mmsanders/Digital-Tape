@@ -47,11 +47,13 @@ judgement · **Either** has both a DIY and a service-bureau path. Streams: 1 eng
 
 ## Phase 2 — desktop tooling · 2–3 weeks · [plan](../PHASE2-PLAN.md)
 
+**Current22October scope (ADR-191): Windows11-only family release.** macOS support/app equivalent is deferred until Michael explicitly resumes it; Linux remains existing CI. See current package status and [ADR-191](../DECISIONS.md#adr-191--windows11-only-phase2-delivery-and-fresh-local-role-contexts). Historical receipts and source are retained; no acceptance is inferred from deferral.
+
 | ID | Package | Owner | Stream | Status |
 |---|---|---|---|---|
-| WP-14 | `tapectl`: format, load, dump, verify, promote — [on real cards](WP-14.md) | Agent | 3 | **P2-R1; full package held.** #390 integrated `46b48edd`; Verification #158 software/CI PASS, #159 tested release authenticated, #160 Mac C60 and #164 ten Windows 11 pulls PASS. Final Windows success/A9/README PASS (#167/#168); only shipped-binary physical >4 GiB captures remain; Windows 11 replaces Windows 10 (ADR-176). Criteria A1–A9 in package file |
-| WP-15 | [Drag-and-drop app (Tauri)](WP-15.md) | Agent | 3 | **Planned, P2-R3.** One window over WP-14 and WP-16; never writes the card itself; no lists (guardrail 03). Milestone test: someone who is not Michael makes a cartridge unaided |
-| WP-16 | [Ingest: gapless join, loudness normalisation](WP-16.md) | Agent | 3 | **Planned, P2-R2.** Folder of mixed sources → one canonical WAV; gain-only loudness; exact gapless joins. D3–D5 settled (ADR-162); preflight #166 disposed; INGEST-1 issued (ADR-177), host authoring/implementation overlap WP-14 physical A6; real-card/full acceptance held |
+| WP-14 | `tapectl` on real cards — [Windows11](WP-14.md) | Agent | 3 | **3/4, full Windows package held.** Integrated CLI/release/ten-pull/README facts carry. Windows A6 native linkage remains;534/277 current local no-card capability and independent closure route. Mac deferred (ADR-191) |
+| WP-15 | [One-window Windows app](WP-15.md) | Agent | 3 | **Contract1/4.** S2/parser integrated; Windows safe make/session, elevation/common path, installs and G2 remain. macOS equivalent deferred; working app is current delivery focus (ADR-191) |
+| WP-16 | [Ingest: gapless join, loudness](WP-16.md) | Agent | 3 | **Coverage2/4.** Windows candidate459 held on own native visibility; exact downloaded resource PASS carries. Mac qualification deferred, Linux existing CI. Full WindowsA6 dependency retained (ADR-191) |
 | WP-38 | Phone / web-app test harness (engine built to WebAssembly) | Agent | 3 | **Not taken in Phase 2 (D7, ADR-162).** Michael: no explicit development, but Software keeps the possibility open; Phase 2 host work must not make a later WASM build of the engine and ingest path impossible. Resume: Michael's `REQUEST:`. Lane outline kept in [the plan](../PHASE2-PLAN.md#wp-38-lane-if-d7-is-yes). Feasibility (PM, #341): the C99 engine compiles to WASM unchanged (guardrail 12); phone audio is not the product codec, so it gives no 85 dB-cap or wake-latency evidence, and golden identity must hold on the WASM build |
 
 **Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided. The detailed plan, rounds and kickoff decisions are in [docs/PHASE2-PLAN.md](../PHASE2-PLAN.md).

@@ -6,6 +6,8 @@ issues ([issue workflow](ISSUE-WORKFLOW.md)), each citing the section of this pl
 Package detail and acceptance criteria are in [WP-14](PACKAGES/WP-14.md),
 [WP-15](PACKAGES/WP-15.md) and [WP-16](PACKAGES/WP-16.md). Current state is in [STATUS](STATUS.md).
 
+**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+
 ## 1. What Phase 2 delivers
 
 **Goal:** a person who is not Michael drops a folder of music onto a computer program, types a
@@ -54,7 +56,7 @@ Each has a recommended default. "Go with the defaults" is a complete answer.
 | # | Answer |
 |---|---|
 | D1 | Go |
-| D2 | **Windows 11** and **current macOS** (up to date; Software records the exact version tested), plus Linux in CI. Michael corrected his mistaken Windows 10 answer on 13 October PDT (ADR-176); the original 5 October answer is superseded |
+| D2 | Historical D2: **Windows 11** and **current macOS**, plus Linux in CI. **Superseded22October by ADR-191: Windows11 only; Mac deferred, Linux CI retained.** Michael corrected his mistaken Windows 10 answer on 13 October PDT (ADR-176); the original 5 October answer is superseded |
 | D3, D4, D5, D8 | Defaults |
 | D6 | Michael's wife, if she agrees. Fallback: the default (a family member who has not seen the app) |
 | D7 | **No WP-38 in Phase 2.** No explicit development, but Software keeps it possible: nothing in WP-14/15/16 may make a later WebAssembly build of the engine and ingest path impossible. Recorded under WP-38 in the roadmap |

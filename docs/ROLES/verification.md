@@ -1,6 +1,6 @@
 # Verification Lead
 
-**Instance:** Sol in a separate ChatGPT Work chat. **Format:** individual lead; no subworkers.
+**Instance:** Michael-selected runtime in a separate fresh independent local chat (ADR-191); never the Software context. **Format:** individual lead; no subworkers.
 
 ## Authority
 

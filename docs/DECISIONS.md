@@ -4272,3 +4272,103 @@ Rationale: complete evidence work should leave the open PR queue; implementation
 acceptance must show its real remaining facts rather than inherit stale faulty-base
 or review-envelope blockers. Reversal cost: reopen preserved envelopes or amend
 unaccepted method/tests; no branch/history deletion, card change or product merge.
+
+
+## ADR-191 — Windows11-only Phase2 delivery and fresh local role contexts
+
+**22 October2026 PDT · PM533 · input main63d708d99a1828b6889c96839ff89da878151292.**
+Michael explicitly cuts macOS scope for now, places Software on the actual local
+Windows machine via the ChatGPT app, prioritizes the functioning app and asks for
+fresh Software/Verification contexts plus a no-card capability/CLI closure task.
+His full words and issued task links are retained in
+[PM533](https://github.com/mmsanders/Digital-Tape/issues/533).
+
+### Current platform and delivery decision
+
+Windows11 x64 is the sole current family release/acceptance platform for WP14,
+WP16 and WP15, including native A6, shipped resource behavior, app install/elevation
+and G2. This supersedes D2/ADR162/176 and current host-contract platform lists only
+to that extent. Linux remains existing build/regression/method CI support, not a
+new family release gate; hosted Windows Server results remain supplemental history,
+not evidence of actual local Windows11 behavior. No new Mac or Server capability/
+native-qualification campaign is assigned. Existing mandatory CI protections remain
+until any Software-owned CI adjustment is independently validated normally.
+
+macOS support/equivalent app is DEFERRED, with explicit Michael resumption required.
+Keep Mac code, tests, raw receipts, capability limitations and historical acceptance
+unchanged; deferred is neither accepted nor failed current scope. Mac A6 and Mac
+ordinary shipping-exhaustion gaps no longer block current Windows-only acceptance.
+All still-applicable Windows criteria remain; no automatic rung gain or candidate
+merge follows from dropping Mac. Frozen engine/format bytes and goldens unchanged.
+
+The destination remains a safe one-window folder→label→cartridge workflow, exact
+audio, clear errors, safe removal and a witnessed unaided family test on Windows11.
+No lists/library/player scope is added. Independent Verification remains separate
+from Software. Michael chooses runtimes; old Opus/Claude or fixed Sol/Work statements
+do not override his fresh local ChatGPT-app role assignment.
+
+### Reset and issue routing
+
+Archive only the old local role chats “local software” and “local verification”
+after checking they are stopped; preserve their histories and evidence. All three
+saved listeners were PAUSED at reset; do not start new listeners. Fresh separate
+local role chats bootstrap exclusively from live GitHub issues/current main.
+Software534 and Verification277 are the first paired task. No user-owned worktree/
+checkout/raw deletion or old-chat follow-up prompt is requested.
+
+Old pending527/270 grouped crash queue closes NOT_PLANNED as SUPERSEDED—PARKED,
+with exact model/source/raw and41/404 disposition retained. Controller268 final
+STOP remains a STOP; no retry, reset or integration. Global numerical proof and
+expanded crash enumeration are not prerequisites to initial local capability
+testing or image/app authoring. Existing S1/443 claims remain held at their real
+boundaries. Q-P2-1 architecture decision remains before firmware; no new campaign,
+batching/async/engine/hardware scope is issued here.
+
+### Fresh local capability authority and safety
+
+A fresh current-context bounded read-only OS/build/tool/effective-token check and
+owned-directory/harmless-child test are authorized. Old235/491/268 capability stops
+describe their actual old attempts, not every future local session. Software must
+measure actual Windows11 capabilities and distinguish app tool permission, OS
+token privilege, missing runtime/tool and Product behavior.
+
+Uncovered acceptance tests/helpers require published independent expectations
+first. Eligible no-card shipped CLI/image/64bit sparse-file controls and exact
+six-case owned-file/NUL/verified-absent-name observer controls may proceed under
+Software534/Verification277's finite published method and allowlists. Actual
+observer/capture or owned VHD operations additionally need already-available
+authorized privilege, exact corrected-kit/runtime/source/session identities and
+sole ownership/cleanup. Inventory is not execution; changed source needs actual
+binding where claimed. A no-card surrogate does not prove physical A6.
+
+No physical disk/card/volume/reader raw access or destructive physical test,
+privilege bypass, UAC/runas/credential action, install/security/AV/execution-policy
+change, self-hosted Actions runner or full-machine raw publication is authorized.
+If a prerequisite is unavailable, return the exact measured blocker and concrete
+required action; do not rerun a denied path or hunt alternate providers. Michael
+need not execute tests that are safely runnable by the authorized local lead.
+Any genuinely necessary physical act remains a separate explicit request.
+
+### CLI closure and app sequence
+
+Verification277 maps Windows-only WP14 criteria to prior merged dispositions,
+retained Windows physical packet and genuinely needed local facts. Windows221 read
+proof and229's unproved request/offset bridge carry; no repeated ten-pull/C60/A6
+collection and no forced reinterpretation. If the Windows-only criteria are all
+substantively met, Verification explicitly clears exact-head overall WP14 and
+Software integrates with normal current-base checks/reviews/protections. Otherwise
+return the smallest concrete residual; PM does not accept its own code or waive
+disk-safety/native evidence.
+
+Mac scope removal permits a fresh Windows-only459 decision once its own Windows
+failed/zero-access visibility criterion is actually satisfied; exact downloaded
+Windows resource234 PASS carries. No faulty436 merge prerequisite. Then focus
+fresh app work on Windows safe S3 make/session binding and S5 child/elevation/common
+path, actual installation/errors and G2. App authoring can overlap accepted
+dependencies under existing host rules; real-card use/full acceptance does not
+follow from a shell, image rehearsal, source proof or green CI.
+
+Rationale: eliminate a deferred platform and obsolete execution-context assumptions,
+measure the actual client machine, and move evidence work back onto the usable app
+critical path. Reversal cost: explicit Mac resumption scope/methods, current host
+contract amendment and new platform qualification; no frozen-format migration.
