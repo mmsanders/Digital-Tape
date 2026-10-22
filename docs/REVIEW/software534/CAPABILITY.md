@@ -41,3 +41,13 @@ Verification256's final published corrected package was read at Verification/mai
 Known current evidence locations were read only: approved INGEST kit/collector under Downloads/DigitalTape-ingest-206; retained kit/packet/procmon/runtime under C:/DigitalTape-ingest-work-206; old Product/Verification trees and return directories unchanged. No full machine raw or native trace was published.
 
 Pending: Verification277 independent finite method publication / disposition of returned actual capability facts. This is Stage1 capability evidence, not completed Windows WP14 acceptance. Normal required CI and explicit independent clearance remain mandatory before any Product integration.
+
+
+## Current preparation update (22 October2026, after the first capability return)
+Verification277 independently located retained221's exact tapectl.exe at workspace/verification-work/a6-replay-private/tapectl.exe. Software read/hash/copied ONLY that ordinary executable to software534/shipping/tapectl.exe:435533bytes, SHA25682798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9. No sibling private traces were copied. Thus retrieval is resolved; initial network failures remain historical current-context facts, not an outstanding blanket retrieval conclusion.
+
+Bundled existing Python3.12.14 was queried successfully through its documented runtime path, SHA256b07b03b9ba866a341a3c13ee69710fbc8d43d4ce2523dee13f6df5c25378d15b. No install or PATH/security change. Published WP14 dependency treee1ef171ffdd7464314b4b838a7d904b1a94f5409 was mechanically exported byte-for-byte into the owned method area (41files; no tests executed by export).
+
+Actual shipping INGEST startup control ran ONCE using already-published201/8261a73c loader predicate/treee8f4a02e, no exhaustion/audio campaign. Exact before/afterd923 shipping copy; PID11088; exit0; correct INGEST1-AP4 version; empty stderr. INGEST-VERSION.json records original timestamps, argv, hashes and raw streams. It proves current shipping startup only.
+
+The new finite ordinary CLI method in independent PR278/headb24d9882 is awaiting its mandatory preflight and merge. New CLI/image/sparse acceptance execution has NOT started. No unpublished selector was executed. N1 observer is ineligible at already-available Administrator prerequisite; VHD has no method. No physical A6 inference, overall WP14 clearance or Product integration follows. Software534 remains at this explicit publication dependency, ready for eligible method execution; no recurring listener is installed.
