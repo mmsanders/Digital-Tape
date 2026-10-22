@@ -143,65 +143,11 @@ class Session:
             raise RuntimeError('terminal session; next command refused')
 
 def supervise(session, argv, output, timeout=0.5, cpu_cap_ns=1000000000, bytes_cap=64*1024**2):
-    session.require_next()
-    output = Path(output)
-    before = census(output)
-    start = time.monotonic_ns()
-    start_cpu = own_completed_cpu()
-    monitors = []
-    reason = None
-    usage = None
-    with (output / 'stdout.bin').open('xb') as stdout, (output / 'stderr.bin').open('xb') as stderr:
-        proc = subprocess.Popen(argv, stdout=stdout, stderr=stderr, start_new_session=True)
-        immutable(output / 'LAUNCH.json', dict(argv=argv, pid=proc.pid, parent=os.getpid(),
-                    start_ns=start, nonce=session.nonce, process_group=proc.pid))
-        try:
-            while True:
-                got, status, measured = os.wait4(proc.pid, os.WNOHANG)
-                if got:
-                    usage = measured
-                    proc.returncode = os.waitstatus_to_exitcode(status)
-                    break
-                live = live_tree(proc.pid)
-                scan = census(output)
-                now = time.monotonic_ns()
-                monitors.append(dict(time_ns=now, live=live, allocated=scan['allocated_bytes']))
-                # The licensed helpers do not spawn. Unknown descendants are not silently charged.
-                if any(p['pid'] != proc.pid for p in live['processes']):
-                    reason = 'unexpected-descendant'
-                elif now - start > int(timeout * 1000000000):
-                    reason = 'timeout'
-                elif own_completed_cpu() - start_cpu + live['cpu_ns'] > cpu_cap_ns:
-                    reason = 'cpu-overrun'
-                elif scan['allocated_bytes'] > bytes_cap:
-                    reason = 'storage-overrun'
-                if reason:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                    _, status, usage = os.wait4(proc.pid, 0)
-                    proc.returncode = os.waitstatus_to_exitcode(status)
-                    break
-                time.sleep(0.01)
-        except BaseException as e:
-            reason = 'measurement-failure:' + repr(e)
-            try:
-                os.killpg(proc.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            if usage is None:
-                _, status, usage = os.wait4(proc.pid, 0)
-                proc.returncode = os.waitstatus_to_exitcode(status)
-    final_scan = census(output)
-    result = dict(pid=proc.pid, argv=argv, start_ns=start, end_ns=time.monotonic_ns(),
-                  wall_ns=time.monotonic_ns()-start, child_cpu_ns=ru_ns(usage),
-                  completed_scope_cpu_ns=own_completed_cpu(), parent_cpu_delta_ns=own_completed_cpu()-start_cpu-ru_ns(usage),
-                  exit=proc.returncode, reason=reason, monitor=monitors,
-                  allocation_before=before, allocation_after=final_scan,
-                  accounting_complete=usage is not None, poll_ns=10000000,
-                  termination='SIGKILL known owned process group then wait4',
-                  hard_overshoot_guarantee=False)
-    if reason or proc.returncode != 0:
-        session.stopped = True
-    return result
+    # Shared exception-safe finalizer; legacy frozen fixture interface stays direct-child only.
+    from task_adapter import supervise as safe_supervise
+    return safe_supervise(session, argv, output, timeout, cpu_cap_ns, bytes_cap,
+                          sensor=lambda root, stage: census(root))
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -236,8 +182,8 @@ def main():
         argv = [sys.executable, '-B', str(a.helper.resolve()), '--mode', a.mode,
                 '--spy', str(spy.resolve()), '--nonce', r['nonce']]
         measurement = supervise(session, argv, a.out)
-        launch = json.loads((a.out/'LAUNCH.json').read_bytes())
-        row['launches'] = [launch]
+        launch_path = a.out/'LAUNCH.json'
+        row['launches'] = [json.loads(launch_path.read_bytes())] if launch_path.exists() else []
         row['spy_after'] = len(spy.read_bytes().splitlines()) if spy.exists() else 0
         row['next_invocation_count'] = 1
         if a.mode == 'incomplete':

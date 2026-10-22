@@ -1,0 +1,27 @@
+name: Software525 changed correction1 harmless mechanics
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'host/budget-controller/**'
+      - '.github/workflows/software525-correction1.yml'
+permissions:
+  contents: read
+jobs:
+  correction1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Changed correction1 controls once
+        run: |
+          mkdir -p "$RUNNER_TEMP/sw525-correction1-task"
+          python3 -B host/budget-controller/run_correction1.py --source "$(git rev-parse HEAD)" --out "$RUNNER_TEMP/sw525-correction1-task/return" > "$RUNNER_TEMP/sw525-correction1-task/stdout.bin" 2> "$RUNNER_TEMP/sw525-correction1-task/stderr.bin"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software525-correction1-original
+          path: ${{ runner.temp }}/sw525-correction1-task
+          if-no-files-found: error
