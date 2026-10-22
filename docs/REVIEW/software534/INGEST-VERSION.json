@@ -1,0 +1,23 @@
+{
+  "case": "shipping INGEST unlimited --version loader control ONLY",
+  "method_commit": "8261a73c3b33889a32f1112a470115c876b9fd24",
+  "method_tree": "e8f4a02ef8b831cd31fbe26807d59e08ac2d46b8",
+  "binary_sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+  "argv": [
+    "ingest.exe",
+    "--version"
+  ],
+  "parent_pid": 6824,
+  "start_utc": "2026-10-22T21:15:37.8298430Z",
+  "pid": 11088,
+  "timed_out": false,
+  "exit": 0,
+  "stdout": "ingest 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4\n",
+  "stderr": "",
+  "loader_predicate": true,
+  "end_utc": "2026-10-22T21:15:38.9084794Z",
+  "binary_after_sha256": "d923613badda95baeb387d5415d5212a5dedb7c5c7144b21874479babd178f5b",
+  "original_receipt_sha256": "07abf7c8ba28a90981053acec4cc16e98fd2f1454400027eae0dd97ce287eda7",
+  "stdout_sha256": "0328ce8743a48e4bfaa923938a29340caa8441caa3bf7800847a048404e8f5ba",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
