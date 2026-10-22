@@ -9,6 +9,9 @@ permissions:
   contents: read
 jobs:
   correction1:
+    # Exact measured source only. PR path filters evaluate the whole diff and
+    # therefore do not prevent an evidence-only synchronize from running again.
+    if: github.event.pull_request.head.sha == 'd5ae96d3002b751813d14a80d557b26153e8b7d6'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

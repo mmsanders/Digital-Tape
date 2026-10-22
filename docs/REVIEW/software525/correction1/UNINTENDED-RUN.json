@@ -1,0 +1,111 @@
+{
+  "run": 39708908912,
+  "source": "a1176730fe477aad06d093948ce7221eb25f6bde",
+  "status": "FAILED unintended unchanged experiment dispatch; no retry",
+  "artifact_id": 12396022644,
+  "provider_bytes": 25924,
+  "provider_sha256": "00bdcb86865e2a34c830eaf6211b17a4c484aad59d7b11c3b695e39e87ebe941",
+  "members": {
+    "return/SOURCE.json": {
+      "bytes": 1402,
+      "sha256": "a72ecd9cddf49a1a2f853d52ff1ca9af5e9245729fbdeb996a187dafb6c57bed"
+    },
+    "return/handoffs/archive/2316.bin": {
+      "bytes": 1152,
+      "sha256": "a25d1e1d8bdeeb247e83bdf62676dfe71c84f12e12ce83df59f772608cb8f85b"
+    },
+    "return/handoffs/PHASE-build.json": {
+      "bytes": 774,
+      "sha256": "afab8d7c9c221ba41e0f0f995836d178a3fbee48526efe742f4712d7a23d9236"
+    },
+    "return/handoffs/build/2316.bin": {
+      "bytes": 896,
+      "sha256": "409bae449bd54e1ebbef11a0d016d4ad609d34cab93d5c76dd35d80a2031a3ab"
+    },
+    "return/handoffs/raw/0001/GATE.json": {
+      "bytes": 4438,
+      "sha256": "bb41c488832d1f90660cfa4616c6cd7f7aa346f09b1c211350d0c1a1ed32616a"
+    },
+    "return/handoffs/raw/0001/LAUNCH.json": {
+      "bytes": 351,
+      "sha256": "7c65588de68bb8ba78ba475cfee313940ed7914e6a7525c66958bf4b2b3ffafa"
+    },
+    "return/handoffs/raw/0001/POST.json": {
+      "bytes": 5595,
+      "sha256": "65f813e7dcb60cf499f9d7debcd163782ce1cb847c285c16085d0e20dca149c0"
+    },
+    "return/handoffs/raw/0001/RESULT.json": {
+      "bytes": 21001,
+      "sha256": "b5db18e3b14ecadfda739107ec2245c82b59228cca5c8f764df0d6efb122e631"
+    },
+    "return/handoffs/raw/0001/stderr.bin": {
+      "bytes": 20,
+      "sha256": "b33016d1df1b98731cc8c4664243952b872f1c3b7de01556d3f454585244b6e8"
+    },
+    "return/handoffs/raw/0001/stdout.bin": {
+      "bytes": 14,
+      "sha256": "133487a82d9f298d21e40de4fc3968bbc67232af3832275e95c9030bbda616ae"
+    },
+    "return/handoffs/retained/2316.bin": {
+      "bytes": 1280,
+      "sha256": "96f44fca4e0dcbd7e3fffc549ff5d78f624406ad9f7c5d81c59e696fd82b2a59"
+    },
+    "return/handoffs/source/2316.bin": {
+      "bytes": 1024,
+      "sha256": "0eaef53b3e47a277597382d9e3bfd83c303addeb1a1e654f6656dbed821e7e39"
+    },
+    "return/handoffs/spy.jsonl": {
+      "bytes": 188,
+      "sha256": "8f3d841e25ee096c396bccf59df0ab9f4fa3e56addcc22611016fa6aa8b1e931"
+    },
+    "return/handoffs/temp/2316.bin": {
+      "bytes": 768,
+      "sha256": "642689c6ca018f13a16228073ee08e14cca5ea59b5a89a5b43ba18c3e64c0d5b"
+    },
+    "return/handoffs/work/2316.bin": {
+      "bytes": 768,
+      "sha256": "ae7c18e2e9fafbd4725c097f64ce81d2d25c23059fea7f79995d3429aa917153"
+    },
+    "return/producer-source/controller.py": {
+      "bytes": 10390,
+      "sha256": "8531ecff58287c0196743d6e600fce6d7f751a6a8d82335de1e26062d5496358"
+    },
+    "return/producer-source/crash_binding.py": {
+      "bytes": 2173,
+      "sha256": "4c6d1e2e1e532313d75e61beef6ba98db9c04d8748eb15e3448f51d1da4adb16"
+    },
+    "return/producer-source/crash_child.py": {
+      "bytes": 2217,
+      "sha256": "d78234c0bc44bec659723ce1286acb60a733d9e07d03b160a4746fc5299d6e4a"
+    },
+    "return/producer-source/harmless_graph.py": {
+      "bytes": 1259,
+      "sha256": "7889b51697b8e0960f87c61a9216a2b59bca8a6970f7144e6dbd36285d8c2824"
+    },
+    "return/producer-source/run_correction1.py": {
+      "bytes": 8819,
+      "sha256": "327538f9522f681e2839d368458a7868e40f085e0b23e001ae3addf3974d8cee"
+    },
+    "return/producer-source/run_method.py": {
+      "bytes": 10951,
+      "sha256": "9684e89f988e3cdb9210eb669e4db91d6d40e3907fdd9d3778dbff6449b96090"
+    },
+    "return/producer-source/task_adapter.py": {
+      "bytes": 14779,
+      "sha256": "b7482baa917723df89cfef388193ea294b1126df83ad48b3ab947116252721b8"
+    },
+    "stderr.bin": {
+      "bytes": 464,
+      "sha256": "7b892c2ac8ce7c67281d64805f9625040f4b2fc303757cd92c3b0c8768b4b0cd"
+    },
+    "stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "original_final_cpu": "MISSING",
+  "original_final_allocation": "MISSING",
+  "producer_final_ledger": "MISSING",
+  "raw_preserved": true,
+  "authentication_calls_no_helpers": true
+}

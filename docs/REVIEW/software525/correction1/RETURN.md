@@ -1,5 +1,23 @@
 # Software525 correction1 actual return
 
+**Correction to the once-only statement below:** publishing the evidence-only
+a117673 head unexpectedly dispatched unchanged controls again because GitHub's
+PR path filter uses the whole PR diff. Unintended run39708908912 FAILED in the
+first handoff scenario: observed roles included None for a sampled zombie,
+`AssertionError: {'leaf', 'tracer', 'adapter', None}`. This is original failed
+evidence, not excluded, relabelled or retried. Earlier run39708669955 remains
+an actual bounded PASS observation, not stable whole-controller acceptance.
+Normal required checks are retained; no integration/C clearance follows.
+
+Exact failed provider ZIP25924bytes/artifact12396022644 SHA256
+`00bdcb86865e2a34c830eaf6211b17a4c484aad59d7b11c3b695e39e87ebe941`
+is retained alongside, with every member/source/loose byte authenticated in
+UNINTENDED-RUN.json. Original producer final CPU/allocation/ledger are MISSING;
+no reconstruction. Failed original stdout/stderr/source/raw/spy retained. The
+workflow now has an exact tested-source SHA guard preventing any further
+experiment dispatch on evidence-only heads. No source/control assertion was
+relaxed, no failed execution retry and no Product invocation occurred.
+
 Independent7b4d09591753ad78841bb8da772fc2abc9d5772b/findings predicates
 imported8db5f9e before changed source. Tested source
 d5ae96d3002b751813d14a80d557b26153e8b7d6, once-only changed workflow
