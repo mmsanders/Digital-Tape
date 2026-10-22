@@ -1,0 +1,12 @@
+{
+  "source_repo": "mmsanders/digital-tape-verification",
+  "source_commit": "7b4d09591753ad78841bb8da772fc2abc9d5772b",
+  "path": "findings/P2-268-CORRECTION1-2026-10-21",
+  "tree": "f2050068e8aa4b55d453846335d7a68483757805",
+  "files": {
+    "README.md": "e90ddbac988eaa5abca1d68c7515be4ce1453a4478edcbb6297a26bd86f77dc8",
+    "RESULT.json": "bff8db82be834f06b234f58e78b54e7148c484fe0ce0986fcf224fabc417fc13",
+    "replay.py": "26cbc83927d072be51c5f3f6eccb9fac58b6444e23251166c648b6ca7615127f"
+  },
+  "authority": "Software525 comment6330698072; independent correction predicates imported before changed logic; no acceptance"
+}

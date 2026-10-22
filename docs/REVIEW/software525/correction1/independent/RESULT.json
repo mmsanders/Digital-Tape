@@ -1,0 +1,12 @@
+{
+  "verdict": "PARTIAL standalone helper facts PASS; C adapter and final-accounting dependency HELD, correction1/2",
+  "archive_members": 422,
+  "controller_invocations": 38,
+  "actual_helpers": 13,
+  "corruptions_detected": 6,
+  "real_sensor_snapshots": 3,
+  "cpu_increment_ns": 30034000,
+  "product_invocations": 0,
+  "correction": "Source-bind C task/phase/whole-root/process-tree adapter with harmless mechanics. Also retain incomplete STOP on actual final census/measurement exception; current final_scan is outside handler and incomplete control only relabels a successful measurement.",
+  "limitations": "No hard overshoot or arbitrary-descendant accounting. No generic native argv, production cost upper bound, C execution or Product integration clearance."
+}
