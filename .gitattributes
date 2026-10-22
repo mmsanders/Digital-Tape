@@ -67,3 +67,6 @@ docs/REVIEW/software511/** -text
 tests/budget_gate_r1/** -text
 
 docs/REVIEW/software525/correction1/independent/** -text
+
+docs/REVIEW/software525/correction1/** -text
+docs/REVIEW/software525/correction1/*.json -text whitespace=cr-at-eol

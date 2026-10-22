@@ -1,0 +1,32 @@
+{
+  "source": "d5ae96d3002b751813d14a80d557b26153e8b7d6",
+  "run": 39708669955,
+  "artifact_id": 12396211774,
+  "provider_size": 204297,
+  "provider_digest": "c17a600305f3b616328c41cac5b189b7a2fb28b4e52ee293feb64a097b30aa14",
+  "archive_bytes": 106395,
+  "archive_sha256": "bfd7e10d31c5b3bdd39d3a71c4d556d325ec354fab6f9d88aee22f51e874c8bd",
+  "closed_members": 149,
+  "inventory_entries": 148,
+  "changed_scenarios": 10,
+  "actual_root_launches": 8,
+  "actual_spy_processes": 20,
+  "incomplete_receipts": [
+    "before-failure/raw/0001/ACCOUNTING-STOP.json",
+    "estimate-stop/raw/0002/ACCOUNTING-STOP.json",
+    "final-failure/raw/0001/ACCOUNTING-STOP.json",
+    "monitor-failure/raw/0001/ACCOUNTING-STOP.json",
+    "unsupported-process/raw/0001/ACCOUNTING-STOP.json"
+  ],
+  "all_members_and_source_authenticated": true,
+  "raw_sensor_exception_authenticated": true,
+  "estimate_stop": "second invocation rejected pre-launch due actual gate receipt growth; no second helper",
+  "allocated_bytes": 1470464,
+  "receipt_reserve": 65536,
+  "cpu_ns_including_reserve": 122707705000,
+  "wall_ns": 2817371767,
+  "original38_replayed": false,
+  "Product_calls": 0,
+  "independent_disposition": "PENDING; no self-acceptance, no integration/C clearance",
+  "provider_bytes_and_every_loose_member_authenticated": true
+}
