@@ -70,3 +70,7 @@ docs/REVIEW/software525/correction1/independent/** -text
 
 docs/REVIEW/software525/correction1/** -text
 docs/REVIEW/software525/correction1/*.json -text whitespace=cr-at-eol
+docs/REVIEW/software525/correction2/** -text
+docs/REVIEW/software525/correction2/*.json -text whitespace=cr-at-eol
+host/budget-controller/task_adapter.py -text whitespace=cr-at-eol
+host/budget-controller/run_correction2.py -text whitespace=cr-at-eol

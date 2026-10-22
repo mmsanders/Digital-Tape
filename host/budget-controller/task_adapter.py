@@ -53,7 +53,7 @@ def processes(group, rules):
 
 
 def supervise(session, argv, output, timeout, cpu_cap_ns, bytes_cap,
-              root=None, rules=None, sensor=None):
+              root=None, rules=None, sensor=None, final_gate=None):
     """Every fallible sensor, including BEFORE/FINAL, enters the same finalizer."""
     session.require_next()
     sensor = sensor or (lambda root, stage: C.census(root))
@@ -68,9 +68,20 @@ def supervise(session, argv, output, timeout, cpu_cap_ns, bytes_cap,
     errors = []
     reason = None
     reaped = False
+    launch_gate = None
     try:
         before = sensor(root, 'before')
         start_cpu = C.own_completed_cpu()
+        # Task owns the original origins: this fresh measurement must not start
+        # another task/phase clock. Include prior gate fsync/hash/census work.
+        if final_gate is not None:
+            launch_gate = final_gate(before, start_cpu)
+            C.immutable(output/'FINAL-GATE.json', launch_gate)
+            if launch_gate['decision'] != 'ALLOW':
+                raise RuntimeError(launch_gate['decision'])
+            cpu_cap_ns = launch_gate['cpu_cap_ns']
+            bytes_cap = launch_gate['bytes_cap']
+            start_cpu = launch_gate['invocation_cpu_origin_ns']
         if before['allocated_bytes'] > bytes_cap or cpu_cap_ns < 0:
             raise RuntimeError('pre-launch actual task/phase exhaustion')
         with (output/'stdout.bin').open('xb') as stdout, (output/'stderr.bin').open('xb') as stderr:
@@ -141,6 +152,7 @@ def supervise(session, argv, output, timeout, cpu_cap_ns, bytes_cap,
                       poll_ns=10000000, hard_overshoot_guarantee=False,
                       termination='SIGKILL owned cooperating process group; wait4 root',
                       scope=str(root), rules=rules)
+        result['final_gate'] = launch_gate
         if not complete:
             C.immutable(output/'ACCOUNTING-STOP.json', dict(status='INCOMPLETE STOP',
                         terminal=True, no_further_command=True, measurement=result))
@@ -187,9 +199,23 @@ class Task:
     def _snapshot(self, stage):
         scan = self.sensor(self.root, stage)
         cpu = C.own_completed_cpu()-self.cpu_origin
-        self.high = max(self.high, scan['allocated_bytes'])
-        self.phase['high'] = max(self.phase['high'], max(0, scan['allocated_bytes']-self.phase['allocation_origin']))
+        self._retain_allocation(scan['allocated_bytes'])
         return scan, cpu
+
+    def _retain_allocation(self, allocated):
+        # Missing scans are never synthesized. Complete samples cannot decrease
+        # either highwater, even if temporary files disappear before POST.
+        if type(allocated) is not int or allocated < 0:
+            raise RuntimeError('invalid complete allocation sample')
+        self.high = max(self.high, allocated)
+        self.phase['high'] = max(self.phase['high'], max(0, allocated-self.phase['allocation_origin']))
+
+    def _retain_supervision(self, result):
+        for key in ('allocation_before', 'allocation_after'):
+            if result[key] is not None:
+                self._retain_allocation(result[key]['allocated_bytes'])
+        for row in result['monitor']:
+            self._retain_allocation(row['allocated'])
 
     def invoke(self, argv, next_cpu_ns, next_bytes, rules, timeout=1):
         self.session.require_next()
@@ -223,12 +249,31 @@ class Task:
                         rules=rules, argv=argv, time_ns=time.monotonic_ns(), phase=self.phase['name']))
             if decision != 'ALLOW':
                 raise RuntimeError(decision)
+            def final_gate(before, absolute_cpu):
+                fresh_cpu = absolute_cpu-self.cpu_origin
+                self._retain_allocation(before['allocated_bytes'])
+                fresh = dict(req, task_cpu_ns=fresh_cpu,
+                             phase_cpu_ns=fresh_cpu-self.phase['cpu_origin'],
+                             current_cpu_ns=fresh_cpu, task_allocated_bytes=self.high,
+                             phase_allocated_bytes=self.phase['high'])
+                return dict(request=fresh, decision=C.decide(fresh), scan=before,
+                            invocation_cpu_origin_ns=self.cpu_origin+cpu,
+                            cpu_cap_ns=next_cpu_ns,
+                            bytes_cap=min(self.limits[1]-self.completion[1],
+                                scan['allocated_bytes']+next_bytes,
+                                self.phase['allocation_origin']+self.phase['bytes_limit']-self.completion[1]),
+                            phase=self.phase['name'], original_gate_cpu_ns=cpu,
+                            final_sample_cpu_ns=fresh_cpu,
+                            last_sample_to_launch_unbounded=True)
             result = supervise(self.session, argv, out, timeout,
                                min(next_cpu_ns, self.limits[0]-cpu-self.build-self.completion[0],
                                    self.phase['cpu_limit']-(cpu-self.phase['cpu_origin'])-self.completion[0]),
                                min(self.limits[1]-self.completion[1], scan['allocated_bytes']+next_bytes,
                                    self.phase['allocation_origin']+self.phase['bytes_limit']-self.completion[1]),
-                               root=self.root, rules=rules, sensor=self.sensor)
+                               root=self.root, rules=rules, sensor=self.sensor, final_gate=final_gate)
+            # Retain every complete observed peak even on terminal/incomplete
+            # supervision, before any subsequent boundary or phase handoff.
+            self._retain_supervision(result)
             if not result['accounting_complete'] or self.session.stopped:
                 raise RuntimeError('terminal supervision result')
             after, total_cpu = self._snapshot('post')

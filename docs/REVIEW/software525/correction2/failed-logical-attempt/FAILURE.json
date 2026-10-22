@@ -1,0 +1,41 @@
+{
+  "status": "FAILED CAPABILITY STOP; no retry",
+  "producer_exit": 1,
+  "argv": [
+    "python.exe",
+    "-B",
+    "Digital-Tape/host/budget-controller/run_correction2.py",
+    "--out",
+    "sw525-correction2-logical"
+  ],
+  "failure": "PermissionError WinError5 during Task.__init__ Path.resolve(strict=True), before first logical gate",
+  "actual_children": 0,
+  "product_calls": 0,
+  "logical_cases_completed": 0,
+  "original_final_parent_cpu": null,
+  "original_final_allocation": null,
+  "original_final_ledger": null,
+  "cumulative_usage": "UNESTABLISHED: failed correction1 final usage and this attempt final usage MISSING; never zero",
+  "files": {
+    "sw525-correction2-stderr.bin": {
+      "bytes": 1173,
+      "sha256": "7b62b2d54221a0ca51d0ac9f610eb4339b1fcbc9fb1862bf2cddfdc9a63432f2"
+    },
+    "sw525-correction2-stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source/controller.py": {
+      "bytes": 10605,
+      "sha256": "4c8d973093966b8431eb34560786e3848e22891f5b6e402520df57a1040f03de"
+    },
+    "source/run_correction2.py": {
+      "bytes": 5408,
+      "sha256": "2038219b8b00e78d091b058c641a54d3757363a244eac5c9becc8da0792c7e83"
+    },
+    "source/task_adapter.py": {
+      "bytes": 17788,
+      "sha256": "f3b6d6b96bbce6cf938dd86a52684f2d960d280ca863903525d0ad0f57aee46d"
+    }
+  }
+}
