@@ -1,0 +1,23 @@
+{
+  "C270_dependency": "NOT_SATISFIED",
+  "Product_calls_by_review": 0,
+  "byte_authentication": "PASS",
+  "changed_A2": "BOUNDED_PASS",
+  "controller_adapter": "HELD",
+  "evidence_head": "ab3373188eddc6ba38b4fa3a95239ae4bbe346fd",
+  "failed_members": 24,
+  "failed_run": 39708908912,
+  "failed_run_disposition": "FAILED producer assertion; final accounting MISSING",
+  "initial_members": 149,
+  "initial_root_launches": 8,
+  "initial_run": 39708669955,
+  "initial_scenarios": 10,
+  "initial_spies": 20,
+  "logical_protocol": "PASS expectations only",
+  "max_corrections": 2,
+  "prelaunch_cpu_binding": "HELD",
+  "sampled_highwater_binding": "HELD",
+  "substantive_correction": 2,
+  "tested_source": "d5ae96d3002b751813d14a80d557b26153e8b7d6",
+  "zombie_pid": 2314
+}
