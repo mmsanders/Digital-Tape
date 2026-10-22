@@ -7,6 +7,10 @@ and on both issues. Package criteria: [WP-14](PACKAGES/WP-14.md). This contract 
 [the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule and command holds unless a line below
 changes it.
 
+**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+
+The port syntax/flush semantics below are retained for historical tests and later port support; current package acceptance requires the Windows11 route only (ADR-191).
+
 ## 1. Scope and what does not change
 
 - `tapectl` stays one C99 binary in `host/`. It composes the public engine API and reimplements no

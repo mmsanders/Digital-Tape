@@ -1,6 +1,6 @@
 # Software Lead
 
-**Instance:** Opus in a Claude Code chat. **Format:** individual lead; no subworkers.
+**Instance:** Michael-selected runtime; current Phase2 Software is a fresh local Windows ChatGPT-app chat (ADR-191). **Format:** individual lead; no subworkers.
 
 ## Authority
 

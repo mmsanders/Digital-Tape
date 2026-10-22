@@ -178,4 +178,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-190](DECISIONS.md#adr-190--close-completed-review-envelopes-and-bound-the-remaining-acceptance-work) | 2026-10-19 PDT | Phase2 closeout / distinct-disk method | Completed evidence PRs retired; defective436 superseded by459; precise remaining blockers; retained-capture223; INGEST policy facts only |
 
-127 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-191](DECISIONS.md#adr-191--windows11-only-phase2-delivery-and-fresh-local-role-contexts) | 2026-10-22 PDT | Windows11-only delivery / local lead reset | Mac deferred; current local no-card Software534/Verification277 capability+CLI closure; old527/270 parked; safe app path prioritized |
+
+128 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

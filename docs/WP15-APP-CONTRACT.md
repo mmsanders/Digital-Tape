@@ -15,6 +15,8 @@ S3 still requires independent retained-session/safety feasibility and relevant p
 tests before implementation. S5 common-path/elevation integration is not issued by
 that bounded tranche. Ready human-run pins and native acceptance holds are unchanged.
 
+**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+
 ## 1. What the app is
 
 One window that turns folders of music into a cartridge on one card. It runs the shipped `ingest`
@@ -27,7 +29,7 @@ for writing. Every device access is a `tapectl` child process. A CI check fails 
 in app code, with a negative control. The app holds no TAPEFS layout or engine knowledge.
 
 Shell: Tauri is recommended (plan §3). Software confirms it or records an alternative before
-building. Platforms (D2): Windows 11 x64 and current macOS arm64. Linux builds only for CI.
+building. Platforms (D2 as amended ADR-191): Windows11 x64 only; macOS app equivalent deferred pending explicit resumption. Linux builds only for existing CI.
 
 ## 2. The window
 
@@ -90,7 +92,7 @@ phase uses a NULL-write binding over the same open device; it does not reopen it
 first on that open, as for `provision`. **Continuity:** if the OS reports media removal or change
 on that open device, `make` stops with ID `CARD_CHANGED` and exit 1, and never continues on a
 reopened path. This covers Windows media-change/removal errors and macOS disk disappearance.
-Software demonstrates detection on Windows 11 and macOS arm64 with an equal-size swap, a
+Software demonstrates detection on current Windows11 with an equal-size swap, a
 remove/reinsert, and a no-change positive. A reader or platform that cannot report a change is
 recorded as a stated limitation, never claimed. A change between `cards` and the start of `make`
 is covered by the app's pre-launch recheck (§4) only. A deliberate equal-size swap inside that gap
@@ -158,8 +160,7 @@ Progress weights per `make` step are Software's choice. They are recorded, and t
 backwards. **Cancel** is offered only before step 3. After `make` starts, interrupting is the
 user's pull, which §6 covers. The app never re-runs a step automatically.
 
-**Elevation.** Raw device access needs administrator rights: UAC on Windows; an authorization
-prompt on macOS. Only the one `tapectl make` child runs elevated, so there is one prompt per Make. The app
+**Elevation.** Raw device access needs administrator rights: UAC on Windows. The macOS authorization route is deferred (ADR-191). Only the one `tapectl make` child runs elevated, so there is one prompt per Make. The app
 process, `ingest` and `tapectl cards` never run elevated. Software proposes the mechanism and records the exact
 prompt text the user sees. Prompts are a G2 hesitation risk, not a failure in themselves.
 

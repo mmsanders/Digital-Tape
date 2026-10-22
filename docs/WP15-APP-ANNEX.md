@@ -8,6 +8,8 @@ Basis: Software444/448 proposal59a868e; independent APP preflight fe8f3bdf.
 The Software proposal's implementation-site map and capability probes are evidence,
 not normative source or a licence to inspect uncovered implementation before authoring tests.
 
+**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+
 ## 1. Diagnostic reports
 
 `--report FILE --report-nonce N` occur together, at most once each. N is32 lowercase
@@ -203,8 +205,7 @@ including failed, transient and zero-access opens; ordinary-file positive contro
 must remain clean. Qualify a candidate method against those controls before using
 absence of records. Handle sampling or app self-logging alone cannot establish
 absence. Windows in-box tracing failed controls; Procmon or another ordinary-settings
-method may be evaluated, not presumed adequate. Mac fs_usage catches paths only
-on the submitted SIP-disabled runner; SIP-on proof remains held. No security change,
+method may be evaluated, not presumed adequate. Historical Mac fs_usage catches paths only on the submitted SIP-disabled runner; Mac qualification is deferred and is not a current Windows release gate (ADR-191). No security change,
 injection, shipping seam, rebuilt tapectl, purchase or new Michael test is licensed.
 Prompts/declines and actual Windows11/macOS family builds remain independently
 unobserved where disclosed. Host authoring/build work may proceed while these
@@ -234,7 +235,7 @@ retain earlier stdout/report/publication facts, never roll back an already commi
 phase or claim the card unchanged, and never reopen the path. A report-write failure
 still obeys §1 and cannot suppress the ordinary child outcome.
 
-Windows/macOS S3 device-session methods remain HELD. The tested access upgrades and
+Windows S3 device-session method remains HELD pending applicable independent clearance; macOS S3 is DEFERRED (ADR-191). The tested access upgrades and
 post-path-open identity checks do not establish binding before authorized write-mode
 access; no weaker guarantee is adopted. Linux retained-inode/diskseq loop receipts
 are only bounded capability facts, not S3 acceptance or proof that an access upgrade

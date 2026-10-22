@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 3 October 2026 UTC** (Phase 1 close-out; ADR-153…160 folded in).
+**Current agreement: 22 October2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment).
 Applies to every lead, regardless of model or app. Revisions/hashes live in
 spec/VERSION.md; phase and gate state in docs/STATUS.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
@@ -49,7 +49,7 @@ Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Prefer short scoped rounds and capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
-Michael may configure issue listeners for lead activation. This agreement does not
+Current Phase2 family delivery is Windows11 only; macOS is deferred under ADR-191, Linux remains existing CI. Michael may configure issue listeners for lead activation. This agreement does not
 install a listener or enable automatic acceptance, review or merge.
 
 **Expired freeze exception:** Michael granted one actor PM + Software + Hardware authority
@@ -199,9 +199,7 @@ unless Michael changes it at kickoff. Phase 2 scope, kickoff decisions, rounds a
 [the Phase 2 plan](docs/PHASE2-PLAN.md). Use
 [role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
 historical record of how Phase 1 was organised.
-PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). Independent
-Verification is Sol in a separate ChatGPT Work chat;
-Software and Hardware are Opus in separate Claude Code chats. Surge is Grok, primarily
+PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). For current Phase2, Michael assigns Software to a fresh local Windows ChatGPT-app chat and Verification to a separate fresh independent local chat (ADR-191); runtime/model selection is Michael's. Earlier fixed Software/Verification app/model statements are superseded. Hardware remains parked in its separate role. Surge is Grok, primarily
 instructed directly by Michael for miscellaneous scoped tasks.
 
 Leads perform their own work within their normal authorities. Software implements and
