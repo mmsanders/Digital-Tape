@@ -40,4 +40,3 @@ try {
 $facts.end_utc=[DateTime]::UtcNow.ToString('o')
 $facts | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $root 'capability.private.json') -Encoding utf8
 $facts | ConvertTo-Json -Depth 8
-
