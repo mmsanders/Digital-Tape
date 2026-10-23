@@ -1,0 +1,31 @@
+name: Backend component carrier
+on:
+  pull_request:
+    paths:
+      - 'host/app/backend-component/**'
+      - 'host/app/src/**'
+      - 'host/app/tests/lifecycle_adapter.rs'
+      - '.github/workflows/backend-component.yml'
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Compile unchanged backend and test-only adapter with exact lock
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          rustc -Vv
+          cargo -V
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib
+          if($LASTEXITCODE -ne 0){throw 'Locked component compile/unit checks failed'}
+          cargo build --manifest-path host/app/backend-component/Cargo.toml --locked --example lifecycle_adapter
+          if($LASTEXITCODE -ne 0){throw 'Adapter link failed'}
