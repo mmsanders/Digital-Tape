@@ -1,0 +1,9 @@
+{
+  "publication": "420e5cf3172376c5edeb95aeb73733c84a83d201",
+  "final_port_constructed_utc": "2026-10-23T17:52:10.109385+00:00",
+  "earlier_unpublished_scaffold_disclosure": 6371062146,
+  "earlier_scaffold_built_or_run": false,
+  "quarantine_preserved": true,
+  "first_postpublication_adapter_sha256": "7d0655af148dbb131cac489b81b8ad1384d1535afc89b22428f66ddc8e375a82",
+  "candidate_adapter_sha256": "17c75318811a20fb1fc963ab9c128f9c248ef7028722fa2fee0f6348baeb78af"
+}

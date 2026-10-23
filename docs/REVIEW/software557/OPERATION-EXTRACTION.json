@@ -1,0 +1,7 @@
+{
+  "prior_candidate": "296780033524f439c3909d77d7847605825d510e",
+  "file": "host/tapectl.c",
+  "before_sha256": "0e64d7df38efcc1d8726c17a26e211273559128bd0fb6424baa707efb66ad541",
+  "after_sha256": "2f72ebc400bbc3aa61030a7b6a6f16048814b0b8e9433b5a6762f8d255f4724c",
+  "scope": "share provision write body, load feed/commit boundaries, verify findings body; engine and format unchanged"
+}

@@ -1,5 +1,5 @@
 /*
- * tapectl — host tooling for loading cartridges, on images and real cards.
+ * tapectl â€” host tooling for loading cartridges, on images and real cards.
  *
  * Normative: docs/WP11-CLI-CONTRACT.md, extended by docs/WP14-CLI-CONTRACT.md.
  * It composes the public engine API (engine/include/tape.h) over the WP-14 host
@@ -44,14 +44,14 @@
 #define FEED_FRAMES  1024u       /* contract: record requests of 1024 frames */
 #define BUDGET       1024u       /* service and long-operation block budget */
 
-/* The report's `version`: this build (APP-1A §1). */
+/* The report's `version`: this build (APP-1A Â§1). */
 #ifndef TAPECTL_BUILD_ID
 #define TAPECTL_BUILD_ID "unknown"
 #endif
 #define TAPECTL_VERSION "tapectl-wp15-s2+" TAPECTL_BUILD_ID
 
 
-/* One static, caller-owned block for the instance (engine-api §4). The RAM gate
+/* One static, caller-owned block for the instance (engine-api Â§4). The RAM gate
    bounds tape_instance_size() at 200 KiB; main() checks it fits. */
 static union { long double ld; uint64_t u; void *p; unsigned char b[256u * 1024u]; } g_mem;
 static unsigned char g_play[TAPE_PLAY_RING_MIN];
@@ -232,7 +232,7 @@ static const char *positional(int argc, char **argv, int n)
 /* ------------------------------------------------------------------ engine */
 
 /* Every engine command opens its target here: disk safety for a device, then
-   the WP-14 §2 recognition. The engine sees partition 2 of a provisioned
+   the WP-14 Â§2 recognition. The engine sees partition 2 of a provisioned
    target, and a bare WP-11 image whole, exactly as before. */
 static int open_image(const char *img)
 {
@@ -281,7 +281,7 @@ static int finish(int rc)
         (void)tape_unmount(g_t, &pos);
         g_t = NULL;
     }
-    /* ADR-164 §6: log which durable barrier ran. Always for a device; in the
+    /* ADR-164 Â§6: log which durable barrier ran. Always for a device; in the
        test build for images too. Images in the shipped build stay quiet, so
        WP-11 output is unchanged. */
 #ifdef TAPECTL_TEST
@@ -335,7 +335,7 @@ static int render(struct wav_out *out, uint64_t frames)
 
 /* Feeds all of `in` in 1024-frame requests, then services until no frames are
    owed and commits. */
-static int feed_and_commit(struct wav_in *in)
+static int feed_without_commit(struct wav_in *in)
 {
     tape_status_t st;
     int bad = 0;
@@ -359,8 +359,20 @@ static int feed_and_commit(struct wav_in *in)
         CHECK(tape_status(g_t, &st));
     } while (st.frames_owed);
     OBS_PHASE("other", 0, -1);
+    return 0;
+}
+
+static int commit_loaded(void)
+{
     CHECK(tape_commit(g_t));
     return 0;
+}
+
+static int feed_and_commit(struct wav_in *in)
+{
+    int rc = feed_without_commit(in);
+    if (rc) { return rc; }
+    return commit_loaded();
 }
 
 static int run_long(int promote)
@@ -454,7 +466,7 @@ static int cmd_format(int argc, char **argv)
         || label == NULL || dup) {
         return usage("format: bad or missing option");
     }
-    /* WP-14 §4: format stays bare-image only. */
+    /* WP-14 Â§4: format stays bare-image only. */
     if (bare_only(positional(argc, argv, 0))) { return EXIT_USAGE; }
     if (hport_create(&g_tgt.hp, positional(argc, argv, 0), (uint64_t)blocks * TAPE_BLOCK_SIZE) != 0) {
         fprintf(stderr, "tapectl: cannot create image\n");
@@ -467,6 +479,21 @@ static int cmd_format(int argc, char **argv)
     return 0;
 }
 
+static int load_existing_feed(struct wav_in *in)
+{
+    int rc = 0;
+    if (!rc) { rc = capacity_check(in->frames); }
+    if (!rc) { rc = mount(TAPE_SIDE_A); }
+    if (!rc) {
+        tape_result r = tape_set_side(g_t, TAPE_SIDE_B);
+        g_side_letter = 'B';
+        if (r == TAPE_OK) { r = tape_seek(g_t, 0u); }
+        if (r == TAPE_OK) { r = tape_arm(g_t, TAPE_REC_OVERWRITE); }
+        rc = (r == TAPE_OK) ? feed_without_commit(in) : engine_fail("load", r);
+    }
+    return rc;
+}
+
 static int cmd_load(int argc, char **argv)
 {
     static const char *const flags[] = {NULL};
@@ -477,15 +504,8 @@ static int cmd_load(int argc, char **argv)
     if (check_args(argc, argv, flags, 2)) { return usage("load: bad arguments"); }
     if (wav_open_read(&in, positional(argc, argv, 1), err, sizeof err)) { return usage(err); }
     rc = open_image(positional(argc, argv, 0));
-    if (!rc) { rc = capacity_check(in.frames); }
-    if (!rc) { rc = mount(TAPE_SIDE_A); }
-    if (!rc) {
-        tape_result r = tape_set_side(g_t, TAPE_SIDE_B);
-        g_side_letter = 'B';
-        if (r == TAPE_OK) { r = tape_seek(g_t, 0u); }
-        if (r == TAPE_OK) { r = tape_arm(g_t, TAPE_REC_OVERWRITE); }
-        rc = (r == TAPE_OK) ? feed_and_commit(&in) : engine_fail("load", r);
-    }
+    if (!rc) { rc = load_existing_feed(&in); }
+    if (!rc) { rc = commit_loaded(); }
     if (!rc) { rc = run_long(1); }
     wav_close_read(&in);
     return rc;
@@ -647,7 +667,7 @@ static int cmd_dump(int argc, char **argv)
 
 /* ---------------------------------------------------------------- provision */
 
-/* UTF-8, 1-32 bytes (WP-14 §3). Longer is refused, never truncated. */
+/* UTF-8, 1-32 bytes (WP-14 Â§3). Longer is refused, never truncated. */
 static int label_ok(const char *s)
 {
     size_t n = strlen(s), i = 0;
@@ -675,7 +695,7 @@ static int label_ok(const char *s)
 }
 
 /* A device that answers nothing: used only to ask tape_format whether
-   GEOMETRY_OK holds, before a single byte is written (WP-14 §3 order of work).
+   GEOMETRY_OK holds, before a single byte is written (WP-14 Â§3 order of work).
    tape_format checks geometry before any callback; past it, the first
    callback fails and the call returns TAPE_ERR_IO. */
 static int dry_rw(void *ctx, uint32_t lba, uint32_t count, void *buf) { (void)ctx; (void)lba; (void)count; (void)buf; return 1; }
@@ -694,6 +714,42 @@ static int io_fail(const char *what)
     return EXIT_ENGINE;
 }
 
+static int provision_existing(uint64_t sectors, uint32_t p2, const char *label,
+                              const uint8_t uuid[16], uint32_t epoch, uint32_t length,
+                              int generated)
+{
+    uint8_t lba0[512], mbr[512];
+    int i, nonzero = 0;
+    /* 3. Zero LBA 0 if it is not already zero, so an interrupted provision is
+          never a provisioned card. */
+    if (hport_read(&g_tgt.hp, 0, lba0, 512) != 0) { return io_fail("read LBA 0"); }
+    for (i = 0; i < 512; i++) { nonzero |= lba0[i]; }
+    if (nonzero) {
+        memset(lba0, 0, sizeof lba0);
+        if (hport_write(&g_tgt.hp, 0, lba0, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("clear LBA 0"); }
+    }
+
+    /* 4. Partition 2 via tape_format (the engine flushes its own writes). */
+    partview_bind(&g_tgt.view, &g_tgt.dev, &g_tgt.hp, LAYOUT_P2_START, p2, 1);
+    CHECK(tape_format(&g_tgt.dev, uuid, epoch, label, length));
+
+    /* 5. Partition 1, then flush. */
+    if (fat_build_p1(put_p1, &g_tgt.hp, label, uuid, epoch) != 0 || hport_flush(&g_tgt.hp) != 0) {
+        return io_fail("write partition 1");
+    }
+
+    /* 6. The MBR last: it is the card's identity. */
+    if (mbr_build(mbr, uuid, sectors) != 0) { return io_fail("build the MBR"); }
+    if (hport_write(&g_tgt.hp, 0, mbr, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("write the MBR"); }
+
+    if (generated) {
+        printf("uuid ");
+        for (i = 0; i < 16; i++) { printf("%02x", uuid[i]); }
+        printf("\nepoch %lu\n", (unsigned long)epoch);
+    }
+    return 0;
+}
+
 static int cmd_provision(int argc, char **argv)
 {
     static const char *const flags[] = {"--label", "--length-s", "--uuid", "--epoch", "--image-bytes", "--erase", NULL};
@@ -701,8 +757,8 @@ static int cmd_provision(int argc, char **argv)
     unsigned long long image_bytes = 0;
     uint64_t sectors;
     uint32_t length = 3600u, epoch = 0, p2;
-    uint8_t uuid[16], lba0[512], mbr[512];
-    int dup = 0, is_dev, generated = 0, i, nonzero = 0, rc;
+    uint8_t uuid[16];
+    int dup = 0, is_dev, generated = 0, rc;
     tape_dev dry;
     tape_result r;
 
@@ -729,7 +785,7 @@ static int cmd_provision(int argc, char **argv)
         }
     }
 
-    /* 1. Every §5 rule first: zero writes on refusal. */
+    /* 1. Every Â§5 rule first: zero writes on refusal. */
     if (is_dev) {
         rc = target_safety(path, 1, erase, 1);
         if (rc) { return rc; }
@@ -774,34 +830,7 @@ static int cmd_provision(int argc, char **argv)
 #endif
     }
 
-    /* 3. Zero LBA 0 if it is not already zero, so an interrupted provision is
-          never a provisioned card. */
-    if (hport_read(&g_tgt.hp, 0, lba0, 512) != 0) { return io_fail("read LBA 0"); }
-    for (i = 0; i < 512; i++) { nonzero |= lba0[i]; }
-    if (nonzero) {
-        memset(lba0, 0, sizeof lba0);
-        if (hport_write(&g_tgt.hp, 0, lba0, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("clear LBA 0"); }
-    }
-
-    /* 4. Partition 2 via tape_format (the engine flushes its own writes). */
-    partview_bind(&g_tgt.view, &g_tgt.dev, &g_tgt.hp, LAYOUT_P2_START, p2, 1);
-    CHECK(tape_format(&g_tgt.dev, uuid, epoch, label, length));
-
-    /* 5. Partition 1, then flush. */
-    if (fat_build_p1(put_p1, &g_tgt.hp, label, uuid, epoch) != 0 || hport_flush(&g_tgt.hp) != 0) {
-        return io_fail("write partition 1");
-    }
-
-    /* 6. The MBR last: it is the card's identity. */
-    if (mbr_build(mbr, uuid, sectors) != 0) { return io_fail("build the MBR"); }
-    if (hport_write(&g_tgt.hp, 0, mbr, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("write the MBR"); }
-
-    if (generated) {
-        printf("uuid ");
-        for (i = 0; i < 16; i++) { printf("%02x", uuid[i]); }
-        printf("\nepoch %lu\n", (unsigned long)epoch);
-    }
-    return 0;
+    return provision_existing(sectors, p2, label, uuid, epoch, length, generated);
 }
 
 /* ------------------------------------------------------------------- verify */
@@ -861,20 +890,14 @@ static void verify_side(tape_side side, struct side_result *s)
     }
 }
 
-/* Findings, in docs/WP14-CLI-CONTRACT.md §4.1 table order (ADR-164):
+/* Findings, in docs/WP14-CLI-CONTRACT.md Â§4.1 table order (ADR-164):
    MBR_LAYOUT, PARTITION_TYPE, PARTITION_TRUNCATED; MOUNT for each failed side,
    A before B; NEEDS_REPAIR; SIDE_B_DEGRADED; READ_ERROR by side, then frame. */
-static int cmd_verify(int argc, char **argv)
+static int verify_existing(unsigned mf, int have_view)
 {
-    static const char *const flags[] = {NULL};
     struct side_result sr[2];
     const struct side_result *state = NULL;
-    unsigned mf;
-    int have_view, n = 0, rc, i;
-
-    if (check_args(argc, argv, flags, 1)) { return usage("verify: bad arguments"); }
-    rc = target_open_verify(&g_tgt, positional(argc, argv, 0), &mf, &have_view);
-    if (rc) { return rc; }
+    int n = 0, i;
     if (mf & MBR_F_LAYOUT)    { printf("MBR_LAYOUT\n"); n++; }
     if (mf & MBR_F_TYPE)      { printf("PARTITION_TYPE\n"); n++; }
     if (mf & MBR_F_TRUNCATED) { printf("PARTITION_TRUNCATED\n"); n++; }
@@ -908,9 +931,20 @@ static int cmd_verify(int argc, char **argv)
     return EXIT_ENGINE;
 }
 
+static int cmd_verify(int argc, char **argv)
+{
+    static const char *const flags[] = {NULL};
+    unsigned mf;
+    int have_view, rc;
+    if (check_args(argc, argv, flags, 1)) { return usage("verify: bad arguments"); }
+    rc = target_open_verify(&g_tgt, positional(argc, argv, 0), &mf, &have_view);
+    if (rc) { return rc; }
+    return verify_existing(mf, have_view);
+}
+
 /* -------------------------------------------------------------------- cards */
 
-/* APP-1A §5 / APP §3: read-only candidate discovery. No device is opened, nothing
+/* APP-1A Â§5 / APP Â§3: read-only candidate discovery. No device is opened, nothing
    is written or unmounted, and a candidate authorizes nothing. stdout carries
    one card line per candidate, then the summary; refused disks are never named. */
 struct cards_count { unsigned long offered, unprobed; };
