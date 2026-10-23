@@ -1,0 +1,34 @@
+name: Prepare exact component lock
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/backend-lock-prepare.yml'
+permissions:
+  contents: read
+jobs:
+  normalize:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Normalize lock feature edges without Product execution
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory -Path lock-evidence | Out-Null
+          Copy-Item host/app/backend-component/Cargo.lock lock-evidence/input.lock
+          rustc -Vv > lock-evidence/rustc.txt
+          cargo -V > lock-evidence/cargo.txt
+          cargo metadata --manifest-path host/app/backend-component/Cargo.toml --format-version 1 > lock-evidence/metadata.json
+          if($LASTEXITCODE -ne 0){throw 'Metadata normalization failed'}
+          Copy-Item host/app/backend-component/Cargo.lock lock-evidence/Cargo.lock
+          git rev-parse HEAD > lock-evidence/source-head.txt
+          python -c "import tomllib,json,pathlib; r=pathlib.Path('lock-evidence'); a=tomllib.loads((r/'input.lock').read_text())['package']; b=tomllib.loads((r/'Cargo.lock').read_text())['package']; keys=lambda p:tuple(p.get(k) for k in ('name','version','source','checksum')); old={keys(p) for p in a}; assert all(keys(p) in old for p in b); assert not any(p['name'] in ('tauri','tauri-build') for p in b); (r/'RESULT.json').write_text(json.dumps({'old_packages':len(a),'new_packages':len(b),'all_retained_identity_records_unchanged':True}))"
+          if($LASTEXITCODE -ne 0){throw 'Retained identity changed'}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software555-normalized-lock
+          path: lock-evidence
+          retention-days: 7
