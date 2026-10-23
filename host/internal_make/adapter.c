@@ -51,7 +51,7 @@ static void file_key(struct hport *p,char out[96]) {
 }
 static void event(struct hport *p,const char *op,const char *extra) {
  char key[96];file_key(p,key);
- fprintf(current->journal,"{\"op\":\"%s\",\"session\":\"%p\",\"file_id\":\"%s\"%s}\n",op,p->h,key,extra?extra:"");
+ fprintf(current->journal,"{\"op\":\"%s\",\"session\":\"%p\",\"file_id\":\"%s\",\"stdout_position\":%lld%s}\n",op,p->h,key,(long long)_ftelli64(stdout),extra?extra:"");
  if(fflush(current->journal)) die("journal flush");
 }
 #ifndef IM_REFERENCE
