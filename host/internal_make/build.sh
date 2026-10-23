@@ -12,7 +12,9 @@ git rev-parse "$ref:host/tapectl.c" "$ref:host/target.c" HEAD:engine HEAD:spec >
 gcc --version > "$out/compiler.txt"
 MAKE=$(command -v mingw32-make || command -v make)
 "$MAKE" -C engine CC=gcc all
-flags=(-std=c99 -O2 -Wall -Wextra -Werror -Iengine/include -Ihost -Ihost/port -Ihost/internal_make)
+# Debug adapter build avoids optimizing unused embedded shipping entrypoints.
+# All warnings remain fatal; engine keeps its unchanged strict optimized build.
+flags=(-std=c99 -O0 -g -Wall -Wextra -Werror -Iengine/include -Ihost -Ihost/port -Ihost/internal_make)
 head=$(git rev-parse HEAD)
 platform=(host/port/hport.c host/port/hport_win.c host/port/probe_win.c host/port/discover_win.c)
 support=(host/wav.c host/report.c host/port/discover.c host/port/mbr.c host/port/fat.c host/port/safety.c host/port/entropy.c)
@@ -40,3 +42,4 @@ done
 sha256sum "$out/reference.exe" "$out/composition.exe" > "$out/binaries.sha256"
 git status --short > "$out/build-working-tree.txt"
 echo 'Compiled exact ordinary-file adapters; ZERO Product/image/runtime execution'
+
