@@ -1,0 +1,73 @@
+name: Software546 backend adapter BUILD
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - '.github/workflows/windows-backend-build.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+      DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+      DT_TEST_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
+        with:
+          repository: mmsanders/digital-tape-verification
+          ref: ce8b9c114d622156ae3f4600776846baf5a0d79c
+          path: verification
+      - name: Original pinned child and source/build inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          if((Get-PSDrive C).Free -lt 15GB){throw 'Compilation headroom unavailable'}
+          New-Item -ItemType Directory adapter,build-evidence | Out-Null
+          gh run download 39883700812 --repo mmsanders/Digital-Tape --name software538-windows-portable --dir original
+          if($LASTEXITCODE -ne 0){throw 'Original artifact retrieval failed'}
+          $child=(Resolve-Path original/ingest.exe).Path
+          if((Get-FileHash $child).Hash.ToLowerInvariant() -ne $env:DT_INGEST_SHA256){throw 'Original S1 mismatch'}
+          "DT_TEST_INGEST=$child" >> $env:GITHUB_ENV
+          "DT_SOURCE_HEAD=$(git rev-parse HEAD)" >> $env:GITHUB_ENV
+          rustc -Vv > build-evidence/rustc.txt
+          cargo -V > build-evidence/cargo.txt
+          git ls-tree -r HEAD host/app > build-evidence/source-tree.txt
+          python verification/tests/windows_app_jobs_r1/lifecycle.py --emit > adapter/cases.json
+          if($LASTEXITCODE -ne 0){throw 'Frozen cases emission failed'}
+      - name: Compile actual production library and test-only adapter
+        working-directory: host/app
+        run: |
+          cargo test --locked --lib 1> ../../build-evidence/unit.stdout 2> ../../build-evidence/unit.stderr
+          if($LASTEXITCODE -ne 0){throw 'Unit regression failed'}
+          cargo test --locked --test child_binding 1> ../../build-evidence/binding.stdout 2> ../../build-evidence/binding.stderr
+          if($LASTEXITCODE -ne 0){throw 'Existing real-child binding regression failed'}
+          cargo build --locked --release --example lifecycle_adapter --bin digital-tape 1> ../../build-evidence/compile.stdout 2> ../../build-evidence/compile.stderr
+          if($LASTEXITCODE -ne 0){throw 'Adapter/main compilation failed'}
+      - name: Package BUILD-only adapter provenance
+        run: |
+          Copy-Item host/app/target/release/examples/lifecycle_adapter.exe adapter/lifecycle_adapter.exe
+          $meta=@{source_head=(git rev-parse HEAD);scope='BUILD only; actual local backend execution pending';independent_method='ce8b9c114d622156ae3f4600776846baf5a0d79c';method_blob='c4fd120e2c9d1c7c24f881009ffcea186799788b';child_sha256=$env:DT_INGEST_SHA256;child_source='35b23cacae886d9b3693b7104f581d8646ea5667';report_version=$env:DT_INGEST_VERSION;adapter_sha256=(Get-FileHash adapter/lifecycle_adapter.exe).Hash.ToLowerInvariant();cases_sha256=(Get-FileHash adapter/cases.json).Hash.ToLowerInvariant();lock_sha256=(Get-FileHash host/app/Cargo.lock).Hash.ToLowerInvariant();run=$env:GITHUB_RUN_ID}
+          $meta | ConvertTo-Json -Depth 5 | Set-Content adapter/ADAPTER-BUILD.json -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software546-backend-adapter
+          path: adapter
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software546-backend-build-evidence
+          path: build-evidence
+          retention-days: 7

@@ -1,0 +1,96 @@
+name: Software538 Windows app artifact
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - '.github/workflows/windows-app-build.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  S1_COMMIT: 35b23cacae886d9b3693b7104f581d8646ea5667
+  INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+jobs:
+  build:
+    name: Windows portable app BUILD only
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.S1_COMMIT }}
+          path: s1
+      - name: Ordinary hosted build preflight and provenance
+        run: |
+          $ErrorActionPreference='Stop'
+          $free=(Get-PSDrive -Name C).Free
+          if($free -lt 15GB){throw 'Insufficient hosted compilation headroom'}
+          New-Item -ItemType Directory build-evidence | Out-Null
+          git rev-parse HEAD > build-evidence/source-head.txt
+          git ls-tree -r HEAD host/app > build-evidence/source-tree.txt
+          git -C s1 rev-parse HEAD > build-evidence/child-source-head.txt
+          git -C s1 rev-parse HEAD:host/ingest > build-evidence/child-source-tree.txt
+          Get-Content s1/host/ingest/rust-toolchain.toml > build-evidence/child-toolchain.txt
+          rustc -Vv > build-evidence/app-rustc.txt
+          cargo -V > build-evidence/app-cargo.txt
+          if($LASTEXITCODE -ne 0){throw 'Hosted Cargo unavailable'}
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'software538-target'
+          "CARGO_TARGET_DIR=$env:CARGO_TARGET_DIR" >> $env:GITHUB_ENV
+      - name: Build the actual existing S1 report child
+        working-directory: s1/host/ingest
+        run: |
+          rustc -Vv > ../../../build-evidence/child-rustc.txt
+          cargo -V > ../../../build-evidence/child-cargo.txt
+          cargo build --release --locked 1> ../../../build-evidence/child-build.stdout.txt 2> ../../../build-evidence/child-build.stderr.txt
+          if($LASTEXITCODE -ne 0){throw 'S1 build failed'}
+          $child=Join-Path $env:CARGO_TARGET_DIR 'release/ingest.exe'
+          "DT_TEST_INGEST=$child" >> $env:GITHUB_ENV
+          "DT_TEST_INGEST_VERSION=$env:INGEST_VERSION" >> $env:GITHUB_ENV
+          "DT_INGEST_SHA256=$((Get-FileHash $child -Algorithm SHA256).Hash.ToLowerInvariant())" >> $env:GITHUB_ENV
+          "DT_INGEST_VERSION=$env:INGEST_VERSION" >> $env:GITHUB_ENV
+      - name: Existing shell unit and real child binding checks
+        working-directory: host/app
+        run: |
+          cargo test --locked 1> ../../build-evidence/app-tests.stdout.txt 2> ../../build-evidence/app-tests.stderr.txt
+          if($LASTEXITCODE -ne 0){throw 'Existing shell checks failed'}
+      - name: Release build with exact child pin
+        working-directory: host/app
+        run: |
+          cargo build --release --locked 1> ../../build-evidence/app-build.stdout.txt 2> ../../build-evidence/app-build.stderr.txt
+          if($LASTEXITCODE -ne 0){throw 'Windows app build failed'}
+      - name: Stage the portable real executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory portable/Digital-Tape | Out-Null
+          Copy-Item -LiteralPath "$env:CARGO_TARGET_DIR/release/digital-tape.exe" -Destination portable/Digital-Tape/digital-tape.exe
+          Copy-Item -LiteralPath $env:DT_TEST_INGEST -Destination portable/Digital-Tape/ingest.exe
+          gh release download wp14-tapectl-5e2df5aaf23e --repo mmsanders/Digital-Tape --pattern tapectl-windows.exe --dir portable/Digital-Tape
+          if($LASTEXITCODE -ne 0){throw 'Exact CLI asset retrieval failed'}
+          Move-Item -LiteralPath portable/Digital-Tape/tapectl-windows.exe -Destination portable/Digital-Tape/tapectl.exe
+          $tapectl=(Get-FileHash portable/Digital-Tape/tapectl.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          if($tapectl -ne '82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9'){throw 'CLI identity mismatch'}
+          $files=@(Get-ChildItem portable/Digital-Tape -File | ForEach-Object {@{name=$_.Name;bytes=$_.Length;sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}})
+          $metadata=@{scope='Windows portable hosted BUILD only; actual local client execution pending independent route';source_head=(git rev-parse HEAD);shell_source='ecca8c1304ba9511d78791e92ed35fac494f2a27';accepted_parser_base='75f867712138b8e436b2cb30ba82e5590cb584ee';s1_source=$env:S1_COMMIT;s1_tree=(git -C s1 rev-parse HEAD:host/ingest);child_pin=$env:DT_INGEST_SHA256;child_version=$env:DT_INGEST_VERSION;tapectl_source='5e2df5aaf23e9ed0e230c444a40650da9459ddb2';run_id=$env:GITHUB_RUN_ID;run_attempt=$env:GITHUB_RUN_ATTEMPT;files=$files}
+          $metadata | ConvertTo-Json -Depth 6 | Set-Content portable/Digital-Tape/BUILD.json -Encoding utf8
+          'Preserved S4 shell. Make is disabled. No card or device action is licensed. Real S1 ingest child is hash-pinned. This portable build requires the existing Windows WebView2 runtime; no runtime installer is included. Startup and UI acceptance are separate.' | Set-Content portable/Digital-Tape/README.txt -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software538-windows-portable
+          path: portable/Digital-Tape
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software538-build-evidence
+          path: build-evidence
+          if-no-files-found: error
+          retention-days: 7
