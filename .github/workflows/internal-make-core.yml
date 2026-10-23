@@ -1,0 +1,33 @@
+name: Software547 internal core compile only
+on:
+  pull_request:
+    paths:
+      - 'host/internal_make/**'
+      - '.github/workflows/internal-make-core.yml'
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Existing Windows C toolchain; no Product or image execution
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          mkdir compile-evidence
+          gcc --version > compile-evidence/compiler.txt
+          git rev-parse HEAD > compile-evidence/source-head.txt
+          git rev-parse HEAD:engine/include/tape_dev.h > compile-evidence/unchanged-engine-header.txt
+          gcc -std=c99 -Wall -Wextra -Werror -Iengine/include -c host/internal_make/core.c -o compile-evidence/core.o
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software547-compile-only
+          path: compile-evidence
+          retention-days: 7
