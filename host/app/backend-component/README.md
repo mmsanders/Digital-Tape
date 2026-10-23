@@ -1,0 +1,5 @@
+# Backend component integration carrier
+
+Software546 / independent286 report82f31d4820d113ee67d6a6807b4e0d9b18b11bdd. Pure production backend source and test adapter are exact Git blobs from disposed candidatecd996a2e91fbbc6daca520438fef5f6c79dc94b5. Existing accepted parser504 source is reused in place. This wrapper preserves dependency locks and library symbols; unused Tauri/build dependencies are optional and no GUI build script or target exists.
+
+No main.rs, page, capabilities, app configuration, startup glue, installer or shipping command is included. This carrier does not clear unexercised label/drop/UI functions, asynchronous glue, or fullAPP/INGEST/native/Make/G2. Only the disposed identified-job gate, typed mapping, ordinary jobs and real runner boundary are proposed for integration through normal current-base checks/reviews/protections. No repeated actual child execution is needed for unchanged source. Do not merge on producer CI alone; independent scope/authentication and normal protections still apply.

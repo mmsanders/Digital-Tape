@@ -5,6 +5,7 @@ from pathlib import Path
 SIZE=20972032
 CASES=['positive','initial-query-failure','unknown-safety','policy-refusal','provision-failure','load-failure','verify-failure','media-change','media-remove','query-failure']
 FIXTURE='48f1b3c7ce7fe27a90469364f841803087a9d274a4af9a4ec8ee195a2846ac18'
+METHOD_BLOBS={'tests/windows_make_core_r1/README.md':'4a54f725dab57d591d032c8ccb3e30eb22754d10','tests/windows_make_core_r1/oracle.py':'0d1e56c04c8edd1d9324001068915b45626af0b7','tests/wp14_r1/oracle.py':'90b8a79114ebb645db3403bcdfa6f605d84228b4','tests/windows_make_port_r1/README.md':'8bd2870d5a744d9d086a3291ec4fcfa98fb7df34','tests/windows_make_port_r1/admission.py':'e1d9d9a1a7fd8841037e2227258fb89272a2c044'}
 
 def sha(p):
  h=hashlib.sha256()
@@ -58,7 +59,10 @@ def main():
  save()
  try:
   receipt['context']=context.current(a.tool_context);save();context.admit(receipt['context'])
-  method=a.method.absolute();core=load_module('frozen_core',method/'tests/windows_make_core_r1/oracle.py')
+  method=a.method.absolute()
+  for name,pin in METHOD_BLOBS.items():
+   data=(method/name).read_bytes();assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==pin
+  core=load_module('frozen_core',method/'tests/windows_make_core_r1/oracle.py')
   admission=load_module('frozen_port',method/'tests/windows_make_port_r1/admission.py')
   bundle=a.bundle.absolute();context.ordinary(bundle,True)
   build=json.loads((bundle/'BUILD.json').read_text(encoding='utf-8-sig'))
@@ -98,10 +102,13 @@ def main():
    argv=[str(bundle/(mode+'.exe')),str(work),str(fixture)]
    child=dict(mode=mode,argv=argv,cwd=str(work),start_ns=time.time_ns(),forced_cleanup=False);receipt['children'].append(child);save()
    with (base/(mode+'.supervisor.stdout')).open('xb') as out,(base/(mode+'.supervisor.stderr')).open('xb') as err:
+    remaining=deadline-time.monotonic();assert remaining>0,'STOP overall600s deadline'
     proc=subprocess.Popen(argv,cwd=work,stdin=subprocess.DEVNULL,stdout=out,stderr=err);child['pid']=proc.pid;save()
-    try:child['exit']=proc.wait(timeout=max(0.1,deadline-time.monotonic()))
+    try:child['exit']=proc.wait(timeout=remaining)
     except subprocess.TimeoutExpired:
      child['forced_cleanup']=True;proc.kill();child['exit']=proc.wait(timeout=10)
+    except BaseException:
+     child['forced_cleanup']=True;proc.kill();child['exit']=proc.wait(timeout=10);raise
    child['end_ns']=time.time_ns();save();assert child['exit']==0 and not child['forced_cleanup'],'STOP actual adapter'
   rows=[];fault_records={}
   for case in CASES:
@@ -112,6 +119,7 @@ def main():
     events[mode]=[json.loads(line) for line in Path(str(prefix)+'.events.jsonl').read_text().splitlines()]
     outputs[mode]=Path(str(prefix)+'.stdout.bin').read_bytes();image=Path(str(prefix)+'.img')
     now=ordinary_facts(image,context.ordinary);assert now['identity']==twins[case][0 if mode=='reference' else 1]['identity']
+    assert all(e['file_id']==now['identity'] for e in events[mode] if 'file_id' in e)
     hashes[mode]=now['initial_sha256']
    rc=data['composition']['exit'];assert rc==data['reference']['exit']
    assert hashes['composition']==hashes['reference'] and outputs['composition']==outputs['reference']

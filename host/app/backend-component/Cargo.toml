@@ -1,0 +1,29 @@
+[package]
+name = "digital-tape-app"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+publish = false
+
+[lib]
+name = "dtapp"
+path = "../src/lib.rs"
+
+[[example]]
+name = "lifecycle_adapter"
+path = "../tests/lifecycle_adapter.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+sha2 = "0.10"
+getrandom = "0.3"
+unicode-normalization = "=0.1.25"
+
+[profile.release]
+panic = "abort"
+overflow-checks = true
+
+[workspace]
+

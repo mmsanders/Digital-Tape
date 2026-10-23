@@ -1,0 +1,36 @@
+{
+  "disposed_candidate": "cd996a2e91fbbc6daca520438fef5f6c79dc94b5",
+  "independent_report": "82f31d4820d113ee67d6a6807b4e0d9b18b11bdd",
+  "source_blobs": [
+    [
+      "children.rs",
+      "5c8619dccac32a3632eea7e4dbcbf6ceb22be5ec"
+    ],
+    [
+      "drops.rs",
+      "0822000af9bffb37d0b9cc45aeba2ed06500c01a"
+    ],
+    [
+      "ingest_job.rs",
+      "823d3cb06b0d15adf6f124a8dd0a49b34f3834fb"
+    ],
+    [
+      "jobdir.rs",
+      "7f69618a59153618cbb3b02e467afe4d4cbe8904"
+    ],
+    [
+      "label.rs",
+      "242b17039790483d703dfdef1ed1acfb54d3ce6d"
+    ],
+    [
+      "lib.rs",
+      "8355fe64f2f97e36aa3cb33818e3accabba378b8"
+    ],
+    [
+      "state.rs",
+      "0084efd8401074bd0de8edda137359a9e83ecb09"
+    ]
+  ],
+  "main_js_capabilities_config_excluded": true,
+  "scope": "mechanical component-only carrier; no new runtime acceptance"
+}
