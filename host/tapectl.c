@@ -335,7 +335,7 @@ static int render(struct wav_out *out, uint64_t frames)
 
 /* Feeds all of `in` in 1024-frame requests, then services until no frames are
    owed and commits. */
-static int feed_and_commit(struct wav_in *in)
+static int feed_without_commit(struct wav_in *in)
 {
     tape_status_t st;
     int bad = 0;
@@ -359,8 +359,20 @@ static int feed_and_commit(struct wav_in *in)
         CHECK(tape_status(g_t, &st));
     } while (st.frames_owed);
     OBS_PHASE("other", 0, -1);
+    return 0;
+}
+
+static int commit_loaded(void)
+{
     CHECK(tape_commit(g_t));
     return 0;
+}
+
+static int feed_and_commit(struct wav_in *in)
+{
+    int rc = feed_without_commit(in);
+    if (rc) { return rc; }
+    return commit_loaded();
 }
 
 static int run_long(int promote)

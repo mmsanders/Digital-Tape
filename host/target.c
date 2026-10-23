@@ -147,12 +147,12 @@ opened:
     return 0;
 }
 
-int target_open(struct target *t, const char *path, int writable)
+static int bind_existing(struct target *t, const char *path, int writable)
 {
     uint8_t lba0[512];
-    int rc = open_common(t, path, writable);
+    
 
-    if (rc) { return rc; }
+    
     if (read_lba0(&t->hp, lba0) != 0) {
         /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
         fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
@@ -178,14 +178,21 @@ int target_open(struct target *t, const char *path, int writable)
     return 0;
 }
 
-int target_open_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
+int target_open(struct target *t, const char *path, int writable)
+{
+    int rc = open_common(t, path, writable);
+    if (rc) { return rc; }
+    return bind_existing(t, path, writable);
+}
+
+static int bind_existing_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
 {
     uint8_t lba0[512];
-    int rc = open_common(t, path, 0);
+    
 
     *findings = 0;
     *have_view = 0;
-    if (rc) { return rc; }
+    
     if (read_lba0(&t->hp, lba0) != 0) {
         /* ADR-164: an unreadable LBA 0 is an I/O failure, never a bare fallback. */
         fprintf(stderr, "tapectl: cannot read LBA 0 of %s (%s): TAPE_ERR_IO\n", path, hport_error());
@@ -219,6 +226,31 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
     *have_view = 1;
     return 0;
 }
+
+int target_open_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
+{
+    int rc;
+    *findings = 0;
+    *have_view = 0;
+    rc = open_common(t, path, 0);
+    if (rc) { return rc; }
+    return bind_existing_verify(t, path, findings, have_view);
+}
+
+#ifdef TAPECTL_INTERNAL_COMPOSE
+/* Internal test adapter borrows an ALREADY caller-authorized retained session.
+   These functions neither open nor authorize a device and are absent in shipping. */
+int target_borrow_write(struct target *t, const char *path)
+{
+    if (t == NULL || !t->open) { return EXIT_ENGINE; }
+    return bind_existing(t, path, 1);
+}
+int target_borrow_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
+{
+    if (t == NULL || !t->open) { return EXIT_ENGINE; }
+    return bind_existing_verify(t, path, findings, have_view);
+}
+#endif
 
 int target_close(struct target *t)
 {

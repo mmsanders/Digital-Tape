@@ -49,4 +49,10 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
 
 int target_close(struct target *t);
 
+#ifdef TAPECTL_INTERNAL_COMPOSE
+/* Test-only borrowed-session binding; caller owns prior authorization and close. */
+int target_borrow_write(struct target *, const char *);
+int target_borrow_verify(struct target *, const char *, unsigned *, int *);
+#endif
+
 #endif /* TAPECTL_TARGET_H */

@@ -7,7 +7,12 @@ It preserves the operation callback's original result and stdout; monitoring fac
 are caller-supplied component inputs, not a claim of native Windows detection.
 
 No actual ordinary-image/engine equivalence result exists for this candidate.
-The remaining adapter must extract existing host operation ownership and load/commit
-boundaries without changing engine/format or separate-command bytes/outcomes, bind
+The candidate mechanically extracts existing target recognition into private binding
+helpers reused by the unchanged shipping open wrappers. Test-build-only borrow
+wrappers perform no open. It splits feed/drain from the existing commit call while
+the shipping feed_and_commit wrapper preserves their order and error propagation.
+No source change is accepted by this description or by syntax compilation.
+The remaining adapter must port provision/load/verify ownership without changing
+engine/format or separate-command bytes/outcomes, bind
 the real same ordinary-file session and prove all ten frozen rows on exact-size twins.
 Compile success alone cannot satisfy that requirement or clear this source for merge.

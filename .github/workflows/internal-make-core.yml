@@ -25,6 +25,8 @@ jobs:
           git rev-parse HEAD > compile-evidence/source-head.txt
           git rev-parse HEAD:engine/include/tape_dev.h > compile-evidence/unchanged-engine-header.txt
           gcc -std=c99 -Wall -Wextra -Werror -Iengine/include -c host/internal_make/core.c -o compile-evidence/core.o
+          gcc -std=c99 -Wall -Wextra -Werror -Iengine/include -Ihost/port -Ihost -fsyntax-only host/target.c host/tapectl.c
+          gcc -std=c99 -Wall -Wextra -Werror -DTAPECTL_INTERNAL_COMPOSE -Iengine/include -Ihost/port -Ihost -fsyntax-only host/target.c host/tapectl.c
       - uses: actions/upload-artifact@v4
         if: always()
         with:
