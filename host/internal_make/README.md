@@ -1,18 +1,25 @@
-# Internal retained-session core (not shipping)
+# Internal retained-file composition candidate
 
-Software547 under independent287 publication a901272c91c781c9278c4abe6e36d68bcfa5fb79.
-This source implements only the declared callback/session sequencing boundary.
-It opens no file/device and is not referenced by the app, CLI build or Make button.
-It preserves the operation callback's original result and stdout; monitoring facts
-are caller-supplied component inputs, not a claim of native Windows detection.
+Issued completion: Product557 / Verification299 under PM554. This is unreachable from
+shipping tapectl/app callers. No shipping Make/device/image command or flag is added.
 
-No actual ordinary-image/engine equivalence result exists for this candidate.
-The candidate mechanically extracts existing target recognition into private binding
-helpers reused by the unchanged shipping open wrappers. Test-build-only borrow
-wrappers perform no open. It splits feed/drain from the existing commit call while
-the shipping feed_and_commit wrapper preserves their order and error propagation.
-No source change is accepted by this description or by syntax compilation.
-The remaining adapter must port provision/load/verify ownership without changing
-engine/format or separate-command bytes/outcomes, bind
-the real same ordinary-file session and prove all ten frozen rows on exact-size twins.
-Compile success alone cannot satisfy that requirement or clear this source for merge.
+The core borrows a caller-owned session for provision, load, commit and read-only
+verify. Host operation bodies are extracted from existing tapectl; the engine and
+format remain unchanged. Reference build includes exact mainbf2381c9 tapectl/target
+bodies, with only declared test-only existing-zero-file admission substituted for
+the original sparse-creating image admission. It does not test that old create path.
+
+Independent292/a901272c freezes ten-row same-input whole-image/stdout/exit/session
+predicates.302/420e5cf3 adds existing/materialized/non-reparse twin admission and
+matched actual copied-handle I/O faults. Modeled query/change/removal facts do not
+establish Windows/native sensing.
+
+build.sh compiles two exact source-bound adapters; it never executes them. Local
+one-attempt600s admission and closed actual raw inventory are still required before
+a runtime return. Compilation is not acceptance. No actual UI/native/session/A6/
+S3/fullAPP/INGEST/G2 or Make clearance follows.
+
+Chronology limitation: unpublished local port scaffolding existed before302, was
+quarantined without build/run/publication, and was disclosed in299 comment6371062146.
+The final port was constructed after reading302; that does not rewrite the earlier
+authoring chronology. See docs/REVIEW/software557/PORT-CHRONOLOGY.json.

@@ -1,8 +1,11 @@
-name: Software547 internal core compile only
+name: Software557 internal retained-file adapter build
 on:
   pull_request:
     paths:
       - 'host/internal_make/**'
+      - 'host/tapectl.c'
+      - 'host/target.c'
+      - 'host/target.h'
       - '.github/workflows/internal-make-core.yml'
 permissions:
   contents: read
@@ -10,26 +13,26 @@ jobs:
   compile:
     runs-on: windows-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Existing Windows C toolchain; no Product or image execution
+          fetch-depth: 0
+      - name: Build existing Windows toolchain only; no Product/image execution
+        shell: bash
+        run: bash host/internal_make/build.sh
+      - name: Record source/compiler and exact artifact identities
+        shell: pwsh
         run: |
-          export PATH="/c/mingw64/bin:$PATH"
-          mkdir compile-evidence
-          gcc --version > compile-evidence/compiler.txt
-          git rev-parse HEAD > compile-evidence/source-head.txt
-          git rev-parse HEAD:engine/include/tape_dev.h > compile-evidence/unchanged-engine-header.txt
-          gcc -std=c99 -Wall -Wextra -Werror -Iengine/include -c host/internal_make/core.c -o compile-evidence/core.o
-          gcc -std=c99 -Wall -Wextra -Werror -Iengine/include -Ihost/port -Ihost -fsyntax-only host/target.c host/tapectl.c
-          gcc -std=c99 -Wall -Wextra -Werror -DTAPECTL_INTERNAL_COMPOSE -Iengine/include -Ihost/port -Ihost -fsyntax-only host/target.c host/tapectl.c
+          $ErrorActionPreference='Stop'
+          python -c "import pathlib,subprocess,json,hashlib; r=pathlib.Path('build/internal-make'); git=lambda *a:subprocess.check_output(['git',*a]).decode().strip(); sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest(); d={'source_head':git('rev-parse','HEAD'),'reference_source':'bf2381c9c187c14ce65cc501b13f9eb512c99693','engine_tree':git('rev-parse','HEAD:engine'),'spec_tree':git('rev-parse','HEAD:spec'),'method':'a901272c91c781c9278c4abe6e36d68bcfa5fb79','port_addendum':'420e5cf3172376c5edeb95aeb73733c84a83d201','executions':0,'binaries':{n:sha(r/n) for n in ('composition.exe','reference.exe')},'source_blobs':git('ls-tree','-r','HEAD','host','engine').splitlines(),'reference_blobs':{n:git('rev-parse','bf2381c9c187c14ce65cc501b13f9eb512c99693:'+n) for n in ('host/tapectl.c','host/target.c')}}; (r/'BUILD.json').write_text(json.dumps(d,indent=2)+'\n')"
+          if($LASTEXITCODE -ne 0){throw 'Build receipt failed'}
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: software547-compile-only
-          path: compile-evidence
+          name: software557-internal-adapters
+          path: |
+            build/internal-make/*.exe
+            build/internal-make/*.json
+            build/internal-make/*.txt
+            build/internal-make/*.sha256
           retention-days: 7
