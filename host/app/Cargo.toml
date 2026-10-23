@@ -16,6 +16,10 @@ path = "src/main.rs"
 name = "dtapp"
 path = "src/lib.rs"
 
+[[example]]
+name = "lifecycle_adapter"
+path = "tests/lifecycle_adapter.rs"
+
 [dependencies]
 tauri = { version = "=2.12.4", features = [] }
 serde = { version = "1", features = ["derive"] }

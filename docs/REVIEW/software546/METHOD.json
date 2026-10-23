@@ -1,0 +1,9 @@
+{
+  "assignment": 546,
+  "independent_publication": "ce8b9c114d622156ae3f4600776846baf5a0d79c",
+  "method_tree": "4859e302e9fd618ecf6e8a65729c6e3f42a8877e",
+  "lifecycle_blob": "c4fd120e2c9d1c7c24f881009ffcea186799788b",
+  "method_precedes_implementation": true,
+  "scope": "Host backend only; production state/delivery/job/real-child runner; test-only Cargo example; no engine/UI/native/device/Make clearance",
+  "prior_compiled_app": "45695aa0edb8a757db5074d17c39eda12bcda888"
+}

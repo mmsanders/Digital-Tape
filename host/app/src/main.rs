@@ -7,15 +7,13 @@ use dtapp::jobdir::{self, Job};
 use dtapp::state::{App, Next, View};
 use dtapp::ingest_job;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, DragDropEvent, Emitter, Manager, State, WindowEvent};
 
 struct Shared {
     app: Mutex<App>,
     data: PathBuf,
-    /// Generation of the latest ingest request; older runs are stale.
-    gen: AtomicU64,
     cancel: Mutex<Option<Arc<AtomicBool>>>,
     /// The job holding the latest checked DEST (kept for Make, deleted when replaced).
     current: Mutex<Option<Job>>,
@@ -35,42 +33,49 @@ fn replace_current(s: &Shared, job: Option<Job>) {
 }
 
 /// Cancel any running check and its DEST, then check every folder so far.
-fn start_ingest(h: AppHandle, s: Arc<Shared>) {
+fn start_ingest(h: AppHandle, s: Arc<Shared>, job_id: String, generation: u64) {
     if let Some(c) = s.cancel.lock().unwrap().take() {
         c.store(true, Ordering::SeqCst);
     }
     replace_current(&s, None);
-    let gen = s.gen.fetch_add(1, Ordering::SeqCst) + 1;
     let bin = match children::resolve(&INGEST) {
         Ok(b) => b,
         Err(e) => {
-            s.app.lock().unwrap().spawn_failed(&e.0);
+            s.app.lock().unwrap().fail_job(generation, &job_id, &e.0);
             return emit(&h, &s);
         }
     };
-    let job = match jobdir::create(&s.data, &format!("ingest-{}", children::nonce())) {
+    let job = match jobdir::create(&s.data, &job_id) {
         Ok(j) => j,
         Err(e) => {
-            s.app.lock().unwrap().spawn_failed(&format!("cannot create the app's own folder: {e}"));
+            s.app.lock().unwrap().fail_job(generation, &job_id, &format!("cannot create the app's own folder: {e}"));
             return emit(&h, &s);
         }
     };
-    let folders = s.app.lock().unwrap().folders.clone();
     let cancel = Arc::new(AtomicBool::new(false));
-    *s.cancel.lock().unwrap() = Some(cancel.clone());
-    emit(&h, &s);
-    std::thread::spawn(move || {
-        let o = ingest_job::run(&bin, INGEST.version.unwrap_or_default(), &job, &folders, cancel);
-        if o.cancelled || s.gen.load(Ordering::SeqCst) != gen {
+    let folders = {
+        let app = s.app.lock().unwrap();
+        if app.generation() != generation || app.active_job() != Some(job_id.as_str()) {
             jobdir::remove(&job);
             return;
         }
-        s.app.lock().unwrap().finished(&o);
+        *s.cancel.lock().unwrap() = Some(cancel.clone());
+        app.folders.clone()
+    };
+    emit(&h, &s);
+    std::thread::spawn(move || {
+        let o = ingest_job::run(&bin, INGEST.version.unwrap_or_default(), &job, &folders, cancel);
+        let mut app = s.app.lock().unwrap();
+        if !app.finish_job(generation, &job_id, &o) {
+            jobdir::remove(&job);
+            return;
+        }
         if o.exit == Some(0) {
             replace_current(&s, Some(job));
         } else {
             jobdir::remove(&job);
         }
+        drop(app);
         emit(&h, &s);
     });
 }
@@ -90,12 +95,14 @@ fn set_label(h: AppHandle, s: Sh, text: String) -> View {
 
 #[tauri::command]
 fn start_over(h: AppHandle, s: Sh) -> View {
-    if let Some(c) = s.cancel.lock().unwrap().take() {
-        c.store(true, Ordering::SeqCst);
+    {
+        let mut app = s.app.lock().unwrap();
+        if let Some(c) = s.cancel.lock().unwrap().take() {
+            c.store(true, Ordering::SeqCst);
+        }
+        app.start_over();
+        replace_current(&s, None);
     }
-    s.gen.fetch_add(1, Ordering::SeqCst);
-    replace_current(&s, None);
-    s.app.lock().unwrap().start_over();
     emit(&h, &s);
     s.app.lock().unwrap().view()
 }
@@ -115,7 +122,6 @@ fn main() {
             app.manage(Arc::new(Shared {
                 app: Mutex::new(App::default()),
                 data,
-                gen: AtomicU64::new(0),
                 cancel: Mutex::new(None),
                 current: Mutex::new(None),
             }));
@@ -125,9 +131,15 @@ fn main() {
             if let WindowEvent::DragDrop(DragDropEvent::Drop { paths, .. }) = e {
                 let h = w.app_handle().clone();
                 let s = h.state::<Arc<Shared>>().inner().clone();
-                let next = s.app.lock().unwrap().dropped(paths);
+                let job_id = format!("ingest-{}", children::nonce());
+                let (next, generation) = {
+                    let mut app = s.app.lock().unwrap();
+                    let next = app.dropped(paths);
+                    let generation = if next == Next::RunIngest { app.begin_job(&job_id) } else { app.generation() };
+                    (next, generation)
+                };
                 match next {
-                    Next::RunIngest => start_ingest(h, s),
+                    Next::RunIngest => start_ingest(h, s, job_id, generation),
                     Next::Nothing => emit(&h, &s),
                 }
             }

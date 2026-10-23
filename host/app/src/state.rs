@@ -45,6 +45,8 @@ pub struct App {
     check: Option<Check>,
     notice: Option<String>,
     pub details: String,
+    generation: u64,
+    active_job: Option<String>,
 }
 
 /// What the shell must do after a drop.
@@ -56,6 +58,35 @@ pub enum Next {
 }
 
 impl App {
+    /// Start one identified invocation. The same lock must protect drop and ticket creation.
+    pub fn begin_job(&mut self, job: &str) -> u64 {
+        self.generation = self.generation.checked_add(1).expect("job generation exhausted");
+        self.active_job = Some(job.to_owned());
+        self.check = Some(Check::Running);
+        self.notice = None;
+        self.details.clear();
+        self.generation
+    }
+
+    pub fn generation(&self) -> u64 { self.generation }
+    pub fn active_job(&self) -> Option<&str> { self.active_job.as_deref() }
+
+    /// Consume exactly one terminal delivery from the current identified invocation.
+    pub fn finish_job(&mut self, generation: u64, job: &str, outcome: &Outcome) -> bool {
+        if outcome.cancelled || generation != self.generation || self.active_job.as_deref() != Some(job) {
+            return false;
+        }
+        self.active_job = None;
+        self.finished(outcome);
+        true
+    }
+
+    pub fn fail_job(&mut self, generation: u64, job: &str, why: &str) -> bool {
+        if generation != self.generation || self.active_job.as_deref() != Some(job) { return false; }
+        self.active_job = None;
+        self.spawn_failed(why);
+        true
+    }
     pub fn view(&self) -> View {
         let check = self.check.clone().unwrap_or(Check::Idle);
         let (view, bar, too_long, message) = match &check {
@@ -141,7 +172,9 @@ impl App {
     }
 
     pub fn start_over(&mut self) {
+        let generation = self.generation.checked_add(1).expect("job generation exhausted");
         *self = App::default();
+        self.generation = generation;
     }
 }
 
