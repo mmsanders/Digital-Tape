@@ -10,5 +10,5 @@ progress[data-too-long="true"] { accent-color: #b23d35; }
 #message { overflow-wrap: anywhere; }
 button { font: inherit; margin: .5rem .5rem .5rem 0; padding: .6rem 1rem; border-radius: .4rem; border: 1px solid #52645d; background: #fff; color: inherit; }
 button:disabled { opacity: .5; }
-textarea { min-height: 8rem; resize: vertical; white-space: pre-wrap; }
+#details { min-height: 8rem; white-space: pre-wrap; overflow-wrap: anywhere; padding: .6rem; border: 1px solid #70817b; }
 [hidden] { display: none !important; }

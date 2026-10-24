@@ -54,8 +54,8 @@ async function main() {
           ratio: meter.dataset.kind === 'length' && meter.hasAttribute('value') ? meter.value : null,
           too_long: meter.dataset.tooLong === 'true',
           indeterminate: meter.dataset.indeterminate === 'true',
-          details: el('details').value,
-          details_copyable: el('details').tagName === 'TEXTAREA' && el('details').readOnly && !el('details').hidden,
+          details: el('details').textContent,
+          details_copyable: el('details').tagName === 'PRE' && el('details').tabIndex === 0 && getComputedStyle(el('details')).userSelect === 'text' && !el('details').hidden,
           progress_bar_count: [...root.querySelectorAll('progress')].filter(x=>!x.hidden).length,
           html: root.innerHTML, raw_ref: 'dom.json#'+id
         };

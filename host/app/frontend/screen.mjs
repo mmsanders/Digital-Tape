@@ -32,8 +32,9 @@ export function mountScreen(root, actions = {}) {
   reset.type = 'button';
   const show = make('button', 'show-details', 'Show details');
   show.type = 'button';
-  const details = make('textarea', 'details');
-  details.readOnly = true;
+  const details = make('pre', 'details');
+  details.tabIndex = 0;
+  details.style.userSelect = 'text';
   details.setAttribute('aria-label', 'Details');
   screen.append(heading, drop, caption, label, meterLabel, meter, length,
     message, card, makeButton, reset, show, details);
@@ -90,7 +91,7 @@ export function mountScreen(root, actions = {}) {
     reset.textContent = state === 'Done' ? 'Make another' : 'Start over';
     reset.hidden = !['Ready', 'Problem', 'Done'].includes(state);
     show.hidden = !(view.details_available && state === 'Problem');
-    details.value = typeof detailsText === 'string' ? detailsText : '';
+    details.textContent = typeof detailsText === 'string' ? detailsText : '';
     details.hidden = true;
     // This candidate has no production Make, discovery or elevation action.
     makeButton.disabled = true;
@@ -108,7 +109,7 @@ export function mountScreen(root, actions = {}) {
     const ticket = serial;
     const response = actions.details?.();
     if (response !== undefined) Promise.resolve(response).then(text => {
-      if (!disposed && serial === ticket && typeof text === 'string') details.value = text;
+      if (!disposed && serial === ticket && typeof text === 'string') details.textContent = text;
     }).catch(() => {}); // Host supplies any authoritative error status.
   };
   label.addEventListener('input', onInput);
