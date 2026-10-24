@@ -1,0 +1,307 @@
+{
+  "cleanup_trace": [
+    "worker-enter",
+    "cancel-request",
+    "worker-terminal",
+    "remove-owned-job",
+    "worker-enter",
+    "replacement-worker-start",
+    "worker-terminal",
+    "completion-delivered",
+    "remove-owned-job"
+  ],
+  "reset_trace": [
+    "worker-enter",
+    "invalidate-current",
+    "cancel-request",
+    "empty-view",
+    "worker-terminal",
+    "remove-owned-job"
+  ],
+  "empty_before_terminal": true,
+  "ui_returned_before_release": true,
+  "request": {
+    "tool": "ingest",
+    "binary_sha256": "3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20",
+    "report_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+    "shell": false,
+    "elevated": false,
+    "length_seconds": 3600,
+    "folders": [
+      "C:\\Music\\A & literal",
+      "C:\\Music\\B",
+      "C:\\Music\\C"
+    ],
+    "argv": [
+      "D:\\a\\Digital-Tape\\Digital-Tape\\host\\app\\backend-component\\target\\debug\\deps\\ingest.exe",
+      "--report",
+      "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request\\control\\ingest-65ad2750b90581d99f7e89888590b8f5.jsonl",
+      "--report-nonce",
+      "65ad2750b90581d99f7e89888590b8f5",
+      "--out",
+      "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request\\out\\DEST",
+      "--length",
+      "3600",
+      "--",
+      "C:\\Music\\A & literal",
+      "C:\\Music\\B",
+      "C:\\Music\\C"
+    ],
+    "resolved_child": "D:\\a\\Digital-Tape\\Digital-Tape\\host\\app\\backend-component\\target\\debug\\deps\\ingest.exe",
+    "executable_dir": "D:\\a\\Digital-Tape\\Digital-Tape\\host\\app\\backend-component\\target\\debug\\deps",
+    "private_root": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053",
+    "job": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request",
+    "control": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request\\control",
+    "dest": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request\\out\\DEST",
+    "report": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request\\control\\ingest-65ad2750b90581d99f7e89888590b8f5.jsonl",
+    "nonce": "65ad2750b90581d99f7e89888590b8f5",
+    "cwd": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\jobs\\request",
+    "invoker_cwd": "C:\\Users\\runneradmin\\AppData\\Local\\DigitalTapeComponent-4ffddefecb140839f57dd9442f4e8053\\foreign-cwd"
+  },
+  "state_rows": {
+    "positive": {
+      "view": "Ready",
+      "category": "success",
+      "total_frames": 88200,
+      "details": "",
+      "make_enabled": false
+    },
+    "missing-pair": {
+      "view": "Problem",
+      "category": "generic",
+      "total_frames": null,
+      "details": "pair missing",
+      "make_enabled": false
+    },
+    "nonzero-with-pair-and-stale-success": {
+      "view": "Problem",
+      "category": "generic",
+      "total_frames": null,
+      "details": "IO_FOLDER",
+      "make_enabled": false
+    },
+    "empty-folder": {
+      "view": "Problem",
+      "category": "folder-nonmusic",
+      "total_frames": null,
+      "details": "actual details",
+      "make_enabled": false
+    },
+    "stderr-is-not-id": {
+      "view": "Problem",
+      "category": "generic",
+      "total_frames": null,
+      "details": "FOLDER_EMPTY",
+      "make_enabled": false
+    },
+    "wrong-nonce-paired-exit0": {
+      "view": "Ready",
+      "category": "success",
+      "total_frames": 88200,
+      "details": "warning",
+      "make_enabled": false
+    },
+    "wrong-version-nonzero": {
+      "view": "Problem",
+      "category": "generic",
+      "total_frames": null,
+      "details": "details",
+      "make_enabled": false
+    },
+    "partial-final-line": {
+      "view": "Problem",
+      "category": "generic",
+      "total_frames": null,
+      "details": "details",
+      "make_enabled": false
+    }
+  },
+  "delivery_rows": {
+    "new-drop-supersedes": [
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": "B",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": "B",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": null,
+        "visible": {
+          "view": "Problem",
+          "category": "folder-nonmusic",
+          "total_frames": null,
+          "details": "actual details",
+          "make_enabled": false
+        }
+      }
+    ],
+    "start-over-supersedes": [
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": null,
+        "visible": {
+          "view": "Empty",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": null,
+        "visible": {
+          "view": "Empty",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      }
+    ],
+    "wrong-job-same-generation": [
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 1,
+        "active_job": null,
+        "visible": {
+          "view": "Ready",
+          "category": "success",
+          "total_frames": 88200,
+          "details": "",
+          "make_enabled": false
+        }
+      }
+    ],
+    "duplicate-completion": [
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 1,
+        "active_job": null,
+        "visible": {
+          "view": "Ready",
+          "category": "success",
+          "total_frames": 88200,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 1,
+        "active_job": null,
+        "visible": {
+          "view": "Ready",
+          "category": "success",
+          "total_frames": 88200,
+          "details": "",
+          "make_enabled": false
+        }
+      }
+    ],
+    "cancelled-stale": [
+      {
+        "generation": 1,
+        "active_job": "A",
+        "visible": {
+          "view": "Checking",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": null,
+        "visible": {
+          "view": "Empty",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      },
+      {
+        "generation": 2,
+        "active_job": null,
+        "visible": {
+          "view": "Empty",
+          "category": null,
+          "total_frames": null,
+          "details": "",
+          "make_enabled": false
+        }
+      }
+    ]
+  }
+}

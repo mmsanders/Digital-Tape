@@ -1,0 +1,11 @@
+{
+  "node": "v24.19.0",
+  "browser": "155.0.4283.62",
+  "platform": "win32",
+  "arch": "x64",
+  "module_sha256": "1bef0045be9a6468199c805e48d74acd716e95263a4078778a7dc67d50266283",
+  "production": "C:\\Users\\mrtro\\Documents\\ChatGPT\\Digital-Tape Verification 2\\software-app-delivery\\source\\host\\app\\frontend\\screen.mjs",
+  "playwright": "1.62.1",
+  "browser_executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "errors": []
+}

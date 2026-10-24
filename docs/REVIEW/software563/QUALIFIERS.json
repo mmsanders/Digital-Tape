@@ -1,0 +1,33 @@
+{
+  "source_head": "9cde1f2affecca7f598a102c3dda161cf517bc3c",
+  "producer_results": true,
+  "independent_acceptance": false,
+  "screen_publication": "4ee2830cf4d7a67eb09e7b267cb93fa30c709206",
+  "bridge_publication": "9f6f9dba46d09474615bf8f03b574f9a72c09d80",
+  "results": [
+    {
+      "qualifier": "screen",
+      "chunk_id": "55dd4b",
+      "wall_time_seconds": 7.4002093,
+      "exit_code": 0,
+      "original_token_count": 18,
+      "output": "ONLY production renderer/input component; actual Windows UI UNEXECUTED\r\n"
+    },
+    {
+      "qualifier": "bridge",
+      "chunk_id": "e30f6e",
+      "wall_time_seconds": 7.4337053,
+      "exit_code": 0,
+      "original_token_count": 22,
+      "output": "ONLY thin production bridge/wiring component; no native UI/race/real-child clearance\r\n"
+    },
+    {
+      "qualifier": "frames",
+      "chunk_id": "ed66cd",
+      "wall_time_seconds": 7.1037748,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "ONLY current exact optional snapshot-frame projection; no native/INGEST acceptance\r\n"
+    }
+  ]
+}

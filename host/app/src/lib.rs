@@ -8,3 +8,4 @@ pub mod label;
 pub mod messages;
 pub mod report;
 pub mod state;
+pub mod bridge;
