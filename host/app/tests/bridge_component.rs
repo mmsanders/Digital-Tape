@@ -1,6 +1,6 @@
 // Compiled only as a Rust unit test. No fake executable or shipping outcome switch.
 use super::*;
-use crate::{messages, report::{self, Reading, Tool}};
+use crate::{messages, report::{self, Tool}};
 use serde_json::{json, Value};
 use std::{fs, path::{Path,PathBuf}, sync::mpsc, time::Duration};
 const VERSION:&str="0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4";

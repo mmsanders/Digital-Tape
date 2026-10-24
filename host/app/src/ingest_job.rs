@@ -137,10 +137,10 @@ pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], c
     capture(receipt, &report_path, out_reader, reader, exit);
     let stderr = String::from_utf8_lossy(&receipt.stderr).into_owned();
     let reading = match (exit, &receipt.report_bytes) {
-        (Some(e), Some(b)) => report::read(b, Tool::Ingest, &nonce, version, e, folders.len()),
+        (Some(e), Some(b)) => report::read(b, Tool::Ingest, &receipt.nonce, version, e, folders.len()),
         _ => Reading::Unusable("no report"),
     };
     // APP-1A §1: ingest exit 0 also requires its published pair.
-    let total_frames = if exit == Some(0) { published_total(&dest) } else { None };
+    let total_frames = if exit == Some(0) { published_total(&receipt.dest) } else { None };
     Outcome { exit, stderr, reading, total_frames, cancelled: false }
 }
