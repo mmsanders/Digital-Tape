@@ -76,7 +76,7 @@ async function main() {
         const projection = {view: v.state.toLowerCase(), checking: v.state === 'Checking',
           label:v.label, total_frames:v.frames, bar:v.ratio, too_long:v.too_long,
           message:v.sentence, card_line:v.card, details_available:!!v.details, make_enabled:false};
-        const authoritative=backend?.views[v.id];
+        const authoritative=backend?.views[v.id] || (v.id==='empty-disabled-discovery' ? backend?.views.empty : null);
         // Copy/count comes from actual production backend; card is explicitly
         // a supplied presentation fixture, with live card line captured separately.
         const model=authoritative ? {...authoritative.view,card_line:v.card,details_available:!!v.details} : projection;
@@ -92,6 +92,8 @@ async function main() {
         }
         if (v.details) el('show-details').click();
         views[v.id] = capture(v.id);
+        views[v.id].input_attribution={backend:authoritative || null,card_fixture:v.card,
+          details_projection_only:v.id==='folders-only',renderer_projection_only:v.state==='Making'||v.state==='Done'};
         if (progress) views[v.id].progress = progress;
       }
       const labels=[];
@@ -183,7 +185,7 @@ async function main() {
       production,playwright:require(path.join(process.env.PLAYWRIGHT_MODULE || 'playwright','package.json')).version,
       browser_executable:process.env.TEST_BROWSER_EXE,errors},null,2)+'\n');
     if(errors.length) throw new Error(errors.join('\n'));
-    console.log('Captured actual production DOM: '+Object.keys(output.views).length+' views; host admission pending306.');
+    console.log('Captured actual production DOM: '+Object.keys(output.views).length+' views; '+(backend?'controlled backend composition captured.':'host admission pending306.'));
   } finally { await browser.close(); }
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

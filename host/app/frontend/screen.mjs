@@ -67,7 +67,7 @@ export function mountScreen(root, actions = {}) {
     screen.dataset.state = state;
     previousLabel = typeof view.label === 'string' ? view.label : '';
     label.value = previousLabel;
-    const bar = view.bar;
+    const bar = state === 'Problem' && view.view === 'empty' ? null : view.bar;
     meter.hidden = state === 'Done' || (state !== 'Checking' && state !== 'Making' && !(typeof bar === 'number' && Number.isFinite(bar)));
     meterLabel.hidden = meter.hidden;
     meter.dataset.kind = state === 'Making' ? 'writing' : 'length';

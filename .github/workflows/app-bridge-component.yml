@@ -53,7 +53,7 @@ jobs:
           if($LASTEXITCODE -ne 0){throw 'Bridge compile/capture failed'}
           python -B tests/windows_bridge_r1/frames.py --input bridge-evidence/frames.json --candidate $env:DT_SOURCE_HEAD
           if($LASTEXITCODE -ne 0){throw 'Exact-frame predicates failed'}
-          git ls-tree HEAD host/app/src/ > bridge-evidence/source-blobs.txt
+          git ls-tree -r HEAD host/app/src/ > bridge-evidence/source-blobs.txt
       - name: Check production Tauri bindings with original full dependency lock (no GUI launch)
         run: |
           $ErrorActionPreference='Stop'
