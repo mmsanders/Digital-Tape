@@ -1,5 +1,5 @@
 /*
- * tapectl â€” host tooling for loading cartridges, on images and real cards.
+ * tapectl — host tooling for loading cartridges, on images and real cards.
  *
  * Normative: docs/WP11-CLI-CONTRACT.md, extended by docs/WP14-CLI-CONTRACT.md.
  * It composes the public engine API (engine/include/tape.h) over the WP-14 host
@@ -44,14 +44,14 @@
 #define FEED_FRAMES  1024u       /* contract: record requests of 1024 frames */
 #define BUDGET       1024u       /* service and long-operation block budget */
 
-/* The report's `version`: this build (APP-1A Â§1). */
+/* The report's `version`: this build (APP-1A §1). */
 #ifndef TAPECTL_BUILD_ID
 #define TAPECTL_BUILD_ID "unknown"
 #endif
 #define TAPECTL_VERSION "tapectl-wp15-s2+" TAPECTL_BUILD_ID
 
 
-/* One static, caller-owned block for the instance (engine-api Â§4). The RAM gate
+/* One static, caller-owned block for the instance (engine-api §4). The RAM gate
    bounds tape_instance_size() at 200 KiB; main() checks it fits. */
 static union { long double ld; uint64_t u; void *p; unsigned char b[256u * 1024u]; } g_mem;
 static unsigned char g_play[TAPE_PLAY_RING_MIN];
@@ -232,7 +232,7 @@ static const char *positional(int argc, char **argv, int n)
 /* ------------------------------------------------------------------ engine */
 
 /* Every engine command opens its target here: disk safety for a device, then
-   the WP-14 Â§2 recognition. The engine sees partition 2 of a provisioned
+   the WP-14 §2 recognition. The engine sees partition 2 of a provisioned
    target, and a bare WP-11 image whole, exactly as before. */
 static int open_image(const char *img)
 {
@@ -281,7 +281,7 @@ static int finish(int rc)
         (void)tape_unmount(g_t, &pos);
         g_t = NULL;
     }
-    /* ADR-164 Â§6: log which durable barrier ran. Always for a device; in the
+    /* ADR-164 §6: log which durable barrier ran. Always for a device; in the
        test build for images too. Images in the shipped build stay quiet, so
        WP-11 output is unchanged. */
 #ifdef TAPECTL_TEST
@@ -466,7 +466,7 @@ static int cmd_format(int argc, char **argv)
         || label == NULL || dup) {
         return usage("format: bad or missing option");
     }
-    /* WP-14 Â§4: format stays bare-image only. */
+    /* WP-14 §4: format stays bare-image only. */
     if (bare_only(positional(argc, argv, 0))) { return EXIT_USAGE; }
     if (hport_create(&g_tgt.hp, positional(argc, argv, 0), (uint64_t)blocks * TAPE_BLOCK_SIZE) != 0) {
         fprintf(stderr, "tapectl: cannot create image\n");
@@ -667,7 +667,7 @@ static int cmd_dump(int argc, char **argv)
 
 /* ---------------------------------------------------------------- provision */
 
-/* UTF-8, 1-32 bytes (WP-14 Â§3). Longer is refused, never truncated. */
+/* UTF-8, 1-32 bytes (WP-14 §3). Longer is refused, never truncated. */
 static int label_ok(const char *s)
 {
     size_t n = strlen(s), i = 0;
@@ -695,7 +695,7 @@ static int label_ok(const char *s)
 }
 
 /* A device that answers nothing: used only to ask tape_format whether
-   GEOMETRY_OK holds, before a single byte is written (WP-14 Â§3 order of work).
+   GEOMETRY_OK holds, before a single byte is written (WP-14 §3 order of work).
    tape_format checks geometry before any callback; past it, the first
    callback fails and the call returns TAPE_ERR_IO. */
 static int dry_rw(void *ctx, uint32_t lba, uint32_t count, void *buf) { (void)ctx; (void)lba; (void)count; (void)buf; return 1; }
@@ -785,7 +785,7 @@ static int cmd_provision(int argc, char **argv)
         }
     }
 
-    /* 1. Every Â§5 rule first: zero writes on refusal. */
+    /* 1. Every §5 rule first: zero writes on refusal. */
     if (is_dev) {
         rc = target_safety(path, 1, erase, 1);
         if (rc) { return rc; }
@@ -890,7 +890,7 @@ static void verify_side(tape_side side, struct side_result *s)
     }
 }
 
-/* Findings, in docs/WP14-CLI-CONTRACT.md Â§4.1 table order (ADR-164):
+/* Findings, in docs/WP14-CLI-CONTRACT.md §4.1 table order (ADR-164):
    MBR_LAYOUT, PARTITION_TYPE, PARTITION_TRUNCATED; MOUNT for each failed side,
    A before B; NEEDS_REPAIR; SIDE_B_DEGRADED; READ_ERROR by side, then frame. */
 static int verify_existing(unsigned mf, int have_view)
@@ -944,7 +944,7 @@ static int cmd_verify(int argc, char **argv)
 
 /* -------------------------------------------------------------------- cards */
 
-/* APP-1A Â§5 / APP Â§3: read-only candidate discovery. No device is opened, nothing
+/* APP-1A §5 / APP §3: read-only candidate discovery. No device is opened, nothing
    is written or unmounted, and a candidate authorizes nothing. stdout carries
    one card line per candidate, then the summary; refused disks are never named. */
 struct cards_count { unsigned long offered, unprobed; };
