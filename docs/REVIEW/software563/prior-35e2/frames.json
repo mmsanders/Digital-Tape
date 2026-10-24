@@ -1,0 +1,39 @@
+{
+  "source_head": "35e2d0b1914755f2464b400661cb64ed05af67fa",
+  "evidence_class": "production bridge / controlled order",
+  "raw_refs": [
+    "frames.raw.json"
+  ],
+  "adapter_ref": "host/app/tests/bridge_component.rs",
+  "rows": {
+    "empty": null,
+    "checking": null,
+    "success": 88200,
+    "new-check-clears": null,
+    "one-frame-over": 158760001,
+    "other-overage": 167227200,
+    "max-safe-overage": 9007199254740991,
+    "bad-report": null,
+    "generic-failure": null,
+    "missing-pair": null,
+    "progress-not-count": null,
+    "stale": null,
+    "duplicate": 88200,
+    "reset": null,
+    "cancelled": null,
+    "label-retains": 88200
+  },
+  "inverse_bar_reconstruction": false,
+  "progress_as_frames": false,
+  "native_ui": false,
+  "actual_snapshot_refs": [
+    "frames.raw.json"
+  ],
+  "accepted_gate_refs": [
+    "src/state.rs:finish_job",
+    "src/bridge.rs:deliver"
+  ],
+  "typed_outcome_refs": [
+    "host/app/tests/bridge_component.rs:pair/refusal"
+  ]
+}

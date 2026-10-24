@@ -1,0 +1,396 @@
+{
+  "source_head": "35e2d0b1914755f2464b400661cb64ed05af67fa",
+  "views": {
+    "empty": {
+      "view": {
+        "view": "empty",
+        "checking": false,
+        "bar": 0.0,
+        "total_frames": null,
+        "too_long": false,
+        "message": null,
+        "label": "",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": false
+      },
+      "details": ""
+    },
+    "checking": {
+      "view": {
+        "view": "ready",
+        "checking": true,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": null,
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": false
+      },
+      "details": ""
+    },
+    "ready-two-seconds": {
+      "view": {
+        "view": "ready",
+        "checking": false,
+        "bar": 0.0005555555555555556,
+        "total_frames": 88200,
+        "too_long": false,
+        "message": null,
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": false
+      },
+      "details": ""
+    },
+    "exact-fit": {
+      "view": {
+        "view": "ready",
+        "checking": false,
+        "bar": 1.0,
+        "total_frames": 158760000,
+        "too_long": false,
+        "message": null,
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": false
+      },
+      "details": ""
+    },
+    "overage-1": {
+      "view": {
+        "view": "ready",
+        "checking": false,
+        "bar": 1.0,
+        "total_frames": 158760001,
+        "too_long": true,
+        "message": "This music is 1 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw overage diagnostic"
+    },
+    "overage-8467200": {
+      "view": {
+        "view": "ready",
+        "checking": false,
+        "bar": 1.0,
+        "total_frames": 167227200,
+        "too_long": true,
+        "message": "This music is 3 min 12 s too long for a 60-minute cartridge. Take some songs out and drop the folder again.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw overage diagnostic"
+    },
+    "folders-only": {
+      "view": {
+        "view": "empty",
+        "checking": false,
+        "bar": 0.0,
+        "total_frames": null,
+        "too_long": false,
+        "message": "Drop a folder of music, not single songs.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": false
+      },
+      "details": ""
+    },
+    "protected": {
+      "view": {
+        "view": "problem",
+        "checking": false,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": "\"song.wav\" is copy-protected, so it can't go on a cartridge. Take it out of the folder.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw\r\n<unsafe>& diagnostics"
+    },
+    "unusable": {
+      "view": {
+        "view": "problem",
+        "checking": false,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": "\"song.wav\" can't be used. Take it out of the folder.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw\r\n<unsafe>& diagnostics"
+    },
+    "folder-content": {
+      "view": {
+        "view": "problem",
+        "checking": false,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": "The folder \"Music\" has something in it that isn't music. Use a folder with only songs in it.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw\r\n<unsafe>& diagnostics"
+    },
+    "generic": {
+      "view": {
+        "view": "problem",
+        "checking": false,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": "Something went wrong. Nothing else on your computer was changed.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "raw\r\n<unsafe>& diagnostics"
+    },
+    "escaped-name": {
+      "view": {
+        "view": "problem",
+        "checking": false,
+        "bar": null,
+        "total_frames": null,
+        "too_long": false,
+        "message": "\"<img src=x onerror=alert(1)>.wav\" can't be used. Take it out of the folder.",
+        "label": "Music",
+        "card_line": "Finding cards isn't part of this build yet.",
+        "make_enabled": false,
+        "details_available": true
+      },
+      "details": "<script>unsafe</script>"
+    }
+  },
+  "drops": {
+    "ordered": {
+      "accepted": [
+        "A",
+        "B",
+        "C"
+      ],
+      "accepted_check_requests": 2,
+      "transport_batches": [
+        [
+          "A"
+        ],
+        [
+          "B",
+          "C"
+        ]
+      ],
+      "accepted_batches": [
+        [
+          "A"
+        ],
+        [
+          "B",
+          "C"
+        ]
+      ],
+      "sentence": null
+    },
+    "file": {
+      "accepted": [
+        "A"
+      ],
+      "accepted_check_requests": 1,
+      "transport_batches": [
+        [
+          "A"
+        ],
+        [
+          "song.wav"
+        ]
+      ],
+      "accepted_batches": [
+        [
+          "A"
+        ]
+      ],
+      "sentence": "Drop a folder of music, not single songs."
+    },
+    "mixed": {
+      "accepted": [
+        "A"
+      ],
+      "accepted_check_requests": 1,
+      "transport_batches": [
+        [
+          "A"
+        ],
+        [
+          "B",
+          "song.wav"
+        ]
+      ],
+      "accepted_batches": [
+        [
+          "A"
+        ]
+      ],
+      "sentence": "Drop a folder of music, not single songs."
+    }
+  },
+  "drop_raw": {
+    "ordered": [
+      {
+        "transport": [
+          "A"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": null,
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A"
+        ]
+      },
+      {
+        "transport": [
+          "B",
+          "C"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": null,
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A",
+          "B",
+          "C"
+        ]
+      }
+    ],
+    "file": [
+      {
+        "transport": [
+          "A"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": null,
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A"
+        ]
+      },
+      {
+        "transport": [
+          "song.wav"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": "Drop a folder of music, not single songs.",
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A"
+        ]
+      }
+    ],
+    "mixed": [
+      {
+        "transport": [
+          "A"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": null,
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A"
+        ]
+      },
+      {
+        "transport": [
+          "B",
+          "song.wav"
+        ],
+        "view": {
+          "view": "ready",
+          "checking": true,
+          "bar": null,
+          "total_frames": null,
+          "too_long": false,
+          "message": "Drop a folder of music, not single songs.",
+          "label": "",
+          "card_line": "Finding cards isn't part of this build yet.",
+          "make_enabled": false,
+          "details_available": false
+        },
+        "accepted": [
+          "A"
+        ]
+      }
+    ]
+  },
+  "start_over": {
+    "accepted": [],
+    "label": "",
+    "details": "",
+    "state": "Empty",
+    "frames": null,
+    "make_disabled": true
+  },
+  "live_card_line": "Finding cards isn't part of this build yet."
+}

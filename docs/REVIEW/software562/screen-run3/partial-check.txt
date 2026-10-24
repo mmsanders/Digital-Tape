@@ -1,0 +1,1 @@
+PASS14 actual production DOM views,8 actual UTF8 input rows,3 whole-batch transport rows, malformed transport/reset/mount observations. FULL qualify UNEXECUTED: actual host admission pending306.
