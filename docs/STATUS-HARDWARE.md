@@ -7,13 +7,26 @@
 > unmerged on 3 Oct; each one's head, content and restore command is recorded in its work
 > package entry in [the roadmap](PACKAGES/README.md#parked-hardware-pr-record).
 > Physical and safety holds are unchanged: fabrication and charging stay CLOSED with five
-> blockers, card atomicity is unqualified and solenoid timing is PROVISIONAL.
+> blockers, card atomicity is unqualified. Legacy solenoid timing is PROVISIONAL; the new
+> solenoid-free proposal does not remove that hold or settle firmware behavior.
 >
 > Everything below is the **20 September 2026 snapshot**, kept as the restart point for
 > Hardware. Where it names an open PR, read "closed, restorable from the PR ref".
 > Since then: Michael owns an A1 Mini (the default printer; the library route is
 > retired), reports filament on hand, and reports that clasps from his own sizing prints
 > appear to work. None of that is qualification.
+
+## Current owner layout — filed 24 October 2026
+
+[Owner layout / intake #569](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md) is the current
+design reference: 68 × 110 × about 29 mm player; GameCube-class cartridges about
+36 × 40 × 7 mm; two top slots; provisional side keys; corner mic; bottom headphones;
+right-side volume/aux; speaker and LED ring. Estimates, material candidates and
+layout preferences are not CAD/fit/safety qualification. Solenoid removal,
+end-of-tape behavior, Record interlock, copy control and speaker safety scope remain
+open. Legacy September snapshots and generated models below do not describe a
+qualified new layout. **RECORDED — PARKED** until explicit hardware/package resume.
+No PM hardware execution, purchase or physical acceptance is issued by filing it.
 
 ## Owner evidence filed14October2026
 

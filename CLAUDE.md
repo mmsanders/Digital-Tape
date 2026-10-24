@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 22 October2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment).
+**Current agreement: 24 October 2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment).
 Applies to every lead, regardless of model or app. Revisions/hashes live in
 spec/VERSION.md; phase and gate state in docs/STATUS.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
@@ -49,6 +49,8 @@ Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Prefer short scoped rounds and capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
+**Current routing (24 October, ADR-192): Software is Claude Code on Michael's actual local Windows machine, with model selected by Michael. Verification remains a separate independent context. PM posts GitHub issues only; no automatic lead kickoff, listener wake-up or next-task continuation until Michael explicitly resumes it. Both existing listeners are PAUSED.**
+
 Current Phase2 family delivery is Windows11 only; macOS is deferred under ADR-191, Linux remains existing CI. Michael may configure issue listeners for lead activation. This agreement does not
 install a listener or enable automatic acceptance, review or merge.
 
@@ -91,6 +93,11 @@ not restore the expired combined product-lead mandate.
    include/link paths and equivalent symbol/type plumbing. Assertions, values,
    tolerances, ordering, ranges, skips and case deletion are not mechanical.
    Return these to Verification/PM; never relax tests to fit code.
+Private or unpublished scaffolding is not an exception to a task's tests-first rule.
+Declare interfaces before code where needed; publish the independent expectations
+before implementing covered behavior. The quarantined pre-302 scaffold is recorded
+process debt, not a precedent or a retrospectively certified test-first result.
+
 3. Spec/test disagreement is a PM decision, not bargaining with the implementer.
    An API absent from the spec is a finding; do not invent it to compile a test.
 4. Authorship, harness checks, engine execution, independent disposition, merge and
@@ -199,7 +206,7 @@ unless Michael changes it at kickoff. Phase 2 scope, kickoff decisions, rounds a
 [the Phase 2 plan](docs/PHASE2-PLAN.md). Use
 [role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
 historical record of how Phase 1 was organised.
-PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). For current Phase2, Michael assigns Software to a fresh local Windows ChatGPT-app chat and Verification to a separate fresh independent local chat (ADR-191); runtime/model selection is Michael's. Earlier fixed Software/Verification app/model statements are superseded. Hardware remains parked in its separate role. Surge is Grok, primarily
+PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). For current Phase 2, Software is Claude Code on Michael's actual local Windows machine (24 October, ADR-192 amendment to ADR-191). The full Software role remains one active context per task; no cloud-owner/local-runner split is adopted. Verification remains separate and independent. Runtime/model selection is Michael's. Earlier fixed Software/Verification app/model statements are superseded. Hardware remains parked in its separate role. Surge is Grok, primarily
 instructed directly by Michael for miscellaneous scoped tasks.
 
 Leads perform their own work within their normal authorities. Software implements and
@@ -207,7 +214,7 @@ integrates; Hardware designs and characterizes; Verification independently autho
 runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
 or automatic delegation are part of the lead format. Do not make routine direct lead work an exception.
 
-Michael configures issue listeners and can also resume chats manually. PM maintains
+Michael manually activates the selected issue/context. PM posts next-round issues without sending kickoff messages, starting a listener or automatically advancing a lead to another assignment. The prior finite automation windows are historical; both lead listeners are PAUSED until Michael explicitly reauthorizes them. PM maintains
 work directions solely in role-labeled GitHub issues. Each lead reads the live issue,
 fetches main, performs its own assigned work, returns evidence in the issue and stops.
 Do not repeat completed work on a duplicate event or create tasks for idle leads just

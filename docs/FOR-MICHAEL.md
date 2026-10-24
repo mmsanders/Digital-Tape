@@ -1,33 +1,50 @@
 # For Michael — issue queue
 
-Active requests and decisions for Michael live only in
+Active hands-on requests and reserved decisions live only in
 [open issues labeled michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
-Read that queue at each round; do not reconstruct a task list from this file.
-The former P1-R1 queue was migrated to [#44](https://github.com/mmsanders/Digital-Tape/issues/44).
+Do not reconstruct a new test list from this document.
 
-## Queue state (23 October 2026 PDT)
+## Current position — 24 October 2026 PDT
 
-Completed return: **[Michael473: received-return locator](https://github.com/mmsanders/Digital-Tape/issues/473)**.
-Both physical A6 and Windows11 INGEST are received. No commands, collection retry or card work are requested. Verification223 returned the physical linkage blocker and226 published bounded INGEST acceptance/gaps; both review envelopes are complete. S2 integration and exact-shipping evidence are complete; Observer491/235 stopped at an unavailable capture-privilege prerequisite; no retry or elevation task is requested. Software498–502 and Verification238–242 are complete. Software511–515 / Verification252–256 are now complete;256 conditionally clears exact kit preparation for separate authorization. All six actual native controls remain unexecuted; no execution authorization. Earlier loads, ten pulls, dumps, README checks and off-card rehearsal are complete.
-No Windows physical test is ready or waiting on Michael. The observer prerequisite is an off-card Administrator context; an exact source/plan/synthetic kit has passed conditional preparation review. Corrected-source actual runtime/session/observer facts remain unmeasured; any future off-card capture needs separately scoped runner review and an already available authorized Administrator context. macOS is now DEFERRED for Phase2 delivery (Michael22October, ADR-191); no Mac test is requested. Hardware remains parked through Phase2; WP-38 was not taken.
-Michael473 is closed with both original returns received; no active hands-on or physical Windows test is requested. Backend555/297 is integrated615899c3; internal ordinary-file Make557/299 is integratedf699f6af after10 real comparison rows. Those gains do not qualify physical/native/session/A6/fullAPP/G2. Actual UI556/298 is BLOCKED: no documented changed exact-app access and supported real folder gesture; no Product defect or permanent machine incapability was diagnosed. PM561 issues source/component app development562–564/305–307 (production screen, thin bridge, new Windows candidate) while that native control prerequisite remains held. No repeated consent experiment or browser/test fixture relabeling as native UI. The old preview uses old binaries and is packaging-only.527/270 and old controller/sparse/proof campaigns remain parked. No user action is requested for completed image/child tests or private review. Exact normal tool approval for permitted owned-file/app non-admin commands remains distinct from UAC/admin/ACL/security changes.
+No physical Windows test or collection retry is waiting on Michael. The original
+A6 and INGEST returns were received; Michael #473 is closed. Their independent
+native/own-host gaps remain gaps, not a request to repeat the old captures.
+
+Backend #551 and internal Make #550 are integrated. Combined app PR #567 now waits
+for independent #305/#306 review. The new candidate #564/#307 depends on that exact
+clearance/integration and any specific startup admission. Actual native UI/IPC/
+folder gestures are not accepted. No source or physical hold is removed here.
+
+Software is back in **local Windows Claude Code**, with Michael's selected model.
+PM posts next-round issues only. Both prior lead listeners are **PAUSED**; PM has
+not messaged, started or automatically advanced a lead. Michael manually starts
+the selected task/context; the lead returns and stops. Verification stays separate.
+
+## Owner hardware design
+
+[Intake #569 is filed and parked](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md):
+68 × 110 × about 29 mm player and GameCube-class cartridges about 36 × 40 × 7 mm,
+with revised controls/audio/I/O layout. The 86 × 54 × 12 mm target is withdrawn.
+Side versus face keys remains provisional. Solenoid removal/end-of-tape behavior,
+Record mechanism, copy control and speaker safety scope remain open product/design
+questions; no new hardware execution or decision request is assigned now.
+
+The updated references preserve the old models as historical, unqualified for the
+new layout. Owner design conversations and informal prototypes are not independent
+fit, material, drop, thermal or charging acceptance. Resume engineering only on
+explicit hardware/package authorization; no automatic Phase 3/4 stream is launched.
 
 ## Standing decisions
 
-Q-001 is signed and closed: Michael signed the exact Phase 0 scope on
-8 September 2026 in [the freeze record](PHASE0-FREEZE.md). Do not ask again.
-Operations/state, implementation acceptance, card qualification and hardware safety
-remain separate. Every purchase remains Michael's decision.
+Q-001 is signed: Michael approved the scoped format freeze on 8 September 2026.
+Operations/state freeze, independent implementation acceptance, physical/card
+qualification and reserved signatures remain distinct. Every purchase needs Michael.
 
-Michael owns three PNY 64 GB V30 samples and a Bambu A1 Mini, the default printer for
-all new print work; these facts supersede the unpurchased HTsemi comparison and the
-library-printer route. As of 3 October Michael reports he has filament on hand and that
-clasps from his own sizing prints appear to work. None of this is card, print-process,
-mechanism or product qualification; PETG, TPU and specific brands are not approved
-purchases unless Michael says so.
+Michael owns three PNY 64 GB V30 samples and a Bambu A1 Mini, the default printer.
+The older unpurchased card cart and library-printer route are retired. Filament on
+hand and observed clasp preferences do not approve PETG/TPU or establish safety.
+Fabrication and cell charging remain CLOSED; media atomicity is unqualified.
+macOS is deferred; hardware execution remains parked through Phase 2.
 
-Michael witnesses physical measurements; Verification independently audits method,
-raw data and uncertainty. Estimates and green regression checks are not measurements.
-Lead work directions are in issues; Michael need not paste instruction files.
-
-Use [the issue workflow](ISSUE-WORKFLOW.md) for labels and handoffs. PM554's finite queue completed and its listeners stopped. Under Michael's next-round authorization PM561 reused the paused Software listener in place and restored one deleted Verification listener, with saved ACTIVE targets/cadence/cutoff verified for the new queue. Stop on completion/permanent whole-queue blockage or24Oct08:00PDT latest. Kickoff messages only wake the existing lead chats to read GitHub; no new chats/subworkers or recurring PM selfassignment.
+See [manual issue routing](ISSUE-WORKFLOW.md), [ADR-192](DECISIONS.md#adr-192--local-windows-claude-software-manual-activation-and-parked-owner-layout)
+and [the PM570 review](REVIEW/PM570-HANDBACK-2026-10-24.md).
