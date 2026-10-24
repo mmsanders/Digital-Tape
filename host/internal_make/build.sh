@@ -42,4 +42,3 @@ done
 sha256sum "$out/reference.exe" "$out/composition.exe" > "$out/binaries.sha256"
 git status --short > "$out/build-working-tree.txt"
 echo 'Compiled exact ordinary-file adapters; ZERO Product/image/runtime execution'
-
