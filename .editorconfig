@@ -1,0 +1,15 @@
+# Editor settings, scoped to host/ only (#571). Matches the host/** rule in
+# .gitattributes: UTF-8, LF. Nothing else in the repository is covered here;
+# evidence and verifier trees keep their exact bytes.
+root = true
+
+[host/**]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# Held byte-exact by .gitattributes (-text); editors leave it as it is.
+[host/app/parser-component/Cargo.lock]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
