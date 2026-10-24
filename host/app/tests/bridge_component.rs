@@ -51,6 +51,7 @@ fn capture(){
     let source=root.join("source-sentinel");let foreign=root.join("foreign-sentinel");
     fs::write(&source,b"SOURCE UNCHANGED\n").unwrap();fs::write(&foreign,b"FOREIGN UNCHANGED\n").unwrap();
     let before_source=fs::read(&source).unwrap();let before_foreign=fs::read(&foreign).unwrap();
+    let(boot,boot_rx,_)=new(&root);let boot_snapshot=boot.snapshot();let mount_jobs=count(&boot_rx);
     let head=std::env::var("DT_SOURCE_HEAD").unwrap();let mut state_rows=json!({});let mut delivery_rows=json!({});
     for c in inputs["state_cases"].as_array().unwrap(){
         let(b,_rx,_)=new(&root);seed(&b);let w=begin(&b,"case");b.execute(w,|_,_|Ok(pair(c,false)));
@@ -131,7 +132,7 @@ fn capture(){
     save(&out.join("bridge.raw.json"),&json!({"cleanup_trace":raw_cleanup,"reset_trace":raw_reset,"empty_before_terminal":empty_before_terminal,"ui_returned_before_release":ui_returned_before_release,"request":request,"state_rows":state_rows,"delivery_rows":delivery_rows}));
     save(&out.join("bridge.json"),&json!({"source_head":head,"evidence_class":"production bridge / controlled order","raw_refs":["bridge.raw.json","frames.raw.json"],"adapter_ref":"host/app/tests/bridge_component.rs","actual_os_race":false,"native_ui":false,"real_child_executed":false,
         "capabilities":{"discovery":false,"make":false,"elevation":false,"raw_device":false,"shipping_fake_switch":false},"state_rows":state_rows,"delivery_rows":delivery_rows,
-        "label_jobs":label_jobs,"details_text":actual_details,"stderr_selected_outcome":state_rows["stderr-is-not-id"]["category"]!="generic",
+        "mount_jobs":mount_jobs,"initial_snapshot":boot_snapshot,"label_jobs":label_jobs,"details_text":actual_details,"stderr_selected_outcome":state_rows["stderr-is-not-id"]["category"]!="generic",
         "valid_drop_workers":[first,second],"accepted_folders":admitted,"invalid_payload_workers":invalid,"classified_drops":classified,"same_identity_duplicate":duplicate,"lock_probe":lock_probe,"cleanup_order":cleanup_order,"start_over_order":reset_order,
         "stale_emissions":stale_emissions,"duplicate_emissions":duplicate_emissions,"auto_relaunches":count(&rx),"ui_thread_waits_for_worker":!ui_returned_before_release,"foreign_sentinel_before":before_foreign,"foreign_sentinel_after":fs::read(&foreign).unwrap(),"source_before":before_source,"source_after":fs::read(&source).unwrap(),"external_cleanup_calls":[],"request":request,
         "linkage_refs":["host/app/src/bridge.rs","host/app/src/ingest_job.rs"],"unchanged_backend_blobs":["report.rs:b51d9d984461fe43b286df44da024505f9c8de1c","messages.rs:6d941f1e82238a452ac38eccce14d4dab16b9918","jobdir.rs:7f69618a59153618cbb3b02e467afe4d4cbe8904"],"tauri_entry_refs":["host/app/src/main.rs"]}));
@@ -161,7 +162,8 @@ fn capture(){
         }
         views[id]=json!({"view":x.snapshot(),"details":x.raw_details()});
     }
-    let transport:Value=serde_json::from_slice(&fs::read("docs/REVIEW/software562/screen-run3/screen-observations.json").unwrap()).unwrap();let mut drops=json!({});let mut drop_raw=json!({});
+    let repository=PathBuf::from(std::env::var("DT_REPO_ROOT").unwrap());
+    let transport:Value=serde_json::from_slice(&fs::read(repository.join("docs/REVIEW/software562/screen-run3/screen-observations.json")).unwrap()).unwrap();let mut drops=json!({});let mut drop_raw=json!({});
     for(id,batches)in transport["drop_transport"].as_object().unwrap(){
         let(x,r,_)=new(&root);let mut accepted_batches=vec![];let mut checks=0;let mut snapshots=vec![];
         for batch in batches.as_array().unwrap(){

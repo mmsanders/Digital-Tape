@@ -30,6 +30,7 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          $env:DT_REPO_ROOT="$PWD"
           $env:DT_INGEST_SHA256='3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20'
           $env:DT_INGEST_VERSION='0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4'
           $taskChild=Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/original-s1" -Filter ingest.exe -File -Recurse
