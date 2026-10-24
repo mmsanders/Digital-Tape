@@ -36,6 +36,11 @@ Original out-of-repo charters/Plan Rev B are not checkpoint dependencies: the cu
 agreement, package index and concrete spec/package files carry operating scope.
 Report a missing requirement rather than inventing text from an absent document.
 
+Current activation is manual (ADR-192): PM posts GitHub issues only; Michael starts
+the selected task/context. No automatic lead kickoff or listener is enabled.
+Software is local Windows Claude Code; Verification remains independent. Current
+owner hardware layout is [filed and parked](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+
 ## Reproduce
 
 Raw evidence over 1 MiB lives in release `evidence-2026-09`, not the tree. Before any

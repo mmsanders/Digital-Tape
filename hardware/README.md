@@ -1,5 +1,11 @@
 # Hardware workspace
 
+Current owner design reference: [24 October layout / intake #569](../docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+The 68 × 110 × about 29 mm player and GameCube-class cartridge replace old taste
+targets; legacy CAD/models are not a qualified implementation. Solenoid removal,
+end-of-tape and new audio/control scope remain unresolved. Hardware execution stays
+parked; document filing does not authorize fabrication, charging or purchases.
+
 > **PARKED through Phase 2 (#309, ADR-160).** No PM-issued hardware work until Phase 3 opens or
 > Michael requests it. Start a resume from [the roadmap's parked hardware PR record](../docs/PACKAGES/README.md#parked-hardware-pr-record).
 > The WP04-01 packet (`packets/wp04-01/`), the `packet-wp04` Make rules and the CAD generators

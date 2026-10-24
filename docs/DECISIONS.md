@@ -4372,3 +4372,65 @@ Rationale: eliminate a deferred platform and obsolete execution-context assumpti
 measure the actual client machine, and move evidence work back onto the usable app
 critical path. Reversal cost: explicit Mac resumption scope/methods, current host
 contract amendment and new platform qualification; no frozen-format migration.
+
+
+## ADR-192 — Local Windows Claude Software, manual activation and parked owner layout
+
+**24 October 2026 PDT · PM570 · input main db0325a9befa333cbc128b24bd2ef3690c48ac08.**
+Michael asks PM to review current Software/Verification work, file the owner design
+intake/update stale design docs, move Software back to local Windows Claude and
+stop automatic assignment kickoff. This amends ADR-191 runtime/routing only:
+Windows11-only delivery, independent Verification and all acceptance/safety holds
+remain. [PM570](https://github.com/mmsanders/Digital-Tape/issues/570) carries his words.
+
+Software's full role is Claude Code on Michael's actual local Windows machine;
+model is Michael-selected. The cloud-owner/local-runner split proposed in568 is
+not adopted by his latest instruction. One active context per task remains.
+Hosted Windows compilation is not actual Windows11 client acceptance, and old
+Codex permission receipts do not grant authority in Claude's current context.
+
+PM posts next-round directions on GitHub only. No chat kickoff, automatic next-task
+jump or listener wake-up until Michael explicitly resumes it. Both existing lead
+heartbeats were PAUSED through the automation tool and saved state verified. No
+lead was messaged or started by PM570. Existing562–564/305–307 keep completed source,
+methods and explicit manual continuation; expired finite queue instructions do not
+supply activation. Source567 is review-ready, not independently cleared or merged.
+
+Software handback568 is dispositioned as follows: pre302 private scaffolding is
+explicit process debt/DO NOT REPEAT; tests-first has no private-code exception.
+The host comment/CR repair and narrowly scoped UTF-8/LF editor attributes are
+approved for Software571, with all evidence/-text exceptions preserved and no
+behavior/global normalization change. New GitHub returns carry readable role
+headers. Local author names/trailers are optional attribution, not acceptance;
+new CI trailer enforcement and role GitHub Apps are not issued. Superseded drafts
+may close with immutable restoration/evidence pointers; genuine held INGEST/report/
+crash candidates stay held. No branch purge or KEEP-list project is assigned.
+STATUS is rewritten for readability with the entire prior snapshot archived verbatim
+and its SHA-256 recorded, rather than compressing history into run-together prose.
+
+[Owner intake569](https://github.com/mmsanders/Digital-Tape/issues/569) is filed as
+RECORDED — PARKED in [the current layout reference](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+The owner target is a 68 × 110 × about 29 mm player and GameCube-class cartridge
+about 36 × 40 × 7 mm, with provisional side keys, revised audio/I/O locations and an extended
+P-catch root. The old 86 × 54 × 12 mm taste target is withdrawn. Dimensions/materials/
+internal clearances are not qualified manufacturing/CAD facts. Versioned hardware
+docs receive explicit reference-only revision/hash updates; no pins, rails, timing,
+BOM, model inputs/generated tables or frozen format/engine criteria change.
+
+Solenoid removal is proposed, not adopted end-of-tape/Record/full-mid-record
+behavior. Stop-and-show versus looping, mechanical Record-after-Play interlock,
+copy control, speaker loudness/power/thermal and record-source selection remain
+open. The sketch cannot remove coil/charging/fabrication blockers. Existing safety
+limits and physical acceptance remain unchanged. No private canvas contents beyond
+the filed written intake are claimed inspected.
+
+Resume engineering at an explicit Michael hardware request or relevant Phase3/
+Phase4 package resumption; independent method/interface/product decisions precede
+new CAD/trials. Owner design conversations may continue, but this filing does not
+launch a PM hardware stream, purchase, print, fabrication or charging. Closure of569
+means durably filed, not rejected or implemented.
+
+Rationale: preserve usable app work at handback, make role/routing authority clear,
+and stop old dimensions and speculative mechanism choices reading as current facts.
+Reversal cost: explicit runtime/activation resumption or product/hardware issuance;
+no history deletion, frozen-byte migration or acceptance-rung gain.
