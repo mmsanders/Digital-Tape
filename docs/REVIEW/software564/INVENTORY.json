@@ -1,0 +1,34 @@
+{
+  "archive": {
+    "name": "Digital-Tape-Windows11-x64-candidate.zip",
+    "bytes": 2438637,
+    "sha256": "a4b11f750fb7e3d9fd77a0e6dc1009683496ef6881791c1947a03970310b190b"
+  },
+  "members": [
+    {
+      "name": "BUILD.json",
+      "bytes": 2274,
+      "sha256": "0faf28103f4e76d75c392a22d7c8dbe7c33ac9732a7ff62a6a76738a358969f2"
+    },
+    {
+      "name": "README.txt",
+      "bytes": 1263,
+      "sha256": "839cf34dfccde339e78e2d595f9e3367ec62dea113a2176f05f25c0b1f5c9ee7"
+    },
+    {
+      "name": "digital-tape.exe",
+      "bytes": 4828672,
+      "sha256": "ee4c84acb03655c4fb1344db1548ab283054eabe9caea9c2482b0181b39fa250"
+    },
+    {
+      "name": "ingest.exe",
+      "bytes": 889856,
+      "sha256": "3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20"
+    },
+    {
+      "name": "tapectl.exe",
+      "bytes": 435533,
+      "sha256": "82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "source_head": "266bdcaa760f702d6f685300cc9ca6e4491b6438",
+  "source_tree": "d0d628f407acc10745b1d01196c6d07603cfbcee",
+  "frontend_disposition": "fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f",
+  "bridge_disposition": "fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f",
+  "app_sha256": "ee4c84acb03655c4fb1344db1548ab283054eabe9caea9c2482b0181b39fa250",
+  "build_sha256": "0faf28103f4e76d75c392a22d7c8dbe7c33ac9732a7ff62a6a76738a358969f2",
+  "archive_sha256": "a4b11f750fb7e3d9fd77a0e6dc1009683496ef6881791c1947a03970310b190b",
+  "ingest_sha256": "3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20",
+  "tapectl_sha256": "82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9",
+  "s1_source": "35b23cacae886d9b3693b7104f581d8646ea5667",
+  "child_version": "0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4",
+  "ci_run": 40141860952,
+  "platform": "Windows11 x64",
+  "attempt_limit": 1,
+  "scope": "startup/native-window/normal-quit ONLY",
+  "disabled": [
+    "discovery",
+    "make",
+    "elevation",
+    "raw-device",
+    "shipping-test-switch"
+  ],
+  "startup_bounds_ms": 20000,
+  "quit_bounds_ms": 10000,
+  "actual_ui": "UNEXECUTED",
+  "selected_runtime": "UNAVAILABLE unless bound from actual own process facts"
+}
