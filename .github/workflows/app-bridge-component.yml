@@ -1,0 +1,60 @@
+name: Production app bridge component
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - 'tools/app/**'
+      - 'tests/windows_bridge_r1/**'
+      - '.github/workflows/app-bridge-component.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  component:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: software538-windows-portable
+          run-id: 39883700812
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/original-s1
+      - name: Compile and capture only new bridge controlled-order component
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          $env:DT_INGEST_SHA256='3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20'
+          $env:DT_INGEST_VERSION='0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4'
+          $taskChild=Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/original-s1" -Filter ingest.exe -File -Recurse
+          if(@($taskChild).Count -ne 1){throw 'Exact original INGEST artifact member missing/ambiguous'}
+          if((Get-FileHash -LiteralPath $taskChild.FullName -Algorithm SHA256).Hash.ToLower() -ne $env:DT_INGEST_SHA256){throw 'Original child pin mismatch'}
+          $env:DT_BRIDGE_INGEST=$taskChild.FullName
+          $env:DT_BRIDGE_OUTPUT="$PWD/bridge-evidence"
+          $env:DT_BRIDGE_INPUT="$PWD/bridge-input.json"
+          $env:DT_BRIDGE_FRAMES="$PWD/frames-input.json"
+          $env:DT_SCREEN_INPUT="$PWD/screen-input.json"
+          python -B tests/windows_bridge_r1/contract.py --emit > $env:DT_BRIDGE_INPUT
+          if($LASTEXITCODE -ne 0){throw 'Bridge fixture emission failed'}
+          python -B tests/windows_bridge_r1/frames.py --emit > $env:DT_BRIDGE_FRAMES
+          if($LASTEXITCODE -ne 0){throw 'Frame fixture emission failed'}
+          python -B tests/windows_screen_r1/contract.py --emit > $env:DT_SCREEN_INPUT
+          if($LASTEXITCODE -ne 0){throw 'Screen fixture emission failed'}
+          rustc -Vv
+          cargo -V
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::component::capture -- --exact --nocapture
+          if($LASTEXITCODE -ne 0){throw 'Bridge compile/capture failed'}
+          python -B tests/windows_bridge_r1/frames.py --input bridge-evidence/frames.json --candidate $env:DT_SOURCE_HEAD
+          if($LASTEXITCODE -ne 0){throw 'Exact-frame predicates failed'}
+          git ls-tree HEAD host/app/src/ > bridge-evidence/source-blobs.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-bridge-component
+          path: bridge-evidence

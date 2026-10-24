@@ -69,7 +69,8 @@ pub fn run(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Ar
     run_recorded(bin, version, job, folders, cancel, &mut RunReceipt::default())
 }
 
-pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Arc<AtomicBool>, receipt: &mut RunReceipt) -> Outcome {
+/// Construct the actual production invocation without spawning it.
+pub fn command(bin: &Path, version: &str, job: &Job, folders: &[PathBuf]) -> (Command, RunReceipt) {
     let nonce = crate::children::nonce();
     let report_path = job.control.join(format!("ingest-{nonce}.jsonl"));
     let dest = job.out.join("DEST");
@@ -77,8 +78,15 @@ pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], c
     cmd.arg("--report").arg(&report_path).arg("--report-nonce").arg(&nonce);
     cmd.arg("--out").arg(&dest).arg("--length").arg("3600").arg("--").args(folders);
     cmd.current_dir(&job.dir).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
-    *receipt = RunReceipt { argv: std::iter::once(bin.to_string_lossy().into_owned()).chain(cmd.get_args().map(|a| a.to_string_lossy().into_owned())).collect(),
+    let receipt = RunReceipt { argv: std::iter::once(bin.to_string_lossy().into_owned()).chain(cmd.get_args().map(|a| a.to_string_lossy().into_owned())).collect(),
         cwd: job.dir.clone(), nonce: nonce.clone(), version: version.to_owned(), report: report_path.clone(), dest: dest.clone(), start_ns: now(), ..Default::default() };
+    (cmd, receipt)
+}
+
+pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Arc<AtomicBool>, receipt: &mut RunReceipt) -> Outcome {
+    let (mut cmd, prepared) = command(bin, version, job, folders);
+    *receipt = prepared;
+    let report_path = receipt.report.clone();
     let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => {

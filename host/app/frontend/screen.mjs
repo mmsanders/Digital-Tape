@@ -62,7 +62,7 @@ export function mountScreen(root, actions = {}) {
   function render(view, detailsText = '') {
     if (disposed) return;
     serial++;
-    const state = view.checking ? 'Checking' : view.too_long || view.view === 'problem'
+    const state = view.checking ? 'Checking' : view.too_long || view.view === 'problem' || (['empty', 'ready'].includes(view.view) && !!view.message)
       ? 'Problem' : ({empty: 'Empty', ready: 'Ready', making: 'Making', done: 'Done'}[view.view] || 'Problem');
     screen.dataset.state = state;
     previousLabel = typeof view.label === 'string' ? view.label : '';
@@ -75,7 +75,7 @@ export function mountScreen(root, actions = {}) {
     else meter.removeAttribute('value');
     meter.dataset.tooLong = String(!!view.too_long);
     meter.dataset.indeterminate = String(state === 'Checking');
-    const frames = view.total_frames;
+    const frames = state === 'Empty' ? 0 : view.total_frames;
     if (Number.isSafeInteger(frames) && frames >= 0) {
       length.dataset.frames = String(frames);
       const seconds = Math.ceil(frames / 44100);
