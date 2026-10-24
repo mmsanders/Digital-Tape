@@ -1,0 +1,39 @@
+# PM561 — landed components and next app-delivery round
+
+23 October2026 PDT. Michael requests review and another useful round in the same style. Inputs Product `60c83ed4597a6c205e26e90b15b743791b72ef89` / Verification `75407b7f3b3cd0a20d52faab12d62d0c827db71b`. Canonical four and all live555–557/297–299 returns read. Authority/directions: [PM561](https://github.com/mmsanders/Digital-Tape/issues/561).
+
+## Review outcome
+
+This round delivered code to main, not merely more drafts. [Backend551](https://github.com/mmsanders/Digital-Tape/pull/551) merged at `615899c39af5d85982be74eb5a3529ea107d26b2`, exactly [297's disposed carrier](https://github.com/mmsanders/digital-tape-verification/blob/d8276b033c6c1aa553d823d0d993ed407cbfc726/findings/P2-297-RETURN-2026-10-23/README.md), carrying286's already accepted real runner/current-job/report/cleanup evidence without replay. A correction removed optional GUI/build features from the standalone manifest, normalized the lock without new external identities and closed the independently detected boundary miss. No blanket public-API or GUI/glue clearance follows.
+
+[Internal Make550](https://github.com/mmsanders/Digital-Tape/pull/550) merged at `f699f6af543b42124bd4ca7e57e1607cfc58842e`, exactly [299's disposed component](https://github.com/mmsanders/digital-tape-verification/blob/75407b7f3b3cd0a20d52faab12d62d0c827db71b/findings/P2-299-RETURN-2026-10-23/README.md). One actual19.055s ordinary-file Windows run passed all10 frozen whole-image/stdout/exit comparisons. Positive composition retained one session with NULL-write verify; three I/O fault pairs matched real copied-invalid-handle ordinary ReadFile/WriteFile outcomes. Required safety/query/change/removal controls that use modeled callbacks remain interface facts, not real native media sensing. The unchanged engine/spec and shipping command boundaries carry; no production Make path was enabled.
+
+Material chronology limitation remains: unpublished private port scaffold existed before302, was quarantined and is not accepted or retrospectively test-first. Its claimed unbuilt/unexecuted history is producer attribution, not independently observed.299 explicitly accepted only the final source/artifact/run constructed after the blinded published port addendum; it did not certify that earlier history. Future tasks may not reuse that quarantine or repeat this process debt.
+
+[UI298](https://github.com/mmsanders/digital-tape-verification/blob/ecf91f9b1729d45071d736a4589871e9cab7bb63/findings/P2-298-RETURN-2026-10-23/README.md) returned BLOCKED without another launch. No documented separate prelaunch consent-status/request API or supported cross-app folder gesture was established. Empty app inventory is not proof an executable cannot run. A minimal future argv/PID receipt correction is published; it is not runtime admission. No actual UI control/page/drop, new native runtime or product-defect claim follows. Another unchanged permission inventory/relaunch would not move the app forward.
+
+PM independently authenticated merged Product551/550 and verifier301/303/304 identities. Both disposed Product heads had68 completed checks,53success/15skipped, no failures; verifier303/304 exact heads each passed their independent check. Integration receipts on Product main bind exact equal source trees. PM used those publications/CI and did not inspect Product implementation or replay old/private runtime suites.
+
+## Decision and issued outcomes
+
+Useful autonomous work remains under APP-1A§6: host authoring/build may proceed while native acceptance is held. This round develops the production app screen and thin host bridge, then builds a new candidate from cleared source. This is ordinary source/component development, not an alternate control provider or substitute acceptance route for blocked298.
+
+| Software | Verification | Bounded outcome |
+|---|---|---|
+|[562](https://github.com/mmsanders/Digital-Tape/issues/562)|[305](https://github.com/mmsanders/digital-tape-verification/issues/305)|Production screen/renderer/state component from APP-1, independent tests before uncovered source; integrate only cleared component|
+|[563](https://github.com/mmsanders/Digital-Tape/issues/563)|[306](https://github.com/mmsanders/digital-tape-verification/issues/306)|Thin production app/worker event bridge reusing the accepted backend, no copied gate/parser or wholesale540 import|
+|[564](https://github.com/mmsanders/Digital-Tape/issues/564)|[307](https://github.com/mmsanders/digital-tape-verification/issues/307)|One newly assembled Windows candidate, exact source/binary provenance and only specifically admitted startup/native-window/quit component facts|
+
+Detailed directions, interfaces/dependencies, correction budgets, direct handoffs and stop conditions live in issues. Verification publishes missing expectations before uncovered implementation/inspection; ready actual returns take priority. Paired waits skip to eligible covered work; no PM relay, busy polling, extra tasks or framework campaign. Existing accepted backend/core evidence carries across mechanical moves without reacceptance.
+
+Unit/model/test-DOM fixtures test production modules only in test environments. They do not establish actual Windows rendering/input or OS folder gestures. No shipping fake-state/child switch, running-app IPC/JS injection, consent retry, browser/native-control workaround or second UI product is authorized.307 must independently decide/predeclare any new-binary startup-only process observation under the existing qualified recorder; issuing the task alone admits no launch. That limited native-window/quit claim cannot waive298's actual capture/input admission. If not admissible, build/artifact-only with exact hold is the proper return.
+
+Production discovery/card/Make/elevation routes stay disabled in this candidate. No physical disk/card/volume/native observer/VHD, admin/security/install/engine/format/hardware work or new proof/crash/sparse campaign is issued. Normal locked repository builds through already approved tooling are permitted; no machine runtime/tool upgrade. A new preview must contain newly cleared app source, not another packaging-only pass of older binaries.
+
+## Operation and gates
+
+PM554's role queue finished; Software saved its listener PAUSED and Verification removed its completed listener. One new finite queue is authorized by Michael's latest request. PM561 updated Software's existing automation `digital-tape-windows-software-overnight` in place and restored only `digital-tape-windows-verification-follow-ups`. Saved files read back: both ACTIVE, same assigned local chat targets respectively `01a16568-595b-7772-9daa-46b6bd015f1c` and `01a16568-2abb-7672-8a0f-549807ad220e`, ten-minute cadence, expiry24Oct2026 08:00PDT/15:00UTC. Prompts pause on completion/permanent blockage/cutoff, deduplicate and stay quiet unchanged. No duplicate listener, new chat or subworker was created. Kickoff delivery/activity and docs publication are recorded in PM561; configuration alone is not execution/completion.
+
+Phase1 remains36/36 and Phase2 **6/12**, because backend/core components do not complete full WP15 acceptance. WP14 native A6 linkage, INGEST own-host visibility, production S3/session/elevation, G1/G3/G4/G5 runtime and witnessed G2 remain held. macOS deferred; Linux existing CI; hardware parked. No physical Windows test or open Michael issue is waiting on him. Actual UI permission/gesture is a separate tool prerequisite, not card/admin work.
+
+PM561 refreshes STATUS/WP15/For Michael and both dashboard snapshots through normal docs CI and runs the required local dashboard test. No Product code was implemented/reviewed/merged or independently accepted by PM. No rung advances from issue closure, green CI or new task issuance.
