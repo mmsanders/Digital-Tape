@@ -19,6 +19,7 @@ async function main() {
     const errors = [];
     page.on('pageerror', e => errors.push(String(e)));
     await page.setContent('<!doctype html><html><body><main id="app"></main></body></html>');
+    await page.addStyleTag({content:fs.readFileSync(path.join(path.dirname(production),'style.css'),'utf8')});
     // A module in a fresh test document, never injection into the Windows app.
     await page.evaluate(async text => {
       const url = URL.createObjectURL(new Blob([text], {type:'text/javascript'}));
@@ -41,6 +42,11 @@ async function main() {
         });
       }
       const el = id => root.querySelector('#'+id);
+      function nativeProgress(node) {
+        const style=getComputedStyle(node);
+        const visible=!node.hidden && style.display!=='none' && style.visibility!=='hidden' && node.getClientRects().length>0;
+        return {visible,position:node.position,pseudo_indeterminate:node.matches(':indeterminate'),value_attribute:node.getAttribute('value'),metadata:node.dataset.indeterminate,accent_color:style.accentColor};
+      }
       function capture(id) {
         const meter = el('length');
         raw[id] = root.innerHTML;
@@ -53,7 +59,8 @@ async function main() {
           frames: el('length-text').hasAttribute('data-frames') ? Number(el('length-text').dataset.frames) : null,
           ratio: meter.dataset.kind === 'length' && meter.hasAttribute('value') ? meter.value : null,
           too_long: meter.dataset.tooLong === 'true',
-          indeterminate: meter.dataset.indeterminate === 'true',
+          indeterminate: nativeProgress(meter).visible && nativeProgress(meter).position === -1,
+          native_progress: nativeProgress(meter),
           details: el('details').textContent,
           details_copyable: el('details').tagName === 'PRE' && el('details').tabIndex === 0 && getComputedStyle(el('details')).userSelect === 'text' && !el('details').hidden,
           progress_bar_count: [...root.querySelectorAll('progress')].filter(x=>!x.hidden).length,
@@ -103,7 +110,12 @@ async function main() {
       const reset=capture('start-over');
       const start_over={callbacks:callbacks.filter(x=>x[0]==='reset').length,label:reset.label,
         details:reset.details,state:reset.state,frames:reset.frames,make_disabled:reset.make_disabled};
-      return {views,labels,drop_transport,malformed_drop_callbacks,mount_side_effects,start_over,raw};
+      const bad=document.createElement('progress');bad.max=1;bad.dataset.indeterminate='false';root.append(bad);
+      const negative_control={actual:nativeProgress(bad),html:bad.outerHTML};
+      negative_control.rejected_by_frozen_false=negative_control.actual.visible && negative_control.actual.position===-1;
+      if(!negative_control.rejected_by_frozen_false) throw new Error('Native indeterminate red control was not detected');
+      bad.remove();
+      return {views,labels,drop_transport,malformed_drop_callbacks,mount_side_effects,start_over,raw,negative_control};
     }, input);
     const raw=result.raw;
     delete result.raw;

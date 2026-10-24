@@ -68,7 +68,8 @@ export function mountScreen(root, actions = {}) {
     previousLabel = typeof view.label === 'string' ? view.label : '';
     label.value = previousLabel;
     const bar = view.bar;
-    meter.hidden = state === 'Done';
+    meter.hidden = state === 'Done' || (state !== 'Checking' && state !== 'Making' && !(typeof bar === 'number' && Number.isFinite(bar)));
+    meterLabel.hidden = meter.hidden;
     meter.dataset.kind = state === 'Making' ? 'writing' : 'length';
     if (state === 'Checking') meter.removeAttribute('value');
     else if (typeof bar === 'number' && Number.isFinite(bar)) meter.value = Math.min(1, Math.max(0, bar));
