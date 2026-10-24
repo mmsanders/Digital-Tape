@@ -599,6 +599,32 @@
         "-B",
         "tests/windows_screen_r1/contract.py"
       ]
+    },
+    {
+      "path": "tests/windows_bridge_r1",
+      "tree": "374aa1087474c2eed7e696c01214894dd4ae5d81",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "9f6f9dba46d09474615bf8f03b574f9a72c09d80",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/306#issuecomment-6378750664",
+      "attestation": "PM561/563 issued thin production bridge/current exact-frame expectations published before implementation; controlled-order component only",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_bridge_r1/contract.py"
+      ]
+    },
+    {
+      "path": "tests/windows_app_jobs_r1",
+      "tree": "4859e302e9fd618ecf6e8a65729c6e3f42a8877e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "9f6f9dba46d09474615bf8f03b574f9a72c09d80",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/306",
+      "attestation": "Unchanged accepted286 lifecycle expectations reused as306 model helper only; no actual accepted-row replay",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_app_jobs_r1/lifecycle.py"
+      ]
     }
   ],
   "evidence_bundles": [
