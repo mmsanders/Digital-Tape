@@ -55,6 +55,12 @@ tests/playback_regression_epoch/**          -text
 tests/wp14_r1/**                       -text
 tests/wp15_boundary_query_r1/**        -text
 
+# Host sources are UTF-8 with LF endings (#571, after a Windows code-page save
+# damaged host/tapectl.c comments). text=auto leaves binaries such as app icons
+# alone. This line must stay ABOVE every host/ exception below: the last
+# matching line wins, so the parser-component Cargo.lock keeps -text.
+host/**                                text=auto eol=lf
+
 docs/REVIEW/software498/run*/** -text
 host/app/parser-component/Cargo.lock -text
 
