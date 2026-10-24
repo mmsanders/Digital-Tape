@@ -29,6 +29,8 @@ pub struct View {
     pub checking: bool,
     /// 0..=1 of a 60-minute cartridge; None while unknown (indeterminate).
     pub bar: Option<f64>,
+    /// Exact current accepted manifest/refusal total, never inferred from the bar.
+    pub total_frames: Option<u64>,
     pub too_long: bool,
     /// The one sentence shown, if any.
     pub message: Option<String>,
@@ -101,6 +103,7 @@ impl App {
         };
         View {
             view,
+            total_frames: match &check { Check::Fits(t) => Some(*t), Check::TooLong { total, .. } => Some(*total), _ => None },
             checking: check == Check::Running,
             bar,
             too_long,
@@ -114,10 +117,15 @@ impl App {
 
     /// A drop gesture. A file or a mix adds nothing (DROP_NOT_FOLDER, zero child calls).
     pub fn dropped(&mut self, paths: &[PathBuf]) -> Next {
+        self.admit_drop(drops::classify(paths, &self.folders))
+    }
+
+    /// Apply the existing classifier's atomic admission result under the coordinator lock.
+    pub fn admit_drop(&mut self, classified: Drop) -> Next {
         if matches!(self.check, Some(Check::Problem(_))) {
             return Next::Nothing; // Problem offers Start over only
         }
-        match drops::classify(paths, &self.folders) {
+        match classified {
             Drop::NotFolder => {
                 self.notice = Some(messages::app_event(AppEvent::DropNotFolder));
                 Next::Nothing

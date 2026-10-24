@@ -1,0 +1,1 @@
+PASS correction1:14 frozen view predicates/8 UTF8 rows; six terminal unknown-length controls hidden; Checking actually visible/position=-1; faulty visible/no-value/metadata=false negative control rejected. Combined host qualifier still pending.

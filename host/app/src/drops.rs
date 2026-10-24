@@ -1,7 +1,7 @@
 //! APP-1 §2 drops and APP-1A §2 deduplication. Folders only: a gesture containing any
 //! non-folder adds nothing and is the app event DROP_NOT_FOLDER, with zero child calls.
 //! The app only reads metadata of dropped paths; it never opens or lists them (INGEST-1
-//! does that, and remains authoritative for symlinks, unreadable folders and duplicates).
+//! does that, and remains authoritative for unreadable content and unknown identities).
 
 use std::path::{Path, PathBuf};
 
@@ -34,34 +34,42 @@ fn identity(p: &Path) -> Option<(u64, u64)> {
     }
 }
 
-/// Classify one drop gesture against the folders already appended.
+/// Minimal metadata facts shared by the production classifier and controlled unit inputs.
+#[derive(Clone, Debug)]
+pub struct Fact { pub plain_folder: bool, pub identity: Option<(u64, u64)> }
+
+fn fact(p: &Path) -> Fact {
+    let plain_folder = std::fs::symlink_metadata(p).is_ok_and(|m| {
+        #[cfg(windows)]
+        { use std::os::windows::fs::MetadataExt; m.is_dir() && !m.file_type().is_symlink() && m.file_attributes() & 0x400 == 0 }
+        #[cfg(not(windows))]
+        { m.is_dir() && !m.file_type().is_symlink() }
+    });
+    Fact { plain_folder, identity: if plain_folder { identity(p) } else { None } }
+}
+
+/// Classify one complete gesture. Reject symlinks/reparse points before scheduling.
 pub fn classify(paths: &[PathBuf], current: &[PathBuf]) -> Drop {
-    if paths.is_empty() {
-        return Drop::NoChange;
-    }
-    for p in paths {
-        // A symlink to a folder is passed through: INGEST refuses it (FOLDER_SYMLINK).
-        let Ok(md) = std::fs::symlink_metadata(p) else { return Drop::NotFolder };
-        let is_folder = md.is_dir() || (md.file_type().is_symlink() && std::fs::metadata(p).is_ok_and(|m| m.is_dir()));
-        if !is_folder {
-            return Drop::NotFolder;
-        }
-    }
-    let mut known: Vec<(u64, u64)> = current.iter().filter_map(|p| identity(p)).collect();
+    classify_with(paths, current, fact)
+}
+
+/// Classification has one implementation; tests supply metadata facts, never job outcomes.
+pub fn classify_with<F: Fn(&Path) -> Fact>(paths: &[PathBuf], current: &[PathBuf], facts: F) -> Drop {
+    if paths.is_empty() { return Drop::NoChange; }
+    let incoming: Vec<_> = paths.iter().map(|p| facts(p)).collect();
+    if incoming.iter().any(|f| !f.plain_folder) { return Drop::NotFolder; }
+    let mut known: Vec<_> = current.iter().filter_map(|p| {
+        let f = facts(p); if f.plain_folder { f.identity } else { None }
+    }).collect();
     let mut add = Vec::new();
-    for p in paths {
-        match identity(p) {
-            Some(id) if known.contains(&id) => continue,
-            Some(id) => known.push(id),
-            None => {}
+    for (p, f) in paths.iter().zip(incoming) {
+        if let Some(id) = f.identity {
+            if known.contains(&id) { continue; }
+            known.push(id);
         }
         add.push(p.clone());
     }
-    if add.is_empty() {
-        Drop::NoChange
-    } else {
-        Drop::Folders(add)
-    }
+    if add.is_empty() { Drop::NoChange } else { Drop::Folders(add) }
 }
 
 /// The dropped folder's own name, for messages. Never a full path.
