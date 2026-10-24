@@ -1,0 +1,106 @@
+name: "Software564 Windows candidate build"
+# ONE new Windows11 x64 app build from the integrated, independently cleared
+# production screen/bridge source (Verification #305/#306 at fad2eac7, merged as
+# main 266bdcaa). BUILD only: nothing is launched here. ingest.exe and tapectl.exe
+# are the original binaries, hash-checked and never rebuilt or invoked.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/windows-candidate-build.yml'
+      - 'tools/app/package_candidate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+env:
+  APP_SOURCE: 266bdcaa760f702d6f685300cc9ca6e4491b6438
+  FRONTEND_DISPOSITION: fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f
+  BRIDGE_DISPOSITION: fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f
+  HOST_APP_TREE: 4e282664107e2635b72dec8801b76e06660fb892
+  TOOLS_APP_TREE: cb842620ba709429ebfa284f1407b2c59a5d7c8a
+  # Original portable artifact from Software538 run 39883700812; its ingest.exe is the pinned child.
+  ORIGINAL_ARTIFACT: '12471942204'
+  ORIGINAL_ZIP_SHA256: d45b2e78d5fd3017a1a3427201605fa0d9ff747527fac37e5c3847ec346fb0fd
+  INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+  TAPECTL_SHA256: 82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9
+jobs:
+  build:
+    name: "Windows11 x64 candidate BUILD only (#564)"
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: tooling
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APP_SOURCE }}
+          path: app-src
+      - name: Source identity is the cleared, integrated tree
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory evidence,stage | Out-Null
+          $head=git -C app-src rev-parse HEAD
+          if($head -ne $env:APP_SOURCE){throw "App source is $head"}
+          if((git -C app-src rev-parse HEAD:host/app) -ne $env:HOST_APP_TREE){throw 'host/app tree is not the cleared tree'}
+          if((git -C app-src rev-parse HEAD:tools/app) -ne $env:TOOLS_APP_TREE){throw 'tools/app tree is not the cleared tree'}
+          rustc -Vv > evidence/rustc.txt
+          cargo -V > evidence/cargo.txt
+          git -C app-src ls-tree -r HEAD host/app > evidence/host-app-tree.txt
+          "CARGO_TARGET_DIR=$(Join-Path $env:RUNNER_TEMP 'candidate-target')" >> $env:GITHUB_ENV
+      - name: Original children, hash-checked (not rebuilt, not run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          gh api "repos/${{ github.repository }}/actions/artifacts/$env:ORIGINAL_ARTIFACT/zip" > original.zip
+          if($LASTEXITCODE -ne 0){throw 'Original artifact retrieval failed'}
+          if((Get-FileHash original.zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:ORIGINAL_ZIP_SHA256){throw 'Original artifact ZIP mismatch'}
+          Expand-Archive original.zip original
+          Copy-Item original/ingest.exe stage/ingest.exe
+          if((Get-FileHash stage/ingest.exe -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:INGEST_SHA256){throw 'ingest.exe pin mismatch'}
+          gh release download wp14-tapectl-5e2df5aaf23e --repo ${{ github.repository }} --pattern tapectl-windows.exe --dir stage
+          if($LASTEXITCODE -ne 0){throw 'Released CLI retrieval failed'}
+          Move-Item stage/tapectl-windows.exe stage/tapectl.exe
+          if((Get-FileHash stage/tapectl.exe -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:TAPECTL_SHA256){throw 'tapectl.exe pin mismatch'}
+      - name: Release build of the new app with the child pin compiled in
+        working-directory: app-src/host/app
+        env:
+          DT_INGEST_SHA256: ${{ env.INGEST_SHA256 }}
+          DT_INGEST_VERSION: ${{ env.INGEST_VERSION }}
+        run: |
+          cargo build --release --locked --bin digital-tape 1> ../../../evidence/app-build.stdout.txt 2> ../../../evidence/app-build.stderr.txt
+          if($LASTEXITCODE -ne 0){Get-Content ../../../evidence/app-build.stderr.txt -Tail 40; throw 'Windows app build failed'}
+          Copy-Item "$env:CARGO_TARGET_DIR/release/digital-tape.exe" ../../../stage/digital-tape.exe
+      - name: Package the five-member candidate
+        run: |
+          $ErrorActionPreference='Stop'
+          $facts=[ordered]@{
+            source_head=$env:APP_SOURCE; source_tree=(git -C app-src rev-parse 'HEAD^{tree}')
+            host_app_tree=$env:HOST_APP_TREE; tools_app_tree=$env:TOOLS_APP_TREE
+            frontend_disposition=$env:FRONTEND_DISPOSITION; bridge_disposition=$env:BRIDGE_DISPOSITION
+            packager_source=(git -C tooling rev-parse HEAD)
+            toolchain=[ordered]@{rustc=(Get-Content evidence/rustc.txt); cargo=(Get-Content evidence/cargo.txt -Raw).Trim()}
+            run_id=[long]$env:GITHUB_RUN_ID; run_attempt=[int]$env:GITHUB_RUN_ATTEMPT }
+          [IO.File]::WriteAllText("$PWD/evidence/facts.json", ($facts | ConvertTo-Json -Depth 4) + "`n")
+          python -I tooling/tools/app/package_candidate.py stage evidence/facts.json candidate
+          if($LASTEXITCODE -ne 0){throw 'Packaging failed'}
+          Copy-Item candidate/INVENTORY.json evidence/INVENTORY.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software564-windows-candidate
+          path: candidate/Digital-Tape-Windows11-x64-candidate.zip
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software564-build-evidence
+          path: evidence
+          if-no-files-found: error
+          retention-days: 30
