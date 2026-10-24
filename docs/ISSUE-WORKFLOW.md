@@ -1,6 +1,6 @@
 # Work directions through GitHub issues
 
-**Michael-directed workflow · adopted 12 September 2026, current through ADR-160 (3 October 2026).**
+**Michael-directed workflow · adopted 12 September 2026; manual activation restored 24 October 2026 (ADR-192).**
 Issues are the single source for active work assignments. Main stores enduring role
 charters, normative specifications, decisions, evidence, package definitions and
 factual status. Do not keep a second current task list or per-round brief on main.
@@ -134,6 +134,19 @@ merge, issue closure and independent acceptance remain separate facts. Verificat
 signs only its documented scope. Michael closes his own resolved or superseded items.
 
 ## Activation and independence
+
+**Current override, 24 October (ADR-192): PM posts issues only.** No automatic
+kickoff messages, listener wake-ups or same-activation next-assignment jumps.
+Michael manually selects/starts the task/context; the lead returns and stops.
+Both previous finite listeners are PAUSED. This overrides historical overnight
+queue instructions without reopening completed work. Software's full role is local
+Windows Claude Code, model selected by Michael; one active context per task.
+
+New issue returns, PR descriptions and review comments start with a readable
+**[PM]**, **[Software Lead]**, **[Verification Lead]** or **[Hardware Lead]** header.
+The shared GitHub account is retained. Role-local Git author names/trailers may help
+attribution but are not independent acceptance or a new mandatory CI gate. No new
+accounts, bots, tokens or trailer-enforcement project is issued.
 
 Michael configures external listeners; the 12 September migration to issue routing is complete.
 This repository change does not install listeners, guarantee delivery or claim a

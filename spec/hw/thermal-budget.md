@@ -1,7 +1,14 @@
 # Thermal and safety budget — WP-34
 
 **Owner:** Hardware Lead · **Status:** living document, versioned not frozen (PM Decisions 001 §3)
-**Revision:** 0.6, 12 Sep 2026 · **Applies to:** production board rev A
+**Revision:** 0.7, 24 Oct 2026 · **Applies to:** production board rev A
+
+> **Current owner-layout boundary (PM570):** [24 October design reference](../../docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+> Owner layout #569 adds a proposed speaker and new enclosure/battery estimates,
+> and considers removing the solenoid. Existing generated thermal/coil tables are
+> legacy rev-A estimates, not a thermal assessment of that layout. No speaker
+> loudness limit, coil deletion or safety/fabrication hold removal is adopted.
+> Rebudget only after the product and electrical interfaces are explicitly settled.
 
 > **STATUS: three IR-015 findings — charger 45 °C enforcement, solenoid sustained-power bound,
 > transient junction temperatures. Numbers in §T-1 and §T-2 are provisional; T-4 is withdrawn.**
@@ -26,6 +33,12 @@ number. Until it does, treat the margins as indicative.
 > `hardware/thermal/budget.py`. Edit the inputs there and run `make -C hardware thermal`.
 > `make -C hardware thermal-check` fails if this file is stale, so the numbers cannot drift
 > away from the model that produced them.
+
+## CHANGES
+
+### 0.7 — 2026-10-24
+PM570 adds the owner-layout scope notice from intake #569. No generated table,
+model input, electrical interface or safety criterion changes; no qualification.
 
 ---
 

@@ -1,6 +1,6 @@
 # Software Lead
 
-**Instance:** Michael-selected runtime; current Phase2 Software is a fresh local Windows ChatGPT-app chat (ADR-191). **Format:** individual lead; no subworkers.
+**Instance:** Claude Code on Michael's actual local Windows machine; model selected by Michael (24 October 2026, ADR-192 amendment to ADR-191). The full role stays here; no cloud/local split. **Format:** individual lead; no subworkers.
 
 ## Authority
 
@@ -47,6 +47,8 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; PM reviews the linked
 PR/evidence and uses a new issue for corrections or the next tranche.
 
+**Manual activation:** PM posts issues only. Do not start from an old event, resume a listener or auto-advance to a second assignment. Michael selects/starts the context/task; return and stop. Existing listeners are PAUSED (24 October, ADR-192).
+
 Michael configures listener/activation tools; the 12 September migration to issue
 routing is complete. Manual resumption also works. No listener is implemented or claimed active
 by these instructions. No subworkers or restoration of the archived signaling bus.
@@ -55,7 +57,7 @@ Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape Software Lead for the current phase, using Opus in a Claude Code chat.
+You are the Digital-Tape Software Lead for the current phase in Michael's local Windows Claude Code context, using his selected model.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/software.md
 and required onboarding documents. Find your current open issue labeled
 `software-lead`, read its live body and scope updates, and report the input main

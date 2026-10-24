@@ -1,11 +1,23 @@
 # Board rev A — the hardware/firmware contract
 
 **Owner:** Hardware Lead · **Consumed by:** `firmware/prod/` · **Status:** skeleton, accreting
-**Revision:** 0.5, 3 Sep 2026 · **Governed by:** PM Decisions 001 §3 and §5
+**Revision:** 0.6, 24 Oct 2026 · **Governed by:** PM Decisions 001 §3 and §5
+
+> **Current owner-layout boundary (PM570):** [24 October design reference](../../docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+> Owner layout #569 uses a 68 × 110 × about 29 mm player, GameCube-class cartridges,
+> an estimated 46 × 62 mm board and proposed speaker/mic/aux/volume interfaces.
+> Those are layout inputs, not a routed board or issued pin/rail/BOM change. The
+> solenoid-free proposal and end-of-tape behavior are undecided; existing electrical
+> interfaces and safety requirements below are unchanged.
 
 <!-- CHANGES: every revision adds a block here. Firmware reads this first. -->
 
 ## CHANGES
+
+### 0.6 — 2026-10-24
+PM570 adds the owner-layout scope notice from intake #569. Reference alignment
+only: no pin, rail, timing, electrical/thermal input, generated table or acceptance
+criterion changes. Legacy models remain historical; new-layout qualification is open.
 
 ### 0.5 — 2026-09-03
 **Pin map §2 populated with signal names, directions and pulls — no pin numbers yet.** Firmware

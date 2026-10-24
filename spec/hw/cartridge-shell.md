@@ -1,11 +1,19 @@
 # Cartridge shell — the clasp, the seam, and what opens it
 
 **Owner:** Hardware Lead · **Consumed by:** WP-24, WP-23, WP-25 · **Status:** assessment
-**Revision:** 0.2, 6 Sep 2026 · **Answers:** PM Decisions 007 §2 (and 006 §2–§3 before it)
+**Revision:** 0.3, 24 Oct 2026 · **Answers:** PM Decisions 007 §2 (and 006 §2–§3 before it)
 
 <!-- CHANGES: every revision adds a block here. -->
 
 ## CHANGES
+
+### 0.3 — 2026-10-24
+PM570 files owner intake #569. Current cartridge taste target is GameCube class,
+about 36 × 40 × 7 mm; 86 × 54 × 12 mm was withdrawn. This is a reference-only
+scope correction: no CAD/model/table, carrier/contact, tolerances or safety result
+is changed or qualified. The remaining 0.2 calculations and coupons describe the
+legacy 12 mm design and cannot establish fit/force/strain for the new envelope.
+The physical copy control is unresolved. See [current owner layout](../../docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
 
 ### 0.2 — 2026-09-06
 **The material assumption is gone, and the design changed to survive not having one.** PM
@@ -32,6 +40,15 @@ USB-MSC package asked for in §3, and records the material correction: **the A1 
 run nylon**, so the "print the latch in nylon at home" path in Decisions 005 §3 does not exist.
 
 ---
+
+## Current design boundary — read before the legacy assessment
+
+The current owner envelope is **GameCube class, about 36 × 40 × 7 mm**, under
+[intake #569](../../docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md). SH-1 below records that choice; exact engineering
+dimensions and a reworked clasp/carrier remain unissued. Sections 0–8 retain the
+old 86 × 54 × 12 mm assessment and generated estimates as history. Do not build or
+qualify the new cartridge from those dimensions, coupons, force margins or ideal
+closed-strain claims. A copy button is not yet part of the new physical layout.
 
 ## 0. What this says, in one page
 
@@ -460,7 +477,7 @@ which is itself an argument for the clasp, because the clasp does not close the 
 
 | # | Item | Who | Default if nobody answers |
 |---|---|---|---|
-| SH-1 | **Cartridge outer dimensions.** 86 × 54 × 12 mm is a working number, not a designed one. §2 shows the analysis does not depend on it — strain has no length term | **Michael** | 86 × 54 × 12 proceeds; changing it later costs a rebuild, not a redesign |
+| SH-1 | **Owner envelope recorded:** GameCube class, about 36 × 40 × 7 mm (#569). Exact fit, tolerances, clasp and carrier/contact geometry remain open | **Michael / Hardware on authorized resume** | 86 × 54 × 12 mm is withdrawn; no new CAD, print or inherited force/strain qualification is issued |
 | SH-2 | **Filament datasheets.** Modulus, permissible strain, creep threshold and friction are all EST, and now for a material we do not choose. No vendor egress here reaches a filament vendor | Michael or PM | The §8 sweep measures around the uncertainty; a datasheet narrows the bracket, it does not unblock it |
 | SH-3 | **Whether the library will let Michael supply his own filament.** He is asking on Monday (Decisions 009 §5). A yes would restore PETG and make the dashboard finding in §1 much less sharp | Michael | Everything here assumes no. If the answer is yes, nothing needs redesigning — the margins just get wider |
 | SH-4 | **S-2's 90-day clock has not started** and cannot until a printed pair exists. It is the longest-lead criterion on the hardware stream and it is on no schedule | — | Runs in parallel; does not gate WP-24 |
