@@ -1,6 +1,6 @@
 # Project status
 
-**24 October 2026 PDT · PM576 · input main `c55452d7`.**
+**25 October 2026 PDT · PM583 · input main `6b1489f7`.**
 
 Phase 1 is complete: all nine engine packages are independently accepted, all
 36 dashboard rungs are final, and Michael approved the ten golden references.
@@ -32,6 +32,9 @@ Michael starts the selected task/context. A lead returns its bounded work and st
 | Screen and bridge on main | Verification #305/#306 cleared the exact component; PR #567 merged at `266bdcaa`. Real IPC/OS gestures were not executed by those staged tests. |
 | New Windows candidate | PR #574 built the new source; #315 passed exact build/archive provenance. Reproducible compilation is not claimed. |
 | New native startup/quit | Verification #316 passed the measured window/normal-close facts. PM576 closes the prompt-record action with the historical record limitation retained. |
+| Discovery integrated | PR #580 merged at `26ed8491`; Verification #318 cleared corrected source/poll lifetime/details behavior. |
+| Live metadata result | Verification #323 / `e4c7237d` passed one admitted child run: exit 0, offered 0, unprobed 0. No app display was observed; allowance consumed. |
+| Original streams retained | PR #582 adds four unchanged stdout/stderr originals omitted by the binary ignore rule; no new runtime fact. |
 | Host text repair | PR #573 merged comment/LF repairs and scoped editor attributes; no behavioral change. |
 
 The production app source is now integrated and packaged. Exact source, build,
@@ -46,17 +49,24 @@ blocker or reason to repeat the passed run. Verification's original full-admissi
 HELD record is not rewritten or falsely certified as compliant. No permission or
 safety rule is waived; future methods must record their actual authorization mode.
 
-Manual next work is [Software #577 / Verification #317](https://github.com/mmsanders/Digital-Tape/issues/577)
-for the real no-card app flow, then [#578 / #318](https://github.com/mmsanders/Digital-Tape/issues/578)
-for accepted read-only card-discovery integration with a newly pinned S2 child.
-The old bundled tapectl predates S2. Make/elevation remain disabled; a live metadata
-enumeration needs its own narrowly published admission. No card handling is issued.
+Software #577 / Verification #317 returned a concrete native-control capability
+blocker: the selected Claude session has no desktop computer-use tool. No native
+session was attempted. PM583 closes the stale Software envelope as blocked; frozen
+317 rows and candidate564 remain available for a fresh scoped human-result review.
+Michael plans a real-card test tomorrow when available. That plan is separate from
+the no-card UI gap; it does not authorize a new procedure or replace old A6 evidence.
+
+Manual work now targets usable editing/details during background updates
+[Software #584 / Verification #324](https://github.com/mmsanders/Digital-Tape/issues/584),
+then a current discovery-enabled portable app bundle
+[#585 / #325](https://github.com/mmsanders/Digital-Tape/issues/585).
+These tasks require no card or desktop-control tool. Make/elevation remain disabled.
+No new native/session provider, runtime metadata collection or physical test is issued.
 Both listeners remain PAUSED; no lead was messaged or automatically started.
 
 The app's next rung requires **complete required independent package coverage**,
-not a build or startup alone. Required native/UI/S3 coverage is still incomplete,
-so the numbers stay 6/12. Milestone progress above is real within that coarse gate.
-No physical Windows test is waiting on Michael.
+not a build or startup alone. Native/UI/S3 coverage is still incomplete: 6/12 stays.
+See [PM583 disposition](REVIEW/PM583-NO-CARD-WORK-2026-10-25.md).
 
 ## Hardware design reference
 
@@ -78,7 +88,7 @@ not automatically activate a new hardware work stream.
 
 - Native A6 linkage and INGEST own-host visibility still block full host acceptance.
 - Production S3/session/query/removal, elevation, app runtime G1/G3/G4/G5 and
-  the witnessed unaided G2 remain held. Make/discovery/card routes stay disabled.
+  the witnessed unaided G2 remain held. Make/elevation stay disabled; only expressly admitted discovery scope is usable.
 - Card atomicity is unqualified; fabrication and charging remain CLOSED.
 - Crash coverage remains 41/404. Sparse/controller and global-proof campaigns
   remain parked; no new fault run or copy/async/firmware campaign is issued.

@@ -184,4 +184,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-193](DECISIONS.md#adr-193--close-the-startup-record-action-and-issue-live-appdiscovery-work) | 2026-10-24 PDT | Startup record disposition / manual live app and discovery | PM576 closes administrative action with limitation retained; retires455/443; no rung gain; manual577/317 and578/318 |
 
-130 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-194](DECISIONS.md#adr-194--keep-app-work-moving-independently-of-the-planned-card-test) | 2026-10-25 PDT | Useful app work independent of human card test | Discovery318 carried; native317 capability stop; usable editing/details and current bundle manual584/324,585/325; Make disabled |
+
+131 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

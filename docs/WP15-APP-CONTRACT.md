@@ -59,6 +59,17 @@ beside a source or on a card.
 input that would exceed 32 bytes, never truncates silently, and is never pre-filled. **Make
 cartridge** is enabled only with a non-empty label, a successful check, and exactly one card.
 
+**Background updates (PM583 / ADR-194 clarification).** Discovery polling and
+music-check snapshots must not interrupt use of the existing controls. Preserve an
+actively edited label's value, focus, caret/selection and UTF-8 limit across
+unrelated updates; a stale snapshot cannot overwrite a newer edit. Preserve an open
+Show details view and its reading/selection state while its diagnostics are unchanged.
+An intentional reset/state action or genuinely changed diagnostics may update them.
+Keep discovery and INGEST diagnostics scoped to their own outcomes; an unrelated
+successful poll cannot erase a current music-check failure. This adds no UI feature,
+list, input route or device authority. Independent component tests precede fixes;
+native usability remains a separate acceptance observation.
+
 **Card line.** The app runs `tapectl cards` (§3) every 2 s while not Making:
 - 0 offered cards: "Put a card in."
 - 1 card: "Card ready (64 GB)." The size uses the OS capacity in decimal GB, rounded.
