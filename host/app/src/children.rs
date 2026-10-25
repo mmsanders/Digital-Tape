@@ -1,7 +1,8 @@
 //! The bundled children. The app runs only the `ingest` and `tapectl` executables that
 //! ship beside it, and only when their SHA-256 equals the hash pinned into this build;
 //! otherwise the launch is the app event SPAWN_FAILED. Pins are build inputs
-//! (DT_INGEST_SHA256 / DT_INGEST_VERSION at compile time), not runtime switches.
+//! (DT_INGEST_SHA256 / DT_INGEST_VERSION and DT_TAPECTL_SHA256 / DT_TAPECTL_VERSION at
+//! compile time), not runtime switches.
 
 use sha2::{Digest, Sha256};
 use std::path::{Path, PathBuf};
@@ -16,6 +17,13 @@ pub const INGEST: Pin = Pin {
     file: if cfg!(windows) { "ingest.exe" } else { "ingest" },
     sha256: option_env!("DT_INGEST_SHA256"),
     version: option_env!("DT_INGEST_VERSION"),
+};
+
+/// The S2 discovery child (`tapectl cards` only). A build without this pin has no card line.
+pub const TAPECTL: Pin = Pin {
+    file: if cfg!(windows) { "tapectl.exe" } else { "tapectl" },
+    sha256: option_env!("DT_TAPECTL_SHA256"),
+    version: option_env!("DT_TAPECTL_VERSION"),
 };
 
 /// Why a child cannot be launched; shown under Show details.
