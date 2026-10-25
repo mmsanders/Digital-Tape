@@ -92,6 +92,9 @@ jobs:
           $env:DT_DISCOVERY_OUTPUT="$PWD/evidence578"
           cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::discovery_component::capture -- --exact --nocapture
           if($LASTEXITCODE -ne 0){throw 'Discovery capture failed'}
+          # V318 correction1: shutdown/admission boundary and discovery details views.
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::discovery_component::correction1 -- --exact --nocapture
+          if($LASTEXITCODE -ne 0){throw 'Correction1 capture failed'}
           python -B tests/windows_discovery_r1/contract.py --input evidence578/discovery.json --candidate $env:DT_SOURCE_HEAD
           if($LASTEXITCODE -ne 0){throw 'Discovery qualifier failed'}
           git ls-tree -r HEAD host/app/src/ > evidence578/source-blobs.txt

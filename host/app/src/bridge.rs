@@ -6,7 +6,9 @@ use std::{path::PathBuf, sync::{Arc, Mutex, Weak, mpsc, atomic::{AtomicBool, Ord
 
 pub struct Work { pub id:String, pub generation:u64, pub folders:Vec<PathBuf>, pub cancel:Arc<AtomicBool> }
 enum Message { Check(Work), Stop }
-struct Core { app:App, cancel:Option<Arc<AtomicBool>>, cards_cancel:Option<Arc<AtomicBool>> }
+// `stopped` is set under this lock by shutdown, so a discovery run is either registered
+// before shutdown's cancellation pass or refused; none crosses that boundary.
+struct Core { app:App, cancel:Option<Arc<AtomicBool>>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool }
 pub struct Bridge {
     core:Mutex<Core>,
     // Mutations/publications are serialized; emit never holds the core lock.
@@ -14,12 +16,14 @@ pub struct Bridge {
     sender:mpsc::Sender<Message>, worker:Mutex<Option<thread::JoinHandle<()>>>,
     stop_polls:AtomicBool, poller:Mutex<Option<thread::JoinHandle<()>>>,
     #[cfg(test)] trace:Mutex<Vec<String>>,
+    /// Controlled tests pause a due poll here, after its stop read and before registration.
+    #[cfg(test)] before_admission:Mutex<Option<Box<dyn FnOnce()+Send>>>,
 }
 impl Bridge {
     fn channel(data:PathBuf,emit:Arc<dyn Fn(View)+Send+Sync>)->(Arc<Self>,mpsc::Receiver<Message>) {
         let(sender,receiver)=mpsc::channel();
-        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,cards_cancel:None}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
-            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),#[cfg(test)]trace:Mutex::new(Vec::new())}),receiver)
+        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,cards_cancel:None,stopped:false}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
+            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),#[cfg(test)]trace:Mutex::new(Vec::new()),#[cfg(test)]before_admission:Mutex::new(None)}),receiver)
     }
     pub fn new(data:PathBuf,emit:impl Fn(View)+Send+Sync+'static)->Arc<Self> {
         let(bridge,receiver)=Self::channel(data,Arc::new(emit));
@@ -45,11 +49,21 @@ impl Bridge {
         let mut schedule=discovery::Schedule::new(0);
         loop{
             let Some(bridge)=weak.upgrade() else{break};
-            if bridge.stop_polls.load(Ordering::SeqCst){break}
-            // S3 Make does not exist in this build, so discovery is never paused for Making.
-            if schedule.tick(ms(),false,false){bridge.discover(Self::run_cards);schedule.terminal(ms());}
+            if !bridge.poll_once(&mut schedule,&ms,Self::run_cards){break}
             drop(bridge);thread::sleep(Duration::from_millis(50));
         }
+    }
+    /// One poller step; false once polls are stopped. The stop read here is only a fast
+    /// exit: `discover` rechecks under the core lock before registering a run.
+    fn poll_once(&self,schedule:&mut discovery::Schedule,ms:&dyn Fn()->u64,
+        run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut())->(Ran,Request))->bool{
+        if self.stop_polls.load(Ordering::SeqCst){return false}
+        // S3 Make does not exist in this build, so discovery is never paused for Making.
+        if schedule.tick(ms(),false,false){
+            #[cfg(test)]if let Some(pause)=self.before_admission.lock().unwrap().take(){pause()}
+            self.discover(run);schedule.terminal(ms());
+        }
+        true
     }
     /// The production discovery child: the pinned tapectl beside the app, cards only.
     fn run_cards(job:&jobdir::Job,cancel:&AtomicBool,on_timeout:&mut dyn FnMut(),on_cancel:&mut dyn FnMut())->(Ran,Request){
@@ -62,7 +76,9 @@ impl Bridge {
     /// One discovery run, shared by the poller and controlled tests: a fresh ticket and owned
     /// job, the child, current-only publication, then removal of only this run's job.
     fn discover(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut())->(Ran,Request))->Option<(Ran,Request,Judged)>{
-        let(ticket,cancel)={let mut core=self.core.lock().unwrap();let cancel=Arc::new(AtomicBool::new(false));core.cards_cancel=Some(cancel.clone());(core.app.begin_cards(),cancel)};
+        let(ticket,cancel)={let mut core=self.core.lock().unwrap();
+            if core.stopped{drop(core);self.note("cards:admission-refused");return None}
+            let cancel=Arc::new(AtomicBool::new(false));core.cards_cancel=Some(cancel.clone());(core.app.begin_cards(),cancel)};
         self.note("cards:worker-start");
         let job=match jobdir::create(&self.data,&format!("cards-{}",children::nonce())){
             Ok(job)=>job,
@@ -154,7 +170,7 @@ impl Bridge {
     }
     pub fn shutdown(&self){
         self.stop_polls.store(true,Ordering::SeqCst);self.note("stop-polls");
-        {let _serial=self.publication.lock().unwrap();let mut core=self.core.lock().unwrap();
+        {let _serial=self.publication.lock().unwrap();let mut core=self.core.lock().unwrap();core.stopped=true;
             if let Some(ticket)=core.app.cards_active(){core.app.invalidate_cards(ticket,None);self.note("cards:invalidate-current");}
             if let Some(cancel)=core.cards_cancel.take(){cancel.store(true,Ordering::SeqCst);}}
         if let Some(poller)=self.poller.lock().unwrap().take(){let _=poller.join();}

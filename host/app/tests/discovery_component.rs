@@ -294,3 +294,99 @@ fn failure_clears_the_hint_and_make_stays_off() {
     assert_eq!(fs::read_dir(r.join("jobs")).unwrap().count(), 0, "every run removes its own job");
     fs::remove_dir_all(&r).unwrap();
 }
+
+/// V318 correction 1. A due poll paused after its stop read and before registration
+/// cannot start or publish a run once shutdown's cancellation pass has completed; and each
+/// current discovery diagnostic reaches the details control in the actual backend view.
+#[test]
+fn correction1() {
+    let Ok(output) = std::env::var("DT_DISCOVERY_OUTPUT") else { return };
+    let out = PathBuf::from(output);
+    fs::create_dir_all(&out).unwrap();
+    let input: Value = serde_json::from_slice(&fs::read(std::env::var("DT_DISCOVERY_INPUT").unwrap()).unwrap()).unwrap();
+    let case = |id: &str| input["cases"].as_array().unwrap().iter().find(|c| c["id"] == id).unwrap().clone();
+
+    // Admission across the stop boundary, through the production poll step.
+    let r = root("admission");
+    let (b, views) = new(&r);
+    let (paused_tx, paused_rx) = mpsc::channel();
+    let (resume_tx, resume_rx) = mpsc::channel::<()>();
+    *b.before_admission.lock().unwrap() = Some(Box::new(move || { paused_tx.send(()).unwrap(); resume_rx.recv().unwrap(); }));
+    let callbacks = Arc::new(AtomicUsize::new(0));
+    let poller = {
+        let (b, callbacks, one) = (b.clone(), callbacks.clone(), case("one64"));
+        std::thread::spawn(move || {
+            let mut schedule = discovery::Schedule::new(0);
+            b.poll_once(&mut schedule, &|| INTERVAL_MS, move |job, _, _, _| { callbacks.fetch_add(1, Ordering::SeqCst); (typed(&one), request(job)) })
+        })
+    };
+    paused_rx.recv().unwrap();
+    b.shutdown();
+    let shutdown_done = trace(&b);
+    let after_shutdown = views.lock().unwrap().len();
+    resume_tx.send(()).unwrap();
+    assert!(poller.join().unwrap(), "the paused step had already passed its stop read");
+    let admission_trace = trace(&b);
+    let admission = json!({"paused_after_stop_read": true, "shutdown_completed_before_resume": shutdown_done.contains(&"stop-polls".to_owned()),
+        "child_callbacks": callbacks.load(Ordering::SeqCst), "current_publications": admission_trace.iter().filter(|e| *e == "cards:published").count(),
+        "emissions_after_resume": views.lock().unwrap().len() - after_shutdown,
+        "registered": admission_trace.contains(&"cards:worker-start".to_owned()), "refused": admission_trace.contains(&"cards:admission-refused".to_owned()),
+        "cards_active": b.core.lock().unwrap().app.cards_active(), "trace": admission_trace});
+    assert_eq!(admission["child_callbacks"], 0);
+    assert_eq!(admission["current_publications"], 0);
+    assert_eq!(admission["emissions_after_resume"], 0);
+    assert_eq!(admission["refused"], true);
+    assert_eq!(admission["registered"], false);
+    fs::remove_dir_all(&r).unwrap();
+
+    // Diagnostics reach the details control with empty and with valid music.
+    let r = root("details");
+    let music = r.parent().unwrap().join(format!("DigitalTapeDiscoveryMusic-{}", children::nonce()));
+    fs::create_dir(&music).unwrap();
+    let mut scenarios = Vec::new();
+    let mut record = |b: &Bridge, id: &str, music: &str, card: &str| {
+        scenarios.push(json!({"id": id, "music": music, "card_check": card, "view": b.snapshot(), "details": b.raw_details()}));
+    };
+    let timeout = |b: &Bridge| {
+        b.discover(|job, cancel, on_timeout, on_cancel| {
+            let mut clock = 0u64;
+            let end = discovery::supervise(&mut Blocked { polled: Arc::new(AtomicBool::new(false)) }, cancel, &mut || { clock += 2500; clock }, on_timeout, on_cancel);
+            (Ran { timed_out: end == End::TimedOut, ..Default::default() }, request(job))
+        }).unwrap();
+    };
+    for music_state in ["empty", "valid"] {
+        let (b, _) = new(&r);
+        if music_state == "valid" {
+            let mut core = b.core.lock().unwrap();
+            core.app.folders = vec![music.clone()];
+            core.app.set_label("Road Trip");
+            core.app.finished(&Outcome { exit: Some(0), stderr: String::new(), reading: Reading::Unusable("not needed"), total_frames: Some(CAPACITY_FRAMES / 2), cancelled: false });
+        }
+        for id in ["one64", "zero-unprobed", "one-plus-unprobed", "enum-unavailable"] {
+            run_case(&b, &case(id));
+            record(&b, &format!("{music_state}/{id}"), music_state, id);
+        }
+        timeout(&b);
+        record(&b, &format!("{music_state}/timeout"), music_state, "timeout");
+        run_case(&b, &case("one64"));
+        record(&b, &format!("{music_state}/fresh-success-after-failure"), music_state, "one64");
+    }
+    for s in &scenarios {
+        let (v, card) = (&s["view"], s["card_check"].as_str().unwrap());
+        let diagnostic = card != "one64";
+        assert_eq!(v["card_details_available"], diagnostic, "{}", s["id"]);
+        assert_eq!(v["make_enabled"], false);
+        let line = v["card_line"].as_str().unwrap();
+        assert!(!line.contains("MODEL-DISK") && !line.contains('\\') && !line.contains('/') && !line.contains('\n'), "{line}");
+        let details = s["details"].as_str().unwrap();
+        if diagnostic { assert!(details.contains("Card check"), "{details}"); }
+        if s["id"].as_str().unwrap().ends_with("fresh-success-after-failure") { assert!(!details.contains("failed"), "{details}"); }
+    }
+    let mut views = serde_json::Map::new();
+    for s in &scenarios { views.insert(s["id"].as_str().unwrap().into(), json!({"view": s["view"], "details": s["details"]})); }
+    save(&out.join("correction1.json"), &json!({"source_head": std::env::var("DT_SOURCE_HEAD").unwrap(), "finding_refs": ["V318-01", "V318-02"],
+        "evidence_class": "production poll step/registration and backend View under controlled order; renderer run separately", "native_ui": false,
+        "live_enumeration": false, "admission": admission, "details_views": views}));
+    fs::remove_dir_all(&music).unwrap();
+    fs::remove_dir_all(&r).unwrap();
+}

@@ -18,6 +18,9 @@ pub struct Cards {
     /// The sentence shown; empty until the first result of a build with discovery.
     pub line: String,
     pub details: String,
+    /// The current details are a diagnostic (a failure, or cards that were not checked),
+    /// so Show details offers them whatever the music's state.
+    pub diagnostic: bool,
     ticket: u64,
     active: Option<u64>,
 }
@@ -25,7 +28,7 @@ pub struct Cards {
 impl Default for Cards {
     fn default() -> Self {
         let line = if crate::children::TAPECTL.sha256.is_some() { String::new() } else { CARD_LINE_UNBUILT.into() };
-        Cards { line, details: String::new(), ticket: 0, active: None }
+        Cards { line, details: String::new(), diagnostic: false, ticket: 0, active: None }
     }
 }
 
@@ -55,7 +58,10 @@ pub struct View {
     pub label: String,
     pub card_line: String,
     pub make_enabled: bool,
+    /// INGEST's details, offered only while the music is a Problem.
     pub details_available: bool,
+    /// The current card check's diagnostic, offered in any state.
+    pub card_details_available: bool,
 }
 
 #[derive(Debug, Default)]
@@ -108,6 +114,7 @@ impl App {
         if let Some(why) = failed {
             self.cards.line = discovery::line(None);
             self.cards.details = why;
+            self.cards.diagnostic = true;
         }
         true
     }
@@ -117,6 +124,7 @@ impl App {
         if self.cards.active != Some(ticket) { return false; }
         self.cards.active = None;
         self.cards.line = discovery::line(judged.hint.as_ref());
+        self.cards.diagnostic = judged.hint.as_ref().map_or(true, |h| h.unprobed > 0);
         self.cards.details = details;
         true
     }
@@ -161,6 +169,7 @@ impl App {
             card_line: self.cards.line.clone(),
             make_enabled: false,
             details_available: !self.details.is_empty(),
+            card_details_available: self.cards.diagnostic && !self.cards.details.is_empty(),
         }
     }
 
