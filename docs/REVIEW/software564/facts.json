@@ -1,0 +1,23 @@
+{
+  "source_head": "266bdcaa760f702d6f685300cc9ca6e4491b6438",
+  "source_tree": "d0d628f407acc10745b1d01196c6d07603cfbcee",
+  "host_app_tree": "4e282664107e2635b72dec8801b76e06660fb892",
+  "tools_app_tree": "cb842620ba709429ebfa284f1407b2c59a5d7c8a",
+  "frontend_disposition": "fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f",
+  "bridge_disposition": "fad2eac7b5aa375a788c8e3ce0a3f7c83374be6f",
+  "packager_source": "15aad634b688e188c0e8ca078eb79e9ecf96e2f2",
+  "toolchain": {
+    "rustc": [
+      "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "binary: rustc",
+      "commit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67",
+      "commit-date: 2026-10-13",
+      "host: x86_64-pc-windows-msvc",
+      "release: 1.99.1",
+      "LLVM version: 23.1.1"
+    ],
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)"
+  },
+  "run_id": 40141860952,
+  "run_attempt": 1
+}
