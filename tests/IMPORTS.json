@@ -625,6 +625,19 @@
         "-B",
         "tests/windows_app_jobs_r1/lifecycle.py"
       ]
+    },
+    {
+      "path": "tests/windows_discovery_r1",
+      "tree": "ec9cda078291e24230302b732fe40d97b412a184",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "f652bc5255dd866db55f2d44ffca2f407c3cab0f",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/318",
+      "attestation": "PM576/578 discovery integration expectations and build preflight published before implementation; controlled component only, no live enumeration",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_discovery_r1/contract.py"
+      ]
     }
   ],
   "evidence_bundles": [
