@@ -1,0 +1,20 @@
+{
+  "time_utc_ns": 1792895921121164400,
+  "pid": 12984,
+  "parent_pid": 22192,
+  "cwd": "C:\\Users\\mrtro\\claude\\software-only\\Digital-Tape",
+  "os": "Windows-10-10.0.26200-SP0",
+  "architecture": "AMD64",
+  "python": "3.10.8 (main, Nov  6 2022, 23:27:16)  [GCC 12.2.0 64 bit (AMD64)]",
+  "python_executable": "C:\\Program Files\\Inkscape\\bin\\python.exe",
+  "token_elevated": false,
+  "effective_admin": false,
+  "tool_route": "approved-claude-code-exact-command",
+  "sandbox_mode": "Claude Code exact per-command approval (caller record required)",
+  "approval": "caller attests tool approved this exact invocation; script cannot independently verify tool decision",
+  "ProductName": "Windows 10 Home",
+  "EditionID": "Core",
+  "DisplayVersion": "25H2",
+  "CurrentBuildNumber": "26200",
+  "UBR": 9711
+}

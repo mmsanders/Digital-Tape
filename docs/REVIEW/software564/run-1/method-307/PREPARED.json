@@ -1,0 +1,15 @@
+{
+  "manifest_sha256": "d28082644506472050220fa7080ec59df726114b10050552dcf9a8e797c96c8e",
+  "tool_route": "approved-claude-code-exact-command",
+  "python": "C:\\Program Files\\Inkscape\\bin\\python.exe",
+  "python_sha256": "fbaff2f38852ac61c5767a91d5efbd4d893fb8ca985a9fdc76cf6d88fb93a745",
+  "files": {
+    "Start-App.ps1": "9c13a32bd7bf4f5ebd7dfc70ca56a039fac5119305b3e7f42cd4fdfa48f8b022",
+    "window_gate.ps1": "a8af2eb0ba2106cdcc2387e4ee1d5bead177b5bf89443937233e9c777901b9f3",
+    "context.py": "5a35a7668e6612fc0321fb70c5a3b37a0ddd5f12f0e166960a1e42184bc0b9c4",
+    "WindowNative.cs": "868c11c40d776792a184dba00dc7f2a6b9a286db286cdff2981d2077956988dc",
+    "judge.ps1": "01ae9208a5d416db09b4d3baec0826b4accad06c7380340570579785f9bf0fbd"
+  },
+  "approval": "NOT granted by this file; actual exact per-command decision/transcript required; no retry after denial",
+  "runtime_admission": "requires specific independent307 admission comment"
+}
