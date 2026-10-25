@@ -58,7 +58,7 @@ export function mountScreen(root, actions = {}) {
   const empty = () => ({view: 'empty', checking: false, bar: 0,
     total_frames: 0, label: '', message: null, too_long: false,
     card_line: "Finding cards isn't part of this build yet.",
-    make_enabled: false, details_available: false});
+    make_enabled: false, details_available: false, card_details_available: false});
   function render(view, detailsText = '') {
     if (disposed) return;
     serial++;
@@ -91,7 +91,8 @@ export function mountScreen(root, actions = {}) {
     card.textContent = view.card_line ?? '';
     reset.textContent = state === 'Done' ? 'Make another' : 'Start over';
     reset.hidden = !['Ready', 'Problem', 'Done'].includes(state);
-    show.hidden = !(view.details_available && state === 'Problem');
+    // INGEST details belong to a Problem; a card check's diagnostic is offered in any state.
+    show.hidden = !((view.details_available && state === 'Problem') || view.card_details_available === true);
     details.textContent = typeof detailsText === 'string' ? detailsText : '';
     details.hidden = true;
     // This candidate has no production Make, discovery or elevation action.

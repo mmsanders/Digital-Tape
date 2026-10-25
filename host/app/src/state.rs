@@ -1,7 +1,8 @@
 //! The window's state (APP-1 §2) as plain data, so every transition is testable without
-//! a window. This slice (S4) has no card discovery or make: the card line says so and
-//! Make cartridge is never enabled. Nothing here pretends otherwise.
+//! a window. The card line comes from S2 discovery when this build pins its tapectl;
+//! discovery is a hint only and Make cartridge is never enabled (no S3 in this build).
 
+use crate::discovery::{self, Judged};
 use crate::drops::{self, Drop};
 use crate::ingest_job::{Outcome, CAPACITY_FRAMES};
 use crate::messages::{self, AppEvent};
@@ -10,6 +11,26 @@ use serde::Serialize;
 use std::path::PathBuf;
 
 pub const CARD_LINE_UNBUILT: &str = "Finding cards isn't part of this build yet.";
+
+/// Discovery's place in the window: survives Start over, never authorizes Make.
+#[derive(Debug, Clone)]
+pub struct Cards {
+    /// The sentence shown; empty until the first result of a build with discovery.
+    pub line: String,
+    pub details: String,
+    /// The current details are a diagnostic (a failure, or cards that were not checked),
+    /// so Show details offers them whatever the music's state.
+    pub diagnostic: bool,
+    ticket: u64,
+    active: Option<u64>,
+}
+
+impl Default for Cards {
+    fn default() -> Self {
+        let line = if crate::children::TAPECTL.sha256.is_some() { String::new() } else { CARD_LINE_UNBUILT.into() };
+        Cards { line, details: String::new(), diagnostic: false, ticket: 0, active: None }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 enum Check {
@@ -35,9 +56,12 @@ pub struct View {
     /// The one sentence shown, if any.
     pub message: Option<String>,
     pub label: String,
-    pub card_line: &'static str,
+    pub card_line: String,
     pub make_enabled: bool,
+    /// INGEST's details, offered only while the music is a Problem.
     pub details_available: bool,
+    /// The current card check's diagnostic, offered in any state.
+    pub card_details_available: bool,
 }
 
 #[derive(Debug, Default)]
@@ -49,6 +73,7 @@ pub struct App {
     pub details: String,
     generation: u64,
     active_job: Option<String>,
+    pub cards: Cards,
 }
 
 /// What the shell must do after a drop.
@@ -71,6 +96,38 @@ impl App {
     }
 
     pub fn generation(&self) -> u64 { self.generation }
+
+    /// The discovery run that may still publish, if any.
+    pub fn cards_active(&self) -> Option<u64> { self.cards.active }
+
+    /// Start one discovery run; any earlier run stops being current.
+    pub fn begin_cards(&mut self) -> u64 {
+        self.cards.ticket = self.cards.ticket.checked_add(1).expect("discovery ticket exhausted");
+        self.cards.active = Some(self.cards.ticket);
+        self.cards.ticket
+    }
+
+    /// The run `ticket` will not publish. With `failed` (a timeout) the old hint is cleared.
+    pub fn invalidate_cards(&mut self, ticket: u64, failed: Option<String>) -> bool {
+        if self.cards.active != Some(ticket) { return false; }
+        self.cards.active = None;
+        if let Some(why) = failed {
+            self.cards.line = discovery::line(None);
+            self.cards.details = why;
+            self.cards.diagnostic = true;
+        }
+        true
+    }
+
+    /// Publish the current run's judged result exactly once; a failure clears the old hint.
+    pub fn finish_cards(&mut self, ticket: u64, judged: &Judged, details: String) -> bool {
+        if self.cards.active != Some(ticket) { return false; }
+        self.cards.active = None;
+        self.cards.line = discovery::line(judged.hint.as_ref());
+        self.cards.diagnostic = judged.hint.as_ref().map_or(true, |h| h.unprobed > 0);
+        self.cards.details = details;
+        true
+    }
     pub fn active_job(&self) -> Option<&str> { self.active_job.as_deref() }
 
     /// Consume exactly one terminal delivery from the current identified invocation.
@@ -109,9 +166,10 @@ impl App {
             too_long,
             message: message.or_else(|| self.notice.clone()),
             label: self.label.clone(),
-            card_line: CARD_LINE_UNBUILT,
+            card_line: self.cards.line.clone(),
             make_enabled: false,
             details_available: !self.details.is_empty(),
+            card_details_available: self.cards.diagnostic && !self.cards.details.is_empty(),
         }
     }
 
@@ -181,8 +239,10 @@ impl App {
 
     pub fn start_over(&mut self) {
         let generation = self.generation.checked_add(1).expect("job generation exhausted");
+        let cards = std::mem::take(&mut self.cards);
         *self = App::default();
         self.generation = generation;
+        self.cards = cards;
     }
 }
 
@@ -210,7 +270,9 @@ mod tests {
         a.finished(&outcome(0, Reading::Unusable("no report"), Some(CAPACITY_FRAMES / 2)));
         let v = a.view();
         assert_eq!((v.view, v.bar, v.make_enabled), ("ready", Some(0.5), false));
-        assert_eq!(v.card_line, CARD_LINE_UNBUILT);
+        // Without a pinned discovery child the line says so; with one it starts empty.
+        let unpinned = crate::children::TAPECTL.sha256.is_none();
+        assert_eq!(v.card_line, if unpinned { CARD_LINE_UNBUILT } else { "" });
     }
 
     #[test]

@@ -1,0 +1,120 @@
+name: "Software578 discovery child and app integration"
+# ONE new non-test tapectl.exe built from the accepted S2 cards source on this head
+# (explicit target, HEAD_ID = source's first 12 hex), then the production app's
+# discovery coordinator over Verification318's frozen controlled cases with that
+# child pinned. BUILD and controlled component only: the child is hash-pinned and
+# placed beside the test executable, never invoked; no live enumeration.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - 'engine/**'
+      - 'tests/windows_discovery_r1/**'
+      - '.github/workflows/windows-discovery-578.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  ENGINE_TREE: d96b4245e04d74078f8938744b1394c3018516f7
+  ACCEPTED_S2: 10faee593fa103fd498bbe71af375bc097a481a6
+  DISCOVER_WIN: 49e0f7e930756a64739b2d49c2b43f91ea1e9d84
+  INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+jobs:
+  build:
+    name: "Windows discovery child BUILD + controlled integration (#578)"
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Non-test tapectl.exe from the accepted S2 path (explicit target)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          mkdir evidence578 child
+          SOURCE=$(git rev-parse HEAD); HEAD12=${SOURCE:0:12}
+          test "$(git rev-parse HEAD:engine)" = "$ENGINE_TREE"
+          test "$(git rev-parse HEAD:host/port/discover_win.c)" = "$DISCOVER_WIN"
+          for f in host/port/discover.c host/port/discover.h host/report.c host/report.h; do
+            test "$(git rev-parse HEAD:$f)" = "$(git rev-parse $ACCEPTED_S2:$f)"
+          done
+          "$MAKE" -C engine CC=gcc all > evidence578/engine-build.stdout.txt
+          CMD="$MAKE -C host CC=gcc HEAD_ID=$HEAD12 ../build/host/tapectl.exe"
+          $CMD > evidence578/tapectl-build.stdout.txt
+          test ! -e build/host/tapectl-test.exe
+          cp build/host/tapectl.exe child/tapectl.exe
+          SHA=$(sha256sum child/tapectl.exe | cut -d' ' -f1)
+          VERSION="tapectl-wp15-s2+$HEAD12"
+          grep -a -c "$VERSION" child/tapectl.exe > /dev/null
+          if grep -a -q TAPECTL_TEST child/tapectl.exe || nm child/tapectl.exe | grep -q tapectl_test_cards; then echo "test seam present"; exit 1; fi
+          gcc -v 2> evidence578/gcc-v.txt
+          python - "$SOURCE" "$SHA" "$VERSION" "$CMD" > evidence578/child-build.json <<'EOF'
+          import json, os, subprocess, sys
+          source, sha, version, cmd = sys.argv[1:]
+          blob = lambda rev, p: subprocess.check_output(['git', 'rev-parse', f'{rev}:{p}'], text=True).strip()
+          files = ['host/tapectl.c', 'host/port/discover_win.c', 'host/port/discover.c', 'host/port/discover.h', 'host/report.c', 'host/report.h']
+          print(json.dumps(dict(
+              scope='BUILD only; non-test tapectl.exe; not invoked; no live enumeration',
+              source=source, version=version, sha256=sha, bytes=os.path.getsize('child/tapectl.exe'),
+              engine_tree=blob(source, 'engine'), host_tree=blob(source, 'host'), test_build=False, build_command=cmd,
+              crosswalk=dict(accepted_s2=os.environ['ACCEPTED_S2'],
+                             blobs={f: dict(current=blob(source, f), accepted=blob(os.environ['ACCEPTED_S2'], f)) for f in files},
+                             cards_dispatch='tapectl.c main -> cmd_cards -> discover_enumerate (discover_win.c) -> discover_policy -> stdout/report only'),
+              run_id=int(os.environ['GITHUB_RUN_ID']), run_attempt=int(os.environ['GITHUB_RUN_ATTEMPT'])), indent=2))
+          EOF
+          echo "DT_TAPECTL_SHA256=$SHA" >> "$GITHUB_ENV"
+          echo "DT_TAPECTL_VERSION=$VERSION" >> "$GITHUB_ENV"
+          cat evidence578/child-build.json
+      - name: Production discovery coordinator over the frozen318 cases
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'target578'
+          $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          $env:DT_CHILD_SOURCE=$env:DT_SOURCE_HEAD
+          $env:DT_CHILD_ENGINE_TREE=git rev-parse HEAD:engine
+          $env:DT_DISCOVERY_INPUT="$PWD/discovery-input.json"
+          python -B tests/windows_discovery_r1/contract.py
+          if($LASTEXITCODE -ne 0){throw 'Verifier causal controls failed'}
+          python -B tests/windows_discovery_r1/contract.py --emit > $env:DT_DISCOVERY_INPUT
+          if($LASTEXITCODE -ne 0){throw 'Case emission failed'}
+          rustc -Vv
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib
+          if($LASTEXITCODE -ne 0){throw 'Backend unit tests failed'}
+          $exe=cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib --no-run --message-format=json | ConvertFrom-Json | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.target.name -eq 'dtapp' -and $_.profile.test } | Select-Object -ExpandProperty executable
+          if(@($exe).Count -ne 1){throw 'Test executable not unique'}
+          Copy-Item child/tapectl.exe (Join-Path (Split-Path $exe) 'tapectl.exe')
+          $env:DT_DISCOVERY_OUTPUT="$PWD/evidence578"
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::discovery_component::capture -- --exact --nocapture
+          if($LASTEXITCODE -ne 0){throw 'Discovery capture failed'}
+          # V318 correction1: shutdown/admission boundary and discovery details views.
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::discovery_component::correction1 -- --exact --nocapture
+          if($LASTEXITCODE -ne 0){throw 'Correction1 capture failed'}
+          python -B tests/windows_discovery_r1/contract.py --input evidence578/discovery.json --candidate $env:DT_SOURCE_HEAD
+          if($LASTEXITCODE -ne 0){throw 'Discovery qualifier failed'}
+          git ls-tree -r HEAD host/app/src/ > evidence578/source-blobs.txt
+      - name: Production Tauri binding with both pins (no GUI launch)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:DT_INGEST_SHA256=$env:INGEST_SHA256
+          $env:DT_INGEST_VERSION=$env:INGEST_VERSION
+          cargo check --manifest-path host/app/Cargo.toml --locked --bin digital-tape
+          if($LASTEXITCODE -ne 0){throw 'Production Tauri binding compile failed'}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software578-tapectl-child
+          path: child/tapectl.exe
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software578-discovery-evidence
+          path: evidence578
+          retention-days: 30

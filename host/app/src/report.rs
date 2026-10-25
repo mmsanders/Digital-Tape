@@ -149,6 +149,11 @@ fn compact(line: &str) -> bool {
     true
 }
 
+/// Whether `line` is JSON with no repeated key in any object.
+pub(crate) fn unique_keys(line: &str) -> bool {
+    serde_json::from_str::<Unique>(line).is_ok()
+}
+
 /// A JSON value walked only to refuse a repeated key in any object (serde_json's map
 /// would silently keep the last).
 struct Unique;
