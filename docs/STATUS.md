@@ -1,6 +1,6 @@
 # Project status
 
-**24 October 2026 PDT · PM570 · input main `db0325a9`.**
+**24 October 2026 PDT · PM576 · input main `c55452d7`.**
 
 Phase 1 is complete: all nine engine packages are independently accepted, all
 36 dashboard rungs are final, and Michael approved the ten golden references.
@@ -29,26 +29,34 @@ Michael starts the selected task/context. A lead returns its bounded work and st
 | Backend on main | PR #551, merged at `615899c3`; Verification #286 accepted the runner/job delta and #297 cleared the mechanical carrier. |
 | Internal Make on main | PR #550, merged at `f699f6af`; Verification #299 passed all ten ordinary-file comparisons. Modeled sensing is not physical/native qualification. |
 | Original Windows startup | Verification #283 accepted the original native-window/normal-quit and direct INGEST positive/refusal route only. |
-| Renderer correction | Verification #305 closed P2-305-001 for the exact partial correction. This is not full screen/bridge acceptance. |
+| Screen and bridge on main | Verification #305/#306 cleared the exact component; PR #567 merged at `266bdcaa`. Real IPC/OS gestures were not executed by those staged tests. |
+| New Windows candidate | PR #574 built the new source; #315 passed exact build/archive provenance. Reproducible compilation is not claimed. |
+| New native startup/quit | Verification #316 passed the measured window/normal-close facts. PM576 closes the prompt-record action with the historical record limitation retained. |
+| Host text repair | PR #573 merged comment/LF repairs and scoped editor attributes; no behavioral change. |
 
-PR **#567** is the combined production screen/bridge candidate: source `9cde1f2a`,
-evidence head `26c47d47`. All 118 current checks passed. Producer qualifiers pass
-for the staged production-function and isolated DOM composition. **Independent
-#305/#306 review and integration are still pending; main has not received #567.**
-Real Tauri IPC, native Windows controls/gestures and actual app-driven INGEST were
-not executed by that packet. Hosted compilation is not Windows 11 runtime proof.
+The production app source is now integrated and packaged. Exact source, build,
+archive and ordinary non-admin startup records were independently checked.
+The new app reached native-window readiness in 1.943 s and closed normally.
+This does not establish page usability, one visual window, live Tauri IPC,
+actual folder gestures or app-driven INGEST. Those are the next useful tests.
 
-Manual order is in the live role issues:
+**The #307 administrative action is closed for planning.** Its missing separate
+prompt transcript remains a documented historical limit, not a continuing Product
+blocker or reason to repeat the passed run. Verification's original full-admission
+HELD record is not rewritten or falsely certified as compliant. No permission or
+safety rule is waived; future methods must record their actual authorization mode.
 
-1. Verification #305/#306 reviews the exact complete #567 packet.
-2. Software #562/#563 handles only scoped findings or integrates cleared source.
-3. Software #564 / Verification #307 builds the new candidate after clearance.
-   Any startup-only run still needs specific source/binary/manifest admission.
-4. Software #571 is the independent, nonbehavioral host encoding/LF repair.
+Manual next work is [Software #577 / Verification #317](https://github.com/mmsanders/Digital-Tape/issues/577)
+for the real no-card app flow, then [#578 / #318](https://github.com/mmsanders/Digital-Tape/issues/578)
+for accepted read-only card-discovery integration with a newly pinned S2 child.
+The old bundled tapectl predates S2. Make/elevation remain disabled; a live metadata
+enumeration needs its own narrowly published admission. No card handling is issued.
+Both listeners remain PAUSED; no lead was messaged or automatically started.
 
-The older preview uses older binaries and has packaging-only acceptance. Actual
-UI access/OS folder gesture remains held under #298. No new full GUI artifact or
-launch admission is claimed. No physical Windows test is waiting on Michael.
+The app's next rung requires **complete required independent package coverage**,
+not a build or startup alone. Required native/UI/S3 coverage is still incomplete,
+so the numbers stay 6/12. Milestone progress above is real within that coarse gate.
+No physical Windows test is waiting on Michael.
 
 ## Hardware design reference
 
@@ -87,5 +95,5 @@ SHA-256: `522e08c18e96964fa4ea97fc67277d1b570ae7228a9bcac38513234d041cb224`.
 The prior file's Git blob is `0caffecfb7edc20c7ae683bc2d3478b2b8ea5cf0`.
 Phase 1 package details, older findings and evidence limits remain there and in
 [the package index](PACKAGES/README.md), [hardware status](STATUS-HARDWARE.md),
-[the PM570 review](REVIEW/PM570-HANDBACK-2026-10-24.md) and immutable dispositions.
+[the PM576 review](REVIEW/PM576-PROGRESS-2026-10-24.md) and immutable dispositions.
 The archive preserves history; current tasks live only in open role-labeled issues.

@@ -182,4 +182,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-192](DECISIONS.md#adr-192--local-windows-claude-software-manual-activation-and-parked-owner-layout) | 2026-10-24 PDT | Local Windows Claude / manual routing / owner layout | PM570: paused listeners; Software handback; parked569 layout, hardware reference corrections, unresolved product choices retained |
 
-129 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-193](DECISIONS.md#adr-193--close-the-startup-record-action-and-issue-live-appdiscovery-work) | 2026-10-24 PDT | Startup record disposition / manual live app and discovery | PM576 closes administrative action with limitation retained; retires455/443; no rung gain; manual577/317 and578/318 |
+
+130 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

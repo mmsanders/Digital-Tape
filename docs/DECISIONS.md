@@ -4434,3 +4434,78 @@ Rationale: preserve usable app work at handback, make role/routing authority cle
 and stop old dimensions and speculative mechanism choices reading as current facts.
 Reversal cost: explicit runtime/activation resumption or product/hardware issuance;
 no history deletion, frozen-byte migration or acceptance-rung gain.
+
+
+## ADR-193 — Close the startup record action and issue live app/discovery work
+
+**24 October 2026 PDT · PM576 · input main c55452d77539a328150eeb74ae2b9c6098b18e70.**
+Michael asks PM to review latest work, assess Verification's approval hold, close
+resolved/deferred work, advance only justified rungs and post next issues. Manual
+GitHub-only routing and local Windows Claude Software remain; both listeners stay
+PAUSED. No lead kickoff/message or automatic next assignment is issued.
+
+### Startup record disposition
+
+Independent #316 / bd9be79a passes the exact build/raw native-window/normal-close
+predicates and finds no denial, settings change, elevation or provider bypass.
+Software reports direct human task/chat authorization in a session already using
+auto permissions. The separate per-command prompt transcript stipulated by #315
+is not established; caller route/approval fields are not an independent grant.
+Verification correctly preserves that difference and does not certify the absent
+record. PM does not rewrite that immutable finding or invent historical compliance.
+
+PM closes the remaining administrative ACTION with the record limitation retained.
+It is not a continuing Product/release blocker for this exact startup component,
+a diagnosed code defect, or a reason to repeat passed technical work. The native
+measurement PASS and build/archive PASS stand only within their independent scope;
+full admission-compliance is not retroactively certified. No Product code is newly
+accepted by PM, and no actual security/permission/physical rule is waived. The old
+one-attempt allowance remains consumed. Closed #564/#307 is not reopened.
+
+Future ordinary owned-app/file methods describe current user/task authorization,
+actual provider and existing permission mode truthfully, with evidence types and
+limits named in advance. Do not require a fictional prompt transcript, copy an old
+provider label, change settings/modes/broad rules, or bypass any real denial. Where
+the actual tool/policy or a reserved action requires specific consent, it still
+must be obtained. An attestation is never relabeled an independent external audit.
+This ruling removes paperwork-only repetition, not user control or test integrity.
+
+### Progress, lifecycle and next scope
+
+#567 integrates exact #305/#306-cleared screen/bridge source at266bdcaa; #573 host
+text repair is complete; #574/#575 deliver the new candidate and one native run.
+Their current-head checks passed. Real UI/live IPC/actual app-driven INGEST and
+required native/device/elevation/physical/full-package criteria remain incomplete.
+
+The dashboard's second rung is COMPLETE required independent package coverage,
+not any code/test or a startup. WP-15 still lacks required native/UI/S3 coverage;
+there is no numerical rung gain. Phase1 stays36/36 and Phase2 stays6/12 (3+2+1).
+Record actual component/source/build/startup milestones clearly instead of changing
+the meaning of a rung. No G1/G3/G4/G5/G2 or physical acceptance is inferred.
+
+Retire #455 as superseded legacy app carrier and #443 as PARKED/DEFERRED crash
+candidate, both unmerged with immutable exact-head/refs/pull restore pointers.
+Their independent facts, 41/404 limits, original STOPs and Q-P2-1-before-firmware
+obligation survive. #454/#459 remain held genuine INGEST/report candidates; no
+code, branch, raw artifact or history is deleted and no missing criterion is waived.
+
+Manual pairs Software577/Verification317 exercise the real no-card native app
+flow on the already authenticated candidate, with current documented tools/methods
+and actual event/IPC/child attribution. It is not a repeat A0 or a DOM surrogate.
+A real consent/capability/gesture gap returns a precise blocker without provider
+hunting or an unchanged denied experiment.
+
+Software578/Verification318 integrates accepted S2 read-only card discovery into
+the app. The old bundled tapectl predates S2 and cannot stand in for a new correctly
+pinned child. Tests/preflight precede code; app performs no device access itself.
+Only the exact accepted read-only OS metadata/zero-access query path may be admitted
+for a bounded live enumeration, never raw-data reads, write-mode opens, writes,
+unmounts, new physical handling or a native observer. Unknown facts fail closed.
+Poll/report/state/UI card-line integration does not authorize Make: destructive
+commands and elevation remain disabled even with one card and valid music/label.
+No new S3 device-session provider, physical test or release acceptance is issued.
+
+Rationale: retain truthful independent evidence, close a nonproductive historical
+record action and move onto real app functionality without diluting package gates.
+Reversal cost: a new explicit method/scope or restoration of preserved PR refs;
+no changed historical report, frozen format, actual permission policy or rung rule.
