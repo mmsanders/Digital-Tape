@@ -1,0 +1,274 @@
+﻿{
+    "case":  "A0-new-candidate-307",
+    "method_manifest_sha256":  "d28082644506472050220fa7080ec59df726114b10050552dcf9a8e797c96c8e",
+    "source":  "266bdcaa760f702d6f685300cc9ca6e4491b6438",
+    "start_utc":  "2026-10-25T02:38:40.8064255Z",
+    "parent_pid":  22192,
+    "cwd":  "C:\\Users\\mrtro\\claude\\software-only\\candidate564\\Digital-Tape",
+    "argv":  [
+                 "C:\\Users\\mrtro\\claude\\software-only\\candidate564\\Digital-Tape\\digital-tape.exe"
+             ],
+    "pins":  {
+                 "digital-tape.exe":  "ee4c84acb03655c4fb1344db1548ab283054eabe9caea9c2482b0181b39fa250",
+                 "ingest.exe":  "3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20",
+                 "tapectl.exe":  "82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9"
+             },
+    "python_path":  "C:\\Program Files\\Inkscape\\bin\\python.exe",
+    "python_sha256":  "fbaff2f38852ac61c5767a91d5efbd4d893fb8ca985a9fdc76cf6d88fb93a745",
+    "tool_route":  "approved-claude-code-exact-command",
+    "samples":  [
+                    {
+                        "pid":  21552,
+                        "seq":  0,
+                        "start_ticks":  639284927220048923,
+                        "visible":  false,
+                        "title":  "",
+                        "elapsed_ms":  320,
+                        "utc":  "2026-10-25T02:38:42.0880810Z",
+                        "responding":  false,
+                        "handle":  0,
+                        "observed_owned_windows":  [
+                                                       {
+                                                           "handle":  1901888,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1574234,
+                                                           "owner_handle":  1901888,
+                                                           "pid":  21552,
+                                                           "title":  "Default IME",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       }
+                                                   ],
+                        "top_level":  false,
+                        "ambiguous":  false,
+                        "owner_handle":  0
+                    },
+                    {
+                        "pid":  21552,
+                        "seq":  1,
+                        "start_ticks":  639284927220048923,
+                        "visible":  true,
+                        "title":  "Digital Tape",
+                        "elapsed_ms":  865,
+                        "utc":  "2026-10-25T02:38:42.6336705Z",
+                        "responding":  true,
+                        "handle":  1246546,
+                        "observed_owned_windows":  [
+                                                       {
+                                                           "handle":  1246546,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "Digital Tape",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1901888,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  2228798,
+                                                           "owner_handle":  1574234,
+                                                           "pid":  21552,
+                                                           "title":  "MSCTFIME UI",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1574234,
+                                                           "owner_handle":  1246546,
+                                                           "pid":  21552,
+                                                           "title":  "Default IME",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       }
+                                                   ],
+                        "top_level":  true,
+                        "ambiguous":  false,
+                        "owner_handle":  0
+                    },
+                    {
+                        "pid":  21552,
+                        "seq":  2,
+                        "start_ticks":  639284927220048923,
+                        "visible":  true,
+                        "title":  "Digital Tape",
+                        "elapsed_ms":  1397,
+                        "utc":  "2026-10-25T02:38:43.1646685Z",
+                        "responding":  true,
+                        "handle":  1246546,
+                        "observed_owned_windows":  [
+                                                       {
+                                                           "handle":  1246546,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "Digital Tape",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1901888,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  2228798,
+                                                           "owner_handle":  1574234,
+                                                           "pid":  21552,
+                                                           "title":  "MSCTFIME UI",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1574234,
+                                                           "owner_handle":  1246546,
+                                                           "pid":  21552,
+                                                           "title":  "Default IME",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       }
+                                                   ],
+                        "top_level":  true,
+                        "ambiguous":  false,
+                        "owner_handle":  0
+                    },
+                    {
+                        "pid":  21552,
+                        "seq":  3,
+                        "start_ticks":  639284927220048923,
+                        "visible":  true,
+                        "title":  "Digital Tape",
+                        "elapsed_ms":  1943,
+                        "utc":  "2026-10-25T02:38:43.7106014Z",
+                        "responding":  true,
+                        "handle":  1246546,
+                        "observed_owned_windows":  [
+                                                       {
+                                                           "handle":  1246546,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "Digital Tape",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1901888,
+                                                           "owner_handle":  0,
+                                                           "pid":  21552,
+                                                           "title":  "",
+                                                           "visible":  true,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  2228798,
+                                                           "owner_handle":  1574234,
+                                                           "pid":  21552,
+                                                           "title":  "MSCTFIME UI",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       },
+                                                       {
+                                                           "handle":  1574234,
+                                                           "owner_handle":  1246546,
+                                                           "pid":  21552,
+                                                           "title":  "Default IME",
+                                                           "visible":  false,
+                                                           "responding":  true,
+                                                           "top_level":  true
+                                                       }
+                                                   ],
+                        "top_level":  true,
+                        "ambiguous":  false,
+                        "owner_handle":  0
+                    }
+                ],
+    "native_window_ready":  true,
+    "page_readiness":  "UNEXECUTED / no actual page observer",
+    "ui_interaction":  "UNEXECUTED",
+    "selected_webview2_runtime":  "UNAVAILABLE: module/child evidence not yet observed",
+    "close_posted":  true,
+    "graceful_exit":  true,
+    "forced_owned_cleanup":  false,
+    "capture_complete":  true,
+    "verdict":  "NATIVE WINDOW READINESS AND NORMAL QUIT observed; page/UI unexecuted",
+    "context":  {
+                    "time_utc_ns":  1792895921121164400,
+                    "pid":  12984,
+                    "parent_pid":  22192,
+                    "cwd":  "C:\\Users\\mrtro\\claude\\software-only\\Digital-Tape",
+                    "os":  "Windows-10-10.0.26200-SP0",
+                    "architecture":  "AMD64",
+                    "python":  "3.10.8 (main, Nov  6 2022, 23:27:16)  [GCC 12.2.0 64 bit (AMD64)]",
+                    "python_executable":  "C:\\Program Files\\Inkscape\\bin\\python.exe",
+                    "token_elevated":  false,
+                    "effective_admin":  false,
+                    "tool_route":  "approved-claude-code-exact-command",
+                    "sandbox_mode":  "Claude Code exact per-command approval (caller record required)",
+                    "approval":  "caller attests tool approved this exact invocation; script cannot independently verify tool decision",
+                    "ProductName":  "Windows 10 Home",
+                    "EditionID":  "Core",
+                    "DisplayVersion":  "25H2",
+                    "CurrentBuildNumber":  "26200",
+                    "UBR":  9711
+                },
+    "recorder_effective_admin":  false,
+    "build_sha256":  "0faf28103f4e76d75c392a22d7c8dbe7c33ac9732a7ff62a6a76738a358969f2",
+    "requested_argv":  [
+                           "C:\\Users\\mrtro\\claude\\software-only\\candidate564\\Digital-Tape\\digital-tape.exe"
+                       ],
+    "pid":  21552,
+    "process_start_ticks":  639284927220048923,
+    "launch_utc":  "2026-10-25T02:38:42.0290662Z",
+    "own_webview_modules":  [
+                                {
+                                    "path":  "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.62\\EBWebView\\x64\\EmbeddedBrowserWebView.dll",
+                                    "sha256":  "4c0d799ae06d2de2fce8cb56d11b4e0046832476562074246a17a6e702a9f951",
+                                    "name":  "EmbeddedBrowserWebView.dll",
+                                    "version":  "155.0.4283.62"
+                                }
+                            ],
+    "preclose_owned_windows":  [
+                                   {
+                                       "handle":  1246546,
+                                       "owner_handle":  0,
+                                       "pid":  21552,
+                                       "title":  "Digital Tape",
+                                       "visible":  true,
+                                       "responding":  true,
+                                       "top_level":  true
+                                   }
+                               ],
+    "ready_elapsed_ms":  1943,
+    "close_requested_utc":  "2026-10-25T02:38:43.8633540Z",
+    "close_elapsed_ms":  2096,
+    "exit":  0,
+    "end_utc":  "2026-10-25T02:38:43.9782205Z",
+    "stdout.bin_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.bin_sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
