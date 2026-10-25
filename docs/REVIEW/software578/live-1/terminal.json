@@ -1,0 +1,14 @@
+{
+  "ended_utc": "2026-10-25T21:12:13.395858+00:00",
+  "exit": 0,
+  "note": null,
+  "stdout_bytes": 41,
+  "stderr_bytes": 0,
+  "report_exists": true,
+  "job_entries_after": [
+    "cards-154abcdcabdabea5199b812735fbe464.jsonl"
+  ],
+  "stdout.bin_sha256": "8a5de7c42d95751e2a76f41840ffdfb5a3cf807d3366a94dc3a3d81955eccad2",
+  "stderr.bin_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "report_sha256": "adc5dd8f9f02db072714547975c6796c5de1643bb56599ff92532449b31d62b1"
+}
