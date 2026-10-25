@@ -1,0 +1,24 @@
+{
+  "exe": "C:\\Users\\mrtro\\claude\\software-only\\live578\\tapectl.exe",
+  "exe_sha256": "44ef26869ba2d01a8a183660a2c7a050d0e7e9ff37c40b727131512739ea6ded",
+  "exe_bytes": 493712,
+  "cwd": "C:\\Users\\mrtro\\claude\\software-only\\live578\\job",
+  "argv": [
+    "C:\\Users\\mrtro\\claude\\software-only\\live578\\tapectl.exe",
+    "cards",
+    "--report",
+    "C:\\Users\\mrtro\\claude\\software-only\\live578\\job\\cards-154abcdcabdabea5199b812735fbe464.jsonl",
+    "--report-nonce",
+    "154abcdcabdabea5199b812735fbe464"
+  ],
+  "job_entries_before": [],
+  "report_exists_before": false,
+  "user": "mrtro",
+  "elevated": false,
+  "os": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "caller": "Claude Code desktop, Opus 5.5, auto mode (caller declaration)",
+  "admission": "Verification318 fdffea5759c2cf48b37a6960c5ed36d09ab91b98 findings/P2-318-CORRECTION1-2026-10-25",
+  "michael_chat_approval": "Go ahead and run",
+  "started_utc": "2026-10-25T21:12:13.311780+00:00"
+}
