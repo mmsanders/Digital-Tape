@@ -36,24 +36,24 @@ jobs:
           set -euo pipefail
           export PATH="/c/mingw64/bin:$PATH"
           MAKE=$(command -v mingw32-make || command -v make)
-          mkdir -p evidence child
+          mkdir evidence578 child
           SOURCE=$(git rev-parse HEAD); HEAD12=${SOURCE:0:12}
           test "$(git rev-parse HEAD:engine)" = "$ENGINE_TREE"
           test "$(git rev-parse HEAD:host/port/discover_win.c)" = "$DISCOVER_WIN"
           for f in host/port/discover.c host/port/discover.h host/report.c host/report.h; do
             test "$(git rev-parse HEAD:$f)" = "$(git rev-parse $ACCEPTED_S2:$f)"
           done
-          "$MAKE" -C engine CC=gcc all > evidence/engine-build.stdout.txt
+          "$MAKE" -C engine CC=gcc all > evidence578/engine-build.stdout.txt
           CMD="$MAKE -C host CC=gcc HEAD_ID=$HEAD12 ../build/host/tapectl.exe"
-          $CMD > evidence/tapectl-build.stdout.txt
+          $CMD > evidence578/tapectl-build.stdout.txt
           test ! -e build/host/tapectl-test.exe
           cp build/host/tapectl.exe child/tapectl.exe
           SHA=$(sha256sum child/tapectl.exe | cut -d' ' -f1)
           VERSION="tapectl-wp15-s2+$HEAD12"
           grep -a -c "$VERSION" child/tapectl.exe > /dev/null
           if grep -a -q TAPECTL_TEST child/tapectl.exe || nm child/tapectl.exe | grep -q tapectl_test_cards; then echo "test seam present"; exit 1; fi
-          gcc -v 2> evidence/gcc-v.txt
-          python - "$SOURCE" "$SHA" "$VERSION" "$CMD" > evidence/child-build.json <<'EOF'
+          gcc -v 2> evidence578/gcc-v.txt
+          python - "$SOURCE" "$SHA" "$VERSION" "$CMD" > evidence578/child-build.json <<'EOF'
           import json, os, subprocess, sys
           source, sha, version, cmd = sys.argv[1:]
           blob = lambda rev, p: subprocess.check_output(['git', 'rev-parse', f'{rev}:{p}'], text=True).strip()
@@ -69,7 +69,7 @@ jobs:
           EOF
           echo "DT_TAPECTL_SHA256=$SHA" >> "$GITHUB_ENV"
           echo "DT_TAPECTL_VERSION=$VERSION" >> "$GITHUB_ENV"
-          cat evidence/child-build.json
+          cat evidence578/child-build.json
       - name: Production discovery coordinator over the frozen318 cases
         shell: pwsh
         run: |
@@ -89,12 +89,12 @@ jobs:
           $exe=cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib --no-run --message-format=json | ConvertFrom-Json | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.target.name -eq 'dtapp' -and $_.profile.test } | Select-Object -ExpandProperty executable
           if(@($exe).Count -ne 1){throw 'Test executable not unique'}
           Copy-Item child/tapectl.exe (Join-Path (Split-Path $exe) 'tapectl.exe')
-          $env:DT_DISCOVERY_OUTPUT="$PWD/evidence"
+          $env:DT_DISCOVERY_OUTPUT="$PWD/evidence578"
           cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib bridge::discovery_component::capture -- --exact --nocapture
           if($LASTEXITCODE -ne 0){throw 'Discovery capture failed'}
-          python -B tests/windows_discovery_r1/contract.py --input evidence/discovery.json --candidate $env:DT_SOURCE_HEAD
+          python -B tests/windows_discovery_r1/contract.py --input evidence578/discovery.json --candidate $env:DT_SOURCE_HEAD
           if($LASTEXITCODE -ne 0){throw 'Discovery qualifier failed'}
-          git ls-tree -r HEAD host/app/src/ > evidence/source-blobs.txt
+          git ls-tree -r HEAD host/app/src/ > evidence578/source-blobs.txt
       - name: Production Tauri binding with both pins (no GUI launch)
         shell: pwsh
         run: |
@@ -113,5 +113,5 @@ jobs:
         if: always()
         with:
           name: software578-discovery-evidence
-          path: evidence
+          path: evidence578
           retention-days: 30
