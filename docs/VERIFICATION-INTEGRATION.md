@@ -1,6 +1,21 @@
 # Independent verification integration
 
-## Current boundary — 19 October2026 PDT (ADR-190 / PM477)
+## Current boundary — 24 October 2026 PDT (ADR-193 / PM576)
+
+Phase 1 remains 36/36; Phase 2 remains 6/12. Complete required WP-15 package
+coverage is not established by the following component/build/startup milestones.
+
+| Merged independent publication | Current disposition |
+|---|---|
+| #314 / `fad2eac7` | Exact production screen/bridge component PASS, integrated by #567 at `266bdcaa`; staged functions/DOM are not real IPC/OS gestures. |
+| #315 / `cba3433b` | Exact new candidate build/archive PASS and specific conditional launch admission; no reproducible-compilation or UI claim. |
+| #316 / `bd9be79a` | Measured native-window/normal-close PASS; separate stipulated prompt record not established. |
+| PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
+
+Actual native UI/IPC/app-driven INGEST, full G1/G3/G4/G5, native/session/S3/A6,
+full INGEST and G2 remain held. Manual next #577/#317 and #578/#318, no auto wake.
+
+## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 
 Phase1 remains independently accepted36/36; Phase2 remains6/12 (WP14=3,
 WP16=2, WP15=1). Bounded evidence publication, source correction and collection

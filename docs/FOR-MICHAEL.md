@@ -10,10 +10,13 @@ No physical Windows test or collection retry is waiting on Michael. The original
 A6 and INGEST returns were received; Michael #473 is closed. Their independent
 native/own-host gaps remain gaps, not a request to repeat the old captures.
 
-Backend #551 and internal Make #550 are integrated. Combined app PR #567 now waits
-for independent #305/#306 review. The new candidate #564/#307 depends on that exact
-clearance/integration and any specific startup admission. Actual native UI/IPC/
-folder gestures are not accepted. No source or physical hold is removed here.
+Backend #551, internal Make #550 and screen/bridge #567 are integrated within
+their independent scopes. The new Windows candidate passed exact build/archive
+and measured native startup/normal-close checks. PM576 closes the separate prompt-
+record action as a retained historical limitation, not retrospective compliance.
+Real UI/IPC/folder gestures/app-driven INGEST and full native/physical gates remain.
+Manual next issues #577/#317 target actual no-card app flow; #578/#318 targets
+accepted read-only discovery with a newly pinned child. Make/elevation stay disabled.
 
 Software is back in **local Windows Claude Code**, with Michael's selected model.
 PM posts next-round issues only. Both prior lead listeners are **PAUSED**; PM has
@@ -47,4 +50,4 @@ Fabrication and cell charging remain CLOSED; media atomicity is unqualified.
 macOS is deferred; hardware execution remains parked through Phase 2.
 
 See [manual issue routing](ISSUE-WORKFLOW.md), [ADR-192](DECISIONS.md#adr-192--local-windows-claude-software-manual-activation-and-parked-owner-layout)
-and [the PM570 review](REVIEW/PM570-HANDBACK-2026-10-24.md).
+and [the PM576 review](REVIEW/PM576-PROGRESS-2026-10-24.md).
