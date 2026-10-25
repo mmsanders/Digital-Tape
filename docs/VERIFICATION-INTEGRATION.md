@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current boundary — 24 October 2026 PDT (ADR-193 / PM576)
+## Current boundary — 25 October 2026 PDT (ADR-194 / PM583)
 
 Phase 1 remains 36/36; Phase 2 remains 6/12. Complete required WP-15 package
 coverage is not established by the following component/build/startup milestones.
@@ -10,10 +10,16 @@ coverage is not established by the following component/build/startup milestones.
 | #314 / `fad2eac7` | Exact production screen/bridge component PASS, integrated by #567 at `266bdcaa`; staged functions/DOM are not real IPC/OS gestures. |
 | #315 / `cba3433b` | Exact new candidate build/archive PASS and specific conditional launch admission; no reproducible-compilation or UI claim. |
 | #316 / `bd9be79a` | Measured native-window/normal-close PASS; separate stipulated prompt record not established. |
+| #319 / `f652bc52` | Native317 prerequisite BLOCKED (no desktop control/real folder gesture); discovery318 tests published before implementation. |
+| #322 / `fdffea57` | Corrected discovery580 source/component PASS, integrated at `26ed8491`; shutdown and hidden-details findings resolved. |
+| #323 / `e4c7237d` | Exact source integration and one admitted child metadata result PASS: exit0/offered0/unprobed0. No GUI observation; allowance consumed. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
 Actual native UI/IPC/app-driven INGEST, full G1/G3/G4/G5, native/session/S3/A6,
-full INGEST and G2 remain held. Manual next #577/#317 and #578/#318, no auto wake.
+full INGEST and G2 remain held. Software577 closed as blocked, not accepted.
+Manual584/324 covers editing/details/concurrent updates;585/325 packages the
+cleared discovery-enabled source. No runtime/physical test or auto wake is issued.
+Michael's planned card test is separate; PR582 restores unchanged stream originals.
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 

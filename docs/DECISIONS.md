@@ -4509,3 +4509,48 @@ Rationale: retain truthful independent evidence, close a nonproductive historica
 record action and move onto real app functionality without diluting package gates.
 Reversal cost: a new explicit method/scope or restoration of preserved PR refs;
 no changed historical report, frozen format, actual permission policy or rung rule.
+
+## ADR-194 — Keep app work moving independently of the planned card test
+**Date:** 2026-10-25 PDT
+**Status:** ADOPTED (PM583, Michael's explicit next-work request).
+
+Michael plans a real-card test tomorrow when available and asks for useful work
+meanwhile. This is not authorization for a new card procedure, destructive action,
+elevation, observer, runtime collection, or automatic lead activation. Preserve
+GitHub-only manual pickup and both PAUSED listeners; no lead messages/subworkers.
+
+Carry Verification318/fdffea5759c2cf48b37a6960c5ed36d09ab91b98 corrected
+discovery source/component clearance and integration580/26ed8491. Independent323/
+e4c7237d958ae96d1053c3fb88a3bfe9980e116f authenticates the one admitted
+metadata-only child result: exit0/offered0/unprobed0. That allowance is consumed;
+it establishes neither the app display nor native device safety or Make. PR582
+restores unchanged original streams omitted by the binary ignore rule.
+
+Dispose Software577/Verification317/f652bc52 as a genuine native-control capability
+blocker, no Product failure or UI acceptance. Close the stale Software execution
+envelope at that stop. Preserve original564 bundle and frozen317 rows. Michael's
+separate human-test intention is recorded without conflating no-card UI with a
+real-card/nativeA6 procedure or inventing a new mandatory checklist.
+
+Clarify APP-1's existing controls: unrelated background snapshots must preserve
+an active label edit/value/focus/caret/selection within UTF8 bounds, and an open
+details view/reading/selection while diagnostics are unchanged. Intentional resets
+or changed diagnostics may update them. Discovery success must not erase an
+unrelated current INGEST failure. This adds no feature/list or input/device route.
+Tests precede covered fixes. Existing component/DOM facts never become native facts.
+
+Issue Software584/Verification324 for those interacting editing/details/lifetime
+families, then separately manually selected585/325 for one discovery-enabled
+portable Windows bundle from the final independently cleared source. Original564
+has no580 discovery; the original82798af2 child predates S2. Reuse authenticated
+44ef2686 S2 and3895f3f3 INGEST binaries/pins where available, not an arbitrary
+rebuild. Package/build authenticity is distinct from native execution/admission.
+Make/elevation remain disabled. No shipping fake provider or new framework.
+
+Phase1 stays36/36, Phase2 stays6/12: complete required WP15 package coverage
+remains incomplete. Native UI/IPC/app-driven INGEST, G1/G3/G4/G5, native/session/
+S3/A6/INGEST-own-host/fullAPP/G2 holds remain where undisposed. No criteria weakened.
+Rationale: improve actual usability and provide a current usable artifact while
+human work waits, rather than repeat passed startup/metadata or spin on tooling.
+Reversal cost: a new explicit scope/clarification; historical reports, frozen engine/
+format and original artifacts remain unchanged.
