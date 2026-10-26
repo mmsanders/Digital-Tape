@@ -25,17 +25,17 @@ Still open: travel (5 mm proposed, was 6.2) and pitch (11 mm proposed).
 
 ## What exists so far
 
-Only a single FF key, so Michael can see the shape: `stl/ctrl01-key-ff.stl`,
+Only a single FF key, so Michael can see the shape: `print/ctrl01-key-ff.stl`,
 oriented to print cap-up (inner end on the bed, no supports). `key-preview.png`
 shows it from three sides.
 
 | File | SHA-256 |
 |---|---|
-| `stl/ctrl01-key-ff.stl` | `e6aefbfa9bc9346c0f72545c25befd20a72ba0b91e6d72c71effeb7568b39617` |
+| `print/ctrl01-key-ff.stl` | `e6aefbfa9bc9346c0f72545c25befd20a72ba0b91e6d72c71effeb7568b39617` |
 
 ```sh
 pip install cadquery pytest
-python3 hardware/prototypes/ctrl-01/ctrl01.py                    # writes stl/
+python3 hardware/prototypes/ctrl-01/ctrl01.py                    # writes print/
 cd hardware/prototypes/ctrl-01 && python3 -m pytest -q test_ctrl01.py
 ```
 

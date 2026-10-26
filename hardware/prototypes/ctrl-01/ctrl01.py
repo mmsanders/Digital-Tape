@@ -11,7 +11,7 @@ Key frame (device coordinates, mm):
 Only the key exists so far. Shell halves, slide lock, spring rail and the Play
 gate follow once Michael has seen a key.
 
-    python3 hardware/prototypes/ctrl-01/ctrl01.py      writes stl/*.stl
+    python3 hardware/prototypes/ctrl-01/ctrl01.py      writes print/*.stl
 """
 
 from __future__ import annotations
@@ -21,7 +21,8 @@ from pathlib import Path
 
 import cadquery as cq
 
-OUT = Path(__file__).resolve().parent / "stl"
+# committed on purpose (Michael, 26 Oct): the per-part stl/ folders elsewhere are ignored
+OUT = Path(__file__).resolve().parent / "print"
 
 
 @dataclass(frozen=True)
