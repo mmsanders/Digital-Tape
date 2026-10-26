@@ -9,6 +9,7 @@ on:
       - 'host/app/**'
       - 'tools/app/**'
       - 'tests/windows_interactions_r1/**'
+      - 'tests/windows_interactions_r2/**'
       - '.github/workflows/windows-interactions-584.yml'
   workflow_dispatch:
 permissions:
@@ -18,6 +19,7 @@ env:
   DT_TAPECTL_SHA256: 44ef26869ba2d01a8a183660a2c7a050d0e7e9ff37c40b727131512739ea6ded
   DT_TAPECTL_VERSION: tapectl-wp15-s2+f9306c2c5a42
   PRE584_MAIN: 920f3d0594180ec00fa9e5ac165c06cfa1b76061
+  PYTHONIOENCODING: utf-8
 jobs:
   interactions:
     name: "Controlled interactions (#584)"
@@ -56,19 +58,29 @@ jobs:
           $ErrorActionPreference='Stop'
           $head=git rev-parse HEAD
           New-Item -ItemType Directory evidence584 | Out-Null
-          python -B tests/windows_interactions_r1/contract.py
+          python -B tests/windows_interactions_r2/contract.py
           if($LASTEXITCODE -ne 0){throw 'Verifier causal controls failed'}
-          python -B tests/windows_interactions_r1/contract.py --emit > evidence584/contract-emit.json
+          python -B tests/windows_interactions_r2/compatibility.py
+          if($LASTEXITCODE -ne 0){throw 'r1->r2 compatibility controls failed'}
+          python -B tests/windows_interactions_r2/summary.py
+          if($LASTEXITCODE -ne 0){throw 'Summary transport controls failed'}
+          python -B tests/windows_interactions_r2/contract.py --emit > evidence584/contract-emit.json
+          if($LASTEXITCODE -ne 0){throw 'Contract emit failed'}
           python -B tests/windows_discovery_r1/contract.py --emit > evidence584/discovery-emit.json
+          if($LASTEXITCODE -ne 0){throw 'Discovery emit failed'}
           node tools/app/interactions-dom.cjs evidence584/contract-emit.json evidence584/discovery-emit.json $env:DT_TEST_EXE "$PWD/host/app/frontend" evidence584/current $head
           if($LASTEXITCODE -ne 0){throw 'Interaction adapter failed'}
-          python -B tools/app/interactions_summary.py tests/windows_interactions_r1/contract.py evidence584/current/interactions.json > evidence584/current/summary.json
-          python -B tests/windows_interactions_r1/contract.py --input evidence584/current/interactions.json --candidate $head *> evidence584/current/qualifier.txt
-          "qualifier exit $LASTEXITCODE" >> evidence584/current/qualifier.txt
+          python -B tests/windows_interactions_r2/summary.py --input evidence584/current/interactions.json --candidate $head --out evidence584/current/summary.json
+          if($LASTEXITCODE -ne 0){throw 'Current summary failed'}
+          python -B tests/windows_interactions_r2/contract.py --input evidence584/current/interactions.json --candidate $head *> evidence584/current/qualifier.txt
+          $q=$LASTEXITCODE
+          "qualifier exit $q" >> evidence584/current/qualifier.txt
+          Get-Content evidence584/current/qualifier.txt
+          if($q -ne 0){throw "Positive qualifier failed (exit $q)"}
           node tools/app/selection-direction-probe.cjs > evidence584/selection-direction-probe.json
           if($LASTEXITCODE -ne 0){throw 'Selection probe failed'}
           git ls-tree -r HEAD host/app/src/ host/app/frontend/ > evidence584/source-blobs.txt
-          $global:LASTEXITCODE=0
+          if($LASTEXITCODE -ne 0){throw 'Source blob listing failed'}
       - name: Negative control - pre-584 renderer/binding from main
         run: |
           $ErrorActionPreference='Stop'
@@ -79,7 +91,13 @@ jobs:
           $old="$root/host/app/frontend"
           node tools/app/interactions-dom.cjs evidence584/contract-emit.json evidence584/discovery-emit.json $env:DT_TEST_EXE $old evidence584/pre584 (git rev-parse HEAD)
           if($LASTEXITCODE -ne 0){throw 'Negative-control adapter failed'}
-          python -B tools/app/interactions_summary.py tests/windows_interactions_r1/contract.py evidence584/pre584/interactions.json > evidence584/pre584/summary.json
+          # Expected red: the old renderer must fail the qualifier.
+          python -B tests/windows_interactions_r2/contract.py --input evidence584/pre584/interactions.json --candidate (git rev-parse HEAD) *> evidence584/pre584/qualifier.txt
+          $q=$LASTEXITCODE
+          "qualifier exit $q (expected nonzero)" >> evidence584/pre584/qualifier.txt
+          if($q -eq 0){throw 'Negative control passed the qualifier'}
+          python -B tests/windows_interactions_r2/summary.py --input evidence584/pre584/interactions.json --candidate (git rev-parse HEAD) --out evidence584/pre584/summary.json
+          if($LASTEXITCODE -ne 0){throw 'Negative-control summary failed'}
           $cur=Get-Content evidence584/current/summary.json -Raw | ConvertFrom-Json
           $pre=Get-Content evidence584/pre584/summary.json -Raw | ConvertFrom-Json
           "current $($cur.passed)/$($cur.total); pre584 $($pre.passed)/$($pre.total)"
