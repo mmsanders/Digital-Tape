@@ -3,160 +3,152 @@
 Owner-directed prototype (Michael, 26 Oct 2026), not a PM-issued round and not
 acceptance. The plan and drawings are the "CTRL-01 Controls Rig Plan" canvas.
 
-Key frame (device coordinates, mm):
-    x  press direction: 0 at the cap's outer face, increasing inward
-    y  along the key row, +y toward the spring housing (Stop end)
-    z  device depth, +z toward the back half and the slide lock
+The key starts from the LADDER-02 P key exactly. Its body, rails, spring groove
+and tooth are rebuilt here from the LADDER-01/02 generator (`rig.py` in Michael's
+latch-rig.zip, SHA-256 e49c6a49...882689b), and `old_key()` reproduces the
+printed key-P-2.stl to check that. Michael's change, 26 Oct:
 
-Only the key exists so far. Shell halves, slide lock, spring rail and the Play
-gate follow once Michael has seen a key.
+  1. body, rails and catch unchanged;
+  2. where the stem started, the body carries on up without the rails, inset on
+     every side, so a flat shoulder runs round the whole key and stops on the
+     shell from inside;
+  3. at the height the old cap sat once installed, a cap that is part of the
+     same piece. Its flat underside lands on the shell at full press.
+
+Key frame, as in rig.py: X across the slide lock (the tooth is on the -X face),
+Y along the key row (rails on the +/-Y faces), Z up, 0 at the key's underside.
+The key prints upright as modelled.
 
     python3 hardware/prototypes/ctrl-01/ctrl01.py      writes print/*.stl
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 import cadquery as cq
 
 # committed on purpose (Michael, 26 Oct): the per-part stl/ folders elsewhere are ignored
 OUT = Path(__file__).resolve().parent / "print"
+FONT = "DejaVu Sans"
+
+# --- LADDER-02, unchanged (rig.py names) -------------------------------------
+STEM_X, STEM_Y = 10.0, 11.0
+BODY_H = 16.0                # underside to shoulder; the shoulder stops on the shell
+RAIL_W, RAIL_P = 3.0, 1.5    # rail ribs on the +/-Y faces: width in X, protrusion in Y
+GROOVE_D = 2.2               # spring groove depth around the key's boss
+BOSS_D = 3.0                 # FIT-01
+SPRING_OD = 5.0              # FIT-01, pen spring
+TRAVEL = 6.2                 # full press: cap underside lands on the shell
+LID_T = 3.0                  # LADDER shell (lid) thickness the key passes through
+TOOTH_X = 2.5                # tooth protrusion from the -X face
+RAMP = 2.5                   # 45 degree ramp: run = rise
+LEDGE_Z = 12.0               # ledge height above the underside
+PAWL_EDGE = 0.5
+CAP_X, CAP_Y, CAP_T = 15.0, 16.0, 5.5
+CAP_R = 2.5
+NECK_D, NECK_FLAT = 6.0, 2.5
+SOCKET_D = 4.0
+LABEL_DEPTH = 0.6
+
+# --- CTRL-01 ---------------------------------------------------------------
+INSET = 1.5                  # extension inset per side (Michael: 1-2 mm, what prints reliably)
+HOLE_CLR = 0.4               # shell aperture round the extension, per side (LADDER's lid value)
 
 
 @dataclass(frozen=True)
 class Key:
-    # cap: 1.5 proud of the side face plus the 2.5 mm wall it passes through
-    cap_y: float = 8.0
-    cap_z: float = 12.0
-    cap_x: float = 4.0
-    cap_round: float = 0.8
-    # body behind the wall; 0.8 mm shoulders along the row are the out-stop
-    body_x: float = 7.0
-    shoulder: float = 0.8
-    # pen spring pocket, open at the inner end
-    pocket_d: float = 5.0
-    pocket_depth: float = 5.0
-    # catch: P business end, unchanged from LADDER-01/02
-    hook: float = 1.2           # overhang along +y beyond the body
-    ledge_x: float = 7.5        # flat retention face, faces the cap
-    tip_x: float = 0.6          # straight tip before the 45 degree ramp
-    # catch root, carried to the key's inner end ("to the edge")
-    root_y: float = 3.0         # root width along y, inside the body footprint
-    root_chamfer: float = 1.0   # 45 degree lead-in under the ledge (the "fillet")
-    reach_z: float = 3.3        # how far the catch reaches back into the slide lock
-    ramp_deg: float = 45.0      # negative control varies this
-    icon: str = "ff"            # engraved on the cap: ff | rew | play | stop | rec | none
+    label: str = "P"
+    h: float = 1.2           # catch overhang; P
+    inset: float = INSET
+    hole_clr: float = HOLE_CLR
 
     @property
-    def length(self) -> float:
-        return self.cap_x + self.body_x
+    def ext_x(self) -> float:
+        return STEM_X - 2 * self.inset
 
     @property
-    def body_y0(self) -> float:
-        return -self.shoulder
+    def ext_y(self) -> float:
+        return STEM_Y - 2 * self.inset
 
     @property
-    def body_y1(self) -> float:
-        return self.cap_y + self.shoulder
+    def cap_z0(self) -> float:
+        """Old cap underside, installed: shoulder + shell + travel."""
+        return BODY_H + LID_T + TRAVEL
+
+    @property
+    def shoulder_overlap(self) -> float:
+        """How far the shoulder reaches past the aperture edge, per side."""
+        return self.inset - self.hole_clr
 
 
-def _catch_profile(k: Key) -> list[tuple[float, float]]:
-    """Catch outline in the x-y plane, walked clockwise from the root corner.
+def _box(x0, x1, y0, y1, z0, z1) -> cq.Workplane:
+    return (cq.Workplane("XY").box(x1 - x0, y1 - y0, z1 - z0, centered=False)
+            .translate((x0, y0, z0)))
 
-    Only the hook (beyond body_y1) meets the slide-lock latch. Inward of the ramp
-    that lane stays empty, otherwise the key would push the slide lock early and
-    a light touch could pop Play.
+
+def _yz_prism(pts, x0, x1) -> cq.Workplane:
+    return cq.Workplane("YZ", origin=(x0, 0, 0)).polyline(pts).close().extrude(x1 - x0)
+
+
+def tooth_profile(k: Key, flip: bool = False) -> list[tuple[float, float]]:
+    """(Y, Z) outline of the LADDER tooth: flat ledge on top, 45 degree ramp below.
+
+    `flip=True` builds the 23 Sep failure (ramp above, shelf below) so the
+    retention gate can be shown to go red.
     """
-    import math
-
-    y_edge = k.body_y1
-    y_root = y_edge - k.root_y
-    ramp_dx = k.hook / math.tan(math.radians(k.ramp_deg))
-    return [
-        (k.ledge_x - k.root_chamfer, y_root),
-        (k.ledge_x, y_root + k.root_chamfer),
-        (k.ledge_x, y_edge + k.hook),                    # flat ledge, faces the cap
-        (k.ledge_x + k.tip_x, y_edge + k.hook),          # tip
-        (k.ledge_x + k.tip_x + ramp_dx, y_edge),         # ramp back to the body
-        (k.length, y_edge),                              # body edge, lane empty
-        (k.length, y_root),                              # inner end
-    ]
+    z = LEDGE_Z
+    tip = PAWL_EDGE + k.h
+    pts = [(tip - RAMP, z - RAMP), (tip, z), (tip - RAMP, z)]
+    if flip:
+        zc = z - RAMP / 2
+        pts = [(y, 2 * zc - zz) for y, zz in pts]
+    return pts
 
 
-def _icon(k: Key, wp: cq.Workplane) -> cq.Workplane:
-    """Engrave a 0.4 mm transport symbol on the cap face (the x = 0 plane)."""
-    s = 1.4
-    tri = lambda c: [(c - s, -s), (c - s, s), (c + s * 0.9, 0)]
-    shapes = {
-        "play": [tri(0)],
-        "ff": [tri(-1.4), tri(1.4)],
-        "rew": [[(-x, y) for x, y in tri(-1.4)], [(-x, y) for x, y in tri(1.4)]],
-        "stop": [[(-s, -s), (-s, s), (s, s), (s, -s)]],
-    }
-    cy, cz = k.cap_y / 2, k.cap_z / 2
-    sk = cq.Workplane("YZ")
-    if k.icon == "rec":
-        cut = sk.center(cy, cz).circle(s).extrude(0.4)
-    elif k.icon in shapes:
-        cut = None
-        for poly in shapes[k.icon]:
-            # symbols run along z (the long axis of the cap)
-            pts = [(cy + v, cz + u) for u, v in poly]
-            solid = sk.polyline(pts).close().extrude(0.4)
-            cut = solid if cut is None else cut.union(solid)
-    else:
-        return wp
-    return wp.cut(cut)
+def _body(k: Key, flip: bool = False) -> cq.Workplane:
+    """The LADDER-02 key below its shoulder: stem, rails, spring groove, tooth, label."""
+    body = _box(-STEM_X / 2, STEM_X / 2, -STEM_Y / 2, STEM_Y / 2, 0, BODY_H)
+    for s in (-1, 1):
+        y0, y1 = (STEM_Y / 2, STEM_Y / 2 + RAIL_P) if s > 0 else (-STEM_Y / 2 - RAIL_P, -STEM_Y / 2)
+        body = body.union(_box(-RAIL_W / 2, RAIL_W / 2, y0, y1, 0, BODY_H))
+    groove = (cq.Workplane("XY").circle((SPRING_OD + 0.8) / 2).circle(BOSS_D / 2)
+              .extrude(GROOVE_D))
+    body = body.cut(groove)
+    body = body.union(_yz_prism(tooth_profile(k, flip), -STEM_X / 2 - TOOTH_X, -STEM_X / 2 + 0.01))
+    return body
 
 
-def key(k: Key = Key()) -> cq.Workplane:
-    cap = (
-        cq.Workplane("XY")
-        .box(k.cap_x, k.cap_y, k.cap_z, centered=False)
-        .faces("<X").edges().fillet(k.cap_round)
-    )
-    body = (
-        cq.Workplane("XY")
-        .box(k.body_x, k.body_y1 - k.body_y0, k.cap_z, centered=False)
-        .translate((k.cap_x, k.body_y0, 0))
-        .faces(">X").edges().chamfer(0.4)
-    )
-    pocket = (
-        cq.Workplane("YZ", origin=(k.length, 0, 0))
-        .center(k.cap_y / 2, k.cap_z / 2)
-        .circle(k.pocket_d / 2)
-        .extrude(-k.pocket_depth)
-    )
-    # 90 degree drill-point end: prints as a 45 degree roof instead of a bridge
-    r = k.pocket_d / 2
-    tip = cq.Solid.makeCone(r, 0, r, cq.Vector(k.length - k.pocket_depth, k.cap_y / 2, k.cap_z / 2),
-                            cq.Vector(-1, 0, 0))
-    pocket = pocket.union(cq.Workplane().add(tip))
-    catch = (
-        cq.Workplane("XY", origin=(0, 0, k.cap_z))
-        .polyline(_catch_profile(k)).close()
-        .extrude(k.reach_z)
-    )
-    part = cap.union(body).union(catch).cut(pocket)
-    return _icon(k, part)
+def _label(part: cq.Workplane, k: Key) -> cq.Workplane:
+    return (part.faces(">X").workplane(centerOption="CenterOfBoundBox")
+            .center(0, -2.0).text(k.label, 5.0, -LABEL_DEPTH, combine="cut", font=FONT))
 
 
-def print_pose(part: cq.Workplane, k: Key) -> cq.Workplane:
-    """Cap up: the inner end on the bed, press axis vertical.
+def old_key(k: Key = Key()) -> cq.Workplane:
+    """LADDER-02 key-P-2 with its D neck, for checking the rebuild against the print."""
+    neck = (cq.Workplane("XY").circle(NECK_D / 2).extrude(LID_T + TRAVEL + SOCKET_D)
+            .intersect(_box(-NECK_D, NECK_FLAT, -NECK_D, NECK_D, 0, LID_T + TRAVEL + SOCKET_D)))
+    neck = neck.faces(">Z").edges().chamfer(0.4).translate((0, 0, BODY_H))
+    return _label(_body(k).union(neck), k)
 
-    The ledge is then a top surface and the ramp a 45 degree underside, and no
-    layer line crosses the catch root.
-    """
-    return part.rotate((0, 0, 0), (0, 1, 0), 90).translate((0, 0, k.length))
+
+def key(k: Key = Key(), flip: bool = False) -> cq.Workplane:
+    body = _body(k, flip)
+    ext = _box(-k.ext_x / 2, k.ext_x / 2, -k.ext_y / 2, k.ext_y / 2, BODY_H - 0.01, k.cap_z0 + 0.01)
+    cap = (cq.Workplane("XY").box(CAP_X, CAP_Y, CAP_T, centered=(True, True, False))
+           .edges("|Z").fillet(CAP_R).faces(">Z").edges().fillet(0.8)
+           .translate((0, 0, k.cap_z0)))
+    cap = (cap.faces(">Z").workplane(centerOption="CenterOfBoundBox")
+           .text(k.label, 7.0, -LABEL_DEPTH, combine="cut", font=FONT))
+    # label the stem's own +X face first, as LADDER did; the cap is wider now
+    return _label(body, k).union(ext).union(cap)
 
 
 def build(out: Path = OUT) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
-    k = Key()
-    p = out / "ctrl01-key-ff.stl"
-    cq.exporters.export(print_pose(key(k), k), str(p), tolerance=0.01, angularTolerance=0.1)
+    p = out / "ctrl01-key-P.stl"
+    cq.exporters.export(key(), str(p), tolerance=0.01, angularTolerance=0.1)
     return [p]
 
 
