@@ -62,6 +62,9 @@ pub struct View {
     pub details_available: bool,
     /// The current card check's diagnostic, offered in any state.
     pub card_details_available: bool,
+    /// Start overs so far. The window owns the label box between them, so only a view
+    /// from a newer Start over may rewrite it.
+    pub resets: u64,
 }
 
 #[derive(Debug, Default)]
@@ -74,6 +77,7 @@ pub struct App {
     generation: u64,
     active_job: Option<String>,
     pub cards: Cards,
+    resets: u64,
 }
 
 /// What the shell must do after a drop.
@@ -170,6 +174,7 @@ impl App {
             make_enabled: false,
             details_available: !self.details.is_empty(),
             card_details_available: self.cards.diagnostic && !self.cards.details.is_empty(),
+            resets: self.resets,
         }
     }
 
@@ -240,9 +245,11 @@ impl App {
     pub fn start_over(&mut self) {
         let generation = self.generation.checked_add(1).expect("job generation exhausted");
         let cards = std::mem::take(&mut self.cards);
+        let resets = self.resets + 1;
         *self = App::default();
         self.generation = generation;
         self.cards = cards;
+        self.resets = resets;
     }
 }
 

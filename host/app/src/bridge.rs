@@ -183,3 +183,6 @@ mod component;
 #[cfg(test)]
 #[path="../tests/discovery_component.rs"]
 mod discovery_component;
+#[cfg(test)]
+#[path="../tests/interaction_component.rs"]
+mod interaction_component;
