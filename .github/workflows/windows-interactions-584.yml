@@ -1,0 +1,92 @@
+name: "Software584 controlled interactions"
+# Verification324's frozen editing/details/ordering cases through the production binding and
+# renderer (headless Edge on the runner, isolated test document) wired to one actual production
+# Bridge per case (unit-test executable). No app launch, native window, IPC, child or device.
+# Negative control: the same adapter over the pre-584 renderer/binding from main.
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - 'tools/app/**'
+      - 'tests/windows_interactions_r1/**'
+      - '.github/workflows/windows-interactions-584.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  # Compile-time pins only (cards line starts empty, as in the discovery build); never invoked.
+  DT_TAPECTL_SHA256: 44ef26869ba2d01a8a183660a2c7a050d0e7e9ff37c40b727131512739ea6ded
+  DT_TAPECTL_VERSION: tapectl-wp15-s2+f9306c2c5a42
+  PRE584_MAIN: 920f3d0594180ec00fa9e5ac165c06cfa1b76061
+jobs:
+  interactions:
+    name: "Controlled interactions (#584)"
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Coordinator unit tests and test executable
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'target584'
+          rustc -Vv
+          cargo -V
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib
+          if($LASTEXITCODE -ne 0){throw 'Backend unit tests failed'}
+          $exe=cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib --no-run --message-format=json | ConvertFrom-Json | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.target.name -eq 'dtapp' -and $_.profile.test } | Select-Object -ExpandProperty executable
+          if(@($exe).Count -ne 1){throw 'Test executable not unique'}
+          "DT_TEST_EXE=$exe" >> $env:GITHUB_ENV
+      - name: Test-only browser driver (no browser download; runner's installed Edge)
+        run: |
+          $ErrorActionPreference='Stop'
+          $dir=Join-Path $env:RUNNER_TEMP 'pw'
+          New-Item -ItemType Directory $dir | Out-Null
+          npm install --prefix $dir --no-save --ignore-scripts playwright-core@1.62.1
+          if($LASTEXITCODE -ne 0){throw 'playwright-core install failed'}
+          "PLAYWRIGHT_MODULE=$dir/node_modules/playwright-core" >> $env:GITHUB_ENV
+          "TEST_BROWSER_EXE=${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe" >> $env:GITHUB_ENV
+      - name: Frozen cases through the production binding/renderer/Bridge
+        run: |
+          $ErrorActionPreference='Stop'
+          $head=git rev-parse HEAD
+          New-Item -ItemType Directory evidence584 | Out-Null
+          python -B tests/windows_interactions_r1/contract.py
+          if($LASTEXITCODE -ne 0){throw 'Verifier causal controls failed'}
+          python -B tests/windows_interactions_r1/contract.py --emit > evidence584/contract-emit.json
+          python -B tests/windows_discovery_r1/contract.py --emit > evidence584/discovery-emit.json
+          node tools/app/interactions-dom.cjs evidence584/contract-emit.json evidence584/discovery-emit.json $env:DT_TEST_EXE "$PWD/host/app/frontend" evidence584/current $head
+          if($LASTEXITCODE -ne 0){throw 'Interaction adapter failed'}
+          python -B tools/app/interactions_summary.py tests/windows_interactions_r1/contract.py evidence584/current/interactions.json > evidence584/current/summary.json
+          python -B tests/windows_interactions_r1/contract.py --input evidence584/current/interactions.json --candidate $head *> evidence584/current/qualifier.txt
+          "qualifier exit $LASTEXITCODE" >> evidence584/current/qualifier.txt
+          node tools/app/selection-direction-probe.cjs > evidence584/selection-direction-probe.json
+          if($LASTEXITCODE -ne 0){throw 'Selection probe failed'}
+          git ls-tree -r HEAD host/app/src/ host/app/frontend/ > evidence584/source-blobs.txt
+          $global:LASTEXITCODE=0
+      - name: Negative control - pre-584 renderer/binding from main
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP 'pre584'
+          New-Item -ItemType Directory $root | Out-Null
+          git archive --output "$root/pre584.tar" $env:PRE584_MAIN host/app/frontend
+          tar -xf "$root/pre584.tar" -C $root
+          $old="$root/host/app/frontend"
+          node tools/app/interactions-dom.cjs evidence584/contract-emit.json evidence584/discovery-emit.json $env:DT_TEST_EXE $old evidence584/pre584 (git rev-parse HEAD)
+          if($LASTEXITCODE -ne 0){throw 'Negative-control adapter failed'}
+          python -B tools/app/interactions_summary.py tests/windows_interactions_r1/contract.py evidence584/pre584/interactions.json > evidence584/pre584/summary.json
+          $cur=Get-Content evidence584/current/summary.json -Raw | ConvertFrom-Json
+          $pre=Get-Content evidence584/pre584/summary.json -Raw | ConvertFrom-Json
+          "current $($cur.passed)/$($cur.total); pre584 $($pre.passed)/$($pre.total)"
+          if($pre.passed -ge $cur.passed){throw 'Negative control did not go red'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software584-interaction-evidence
+          path: evidence584
+          retention-days: 30
