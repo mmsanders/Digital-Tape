@@ -601,6 +601,19 @@
       ]
     },
     {
+      "path": "tests/windows_native_flow_r1",
+      "tree": "85a9bef82b0af8abf28cb72955045be55702a68c",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "f652bc5255dd866db55f2d44ffca2f407c3cab0f",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/317",
+      "attestation": "Frozen 317 no-card native-flow rows, oracles and positive WAV fixture, carried by PM588 for the human-operated 564 follow-up; evidence index only, no runtime admission",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_native_flow_r1/contract.py"
+      ]
+    },
+    {
       "path": "tests/windows_bridge_r1",
       "tree": "374aa1087474c2eed7e696c01214894dd4ae5d81",
       "source_repo": "mmsanders/digital-tape-verification",
