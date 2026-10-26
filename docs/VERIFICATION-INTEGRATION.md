@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current boundary — 25 October 2026 PDT (ADR-194 / PM583)
+## Current boundary — 26 October2026 PDT (PM593)
 
 Phase 1 remains 36/36; Phase 2 remains 6/12. Complete required WP-15 package
 coverage is not established by the following component/build/startup milestones.
@@ -13,13 +13,19 @@ coverage is not established by the following component/build/startup milestones.
 | #319 / `f652bc52` | Native317 prerequisite BLOCKED (no desktop control/real folder gesture); discovery318 tests published before implementation. |
 | #322 / `fdffea57` | Corrected discovery580 source/component PASS, integrated at `26ed8491`; shutdown and hidden-details findings resolved. |
 | #323 / `e4c7237d` | Exact source integration and one admitted child metadata result PASS: exit0/offered0/unprobed0. No GUI observation; allowance consumed. |
+| #329 / `91815bc1` |584 component FINAL PASS32/32, old renderer18/32;587 integrated679e01ec,120/120checks success, accepted source unchanged. |
+| #330 / `2ffd014d` | Original564 human visible-row method admitted; proposed collector refused, internal chains held. |
+| #331 / `42619272` | Actual human visible observations reviewed/partial; Show Details/NUL and internal chains held. F328-1 terminal finding, owner unknown. No repeat requested. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Actual native UI/IPC/app-driven INGEST, full G1/G3/G4/G5, native/session/S3/A6,
-full INGEST and G2 remain held. Software577 closed as blocked, not accepted.
-Manual584/324 covers editing/details/concurrent updates;585/325 packages the
-cleared discovery-enabled source. No runtime/physical test or auto wake is issued.
-Michael's planned card test is separate; PR582 restores unchanged stream originals.
+Human589/Software590 close at bounded partial return;592 retired unmerged with
+restore refs, not integrated or accepted as a collector. Historical reports carry.
+Manual594/332 fixes console and tests bounded first-party receipts, not G1 absence.
+595/333 decides exact INGEST integration-only scope versus final native holds.
+585/325 packaging waits for final cleared594 source;584 dependency is complete.
+No current human action, native/poller run or automatic lead activation is issued.
+Phase2 stays6/12; full coverage/native/session/S3/A6/own-hostINGEST/G2 remain held
+where unmet. Make/elevation disabled. See [PM593](REVIEW/PM593-CLOSEOUT-2026-10-26.md).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 
