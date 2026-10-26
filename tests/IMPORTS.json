@@ -651,6 +651,19 @@
         "-B",
         "tests/windows_interactions_r1/contract.py"
       ]
+    },
+    {
+      "path": "tests/windows_interactions_r2",
+      "tree": "80ad54526d09ee763b04c4351d363831b8a39478",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "0b1ed4f394a300513a6ced15d3e8c2f7c299f893",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/324",
+      "attestation": "Verification324 r2: six Windows selection-direction readback constants corrected none->forward per the HTML Standard and an ASCII-safe diagnostic summary; r1 preserved byte-identical. Published after inspection of PR587 head 2decba2f, with no tests-first claim for it",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_interactions_r2/compatibility.py"
+      ]
     }
   ],
   "evidence_bundles": [
