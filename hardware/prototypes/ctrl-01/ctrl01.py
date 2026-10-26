@@ -27,6 +27,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+import math
+
 import cadquery as cq
 
 # committed on purpose (Michael, 26 Oct): the per-part stl/ folders elsewhere are ignored
@@ -55,6 +57,12 @@ LABEL_DEPTH = 0.6
 # --- CTRL-01 ---------------------------------------------------------------
 INSET = 1.5                  # extension inset per side (Michael: 1-2 mm, what prints reliably)
 HOLE_CLR = 0.4               # shell aperture round the extension, per side (LADDER's lid value)
+REST_GAP = 0.5               # LADDER: the tooth clears the pawl top by this much at rest
+PAWL_TOP = LEDGE_Z - RAMP - REST_GAP   # pawl top at rest, in the key's own frame
+STOP_SHIFT = 2.1             # LADDER: bar shift under Stop; more than any catch is deep
+STOP_RAMP_DEG = 30.0         # from the press direction; LADDER's was 45 then a vertical dwell
+STOP_FULL_AT = TRAVEL - 0.6  # press depth where the shift is complete; the flat after it
+                             # is reached only in the last 0.6 mm, so it is barely felt
 
 
 @dataclass(frozen=True)
@@ -64,6 +72,9 @@ class Key:
     inset: float = INSET
     hole_clr: float = HOLE_CLR
     full_catch: bool = True  # catch lines run on to the face edge (Michael, 26 Oct)
+    role: str = "latch"      # latch | stop
+    icon: str = "ff"         # engraved on the cap: ff | rew | play | stop | rec
+    stop_full_at: float = STOP_FULL_AT
 
     @property
     def ext_x(self) -> float:
@@ -105,6 +116,8 @@ def tooth_profile(k: Key, flip: bool = False) -> list[tuple[float, float]]:
     `flip=True` builds the 23 Sep failure (ramp above, shelf below) so the
     retention gate can be shown to go red.
     """
+    if k.role == "stop":
+        return stop_profile(k, flip)
     z = LEDGE_Z
     tip = PAWL_EDGE + k.h
     back = -STEM_Y / 2 if k.full_catch else tip - RAMP
@@ -113,6 +126,51 @@ def tooth_profile(k: Key, flip: bool = False) -> list[tuple[float, float]]:
         zc = z - RAMP / 2
         pts = [(y, 2 * zc - zz) for y, zz in pts]
     return pts
+
+
+def stop_profile(k: Key, flip: bool = False) -> list[tuple[float, float]]:
+    """(Y, Z) outline of Stop's cam. No ledge anywhere, so it never latches.
+
+    One even ramp, STOP_RAMP_DEG from the press direction, moves the slide lock
+    STOP_SHIFT by press depth `stop_full_at`; then a flat runs to the top of the
+    body. Like the latch keys' catch, both lines run on to the edge of the face:
+    the ramp down to the face's far edge (or its bottom, if it gets there first),
+    the flat up to the shoulder.
+    """
+    tip = PAWL_EDGE + STOP_SHIFT
+    z_tip = PAWL_TOP + k.stop_full_at
+    slope = 1 / math.tan(math.radians(STOP_RAMP_DEG))      # dz per dy
+    back = -STEM_Y / 2
+    z_back = z_tip - slope * (tip - back)
+    if z_back >= 0:
+        pts = [(back, z_back), (tip, z_tip), (tip, BODY_H), (back, BODY_H)]
+    else:
+        y0 = tip - z_tip / slope
+        pts = [(y0, 0.0), (tip, z_tip), (tip, BODY_H), (back, BODY_H), (back, 0.0)]
+    if flip:
+        zc = BODY_H / 2
+        pts = [(y, 2 * zc - zz) for y, zz in pts]
+    return pts
+
+
+def _icon(k: Key) -> cq.Workplane:
+    """Transport symbol to engrave on the cap top, 0.6 mm deep, pointing along +X."""
+    s = 2.2
+    tri = lambda c: [(c - s * 0.9, -s), (c - s * 0.9, s), (c + s * 0.9, 0)]
+    shapes = {
+        "play": [tri(0)],
+        "ff": [tri(-1.9), tri(1.9)],
+        "rew": [[(-x, y) for x, y in tri(-1.9)], [(-x, y) for x, y in tri(1.9)]],
+        "stop": [[(-s, -s), (-s, s), (s, s), (s, -s)]],
+    }
+    z = k.cap_z0 + CAP_T - LABEL_DEPTH
+    if k.icon == "rec":
+        return cq.Workplane("XY", origin=(0, 0, z)).circle(s).extrude(1.0)
+    cut = None
+    for poly in shapes[k.icon]:
+        solid = cq.Workplane("XY", origin=(0, 0, z)).polyline(poly).close().extrude(1.0)
+        cut = solid if cut is None else cut.union(solid)
+    return cut
 
 
 def _body(k: Key, flip: bool = False, tooth: bool = True) -> cq.Workplane:
@@ -149,17 +207,38 @@ def key(k: Key = Key(), flip: bool = False) -> cq.Workplane:
     cap = (cq.Workplane("XY").box(CAP_X, CAP_Y, CAP_T, centered=(True, True, False))
            .edges("|Z").fillet(CAP_R).faces(">Z").edges().fillet(0.8)
            .translate((0, 0, k.cap_z0)))
-    cap = (cap.faces(">Z").workplane(centerOption="CenterOfBoundBox")
-           .text(k.label, 7.0, -LABEL_DEPTH, combine="cut", font=FONT))
+    cap = cap.cut(_icon(k))
     # label the stem's own +X face first, as LADDER did; the cap is wider now
     return _label(body, k).union(ext).union(cap)
 
 
+# The keys built so far. Play and Record wait on Michael's call on the gate.
+KEYS = {
+    "stop": Key(label="S", role="stop", icon="stop"),
+    "rew": Key(label="W", icon="rew"),
+    "ff": Key(label="F", icon="ff"),
+}
+PLATE_PITCH = 22.0           # key spacing on the bed, mm
+
+
+def plate(names=tuple(KEYS)) -> cq.Workplane:
+    out = None
+    for i, n in enumerate(names):
+        part = key(KEYS[n]).translate((0, i * PLATE_PITCH, 0))
+        out = part if out is None else out.union(part)
+    return out
+
+
 def build(out: Path = OUT) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
-    p = out / "ctrl01-key-P.stl"
-    cq.exporters.export(key(), str(p), tolerance=0.01, angularTolerance=0.1)
-    return [p]
+    written = []
+    for n, k in KEYS.items():
+        p = out / f"ctrl01-key-{n}.stl"
+        cq.exporters.export(key(k), str(p), tolerance=0.01, angularTolerance=0.1)
+        written.append(p)
+    p = out / "ctrl01-plate-keys.stl"
+    cq.exporters.export(plate(), str(p), tolerance=0.01, angularTolerance=0.1)
+    return written + [p]
 
 
 if __name__ == "__main__":

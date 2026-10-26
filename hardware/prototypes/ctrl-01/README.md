@@ -18,7 +18,7 @@ The plan and drawings are the private canvas "CTRL-01 Controls Rig Plan"
 | Key | **Starts from the LADDER-02 P key exactly** (26 Oct): body, rails, spring groove and tooth unchanged. Where the stem began, the body carries on up without the rails, inset 1.5 mm a side, so a flat shoulder all round stops on the shell. At the old installed cap height there is a one-piece cap whose flat underside lands on the shell at full press |
 | Catch | **P catch, root run on** (26 Oct): the tip, flat ledge and 45° ramp are LADDER's P exactly; the ledge and ramp lines simply continue until they meet the edge of the key face, instead of stopping at LADDER's short vertical side. Only the root grows; the pawl never reaches it |
 | Slide lock | Every latch thickened to the Stop version; prints flat so no latch root is a single layer line |
-| Stop | Long even ramp, then a flat that runs to the end of the key, beyond where the key travels |
+| Stop | **Built** (26 Oct): same key; its cam has no ledge. One even ramp 30° from the press direction finishes the 2.1 mm slide-lock shift at 5.6 mm of the 6.2 mm press, then a flat runs up to the shoulder. Both lines run on to the face edge |
 | Solenoid | None |
 | Files | Generator, tests and STLs committed here (approved) |
 
@@ -35,15 +35,20 @@ as the check that the rebuild is exact.
 
 ## What exists so far
 
-One key: `print/ctrl01-key-P.stl`, modelled and exported upright as it prints.
-`key-preview.png` shows it beside the LADDER-02 key.
+Stop, Rew and FF keys, each modelled and exported upright as it prints, and
+all three on one plate (`ctrl01-plate-keys.stl`, 22 mm apart). Play and Record
+wait on Michael's decision on the gate. `key-preview.png` compares the key with
+LADDER-02's; `keys-preview.png` shows Stop, FF and Rew.
 
 | File | SHA-256 |
 |---|---|
-| `print/ctrl01-key-P.stl` | `ec24674b63fb619901bb40afe5abde7361a348865f0665557fe1fafd16ac1fe5` |
+| `print/ctrl01-key-ff.stl` | `d294924716e411d933b5c10e911c228d65cf307fe7773cce072a36e9f2da02b0` |
+| `print/ctrl01-key-rew.stl` | `a5c1448bebb01c296c56bcf0cf3fdc524977bf1f371516435565fde0d54d5750` |
+| `print/ctrl01-key-stop.stl` | `9d7b2381f8277015fdff0953ac3b6ec1f8f15614ff8c412966b47940d8b45f86` |
+| `print/ctrl01-plate-keys.stl` | `a740973469c2a59cf8687ad0a7f94f6a268300c232ff090d004b6b3f0f3526a8` |
 | `reference/ladder02-key-P-2.stl` | `a3e0dafd342506e78b6ed5b2aff249397ccee33154ced8ec70c394ce8a5ece0a` |
 
-**Print it upright with support under the cap only.** The cap overhangs the
+**Print every key upright with support under the cap only.** The cap overhangs the
 extension by 4 mm all round, and its underside is flat on purpose because it is
 the down-stop. Everything else prints as LADDER did.
 
@@ -64,3 +69,7 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q test_ctrl01.py
 | The shoulder reaches at least 1.0 mm past the shell aperture, per side (1.5 inset − 0.4 clearance = 1.1) | a 0.8 mm inset |
 | The cap underside lands on the shell at full press (6.2 mm travel) | the cap moved 1 mm |
 | No downward face steeper than 45° except the declared ones (groove roof, cap underside, the engraved letter) | the tooth reversed |
+| Stop has no upward face a pawl can reach, so it never latches | the FF key |
+| Stop moves the slide lock at least 2.1 mm before full press | a ramp that finishes 1 mm past full travel |
+| Stop's ramp and flat run on to the face edge | — |
+| The key plate is separate solids | — |

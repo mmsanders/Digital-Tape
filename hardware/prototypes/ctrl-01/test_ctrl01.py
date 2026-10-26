@@ -166,3 +166,66 @@ def test_cap_gate_catches_a_cap_at_the_wrong_height():
 
 def test_overhang_gate_catches_a_reversed_tooth():
     assert overhangs(key(flip=True).val(), _allowed(Key())) != []
+
+
+# --- Stop ----------------------------------------------------------------------
+
+from ctrl01 import KEYS, PAWL_TOP, STOP_SHIFT, TRAVEL, stop_profile, plate  # noqa: E402
+
+
+def catching_faces(shape: cq.Shape) -> list[float]:
+    """Heights of upward-facing flats in the tooth lane that a pawl could hook.
+
+    The pawl's top reaches PAWL_TOP + TRAVEL at full press, so an upward face
+    above that height is out of its reach.
+    """
+    from ctrl01 import STEM_X
+    out = []
+    for f in shape.Faces():
+        bb = f.BoundingBox()
+        if (f.geomType() == "PLANE" and f.normalAt().z > 0.99 and bb.xmax <= -STEM_X / 2 + 0.02
+                and bb.zmin < PAWL_TOP + TRAVEL + 0.1):
+            out.append(round(bb.zmin, 2))
+    return out
+
+
+def stop_shift_at_full_press(pts) -> float:
+    """Slide-lock shift once the pawl top is at its full-press height.
+
+    stop_profile() always starts with the ramp: pts[0] (low) to pts[1] (the tip).
+    """
+    z = PAWL_TOP + TRAVEL
+    (y0, z0), (y1, z1) = pts[0], pts[1]
+    y = y1 if z >= z1 else y0 + (y1 - y0) * (z - z0) / (z1 - z0)
+    return y - PAWL_EDGE
+
+
+def test_stop_never_latches():
+    assert catching_faces(key(KEYS["stop"]).val()) == []
+
+
+def test_stop_frees_every_catch_before_full_press():
+    assert stop_shift_at_full_press(stop_profile(KEYS["stop"])) >= STOP_SHIFT - 1e-6
+
+
+def test_stop_lines_run_to_the_face_edge():
+    pts = stop_profile(KEYS["stop"])
+    assert min(p[0] for p in pts) == -STEM_Y / 2 and max(p[1] for p in pts) == BODY_H
+
+
+def test_every_key_prints_with_support_only_under_the_cap():
+    for k in KEYS.values():
+        assert overhangs(key(k).val(), _allowed(k)) == [], k
+
+
+def test_key_plate_is_separate_solids():
+    assert len(plate().val().Solids()) == len(KEYS)
+
+
+def test_stop_gate_catches_a_latch_key():
+    assert catching_faces(key(KEYS["ff"]).val()) != []
+
+
+def test_stop_shift_gate_catches_a_ramp_that_finishes_too_late():
+    late = replace(KEYS["stop"], stop_full_at=TRAVEL + 1.0)
+    assert stop_shift_at_full_press(stop_profile(late)) < STOP_SHIFT
