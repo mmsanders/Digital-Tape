@@ -1,0 +1,76 @@
+name: "Software594 console correction and opt-in receipts"
+# Verification332's controlled method (tests/windows_diagnostics_r1): the production
+# Command/run_hooked/Bridge/Session code driven with the TEST-ONLY harmless probe_child,
+# never the real INGEST, an app window, the discovery poller or a device. The tests keep
+# the helper's originals and session envelopes; Verification's own receipts.py/cases.py
+# then judge them. Nothing here is native, G1/A4, own-HOST, A6, S3, fullAPP or G2 evidence.
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - 'tests/windows_diagnostics_r1/**'
+      - 'tools/app/diagnostics594_check.py'
+      - '.github/workflows/windows-diagnostics-594.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  # Build identity only (the four existing child pins); the helper is never pinned.
+  DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+  DT_TAPECTL_SHA256: 44ef26869ba2d01a8a183660a2c7a050d0e7e9ff37c40b727131512739ea6ded
+  DT_TAPECTL_VERSION: tapectl-wp15-s2+f9306c2c5a42
+jobs:
+  controlled:
+    name: "Windows controlled C01-C27 (#594)"
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verification332 oracle self-tests
+        shell: pwsh
+        run: |
+          python -B tests/windows_diagnostics_r1/receipts.py; if($LASTEXITCODE -ne 0){throw 'receipts.py'}
+          python -B tests/windows_diagnostics_r1/cases.py; if($LASTEXITCODE -ne 0){throw 'cases.py'}
+      - name: Component tests with the test-only helper
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'target594'
+          $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          $env:DT_DIAG_REQUIRE='1'
+          $env:DT_DIAG_EVIDENCE=Join-Path $env:GITHUB_WORKSPACE 'evidence594/raw'
+          New-Item -ItemType Directory -Force $env:DT_DIAG_EVIDENCE | Out-Null
+          rustc -vV; cargo -V
+          cargo build --manifest-path host/app/backend-component/Cargo.toml --locked --example probe_child
+          if($LASTEXITCODE -ne 0){throw 'probe build'}
+          $probe=Join-Path $env:CARGO_TARGET_DIR 'debug/examples/probe_child.exe'
+          (Get-FileHash $probe).Hash.ToLower() | Set-Content -Encoding ascii evidence594/probe_child.sha256
+          git rev-parse HEAD:host/app/examples/probe_child.rs | Set-Content -Encoding ascii evidence594/probe_child.source-blob
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib -- --test-threads=4 2>&1 | Tee-Object evidence594/cargo-test.txt
+          if($LASTEXITCODE -ne 0){throw 'cargo test'}
+      - name: C28 shipping-source boundary
+        shell: python
+        run: |
+          import pathlib, re
+          src = {p.name: p.read_text(encoding='utf-8') for p in pathlib.Path('host/app/src').glob('*.rs')}
+          assert 'DT_DIAG' not in ''.join(src.values()), 'no environment switch'
+          assert [n for n, t in src.items() if '"--diagnostic-receipts"' in t] == ['diagnostics.rs'], 'one opt-in literal'
+          assert 'diagnostics::opted_in(&args)' in src['main.rs'] and 'Bridge::new(' not in src['main.rs']
+          assert 'probe' not in pathlib.Path('tools/app/package_candidate.py').read_text(encoding='utf-8').lower(), 'helper never packaged'
+          assert not re.search(r'\[\[bin\]\][^\[]*probe', pathlib.Path('host/app/Cargo.toml').read_text(encoding='utf-8')), 'helper is no binary target'
+          print('C28 source boundary PASS: one exact opt-in argument, no env/default switch, helper not packaged or a binary target')
+      - name: Verification332 oracles on the actual originals
+        shell: pwsh
+        run: |
+          python -B tools/app/diagnostics594_check.py --evidence evidence594/raw --out evidence594/summary.json
+          $q=$LASTEXITCODE; "checker exit $q" | Tee-Object evidence594/checker-exit.txt
+          if($q -ne 0){throw 'Verification332 oracles rejected actual originals; see summary.json (oracle_gap_1)'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence594
+          path: evidence594
+          if-no-files-found: error
