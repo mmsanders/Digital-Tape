@@ -1,0 +1,20 @@
+{
+  "status": "STAGE1_AUTHORED",
+  "authority": "INGEST-1 ADR177/178/180",
+  "product_input": "c6ff868086e3333bb7568e60d3a2f4ec60fd3344",
+  "verification_input": "10db792e0eb66d048257dedb0360af6d37b1c1ed",
+  "contract_blob": "712a0696917672afb639475960609b6367c1c7d4",
+  "wp16_blob": "190850e23d7448cfd5f09a5f9d4f19b74e4ebf84",
+  "assignment": 169,
+  "assignment_updated": "2026-10-15T05:31:00Z",
+  "partner": 435,
+  "finding": 179,
+  "pending_cells": 0,
+  "source_count": 1763,
+  "case_count": 1927,
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "historical_checkpoint": "10db792e0eb66d048257dedb0360af6d37b1c1ed",
+  "historical_tree": "00cca9c046b006807fa491c957a1ad3736aaeeb1"
+}
