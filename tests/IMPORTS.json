@@ -664,6 +664,19 @@
         "-B",
         "tests/windows_interactions_r2/compatibility.py"
       ]
+    },
+    {
+      "path": "tests/windows_diagnostics_r1",
+      "tree": "08b6d314e04fd439cf9f74880c9c7a2f631e451e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "d916750db4974467b9cc79a6e5f242b5baa2ecff",
+      "attested_in": "Verification332 Stage A (PR335, authored fa3aa9c7ebaf7ed04f472674bb0d316a4d50d7a2; CI 40393577385)",
+      "attestation": "PM593 APP-1A §8 first-party diagnostic receipt schema1 and C01-C28 production obligations, frozen before Software594 code from its public declaration 6425763463. receipts.py checks first-party transcript consistency only; cases.py holds the command/parity oracles. Synthetic oracle self-tests with zero Product, child or UI execution; not native, G1/A4, own-HOST, A6, S3, fullAPP or G2 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_diagnostics_r1/receipts.py"
+      ]
     }
   ],
   "evidence_bundles": [
