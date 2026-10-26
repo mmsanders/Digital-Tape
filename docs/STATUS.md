@@ -1,109 +1,75 @@
 # Project status
 
-**25 October 2026 PDT · PM583 · input main `6b1489f7`.**
+**26 October2026 PDT · PM593 · input main679e01ec.**
+Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
+Linux existing CI. Gate counts below are completed criteria, not effort estimates.
 
-Phase 1 is complete: all nine engine packages are independently accepted, all
-36 dashboard rungs are final, and Michael approved the ten golden references.
-Phase 2 is open. Current family delivery is **Windows 11 x64 only**; macOS is
-deferred and Linux remains existing CI support (ADR-191).
-
-| Phase 2 package | Accepted rungs | Current boundary |
+| Phase2 package | Rungs | Current boundary |
 |---|---:|---|
-| WP-14 CLI | 3/4 | Full Windows acceptance still needs native A6 request/offset-space linkage. |
-| WP-16 INGEST | 2/4 | Exact downloaded Windows resource rows passed; own-host failed/zero-access visibility and full acceptance remain held. |
-| WP-15 app | 1/4 | Contract issued; accepted components are not a completed native app. |
-| **Phase 2 total** | **6/12** | Gate count, not an estimate of remaining effort. |
+| WP14 CLI |3/4| NativeA6 request/offset-space linkage still unproved; existing real-card/witness facts carry. |
+| WP16 INGEST |2/4|459/454 not integrated; published Windows byte/resource PASSs carry.333/595 decides exact source-integration scope versus final native holds. |
+| WP15 app |1/4| Many components and bounded human visual facts accepted; complete required native/S3/package coverage absent. |
+| **Total** |**6/12**| No rung gain from issue closure, component tests or edited video alone. |
 
-## Software handback and current app work
+## Completed and closed
 
-Software's full role is **Claude Code on Michael's actual local Windows machine**.
-Michael selects the model. Verification remains a separate independent context.
-No cloud-owner/local-runner split is adopted (ADR-192).
-
-**Activation is manual.** PM posts GitHub issues only. Both lead listeners are
-PAUSED; no kickoff messages or automatic next-assignment jumps are authorized.
-Michael starts the selected task/context. A lead returns its bounded work and stops.
-
-| Delivered | Evidence and limit |
+| Delivery | Independent disposition and limit |
 |---|---|
-| Backend on main | PR #551, merged at `615899c3`; Verification #286 accepted the runner/job delta and #297 cleared the mechanical carrier. |
-| Internal Make on main | PR #550, merged at `f699f6af`; Verification #299 passed all ten ordinary-file comparisons. Modeled sensing is not physical/native qualification. |
-| Original Windows startup | Verification #283 accepted the original native-window/normal-quit and direct INGEST positive/refusal route only. |
-| Screen and bridge on main | Verification #305/#306 cleared the exact component; PR #567 merged at `266bdcaa`. Real IPC/OS gestures were not executed by those staged tests. |
-| New Windows candidate | PR #574 built the new source; #315 passed exact build/archive provenance. Reproducible compilation is not claimed. |
-| New native startup/quit | Verification #316 passed the measured window/normal-close facts. PM576 closes the prompt-record action with the historical record limitation retained. |
-| Discovery integrated | PR #580 merged at `26ed8491`; Verification #318 cleared corrected source/poll lifetime/details behavior. |
-| Live metadata result | Verification #323 / `e4c7237d` passed one admitted child run: exit 0, offered 0, unprobed 0. No app display was observed; allowance consumed. |
-| Original streams retained | PR #582 adds four unchanged stdout/stderr originals omitted by the binary ignore rule; no new runtime fact. |
-| Host text repair | PR #573 merged comment/LF repairs and scoped editor attributes; no behavioral change. |
+| Backend551/internal Make550 |286/297 and299 carry accepted ordinary-file/component scope; no shipping Make/session qualification. |
+| Screen/bridge567 |305/306 source scope integrated266bdcaa; original564 source/build/archive315 and native startup/quit316 carry only for that binary. |
+| Discovery580 |318/fdffea57 source integrated26ed8491;323/e4c7237d one metadata result exit0/offered0/unprobed0. Allowance consumed; no GUI/poller grant. |
+| Editing/details584 |324/91815bc1 exact source3104e04e PASS32/32 versus old18/32;587 merged679e01ec with accepted source unchanged and120/120checks SUCCESS. |
+| Human589/support590 |328/331/42619272 reviewed partial visual result. Both envelopes closed;592 proposal retired unmerged with exact restore refs. No repeat requested. |
 
-The production app source is now integrated and packaged. Exact source, build,
-archive and ordinary non-admin startup records were independently checked.
-The new app reached native-window readiness in 1.943 s and closed normally.
-This does not establish page usability, one visual window, live Tauri IPC,
-actual folder gestures or app-driven INGEST. Those are the next useful tests.
+Actual original564 human clips support initial page, seven natural label cases,
+file gesture/new refusal, mixed gesture/persistent refusal, Music Checking and
+displayed2seconds, Empty plain message/button, visible reset and close.
+Show Details was not clicked; NUL unsupported/unexecuted. Full child/IPC/argv/
+nonce/report/OS-exit/pair/zero-request/cleanup claims remain held.
+Edited clips, multiple launches and missing running-PID snapshot limit identity/
+timing claims; source/kit hashes do not establish an actual current process link.
+F328-1: a terminal appeared automatically during Music checking. Its owner/PID
+is unknown; one-window-throughout is not established. No human rerun is requested.
 
-**The #307 administrative action is closed for planning.** Its missing separate
-prompt transcript remains a documented historical limit, not a continuing Product
-blocker or reason to repeat the passed run. Verification's original full-admission
-HELD record is not rewritten or falsely certified as compliant. No permission or
-safety rule is waived; future methods must record their actual authorization mode.
+## Current ownership — manual issues only
 
-Software #577 / Verification #317 returned a concrete native-control capability
-blocker: the selected Claude session has no desktop computer-use tool. No native
-session was attempted. PM583 closes the stale Software envelope as blocked; frozen
-317 rows and candidate564 remain available for a fresh scoped human-result review.
-Michael plans a real-card test tomorrow when available. That plan is separate from
-the no-card UI gap; it does not authorize a new procedure or replace old A6 evidence.
+| Pair | Concrete outcome / dependency |
+|---|---|
+| Software594 / Verification332 | Fix GUI-owned INGEST console behavior; independently test bounded opt-in first-party receipts before normal job cleanup. New source, no564 patch/run or G1 observer. |
+| Software595 / Verification333 | Decide459/454 exact integration-only scope or supersession against existing evidence; integrate safely if expressly cleared, otherwise one precise missing fact. |
+| Software585 / Verification325 | Final discovery-enabled bundle from cleared integrated594 source;584 dependency DONE. One final build, correct existing children/pins; no premature package/rebuild loop. |
 
-Manual work now targets usable editing/details during background updates
-[Software #584 / Verification #324](https://github.com/mmsanders/Digital-Tape/issues/584),
-then a current discovery-enabled portable app bundle
-[#585 / #325](https://github.com/mmsanders/Digital-Tape/issues/585).
-These tasks require no card or desktop-control tool. Make/elevation remain disabled.
-No new native/session provider, runtime metadata collection or physical test is issued.
-Both listeners remain PAUSED; no lead was messaged or automatically started.
+First-party diagnostics are default OFF and are not independent device-open
+absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
+new tests/method precede code. Future native receipt collection needs a separately
+admitted final candidate. No new app/poller/card/Make/elevation run is issued.
 
-The app's next rung requires **complete required independent package coverage**,
-not a build or startup alone. Native/UI/S3 coverage is still incomplete: 6/12 stays.
-See [PM583 disposition](REVIEW/PM583-NO-CARD-WORK-2026-10-25.md).
+Software is local Windows Claude Code, model selected by the user; Verification
+is separate. GitHub-only manual selection/resumption. Both listeners checked PAUSED.
+No lead messages/kickoff, next-task auto transition, new chat or subworkers.
+No current action remains for the human tester.589 is reviewed/partial and closed.
 
-## Hardware design reference
+## Remaining rung blockers
 
-Intake #569 is **RECORDED — PARKED**, filed in the
-[24 October owner layout](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
-The player target is 68 × 110 × about 29 mm; cartridge target is GameCube class,
-about 36 × 40 × 7 mm. Side keys are provisional. Internal dimensions/materials
-are estimates and preferences, not released CAD, fit or safety acceptance.
+- WP14 rung4: native physicalA6 linkage; previous two final-sector reads/zero
+  observed card writes and prior witness facts do not prove the missing relation.
+- WP16 rung3: no independently cleared protected integration of459/454 yet.
+ 333 must distinguish covered source from whole native acceptance; Mac is not
+ a current gate. Windows failed/zero-access own-HOST visibility remains genuine.
+- WP16 rung4: all applicable Windows/own-host/full package and physical integration
+ criteria, with conditional numerical claims kept at their proven bounds.
+- WP15 rung2: complete required package coverage, including native child/IPC
+ attribution, remaining error/runtime rows and production S3/session feasibility.
+ Component/headless-DOM or source receipts alone do not supply that coverage.
+- WP15 rung3/4 and G2: integrated full behavior/accepted dependencies, native
+ G1/G3/G4/G5 and witnessed unaided family trial. Shipping Make/elevation disabled.
+- Crash41/404/global proof, batching/async, firmware/hardware, card atomicity,
+ fabrication/charging and frozen engine/format boundaries remain unchanged.
 
-Solenoid removal, end-of-tape behavior, mechanical Record interlock, copy control,
-speaker safety and record-source selection remain unresolved. Legacy coil and
-charging/fabrication holds are unchanged. Versioned hardware docs now mark the
-new layout boundary without changing pins, model tables or frozen criteria.
-No PM hardware execution, printing, purchase or physical trial is scheduled.
-Resume at explicit hardware/package authorization; owner design discussions do
-not automatically activate a new hardware work stream.
+## Preserved references
 
-## Remaining gates and standing boundaries
-
-- Native A6 linkage and INGEST own-host visibility still block full host acceptance.
-- Production S3/session/query/removal, elevation, app runtime G1/G3/G4/G5 and
-  the witnessed unaided G2 remain held. Make/elevation stay disabled; only expressly admitted discovery scope is usable.
-- Card atomicity is unqualified; fabrication and charging remain CLOSED.
-- Crash coverage remains 41/404. Sparse/controller and global-proof campaigns
-  remain parked; no new fault run or copy/async/firmware campaign is issued.
-- Frozen engine/format and golden bytes are unchanged. Hardware safety and
-  Michael's purchase/physical/final-signature authority survive every handoff.
-- The pre-302 private scaffold is quarantined process debt: DO NOT REPEAT.
-  Private/unpublished code is not exempt when a task requires tests first.
-
-## History and detailed references
-
-The previous full status is preserved verbatim at
-[the archived snapshot](archive/status-history/2026-10-24-before-PM570.md).
-SHA-256: `522e08c18e96964fa4ea97fc67277d1b570ae7228a9bcac38513234d041cb224`.
-The prior file's Git blob is `0caffecfb7edc20c7ae683bc2d3478b2b8ea5cf0`.
-Phase 1 package details, older findings and evidence limits remain there and in
-[the package index](PACKAGES/README.md), [hardware status](STATUS-HARDWARE.md),
-[the PM576 review](REVIEW/PM576-PROGRESS-2026-10-24.md) and immutable dispositions.
-The archive preserves history; current tasks live only in open role-labeled issues.
+Current [PM593 closeout](REVIEW/PM593-CLOSEOUT-2026-10-26.md),
+[verification integration](VERIFICATION-INTEGRATION.md),
+[package index](PACKAGES/README.md) and [human queue](FOR-MICHAEL.md).
+Prior status revisions remain unchanged in Git history. This current table omits
+unrelated owner-specific history rather than republishing or linking that material. No historical report, raw evidence or commit was deleted or rewritten.

@@ -242,3 +242,40 @@ are only bounded capability facts, not S3 acceptance or proof that an access upg
 cannot reach changed media. Any platform must first obtain independent method/test
 clearance under §5; other platforms need not wait for it. No speculative API-search
 campaign is issued. S2 and other issued host evidence work continue independently.
+
+## 8. Bounded opt-in native-flow receipts — PM593
+
+This diagnostic exception serves missing native-flow attribution without racing
+live report files or weakening normal cleanup. It is not a new user feature or
+a device-access observer. Independent tests/methods precede covered implementation;
+a later exact candidate still needs separate native-session admission.
+
+Default OFF. A manually opted-in session uses an exclusive fresh marked directory
+inside the app's private per-user CONTROL root. No arbitrary export path, network,
+background service, device API, fake event/provider or injected IPC. No source
+music/audio copy. Maximum16MiB per session; per-record limits/schema frozen by
+Verification before code. Private owned/nonfollowing creation and foreign-directory
+protection apply. Never overwrite old receipts or traverse substituted targets.
+
+Use the same production native event/IPC/worker/process paths. Correlate session/
+source/OS/binary identity, ordered record ids, actual accepted/rejected drop and
+generation/reset/job admission, executable pin/PID/start/argv/current nonce,
+actual wait/exit/cancel, original report bytes after child closes it, captured
+stdout/stderr and manifest bytes plus audio hash/length/frame facts. Preserve
+these before ordinary job cleanup; include stale-result/cleanup outcomes.
+Retain only bounded first-party observations, not inferred whole-machine behavior.
+
+This session receipt CONTROL directory may survive job reset/normal close for
+explicit owner copy/removal; ordinary child-job/DEST cleanup still follows the
+existing terminal-before-cleanup rules. Default mode retains existing cleanup.
+No indefinite automatic history, startup deletion of foreign data or app behavior
+change for evidence. Storage/limit/write failure stops collection with explicit
+incompleteness where writable; it never retries a child, changes outcomes or turns
+missing bytes into passing facts. Unwritten facts remain missing.
+
+First-party logs are not independent no-device/no-child absence proof and do not
+waive G1/A4 or nativeA6/INGEST-own-host/S3/fullAPP/G2. Verification independently
+judges which recorded chain plus native observations is sufficient before future
+collection. Original564 remains immutable; no retrospective repair or rerun.
+Separate console-launch correction preserves child argv/pins/capture/exits while
+preventing unsolicited console windows from GUI-owned INGEST on Windows.

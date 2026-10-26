@@ -1,53 +1,31 @@
-# For Michael — issue queue
+# Human actions and queue
 
-Active hands-on requests and reserved decisions live only in
-[open issues labeled michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
-Do not reconstruct a new test list from this document.
+**26 October2026 PDT · PM593.**
+Active reserved/hands-on actions live in
+[open michael issues](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
+There is currently no new action requested from the human tester.
 
-## Current position — 24 October 2026 PDT
+Human589's original564 test is independently reviewed/partial and closed.
+Verification331/42619272 accepted the supported visible observations with the
+edited-media/launch/identity/timing limits preserved. Show Details and NUL were
+not observed. No repeat, recovery click or new raw-card procedure is requested.
+A terminal appeared automatically during Music; F328-1 is assigned to594/332.
 
-No physical Windows test or collection retry is waiting on Michael. The original
-A6 and INGEST returns were received; Michael #473 is closed. Their independent
-native/own-host gaps remain gaps, not a request to repeat the old captures.
+The source app now includes independently cleared editing/details fixes:
+584/324, integrated through587/679e01ec. Final585/325 packaging waits for594/332's
+console correction and bounded diagnostic-source clearance; no premature build.
+Software595/Verification333 targets the remaining INGEST integration decision.
+These are manually selected role tasks, not new human test instructions.
+Make/elevation stay disabled; full native/A6/S3/INGEST/G2 gates remain held.
 
-Backend #551, internal Make #550 and screen/bridge #567 are integrated within
-their independent scopes. The new Windows candidate passed exact build/archive
-and measured native startup/normal-close checks. PM576 closes the separate prompt-
-record action as a retained historical limitation, not retrospective compliance.
-Real UI/IPC/folder gestures/app-driven INGEST and full native/physical gates remain.
-Manual next issues #577/#317 target actual no-card app flow; #578/#318 targets
-accepted read-only discovery with a newly pinned child. Make/elevation stay disabled.
+Software uses local Windows Claude Code; Verification remains independent.
+GitHub-only manual pickup/resumption, both listeners PAUSED. No lead was started,
+messaged or automatically advanced by PM593.
 
-Software is back in **local Windows Claude Code**, with Michael's selected model.
-PM posts next-round issues only. Both prior lead listeners are **PAUSED**; PM has
-not messaged, started or automatically advanced a lead. Michael manually starts
-the selected task/context; the lead returns and stops. Verification stays separate.
-
-## Owner hardware design
-
-[Intake #569 is filed and parked](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md):
-68 × 110 × about 29 mm player and GameCube-class cartridges about 36 × 40 × 7 mm,
-with revised controls/audio/I/O layout. The 86 × 54 × 12 mm target is withdrawn.
-Side versus face keys remains provisional. Solenoid removal/end-of-tape behavior,
-Record mechanism, copy control and speaker safety scope remain open product/design
-questions; no new hardware execution or decision request is assigned now.
-
-The updated references preserve the old models as historical, unqualified for the
-new layout. Owner design conversations and informal prototypes are not independent
-fit, material, drop, thermal or charging acceptance. Resume engineering only on
-explicit hardware/package authorization; no automatic Phase 3/4 stream is launched.
-
-## Standing decisions
-
-Q-001 is signed: Michael approved the scoped format freeze on 8 September 2026.
-Operations/state freeze, independent implementation acceptance, physical/card
-qualification and reserved signatures remain distinct. Every purchase needs Michael.
-
-Michael owns three PNY 64 GB V30 samples and a Bambu A1 Mini, the default printer.
-The older unpurchased card cart and library-printer route are retired. Filament on
-hand and observed clasp preferences do not approve PETG/TPU or establish safety.
-Fabrication and cell charging remain CLOSED; media atomicity is unqualified.
-macOS is deferred; hardware execution remains parked through Phase 2.
-
-See [manual issue routing](ISSUE-WORKFLOW.md), [ADR-192](DECISIONS.md#adr-192--local-windows-claude-software-manual-activation-and-parked-owner-layout)
-and [the PM576 review](REVIEW/PM576-PROGRESS-2026-10-24.md).
+Current decisions and limits:
+[PM593 closeout](REVIEW/PM593-CLOSEOUT-2026-10-26.md),
+[status](STATUS.md), [packages](PACKAGES/README.md).
+Historical revisions remain in Git history; unrelated prior owner-specific
+material is not copied or linked here. Hardware execution remains parked through
+Phase2; safety gates/reserved signatures and purchase authority are unchanged.
+No history or raw evidence deleted.
