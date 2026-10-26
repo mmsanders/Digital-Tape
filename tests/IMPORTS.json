@@ -638,6 +638,19 @@
         "-B",
         "tests/windows_discovery_r1/contract.py"
       ]
+    },
+    {
+      "path": "tests/windows_interactions_r1",
+      "tree": "478499b20c603965d5cc6bc838c6e909c0a7c4c3",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "38c20dea30cda0aed055254f4bc3fd50c9d07ff8",
+      "attested_in": "https://github.com/mmsanders/digital-tape-verification/issues/324",
+      "attestation": "PM583/584 editing, details and concurrent-update interaction expectations published before implementation; controlled production components only, no native UI",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_interactions_r1/contract.py"
+      ]
     }
   ],
   "evidence_bundles": [
