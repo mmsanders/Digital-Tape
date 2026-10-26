@@ -13,7 +13,7 @@ from pathlib import Path
 import cadquery as cq
 import pytest
 
-from ctrl01 import BODY_H, Key, key, old_key
+from ctrl01 import BODY_H, LEDGE_Z, PAWL_EDGE, RAMP, STEM_Y, TOOTH_X, Key, key, old_key, tooth_profile
 
 HERE = Path(__file__).resolve().parent
 # Michael's LADDER-02 print file, from latch-rig.zip; SHA-256 a3e0dafd...a5ece0a
@@ -92,10 +92,26 @@ def test_rebuild_matches_the_printed_ladder02_key():
     assert worst_vertex_gap(old_key().val(), REFERENCE) < 0.02
 
 
-def test_body_below_the_shoulder_is_unchanged():
+def _catch_growth(k: Key) -> float:
+    """Volume the run-on lines add to LADDER's triangle."""
+    leg_new = PAWL_EDGE + k.h + STEM_Y / 2
+    return (leg_new ** 2 - RAMP ** 2) / 2 * TOOTH_X
+
+
+def test_body_below_the_shoulder_is_unchanged_except_the_catch_root():
     new, old = lower_part(key().val()), lower_part(old_key().val())
-    assert abs(new.Volume() - old.Volume()) < 0.01
-    assert new.cut(old).Volume() < 0.01 and old.cut(new).Volume() < 0.01
+    assert old.cut(new).Volume() < 0.01                       # nothing LADDER had is gone
+    assert new.cut(old).Volume() == pytest.approx(_catch_growth(Key()), abs=0.1)
+
+
+def test_catch_working_lines_are_P_and_run_to_the_face_edge():
+    pts = tooth_profile(Key())
+    tip = (PAWL_EDGE + 1.2, LEDGE_Z)
+    assert tip in pts                                          # P tip and ledge height
+    back = min(pts)
+    assert back[0] == -STEM_Y / 2                              # reaches the face edge
+    assert tip[1] - back[1] == pytest.approx(tip[0] - back[0]) # same 45 degree ramp line
+    assert (back[0], LEDGE_Z) in pts                           # same ledge line
 
 
 def test_shoulder_reaches_past_the_aperture():
@@ -123,7 +139,15 @@ def test_rebuild_gate_catches_a_different_ladder_key():
 
 def test_body_gate_catches_a_reversed_tooth():
     new, old = lower_part(key(flip=True).val()), lower_part(old_key().val())
-    assert new.cut(old).Volume() > 1.0
+    assert old.cut(new).Volume() > 1.0
+
+
+def test_catch_gate_catches_the_short_ladder_triangle():
+    assert min(tooth_profile(replace(Key(), full_catch=False)))[0] != -STEM_Y / 2
+
+
+def test_catch_gate_catches_a_different_overhang():
+    assert (PAWL_EDGE + 1.2, LEDGE_Z) not in tooth_profile(replace(Key(), h=0.9))
 
 
 def test_shoulder_gate_catches_a_thin_shoulder():

@@ -16,7 +16,7 @@ The plan and drawings are the private canvas "CTRL-01 Controls Rig Plan"
 | Record | **Play gates Record** (approved). Record latches on the slide lock with the same catch as every key, and a gate on Play stops it after 2 mm unless Play is down. A hook from Record directly onto Play was dropped: the same two faces would have to hold Record and let Play pass, pushed the same way |
 | Rig housing | **Full 68 × 110 × 29 mm shell** (approved), split at mid-depth; the back half locates everything, the front half adds flat faces and clearance |
 | Key | **Starts from the LADDER-02 P key exactly** (26 Oct): body, rails, spring groove and tooth unchanged. Where the stem began, the body carries on up without the rails, inset 1.5 mm a side, so a flat shoulder all round stops on the shell. At the old installed cap height there is a one-piece cap whose flat underside lands on the shell at full press |
-| Catch | The old P catch for now. Michael will talk through a new one once the body is right |
+| Catch | **P catch, root run on** (26 Oct): the tip, flat ledge and 45° ramp are LADDER's P exactly; the ledge and ramp lines simply continue until they meet the edge of the key face, instead of stopping at LADDER's short vertical side. Only the root grows; the pawl never reaches it |
 | Slide lock | Every latch thickened to the Stop version; prints flat so no latch root is a single layer line |
 | Stop | Long even ramp, then a flat that runs to the end of the key, beyond where the key travels |
 | Solenoid | None |
@@ -40,7 +40,7 @@ One key: `print/ctrl01-key-P.stl`, modelled and exported upright as it prints.
 
 | File | SHA-256 |
 |---|---|
-| `print/ctrl01-key-P.stl` | `1cbef7ae97d1ec052e3d85a1ba02c1dd93eabc3297f4fc9ed0abd475c5704c51` |
+| `print/ctrl01-key-P.stl` | `ec24674b63fb619901bb40afe5abde7361a348865f0665557fe1fafd16ac1fe5` |
 | `reference/ladder02-key-P-2.stl` | `a3e0dafd342506e78b6ed5b2aff249397ccee33154ced8ec70c394ce8a5ece0a` |
 
 **Print it upright with support under the cap only.** The cap overhangs the
@@ -59,7 +59,8 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q test_ctrl01.py
 |---|---|
 | One valid solid | — |
 | The rebuilt LADDER key matches Michael's printed `key-P-2.stl` to 0.02 mm | the L key (h = 0.9) |
-| Below the shoulder the new key is identical to the old one | the tooth reversed (the WP-04 failure) |
+| Below the shoulder nothing LADDER had is gone, and the only addition is the catch root (volume checked) | the tooth reversed (the WP-04 failure) |
+| The catch's tip, ledge and ramp are P, and its lines reach the face edge | LADDER's short triangle; an L-depth (0.9 mm) catch |
 | The shoulder reaches at least 1.0 mm past the shell aperture, per side (1.5 inset − 0.4 clearance = 1.1) | a 0.8 mm inset |
 | The cap underside lands on the shell at full press (6.2 mm travel) | the cap moved 1 mm |
 | No downward face steeper than 45° except the declared ones (groove roof, cap underside, the engraved letter) | the tooth reversed |

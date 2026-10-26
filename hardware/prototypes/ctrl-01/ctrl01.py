@@ -24,7 +24,7 @@ The key prints upright as modelled.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import cadquery as cq
@@ -63,6 +63,7 @@ class Key:
     h: float = 1.2           # catch overhang; P
     inset: float = INSET
     hole_clr: float = HOLE_CLR
+    full_catch: bool = True  # catch lines run on to the face edge (Michael, 26 Oct)
 
     @property
     def ext_x(self) -> float:
@@ -93,22 +94,29 @@ def _yz_prism(pts, x0, x1) -> cq.Workplane:
 
 
 def tooth_profile(k: Key, flip: bool = False) -> list[tuple[float, float]]:
-    """(Y, Z) outline of the LADDER tooth: flat ledge on top, 45 degree ramp below.
+    """(Y, Z) outline of the tooth: flat ledge on top, 45 degree ramp below.
+
+    LADDER's tooth was a small right triangle whose third, vertical side did no
+    work. With `full_catch` the ledge line and the ramp line simply run on until
+    they meet the edge of the key face, so the tip, ledge and ramp the pawl sees
+    are unchanged and only the root grows. The pawl sits on the tip's side and
+    never reaches the extension.
 
     `flip=True` builds the 23 Sep failure (ramp above, shelf below) so the
     retention gate can be shown to go red.
     """
     z = LEDGE_Z
     tip = PAWL_EDGE + k.h
-    pts = [(tip - RAMP, z - RAMP), (tip, z), (tip - RAMP, z)]
+    back = -STEM_Y / 2 if k.full_catch else tip - RAMP
+    pts = [(back, z - (tip - back)), (tip, z), (back, z)]
     if flip:
         zc = z - RAMP / 2
         pts = [(y, 2 * zc - zz) for y, zz in pts]
     return pts
 
 
-def _body(k: Key, flip: bool = False) -> cq.Workplane:
-    """The LADDER-02 key below its shoulder: stem, rails, spring groove, tooth, label."""
+def _body(k: Key, flip: bool = False, tooth: bool = True) -> cq.Workplane:
+    """The LADDER-02 key below its shoulder: stem, rails, spring groove, tooth."""
     body = _box(-STEM_X / 2, STEM_X / 2, -STEM_Y / 2, STEM_Y / 2, 0, BODY_H)
     for s in (-1, 1):
         y0, y1 = (STEM_Y / 2, STEM_Y / 2 + RAIL_P) if s > 0 else (-STEM_Y / 2 - RAIL_P, -STEM_Y / 2)
@@ -116,7 +124,8 @@ def _body(k: Key, flip: bool = False) -> cq.Workplane:
     groove = (cq.Workplane("XY").circle((SPRING_OD + 0.8) / 2).circle(BOSS_D / 2)
               .extrude(GROOVE_D))
     body = body.cut(groove)
-    body = body.union(_yz_prism(tooth_profile(k, flip), -STEM_X / 2 - TOOTH_X, -STEM_X / 2 + 0.01))
+    if tooth:
+        body = body.union(_yz_prism(tooth_profile(k, flip), -STEM_X / 2 - TOOTH_X, -STEM_X / 2 + 0.01))
     return body
 
 
@@ -127,6 +136,7 @@ def _label(part: cq.Workplane, k: Key) -> cq.Workplane:
 
 def old_key(k: Key = Key()) -> cq.Workplane:
     """LADDER-02 key-P-2 with its D neck, for checking the rebuild against the print."""
+    k = replace(k, full_catch=False)
     neck = (cq.Workplane("XY").circle(NECK_D / 2).extrude(LID_T + TRAVEL + SOCKET_D)
             .intersect(_box(-NECK_D, NECK_FLAT, -NECK_D, NECK_D, 0, LID_T + TRAVEL + SOCKET_D)))
     neck = neck.faces(">Z").edges().chamfer(0.4).translate((0, 0, BODY_H))
