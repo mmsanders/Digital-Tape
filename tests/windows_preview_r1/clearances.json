@@ -1,0 +1,10 @@
+{
+  "authority": "Verification-owned initial bounded preview registry; not whole-package acceptance",
+  "components": {
+    "digital-tape.exe": {"bytes":4810752,"sha256":"05bc85626bfeaaa904f9ec52b2208f18e584d5808916a5e561be762eebac02dc","source":"45695aa0edb8a757db5074d17c39eda12bcda888","publication":"81033e2a20b4fed377fdbbb82963693b10c9b79b","scope":"native-window readiness/normal quit only; UI/app-driven child excluded"},
+    "ingest.exe": {"bytes":889856,"sha256":"3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20","source":"35b23cacae886d9b3693b7104f581d8646ea5667","publication":"81033e2a20b4fed377fdbbb82963693b10c9b79b","scope":"declared approved non-admin DIRECT P0/P1 route only; fullINGEST excluded"},
+    "tapectl.exe": {"bytes":435533,"sha256":"82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9","source":"5e2df5aaf23e9ed0e230c444a40650da9459ddb2","publication":"f715776bd5cf640743a29d83ad2a25004b8c73d9","scope":"retained ordinary/small-image277 facts only; not invoked by preview, A6/native/Make excluded"}
+  },
+  "allowed_claims": ["native-window readiness", "normal quit", "direct ingest positive", "direct ingest empty-folder refusal"],
+  "required_exclusions": ["actual UI", "app-driven child", "fullAPP", "fullINGEST", "CLI A6", "native session", "shipping Make", "G2"]
+}
