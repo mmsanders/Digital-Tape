@@ -680,6 +680,32 @@
         "-B",
         "tests/wp16_ingest_stage1/selftest.py"
       ]
+    },
+    {
+      "path": "tests/windows_diagnostics_r1",
+      "tree": "08b6d314e04fd439cf9f74880c9c7a2f631e451e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "d916750db4974467b9cc79a6e5f242b5baa2ecff",
+      "attested_in": "Verification332 Stage A (PR335, authored fa3aa9c7ebaf7ed04f472674bb0d316a4d50d7a2; CI 40393577385)",
+      "attestation": "PM593 APP-1A §8 first-party diagnostic receipt schema1 and C01-C28 production obligations, frozen before Software594 code from its public declaration 6425763463. receipts.py checks first-party transcript consistency only; cases.py holds the command/parity oracles. Synthetic oracle self-tests with zero Product, child or UI execution; not native, G1/A4, own-HOST, A6, S3, fullAPP or G2 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_diagnostics_r1/receipts.py"
+      ]
+    },
+    {
+      "path": "tests/windows_diagnostics_r2",
+      "tree": "338796182b0e3979b97a1411c1552848e6649a0b",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "e7f61d43cab9791f11b73e487eedb84fe17139ba",
+      "attested_in": "Verification332 Stage B consolidated correction 1/2 (PR336, merged e7f61d43; CI 40404794833)",
+      "attestation": "Additive correction to immutable r1: receipts.py accepts exact unsigned64 epoch nanoseconds and per-work cumulative ordered folder snapshots with reset, and rejects a complete footer for a cancelled child with no retained report; cases.py unchanged; regressions.py adds epoch/cumulative/reset/source-binding/limit-stop/incomplete/footer controls. Independent oracle self-tests with zero Product, child or UI execution; not native, G1/A4, own-HOST, A6, S3, fullAPP or G2 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_diagnostics_r2/receipts.py"
+      ]
     }
   ],
   "evidence_bundles": [

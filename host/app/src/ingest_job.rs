@@ -27,6 +27,18 @@ pub struct RunReceipt {
     pub stdout: Vec<u8>,
     pub stderr: Vec<u8>,
     pub report_bytes: Option<Vec<u8>>,
+    /// The process creation flags actually set on the Command.
+    pub creation_flags: u32,
+    /// SHA-256 of the environment the child inherits (the app's own, unchanged).
+    pub env_sha256: String,
+    /// Wall time just before the spawn call, distinct from the OS creation time below.
+    pub spawn_call_ns: u128,
+    /// The child's actual OS creation time, when the OS reports it.
+    pub os_start_ns: Option<u128>,
+    pub spawn_error: Option<String>,
+    pub cancelled: bool,
+    /// How the terminal status was obtained: "try_wait-terminal" or "wait".
+    pub wait_kind: &'static str,
 }
 
 fn now() -> u128 {
@@ -42,6 +54,22 @@ fn capture(receipt: &mut RunReceipt, report_path: &Path, out: std::thread::JoinH
 }
 
 pub const CAPACITY_FRAMES: u64 = 3600 * 44100;
+
+/// CREATE_NO_WINDOW. The app is a GUI-subsystem program, so a console child started
+/// without it gets a console window of its own (F328-1). Nothing else changes.
+pub const INGEST_CREATION_FLAGS: u32 = 0x0800_0000;
+
+/// SHA-256 over the inherited environment, sorted by name: what the child receives.
+pub fn env_sha256() -> String {
+    use sha2::{Digest, Sha256};
+    let mut vars: Vec<_> = std::env::vars_os().collect();
+    vars.sort();
+    let mut h = Sha256::new();
+    for (k, v) in vars {
+        for part in [k.as_encoded_bytes(), b"=", v.as_encoded_bytes(), b"\0"] { h.update(part); }
+    }
+    h.finalize().iter().map(|x| format!("{x:02x}")).collect()
+}
 
 #[derive(Debug)]
 pub struct Outcome {
@@ -78,19 +106,38 @@ pub fn command(bin: &Path, version: &str, job: &Job, folders: &[PathBuf]) -> (Co
     cmd.arg("--report").arg(&report_path).arg("--report-nonce").arg(&nonce);
     cmd.arg("--out").arg(&dest).arg("--length").arg("3600").arg("--").args(folders);
     cmd.current_dir(&job.dir).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(INGEST_CREATION_FLAGS);
+    }
     let receipt = RunReceipt { argv: std::iter::once(bin.to_string_lossy().into_owned()).chain(cmd.get_args().map(|a| a.to_string_lossy().into_owned())).collect(),
-        cwd: job.dir.clone(), nonce: nonce.clone(), version: version.to_owned(), report: report_path.clone(), dest: dest.clone(), start_ns: now(), ..Default::default() };
+        cwd: job.dir.clone(), nonce: nonce.clone(), version: version.to_owned(), report: report_path.clone(), dest: dest.clone(), start_ns: now(),
+        creation_flags: if cfg!(windows) { INGEST_CREATION_FLAGS } else { 0 }, env_sha256: env_sha256(), wait_kind: "none", ..Default::default() };
     (cmd, receipt)
 }
 
 pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Arc<AtomicBool>, receipt: &mut RunReceipt) -> Outcome {
-    let (mut cmd, prepared) = command(bin, version, job, folders);
+    run_hooked(bin, version, job, folders, cancel, receipt, &|_| {})
+}
+
+/// The production run, calling `spawned` once the child exists (before any wait).
+pub fn run_hooked(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], cancel: Arc<AtomicBool>, receipt: &mut RunReceipt, spawned: &dyn Fn(&RunReceipt)) -> Outcome {
+    let (cmd, prepared) = command(bin, version, job, folders);
     *receipt = prepared;
+    run_command(cmd, version, folders, cancel, receipt, spawned)
+}
+
+/// Spawn a Command built by `command` and observe it to its terminal. Controlled tests
+/// may alter that Command (C02 clears its flags) and record what they set.
+pub fn run_command(mut cmd: Command, version: &str, folders: &[PathBuf], cancel: Arc<AtomicBool>, receipt: &mut RunReceipt, spawned: &dyn Fn(&RunReceipt)) -> Outcome {
     let report_path = receipt.report.clone();
+    receipt.spawn_call_ns = now();
     let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => {
             receipt.end_ns = now();
+            receipt.spawn_error = Some(format!("cannot start ingest: {e}"));
             receipt.stderr = format!("cannot start ingest: {e}").into_bytes();
             return Outcome {
                 exit: None,
@@ -102,6 +149,12 @@ pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], c
         }
     };
     receipt.pid = Some(child.id());
+    #[cfg(windows)]
+    {
+        use std::os::windows::io::AsRawHandle;
+        receipt.os_start_ns = crate::win::process_start_ns(child.as_raw_handle());
+    }
+    spawned(receipt);
     let mut out = child.stdout.take().unwrap();
     let out_reader = std::thread::spawn(move || {
         let mut b = Vec::new();
@@ -118,6 +171,8 @@ pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], c
         if cancel.load(Ordering::SeqCst) {
             let _ = child.kill();
             let exit = child.wait().ok().and_then(|s| s.code());
+            receipt.cancelled = true;
+            receipt.wait_kind = "wait";
             capture(receipt, &report_path, out_reader, reader, exit);
             return Outcome {
                 exit: None,
@@ -128,9 +183,15 @@ pub fn run_recorded(bin: &Path, version: &str, job: &Job, folders: &[PathBuf], c
             };
         }
         match child.try_wait() {
-            Ok(Some(s)) => break s,
+            Ok(Some(s)) => {
+                receipt.wait_kind = "try_wait-terminal";
+                break s;
+            }
             Ok(None) => std::thread::sleep(std::time::Duration::from_millis(50)),
-            Err(_) => break child.wait().expect("wait"),
+            Err(_) => {
+                receipt.wait_kind = "wait";
+                break child.wait().expect("wait");
+            }
         }
     };
     let exit = status.code();
