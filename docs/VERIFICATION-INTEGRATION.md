@@ -1,8 +1,8 @@
 # Independent verification integration
 
-## Current boundary — 26 October2026 PDT (PM593)
+## Current boundary — PM604 latest-round review
 
-Phase 1 remains 36/36; Phase 2 remains 6/12. Complete required WP-15 package
+Phase 1 remains 36/36; Phase 2 now 7/12. Complete required WP-15 package
 coverage is not established by the following component/build/startup milestones.
 
 | Merged independent publication | Current disposition |
@@ -16,16 +16,19 @@ coverage is not established by the following component/build/startup milestones.
 | #329 / `91815bc1` |584 component FINAL PASS32/32, old renderer18/32;587 integrated679e01ec,120/120checks success, accepted source unchanged. |
 | #330 / `2ffd014d` | Original564 human visible-row method admitted; proposed collector refused, internal chains held. |
 | #331 / `42619272` | Actual human visible observations reviewed/partial; Show Details/NUL and internal chains held. F328-1 terminal finding, owner unknown. No repeat requested. |
+| #336 / `e7f61d43` | Exact598 source integration-only clearance; merged1695552d with identical root,122SUCCESS/2expected skips. WP16 rung3 complete, not final native acceptance. |
+| #339 / `fcad6b0c` | Effective actual-parent console C01false/C02true PASS; express599 source clearance, integrated1731f6ec with121SUCCESS. |
+| #341/#342 / `494f8336` |603 technical source/pin/archive PASS and durable retention; truthful count2 violates old one-build guard. PM604 permits exact scoped exception; new343 final disposition pending. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Human589/Software590 close at bounded partial return;592 retired unmerged with
-restore refs, not integrated or accepted as a collector. Historical reports carry.
-Manual594/332 fixes console and tests bounded first-party receipts, not G1 absence.
-595/333 decides exact INGEST integration-only scope versus final native holds.
-585/325 packaging waits for final cleared594 source;584 dependency is complete.
-No current human action, native/poller run or automatic lead activation is issued.
-Phase2 stays6/12; full coverage/native/session/S3/A6/own-hostINGEST/G2 remain held
-where unmet. Make/elevation disabled. See [PM593](REVIEW/PM593-CLOSEOUT-2026-10-26.md).
+Human589/Software590 retain partial reviewed closure/no repeat. Source594/599 and
+INGEST595/598 now integrated under exact independent clearance, no corpus replay.
+605/343 closes the existing603 count exception/integration; no artifact rebuild.
+344 designs one sufficient A6 route without capture/runtime/card execution.
+Phase2 now7/12 from actual WP16 integration. WP15 remains1/4, WP14 remains3/4.
+All unmatched full native/own-host/session/S3/G1/G2 criteria remain held.
+Make/elevation disabled, no lead activation or current human task.
+See [PM604 review](REVIEW/PM604-LATEST-ROUND.md).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 
