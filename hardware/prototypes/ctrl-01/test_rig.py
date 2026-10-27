@@ -198,7 +198,7 @@ def test_slot_clearances_are_as_specified():
 
 # --- front-zone features are properly joined to their keys ---------------------------
 
-MIN_JOINT = 6.0      # mm^2
+MIN_JOINT = 20.0     # mm^2: the joint spans the key's whole front face
 
 
 def test_record_finger_and_play_arm_are_joined_across_the_key_face():
