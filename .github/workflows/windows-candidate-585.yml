@@ -175,6 +175,8 @@ jobs:
           $neg=$LASTEXITCODE; "exit $neg" >> evidence/negative-mismatch.txt
           if($neg -eq 0){throw 'negative mismatch control was accepted'}
           Get-Content evidence/positive-judge.txt, evidence/negative-mismatch.txt
+          # The expected refusal left LASTEXITCODE=1, which the runner would report as the step's result.
+          exit 0
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.CANDIDATE_ARTIFACT }}
