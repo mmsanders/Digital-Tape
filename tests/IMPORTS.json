@@ -706,6 +706,45 @@
         "-B",
         "tests/windows_diagnostics_r2/receipts.py"
       ]
+    },
+    {
+      "path": "tests/windows_preview_r1",
+      "tree": "25282007045b95577d7a8385c2825c2f6de1f74e",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "ca8444975213da99d756694add762883cae7d004",
+      "attested_in": "Verification288 bounded portable preview method (PR293, merged ca844497)",
+      "attestation": "Closed five-member portable archive judge (archive.py) plus its Verification-owned initial clearances.json registry, imported unchanged because windows_discovery_candidate_r1 loads archive.py as its base gate. foreign_cwd.py is imported for byte identity only and is not run. Synthetic archive-data controls with zero Product extraction, launch or UI execution; not preview release, fullAPP or G2 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_preview_r1/archive.py"
+      ]
+    },
+    {
+      "path": "tests/windows_discovery_candidate_r1",
+      "tree": "c3925a405d992fa02deaf9694d439286eeb75197",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "38c20dea30cda0aed055254f4bc3fd50c9d07ff8",
+      "attested_in": "Verification325 Stage A (PR326, merged 38c20dea; CI 40262771204)",
+      "attestation": "Additive Software585 dual-pin/dependency/transport/guide/readiness preflight over the unchanged windows_preview_r1 archive judge: original INGEST 3895f3f3, S2 tapectl 44ef2686, four compile pins, closed five-member ZIP with external INVENTORY, BUILD/ARCHIVE READY UI METHOD HELD. Ten synthetic causal controls with zero build, archive or Product execution; not candidate, native, poller or UI acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_discovery_candidate_r1/contract.py"
+      ]
+    },
+    {
+      "path": "tests/windows_discovery_candidate_r2",
+      "tree": "4e65c51879cb4a305f3be2fef79e98f8045fb64c",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7731e29a5f6081140f013a8eb622fbae491d7c2f",
+      "attested_in": "Verification325 PM593 final-build guard (PR334, merged 7731e29a; CI 40389229378)",
+      "attestation": "Wraps r1 and the archive judge, adding the exact integrated 332/594 console/receipt clearance, BUILD diagnostics_default OFF, private per-user CONTROL 16 MiB bound, no build-environment opt-in or packaged session data, one final build and README/manual-sheet wording. Twelve synthetic causal guards with zero build, archive or Product execution; not candidate, native, poller or UI acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_discovery_candidate_r2/contract.py"
+      ]
     }
   ],
   "evidence_bundles": [
