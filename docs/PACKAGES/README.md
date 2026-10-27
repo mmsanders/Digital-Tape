@@ -1,11 +1,11 @@
 # Work packages — current roadmap
 
-**26 October2026 PDT · PM593.** Current Phase2 target: Windows11 x64;
+**PM604 latest-round review.** Current Phase2 target: Windows11 x64;
 macOS deferred, Linux existing CI. Live assignments are GitHub role issues,
 not this index. [Status](../STATUS.md), [Phase2 plan](../PHASE2-PLAN.md) and
 [independent integration](../VERIFICATION-INTEGRATION.md) govern current gates.
 
-Phase1 is COMPLETE36/36. Phase2 remains6/12; numerical rungs are complete
+Phase1 is COMPLETE36/36. Phase2 now7/12; numerical rungs are complete
 criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 
 ## Phase 0 — foundations and parked hardware
@@ -36,14 +36,16 @@ criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
 | WP-14 | [Real-card CLI](WP-14.md) | Software/Verification |3|3/4; nativeA6 request/offset linkage remains held, no new physical test issued. |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;584 source integrated,328 human visual partial reviewed.594/332 fixes console/receipts;585/325 final bundle waits. Full native/S3/G2 coverage incomplete. |
-| WP-16 | [Ingest](WP-16.md) | Software/Verification |3|2/4;595/333 resolves exact459/454 integration scope versus final own-host/native gates; no unchecked merge or obsolete Mac condition. |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4; console/receipt599 cleared338 and integrated1731f6ec.603 built/byte-audited, exact count2 exception permitted by PM604;605/343 final clearance/integration pending. Native/S3/G2 still held. |
+| WP-16 | [Ingest](WP-16.md) | Software/Verification |3|3/4; exact333-cleared598 source integrated1695552d unchanged with122SUCCESS/2expected skips. Full native/own-host acceptance remains held. |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
 No current human action:589 reviewed/partial closed; no repeat or Show Details
-recovery requested. Source fixes do not retrospectively qualify original564 or585.
+recovery requested. Source fixes do not retrospectively qualify original564 or native585.
+A6 route design is assigned344, no new physical test. Existing artifact closeout
+605/343 preserves both build records; no third compilation.
 Shipping Make/elevation disabled. No current G1 observer or raw-card/S3 run issued.
-[PM593 closeout](../REVIEW/PM593-CLOSEOUT-2026-10-26.md) records exact evidence,
+[PM604 review](../REVIEW/PM604-LATEST-ROUND.md) records exact evidence,
 closures/restoration pointers and remaining gates. Manual role pickup only.
 
 ## Phase 3 — future scope, not activated
