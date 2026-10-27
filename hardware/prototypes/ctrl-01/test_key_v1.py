@@ -13,7 +13,7 @@ from pathlib import Path
 import cadquery as cq
 import pytest
 
-from ctrl01 import BODY_H, LEDGE_Z, PAWL_EDGE, RAMP, STEM_Y, TOOTH_X, Key, key, old_key, tooth_profile
+from key_v1 import BODY_H, LEDGE_Z, PAWL_EDGE, RAMP, STEM_Y, TOOTH_X, Key, key, old_key, tooth_profile
 
 HERE = Path(__file__).resolve().parent
 # Michael's LADDER-02 print file, from latch-rig.zip; SHA-256 a3e0dafd...a5ece0a
@@ -60,7 +60,7 @@ def overhangs(shape: cq.Shape, allowed_z: tuple[float, ...]) -> list[tuple[float
     bridge that printed fine on LADDER-01/02) and the cap underside, which is
     flat on purpose and gets support.
     """
-    from ctrl01 import LABEL_DEPTH, STEM_X
+    from key_v1 import LABEL_DEPTH, STEM_X
     limit = -math.sin(math.radians(MAX_OVERHANG_DEG)) - 1e-3
     bad = []
     for f in shape.Faces():
@@ -77,7 +77,7 @@ def overhangs(shape: cq.Shape, allowed_z: tuple[float, ...]) -> list[tuple[float
 
 
 def _allowed(k: Key) -> tuple[float, ...]:
-    from ctrl01 import GROOVE_D
+    from key_v1 import GROOVE_D
     return (GROOVE_D, k.cap_z0)
 
 
@@ -119,7 +119,7 @@ def test_shoulder_reaches_past_the_aperture():
 
 
 def test_cap_underside_lands_on_the_shell_at_full_press():
-    from ctrl01 import LID_T, TRAVEL
+    from key_v1 import LID_T, TRAVEL
     s = key().val()
     flats = [f.BoundingBox().zmin for f in s.Faces()
              if f.geomType() == "PLANE" and f.normalAt().z < -0.99]
@@ -155,7 +155,7 @@ def test_shoulder_gate_catches_a_thin_shoulder():
 
 
 def test_cap_gate_catches_a_cap_at_the_wrong_height():
-    from ctrl01 import LID_T, TRAVEL
+    from key_v1 import LID_T, TRAVEL
     s = key().val().translate(cq.Vector(0, 0, 0))
     moved = s.cut(cq.Workplane().box(40, 40, 1.0, centered=(True, True, False))
                   .translate((0, 0, Key().cap_z0)).val())
@@ -170,7 +170,7 @@ def test_overhang_gate_catches_a_reversed_tooth():
 
 # --- Stop ----------------------------------------------------------------------
 
-from ctrl01 import KEYS, PAWL_TOP, STOP_SHIFT, TRAVEL, stop_profile, plate  # noqa: E402
+from key_v1 import KEYS, PAWL_TOP, STOP_SHIFT, TRAVEL, stop_profile, plate  # noqa: E402
 
 
 def catching_faces(shape: cq.Shape) -> list[float]:
@@ -179,7 +179,7 @@ def catching_faces(shape: cq.Shape) -> list[float]:
     The pawl's top reaches PAWL_TOP + TRAVEL at full press, so an upward face
     above that height is out of its reach.
     """
-    from ctrl01 import STEM_X
+    from key_v1 import STEM_X
     out = []
     for f in shape.Faces():
         bb = f.BoundingBox()

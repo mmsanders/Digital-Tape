@@ -32,7 +32,7 @@ import math
 import cadquery as cq
 
 # committed on purpose (Michael, 26 Oct): the per-part stl/ folders elsewhere are ignored
-OUT = Path(__file__).resolve().parent / "print"
+OUT = Path(__file__).resolve().parent / "print" / "v1"     # superseded by the shrunk keys (rig.py family)
 FONT = "DejaVu Sans"
 
 # --- LADDER-02, unchanged (rig.py names) -------------------------------------
