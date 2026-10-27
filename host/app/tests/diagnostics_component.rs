@@ -1,4 +1,4 @@
-// Software594 controlled method (Verification332, windows_diagnostics_r1 C01-C26). Compiled
+// Software594 controlled method (Verification332, windows_diagnostics_r1 C01-C26, corrected r2). Compiled
 // only as a Rust unit test inside `bridge`. Every case runs the production Command/
 // run_hooked/Bridge/Session code with the test-only harmless `probe_child` (never the
 // real INGEST, a window, a poller or a device). The harness keeps its own copies of the
@@ -308,12 +308,13 @@ fn c05_missing_executable_and_unpinned_child() {
     assert!(of(&rows, "cleanup").iter().all(|c| c["result"] == "removed"));
 }
 
-/// A sleeping child stopped by `stop` (Start over or shutdown) while the worker waits on it.
-fn cancel_case(case: &'static str, shutdown: bool) {
+/// A sleeping child stopped by `stop` (Start over or shutdown) while the worker waits on
+/// it: `mode` "sleep" after its report exists, "sleep-before-report" before it creates one.
+fn cancel_case(case: &'static str, shutdown: bool, mode: &str) {
     let Some(fx) = Fx::new(case) else { return };
     let s = Session::open(&fx.data(), provenance(true)).unwrap();
     let (b, rx, _, s) = bridge(&fx, Some(s));
-    let sleep = fx.folder("sleep", json!({}));
+    let sleep = fx.folder(mode, json!({}));
     drop_folder(&b, &sleep);
     let w = next(&rx);
     let runner = b.clone();
@@ -336,7 +337,21 @@ fn cancel_case(case: &'static str, shutdown: bool) {
     keep(&fx, "cancel", &k);
     let s = s.unwrap();
     let (rows, _) = fx.envelope(&s, "cancel", "incomplete");
-    assert!(of(&rows, "session-end")[0]["reason"].as_str().unwrap().split(';').any(|r| r == "cancelled-child-report"));
+    let end = of(&rows, "session-end")[0];
+    assert_eq!(end["complete"], json!(false));
+    let reasons: Vec<&str> = end["reason"].as_str().unwrap().split(';').collect();
+    let reports: Vec<_> = of(&rows, "blob").into_iter().filter(|b| b["role"] == "report").collect();
+    if mode == "sleep" {
+        assert!(reasons.contains(&"cancelled-child-report"), "{end}");
+        assert_eq!(reports.len(), 1, "the partial report is kept as left");
+    } else {
+        assert!(k.report.is_none(), "the helper never created its report");
+        assert!(reasons.contains(&"cancelled-before-report"), "{end}");
+        assert!(reports.is_empty());
+        let m = of(&rows, "missing");
+        assert_eq!((m.len(), &m[0]["role"]), (1, &json!("report")), "the absence is recorded honestly");
+        assert!(of(&rows, "blob").iter().any(|b| b["role"] == "stdout") && of(&rows, "blob").iter().any(|b| b["role"] == "stderr"));
+    }
     let t = of(&rows, "child-terminal")[0];
     assert_eq!(t["cancelled"], json!(true));
     assert_eq!(t["wait_kind"], json!("wait"));
@@ -353,9 +368,13 @@ fn alive(pid: u32) -> bool {
     String::from_utf8_lossy(&out.stdout).contains(&format!("\"{pid}\""))
 }
 #[test]
-fn c06_cancellation() { cancel_case("C06", false); }
+fn c06_cancellation() { cancel_case("C06", false, "sleep"); }
 #[test]
-fn c07_teardown_during_child() { cancel_case("C07", true); }
+fn c06_cancelled_before_report() { cancel_case("C06-before-report", false, "sleep-before-report"); }
+#[test]
+fn c07_teardown_during_child() { cancel_case("C07", true, "sleep"); }
+#[test]
+fn c07_teardown_before_report() { cancel_case("C07-before-report", true, "sleep-before-report"); }
 
 #[test]
 fn c08_off_on_parity() {
@@ -503,9 +522,9 @@ fn c13_stale_after_reset_and_new_drop() {
 }
 
 #[test]
-fn c13_cumulative_folders_oracle_gap() {
-    // Production runs INGEST over every folder so far; the r1 oracle compares argv to the
-    // latest drop's paths only. Recorded honestly for Verification, not reshaped.
+fn c13_cumulative_folders() {
+    // Production runs INGEST over every folder so far (APP-1 §2); r2 freezes each work's
+    // cumulative ordered snapshot, so this original chain is complete as recorded.
     let Some(fx) = Fx::new("C13-cumulative") else { return };
     let s = Session::open(&fx.data(), provenance(true)).unwrap();
     let (b, rx, _, s) = bridge(&fx, Some(s));
@@ -517,7 +536,8 @@ fn c13_cumulative_folders_oracle_gap() {
     keep(&fx, "first", &k1);
     keep(&fx, "second", &k2);
     let s = s.unwrap();
-    let (rows, _) = fx.envelope(&s, "cumulative", "oracle-gap");
+    let (rows, _) = fx.envelope(&s, "cumulative", "complete");
+    assert_eq!(of(&rows, "session-end")[0]["complete"], json!(true));
     let second = of(&rows, "child-launch")[1];
     assert_eq!(second["argv"].as_array().unwrap().len(), 12, "two folders after --");
 }
@@ -584,6 +604,47 @@ fn c20_unknown_provenance_incomplete() {
     assert!(of(&rows, "session-end")[0]["reason"].as_str().unwrap().split(';').any(|r| r == "unknown-provenance"));
 }
 
+/// F332-2: BUILD.json names the source only for the exact running executable.
+#[test]
+fn c20_source_bound_to_the_running_app() {
+    let (Some(ingest), Some(tapectl)) = (crate::children::INGEST.sha256, crate::children::TAPECTL.sha256) else {
+        eprintln!("C20-binding: UNEXECUTED, child pins not compiled in");
+        return;
+    };
+    let p = provenance(true);
+    let head = "a".repeat(40);
+    let meta = |files: Value| serde_json::to_vec(&json!({"source_head": head, "child_pin": ingest, "tapectl_pin": tapectl, "files": files})).unwrap();
+    let entry = |name: &str, sha: &str| json!({"name": name, "bytes": 1, "sha256": sha});
+    let other = "d".repeat(64);
+    assert_eq!(diagnostics::bound_source(&meta(json!([entry("digital-tape.exe", &p.app_sha256), entry("ingest.exe", ingest)])), &p.app_sha256), Some(head.clone()));
+    for (why, build) in [
+        ("stale sidecar: same pins, another app", meta(json!([entry("digital-tape.exe", &other)]))),
+        ("no app entry", meta(json!([entry("ingest.exe", ingest)]))),
+        ("two app entries", meta(json!([entry("digital-tape.exe", &p.app_sha256), entry("digital-tape.exe", &p.app_sha256)]))),
+        ("no files", serde_json::to_vec(&json!({"source_head": head, "child_pin": ingest, "tapectl_pin": tapectl})).unwrap()),
+        ("other child pin", serde_json::to_vec(&json!({"source_head": head, "child_pin": other, "tapectl_pin": tapectl, "files": [entry("digital-tape.exe", &p.app_sha256)]})).unwrap()),
+    ] {
+        assert_eq!(diagnostics::bound_source(&build, &p.app_sha256), None, "{why}");
+    }
+    assert_eq!(diagnostics::bound_source(&meta(json!([entry("digital-tape.exe", "")])), ""), None, "an unmeasured app binds nothing");
+
+    // A stale sidecar leaves the source unknown, and so does an unmeasured app: neither
+    // session may be complete.
+    let Some(fx) = Fx::new("C20-binding") else { return };
+    let stale = Provenance { source_commit: diagnostics::bound_source(&meta(json!([entry("digital-tape.exe", &other)])), &p.app_sha256), ..p.clone() };
+    let unmeasured = Provenance { app_path: String::new(), app_sha256: String::new(), ..p.clone() };
+    for (tag, prov, expect) in [("stale", stale, "incomplete"), ("unmeasured", unmeasured, "invalid")] {
+        let s = Session::open(&fx.data(), prov).unwrap();
+        s.finish();
+        // receipts.py rejects a header without an app path/hash outright ("invalid"); the
+        // writer still never calls it complete.
+        let (rows, _) = fx.envelope(&s, tag, expect);
+        let end = of(&rows, "session-end")[0];
+        assert_eq!(end["complete"], json!(false), "{tag}");
+        assert_eq!(end["reason"], json!("unknown-provenance"), "{tag}");
+    }
+}
+
 /// The exact bytes Session writes for an ingress record (same construction).
 fn ingress_len(id: &str, seq: u64, drop_id: &str, paths: &[String], generation: u64) -> usize {
     serde_json::to_vec(&json!({"schema": 1, "session": id, "seq": seq, "kind": "ingress", "data": {"drop_id": drop_id, "route": "controlled-test", "paths": paths, "generation": generation}})).unwrap().len() + 1
@@ -625,15 +686,50 @@ fn c22_blob_limit() {
     b.start_over();
     drop_folder(&b, &fx.folder("success", json!({"stdout_bytes": 4_194_305})));
     let k2 = run(&b, next(&rx), &probe(), None);
+    let view = b.snapshot();
+    let cleaned = !PathBuf::from(k2.receipt["job_dir"].as_str().unwrap()).exists();
     b.shutdown();
     let s = s.unwrap();
     let (rows, _) = fx.envelope(&s, "blob", "incomplete");
     let outs: Vec<_> = of(&rows, "blob").into_iter().filter(|b| b["role"] == "stdout").collect();
     assert_eq!(outs.len(), 1);
     assert_eq!(outs[0]["bytes"], json!(4_194_304));
-    assert_eq!(of(&rows, "missing")[0]["role"], json!("stdout"));
+    // F332-1: the over-limit original is named missing, then collection stops there.
+    let at = rows.iter().position(|r| r["kind"] == "missing").unwrap();
+    assert_eq!(rows[at]["data"]["role"], json!("stdout"));
+    assert_eq!(kinds(&rows[at + 1..]), ["incomplete"], "nothing is recorded after the limit");
+    assert_eq!(of(&rows, "incomplete")[0]["reason"], json!("blob-limit"));
+    // The child's own outcome and cleanup go on outside the sink.
+    assert_eq!((k2.receipt["exit"].clone(), view.view, cleaned), (json!(0), "ready", true));
     assert_eq!((k1.stdout.len(), k2.stdout.len()), (4_194_304, 4_194_305), "originals are never truncated");
     assert!(s.total() <= diagnostics::SESSION_LIMIT);
+}
+
+/// The exact bytes Session writes for a footer (same construction).
+fn footer_len(id: &str, seq: u64, reason: &str) -> usize {
+    serde_json::to_vec(&json!({"schema": 1, "session": id, "seq": seq, "kind": "session-end", "data": {"complete": false, "reason": reason}})).unwrap().len() + 1
+}
+/// F332-1: the footer obeys the 64 KiB line bound like every other record.
+#[test]
+fn c21_footer_line_limit() {
+    let Some(fx) = Fx::new("C21-footer") else { return };
+    for (tag, want) in [("exact", 65_536usize), ("over", 65_537)] {
+        let s = Session::open(&fx.data(), provenance(true)).unwrap();
+        let id = s.id();
+        let reason = format!("r{}", "x".repeat(want - footer_len(&id, 1, "r")));
+        assert_eq!(footer_len(&id, 1, &reason), want);
+        s.finish_with(reason);
+        let (rows, _) = fx.envelope(&s, tag, "incomplete");
+        let raw = fs::read(s.path_in(&fx.data()).join("records.jsonl")).unwrap();
+        let lens: Vec<usize> = raw.split_inclusive(|&b| b == b'\n').map(<[u8]>::len).collect();
+        assert!(lens.iter().all(|&n| n as u64 <= diagnostics::LINE_LIMIT), "{tag}: {lens:?}");
+        if want == 65_536 {
+            assert_eq!((kinds(&rows).last().unwrap().as_str(), lens[1]), ("session-end", 65_536), "the boundary footer is written");
+        } else {
+            assert_eq!(kinds(&rows), ["session", "incomplete"], "an over-limit footer is never written");
+            assert_eq!(of(&rows, "incomplete")[0]["reason"], json!("footer-line-over-limit"));
+        }
+    }
 }
 
 #[test]

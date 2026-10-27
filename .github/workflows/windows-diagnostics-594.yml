@@ -1,5 +1,5 @@
 name: "Software594 console correction and opt-in receipts"
-# Verification332's controlled method (tests/windows_diagnostics_r1): the production
+# Verification332's controlled method (tests/windows_diagnostics_r1, corrected r2): the production
 # Command/run_hooked/Bridge/Session code driven with the TEST-ONLY harmless probe_child,
 # never the real INGEST, an app window, the discovery poller or a device. The tests keep
 # the helper's originals and session envelopes; Verification's own receipts.py/cases.py
@@ -9,6 +9,7 @@ on:
     paths:
       - 'host/app/**'
       - 'tests/windows_diagnostics_r1/**'
+      - 'tests/windows_diagnostics_r2/**'
       - 'tools/app/diagnostics594_check.py'
       - '.github/workflows/windows-diagnostics-594.yml'
   workflow_dispatch:
@@ -29,11 +30,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Verification332 oracle self-tests
+      - name: Verification332 oracle self-tests (r1 immutable, r2 corrected)
         shell: pwsh
         run: |
-          python -B tests/windows_diagnostics_r1/receipts.py; if($LASTEXITCODE -ne 0){throw 'receipts.py'}
-          python -B tests/windows_diagnostics_r1/cases.py; if($LASTEXITCODE -ne 0){throw 'cases.py'}
+          python -B tests/windows_diagnostics_r1/receipts.py; if($LASTEXITCODE -ne 0){throw 'r1 receipts.py'}
+          python -B tests/windows_diagnostics_r1/cases.py; if($LASTEXITCODE -ne 0){throw 'r1 cases.py'}
+          python -B tests/windows_diagnostics_r2/receipts.py; if($LASTEXITCODE -ne 0){throw 'r2 receipts.py'}
+          python -B tests/windows_diagnostics_r2/cases.py; if($LASTEXITCODE -ne 0){throw 'r2 cases.py'}
+          Push-Location tests/windows_diagnostics_r2; python -B regressions.py; $q=$LASTEXITCODE; Pop-Location; if($q -ne 0){throw 'r2 regressions.py'}
       - name: Component tests with the test-only helper
         shell: pwsh
         run: |
@@ -67,7 +71,7 @@ jobs:
         run: |
           python -B tools/app/diagnostics594_check.py --evidence evidence594/raw --out evidence594/summary.json
           $q=$LASTEXITCODE; "checker exit $q" | Tee-Object evidence594/checker-exit.txt
-          if($q -ne 0){throw 'Verification332 oracles rejected actual originals; see summary.json (oracle_gap_1)'}
+          if($q -ne 0){throw 'Verification332 r2 oracles rejected actual originals; see summary.json'}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -46,6 +46,8 @@ fn main() {
         "argv": argv, "cwd": std::env::current_dir().map(|p| p.to_string_lossy().into_owned()).unwrap_or_default()});
     std::fs::write(text("observe"), serde_json::to_vec_pretty(&observed).unwrap()).expect("observation");
     let mode = text("mode");
+    // Stopped while waiting here, the child never creates its report.
+    if mode == "sleep-before-report" { std::thread::sleep(std::time::Duration::from_secs(120)); }
     let mut r = std::fs::File::create(&report).expect("report");
     let start = serde_json::json!({"t": "start", "tool": "ingest", "version": text("version"), "nonce": nonce});
     // Fixed originals: NUL, non-UTF-8 and CRLF bytes must survive capture unchanged.
@@ -77,6 +79,7 @@ fn main() {
             r.write_all(b"not a report \xff\n").unwrap();
             2
         }
+        "sleep-before-report" => 0,
         "sleep" => {
             writeln!(r, "{start}").unwrap();
             r.flush().unwrap();

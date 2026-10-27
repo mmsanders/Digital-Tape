@@ -81,18 +81,32 @@ fn is_hex(s: &str, n: usize) -> bool {
 }
 
 impl Provenance {
-    /// This executable, and its source only from a BUILD.json beside it whose child pins
-    /// equal the pins compiled into this build.
+    /// This executable, and its source only from a BUILD.json beside it that binds both
+    /// this build's child pins and this exact executable (`bound_source`).
     pub fn of_running_app() -> Provenance {
         let exe = std::env::current_exe().ok();
         let app_sha256 = exe.as_deref().and_then(|p| sha_file(p).ok()).map(|x| x.0).unwrap_or_default();
         let source_commit = exe.as_deref().and_then(Path::parent).and_then(|d| std::fs::read(d.join("BUILD.json")).ok())
-            .and_then(|b| serde_json::from_slice::<Value>(&b).ok()).and_then(|m| {
-                let bound = m["child_pin"].as_str() == crate::children::INGEST.sha256 && m["tapectl_pin"].as_str() == crate::children::TAPECTL.sha256;
-                m["source_head"].as_str().filter(|s| bound && is_hex(s, 40)).map(str::to_owned)
-            });
+            .and_then(|b| bound_source(&b, &app_sha256));
         Provenance { app_path: exe.map(|p| p.to_string_lossy().into_owned()).unwrap_or_default(), app_sha256, source_commit, os_build: os_build(), app_os_start_ns: own_start_ns() }
     }
+
+    /// Anything unknown: no complete receipt can be written under it.
+    fn unknown(&self) -> bool {
+        self.app_path.is_empty() || !is_hex(&self.app_sha256, 64) || self.source_commit.is_none() || self.os_build.is_none() || self.app_os_start_ns.is_none()
+    }
+}
+
+/// BUILD.json's source head, only when its child pins equal the ones compiled into this
+/// build AND its single digital-tape.exe entry is the measured running executable. The
+/// pins alone are shared by many app heads, so a stale sidecar must not name the source.
+pub fn bound_source(build: &[u8], app_sha256: &str) -> Option<String> {
+    let m: Value = serde_json::from_slice(build).ok()?;
+    let pins = crate::children::INGEST.sha256.is_some() && m["child_pin"].as_str() == crate::children::INGEST.sha256
+        && m["tapectl_pin"].as_str() == crate::children::TAPECTL.sha256;
+    let apps: Vec<&Value> = m["files"].as_array()?.iter().filter(|f| f["name"] == "digital-tape.exe").collect();
+    let app = is_hex(app_sha256, 64) && apps.len() == 1 && apps[0]["sha256"].as_str() == Some(app_sha256);
+    m["source_head"].as_str().filter(|s| pins && app && is_hex(s, 40)).map(str::to_owned)
 }
 #[cfg(windows)]
 fn os_build() -> Option<String> { crate::win::os_build() }
@@ -139,6 +153,13 @@ struct Ledger {
     roles: BTreeMap<String, BTreeSet<&'static str>>,
     launched: BTreeSet<String>,
     flaws: Vec<&'static str>,
+}
+
+impl Ledger {
+    /// Each reason once, in first-seen order, so the footer's reason stays short.
+    fn flaw(&mut self, f: &'static str) {
+        if !self.flaws.contains(&f) { self.flaws.push(f); }
+    }
 }
 
 struct Inner {
@@ -220,10 +241,9 @@ impl Session {
                 total: marker_bytes.len() as u64, next_drop: 0, stopped: false, ledger: Ledger::default(),
                 #[cfg(test)] fault, #[cfg(test)] creates: 0, #[cfg(test)] writes: 0 };
             let s = Session { inner: Mutex::new(inner), dir_name };
-            let flawed = provenance.source_commit.is_none() || provenance.os_build.is_none() || provenance.app_os_start_ns.is_none();
             {
                 let mut g = s.inner.lock().unwrap();
-                if flawed { g.ledger.flaws.push("unknown-provenance"); }
+                if provenance.unknown() { g.ledger.flaw("unknown-provenance"); }
                 let pins = json!({"DT_INGEST_SHA256": crate::children::INGEST.sha256, "DT_INGEST_VERSION": crate::children::INGEST.version,
                     "DT_TAPECTL_SHA256": crate::children::TAPECTL.sha256, "DT_TAPECTL_VERSION": crate::children::TAPECTL.version});
                 g.record("session", json!({"app_path": provenance.app_path, "app_sha256": provenance.app_sha256, "source_commit": provenance.source_commit,
@@ -285,7 +305,7 @@ impl Session {
         let exe_sha256 = sha_file(Path::new(&exe)).ok().map(|x| x.0);
         let mut g = self.inner.lock().unwrap();
         let Some(exe_sha256) = exe_sha256 else { g.stop("exe-hash-unavailable"); return };
-        if r.os_start_ns.is_none() { g.ledger.flaws.push("unknown-child-creation-time"); }
+        if r.os_start_ns.is_none() { g.ledger.flaw("unknown-child-creation-time"); }
         if g.record("child-launch", json!({"work_id": work_id, "generation": generation, "pid": r.pid, "os_start_ns": r.os_start_ns.map(|n| n as u64),
             "spawn_call_ns": r.spawn_call_ns as u64, "exe": exe, "exe_sha256": exe_sha256, "version": r.version, "argv": r.argv,
             "cwd": r.cwd.to_string_lossy(), "report_path": r.report.to_string_lossy(), "dest": r.dest.to_string_lossy(), "nonce": r.nonce,
@@ -320,12 +340,15 @@ impl Session {
         match &r.report_bytes {
             Some(b) => {
                 g.blob(work_id, generation, pid, "report", b);
-                if !r.cancelled && matches!(reading, Reading::Unusable(_)) { g.ledger.flaws.push("invalid-original-report"); }
+                if !r.cancelled && matches!(reading, Reading::Unusable(_)) { g.ledger.flaw("invalid-original-report"); }
                 // A killed child's report is kept as it was left: never a finished chain.
-                if r.cancelled { g.ledger.flaws.push("cancelled-child-report"); }
+                if r.cancelled { g.ledger.flaw("cancelled-child-report"); }
             }
-            // A killed child may never have finished its report; its terminal says so.
-            None if r.cancelled => {}
+            // Killed before it created a report: the absence is recorded, never complete.
+            None if r.cancelled => {
+                g.ledger.flaw("cancelled-before-report");
+                g.missing(work_id, generation, "report", "cancelled before the child created its report");
+            }
             None => g.missing(work_id, generation, "report", "no report file after the child's wait"),
         }
         g.blob(work_id, generation, pid, "stdout", &r.stdout);
@@ -378,6 +401,14 @@ impl Session {
         g.footer(json!({"complete": reason.is_none(), "reason": reason}));
     }
 
+    /// The production footer path with a chosen reason, for the line-bound boundary.
+    #[cfg(test)]
+    pub fn finish_with(&self, reason: String) {
+        let mut g = self.inner.lock().unwrap();
+        if g.stopped { return; }
+        g.footer(json!({"complete": false, "reason": reason}));
+    }
+
     /// Exact test reads of the session's files, by leaf, through held handles' names.
     #[cfg(test)]
     pub fn path_in(&self, data: &Path) -> std::path::PathBuf {
@@ -404,8 +435,11 @@ impl Inner {
         let accounted: BTreeSet<String> = l.jobs.union(&l.skipped).cloned().collect();
         if l.scheduled != accounted { return Some("scheduled-work-unaccounted".into()); }
         for (w, (cancelled, exit)) in &l.terminal {
-            if *cancelled { continue; }
             let roles = l.roles.get(w).cloned().unwrap_or_default();
+            if *cancelled {
+                if !roles.contains("report") { return Some("cancelled-before-report".into()); }
+                continue;
+            }
             let mut need = vec!["report", "stdout", "stderr"];
             if *exit == Some(0) { need.extend(["manifest", "audio"]); }
             if !need.iter().all(|r| roles.contains(r)) { return Some("missing-capture".into()); }
@@ -463,15 +497,20 @@ impl Inner {
         true
     }
 
+    /// A fact that could not be kept: the receipt can no longer be complete.
     fn missing(&mut self, work_id: &str, generation: u64, role: &str, reason: &str) {
+        self.ledger.flaw("missing-capture");
         self.record("missing", json!({"work_id": work_id, "generation": generation, "role": role, "reason": reason}));
     }
 
     /// One original, byte-exact, in its own fresh leaf named by the record that cites it.
+    /// An original over the blob limit is named missing and collection stops (APP-1A §8):
+    /// nothing after it is recorded, while the child's own outcome and cleanup go on.
     fn blob(&mut self, work_id: &str, generation: u64, pid: Option<u32>, role: &'static str, bytes: &[u8]) {
         if self.stopped { return; }
         if bytes.len() as u64 > BLOB_LIMIT {
-            return self.missing(work_id, generation, role, &format!("original is {} bytes, over the {BLOB_LIMIT}-byte blob limit", bytes.len()));
+            self.missing(work_id, generation, role, &format!("original is {} bytes, over the {BLOB_LIMIT}-byte blob limit", bytes.len()));
+            return self.stop("blob-limit");
         }
         let leaf = format!("{:08}-{role}.bin", self.seq);
         let cite = self.line("blob", json!({"work_id": work_id, "generation": generation, "pid": pid, "role": role, "leaf": format!("blobs/{leaf}"),
@@ -506,8 +545,11 @@ impl Inner {
         }
     }
 
+    /// The footer obeys the same per-line bound as every record; one that would not fit
+    /// ends the session as `incomplete` instead.
     fn footer(&mut self, data: Value) {
         let b = self.line("session-end", data);
+        if b.len() as u64 > LINE_LIMIT { return self.stop("footer-line-over-limit"); }
         self.stopped = true;
         if self.total + b.len() as u64 <= SESSION_LIMIT && self.put(None, &b).is_ok() { self.seq += 1; }
     }
