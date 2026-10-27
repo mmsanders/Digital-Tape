@@ -194,3 +194,20 @@ def test_slot_clearances_are_as_specified():
         width = (x1 - x0) if s.loc in ("top", "bottom") else (y1 - y0)
         assert width - (C.A if s.loc in ("top", "bottom") else C.B) == pytest.approx(2 * s.clr)
         assert (s.z[1] - s.z[0]) - C.TH == pytest.approx(2 * s.clr)
+
+
+# --- front-zone features are properly joined to their keys ---------------------------
+
+MIN_JOINT = 6.0      # mm^2
+
+
+def test_record_finger_and_play_arm_are_joined_across_the_key_face():
+    assert M.joint_area(M._finger()) >= MIN_JOINT
+    assert M.joint_area(M._arm_and_pin()) >= MIN_JOINT
+
+
+def test_joint_gate_catches_a_feature_hanging_on_a_sliver():
+    # the 27 Oct defect: the arm touched the key only along a 0.01 mm strip
+    x = -L.STEM_XP / 2
+    sliver = M._box(x - 0.21, x + 0.3, -3.6, -3.49, 0, 3.5)
+    assert M.joint_area(sliver) < MIN_JOINT

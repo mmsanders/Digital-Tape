@@ -181,36 +181,50 @@ def key_local(name: str, raise_: float | None = None, flip: bool = False) -> cq.
 
 
 FRONT_CLR = 0.2     # finger and arm stay this far in front of the keys' front plane (the fins' edge)
+JOIN_Y = 1.0        # front-zone features join the key across its front face from |y'| = 1.0 ...
+JOIN_EDGE = 3.4     # ... out to here, inside the key's own outline, where no fin can be
+ARM_H = 6.0         # Play's arm, z' extent (taller than the finger: it carries the pin)
 
 
-def _root(y0: float, y1: float) -> cq.Workplane:
-    """Where a front-zone feature joins the key, inside the key's own outline."""
+def _root(y0: float, y1: float, h: float) -> cq.Workplane:
+    """The joint between a front-zone feature and its key: a block bridging the
+    FRONT_CLR gap across the key's own front face (|y'| <= JOIN_EDGE), sunk 0.3 mm
+    into the key so the two fuse over the whole face."""
     x = -L.STEM_XP / 2
-    return _box(x - FRONT_CLR - 0.01, x + 0.3, y0, y1, 0, 3.5)
+    return _box(x - FRONT_CLR - 0.01, x + 0.3, y0, y1, 0, h)
 
 
 def _finger() -> cq.Workplane:
     """Record's finger: reaches into the gap in front of the keys and lands on the
-    blocker. Its tip's inner corner is bevelled so a returning blocker pushes it
-    up rather than jamming."""
+    blocker. It starts over the key's own front face, so it joins the key across
+    2.4 x 3.5 mm. Its tip's inner corner is bevelled so a returning blocker pushes
+    it up rather than jamming."""
     x0, x1 = L.FINGER_Z[0] - L.KEY_Z, L.FINGER_Z[1] - L.KEY_Z - FRONT_CLR
-    y0, y1 = L.STEM_YP / 2 - 0.01, 9.0
-    f = _box(x0, x1, y0, y1, 0, 3.5).union(_root(y0, 3.6))
+    y0, y1 = JOIN_Y, 9.0
+    f = _box(x0, x1, y0, y1, 0, 3.5).union(_root(JOIN_Y, JOIN_EDGE, 3.5))
     bevel = _prism_yz([(y1 - 1.5, -0.01), (y1 + 0.01, -0.01), (y1 + 0.01, 1.51)], x0 - 1, x1 + 1)
     return f.cut(bevel)
 
 
 def _arm_and_pin() -> cq.Workplane:
-    """Play's arm and the square pin (turned 45 degrees) that drives the blocker."""
+    """Play's arm and the square pin (turned 45 degrees) that drives the blocker.
+    The arm starts over the key's own front face and joins it across 2.4 x 6 mm."""
     x0, x1 = L.ARM_Z[0] - L.KEY_Z, L.ARM_Z[1] - L.KEY_Z - FRONT_CLR
     py = L.PIN_Y - L.key_y("play")
-    y1 = -L.STEM_YP / 2 + 0.01
-    arm = _box(x0, x1, py - 1.6, y1, 0, 3.5).union(_root(-3.6, y1))
+    arm = _box(x0, x1, py - 1.6, -JOIN_Y, 0, ARM_H).union(_root(-JOIN_EDGE, -JOIN_Y, ARM_H))
     pz = L.KEY_BOTTOM - L.PIN_X_REST
     r = L.PIN_SIDE / math.sqrt(2)
     diamond = [(py - r, pz), (py, pz - r), (py + r, pz), (py, pz + r)]
     pin = _prism_yz(diamond, L.BLOCKER_Z[0] + 0.1 - L.KEY_Z, x0 + 0.01)
     return arm.union(pin)
+
+
+def joint_area(feature: cq.Workplane, depth: float = 0.1) -> float:
+    """Area over which a front-zone feature fuses with the key body: its volume in a
+    thin slab just inside the key's front face, divided by the slab's depth."""
+    x = -L.STEM_XP / 2
+    slab = _box(x + 0.05, x + 0.05 + depth, -L.STEM_YP / 2, L.STEM_YP / 2, 0, L.BODY_H)
+    return feature.val().intersect(slab.val()).Volume() / depth
 
 
 def place_key(part: cq.Workplane, name: str, depth: float = 0.0) -> cq.Workplane:

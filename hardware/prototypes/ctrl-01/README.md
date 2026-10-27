@@ -147,6 +147,7 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q        # about 2 minutes
 | Plates fit the 180 × 180 bed | — |
 | Plain slots take every card; rib slots grip every card; slot clearances are as specified | — |
 | The detent takes card C into its notch | card A, which has no notch, clashes with the bump |
+| Record's finger and Play's arm join their keys across ≥ 6 mm² of the key face (8.4 and 14.4) | the 27 Oct defect: an arm hanging on a 0.01 mm strip |
 
 Numbers that come from the printer, not this code: key slide 0.15 mm a side, spring
 holes and bosses (FIT-01); the P preference (LADDER-01/02). The latch simulation is
@@ -166,14 +167,14 @@ the check that `key_v1.py` rebuilt it exactly.
 | File | SHA-256 |
 |---|---|
 | `print/ctrl01-plate-shell.stl` | `8608f150cb086d3df2b3e47fcb84e22f38301be8630dd081b5e5b0b02ce0cac1` |
-| `print/ctrl01-plate-mech.stl` | `917bb92aa26092ba6965fba9ba99ed7facbe7d961ee8d4c93f40e56158a98e34` |
+| `print/ctrl01-plate-mech.stl` | `24c9dd873c54dd5067b200505e47eebc6a865a546c639469b8a50a8afef7257c` |
 | `print/ctrl01-plate-cards.stl` | `b01aeaae0dc72a20a331e9dea813a38361ca161e286845932b13d24651e385fa` |
 | `print/ctrl01-front.stl` | `d73380c47740c63af08ac5866aedec0338f74f0d5645a5d3b4d6c76cc3ad90da` |
 | `print/ctrl01-back.stl` | `ac4e3f2376553000bf7e32714eef9ed05f600272136f23fdd39e9f71faa7fbc8` |
 | `print/ctrl01-bar.stl` | `070e8ea0b75cd06d599d4f7dc10a92e12b2d5da7608eafa09db455c6bca7dab4` |
 | `print/ctrl01-blocker.stl` | `c6ab517a65b05cb6dd5c0d9d6c538d9f77423dcff57afd12554a811b8ccb0c52` |
-| `print/ctrl01-key-rec.stl` | `785395bf7db80898637a4383885030c33b6ab147867bcf7d60ff00ececb505dc` |
-| `print/ctrl01-key-play.stl` | `cced851f64afbdb7848cfb158b4eb07ca1a176a66e936b92709882aa3a8c8207` |
+| `print/ctrl01-key-rec.stl` | `207289cb3b167813cfd7a7f219b94b672364bf2ed5e1423a893b715e774265fd` |
+| `print/ctrl01-key-play.stl` | `6c3c5f1de3225fea6fb13f1212014c6f577a0330e34a43b587d3d9b0d617ae1c` |
 | `print/ctrl01-key-ff.stl` | `efb99f00db402e0d8bebea6e410584e5bf93f15d9df04520a3863797b0824d99` |
 | `print/ctrl01-key-rew.stl` | `f0cf613ea76225ece2e79015b899cf1ba1d4952ccbd34dfbf38c7872b82c8997` |
 | `print/ctrl01-key-stop.stl` | `3eff05b9a1125dedfae021b7970e057321dbfbcda01fd3e546ba7fd221031eac` |
