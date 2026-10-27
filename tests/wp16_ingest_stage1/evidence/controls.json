@@ -1,0 +1,290 @@
+[
+  {
+    "id": "finite-gain-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "compressor",
+    "result": "DETECTED",
+    "gate": "constant-gain",
+    "kind": "causal-control"
+  },
+  {
+    "id": "intersample-safe-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "sample-peak-only",
+    "result": "DETECTED",
+    "gate": "peak",
+    "kind": "causal-control"
+  },
+  {
+    "id": "peak-limited-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "force-target-above-ceiling",
+    "result": "DETECTED",
+    "gate": "peak",
+    "kind": "causal-control"
+  },
+  {
+    "id": "short-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "gated-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "silence-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "noisy-digital-silence",
+    "result": "DETECTED",
+    "gate": "silence",
+    "kind": "causal-control"
+  },
+  {
+    "id": "exact-stereo-dither-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "shared-dither-state",
+    "result": "DETECTED",
+    "gate": "dither",
+    "kind": "causal-control"
+  },
+  {
+    "id": "exact-mono-dither-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "independent-mono-draws",
+    "result": "DETECTED",
+    "gate": "mono",
+    "kind": "causal-control"
+  },
+  {
+    "id": "reset-identity-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "shared-filter-meter-state",
+    "result": "DETECTED",
+    "gate": "identity",
+    "kind": "causal-control"
+  },
+  {
+    "id": "manifest-two-folders-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "guessed-trim",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "double-trim",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "missed-frame",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "extra-frame",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "metadata-drift",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "volatile-manifest-metadata",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "absolute-manifest-path",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "noninteger-folder-count",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "noninteger-gap-count",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "global-folder-sort",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "source-omission",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "gap-omission",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "noisy-folder-gap",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "noncanonical-json",
+    "result": "DETECTED",
+    "gate": "manifest",
+    "kind": "causal-control"
+  },
+  {
+    "id": "unicode-natural-comparator",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "locale-lexical-sort",
+    "result": "DETECTED",
+    "gate": "order",
+    "kind": "causal-control"
+  },
+  {
+    "id": "pair-transaction-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "half-published-output",
+    "result": "DETECTED",
+    "gate": "pair",
+    "kind": "causal-control"
+  },
+  {
+    "id": "preflight-output-open",
+    "result": "DETECTED",
+    "gate": "preflight",
+    "kind": "causal-control"
+  },
+  {
+    "id": "source-mutation-undetected",
+    "result": "DETECTED",
+    "gate": "mutation",
+    "kind": "causal-control"
+  },
+  {
+    "id": "truncated-observer",
+    "result": "DETECTED",
+    "gate": "trace",
+    "kind": "causal-control"
+  },
+  {
+    "id": "ref_fir_a-reset-8000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_a-reset-44100",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_a-reset-48000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_a-reset-192000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_b-reset-8000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_b-reset-44100",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_b-reset-48000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_b-reset-192000",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "safe-isolated-join-left",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "safe-isolated-join-right",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "unsafe-joined-boundary",
+    "result": "DETECTED",
+    "gate": "join-peak",
+    "kind": "causal-control"
+  },
+  {
+    "id": "ref_fir_a-alias-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "ref_fir_b-alias-baseline",
+    "result": "PASS",
+    "kind": "green-baseline"
+  },
+  {
+    "id": "alias-filter-bypass",
+    "result": "DETECTED",
+    "gate": "src-quality",
+    "kind": "causal-control"
+  }
+]
