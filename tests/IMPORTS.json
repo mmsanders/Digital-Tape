@@ -666,6 +666,22 @@
       ]
     },
     {
+      "path": "tests/wp16_ingest_stage1",
+      "tree": "609a4c819076a2b85b26cc4f3cd254b92caef6de",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "9587317ac4bca4e8164347f0ec62eeb719245cf7",
+      "attested_in": "tests/IMPORTS.json",
+      "attestation": "WP-16 INGEST-1 complete Stage 1 independent package against ADR-177/178/180 (Product c6ff868086e3333bb7568e60d3a2f4ec60fd3344; Verification input 10db792e0eb66d048257dedb0360af6d37b1c1ed): 1927 census descriptors in six rows, 1763 CC0 sources in the durable asset evidence-ingest1-stage1-adr180 (INGEST1-STAGE1-SOURCES.tar.gz SHA-256 980c57c7616bbf7b1b8870f8c9b0da9ab8c7ae4678871788b4c60d9524a67edb; SOURCES.json SHA-256 19b8a56f67a4a4a0d0a63e63635d7d64c6835b2eb4620a23ade5a33be17f41ea). Published by Verification #169 and merged to Verification main as #181 at 40dd4b55dae5b1daac3af6eba0b58dde3d98d373 (root tree fa9cf729390a4aeb4d648036470dd162dbdc740a); imported byte-identically by Software #435. The self-tests are synthetic verifier tests with zero Product runs; not Product, native, platform, real-card, full WP16 or WP15 acceptance Corrected publication: Verification #169 Stage2 portability fix merged as #182 at 9587317ac4bca4e8164347f0ec62eeb719245cf7 (root tree 55d29e624f059d536e533482b3c8b18015b808bd): check_pins.py names members with as_posix() and portability_selftest.py adds POSIX/Windows path regressions; FILES.json repinned; member census, source/contract identities and every assertion unchanged. Superseded tree 13b368138642506f6f154dd8172507c097432f32 (original import, Verification 40dd4b55) stays in history.",
+      "superseded_trees": [
+        "13b368138642506f6f154dd8172507c097432f32"
+      ],
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp16_ingest_stage1/selftest.py"
+      ]
+    },
+    {
       "path": "tests/windows_diagnostics_r1",
       "tree": "08b6d314e04fd439cf9f74880c9c7a2f631e451e",
       "source_repo": "mmsanders/digital-tape-verification",

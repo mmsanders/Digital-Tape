@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "reference_cases": 10,
+  "negative_controls": [
+    "missing-case"
+  ],
+  "scope": "file packet integration only; zero Product/native acceptance"
+}

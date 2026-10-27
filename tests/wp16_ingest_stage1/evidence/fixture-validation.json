@@ -1,0 +1,8688 @@
+[
+  {
+    "asset": "NONE-11025-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-11025-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-12000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-16000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-176400-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-192000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-22050-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-24000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-32000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-44100-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-48000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-64000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-7350-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-8000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-88200-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "NONE-96000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aac-11025-1.m4a",
+    "check": "raw-count",
+    "frames": 12288
+  },
+  {
+    "asset": "aac-11025-2.m4a",
+    "check": "raw-count",
+    "frames": 12288
+  },
+  {
+    "asset": "aac-12000-1.m4a",
+    "check": "raw-count",
+    "frames": 13312
+  },
+  {
+    "asset": "aac-12000-2.m4a",
+    "check": "raw-count",
+    "frames": 13312
+  },
+  {
+    "asset": "aac-16000-1.m4a",
+    "check": "raw-count",
+    "frames": 17408
+  },
+  {
+    "asset": "aac-16000-2.m4a",
+    "check": "raw-count",
+    "frames": 17408
+  },
+  {
+    "asset": "aac-22050-1.m4a",
+    "check": "raw-count",
+    "frames": 23552
+  },
+  {
+    "asset": "aac-22050-2.m4a",
+    "check": "raw-count",
+    "frames": 23552
+  },
+  {
+    "asset": "aac-24000-1.m4a",
+    "check": "raw-count",
+    "frames": 25600
+  },
+  {
+    "asset": "aac-24000-2.m4a",
+    "check": "raw-count",
+    "frames": 25600
+  },
+  {
+    "asset": "aac-32000-1.m4a",
+    "check": "raw-count",
+    "frames": 33792
+  },
+  {
+    "asset": "aac-32000-2.m4a",
+    "check": "raw-count",
+    "frames": 33792
+  },
+  {
+    "asset": "aac-44100-1.m4a",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "aac-44100-2.m4a",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "aac-48000-1.m4a",
+    "check": "raw-count",
+    "frames": 50176
+  },
+  {
+    "asset": "aac-48000-2.m4a",
+    "check": "raw-count",
+    "frames": 50176
+  },
+  {
+    "asset": "aac-64000-1.m4a",
+    "check": "raw-count",
+    "frames": 65536
+  },
+  {
+    "asset": "aac-64000-2.m4a",
+    "check": "raw-count",
+    "frames": 65536
+  },
+  {
+    "asset": "aac-7350-1.m4a",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "aac-7350-2.m4a",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "aac-8000-1.m4a",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "aac-8000-2.m4a",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "aac-88200-1.m4a",
+    "check": "raw-count",
+    "frames": 90112
+  },
+  {
+    "asset": "aac-88200-2.m4a",
+    "check": "raw-count",
+    "frames": 90112
+  },
+  {
+    "asset": "aac-96000-1.m4a",
+    "check": "raw-count",
+    "frames": 97280
+  },
+  {
+    "asset": "aac-96000-2.m4a",
+    "check": "raw-count",
+    "frames": 97280
+  },
+  {
+    "asset": "adif.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "adts-11025-1.aac",
+    "check": "raw-count",
+    "frames": 12288
+  },
+  {
+    "asset": "adts-11025-2.aac",
+    "check": "raw-count",
+    "frames": 12288
+  },
+  {
+    "asset": "adts-12000-1.aac",
+    "check": "raw-count",
+    "frames": 13312
+  },
+  {
+    "asset": "adts-12000-2.aac",
+    "check": "raw-count",
+    "frames": 13312
+  },
+  {
+    "asset": "adts-16000-1.aac",
+    "check": "raw-count",
+    "frames": 17408
+  },
+  {
+    "asset": "adts-16000-2.aac",
+    "check": "raw-count",
+    "frames": 17408
+  },
+  {
+    "asset": "adts-22050-1.aac",
+    "check": "raw-count",
+    "frames": 23552
+  },
+  {
+    "asset": "adts-22050-2.aac",
+    "check": "raw-count",
+    "frames": 23552
+  },
+  {
+    "asset": "adts-24000-1.aac",
+    "check": "raw-count",
+    "frames": 25600
+  },
+  {
+    "asset": "adts-24000-2.aac",
+    "check": "raw-count",
+    "frames": 25600
+  },
+  {
+    "asset": "adts-32000-1.aac",
+    "check": "raw-count",
+    "frames": 33792
+  },
+  {
+    "asset": "adts-32000-2.aac",
+    "check": "raw-count",
+    "frames": 33792
+  },
+  {
+    "asset": "adts-44100-1.aac",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "adts-44100-2.aac",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "adts-48000-1.aac",
+    "check": "raw-count",
+    "frames": 50176
+  },
+  {
+    "asset": "adts-48000-2.aac",
+    "check": "raw-count",
+    "frames": 50176
+  },
+  {
+    "asset": "adts-64000-1.aac",
+    "check": "raw-count",
+    "frames": 65536
+  },
+  {
+    "asset": "adts-64000-2.aac",
+    "check": "raw-count",
+    "frames": 65536
+  },
+  {
+    "asset": "adts-7350-1.aac",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "adts-7350-2.aac",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "adts-8000-1.aac",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "adts-8000-2.aac",
+    "check": "raw-count",
+    "frames": 9216
+  },
+  {
+    "asset": "adts-88200-1.aac",
+    "check": "raw-count",
+    "frames": 90112
+  },
+  {
+    "asset": "adts-88200-2.aac",
+    "check": "raw-count",
+    "frames": 90112
+  },
+  {
+    "asset": "adts-96000-1.aac",
+    "check": "raw-count",
+    "frames": 97280
+  },
+  {
+    "asset": "adts-96000-2.aac",
+    "check": "raw-count",
+    "frames": 97280
+  },
+  {
+    "asset": "adts-crc-mismatch-1.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "adts-crc-mismatch-2.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "adts-multiblock.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "aiff-11025-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-11025-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-12000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-16000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-176400-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-192000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-22050-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-24000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-32000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-44100-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-48000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-64000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-7350-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-8000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-88200-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-1-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-1-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-1-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-2-24.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-2-32.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "aiff-96000-2-8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "alac.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "alias-176400-22050.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "alias-176400-23000.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "alias-176400-82908p0.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "alias-192000-22050.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "alias-192000-23000.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "alias-192000-90240p0.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "alias-48000-22050.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "alias-48000-22560p0.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "alias-48000-23000.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "alias-64000-22050.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "alias-64000-23000.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "alias-64000-30080p0.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "alias-88200-22050.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "alias-88200-23000.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "alias-88200-41454p0.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "alias-96000-22050.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "alias-96000-23000.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "alias-96000-45120p0.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "ambiguous-mask.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "audio-video.mp4",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "bad-fdk-crc-1.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "bad-fdk-crc-2.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "changing-channels.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "changing-rate.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "compressed.aifc",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "conflicting-trim.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "crc.flac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "crest.wav",
+    "check": "finite-and-count",
+    "frames": 88201
+  },
+  {
+    "asset": "dither-mono.wav",
+    "check": "finite-and-count",
+    "frames": 64
+  },
+  {
+    "asset": "dither-stereo.wav",
+    "check": "finite-and-count",
+    "frames": 64
+  },
+  {
+    "asset": "edit-fractional.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "edit-multiple.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "edit-negative.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "edit-outside.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "edit-rate.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "edit-zero.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "empty.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "endpoint-11025-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-11025-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-12000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-12000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-16000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-16000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-176400-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-176400-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-192000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-192000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-22050-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-22050-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-24000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-24000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-32000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-32000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-44100-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-44100-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-48000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-48000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-64000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-64000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-7350-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-7350-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-8000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-8000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-88200-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-88200-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-96000-0.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "endpoint-96000-256.wav",
+    "check": "finite-and-count",
+    "frames": 257
+  },
+  {
+    "asset": "exact-one-second.wav",
+    "check": "finite-and-count",
+    "frames": 44100
+  },
+  {
+    "asset": "ext-11025-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-11025-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-12000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-16000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-176400-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-192000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-22050-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-24000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-32000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-44100-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-48000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-64000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-7350-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-8000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-88200-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-96000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-11025-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-11025-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-11025-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-11025-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-12000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-12000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-12000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-12000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-16000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-16000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-16000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-16000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-176400-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-176400-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-176400-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-176400-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-192000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-192000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-192000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-192000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-22050-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-22050-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-22050-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-22050-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-24000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-24000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-24000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-24000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-32000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-32000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-32000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-32000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-44100-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-44100-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-44100-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-44100-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-48000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-48000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-48000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-48000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-64000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-64000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-64000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-64000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-7350-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-7350-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-7350-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-7350-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-8000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-8000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-8000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-8000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-88200-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-88200-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-88200-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-88200-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-96000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-96000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-96000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-float-96000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "ext-valid16-in32-1.wav",
+    "check": "exact-lossless-samples-independent-WAVE-reader",
+    "frames": 256,
+    "FFmpeg6.1_reference_limitation_frames": 512,
+    "note": "container alignment/valid precision; FFmpeg bytes are not an oracle"
+  },
+  {
+    "asset": "ext-valid16-in32-2.wav",
+    "check": "exact-lossless-samples-independent-WAVE-reader",
+    "frames": 256,
+    "FFmpeg6.1_reference_limitation_frames": 512,
+    "note": "container alignment/valid precision; FFmpeg bytes are not an oracle"
+  },
+  {
+    "asset": "ext-valid24-in32-1.wav",
+    "check": "exact-lossless-samples-independent-WAVE-reader",
+    "frames": 256,
+    "FFmpeg6.1_reference_limitation_frames": 256,
+    "note": "container alignment/valid precision; FFmpeg bytes are not an oracle"
+  },
+  {
+    "asset": "ext-valid24-in32-2.wav",
+    "check": "exact-lossless-samples-independent-WAVE-reader",
+    "frames": 256,
+    "FFmpeg6.1_reference_limitation_frames": 256,
+    "note": "container alignment/valid precision; FFmpeg bytes are not an oracle"
+  },
+  {
+    "asset": "extra-audio.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "fdk-crc-1.aac",
+    "check": "raw-count",
+    "frames": 47104
+  },
+  {
+    "asset": "fdk-crc-2.aac",
+    "check": "raw-count",
+    "frames": 47104
+  },
+  {
+    "asset": "flac-11025-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-11025-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-12000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-16000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-176400-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-192000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-22050-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-24000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-32000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-44100-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-48000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-64000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-7350-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-8000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-88200-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-1-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-10.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-11.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-12.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-13.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-14.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-15.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-16.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-17.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-18.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-19.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-20.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-21.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-22.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-23.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-24.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-25.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-26.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-27.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-28.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-29.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-30.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-31.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-32.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-8.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "flac-96000-2-9.flac",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-11025-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-11025-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-11025-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-11025-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-12000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-12000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-12000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-12000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-16000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-16000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-16000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-16000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-176400-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-176400-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-176400-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-176400-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-192000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-192000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-192000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-192000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-22050-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-22050-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-22050-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-22050-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-24000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-24000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-24000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-24000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-32000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-32000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-32000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-32000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-44100-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-44100-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-44100-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-44100-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-48000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-48000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-48000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-48000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-64000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-64000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-64000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-64000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-7350-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-7350-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-7350-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-7350-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-8000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-8000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-8000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-8000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-88200-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-88200-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-88200-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-88200-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-96000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-96000-1-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-96000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "float-96000-2-64.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "free-format.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "gated.wav",
+    "check": "finite-and-count",
+    "frames": 44100
+  },
+  {
+    "asset": "he-aac-v2.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "he-aac.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "infinity.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "join-minus.wav",
+    "check": "finite-and-count",
+    "frames": 64
+  },
+  {
+    "asset": "join-plus.wav",
+    "check": "finite-and-count",
+    "frames": 64
+  },
+  {
+    "asset": "junk.bin",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "layer1.mp1",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "layer2.mp2",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "legacy.mp3",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "loas.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "minimal-adts-1-crc.aac",
+    "check": "raw-count",
+    "frames": 4096
+  },
+  {
+    "asset": "minimal-adts-1-plain.aac",
+    "check": "raw-count",
+    "frames": 4096
+  },
+  {
+    "asset": "minimal-adts-2-crc.aac",
+    "check": "raw-count",
+    "frames": 4096
+  },
+  {
+    "asset": "minimal-adts-2-plain.aac",
+    "check": "raw-count",
+    "frames": 4096
+  },
+  {
+    "asset": "mp3-11025-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 12672
+  },
+  {
+    "asset": "mp3-11025-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 12672
+  },
+  {
+    "asset": "mp3-11025-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 12672
+  },
+  {
+    "asset": "mp3-11025-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 12672
+  },
+  {
+    "asset": "mp3-12000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 13824
+  },
+  {
+    "asset": "mp3-12000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 13824
+  },
+  {
+    "asset": "mp3-12000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 13824
+  },
+  {
+    "asset": "mp3-12000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 13824
+  },
+  {
+    "asset": "mp3-16000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 17856
+  },
+  {
+    "asset": "mp3-16000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 17856
+  },
+  {
+    "asset": "mp3-16000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 17856
+  },
+  {
+    "asset": "mp3-16000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 17856
+  },
+  {
+    "asset": "mp3-22050-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 23616
+  },
+  {
+    "asset": "mp3-22050-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 23616
+  },
+  {
+    "asset": "mp3-22050-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 23616
+  },
+  {
+    "asset": "mp3-22050-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 23616
+  },
+  {
+    "asset": "mp3-24000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 25344
+  },
+  {
+    "asset": "mp3-24000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 25344
+  },
+  {
+    "asset": "mp3-24000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 25344
+  },
+  {
+    "asset": "mp3-24000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 25344
+  },
+  {
+    "asset": "mp3-32000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 33408
+  },
+  {
+    "asset": "mp3-32000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 33408
+  },
+  {
+    "asset": "mp3-32000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 33408
+  },
+  {
+    "asset": "mp3-32000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 33408
+  },
+  {
+    "asset": "mp3-44100-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "mp3-44100-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "mp3-44100-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "mp3-44100-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "mp3-48000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 49536
+  },
+  {
+    "asset": "mp3-48000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 49536
+  },
+  {
+    "asset": "mp3-48000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 49536
+  },
+  {
+    "asset": "mp3-48000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 49536
+  },
+  {
+    "asset": "mp3-8000-1-cbr.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "mp3-8000-1-vbr.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "mp3-8000-2-cbr.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "mp3-8000-2-vbr.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "nan.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "no-edit.m4a",
+    "check": "raw-count",
+    "frames": 46080
+  },
+  {
+    "asset": "odd-pcm8.aif",
+    "check": "exact-lossless-samples",
+    "frames": 257
+  },
+  {
+    "asset": "odd-pcm8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 257
+  },
+  {
+    "asset": "ogg-flac.ogg",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "one-frame-over.wav",
+    "check": "finite-and-count",
+    "frames": 44101
+  },
+  {
+    "asset": "one-frame-quant-zero.wav",
+    "check": "finite-and-count",
+    "frames": 1
+  },
+  {
+    "asset": "ordinary.wav",
+    "check": "finite-and-count",
+    "frames": 88200
+  },
+  {
+    "asset": "positive-192-n3.wav",
+    "check": "finite-and-count",
+    "frames": 3
+  },
+  {
+    "asset": "protected.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "qual-gate-absolute.wav",
+    "check": "finite-and-count",
+    "frames": 4410000
+  },
+  {
+    "asset": "qual-gate-relative.wav",
+    "check": "finite-and-count",
+    "frames": 3528000
+  },
+  {
+    "asset": "qual-gate-transition.wav",
+    "check": "finite-and-count",
+    "frames": 2650410
+  },
+  {
+    "asset": "qual-loudness-18.wav",
+    "check": "finite-and-count",
+    "frames": 882000
+  },
+  {
+    "asset": "qual-loudness-23.wav",
+    "check": "finite-and-count",
+    "frames": 882000
+  },
+  {
+    "asset": "qual-loudness-33.wav",
+    "check": "finite-and-count",
+    "frames": 882000
+  },
+  {
+    "asset": "qual-loudness-60.wav",
+    "check": "finite-and-count",
+    "frames": 882000
+  },
+  {
+    "asset": "qual-truepeak-finite-0.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-1.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-10.wav",
+    "check": "finite-and-count",
+    "frames": 33
+  },
+  {
+    "asset": "qual-truepeak-finite-11.wav",
+    "check": "finite-and-count",
+    "frames": 33
+  },
+  {
+    "asset": "qual-truepeak-finite-12.wav",
+    "check": "finite-and-count",
+    "frames": 33
+  },
+  {
+    "asset": "qual-truepeak-finite-13.wav",
+    "check": "finite-and-count",
+    "frames": 33
+  },
+  {
+    "asset": "qual-truepeak-finite-14.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-15.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-16.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-17.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-2.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-3.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-4.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-5.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-6.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-7.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-8.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-finite-9.wav",
+    "check": "finite-and-count",
+    "frames": 65
+  },
+  {
+    "asset": "qual-truepeak-sine-0.wav",
+    "check": "finite-and-count",
+    "frames": 4410
+  },
+  {
+    "asset": "qual-truepeak-sine-1.wav",
+    "check": "finite-and-count",
+    "frames": 4410
+  },
+  {
+    "asset": "qual-truepeak-sine-2.wav",
+    "check": "finite-and-count",
+    "frames": 4410
+  },
+  {
+    "asset": "qual-truepeak-sine-3.wav",
+    "check": "finite-and-count",
+    "frames": 4410
+  },
+  {
+    "asset": "qual-truepeak-sine-4.wav",
+    "check": "finite-and-count",
+    "frames": 4410
+  },
+  {
+    "asset": "rf64.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "riff-largest-source.wav",
+    "check": "exact-sparse-PCM-size/hash",
+    "frames": 178956969
+  },
+  {
+    "asset": "riff-overflow-source.wav",
+    "check": "exact-sparse-PCM-size/hash",
+    "frames": 178956970
+  },
+  {
+    "asset": "short-stts-alone.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "short-stts-conflict.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "short-trim.mp3",
+    "check": "raw-count",
+    "frames": 2304
+  },
+  {
+    "asset": "short.wav",
+    "check": "finite-and-count",
+    "frames": 17
+  },
+  {
+    "asset": "silence.wav",
+    "check": "finite-and-count",
+    "frames": 8820
+  },
+  {
+    "asset": "sowt-11025-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-11025-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-11025-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-11025-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-11025-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-11025-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-11025-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-11025-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-12000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-12000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-12000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-16000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-16000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-16000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-176400-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-176400-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-176400-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-192000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-192000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-192000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-22050-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-22050-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-22050-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-24000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-24000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-24000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-32000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-32000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-32000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-44100-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-44100-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-44100-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-48000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-48000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-48000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-64000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-64000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-64000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-7350-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-7350-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-7350-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-8000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-8000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-8000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-88200-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-88200-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-88200-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-1-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-96000-1-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-1-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-1-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-2-16.aif",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "sowt-96000-2-24.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-2-32.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "sowt-96000-2-8.aif",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "src-11025-20.wav",
+    "check": "finite-and-count",
+    "frames": 22050
+  },
+  {
+    "asset": "src-11025-4410p0.wav",
+    "check": "finite-and-count",
+    "frames": 22050
+  },
+  {
+    "asset": "src-11025-997.wav",
+    "check": "finite-and-count",
+    "frames": 22050
+  },
+  {
+    "asset": "src-12000-20.wav",
+    "check": "finite-and-count",
+    "frames": 24000
+  },
+  {
+    "asset": "src-12000-4800p0.wav",
+    "check": "finite-and-count",
+    "frames": 24000
+  },
+  {
+    "asset": "src-12000-997.wav",
+    "check": "finite-and-count",
+    "frames": 24000
+  },
+  {
+    "asset": "src-16000-20.wav",
+    "check": "finite-and-count",
+    "frames": 32000
+  },
+  {
+    "asset": "src-16000-6400p0.wav",
+    "check": "finite-and-count",
+    "frames": 32000
+  },
+  {
+    "asset": "src-16000-997.wav",
+    "check": "finite-and-count",
+    "frames": 32000
+  },
+  {
+    "asset": "src-176400-18000.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "src-176400-20.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "src-176400-997.wav",
+    "check": "finite-and-count",
+    "frames": 352800
+  },
+  {
+    "asset": "src-192000-18000.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "src-192000-20.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "src-192000-997.wav",
+    "check": "finite-and-count",
+    "frames": 384000
+  },
+  {
+    "asset": "src-22050-20.wav",
+    "check": "finite-and-count",
+    "frames": 44100
+  },
+  {
+    "asset": "src-22050-8820p0.wav",
+    "check": "finite-and-count",
+    "frames": 44100
+  },
+  {
+    "asset": "src-22050-997.wav",
+    "check": "finite-and-count",
+    "frames": 44100
+  },
+  {
+    "asset": "src-24000-20.wav",
+    "check": "finite-and-count",
+    "frames": 48000
+  },
+  {
+    "asset": "src-24000-9600p0.wav",
+    "check": "finite-and-count",
+    "frames": 48000
+  },
+  {
+    "asset": "src-24000-997.wav",
+    "check": "finite-and-count",
+    "frames": 48000
+  },
+  {
+    "asset": "src-32000-12800p0.wav",
+    "check": "finite-and-count",
+    "frames": 64000
+  },
+  {
+    "asset": "src-32000-20.wav",
+    "check": "finite-and-count",
+    "frames": 64000
+  },
+  {
+    "asset": "src-32000-997.wav",
+    "check": "finite-and-count",
+    "frames": 64000
+  },
+  {
+    "asset": "src-44100-17640p0.wav",
+    "check": "finite-and-count",
+    "frames": 88200
+  },
+  {
+    "asset": "src-44100-20.wav",
+    "check": "finite-and-count",
+    "frames": 88200
+  },
+  {
+    "asset": "src-44100-997.wav",
+    "check": "finite-and-count",
+    "frames": 88200
+  },
+  {
+    "asset": "src-48000-18000.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "src-48000-20.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "src-48000-997.wav",
+    "check": "finite-and-count",
+    "frames": 96000
+  },
+  {
+    "asset": "src-64000-18000.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "src-64000-20.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "src-64000-997.wav",
+    "check": "finite-and-count",
+    "frames": 128000
+  },
+  {
+    "asset": "src-7350-20.wav",
+    "check": "finite-and-count",
+    "frames": 14700
+  },
+  {
+    "asset": "src-7350-2940p0.wav",
+    "check": "finite-and-count",
+    "frames": 14700
+  },
+  {
+    "asset": "src-7350-997.wav",
+    "check": "finite-and-count",
+    "frames": 14700
+  },
+  {
+    "asset": "src-8000-20.wav",
+    "check": "finite-and-count",
+    "frames": 16000
+  },
+  {
+    "asset": "src-8000-3200p0.wav",
+    "check": "finite-and-count",
+    "frames": 16000
+  },
+  {
+    "asset": "src-8000-997.wav",
+    "check": "finite-and-count",
+    "frames": 16000
+  },
+  {
+    "asset": "src-88200-18000.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "src-88200-20.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "src-88200-997.wav",
+    "check": "finite-and-count",
+    "frames": 176400
+  },
+  {
+    "asset": "src-96000-18000.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "src-96000-20.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "src-96000-997.wav",
+    "check": "finite-and-count",
+    "frames": 192000
+  },
+  {
+    "asset": "tag-crc-ffmpeg.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "tag-crc-invalid.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "tag-crc-lame.mp3",
+    "check": "raw-count",
+    "frames": 9792
+  },
+  {
+    "asset": "three-channels.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "tie-88200.wav",
+    "check": "finite-and-count",
+    "frames": 1
+  },
+  {
+    "asset": "trim-outside.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "truncated.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "truncated.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "unsupported-aac.aac",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "unsupported-rate.wav",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "unsupported-trim.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "video-handler.m4a",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "wave-11025-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-11025-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-12000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-16000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-176400-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-192000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-22050-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-24000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-32000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-44100-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-48000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-64000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-7350-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-8000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-88200-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-1-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-1-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-1-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-1-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-2-16.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-2-24.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-2-32.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave-96000-2-8.wav",
+    "check": "exact-lossless-samples",
+    "frames": 256
+  },
+  {
+    "asset": "wave64.w64",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "xing-count.mp3",
+    "check": "hash-only-refusal-fixture"
+  },
+  {
+    "asset": "zero-192-n1.wav",
+    "check": "finite-and-count",
+    "frames": 1
+  },
+  {
+    "asset": "zero-192-n2.wav",
+    "check": "finite-and-count",
+    "frames": 2
+  }
+]
