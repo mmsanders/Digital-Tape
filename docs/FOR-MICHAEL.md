@@ -1,37 +1,29 @@
 # Human actions and queue
 
-**PM604 latest-round review.**
-Active reserved/hands-on actions live in
+**PM607 candidate integration / next native method.**
+Active human actions live in
 [open michael issues](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
-There is currently no new action requested from the human tester.
+No new human operation is requested in this round. Original589 stays reviewed/
+partial and closed; no repeat or Show Details recovery on original564.
 
-Human589's original564 test is independently reviewed/partial and closed.
-Verification331/42619272 accepted the supported visible observations with the
-edited-media/launch/identity/timing limits preserved. Show Details and NUL were
-not observed. No repeat, recovery click or new raw-card procedure is requested.
-The terminal finding has a covered source/component response: actual Claude
-Terminal C01/C02 contrast passed, and console/receipt source599 is integrated.
-This does not claim a new native app observation or require your old test repeated.
+The existing585 ZIP is now source/build/archive-cleared and its packaging
+integrated via603/c3d5b8fd. Exact artifacts and two-compilation/onecandidate
+history are preserved; no third build. A new app/runtime session is separate.
+Software608/Verification347 prepares the exact current585 native/poller/receipt
+method and a human-ready gesture kit. It can admit at most one ordinary native
+window/poller/close session after publication and manual resumption. Unsupported
+gesture/page claims stay HELD; no automatic grant to operate585 as a human here.
 
-A discovery-enabled Windows bundle603 exists and technical archive checks pass.
-Two compilations produced one uploaded candidate after a workflow exit-status fix.
-PM604 permits that exact disclosed exception;605/343 final integration clearance
-is next. No third build or launch instruction; native UI/poller method stays HELD.
-Diagnostics default OFF, Make/elevation disabled.
+A6 design344 found neither route supported by old evidence. Software609/
+Verification348 prepares the finite OFF-CARD kit before any future recorder/
+privilege authorization. No new trace, extent query, admin step or card test runs.
+A later request would identify the exact ready method/commands, not vague approval.
 
-INGEST598 is independently cleared and integrated: WP16 advances to3/4 and
-Phase2 to7/12. Full Windows native/own-host and other package gates remain.
-A6 route design is assigned Verification344, without a new card test or collection.
-No current human action is requested.
+Phase2 remains7/12. Full app/S3/G1/G2, A6 and INGEST own-host gates still apply.
+Make/elevation disabled; diagnostics defaultOFF except the new exact admitted
+receipt session. Software local Windows Claude, independent Verification,
+GitHub-only manual pickup; both listeners checked PAUSED. No lead was started,
+messaged or automatically advanced. Prior history remains in Git.
 
-Software uses local Windows Claude Code; Verification remains independent.
-GitHub-only manual pickup/resumption, both listeners PAUSED. No lead was started,
-messaged or automatically advanced by PM604.
-
-Current decisions and limits:
-[PM604 review](REVIEW/PM604-LATEST-ROUND.md),
-[status](STATUS.md), [packages](PACKAGES/README.md).
-Historical revisions remain in Git history; unrelated prior owner-specific
-material is not copied or linked here. Hardware execution remains parked through
-Phase2; safety gates/reserved signatures and purchase authority are unchanged.
-No history or raw evidence deleted.
+[Current review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md), [status](STATUS.md),
+[packages](PACKAGES/README.md).

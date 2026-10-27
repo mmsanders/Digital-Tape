@@ -1,6 +1,6 @@
 # Work packages — current roadmap
 
-**PM604 latest-round review.** Current Phase2 target: Windows11 x64;
+**PM607 latest-round review.** Current Phase2 target: Windows11 x64;
 macOS deferred, Linux existing CI. Live assignments are GitHub role issues,
 not this index. [Status](../STATUS.md), [Phase2 plan](../PHASE2-PLAN.md) and
 [independent integration](../VERIFICATION-INTEGRATION.md) govern current gates.
@@ -36,16 +36,18 @@ criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
 | WP-14 | [Real-card CLI](WP-14.md) | Software/Verification |3|3/4; nativeA6 request/offset linkage remains held, no new physical test issued. |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4; console/receipt599 cleared338 and integrated1731f6ec.603 built/byte-audited, exact count2 exception permitted by PM604;605/343 final clearance/integration pending. Native/S3/G2 still held. |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;603 integratedc3d5b8fd under343 exact clearance, same existing artifact/no third build.608/347 qualifies actual native poller/receipts and human-ready method. Native/S3/G2 still held. |
 | WP-16 | [Ingest](WP-16.md) | Software/Verification |3|3/4; exact333-cleared598 source integrated1695552d unchanged with122SUCCESS/2expected skips. Full native/own-host acceptance remains held. |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
 No current human action:589 reviewed/partial closed; no repeat or Show Details
 recovery requested. Source fixes do not retrospectively qualify original564 or native585.
-A6 route design is assigned344, no new physical test. Existing artifact closeout
-605/343 preserves both build records; no third compilation.
+A6 design344 complete: neither route substantiated for old data.609/348 prepares
+one off-card feasibility kit; no trial/recorder/query/admin/card action issued.
+605/343 closeout complete; unchanged existing candidate integrated, no third build.
+608/347 owns final-candidate native method/conditional session and human-ready kit.
 Shipping Make/elevation disabled. No current G1 observer or raw-card/S3 run issued.
-[PM604 review](../REVIEW/PM604-LATEST-ROUND.md) records exact evidence,
+[PM607 review](../REVIEW/PM607-CANDIDATE-NEXT-STEPS.md) records exact evidence,
 closures/restoration pointers and remaining gates. Manual role pickup only.
 
 ## Phase 3 — future scope, not activated
