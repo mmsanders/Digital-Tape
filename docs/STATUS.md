@@ -1,6 +1,6 @@
 # Project status
 
-**PM604 · input main1731f6ec · latest source/build review.**
+**PM607 · input mainc3d5b8fd · candidate integration / next native method.**
 Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
 Linux existing CI. Gate counts below are completed criteria, not effort estimates.
 
@@ -21,7 +21,7 @@ Linux existing CI. Gate counts below are completed criteria, not effort estimate
 | Editing/details584 |324/91815bc1 exact source3104e04e PASS32/32 versus old18/32;587 merged679e01ec with accepted source unchanged and120/120checks SUCCESS. |
 | INGEST595/598 | Exact cleared tree de1aaa23 equals merge1695552d; historical454/459 retired as superseded. Source integration only, no new child identity. |
 | Console/receipts599 |338/fcad6b0c effective C01false/C02true under actual console parent; exact cleared source integrated1731f6ec,121SUCCESS. |
-| Existing bundle603 |341/342 technical source/pin/archive checks PASS; two compilations/one candidate. PM604 permits exact disclosed exception, independent final clearance still pending343. |
+| Existing bundle603 |343/e880e210 express clearance under exact count2 exception;605 mergedc3d5b8fd with identical root48ed5e68,117SUCCESS/1guarded BUILDskip. Same ZIP/app/children, no third compile. |
 | Human589/support590 |328/331/42619272 reviewed partial visual result. Both envelopes closed;592 proposal retired unmerged with exact restore refs. No repeat requested. |
 
 Actual original564 human clips support initial page, seven natural label cases,
@@ -38,14 +38,15 @@ is unknown; one-window-throughout is not established. No human rerun is requeste
 
 | Pair | Concrete outcome / dependency |
 |---|---|
-| Software605 / Verification343 | Close exact count2/onecandidate scope exception and express final603 integration clearance; Software protected merge, no third build. |
-| Verification344 | A6 method DESIGN only: at most2 sufficient-proof routes, one recommendation/minimum missing evidence. No new scan/capture/card test. |
-| Existing585/325 | Source/build round complete;603 exact artifact retained durably. Native UI/poller method still HELD; no new launch or human repeat. |
+| Software608 / Verification347 | Exact585 native-window/poller/diagnostic method and human-ready kit; at most one bounded actual session ONLY after published method and manual resumption. No fake gestures. |
+| Software609 / Verification348 | Implement source/test-qualified off-card A6 route1 kit/profile/interpreter. Preparation only: no recorder/workload/query/admin/card trial. |
+| Completed605/343/344 | Packaging closeout integrated; A6 design evaluated2 routes, neither rescues old capture. Current native/poller method still pending347. |
 
 First-party diagnostics are default OFF and are not independent device-open
 absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
-new tests/method precede code. Future native receipt collection needs a separately
-admitted final candidate. No new app/poller/card/Make/elevation run is issued.
+independent methods/tests precede implementation or collection. PM607 issues only
+a staged new585 native/poller scope after exact347 admission; no app run by PM.
+No card/raw-device/Make/elevation or unsupported human gesture is issued.
 
 Software is local Windows Claude Code, model selected by the user; Verification
 is separate. GitHub-only manual selection/resumption. Both listeners checked PAUSED.
@@ -54,8 +55,9 @@ No current action remains for the human tester.589 is reviewed/partial and close
 
 ## Remaining rung blockers
 
-- WP14 rung4: native physicalA6 linkage remains unproved.344 now owns a manually
- selected design-only closure route; existing observations/witness facts carry.
+- WP14 rung4: native physicalA6 linkage remains unproved.344 found neither route
+ substantiated for retained facts.609/348 prepares route1 OFF-CARD feasibility kit;
+ no historical rescue, new native trial or privilege is inferred.
 - WP16 rung3 is now COMPLETE: independently cleared598 source integrated unchanged
  and applicable green checks authenticated. Mac remains deferred.
 - WP16 rung4: all applicable Windows/own-host/full package and physical integration
@@ -70,7 +72,7 @@ No current action remains for the human tester.589 is reviewed/partial and close
 
 ## Preserved references
 
-Current [PM604 review](REVIEW/PM604-LATEST-ROUND.md),
+Current [PM607 review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md),
 [verification integration](VERIFICATION-INTEGRATION.md),
 [package index](PACKAGES/README.md) and [human queue](FOR-MICHAEL.md).
 Prior status revisions remain unchanged in Git history. This current table omits

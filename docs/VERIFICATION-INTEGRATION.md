@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current boundary — PM604 latest-round review
+## Current boundary — PM607 candidate integration / native-method work
 
 Phase 1 remains 36/36; Phase 2 now 7/12. Complete required WP-15 package
 coverage is not established by the following component/build/startup milestones.
@@ -19,16 +19,18 @@ coverage is not established by the following component/build/startup milestones.
 | #336 / `e7f61d43` | Exact598 source integration-only clearance; merged1695552d with identical root,122SUCCESS/2expected skips. WP16 rung3 complete, not final native acceptance. |
 | #339 / `fcad6b0c` | Effective actual-parent console C01false/C02true PASS; express599 source clearance, integrated1731f6ec with121SUCCESS. |
 | #341/#342 / `494f8336` |603 technical source/pin/archive PASS and durable retention; truthful count2 violates old one-build guard. PM604 permits exact scoped exception; new343 final disposition pending. |
+| #345 / `e880e210` | Express exact603 packaging/source integration clearance;605 mergedc3d5b8fd with identical root,117SUCCESS/1guarded BUILDskip. Count exception fixed to existing bytes. |
+| #346 / `653c20b7` | A6 design-only: neither route substantiated for old facts; recommends one off-card route1 feasibility scope, not execution/qualification. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
 Human589/Software590 retain partial reviewed closure/no repeat. Source594/599 and
-INGEST595/598 now integrated under exact independent clearance, no corpus replay.
-605/343 closes the existing603 count exception/integration; no artifact rebuild.
-344 designs one sufficient A6 route without capture/runtime/card execution.
-Phase2 now7/12 from actual WP16 integration. WP15 remains1/4, WP14 remains3/4.
-All unmatched full native/own-host/session/S3/G1/G2 criteria remain held.
-Make/elevation disabled, no lead activation or current human task.
-See [PM604 review](REVIEW/PM604-LATEST-ROUND.md).
+INGEST595/598 remain integrated under exact clearance.603/605 packaging closeout
+also complete; ZIP/build history unchanged, no third build. Phase2 remains7/12.
+608/347 owns exact585 native/poller/diagnostic method and human-ready kit; ONLY a
+published adequate method can admit the one bounded session, not build readiness.
+609/348 prepares an A6 off-card route1 kit/tests; no new trace/query/admin/card run.
+No full native/own-host/session/S3/G1/G2 gain. Make/elevation disabled; manual
+pickup only, no lead activation or current human task. See [PM607](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 
