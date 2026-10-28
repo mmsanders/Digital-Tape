@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 24 October 2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment).
+**Current agreement: 24 October 2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment; ADR-195 proportional-evidence amendment, 28 October).
 Applies to every lead, regardless of model or app. Revisions/hashes live in
 spec/VERSION.md; phase and gate state in docs/STATUS.md.
 Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
@@ -47,21 +47,15 @@ control: a gate that never goes red has not established what it detects.
 
 Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
-Michael assigns the runtime. Prefer short scoped rounds and capability appropriate to the
+Michael assigns the runtime. Size rounds to an outcome (ADR-195) and use capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
 **Current routing (24 October, ADR-192): Software is Claude Code on Michael's actual local Windows machine, with model selected by Michael. Verification remains a separate independent context. PM posts GitHub issues only; no automatic lead kickoff, listener wake-up or next-task continuation until Michael explicitly resumes it. Both existing listeners are PAUSED.**
 
 Current Phase2 family delivery is Windows11 only; macOS is deferred under ADR-191, Linux remains existing CI. Michael may configure issue listeners for lead activation. This agreement does not
 install a listener or enable automatic acceptance, review or merge.
 
-**Expired freeze exception:** Michael granted one actor PM + Software + Hardware authority
-for this Phase 0 push, including writes and merges. Verification, wallet, physical
-acts and Michael’s reserved sign-off remain separate. The exception ended at Michael’s recorded freeze signature on 8 September 2026;
-a fresh lead does not inherit it.
-The combined actor recorded its exercised authority without claiming independent acceptance.
-Michael's latest instruction replaces the proposed automated organization with individual
-lead chats for Phase 1. This repository transition is separately authorized; it does
-not restore the expired combined product-lead mandate.
+The Phase 0 combined PM + Software + Hardware freeze exception expired on 8 September 2026
+(see DECISIONS.md); no lead inherits it.
 
 ## 3. Spec → independent tests → implementation
 
@@ -105,6 +99,10 @@ process debt, not a precedent or a retrospectively certified test-first result.
    package or freeze operations.
 5. Goldens are independent, byte-exact and human-listened. Regeneration requires
    logged PM approval. Missing fixtures stay visible; do not hide a red gate.
+6. **Proportional evidence (ADR-195).** A criterion is proved by a test of the outcome it
+   names plus a negative control that shows the test can fail. Mechanism forensics (kernel
+   traces, PID/handle attribution) are required only where a criterion names them. A method is
+   qualified by its own controls in the tranche that uses it, not in a separate round.
 
 Completed verification work is published on digital-tape-verification/main and
 imported with source SHA, files and coverage into Digital-Tape. All checkpoint

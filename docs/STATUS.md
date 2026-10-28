@@ -1,82 +1,66 @@
 # Project status
 
-**PM620 ·28 October2026 PDT · input main090551e · packaging done / method-controls blocker.**
-Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
-Linux existing CI. Gate counts below are completed criteria, not effort estimates.
+**PM622 · 28 October 2026 PDT · input main `4f5810b6` · Verification main `5512a2d0`.**
+Phase 1 is complete (36/36). Phase 2 is at **7/12** rungs and in closeout under
+[ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path).
+Windows 11 x64 is the only current release platform. macOS is deferred (ADR-191), and Linux
+stays as CI. The [Phase 2 ledger](PHASE2-LEDGER.md) has every exit criterion row by row. The
+[closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195) has the rounds.
 
-| Phase2 package | Rungs | Current boundary |
+## Packages
+
+| Package | Rungs | Where it stands |
 |---|---:|---|
-| WP14 CLI |3/4| NativeA6 request/offset-space linkage still unproved; existing real-card/witness facts carry. |
-| WP16 INGEST |3/4|333/e7f61d43 independently cleared exact598 source; merged1695552d unchanged,122SUCCESS/2expected skips. Full native/own-host acceptance remains held. |
-| WP15 app |1/4| Many components and bounded human visual facts accepted; complete required native/S3/package coverage absent. |
-| **Total** |**7/12**| WP16 gains actual protected implementation-integration rung; no final native acceptance inferred. |
+| WP-14 `tapectl` on real cards | 3/4 | Every criterion except A6 passed on Windows 11 by 14 Oct. A6 evidence is in hand (64 GB card, last-sector reads above 4 GiB). It needs a negative control and a disposition under ADR-195. |
+| WP-16 Ingest | 3/4 | Built, independently cleared and integrated (`1695552d`). I1–I8 evidence is in hand, including Windows 11 byte-identity runs. Needs a final disposition under ADR-195, including the own-host check. |
+| WP-15 App | 1/4 | Window, drop, ingest on drop, label, card discovery, messages and packaging are built and integrated. **Make is not built**: the button is hard-wired off and `tapectl make` is not in the shipping binary. |
+| **Total** | **7/12** | |
 
-## Completed and closed
+## What changed this round (PM622)
 
-| Delivery | Independent disposition and limit |
-|---|---|
-| Backend551/internal Make550 |286/297 and299 carry accepted ordinary-file/component scope; no shipping Make/session qualification. |
-| Screen/bridge567 |305/306 source scope integrated266bdcaa; original564 source/build/archive315 and native startup/quit316 carry only for that binary. |
-| Discovery580 |318/fdffea57 source integrated26ed8491;323/e4c7237d one metadata result exit0/offered0/unprobed0. Allowance consumed; no GUI/poller grant. |
-| Editing/details584 |324/91815bc1 exact source3104e04e PASS32/32 versus old18/32;587 merged679e01ec with accepted source unchanged and120/120checks SUCCESS. |
-| INGEST595/598 | Exact cleared tree de1aaa23 equals merge1695552d; historical454/459 retired as superseded. Source integration only, no new child identity. |
-| Console/receipts599 |338/fcad6b0c effective C01false/C02true under actual console parent; exact cleared source integrated1731f6ec,121SUCCESS. |
-| Existing bundle603 |343/e880e210 express clearance under exact count2 exception;605 mergedc3d5b8fd with identical root48ed5e68,117SUCCESS/1guarded BUILDskip. Same ZIP/app/children, no third compile. |
-| Human589/support590 |328/331/42619272 reviewed partial visual result. Both envelopes closed;592 proposal retired unmerged with exact restore refs. No repeat requested. |
+- New PM review: [PM622](REVIEW/PM622-CLOSEOUT-RESET.md) explains why rungs moved 6 → 7 in
+  eleven days. The evidence demanded had outgrown the criteria. Work had moved to what could be
+  proved rather than what was missing. Make had no implementation issue after ~18 Oct.
+- ADR-195: outcome tests plus negative controls; no separate method-qualification or
+  session-admission rounds; A6, WP-16 own-host, G1 and G3 methods clarified; `make` built now on
+  the accepted WP-14 provision open; **Q-P2-1(b) ruled: port-level batching, engine unchanged.**
+- APP-1, APP-1A and INGEST-1 amended to match. No criterion, guardrail or frozen interface
+  changed.
+- Recorded: Verification #361 disposed the single #618 native session as a bounded PASS. The
+  app window opened and closed normally. Its background poller ran `tapectl cards` twice and got
+  `offered 0` with no card inserted. The app ran unelevated at Medium integrity. No rung moved.
 
-Actual original564 human clips support initial page, seven natural label cases,
-file gesture/new refusal, mixed gesture/persistent refusal, Music Checking and
-displayed2seconds, Empty plain message/button, visible reset and close.
-Show Details was not clicked; NUL unsupported/unexecuted. Full child/IPC/argv/
-nonce/report/OS-exit/pair/zero-request/cleanup claims remain held.
-Edited clips, multiple launches and missing running-PID snapshot limit identity/
-timing claims; source/kit hashes do not establish an actual current process link.
-F328-1: a terminal appeared automatically during Music checking. Its owner/PID
-is unknown; one-window-throughout is not established. No human rerun is requested.
+## Current assignments (manual activation, ADR-192)
 
-## Current ownership — manual issues only
+| Owner | Issue | Outcome wanted |
+|---|---|---|
+| Software | [#624](https://github.com/mmsanders/Digital-Tape/issues/624) | `tapectl make`, UAC elevation of that one child, Make button wired, one Windows candidate ZIP |
+| Verification | [V#364](https://github.com/mmsanders/digital-tape-verification/issues/364) | Stage 1: dispose WP-14 and WP-16 under ADR-195; author WP-15 tests and the C2 checklist. Stage 2: dispose Software's head |
+| Michael | [#623](https://github.com/mmsanders/Digital-Tape/issues/623) | Merge the PM622 PR (the go signal), confirm or veto ADR-195, book the C2 session and G2 |
 
-| Pair | Concrete outcome / dependency |
-|---|---|
-| Software618 / Verification361 |616 packaging DONE.359 method held by local script-policy refusal;361 qualifies pure/file/parse controls in ordinary isolated Windows CI before fresh exact admission and ONE manually resumed618 session. No local policy workaround. |
-| A6 PARKED after613/353 | Exact SplitIo32 actual version/export/length absent; DiskIo Init/Flush also unsupported. No useful duplicate partial decoder. Resume only with concrete reviewed schema-observation method and actual operator/privilege authority. |
-| Completed612/352 | F347-1 source extension/correction cleared6fa36426, mergedfce1d644 after122SUCCESS. Final candidate audit1718ac63 PASS;616 integrated090551e at source-preserving4227dccd,116SUCCESS/1guarded BUILDskip. |
+Software and Verification Stage 1 run in parallel. Verification Stage 2 waits on Software's
+return. Leads start only when Michael starts them. No listener, kickoff or subworker.
 
-First-party diagnostics are default OFF and are not independent device-open
-absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
-independent methods/tests precede implementation or collection. New612 ZIPf6a90829/appccae0cf5/sourcefce1d644 is BUILD/ARCHIVE PASS, one compilation/one upload.
-359/360/7b80c14b returned StageA BLOCKED before controls execution; no native session.361 must qualify method on MAIN before618's single manually resumed session; old585 remains unrun/replaced.
-No card/raw-device/Make/elevation or unsupported human gesture is issued.
+## Next rounds
 
-Software is local Windows Claude Code, model selected by the user; Verification
-is separate. GitHub-only manual selection/resumption. Both listeners checked PAUSED.
-No lead messages/kickoff, next-task auto transition, new chat or subworkers.
-No current action remains for the human tester.589 is reviewed/partial and closed.
+C2 is Michael's ~45-minute real-card session with the candidate. C3 is the final WP-15
+disposition and G2 (his wife, unaided, witnessed). C4 is the exit ADR. Details in the
+[closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195).
 
-## Remaining rung blockers
+## Holds that stand
 
-- WP14 rung4: native physicalA6 linkage remains unproved.344 found neither route
- substantiated for retained facts.353/10bbe7ad names absent SplitIo32 contract;
- no historical rescue, new native trial or privilege is inferred.
-- WP16 rung3 is now COMPLETE: independently cleared598 source integrated unchanged
- and applicable green checks authenticated. Mac remains deferred.
-- WP16 rung4: all applicable Windows/own-host/full package and physical integration
- criteria, with conditional numerical claims kept at their proven bounds.
-- WP15 rung2: complete required package coverage, including native child/IPC
- attribution, remaining error/runtime rows and production S3/session feasibility.
- Component/headless-DOM or source receipts alone do not supply that coverage.
-- WP15 rung3/4 and G2: integrated full behavior/accepted dependencies, native
- G1/G3/G4/G5 and witnessed unaided family trial. Shipping Make/elevation disabled.
-- Crash41/404/global proof, batching/async, firmware/hardware, card atomicity,
- fabrication/charging and frozen engine/format boundaries remain unchanged.
+- Guardrails 01–13; engine pinned at A8 `d96b4245`; format frozen; Structural Rule 1 for engine
+  code; Verification independence and blindness.
+- WP-14 A4 disk safety outranks everything. Make ships only after independent disposition.
+  The app and ingest never run elevated.
+- Hardware, firmware, fabrication and charging are parked. Card atomicity is unqualified.
+  Phase 3 entry items from Q-P2-1: any-subset coverage of deferred faults, and guardrail 10
+  measured on target.
+- macOS deferred; WP-38 not taken.
 
 ## Preserved references
 
-Current [PM620 review](REVIEW/PM620-METHOD-CONTROLS.md),
-prior [PM617 review](REVIEW/PM617-NATIVE-COLLECTION-NEXT.md),
-prior [PM611 ruling](REVIEW/PM611-UNBLOCKING-RULING.md),
-prior [PM607 review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md),
-[verification integration](VERIFICATION-INTEGRATION.md),
-[package index](PACKAGES/README.md) and [human queue](FOR-MICHAEL.md).
-Prior status revisions remain unchanged in Git history. This current table omits
-unrelated owner-specific history rather than republishing or linking that material. No historical report, raw evidence or commit was deleted or rewritten.
+[PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md), prior [PM620](REVIEW/PM620-METHOD-CONTROLS.md),
+[verification integration](VERIFICATION-INTEGRATION.md), [package index](PACKAGES/README.md),
+[human queue](FOR-MICHAEL.md). Earlier status revisions are unchanged in Git history
+(PM620 status at `4f5810b6:docs/STATUS.md`).

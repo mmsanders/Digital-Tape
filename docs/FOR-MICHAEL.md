@@ -1,25 +1,19 @@
 # Human actions and queue
 
-**PM620 ·28 October2026 PDT.** No current human/card/admin action requested.
-Original589 remains reviewed/partial and closed; no old564 repeat.
+**PM622 · 28 October 2026 PDT.** Your current items are in
+[#623](https://github.com/mmsanders/Digital-Tape/issues/623):
 
-616 packaging is integrated090551e, candidate unchanged, no rebuild/upload.
-Software618 declared current ordinary Windows context but has not launched.
-Verification359's new PowerShell method controls were refused before execution
-by its own local script policy. That is a test-method blocker, not app failure
-or an automatic approval-review rejection. Held launcher must not be used.
+1. **Merge the PM622 docs PR** when you are happy with it. That is the go signal for round C1.
+   Then start Software and Verification on their C1 issues, in any order. They run in parallel.
+2. **Confirm or veto ADR-195**, the evidence reset ([review](REVIEW/PM622-CLOSEOUT-RESET.md)).
+3. **Book the C2 session.** About 45 minutes at the Windows 11 machine with one PNY card and
+   the reader, once Software's candidate and Verification's checklist are ready.
+4. **G2.** Ask whether your wife is willing to be the unaided tester (D6), and choose the
+   folder of music she will use. She should not see the app before the test.
+5. Optional: tell PM whether a lead may continue into the next stage of the *same* issue
+   without you restarting it.
 
-Fresh Verification361 qualifies only pure/file/parser method controls in normal
-isolated Windows CI under default policy. No denied-local-script workaround,
-execution-policy flag/change, provider/mode change or native app test in CI.
-After successful controls/full method review and exact admission on MAIN,
-Michael can manually resume existing618 for its ONE bounded native session.
-No human gesture/card/admin test, new Software duplicate issue or rebuild.
+Nothing needs a card or admin action until C2. Older items (#589 and earlier) are closed and
+need nothing more.
 
-Phase2 stays7/12. A6 route1 remains PARKED at missing SplitIo contracts; no new
-capture or duplicate partial decoder. Full native/G1/S3/own-host/fullAPP/G2 holds.
-First-party child receipts never become external child/no-device/no-write proof.
-Manual GitHub-only, Software local Windows Claude and independent Verification.
-Listeners PAUSED; no lead messages/kickoff/subworkers/automatic continuation.
-
-[Current review](REVIEW/PM620-METHOD-CONTROLS.md), [status](STATUS.md).
+[Status](STATUS.md) · [ledger](PHASE2-LEDGER.md) · [closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195)

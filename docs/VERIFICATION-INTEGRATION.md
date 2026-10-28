@@ -1,9 +1,11 @@
 # Independent verification integration
 
-## Current boundary — PM620 packaging complete / method controls held
+## Current boundary — PM622 closeout (ADR-195)
 
-Phase 1 remains 36/36; Phase 2 now 7/12. Complete required WP-15 package
-coverage is not established by the following component/build/startup milestones.
+Phase 1 is 36/36; Phase 2 is 7/12. From PM622 on, remaining acceptance follows ADR-195
+(outcome tests plus negative controls) and is tracked row by row in
+[the Phase 2 ledger](PHASE2-LEDGER.md). The rows below are the independent publications
+merged so far. They keep their recorded scope.
 
 | Merged independent publication | Current disposition |
 |---|---|
@@ -25,18 +27,13 @@ coverage is not established by the following component/build/startup milestones.
 | #358 / `1718ac63` | Exact612 BUILD/ARCHIVE PASS, one compilation/one upload, ZIPf6a90829/appccae0cf5;616e8f61975 packaging cleared117SUCCESS, integrated090551e at4227dccd with116SUCCESS/1guardedBUILDskip. No runtime yet. |
 | #355 / `10bbe7ad` |353 finite native-layout12positive/63negative controls; missing actual SplitIo32 contract prevents full A6 kit.613/353 closed at BLOCKED return; no duplicate partial decoder or new capture. |
 | #360 / `7b80c14b` |359 StageA BLOCKED before PowerShell controls execution by local script policy; Python preparation PASS only, launcher unconditional STOP. No native admission/session. Fresh361 owns isolated Windows-CI pure/file/parser qualification. |
+| #362/#363 / `5512a2d0` |361 qualified the session method in Windows CI, then disposed the single618 native session: bounded PASS. Window opened/closed normally, two first-party `tapectl cards` polls returned offered0, app parent at Medium integrity. No rung change. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Human589/Software590 retain partial reviewed closure/no repeat. Source594/599 and
-INGEST595/598 remain integrated under exact clearance.603/605 packaging closeout
-also complete; ZIP/build history unchanged, no third build. Phase2 remains7/12.
-616 integrated090551e unchanged.618 now awaits fresh361 method qualification
-and ONE conditional native collection after publication/manual resumption;
-359/360's local policy refusal remains a real blocked control run, not app failure. Parent native observation and source-bound
-first-party child receipts stay distinct; independent G1 absence remains HELD.
-A6 route1 PARKED at353's missing schema; no new trace/query/admin/card run.
-No full native/own-host/session/S3/G1/G2 gain. Make/elevation disabled; manual
-pickup only, no lead activation or current human task. See [PM620](REVIEW/PM620-METHOD-CONTROLS.md).
+Next: Verification C1 disposes WP-14 (A6) and WP-16 (I1–I8, own-host) under ADR-195,
+authors the remaining WP-15 tests and the C2 checklist, then disposes Software's `make`/app
+head. Software integrates each exact cleared head. No Make-enabled candidate touches a real card
+until Verification has disposed its exact `make` head on images. See [PM622](REVIEW/PM622-CLOSEOUT-RESET.md).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 

@@ -8,6 +8,9 @@ Package detail and acceptance criteria are in [WP-14](PACKAGES/WP-14.md),
 
 **Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
 
+**Closeout, 28 October 2026 / ADR-195:** the remaining work is planned in [§8](#8-closeout-plan-adr-195)
+and tracked row by row in [the Phase 2 ledger](PHASE2-LEDGER.md).
+
 ## 1. What Phase 2 delivers
 
 **Goal:** a person who is not Michael drops a folder of music onto a computer program, types a
@@ -186,3 +189,26 @@ The pilot targets from #372, tracked weekly in STATUS while Phase 2 runs:
 - no repeat of a settled contract defect.
 
 After two corrections of the same kind, the shared mechanism gets fixed rather than patched a third time.
+
+## 8. Closeout plan (ADR-195)
+
+Issued by PM622, 28 October 2026 PDT. Diagnosis and rationale: [PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md).
+Evidence rule: outcome tests plus a negative control; no separate method-qualification rounds;
+Michael's witnessed records count as returned (ADR-195 §1). Each round closes named
+[ledger](PHASE2-LEDGER.md) rows. Rounds are as long as their work needs, not calendar days.
+
+| Round | Software | Verification | Michael | Ledger rows closed |
+|---|---|---|---|---|
+| **C1** | Build `tapectl make` (accepted provision open kept for load and verify), UAC elevation of the one `make` child, and the app's Make button. Build one Windows candidate ZIP. Return the head and a one-page method note | Stage 1 (no Software dependency): dispose WP-14 A1–A9 and WP-16 I1–I8 plus own-host under ADR-195; author remaining WP-15 G1/G3/G4/G5 tests and the C2 checklist. Stage 2: dispose Software's exact make/app head and candidate | Merge the PM622 PR; answer the PM622 questions issue; book C2 and G2 | WP-14 A6 → **WP-14 4/4**; I1–I8 + own-host → **WP-16 4/4**; Make path built |
+| **C2** | Fix anything C2 finds, rebuild | Dispose Michael's C2 return; dispose G1/G3/G4/G5 | One session of about 45 minutes on the Windows 11 machine: install the candidate, make a real cartridge from a folder through the app, check it with `tapectl verify` and `dump`, run the scripted error cases, pull the card once mid-make | G1, G3, G4, G5 → WP-15 rungs 2–3 |
+| **C3** | Final candidate only if C2 needed fixes | Final WP-15 disposition on the exact head | G2: his wife's unaided run, witnessed and recorded | G2 → **WP-15 4/4** |
+| **C4** | — | — | Phase 2 sign-off | PM exit ADR: host scope frozen, goldens green, Q-P2-1 recorded |
+
+**Critical path:** Make (C1) → C2 real-card session → G2. WP-14/16 closure runs beside it and
+does not wait on Software. If C2 is clean, C3 and C4 can share a day.
+
+**Already decided:** Q-P2-1(b), port-level batching with the engine unchanged (ADR-195 §4).
+Its any-subset coverage and on-target guardrail 10 measurement are Phase 3 entry items.
+
+**Not in closeout:** macOS (deferred, ADR-191), WP-38, hardware, firmware, card atomicity
+qualification, the optional native-flow receipts (APP-1A §8), and any kernel-trace method.

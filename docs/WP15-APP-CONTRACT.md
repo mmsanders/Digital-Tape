@@ -7,13 +7,13 @@ ADR-182/183; Software444's Q1–Q7 are resolved by APP-1A. Package criteria are
 APP-1A controls the amended discovery/report interfaces. No engine, format or
 frozen-spec change. Independent preflight/tests/disposition remain required.
 **Michael's taste items** (§8) carry defaults. They may change wording or defaults without a new
-round until Software starts the build. Build starts only within a fresh Software issue; S2/S3 discovery/make implementation
-waits for independent feasibility preflight. Host report/app-shell work may overlap
-independent authoring under the existing host-tool rule.
-ADR-188 issues S2 discovery and conditionally S3 make host slices in fresh role issues;
-S3 still requires independent retained-session/safety feasibility and relevant published
-tests before implementation. S5 common-path/elevation integration is not issued by
-that bounded tranche. Ready human-run pins and native acceptance holds are unchanged.
+round until Software starts the build.
+
+**Amended 28 October 2026 PDT by [ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path).**
+`tapectl make` (S3) is implemented now against the S3 tests already on main. It reuses the
+accepted WP-14 provision open and safety sequence (§3). The G1 runtime trace is withdrawn (§7).
+App-origin G3 rows are proved by bridge-level tests plus Michael's scripted C2 checklist (§6, §7).
+Earlier S3 feasibility gating (ADR-188/189) is superseded; its history is unchanged.
 
 **Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
 
@@ -97,20 +97,17 @@ When none is offered the app keeps polling and records unprobed for Show details
 
 **`tapectl make DEV --label L --length-s S --wav FILE --erase DEV`** (ADR-183, P2V15-003). One
 process runs `provision`, then `load` of FILE, then `verify`, with exactly their existing outcomes,
-order of work and exit meanings. It holds **one authorized device session** across the whole sequence; preliminary
-read-only/zero-access safety query handles are permitted (APP-1A §5). The verify
-phase uses a NULL-write binding over the same open device; it does not reopen it. §5 safety runs
-first on that open, as for `provision`. **Continuity:** if the OS reports media removal or change
-on that open device, `make` stops with ID `CARD_CHANGED` and exit 1, and never continues on a
-reopened path. This covers Windows media-change/removal errors and macOS disk disappearance.
-Software demonstrates detection on current Windows11 with an equal-size swap, a
-remove/reinsert, and a no-change positive. A reader or platform that cannot report a change is
-recorded as a stated limitation, never claimed. A change between `cards` and the start of `make`
-is covered by the app's pre-launch recheck (§4) only. A deliberate equal-size swap inside that gap
-is not detectable from published facts, and the app does not claim otherwise. Separate
-`provision`, `load` and `verify` remain available and unchanged. Required/optional
-boundary-query failure semantics and platform device-binding holds are in APP-1A §7
-(ADR-189); ordinary query failure cannot silently authorize continued work.
+order of work and exit meanings. **Open and safety (ADR-195):** `make` opens the device and runs the
+§5 safety checks exactly as the accepted WP-14 `provision` does, then keeps that one handle for
+`load` and for `verify`. `verify` uses a NULL-write binding over the same handle and does not
+reopen the path. A refused target gets zero writes (WP-14 A4). **Continuity:** if the OS reports
+media removal or change on that open handle, `make` stops with ID `CARD_CHANGED` and exit 1, and
+never continues on a reopened path. A reader that cannot report a change, or an equal-size swap
+it cannot see, is a stated limitation and is never claimed as detected. A change between `cards`
+and the start of `make` is covered by the app's pre-launch recheck (§4) only. Separate
+`provision`, `load` and `verify` remain available and unchanged. Boundary-query failure
+semantics (`HOST_QUERY_FAILED`) are in APP-1A §7; ordinary query failure cannot silently
+authorize continued work.
 
 **`--report FILE --report-nonce N`** on `ingest`, `tapectl cards` and `tapectl make`. This is a
 narrow, opt-in **diagnostic exception** to INGEST-1 §6's no-output-before-preflight rule (ADR-183,
@@ -192,7 +189,7 @@ prompt text the user sees. Prompts are a G2 hesitation risk, not a failure in th
 These are defaults; Michael may change the wording (§8). A **child-origin** row comes from a real
 child exit code plus a report ID, never from free text. An **app-origin** row (marked †) comes
 from a named app event (P2V15-004): `DROP_NOT_FOLDER`, `SPAWN_FAILED`, `ELEVATION_DECLINED` or
-`CARD_RECHECK_MISMATCH`. App-origin events are tested with real OS/UI controls. No shipping switch
+`CARD_RECHECK_MISMATCH`. App-origin events are tested per §7 (ADR-195). No shipping switch
 fakes either kind. Every Problem state also has **Show details**, which shows
 the raw stderr as copyable text for a grown-up.
 
@@ -222,13 +219,18 @@ and independently tested. "Not a card" is satisfied by non-offering plus a refus
 
 ## 7. Acceptance mapping
 
-- **G1:** the §1 static check, plus a runtime trace showing no device opens by the app process.
-- **G3:** every child-origin §6 row is driven by real tool outcomes on images or loop devices in CI,
-  and every † row by a real OS/UI event. The pulled case uses a device-removal fixture, with a
-  WP-14 A4 zero-foreign-write observation. `make` continuity uses the §3 swap/reinsert controls.
+- **G1:** the §1 static check with its negative control, plus evidence that the app and `ingest`
+  run unelevated (`asInvoker`, Medium integrity), so Windows refuses them raw device access. Only
+  the `tapectl make` child is elevated (ADR-195; the earlier runtime-trace requirement is withdrawn).
+- **G3:** every child-origin §6 row is driven by real tool outcomes on images or loop devices in CI.
+  Every † row is driven through the production bridge in a component or app-level test, and the
+  rows a person can trigger (drop a file, decline UAC, pull the card) are also run once by
+  Michael on the candidate from Verification's C2 checklist (ADR-195). In CI the pulled case uses
+  a device-removal fixture; on the real card it is one physical pull mid-make in C2, followed by
+  a successful remake. `make` never reopens after a reported removal.
 - **G4:** screens are checked against §2. No element enumerates tracks, files, folders or cards.
-- **G5:** install and run from the build artifact on each D2 platform. Unsigned is acceptable. Exact
-  OS builds are recorded.
+- **G5:** Michael installs and runs the exact candidate ZIP on his Windows 11 machine in C2.
+  Unsigned is acceptable. The exact OS build is recorded.
 - **G2:** Michael's witnessed unaided run (D6) after G1/G3/G4/G5 pass on an exact head.
 - **§3 additions:** Verification-authored tests, with negative controls, before the app's exact-head
   disposition. Required controls include:
@@ -241,8 +243,7 @@ and independently tested. "Not a card" is satisfied by non-offering plus a refus
     byte-invalid candidates and a bare CRC ending `55 AA`;
   - stderr wording changes leave the app result unchanged.
 
-Real-card G2 waits on WP-14 physical A6 and WP-16 acceptance. App authoring and implementation may
-overlap them under the host-tool rule.
+Real-card G2 waits on WP-14 and WP-16 acceptance and on G1/G3/G4/G5 passing on an exact head.
 
 ## 8. Michael's taste items (defaults stand unless changed)
 
