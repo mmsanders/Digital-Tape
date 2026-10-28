@@ -1,6 +1,6 @@
 # Work packages — current roadmap
 
-**PM617 latest-round review.** Current Phase2 target: Windows11 x64;
+**PM620 latest-round review.** Current Phase2 target: Windows11 x64;
 macOS deferred, Linux existing CI. Live assignments are GitHub role issues,
 not this index. [Status](../STATUS.md), [Phase2 plan](../PHASE2-PLAN.md) and
 [independent integration](../VERIFICATION-INTEGRATION.md) govern current gates.
@@ -36,7 +36,7 @@ criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
 | WP-14 | [Real-card CLI](WP-14.md) | Software/Verification |3|3/4; nativeA6 request/offset linkage remains held, no new physical test issued. |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;612 corrected source integratedfce1d644, new candidate audit1718ac63 PASS.618/359 owns616 integration and one qualified native poller receipt session; no rebuild/human task. Native/S3/G2 still held. |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;612 corrected source integratedfce1d644, new candidate audit1718ac63 PASS.616 integrated090551e;618 awaits fresh361 method qualification after359 script-policy blocker. ONE native session remains unexecuted; no rebuild/human task. Native/S3/G2 still held. |
 | WP-16 | [Ingest](WP-16.md) | Software/Verification |3|3/4; exact333-cleared598 source integrated1695552d unchanged with122SUCCESS/2expected skips. Full native/own-host acceptance remains held. |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
@@ -45,8 +45,9 @@ recovery requested. Source fixes do not retrospectively qualify original564 or n
 A6 route1 PARKED after353/10bbe7ad: exact SplitIo32 native contract absent;
 no duplicate partial decoder or new recording/admin/card task. Resume only with
 concrete reviewed schema observation and actual operator/privilege authority.
-618/359 owns corrected612 packaging integration and one conditional native session.
-[PM617 review](../REVIEW/PM617-NATIVE-COLLECTION-NEXT.md) records exact evidence,
+616 packaging is integrated.618 awaits361's executable method qualification in
+ordinary Windows CI after359 local script-policy refusal; no native session yet.
+[PM620 review](../REVIEW/PM620-METHOD-CONTROLS.md) records exact evidence,
 closures/restoration pointers and remaining gates. Manual role pickup only.
 
 ## Phase 3 — future scope, not activated
