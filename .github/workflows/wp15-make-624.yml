@@ -1,0 +1,100 @@
+name: WP15 S3 tapectl make (#624)
+
+# Software's actual `tapectl make` observations for tests/wp15_cards_make_r1 (APP-1 §3,
+# ADR-195): hosted runners only, on Linux loop devices and Windows Server VHDs; no
+# physical disk, no reader, no Windows 11. tools/wp15-cards/s3_bundle.py runs the rows
+# and writes BUNDLE.json; the imported runner.py (unchanged) judges it. A second bundle
+# with one write callback during verify must be REFUSED by the same judge (its negative
+# control). Raw observations and judgments only: no acceptance.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - 'engine/**'
+      - 'tools/wp15-cards/s3_bundle.py'
+      - 'tests/wp15_cards_make_r1/**'
+      - '.github/workflows/wp15-make-624.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: make — Linux loop devices (hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build and host tests
+        run: make -C engine all && make -C host test
+      - name: Binaries
+        run: sha256sum build/host/tapectl build/host/tapectl-test; uname -a; . /etc/os-release; echo "$PRETTY_NAME"
+      - name: S3 bundle (loop devices and device-mapper, as root)
+        run: |
+          sudo python3 -B tools/wp15-cards/s3_bundle.py --platform linux --tapectl build/host/tapectl \
+            --tapectl-test build/host/tapectl-test --out "$RUNNER_TEMP/s3" \
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+          sudo chown -R "$(id -u):$(id -g)" "$RUNNER_TEMP"
+      - name: Imported runner judges the bundle (tests/wp15_cards_make_r1, unchanged)
+        run: |
+          python3 -B tests/wp15_cards_make_r1/selftest.py > /dev/null
+          python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/s3/JUDGED.json"
+          python3 -c "import json,sys;[print('unjudged:',u['name'],'-',u['why']) for u in json.load(open(sys.argv[1]))['unjudged']]" "$RUNNER_TEMP/s3/BUNDLE.json"
+      - name: Judge negative control (a write callback during verify must be refused)
+        run: |
+          if python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3-negative" --out "$RUNNER_TEMP/negative.json" 2> "$RUNNER_TEMP/negative.err"; then
+            echo "FAIL: the judge accepted a session with a write callback during verify"; exit 1
+          fi
+          echo "ok: refused"; tail -2 "$RUNNER_TEMP/negative.err"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-linux
+          path: |
+            ${{ runner.temp }}/s3
+            ${{ runner.temp }}/s3-negative
+            ${{ runner.temp }}/negative.err
+          retention-days: 90
+
+  windows:
+    name: make — Windows Server VHDs (hosted, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc test-bins
+      - name: Binaries
+        run: |
+          sha256sum build/host/tapectl.exe build/host/tapectl-test.exe
+          powershell -NoProfile -Command "\$o=Get-CimInstance Win32_OperatingSystem; \$o.Caption + ' ' + \$o.Version + ' build ' + \$o.BuildNumber"
+      - name: S3 bundle (VHDs; removal, re-insertion and equal-size swap at phase boundaries)
+        run: |
+          python -B tools/wp15-cards/s3_bundle.py --platform windows --tapectl build/host/tapectl.exe \
+            --tapectl-test build/host/tapectl-test.exe --out "$RUNNER_TEMP/s3" \
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Imported runner judges the bundle (tests/wp15_cards_make_r1, unchanged)
+        run: |
+          python -B tests/wp15_cards_make_r1/selftest.py > /dev/null
+          python -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED.json"
+          python -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/s3/JUDGED.json"
+          python -c "import json,sys;[print('unjudged:',u['name'],'-',u['why']) for u in json.load(open(sys.argv[1]))['unjudged']]" "$RUNNER_TEMP/s3/BUNDLE.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-windows
+          path: ${{ runner.temp }}/s3
+          retention-days: 90

@@ -61,6 +61,33 @@ static int16_t g_pcm[FEED_FRAMES * 2u];
 static struct target g_tgt;
 static tape *g_t;
 
+/* make (APP-1 §3): the first failure's closed APP-1A ID and its payload keys,
+   noted where the existing commands already detect it, and the report phase
+   it happened in. Other commands never read these. */
+static struct { const char *id; char payload[1024]; } g_fail;
+static const char *g_phase_name;
+static int g_in_capacity;
+
+static void fail_note(const char *id, const char *payload)
+{
+    if (g_fail.id != NULL) { return; }
+    g_fail.id = id;
+    snprintf(g_fail.payload, sizeof g_fail.payload, "%s", payload);
+}
+
+/* Optional progress (APP-1A §4), about 1/64 of a step at a time. Without a
+   report, report_progress does nothing. */
+static void progress(const char *step, uint64_t done, uint64_t total)
+{
+    static const char *last_step;
+    static uint64_t last;
+    if (last_step == NULL || strcmp(step, last_step) != 0 || done == total || done >= last + total / 64u || done < last) {
+        report_progress(step, done, total);
+        last_step = step;
+        last = done;
+    }
+}
+
 static const char *rname(tape_result r)
 {
     switch (r) {
@@ -93,6 +120,10 @@ static const char *rname(tape_result r)
 
 static int engine_fail(const char *what, tape_result r)
 {
+    char p[96];
+    snprintf(p, sizeof p, ",\"phase\":\"%s\",\"result\":\"%s\"",
+             g_in_capacity ? "capacity" : g_phase_name ? g_phase_name : "provision", rname(r));
+    fail_note("ENGINE", p);
     fprintf(stderr, "tapectl: %s: %s\n", what, rname(r));
     return EXIT_ENGINE;
 }
@@ -339,10 +370,16 @@ static int feed_without_commit(struct wav_in *in)
 {
     tape_status_t st;
     int bad = 0;
+    uint64_t fed = 0;
 
+    progress("load", 0, in->frames);
     for (;;) {
         uint32_t n = wav_read_frames(in, g_pcm, FEED_FRAMES, &bad), done = 0;
-        if (bad) { fprintf(stderr, "tapectl: truncated WAV data\n"); return EXIT_USAGE; }
+        if (bad) {
+            fail_note("WAV_TRUNCATED", ",\"phase\":\"load\"");
+            fprintf(stderr, "tapectl: truncated WAV data\n");
+            return EXIT_USAGE;
+        }
         if (n == 0u) { break; }
         while (done < n) {
             uint32_t acc = 0;
@@ -351,6 +388,8 @@ static int feed_without_commit(struct wav_in *in)
             CHECK(tape_feed(g_t, g_pcm + (size_t)done * 2u, n - done, &acc));
             done += acc;
         }
+        fed += n;
+        progress("load", fed, in->frames);
     }
     OBS_PHASE("service", g_side_letter, -1);
     do {
@@ -413,7 +452,19 @@ static int bare_only(const char *img)
 /* WP-14 A7: refuse, before any write, a source longer than the label. The
    cartridge's nominal length is read through a read-only binding, so even a
    mount that would otherwise repair a superblock writes nothing. */
+static int capacity_check_body(uint32_t src_frames);
+
+/* make reports an engine failure here as phase "capacity" (APP-1A §3). */
 static int capacity_check(uint32_t src_frames)
+{
+    int rc;
+    g_in_capacity = 1;
+    rc = capacity_check_body(src_frames);
+    g_in_capacity = 0;
+    return rc;
+}
+
+static int capacity_check_body(uint32_t src_frames)
 {
     tape_dev ro = g_tgt.dev;
     tape_info info;
@@ -441,6 +492,12 @@ static int capacity_check(uint32_t src_frames)
     limit = (uint64_t)len * WAV_RATE;
     if ((uint64_t)src_frames <= limit) { return 0; }
     over = (uint64_t)src_frames - limit;
+    {
+        char p[160];
+        snprintf(p, sizeof p, ",\"total_frames\":%llu,\"capacity_frames\":%llu,\"excess_frames\":%llu",
+                 (unsigned long long)src_frames, (unsigned long long)limit, (unsigned long long)over);
+        fail_note("TOO_LONG", p);
+    }
     secs = (over + WAV_RATE - 1u) / WAV_RATE;           /* #384 Q8: round up */
     fprintf(stderr, "tapectl: Too long by ");
     if (secs >= 60u) { fprintf(stderr, "%llu min", (unsigned long long)(secs / 60u)); }
@@ -708,8 +765,11 @@ static int put_p1(void *user, uint32_t sector, const uint8_t data[512])
     return hport_write(hp, ((uint64_t)LAYOUT_P1_START + sector) * 512u, data, 512);
 }
 
-static int io_fail(const char *what)
+static int io_fail(const char *what, const char *op)
 {
+    char p[64];
+    snprintf(p, sizeof p, ",\"phase\":\"provision\",\"op\":\"%s\"", op);
+    fail_note("IO", p);
     fprintf(stderr, "tapectl: provision: cannot %s\n", what);
     return EXIT_ENGINE;
 }
@@ -720,27 +780,32 @@ static int provision_existing(uint64_t sectors, uint32_t p2, const char *label,
 {
     uint8_t lba0[512], mbr[512];
     int i, nonzero = 0;
+    progress("provision", 0, 4);
     /* 3. Zero LBA 0 if it is not already zero, so an interrupted provision is
           never a provisioned card. */
-    if (hport_read(&g_tgt.hp, 0, lba0, 512) != 0) { return io_fail("read LBA 0"); }
+    if (hport_read(&g_tgt.hp, 0, lba0, 512) != 0) { return io_fail("read LBA 0", "read_lba0"); }
     for (i = 0; i < 512; i++) { nonzero |= lba0[i]; }
     if (nonzero) {
         memset(lba0, 0, sizeof lba0);
-        if (hport_write(&g_tgt.hp, 0, lba0, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("clear LBA 0"); }
+        if (hport_write(&g_tgt.hp, 0, lba0, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("clear LBA 0", "clear_lba0"); }
     }
+    progress("provision", 1, 4);
 
     /* 4. Partition 2 via tape_format (the engine flushes its own writes). */
     partview_bind(&g_tgt.view, &g_tgt.dev, &g_tgt.hp, LAYOUT_P2_START, p2, 1);
     CHECK(tape_format(&g_tgt.dev, uuid, epoch, label, length));
+    progress("provision", 2, 4);
 
     /* 5. Partition 1, then flush. */
     if (fat_build_p1(put_p1, &g_tgt.hp, label, uuid, epoch) != 0 || hport_flush(&g_tgt.hp) != 0) {
-        return io_fail("write partition 1");
+        return io_fail("write partition 1", "write_p1");
     }
+    progress("provision", 3, 4);
 
     /* 6. The MBR last: it is the card's identity. */
-    if (mbr_build(mbr, uuid, sectors) != 0) { return io_fail("build the MBR"); }
-    if (hport_write(&g_tgt.hp, 0, mbr, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("write the MBR"); }
+    if (mbr_build(mbr, uuid, sectors) != 0) { return io_fail("build the MBR", "build_mbr"); }
+    if (hport_write(&g_tgt.hp, 0, mbr, 512) != 0 || hport_flush(&g_tgt.hp) != 0) { return io_fail("write the MBR", "write_mbr"); }
+    progress("provision", 4, 4);
 
     if (generated) {
         printf("uuid ");
@@ -809,7 +874,7 @@ static int cmd_provision(int argc, char **argv)
     p2 = sectors > LAYOUT_P2_START ? (uint32_t)(sectors - LAYOUT_P2_START) : 0u;
 
     if (s_uuid == NULL) {
-        if (entropy_uuid(uuid) != 0 || entropy_epoch(&epoch) != 0) { return io_fail("get a UUID and epoch from the OS"); }
+        if (entropy_uuid(uuid) != 0 || entropy_epoch(&epoch) != 0) { return io_fail("get a UUID and epoch from the OS", "entropy"); }
         generated = 1;
     }
 
@@ -867,6 +932,7 @@ static void verify_side(tape_side side, struct side_result *s)
     else { OBS_INFO(letter, s->info); }
     r = tape_seek(g_t, 0u);
     if (r == TAPE_OK) { r = tape_set_rate(g_t, 65536); }
+    progress(letter == 'A' ? "verify_a" : "verify_b", 0, s->info.total_frames);
     while (r == TAPE_OK && done < s->info.total_frames) {
         uint64_t left = s->info.total_frames - done;
         uint32_t want = left > RENDER_MAX ? RENDER_MAX : (uint32_t)left, got = 0;
@@ -877,6 +943,7 @@ static void verify_side(tape_side side, struct side_result *s)
         if (r == TAPE_OK) { r = tape_render(g_t, g_pcm, want, &got); }
         if (r == TAPE_OK && got == 0u) { break; }
         done += got;
+        progress(letter == 'A' ? "verify_a" : "verify_b", done, s->info.total_frames);
     }
     if (r != TAPE_OK) {
         /* Reported as READ_ERROR only: verify's output is exactly its findings. */
@@ -890,6 +957,19 @@ static void verify_side(tape_side side, struct side_result *s)
     }
 }
 
+/* make: each finding as APP-1A §3 report JSON, in emitted order. */
+static char g_findings[1024];
+
+static void finding(const char *json)
+{
+    size_t len = strlen(g_findings);
+    snprintf(g_findings + len, sizeof g_findings - len, "%s%s", len ? "," : "", json);
+}
+
+/* verify stops here, before any further finding or OK, when make's port has
+   seen the card removed or changed. Never for a standalone command. */
+#define EXIT_GONE (-1)
+
 /* Findings, in docs/WP14-CLI-CONTRACT.md §4.1 table order (ADR-164):
    MBR_LAYOUT, PARTITION_TYPE, PARTITION_TRUNCATED; MOUNT for each failed side,
    A before B; NEEDS_REPAIR; SIDE_B_DEGRADED; READ_ERROR by side, then frame. */
@@ -897,15 +977,24 @@ static int verify_existing(unsigned mf, int have_view)
 {
     struct side_result sr[2];
     const struct side_result *state = NULL;
+    char f[96];
     int n = 0, i;
-    if (mf & MBR_F_LAYOUT)    { printf("MBR_LAYOUT\n"); n++; }
-    if (mf & MBR_F_TYPE)      { printf("PARTITION_TYPE\n"); n++; }
-    if (mf & MBR_F_TRUNCATED) { printf("PARTITION_TRUNCATED\n"); n++; }
+    g_findings[0] = '\0';
+    if (mf & MBR_F_LAYOUT)    { printf("MBR_LAYOUT\n"); finding("{\"f\":\"MBR_LAYOUT\"}"); n++; }
+    if (mf & MBR_F_TYPE)      { printf("PARTITION_TYPE\n"); finding("{\"f\":\"PARTITION_TYPE\"}"); n++; }
+    if (mf & MBR_F_TRUNCATED) { printf("PARTITION_TRUNCATED\n"); finding("{\"f\":\"PARTITION_TRUNCATED\"}"); n++; }
     if (have_view) {
         verify_side(TAPE_SIDE_A, &sr[0]);
+        if (g_tgt.hp.gone) { return EXIT_GONE; }
         verify_side(TAPE_SIDE_B, &sr[1]);
+        if (g_tgt.hp.gone) { return EXIT_GONE; }
         for (i = 0; i < 2; i++) {
-            if (sr[i].mount != TAPE_OK) { printf("MOUNT %s\n", rname(sr[i].mount)); n++; }
+            if (sr[i].mount != TAPE_OK) {
+                printf("MOUNT %s\n", rname(sr[i].mount));
+                snprintf(f, sizeof f, "{\"f\":\"MOUNT\",\"side\":\"%c\",\"result\":\"%s\"}", i == 0 ? 'A' : 'B', rname(sr[i].mount));
+                finding(f);
+                n++;
+            }
         }
         {
             int repair = 0, degraded = 0;
@@ -917,12 +1006,15 @@ static int verify_existing(unsigned mf, int have_view)
                 }
             }
             (void)state;
-            if (repair)   { printf("NEEDS_REPAIR\n"); n++; }
-            if (degraded) { printf("SIDE_B_DEGRADED\n"); n++; }
+            if (repair)   { printf("NEEDS_REPAIR\n"); finding("{\"f\":\"NEEDS_REPAIR\"}"); n++; }
+            if (degraded) { printf("SIDE_B_DEGRADED\n"); finding("{\"f\":\"SIDE_B_DEGRADED\"}"); n++; }
         }
         for (i = 0; i < 2; i++) {
             if (sr[i].read_error) {
                 printf("READ_ERROR SIDE %c FRAME %llu\n", i == 0 ? 'A' : 'B', (unsigned long long)sr[i].frame);
+                snprintf(f, sizeof f, "{\"f\":\"READ_ERROR\",\"side\":\"%c\",\"frame\":%llu}", i == 0 ? 'A' : 'B',
+                         (unsigned long long)sr[i].frame);
+                finding(f);
                 n++;
             }
         }
@@ -940,6 +1032,240 @@ static int cmd_verify(int argc, char **argv)
     rc = target_open_verify(&g_tgt, positional(argc, argv, 0), &mf, &have_view);
     if (rc) { return rc; }
     return verify_existing(mf, have_view);
+}
+
+/* --------------------------------------------------------------------- make */
+
+/* APP-1 §3 (ADR-195) / APP-1A §3-§4 and §7: provision, then load, then verify,
+   in one process, with their existing outcomes, order of work and exit
+   meanings. The device is opened exactly as provision opens it, after the §5
+   safety sequence, and that one handle serves load and a NULL-write verify;
+   nothing is reopened. If the OS reports the medium removed or changed on that
+   handle, the port stops all further I/O (hport failstop) and make stops with
+   CARD_CHANGED. No other media query is made, so make never reports
+   HOST_QUERY_FAILED: an unknown safety fact is a §5 refusal, as for provision. */
+
+static int make_usage(const char *why)
+{
+    fprintf(stderr, "tapectl: %s\nusage: tapectl make DEV --label L [--length-s S] --wav FILE --erase DEV "
+                    "[--report FILE --report-nonce N]\n", why);
+    return EXIT_USAGE;
+}
+
+static const char *wav_reason(const char *err)
+{
+    static const char *const map[][2] = {
+        {"cannot open WAV", "open"}, {"not a RIFF/WAVE file", "riff"}, {"short fmt chunk", "fmt"},
+        {"truncated fmt chunk", "fmt"}, {"data chunk before fmt chunk", "fmt"}, {"not PCM", "pcm"},
+        {"not stereo", "channels"}, {"not 44100 Hz", "rate"}, {"not 16-bit", "bits"},
+        {"inconsistent byte rate or block align", "align"}, {"no data chunk", "data"},
+        {"data size is not whole frames", "data"}, {"truncated chunk", "chunk"}};
+    size_t i;
+    for (i = 0; i < sizeof map / sizeof map[0]; i++) {
+        if (strncmp(err, map[i][0], strlen(map[i][0])) == 0) { return map[i][1]; }
+    }
+    return "riff";
+}
+
+/* One step's start: its report phase and, in the test build, its observation. */
+static void make_phase(const char *phase)
+{
+    g_phase_name = phase;
+#ifdef TAPECTL_TEST
+    tseam_make("make_phase", phase, NULL, g_tgt.dev.write == NULL);
+    tseam_make_pause(phase);
+#endif
+}
+
+/* The terminal record for a failed step, then the exit. A removal or change the
+   port saw outranks every other outcome: nothing further is reported as a card
+   finding (APP-1A §3). */
+static int make_stop(int rc)
+{
+    char p[1200], e[160];
+    if (rc == EXIT_GONE) { rc = EXIT_ENGINE; }
+    if (g_tgt.hp.gone) {
+        report_json_string(e, sizeof e, g_tgt.hp.gone_error);
+        snprintf(p, sizeof p, ",\"phase\":\"%s\",\"os_error\":%s", g_phase_name, e);
+        fprintf(stderr, "tapectl: CARD_CHANGED: the card was removed or changed during %s (%s)\n",
+                g_phase_name, g_tgt.hp.gone_error);
+#ifdef TAPECTL_TEST
+        tseam_make("make_media_change", g_phase_name, g_tgt.hp.gone_error, 0);
+#endif
+        report_refusal_payload("CARD_CHANGED", p);
+        return EXIT_ENGINE;
+    }
+    if (rc != 0 && g_fail.id != NULL) { report_refusal_payload(g_fail.id, g_fail.payload); }
+    return rc;
+}
+
+static int make_provision(const char *path, const char *label, uint32_t length)
+{
+    uint8_t uuid[16];
+    uint32_t epoch = 0, p2;
+    uint64_t sectors = g_tgt.hp.bytes / 512u;
+    tape_dev dry;
+    tape_result r;
+    (void)path;
+    make_phase("provision");
+    if (sectors > LAYOUT_P2_START && sectors - LAYOUT_P2_START > 0xFFFFFFFFull) {
+        fail_note("P2_TOO_LARGE", "");
+        return make_usage("make: target too large for partition 2");
+    }
+    p2 = sectors > LAYOUT_P2_START ? (uint32_t)(sectors - LAYOUT_P2_START) : 0u;
+    if (entropy_uuid(uuid) != 0 || entropy_epoch(&epoch) != 0) { return io_fail("get a UUID and epoch from the OS", "entropy"); }
+    dry.read = dry_rw; dry.write = dry_w; dry.flush = dry_flush; dry.ctx = NULL; dry.block_count = p2;
+    OBS_ENGINE();
+    r = tape_format(&dry, uuid, epoch, label, length);
+    if (r != TAPE_ERR_IO) { return engine_fail("provision", r == TAPE_OK ? TAPE_ERR_IO : r); }
+    return provision_existing(sectors, p2, label, uuid, epoch, length, 1);
+}
+
+static int make_load(const char *path, const char *wav)
+{
+    struct wav_in in;
+    char err[96], p[64];
+    int rc;
+    make_phase("load");
+    if (wav_open_read(&in, wav, err, sizeof err)) {
+        snprintf(p, sizeof p, ",\"reason\":\"%s\"", wav_reason(err));
+        fail_note("WAV_INVALID", p);
+        return make_usage(err);
+    }
+    rc = target_bind_write(&g_tgt, path);
+    if (rc == EXIT_ENGINE) { fail_note("ENGINE", ",\"phase\":\"load\",\"result\":\"TAPE_ERR_IO\""); }
+    else if (rc == EXIT_USAGE) { fail_note("NOT_PROVISIONED", ""); }
+    if (!rc) { rc = load_existing_feed(&in); }
+    if (!rc) {
+        make_phase("commit");
+        progress("commit", 0, 1);
+        rc = commit_loaded();
+        if (!rc) { rc = run_long(1); }
+        if (!rc) { progress("commit", 1, 1); }
+    }
+    wav_close_read(&in);
+    if (g_t != NULL) {
+        uint64_t pos;
+        (void)tape_unmount(g_t, &pos);
+        g_t = NULL;
+    }
+    return rc;
+}
+
+static int make_verify(const char *path)
+{
+    unsigned mf;
+    int have_view, rc;
+    rc = target_bind_verify(&g_tgt, path, &mf, &have_view);
+    make_phase("verify");
+    if (rc == EXIT_ENGINE) { fail_note("IO", ",\"phase\":\"verify\",\"op\":\"read_lba0\""); }
+    else if (rc == EXIT_USAGE) { fail_note("NOT_PROVISIONED", ""); }
+    if (rc) { return rc; }
+    rc = verify_existing(mf, have_view);
+    if (rc == EXIT_ENGINE) {
+        char p[1100];
+        snprintf(p, sizeof p, ",\"findings\":[%s]", g_findings);
+        fail_note("VERIFY_FINDINGS", p);
+    }
+    return rc;
+}
+
+static int make_run(int argc, char **argv)
+{
+    static const char *const flags[] = {"--label", "--length-s", "--wav", "--erase", "--report", "--report-nonce", NULL};
+    const char *path, *label, *s_len, *wav, *erase;
+    uint32_t length = 3600u;
+    enum refusal why;
+    int dup = 0, unmount_failed, rc;
+
+    if (check_args(argc, argv, flags, 1)) {
+        report_refusal("USAGE");
+        return make_usage("make: bad arguments");
+    }
+    path = positional(argc, argv, 0);
+    label = opt(argc, argv, "--label", &dup);
+    s_len = opt(argc, argv, "--length-s", &dup);
+    wav = opt(argc, argv, "--wav", &dup);
+    erase = opt(argc, argv, "--erase", &dup);
+    if (dup || wav == NULL || label == NULL) {
+        report_refusal("USAGE");
+        return make_usage("make: give DEV, --label and --wav, each once");
+    }
+    if (!label_ok(label)) {
+        report_refusal("LABEL_INVALID");
+        return make_usage("make: --label must be 1 to 32 bytes of UTF-8");
+    }
+    if (s_len != NULL && parse_u32(s_len, &length)) {
+        report_refusal("LENGTH_INVALID");
+        return make_usage("make: bad --length-s");
+    }
+
+    /* Safety, exactly as provision: every §5 rule, own-p1 unmount, zero writes
+       and no write-mode open on refusal. */
+    g_phase_name = "safety";
+    progress("safety", 0, 1);
+    rc = target_safety_why(path, 1, erase, 1, &why, &unmount_failed);
+    if (rc) {
+        report_refusal_payload(refusal_id(why), unmount_failed ? ",\"unmount_failed\":true" : "");
+        return rc;
+    }
+#ifdef TAPECTL_TEST
+    tseam_make("make_safety_pass", NULL, NULL, 0);
+#endif
+    progress("safety", 1, 1);
+
+    /* The one authorized open, as provision's, kept to the end. */
+    memset(&g_tgt, 0, sizeof g_tgt);
+    if (hport_open(&g_tgt.hp, path, 1, 1) != 0) {
+        char e[160];
+        const char *os = hport_error();
+        report_json_string(e, sizeof e, os);
+        fprintf(stderr, "tapectl: cannot open device %s for writing (%s)\n", path, os);
+        {
+            char p[200];
+            snprintf(p, sizeof p, ",\"os_error\":%s", e);
+            report_refusal_payload("DEVICE_OPEN_FAILED", p);
+        }
+        return EXIT_USAGE;
+    }
+    g_tgt.open = 1;
+    g_tgt.is_device = 1;
+    g_tgt.sectors = g_tgt.hp.bytes / 512u;
+    g_tgt.hp.failstop = 1;
+#ifdef TAPECTL_TEST
+    tseam_target(path, 1, g_tgt.hp.bytes);
+#endif
+
+    rc = make_provision(path, label, length);
+    if (!rc && !g_tgt.hp.gone) { rc = make_load(path, wav); }
+    if (!rc && !g_tgt.hp.gone) { rc = make_verify(path); }
+    return make_stop(rc);
+}
+
+static int cmd_make(int argc, char **argv)
+{
+    const char *file, *nonce;
+    int dup = 0, rc;
+
+    /* Report options first: invalid ones exit 2 without creating FILE. */
+    file = opt(argc, argv, "--report", &dup);
+    nonce = opt(argc, argv, "--report-nonce", &dup);
+    if (dup || (file == NULL) != (nonce == NULL) || (nonce != NULL && !report_nonce_ok(nonce))) {
+        return make_usage("make: --report FILE and --report-nonce N (32 lowercase hex digits) go together, once each");
+    }
+    if (file != NULL && report_open_bound(file, "tapectl make", TAPECTL_VERSION, nonce) != 0) {
+        fprintf(stderr, "tapectl: report: cannot create %s (%s)\n", file, report_error());
+        return EXIT_ENGINE;
+    }
+    (void)report_capture_stderr();
+    rc = make_run(argc, argv);
+#ifdef TAPECTL_TEST
+    if (g_tgt.open) { tseam_make("make_close", NULL, NULL, 0); }
+#endif
+    rc = finish(rc);
+    report_release_stderr();
+    report_end(rc);
+    return rc;
 }
 
 /* -------------------------------------------------------------------- cards */
@@ -1123,6 +1449,7 @@ static int tapectl_main(int argc, char **argv)
         return EXIT_USAGE;
     }
     if (argc >= 2 && strcmp(argv[1], "cards") == 0) { return cmd_cards(argc - 2, argv + 2); }
+    if (argc >= 2 && strcmp(argv[1], "make") == 0) { return cmd_make(argc - 2, argv + 2); }
 #ifdef TAPECTL_TEST
     if (argc == 2 && strcmp(argv[1], "discover") == 0) { return cmd_discover(); }
 #endif

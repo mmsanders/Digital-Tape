@@ -175,10 +175,23 @@ const char *hport_os_errname(void)
     case ENOTSUP: return "ENOTSUP";
     case EPERM: return "EPERM";
     case EACCES: return "EACCES";
+    case ENXIO: return "ENXIO";
+    case ENODEV: return "ENODEV";
+#ifdef ENOMEDIUM
+    case ENOMEDIUM: return "ENOMEDIUM";
+#endif
     default: break;
     }
     snprintf(buf, sizeof buf, "errno %d", errno);
     return buf;
+}
+
+int hport_os_removed(void)
+{
+#ifdef ENOMEDIUM
+    if (errno == ENOMEDIUM) { return 1; }
+#endif
+    return errno == ENXIO || errno == ENODEV;
 }
 
 int hport_close(struct hport *p)

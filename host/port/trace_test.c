@@ -7,6 +7,10 @@
  * tseam_finish().
  */
 
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L   /* nanosleep under -std=c99 */
+#endif
+
 #ifdef TAPECTL_TEST
 
 #include "tseam.h"
@@ -15,6 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <time.h>
+#endif
 
 #ifndef TAPECTL_HEAD
 #define TAPECTL_HEAD "unknown"
@@ -98,12 +107,17 @@ int tseam_fault_native_flush_error(void) { return strcmp(fault(), "native-flush-
 int tseam_fault_nonnull_binding(void)    { return strcmp(fault(), "nonnull-binding") == 0; }
 int tseam_fault_unmount(void)            { return strcmp(fault(), "unmount-error") == 0; }
 
+static char g_make_phase[16];   /* make's current phase, from tseam_make */
+
+/* read-error:LBA, or read-error:LBA@PHASE to fail it only during that make phase. */
 int tseam_fault_read(uint64_t partition_lba, uint32_t count)
 {
-    const char *f = fault();
+    const char *f = fault(), *at_phase;
     unsigned long long at;
     if (strncmp(f, "read-error:", 11) != 0) { return 0; }
     at = strtoull(f + 11, NULL, 10);
+    at_phase = strchr(f, '@');
+    if (at_phase != NULL && strcmp(at_phase + 1, g_make_phase) != 0) { return 0; }
     return at >= partition_lba && at < partition_lba + count;
 }
 
@@ -325,6 +339,53 @@ void tseam_unmount(const char *where, const char *os_call, int ok, const char *o
     fprintf(g_fp, ",\"fault\":");
     str_or_null(flt);
     fputc('}', g_fp);
+}
+
+void tseam_make(const char *kind, const char *phase, const char *os_error, int write_is_null)
+{
+    long long out;
+    if (strcmp(kind, "make_phase") == 0 && phase) { snprintf(g_make_phase, sizeof g_make_phase, "%s", phase); }
+    if (!g_fp) { return; }
+    run_flush();
+    fflush(stdout);
+    out = (long long)ftell(stdout);
+    event_begin(kind);
+    if (phase) { fprintf(g_fp, ",\"phase\":"); json_str(phase); }
+    if (strcmp(kind, "make_phase") == 0) { fprintf(g_fp, ",\"write_is_null\":%s", write_is_null ? "true" : "false"); }
+    if (strcmp(kind, "make_media_change") == 0) {
+        fprintf(g_fp, ",\"os_error\":");
+        str_or_null(os_error);
+    }
+    fprintf(g_fp, ",\"stdout_bytes\":%lld}", out);
+    fflush(g_fp);
+}
+
+void tseam_make_pause(const char *phase)
+{
+    const char *v = getenv("TAPECTL_TEST_PAUSE");
+    const char *colon;
+    char ready[1024], go[1024];
+    FILE *f;
+    int i;
+    if (v == NULL || (colon = strchr(v, ':')) == NULL) { return; }
+    if (strlen(phase) != (size_t)(colon - v) || strncmp(v, phase, (size_t)(colon - v)) != 0) { return; }
+    snprintf(ready, sizeof ready, "%s/ready", colon + 1);
+    snprintf(go, sizeof go, "%s/go", colon + 1);
+    if (g_fp) { fflush(g_fp); }
+    f = fopen(ready, "w");
+    if (f) { fclose(f); }
+    for (i = 0; i < 3000; i++) {               /* at most 5 minutes */
+        f = fopen(go, "r");
+        if (f) { fclose(f); return; }
+#if defined(_WIN32)
+        Sleep(100);
+#else
+        {
+            struct timespec ts = {0, 100000000L};
+            (void)nanosleep(&ts, NULL);
+        }
+#endif
+    }
 }
 
 int tseam_finish(int exit_code)

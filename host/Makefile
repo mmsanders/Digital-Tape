@@ -34,7 +34,7 @@ else
     SYSLIBS  := -framework CoreFoundation -framework DiskArbitration -framework IOKit -framework Security
   else
     PLATFORM := port/hport_posix.c port/probe_linux.c port/discover_linux.c
-    SYSLIBS  :=
+    SYSLIBS  := -lpthread
   endif
 endif
 

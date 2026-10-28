@@ -38,7 +38,8 @@
  *   native-flush-error     the barrier fails in the OS; failure propagates
  *   nonnull-binding        read-only engine bindings get a write callback
  *   read-error:LBA         an engine read covering partition LBA fails (real
- *                          failed OS read)
+ *                          failed OS read); read-error:LBA@PHASE only during
+ *                          that make phase (e.g. @verify)
  *   target-read-error:LBA  a port read covering absolute target LBA fails
  *                          (real failed OS read), e.g. 0 for LBA 0
  *   unmount-error          the own-partition-1 unmount is a real OS call on
@@ -69,6 +70,16 @@ void tseam_flush(const char *os_call, int os_success, const char *os_error, int 
                  const char *fullfsync_unsupported, const char *fault);
 void tseam_bind(uint64_t base_lba, uint32_t blocks, int write_is_null);
 void tseam_unmount(const char *where, const char *os_call, int ok, const char *os_error, const char *fault);
+
+/* make (APP-1 §3) only, so no other command's trace changes:
+   make_safety_pass, make_phase (provision/load/commit/verify, with the
+   current write binding), make_media_change (phase, the OS error that the
+   port classified as removal/change, and stdout bytes written so far) and
+   make_close. tseam_make_pause: with TAPECTL_TEST_PAUSE=PHASE:DIR, at the
+   start of PHASE create DIR/ready and wait for DIR/go, so a CI fixture can
+   remove or swap the device at an exact boundary. Real I/O then detects it. */
+void tseam_make(const char *kind, const char *phase, const char *os_error, int write_is_null);
+void tseam_make_pause(const char *phase);
 
 /* Engine call sites in tapectl. */
 void tseam_engine_used(void);
