@@ -1,6 +1,6 @@
 # Project status
 
-**PM607 · input mainc3d5b8fd · candidate integration / next native method.**
+**PM611 · input main7126ca63 · poller correction / finite native-layout ruling.**
 Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
 Linux existing CI. Gate counts below are completed criteria, not effort estimates.
 
@@ -38,14 +38,14 @@ is unknown; one-window-throughout is not established. No human rerun is requeste
 
 | Pair | Concrete outcome / dependency |
 |---|---|
-| Software608 / Verification347 | Exact585 native-window/poller/diagnostic method and human-ready kit; at most one bounded actual session ONLY after published method and manual resumption. No fake gestures. |
-| Software609 / Verification348 | Implement source/test-qualified off-card A6 route1 kit/profile/interpreter. Preparation only: no recorder/workload/query/admin/card trial. |
-| Completed605/343/344 | Packaging closeout integrated; A6 design evaluated2 routes, neither rescues old capture. Current native/poller method still pending347. |
+| Software612 / Verification352 | F347-1 upheld: tests-first production poller receipt retention, source clearance, one replacement candidate (max2 compilation attempts). No native launch this round. |
+| Software613 / Verification353 | Qualify retained exact native layouts including raw payloads, then only covered offline decoder/kit. Unsupported required layout returns one blocker. No new capture/query/admin/card trial. |
+| Closed608/347 and609/348 |347/9b4238e1 found missing production poller originals;348/ed34966c returned native-schema gap after corrected declaration. No launch or qualified runnable kit. Holds upheld; new scopes above. |
 
 First-party diagnostics are default OFF and are not independent device-open
 absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
-independent methods/tests precede implementation or collection. PM607 issues only
-a staged new585 native/poller scope after exact347 admission; no app run by PM.
+independent methods/tests precede implementation or collection. PM611 authorizes the new receipt source/build scope, not a585 launch.
+Existing585 stays BUILD/ARCHIVE READY; new runtime admission follows actual new identity.
 No card/raw-device/Make/elevation or unsupported human gesture is issued.
 
 Software is local Windows Claude Code, model selected by the user; Verification
@@ -56,7 +56,7 @@ No current action remains for the human tester.589 is reviewed/partial and close
 ## Remaining rung blockers
 
 - WP14 rung4: native physicalA6 linkage remains unproved.344 found neither route
- substantiated for retained facts.609/348 prepares route1 OFF-CARD feasibility kit;
+ substantiated for retained facts.613/353 qualifies finite retained native layouts;
  no historical rescue, new native trial or privilege is inferred.
 - WP16 rung3 is now COMPLETE: independently cleared598 source integrated unchanged
  and applicable green checks authenticated. Mac remains deferred.
@@ -72,7 +72,8 @@ No current action remains for the human tester.589 is reviewed/partial and close
 
 ## Preserved references
 
-Current [PM607 review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md),
+Current [PM611 ruling](REVIEW/PM611-UNBLOCKING-RULING.md),
+prior [PM607 review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md),
 [verification integration](VERIFICATION-INTEGRATION.md),
 [package index](PACKAGES/README.md) and [human queue](FOR-MICHAEL.md).
 Prior status revisions remain unchanged in Git history. This current table omits
