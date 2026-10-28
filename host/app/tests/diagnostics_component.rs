@@ -956,7 +956,9 @@ fn c612_p2_outcomes() {
         let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(|_| {}), Some(Arc::new(s)));
         b.discover(|job, cancel, on_timeout, on_cancel, launched| {
             let (cmd, req) = discovery::command(&data.join("absent").join("tapectl.exe"), children::TAPECTL.version.unwrap(), job);
-            let ran = discovery::run(cmd, &req, cancel, on_timeout, on_cancel, &mut |r| launched(r, &req));
+            let q = &req;
+            let mut hook = launched.map(|l| move |r: &Ran| l(r, q));
+            let ran = discovery::run(cmd, &req, cancel, on_timeout, on_cancel, hook.as_mut().map(|h| h as &mut dyn FnMut(&Ran)));
             (ran, req)
         });
         b.shutdown();
@@ -1128,4 +1130,165 @@ fn c612_p5_sink_bounds() {
             + fs::metadata(diag_dir(&data).join("records.jsonl")).unwrap().len();
         assert!(total <= diagnostics::SESSION_LIMIT);
     }
+}
+
+/// One F352 sub-case: its own app data folder, session and recorded Views.
+fn fault_case(fx: &Fx, tag: &str) -> (PathBuf, Arc<Bridge>, Arc<Mutex<Vec<View>>>) {
+    let data = fx.root.join(tag);
+    fs::create_dir_all(&data).unwrap();
+    let s = Session::open(&data, provenance(true)).unwrap();
+    let views = Arc::new(Mutex::new(Vec::new()));
+    let out = views.clone();
+    let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(move |v| out.lock().unwrap().push(v)), Some(Arc::new(s)));
+    (data, b, views)
+}
+fn last_view(views: &Mutex<Vec<View>>) -> View { views.lock().unwrap().last().cloned().unwrap() }
+
+/// F352-1: stderr's read fails after the child's real bytes. The prefix is never kept as
+/// a complete original; the actual error, its length and hash are, and the Product line is unchanged.
+#[test]
+fn c612_f1_read_error() {
+    let Some((fx, _g)) = cards_fx("F1-read") else { return };
+    let (data, b, views) = fault_case(&fx, "read");
+    let observe = cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::ReadError, "stderr")));
+    poll(&b);
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "read", "incomplete");
+    let o = external(&fx, "read", &observe);
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-missing", "cards-cleanup"]);
+    let m = last(&rows, "cards-missing");
+    let stderr_sha = o["sha256"]["stderr"].as_str().unwrap();
+    assert_eq!(m["role"], json!("stderr"));
+    assert_eq!(m["reason"], json!(format!("injected read failure; 19 bytes read before it, sha256 {stderr_sha}")), "the actual error and the prefix the child wrote");
+    assert_eq!(last(&rows, "session-end")["complete"], json!(false));
+    assert_eq!(view.card_line, "Card ready (64 GB).", "Product judgment unchanged");
+    assert_eq!(last(&rows, "cards-cleanup")["result"], json!("removed"));
+    assert_eq!(jobs_left(&data), 0);
+}
+
+/// F352-1: the stdout reader thread fails. No bytes are known; it is recorded missing with
+/// the actual failure, and Product judges the same empty stdout as before.
+#[test]
+fn c612_f1_reader_failure() {
+    let Some((fx, _g)) = cards_fx("F1-reader") else { return };
+    let (data, b, views) = fault_case(&fx, "reader");
+    cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::ReaderPanic, "stdout")));
+    let (ran, req, judged) = b.discover(Bridge::run_cards).unwrap();
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "reader", "incomplete");
+    let m = last(&rows, "cards-missing");
+    assert_eq!((m["role"].clone(), m["reason"].clone()), (json!("stdout"), json!(format!("reader thread failed: injected stdout reader failure; 0 bytes read before it, sha256 {}", sha(b"")))));
+    assert!(ran.stdout.is_empty() && ran.stdout_error.is_some());
+    assert_eq!(judged.hint, discovery::judge(ran.exit, b"", ran.report.as_deref(), &req.nonce, &req.version).hint, "Product judges what it judged before");
+    assert_eq!(view.card_line, discovery::line(judged.hint.as_ref()));
+    assert_eq!(last(&rows, "session-end")["complete"], json!(false));
+    assert_eq!(jobs_left(&data), 0);
+}
+
+/// F352-1: neither try_wait nor wait observes a terminal. No terminal or exit is invented:
+/// the session stops with the actual errors, while Product keeps its unknown-exit result.
+#[test]
+fn c612_f1_wait_failure() {
+    let Some((fx, _g)) = cards_fx("F1-wait") else { return };
+    let (data, b, views) = fault_case(&fx, "wait");
+    cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::WaitError, "wait")));
+    let (ran, _, judged) = b.discover(Bridge::run_cards).unwrap();
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "wait", "incomplete");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch"], "no terminal, publication, capture or cleanup is claimed after an unobserved reap");
+    let run = last(&rows, "cards-launch")["run_id"].as_str().unwrap().to_owned();
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-wait-failed: {run}: try_wait failed: injected try_wait failure; wait failed: injected wait failure")));
+    assert_eq!(kinds(&rows).last().unwrap(), "incomplete");
+    assert_eq!((ran.exit, ran.timed_out, ran.cancelled), (None, false, false), "Product's own unknown exit, as before");
+    assert!(judged.hint.is_none());
+    assert_eq!(view.card_line, discovery::line(None));
+}
+
+/// F352-2: the job's marker no longer matches at cleanup. The ownership guard refuses and
+/// nothing is deleted or attempted; the session says so rather than recording an attempt.
+#[test]
+fn c612_f2_guard_refused() {
+    let Some((fx, _g)) = cards_fx("F2-guard") else { return };
+    let (data, b, views) = fault_case(&fx, "guard");
+    cards_mode(&fx, "offered");
+    let mut kept = None;
+    b.discover(|job, c, t, k, l| {
+        let r = Bridge::run_cards(job, c, t, k, l);
+        fs::write(job.dir.join(jobdir::MARKER), b"not this app's marker").unwrap();
+        kept = Some((job.dir.clone(), r.1.report.clone()));
+        r
+    });
+    let view = last_view(&views);
+    b.shutdown();
+    let (dir, report) = kept.unwrap();
+    let rows = cards_envelope_at(&fx, &data, "guard", "incomplete");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-blob"]);
+    let run = last(&rows, "cards-launch")["run_id"].as_str().unwrap().to_owned();
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-cleanup-refused: {run}: {} failed the ownership check; nothing was removed", dir.display())));
+    assert_eq!(fs::read(dir.join(jobdir::MARKER)).unwrap(), b"not this app's marker", "sentinel retained");
+    let report_blob = of(&rows, "cards-blob").into_iter().find(|x| x["role"] == "report").unwrap();
+    assert_eq!(json!(sha(&fs::read(&report).unwrap())), report_blob["sha256"], "the job was not touched");
+    assert_eq!(view.card_line, "Card ready (64 GB).");
+    assert_eq!(jobdir::clean_stale(&data), 0, "the existing policy still never deletes it");
+}
+
+/// F352-2: remove_dir_all is called and fails on an owned job (a file in it is held open
+/// without delete sharing). The actual error is recorded, never success.
+#[cfg(windows)]
+#[test]
+fn c612_f2_removal_failure() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let Some((fx, _g)) = cards_fx("F2-remove") else { return };
+    let (data, b, views) = fault_case(&fx, "remove");
+    cards_mode(&fx, "offered");
+    let mut held = None;
+    b.discover(|job, c, t, k, l| {
+        let r = Bridge::run_cards(job, c, t, k, l);
+        held = Some((job.dir.clone(), r.1.report.clone(), fs::OpenOptions::new().read(true).share_mode(0).open(&r.1.report).unwrap()));
+        r
+    });
+    let view = last_view(&views);
+    b.shutdown();
+    let (dir, report, file) = held.unwrap();
+    drop(file);
+    let rows = cards_envelope_at(&fx, &data, "remove", "incomplete");
+    let c = last(&rows, "cards-cleanup");
+    assert_eq!((c["attempted"].clone(), c["result"].clone()), (json!(true), json!("failed")));
+    assert!(c["error"].as_str().unwrap().contains("os error 32"), "the actual sharing violation: {}", c["error"]);
+    assert_eq!(last(&rows, "session-end")["reason"], json!("cards-cleanup-not-removed"));
+    // remove_dir_all stops at the held file, so what it already deleted stays deleted.
+    assert!(dir.exists() && report.exists(), "the held original and its job folder are still there");
+    assert_eq!(view.card_line, "Card ready (64 GB).");
+}
+
+/// F352-2: the job directory is created, then a later stage fails. It is neither claimed
+/// created nor not-created; the session stops with the stage, and the partial job is left
+/// for the existing stale cleanup.
+#[test]
+fn c612_f2_partial_create() {
+    let Some((fx, _g)) = cards_fx("F2-partial") else { return };
+    let (data, b, views) = fault_case(&fx, "partial");
+    cards_mode(&fx, "offered");
+    jobdir::fault::arm();
+    poll(&b);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "partial", "incomplete");
+    assert_eq!(kinds(&rows), ["session", "cards-contract", "incomplete"]);
+    let jobs: Vec<PathBuf> = fs::read_dir(data.join("jobs")).unwrap().flatten().map(|e| e.path()).collect();
+    assert_eq!(jobs.len(), 1);
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-job-partially-created: {} exists, then control failed: injected create failure after the job directory", jobs[0].display())));
+    assert!(jobdir::owned(&jobs[0]) && !jobs[0].join("control").exists());
+    assert!(view.card_details_available);
+    assert!(b.raw_details().contains("cannot create the app's own folder: injected create failure after the job directory"), "Product shows the same failure");
+    assert_eq!(jobdir::clean_stale(&data), 1);
 }

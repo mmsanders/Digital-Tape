@@ -61,7 +61,7 @@ impl Session {
         for m in self.rx.try_iter() { if let Message::Check(w) = m { self.requests += 1; self.works.push_back(w); } }
     }
     /// A run closure for one typed card outcome that records single-flight occupancy.
-    fn card_run(&self, c: Value) -> impl FnOnce(&jobdir::Job, &AtomicBool, &mut dyn FnMut(), &mut dyn FnMut(), &mut dyn FnMut(&Ran, &Request)) -> (Ran, Request) {
+    fn card_run(&self, c: Value) -> impl FnOnce(&jobdir::Job, &AtomicBool, &mut dyn FnMut(), &mut dyn FnMut(), Option<&mut dyn FnMut(&Ran, &Request)>) -> (Ran, Request) {
         let (live, peak) = (self.live.clone(), self.peak.clone());
         move |job, _, _, _, _| {
             let n = live.fetch_add(1, Ordering::SeqCst) + 1;

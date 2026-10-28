@@ -452,12 +452,15 @@ impl Session {
         self.inner.lock().unwrap().record("cards-invalidate", json!({"run_id": run, "ticket": ticket, "reason": "timeout", "changed": changed}));
     }
 
-    /// cards-1: the actual reaped terminal of a launched child.
+    /// cards-1: the actual reaped terminal of a launched child. When the wait itself failed no
+    /// terminal was observed, so none is recorded: the session stops with the actual error.
     pub fn cards_terminal(&self, run: &str, ticket: u64, ran: &Ran) {
         let end = if ran.timed_out { "timed_out" } else if ran.cancelled { "cancelled" } else { "exited" };
         let mut g = self.inner.lock().unwrap();
+        if let Some(e) = &ran.wait_error { g.stop(&format!("cards-wait-failed: {run}: {e}")); return; }
         // A stopped child is never a finished check, whatever its exit code.
         if end != "exited" { g.ledger.flaw("cards-child-stopped"); }
+        if end == "exited" && ran.exit.is_none() { g.ledger.flaw("cards-exit-unknown"); }
         if g.record("cards-terminal", json!({"run_id": run, "ticket": ticket, "pid": ran.pid, "exit": ran.exit, "end": end,
             "wait_kind": ran.wait_kind, "end_ns": ran.end_ns as u64, "timeout_ms": crate::discovery::TIMEOUT_MS})) {
             if let Some(r) = g.ledger.cards.get_mut(run) { r.terminal = true; }
@@ -484,10 +487,15 @@ impl Session {
         let mut g = self.inner.lock().unwrap();
         match &ran.report {
             Some(b) => g.cards_blob(run, ticket, ran.pid, "report", b),
-            None => g.cards_missing(run, ticket, "report", "no report file after the child's wait"),
+            None => g.cards_missing(run, ticket, "report", &format!("cannot read the report after the child's terminal: {}", ran.report_error.as_deref().unwrap_or("no error was returned"))),
         }
-        g.cards_blob(run, ticket, ran.pid, "stdout", &ran.stdout);
-        g.cards_blob(run, ticket, ran.pid, "stderr", &ran.stderr);
+        // A read or reader failure leaves only a prefix (or nothing): never kept as complete.
+        for (role, bytes, error) in [("stdout", &ran.stdout, &ran.stdout_error), ("stderr", &ran.stderr, &ran.stderr_error)] {
+            match error {
+                None => g.cards_blob(run, ticket, ran.pid, role, bytes),
+                Some(e) => g.cards_missing(run, ticket, role, &format!("{e}; {} bytes read before it, sha256 {}", bytes.len(), sha(bytes))),
+            }
+        }
         if let (Some(exit), Some(b)) = (ran.exit, &ran.report) {
             if !matches!(crate::report::read(b, crate::report::Tool::Cards, &request.nonce, &request.version, exit, 0), Reading::Usable { .. }) {
                 g.ledger.flaw("invalid-cards-report");
@@ -498,15 +506,22 @@ impl Session {
     }
 
     /// cards-1: the actual removal outcome of this run's own job, recorded only afterwards.
-    /// `None`: the job directory was never created, so nothing was attempted.
-    pub fn cards_cleanup(&self, run: &str, ticket: u64, job_dir: Option<&Path>, removed: bool) {
+    /// `None`: the job directory was never created, so nothing was attempted. An ownership
+    /// refusal deletes nothing and attempts nothing; cards-1 has no unattempted cleanup of an
+    /// existing job, so the session stops saying so instead of recording one.
+    pub fn cards_cleanup(&self, run: &str, ticket: u64, job: Option<(&Path, &crate::jobdir::Removal)>) {
+        use crate::jobdir::Removal;
         let mut g = self.inner.lock().unwrap();
-        let (attempted, result, error) = match job_dir {
+        let (attempted, result, error) = match job {
             None => (false, "not-created", None),
-            Some(_) if removed => (true, "removed", None),
-            Some(d) if d.exists() => (true, "failed", Some("remove_dir_all failed")),
-            Some(_) => (true, "missing", Some("job directory was already gone")),
+            Some((_, Removal::Removed)) => (true, "removed", None),
+            Some((d, Removal::Refused)) => {
+                g.stop(&format!("cards-cleanup-refused: {run}: {} failed the ownership check; nothing was removed", d.display()));
+                return;
+            }
+            Some((_, Removal::Failed(e))) => (true, if e.kind() == io::ErrorKind::NotFound { "missing" } else { "failed" }, Some(e.to_string())),
         };
+        let job_dir = job.map(|(d, _)| d);
         if error.is_some() { g.ledger.flaw("cards-cleanup-not-removed"); }
         if g.record("cards-cleanup", json!({"run_id": run, "ticket": ticket, "job_dir": job_dir.map(|d| d.to_string_lossy()),
             "attempted": attempted, "result": result, "error": error})) {

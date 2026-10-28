@@ -12,7 +12,8 @@ enum Message { Check(Work), Stop }
 struct Core { app:App, cancel:Option<Arc<AtomicBool>>, active:Option<(String,u64)>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool }
 type Effect=dyn Fn(View)->Result<(),String>+Send+Sync;
 /// The launch callback a discovery run calls once its child exists, before any wait.
-type Launched<'a>=&'a mut dyn FnMut(&Ran,&Request);
+/// The launch hook, present only with diagnostics ON.
+type Launched<'a>=Option<&'a mut dyn FnMut(&Ran,&Request)>;
 pub struct Bridge {
     core:Mutex<Core>,
     // Mutations/publications are serialized; emit never holds the core lock.
@@ -85,7 +86,8 @@ impl Bridge {
     fn run_cards(job:&jobdir::Job,cancel:&AtomicBool,on_timeout:&mut dyn FnMut(),on_cancel:&mut dyn FnMut(),launched:Launched)->(Ran,Request){
         let version=children::TAPECTL.version.unwrap_or_default();
         match children::resolve(&children::TAPECTL){
-            Ok(bin)=>{let(cmd,request)=discovery::command(&bin,version,job);let ran=discovery::run(cmd,&request,cancel,on_timeout,on_cancel,&mut|r|launched(r,&request));(ran,request)}
+            Ok(bin)=>{let(cmd,request)=discovery::command(&bin,version,job);let q=&request;let mut hook=launched.map(|l|move|r:&Ran|l(r,q));
+                let ran=discovery::run(cmd,&request,cancel,on_timeout,on_cancel,hook.as_mut().map(|h|h as &mut dyn FnMut(&Ran)));(ran,request)}
             Err(e)=>(Ran{spawn_error:Some(e.0),..Default::default()},Request{version:version.into(),..Default::default()}),
         }
     }
@@ -97,8 +99,11 @@ impl Bridge {
             if core.stopped{drop(core);self.note("cards:admission-refused");if let Some(d)=&self.diag{d.cards_admission_refused();}return None}
             let cancel=Arc::new(AtomicBool::new(false));core.cards_cancel=Some(cancel.clone());(core.app.begin_cards(),cancel)};
         self.note("cards:worker-start");
-        let created=jobdir::create(&self.data,&format!("cards-{}",children::nonce()));
-        let failed=created.as_ref().err().map(|e|format!("Card check failed: cannot create the app's own folder: {e}"));
+        let created=jobdir::create_staged(&self.data,&format!("cards-{}",children::nonce()));
+        let failed=created.as_ref().err().map(|p|format!("Card check failed: cannot create the app's own folder: {}",p.error));
+        // A job directory that exists but failed later is neither created nor not-created in
+        // cards-1; the session stops with the actual stage. The policy is unchanged: it is left for clean_stale.
+        if let(Some(d),Err(jobdir::Partial{created:Some(dir),stage,error}))=(&self.diag,&created){d.incomplete(&format!("cards-job-partially-created: {} exists, then {stage} failed: {error}",dir.display()));}
         let rid=self.diag.as_ref().map(|d|d.cards_admit(ticket,match &created{Ok(job)=>Ok(job.dir.as_path()),Err(_)=>Err(failed.as_deref().unwrap_or_default())}));
         let diag=self.diag.as_deref().zip(rid.as_deref());
         let job=match created{
@@ -107,12 +112,13 @@ impl Bridge {
                 let why=failed.unwrap_or_default();
                 if let Some((d,r))=diag{d.cards_not_launched(r,ticket,&why);}
                 self.publish_cards(ticket,&Judged{hint:None,id_specific:None},why,rid.as_deref());
-                if let Some((d,r))=diag{d.cards_cleanup(r,ticket,None,false);}
+                if let Some((d,r))=diag{d.cards_cleanup(r,ticket,None);}
                 return None}
         };
         let launched=Cell::new(false);
+        let flag=&launched;let mut hook=diag.map(|(d,id)|move|r:&Ran,q:&Request|{flag.set(true);d.cards_launch(id,ticket,r,q);});
         let(ran,request)=run(&job,&cancel,&mut||self.invalidate_cards(ticket,true,rid.as_deref()),&mut||self.note("cards:cancel"),
-            &mut|r,q|{launched.set(true);if let Some((d,id))=diag{d.cards_launch(id,ticket,r,q);}});
+            hook.as_mut().map(|h|h as &mut dyn FnMut(&Ran,&Request)));
         self.note("cards:child-terminal");
         if let Some((d,r))=diag{
             if launched.get(){d.cards_terminal(r,ticket,&ran);}
@@ -123,8 +129,8 @@ impl Bridge {
         // Originals are kept after publication and before the job they live in is removed.
         if let(Some((d,r)),true)=(diag,launched.get()){d.cards_capture(r,ticket,&ran,&request);}
         // Sole target is this run's freshly created Job, only after the child's terminal.
-        let removed=jobdir::remove(&job);self.note("cards:remove-owned-job");
-        if let Some((d,r))=diag{d.cards_cleanup(r,ticket,Some(&job.dir),removed);}
+        let removal=jobdir::removal(&job);self.note("cards:remove-owned-job");
+        if let Some((d,r))=diag{d.cards_cleanup(r,ticket,Some((&job.dir,&removal)));}
         let mut core=self.core.lock().unwrap();
         if core.cards_cancel.as_ref().is_some_and(|c|Arc::ptr_eq(c,&cancel)){core.cards_cancel=None;}
         Some((ran,request,judged))

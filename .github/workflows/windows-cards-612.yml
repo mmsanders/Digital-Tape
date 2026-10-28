@@ -35,7 +35,7 @@ jobs:
         run: |
           python -B tests/windows_cards_receipts_r1/controls.py; if($LASTEXITCODE -ne 0){throw 'controls.py'}
           python -B tests/windows_cards_receipts_r1/candidate.py; if($LASTEXITCODE -ne 0){throw 'candidate.py'}
-      - name: P1-P5 component cases with the pinned test-only probe
+      - name: P1-P5 and F352 correction cases with the pinned test-only probe
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
@@ -55,7 +55,7 @@ jobs:
           cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib c612_ -- --test-threads=4 --nocapture 2>&1 | Tee-Object evidence612/cargo-test.txt
           if($LASTEXITCODE -ne 0){throw 'cargo test c612_'}
           if((Select-String -Path evidence612/cargo-test.txt -Pattern 'UNEXECUTED' -Quiet)){throw 'a c612 case did not execute'}
-          if(-not (Select-String -Path evidence612/cargo-test.txt -Pattern 'test result: ok\. 9 passed' -Quiet)){throw 'expected exactly 9 c612 cases'}
+          if(-not (Select-String -Path evidence612/cargo-test.txt -Pattern 'test result: ok\. 15 passed' -Quiet)){throw 'expected exactly 15 c612 cases'}
       - name: P6 shipping-source boundary
         shell: python
         run: |
