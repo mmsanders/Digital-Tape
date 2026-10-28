@@ -745,6 +745,19 @@
         "-B",
         "tests/windows_discovery_candidate_r2/contract.py"
       ]
+    },
+    {
+      "path": "tests/windows_cards_receipts_r1",
+      "tree": "c3b0d52cc6dc30b8ee6dfc17250bef914e8e9b27",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "a4f3138cce76b7675116742d109adb91232d1b00",
+      "attested_in": "Verification352 Stage A tests first (PR354, merged a4f3138c; CI 40618596614)",
+      "attestation": "Closed additive cards-1 receipt schema (cards-contract after session; admit/launch/not-launched/invalidate/terminal/publication-attempt/publication/cards-blob/cards-missing/cards-cleanup) with a legacy-only r2 projection, plus the new PM611/612 candidate profile (max two compilation attempts, one uploaded candidate) over the unchanged r1/r2 judges. 15 positive/62 negative receipt and 2 positive/17 negative candidate synthetic controls with zero Product, build or native execution; P1-P6 are source/component acceptance obligations, not executed tests; not native, G1, A6, S3, fullAPP or G2 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/windows_cards_receipts_r1/controls.py"
+      ]
     }
   ],
   "evidence_bundles": [
