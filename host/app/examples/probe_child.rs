@@ -4,6 +4,11 @@
 //! the first folder argument, never from a flag. It reads its own console association,
 //! PID, OS creation time, argv and cwd into the fixture's observation file, writes only
 //! the report, the DEST pair it is told to, fixed stdout/stderr bytes, and exits.
+//! Software612 (Verification352 P1-P6): copied beside the test executable as the pinned
+//! `tapectl.exe`, it takes the production `cards --report R --report-nonce N` argv
+//! unchanged and reads its behavior from `probe-cards.json` beside itself. It writes only
+//! that report, fixed stdout/stderr bytes and its observation (with the SHA-256 of every
+//! byte it wrote), and never opens a device.
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -35,8 +40,47 @@ fn own_start_ns() -> Option<u64> {
     None
 }
 
+fn hex_sha(b: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(b).iter().map(|x| format!("{x:02x}")).collect()
+}
+
+/// The cards stand-in: a report and stdout in the accepted S2 shapes, or a chosen failure.
+fn cards(argv: &[String]) -> ! {
+    let at = |flag: &str| argv.iter().position(|a| a == flag).map(|i| argv[i + 1].clone()).expect(flag);
+    let (report, nonce) = (PathBuf::from(at("--report")), at("--report-nonce"));
+    let me = std::env::current_exe().expect("own path");
+    let config: serde_json::Value = serde_json::from_slice(&std::fs::read(me.with_file_name("probe-cards.json")).expect("probe-cards.json")).expect("config");
+    let text = |k: &str| config[k].as_str().unwrap_or_default().to_owned();
+    let mode = text("mode");
+    let start = serde_json::json!({"t": "start", "tool": "tapectl cards", "version": text("version"), "nonce": nonce}).to_string();
+    let (rep, out, exit): (Vec<u8>, Vec<u8>, i32) = match mode.as_str() {
+        "offered" => (format!("{start}\n{{\"t\":\"end\",\"exit\":0}}\n").into_bytes(),
+            b"{\"t\":\"card\",\"path\":\"PROBE-DISK-0\",\"bytes\":64000000000}\n{\"t\":\"summary\",\"offered\":1,\"unprobed\":0}\n".to_vec(), 0),
+        "refusal" => (format!("{start}\n{{\"t\":\"refusal\",\"id\":\"CARDS_ENUM_UNAVAILABLE\",\"subject\":null,\"os_error\":\"PROBE\"}}\n{{\"t\":\"end\",\"exit\":1}}\n").into_bytes(), Vec::new(), 1),
+        "malformed" => (b"not a report \xff\n".to_vec(), b"{\"t\":\"summary\",\"offered\":0,\"unprobed\":0}\n".to_vec(), 0),
+        "max-stdout" => (format!("{start}\n{{\"t\":\"end\",\"exit\":0}}\n").into_bytes(), vec![b'o'; 4_194_304], 0),
+        "big-stdout" => (format!("{start}\n{{\"t\":\"end\",\"exit\":0}}\n").into_bytes(), vec![b'o'; 4_194_305], 0),
+        "sleep" => (format!("{start}\n").into_bytes(), Vec::new(), 0),
+        other => panic!("unknown probe cards mode {other}"),
+    };
+    let err = b"PROBE-CARDS-ERR\0\xff\r\n".to_vec();
+    let observed = serde_json::json!({"pid": std::process::id(), "console_window": console_window(), "os_start_ns": own_start_ns(),
+        "argv": argv, "cwd": std::env::current_dir().map(|p| p.to_string_lossy().into_owned()).unwrap_or_default(),
+        "sha256": {"report": hex_sha(&rep), "stdout": hex_sha(&out), "stderr": hex_sha(&err)}});
+    std::fs::write(text("observe"), serde_json::to_vec_pretty(&observed).unwrap()).expect("observation");
+    std::fs::write(&report, &rep).expect("report");
+    std::io::stdout().write_all(&out).unwrap();
+    std::io::stderr().write_all(&err).unwrap();
+    std::io::stdout().flush().unwrap();
+    // Stopped while waiting here, the run is a timeout or a cancel, never a finished check.
+    if mode == "sleep" { std::thread::sleep(std::time::Duration::from_secs(120)); }
+    std::process::exit(exit);
+}
+
 fn main() {
     let argv: Vec<String> = std::env::args().collect();
+    if argv.get(1).map(String::as_str) == Some("cards") { cards(&argv); }
     let at = |flag: &str| argv.iter().position(|a| a == flag).map(|i| argv[i + 1].clone()).expect(flag);
     let (report, nonce, dest) = (PathBuf::from(at("--report")), at("--report-nonce"), PathBuf::from(at("--out")));
     let folders: Vec<String> = argv[argv.iter().position(|a| a == "--").expect("--") + 1..].to_vec();

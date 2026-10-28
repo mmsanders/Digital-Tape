@@ -447,10 +447,10 @@ fn c11_occupied_leaves_fail_closed() {
     let e = Session::open_faulty(&fx.data(), provenance(true), id, None).err().expect("occupied session must fail");
     assert_eq!(e.kind(), std::io::ErrorKind::AlreadyExists);
     assert_eq!(fs::read(occupied.join("records.jsonl")).unwrap(), b"someone else's\n");
-    // An occupied blob leaf: the report blob of a one-drop success is record 7.
+    // An occupied blob leaf: the report blob of a one-drop success is record 8 (after cards-contract).
     let id = crate::children::nonce();
     let s = Session::open_faulty(&fx.data(), provenance(true), id, None).unwrap();
-    let leaf = s.path_in(&fx.data()).join("blobs").join("00000007-report.bin");
+    let leaf = s.path_in(&fx.data()).join("blobs").join("00000008-report.bin");
     fs::write(&leaf, b"foreign leaf").unwrap();
     let (k, view, s, cleaned) = flow(&fx, Some(s), "success", json!({}), "occupied");
     assert_eq!(fs::read(&leaf).unwrap(), b"foreign leaf");
@@ -662,16 +662,16 @@ fn c21_line_limit() {
         assert_eq!(ingress_len(&id, seq, drop, &[p.clone()], 0), want);
         p
     };
-    let exact = fit(1, "drop-0", 65_536);
+    let exact = fit(2, "drop-0", 65_536);
     b.drop_routed(Route::ControlledTest, json!([exact]), drops::classify);
-    let over = fit(3, "drop-1", 65_537);
+    let over = fit(4, "drop-1", 65_537);
     b.drop_routed(Route::ControlledTest, json!([over]), drops::classify);
     b.shutdown();
     let s = s.unwrap();
     let (rows, _) = fx.envelope(&s, "line", "incomplete");
     let raw = fs::read(s.path_in(&fx.data()).join("records.jsonl")).unwrap();
     let lens: Vec<usize> = raw.split_inclusive(|&b| b == b'\n').map(<[u8]>::len).collect();
-    assert_eq!(lens[1], 65_536, "the boundary line is accepted");
+    assert_eq!(lens[2], 65_536, "the boundary line is accepted");
     assert_eq!(of(&rows, "incomplete")[0]["reason"], json!("record-line-over-limit"));
     assert_eq!(kinds(&rows).last().unwrap(), "incomplete");
 }
@@ -716,17 +716,17 @@ fn c21_footer_line_limit() {
     for (tag, want) in [("exact", 65_536usize), ("over", 65_537)] {
         let s = Session::open(&fx.data(), provenance(true)).unwrap();
         let id = s.id();
-        let reason = format!("r{}", "x".repeat(want - footer_len(&id, 1, "r")));
-        assert_eq!(footer_len(&id, 1, &reason), want);
+        let reason = format!("r{}", "x".repeat(want - footer_len(&id, 2, "r")));
+        assert_eq!(footer_len(&id, 2, &reason), want);
         s.finish_with(reason);
         let (rows, _) = fx.envelope(&s, tag, "incomplete");
         let raw = fs::read(s.path_in(&fx.data()).join("records.jsonl")).unwrap();
         let lens: Vec<usize> = raw.split_inclusive(|&b| b == b'\n').map(<[u8]>::len).collect();
         assert!(lens.iter().all(|&n| n as u64 <= diagnostics::LINE_LIMIT), "{tag}: {lens:?}");
         if want == 65_536 {
-            assert_eq!((kinds(&rows).last().unwrap().as_str(), lens[1]), ("session-end", 65_536), "the boundary footer is written");
+            assert_eq!((kinds(&rows).last().unwrap().as_str(), lens[2]), ("session-end", 65_536), "the boundary footer is written");
         } else {
-            assert_eq!(kinds(&rows), ["session", "incomplete"], "an over-limit footer is never written");
+            assert_eq!(kinds(&rows), ["session", "cards-contract", "incomplete"], "an over-limit footer is never written");
             assert_eq!(of(&rows, "incomplete")[0]["reason"], json!("footer-line-over-limit"));
         }
     }
@@ -760,10 +760,10 @@ fn c24_c25_sink_failures_stop_without_changing_outcomes() {
     let (healthy, hv, _, hc) = flow_in(&fx, None, &folder, "healthy");
     let base = projection(&healthy, &hv, hc);
     let mut results = serde_json::Map::new();
-    // Write 1 is the session record; 2-6 are ingress/drop/admit/launch/terminal; the
-    // first blob write (report) is write 8 after the outcome record.
-    for (tag, fault, expect) in [("create", Fault::Create(1), "incomplete"), ("short-blob", Fault::ShortWrite(8), "incomplete"),
-        ("short-record", Fault::ShortWrite(4), "invalid"), ("full", Fault::NoSpace(5), "incomplete"), ("dead", Fault::DeadFrom(5), "incomplete")] {
+    // Write 1 is the session record and 2 the cards-contract; 3-7 are ingress/drop/admit/
+    // launch/terminal; the first blob write (report) is write 9 after the outcome record.
+    for (tag, fault, expect) in [("create", Fault::Create(1), "incomplete"), ("short-blob", Fault::ShortWrite(9), "incomplete"),
+        ("short-record", Fault::ShortWrite(5), "invalid"), ("full", Fault::NoSpace(6), "incomplete"), ("dead", Fault::DeadFrom(6), "incomplete")] {
         let s = Session::open_faulty(&fx.data(), provenance(true), crate::children::nonce(), Some(fault)).unwrap();
         let (k, v, s, c) = flow_in(&fx, Some(s), &folder, tag);
         let p = projection(&k, &v, c);
@@ -776,4 +776,519 @@ fn c24_c25_sink_failures_stop_without_changing_outcomes() {
         results.insert(tag.into(), json!({"projection": p, "last_kind": rows.last().map(|r| r["kind"].clone()), "torn": !raw.ends_with(b"\n")}));
     }
     fx.json("faults.json", &json!({"healthy": base, "faults": results}));
+}
+
+// ---- Software612 cards-1 (Verification352 tests/windows_cards_receipts_r1, rows P1-P6) ----
+// The test-only probe is copied beside this test executable as `tapectl.exe` and pinned
+// by the 612 workflow (DT_TAPECTL_SHA256 = its hash), so the production
+// poll_once -> discover -> run_cards -> discovery::command/run path starts it exactly
+// as it would start the real S2 child. These are COMPONENT facts only: no app window,
+// real tapectl, device or native session. Each case exports its session envelope,
+// an independently supplied binding and the probe's own observation for
+// tools/app/cards612_check.py, which routes them to Verification352's receipts.py.
+
+static CARDS: Mutex<()> = Mutex::new(());
+
+fn beside() -> PathBuf { std::env::current_exe().unwrap().with_file_name(children::TAPECTL.file) }
+
+/// None (reported UNEXECUTED) unless this build pins the probe as its discovery child;
+/// the 612 workflow sets DT_CARDS_REQUIRE so a wrong pin fails there instead.
+fn cards_fx(case: &'static str) -> Option<(Fx, std::sync::MutexGuard<'static, ()>)> {
+    let fx = Fx::new(case)?;
+    let guard = CARDS.lock().unwrap_or_else(|e| e.into_inner());
+    let want = children::TAPECTL.sha256.unwrap_or_default();
+    if sha(&fs::read(probe()).unwrap()) != want {
+        assert!(std::env::var_os("DT_CARDS_REQUIRE").is_none(), "DT_CARDS_REQUIRE: DT_TAPECTL_SHA256 is not the probe's hash");
+        eprintln!("{case}: UNEXECUTED, this build does not pin the test-only probe as its discovery child");
+        return None;
+    }
+    if fs::read(beside()).map(|b| sha(&b)).ok().as_deref() != Some(want) { fs::copy(probe(), beside()).unwrap(); }
+    assert!(children::resolve(&children::TAPECTL).is_ok(), "the pinned probe must resolve exactly as production does");
+    Some((fx, guard))
+}
+/// Select the probe's next behavior; returns where it will write its own observation.
+fn cards_mode(fx: &Fx, mode: &str) -> PathBuf {
+    let i = fx.n.get(); fx.n.set(i + 1);
+    let observe = fx.root.join(format!("observe-cards-{i}.json"));
+    let cfg = json!({"mode": mode, "version": children::TAPECTL.version, "observe": observe});
+    fs::write(std::env::current_exe().unwrap().with_file_name("probe-cards.json"), serde_json::to_vec(&cfg).unwrap()).unwrap();
+    observe
+}
+/// One due production poll: the real `run_cards`, never a typed child.
+fn poll(b: &Bridge) { let mut s = discovery::Schedule::new(0); assert!(b.poll_once(&mut s, &|| discovery::INTERVAL_MS, Bridge::run_cards)); }
+fn diag_dir(data: &Path) -> PathBuf {
+    let dirs: Vec<PathBuf> = fs::read_dir(data.join("control")).unwrap().flatten().map(|e| e.path()).collect();
+    assert_eq!(dirs.len(), 1, "one session per case root");
+    dirs[0].clone()
+}
+fn rows_at(dir: &Path) -> Vec<Value> {
+    let raw = fs::read(dir.join("records.jsonl")).unwrap();
+    raw.split(|&b| b == b'\n').filter(|l| !l.is_empty()).filter_map(|l| serde_json::from_slice(l).ok()).collect()
+}
+fn cards_kinds(rows: &[Value]) -> Vec<String> { kinds(rows).into_iter().filter(|k| k.starts_with("cards-") && k != "cards-contract").collect() }
+/// The session's files in receipts.py's envelope plus the binding the oracle checks
+/// them against, measured here and not read from the session.
+fn cards_envelope(fx: &Fx, dir: &Path, root: &Path, tag: &str, expect: &str) -> Vec<Value> {
+    let mut files = serde_json::Map::new();
+    for (name, path) in [(diagnostics::MARKER.to_owned(), dir.join(diagnostics::MARKER)), ("records.jsonl".to_owned(), dir.join("records.jsonl"))] {
+        files.insert(name, json!(b64(&fs::read(path).unwrap())));
+    }
+    for e in fs::read_dir(dir.join("blobs")).unwrap().flatten() {
+        files.insert(format!("blobs/{}", e.file_name().to_string_lossy()), json!(b64(&fs::read(e.path()).unwrap())));
+    }
+    fx.json(&format!("envelope-{tag}.json"), &json!({"files": files}));
+    fx.evidence(&format!("expect-{tag}.txt"), expect.as_bytes());
+    let exe = std::env::current_exe().unwrap();
+    fx.json(&format!("binding-{tag}.json"), &json!({"app_path": exe, "app_sha256": sha(&fs::read(&exe).unwrap()), "exe": beside(),
+        "sha256": sha(&fs::read(beside()).unwrap()), "version_label": children::TAPECTL.version, "private_root": root}));
+    rows_at(dir)
+}
+fn external(fx: &Fx, tag: &str, observe: &Path) -> Value {
+    let o: Value = serde_json::from_slice(&fs::read(observe).unwrap()).unwrap();
+    fx.json(&format!("external-{tag}.json"), &o);
+    o
+}
+fn jobs_left(data: &Path) -> usize { fs::read_dir(data.join("jobs")).map(|d| d.count()).unwrap_or(0) }
+fn last<'a>(rows: &'a [Value], kind: &str) -> &'a Value { of(rows, kind).pop().unwrap_or_else(|| panic!("no {kind}")) }
+
+/// P1: the real production constructor and poller thread, two actual runs, normal close.
+#[test]
+fn c612_p1_production_poller() {
+    let Some((fx, _g)) = cards_fx("P1-production") else { return };
+    let observe = cards_mode(&fx, "offered");
+    let views = Arc::new(Mutex::new(Vec::new()));
+    let out = views.clone();
+    let s = Session::open(&fx.data(), provenance(true)).unwrap();
+    let b = Bridge::with_diagnostics(fx.data(), move |v| { out.lock().unwrap().push(v); Ok(()) }, Some(s));
+    let dir = diag_dir(&fx.data());
+    let start = std::time::Instant::now();
+    // Watch the session file only; the next run is due 2000 ms after this terminal.
+    while of(&rows_at(&dir), "cards-cleanup").len() < 2 {
+        assert!(start.elapsed() < Duration::from_secs(60), "two production polls did not finish");
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    let (view, generation) = (views.lock().unwrap().last().cloned().unwrap(), b.core.lock().unwrap().app.generation());
+    b.shutdown();
+    let rows = cards_envelope(&fx, &dir, &fx.data(), "production", "complete");
+    let o = external(&fx, "production", &observe);
+    let runs = of(&rows, "cards-admit");
+    assert_eq!(runs.len(), 2, "exactly the runs completed before close");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-blob", "cards-cleanup"].repeat(2));
+    assert_eq!(kinds(&rows)[..2], ["session", "cards-contract"]);
+    let foot = last(&rows, "session-end");
+    assert_eq!((foot["complete"].clone(), kinds(&rows).last().unwrap().as_str()), (json!(true), "session-end"), "footer after the poller joined");
+    let launch = last(&rows, "cards-launch");
+    // The child's own observation, not the logger, is the comparison.
+    assert_eq!((&launch["pid"], &launch["os_start_ns"], &launch["argv"], &launch["cwd"]), (&o["pid"], &o["os_start_ns"], &o["argv"], &o["cwd"]));
+    assert_eq!(o["console_window"], json!(false), "CREATE_NO_WINDOW child has no console");
+    assert_eq!(launch["creation_flags"], json!(discovery::CARDS_CREATION_FLAGS));
+    assert_eq!(launch["exe_sha256_observed"], json!(sha(&fs::read(beside()).unwrap())));
+    assert_eq!(launch["env_sha256"], json!(ingest_job::env_sha256()));
+    let run = launch["run_id"].clone();
+    for blob in of(&rows, "cards-blob").into_iter().filter(|x| x["run_id"] == run) {
+        let stored = fs::read(dir.join(blob["leaf"].as_str().unwrap().replace('/', "\\"))).unwrap();
+        assert_eq!(json!(sha(&stored)), o["sha256"][blob["role"].as_str().unwrap()], "{} is not what the child wrote", blob["role"]);
+    }
+    let published = last(&rows, "cards-publication");
+    assert_eq!(published["state_ref"], json!(Bridge::cards_ref(&view, generation)), "the receipt names the View the callback received");
+    assert_eq!(view.card_line, "Card ready (64 GB).");
+    assert_eq!(jobs_left(&fx.data()), 0, "every owned job removed");
+}
+
+/// P1/P2: due production polls on this thread; distinct runs, nonces and tickets.
+#[test]
+fn c612_p1_poll_once_runs() {
+    let Some((fx, _g)) = cards_fx("P1-poll") else { return };
+    let s = Session::open(&fx.data(), provenance(true)).unwrap();
+    let (b, _rx, views, s) = bridge(&fx, Some(s));
+    let mut seen = Vec::new();
+    for _ in 0..2 { let observe = cards_mode(&fx, "offered"); poll(&b); seen.push(external(&fx, &format!("poll-{}", seen.len()), &observe)); }
+    let published = views.lock().unwrap().len();
+    b.shutdown();
+    let rows = cards_envelope(&fx, &s.unwrap().path_in(&fx.data()), &fx.data(), "poll", "complete");
+    let launches = of(&rows, "cards-launch");
+    assert_eq!(launches.iter().map(|l| l["pid"].clone()).collect::<Vec<_>>(), seen.iter().map(|o| o["pid"].clone()).collect::<Vec<_>>());
+    assert_ne!(launches[0]["nonce"], launches[1]["nonce"]);
+    let tickets: Vec<u64> = of(&rows, "cards-admit").iter().map(|a| a["ticket"].as_u64().unwrap()).collect();
+    assert!(tickets[0] < tickets[1]);
+    assert_eq!(published, 2, "one publication per run");
+}
+
+/// P2: refusal, malformed report, resolve failure and spawn failure, each its own session.
+#[test]
+fn c612_p2_outcomes() {
+    let Some((fx, _g)) = cards_fx("P2-outcomes") else { return };
+    for (tag, mode, expect) in [("refusal", "refusal", "complete"), ("malformed", "malformed", "incomplete")] {
+        let data = fx.root.join(tag);
+        fs::create_dir_all(&data).unwrap();
+        let s = Session::open(&data, provenance(true)).unwrap();
+        let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(|_| {}), Some(Arc::new(s)));
+        let observe = cards_mode(&fx, mode);
+        poll(&b);
+        b.shutdown();
+        let rows = cards_envelope_at(&fx, &data, tag, expect);
+        external(&fx, tag, &observe);
+        assert_eq!(last(&rows, "cards-terminal")["exit"], json!(if mode == "refusal" { 1 } else { 0 }));
+        assert_eq!(last(&rows, "session-end")["complete"], json!(expect == "complete"));
+        assert_eq!(jobs_left(&data), 0);
+    }
+    // Resolve failure: the file beside the app is not the pinned child; no PID is invented.
+    {
+        let data = fx.root.join("resolve");
+        fs::create_dir_all(&data).unwrap();
+        let s = Session::open(&data, provenance(true)).unwrap();
+        let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(|_| {}), Some(Arc::new(s)));
+        let pinned = fs::read(beside()).unwrap();
+        fs::write(beside(), b"not the pinned child").unwrap();
+        poll(&b);
+        fs::write(beside(), &pinned).unwrap();
+        b.shutdown();
+        let rows = cards_envelope_at(&fx, &data, "resolve", "complete");
+        assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-not-launched", "cards-publication-attempt", "cards-publication", "cards-cleanup"]);
+        assert!(last(&rows, "cards-not-launched")["reason"].as_str().unwrap().contains("not the pinned"));
+        assert_eq!(last(&rows, "cards-cleanup")["result"], json!("removed"));
+    }
+    // Spawn failure through the production discovery::command/run: the OS refuses the start.
+    {
+        let data = fx.root.join("spawn");
+        fs::create_dir_all(&data).unwrap();
+        let s = Session::open(&data, provenance(true)).unwrap();
+        let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(|_| {}), Some(Arc::new(s)));
+        b.discover(|job, cancel, on_timeout, on_cancel, launched| {
+            let (cmd, req) = discovery::command(&data.join("absent").join("tapectl.exe"), children::TAPECTL.version.unwrap(), job);
+            let q = &req;
+            let mut hook = launched.map(|l| move |r: &Ran| l(r, q));
+            let ran = discovery::run(cmd, &req, cancel, on_timeout, on_cancel, hook.as_mut().map(|h| h as &mut dyn FnMut(&Ran)));
+            (ran, req)
+        });
+        b.shutdown();
+        let rows = cards_envelope_at(&fx, &data, "spawn", "complete");
+        assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-not-launched", "cards-publication-attempt", "cards-publication", "cards-cleanup"]);
+        assert!(last(&rows, "cards-not-launched")["reason"].as_str().unwrap().starts_with("cannot start tapectl"));
+    }
+}
+/// A sub-case whose app data folder is `data`, with its single session.
+fn cards_envelope_at(fx: &Fx, data: &Path, tag: &str, expect: &str) -> Vec<Value> { cards_envelope(fx, &diag_dir(data), data, tag, expect) }
+
+/// P2: the job folder cannot be created; nothing is attempted or invented.
+#[test]
+fn c612_p2_job_create_failure() {
+    let Some((fx, _g)) = cards_fx("P2-job") else { return };
+    fs::write(fx.data().join("jobs"), b"a file where the jobs folder goes").unwrap();
+    let s = Session::open(&fx.data(), provenance(true)).unwrap();
+    let (b, _rx, views, s) = bridge(&fx, Some(s));
+    cards_mode(&fx, "offered");
+    poll(&b);
+    let view = views.lock().unwrap().last().cloned().unwrap();
+    b.shutdown();
+    let rows = cards_envelope(&fx, &s.unwrap().path_in(&fx.data()), &fx.data(), "job", "complete");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-not-launched", "cards-publication-attempt", "cards-publication", "cards-cleanup"]);
+    let admit = last(&rows, "cards-admit");
+    assert!(admit["job_dir"].is_null() && admit["job_error"].as_str().unwrap().contains("cannot create"));
+    assert_eq!((last(&rows, "cards-cleanup")["attempted"].clone(), last(&rows, "cards-cleanup")["result"].clone()), (json!(false), json!("not-created")));
+    assert!(view.card_details_available, "the failure is shown under Show details");
+}
+
+/// P2: the publication effect fails; the receipt says so and is never complete.
+#[test]
+fn c612_p2_effect_failure() {
+    let Some((fx, _g)) = cards_fx("P2-effect") else { return };
+    let s = Arc::new(Session::open(&fx.data(), provenance(true)).unwrap());
+    let (b, _rx) = Bridge::channel_effect(fx.data(), Arc::new(|_| Err("injected effect failure".into())), Some(s.clone()));
+    cards_mode(&fx, "offered");
+    poll(&b);
+    b.shutdown();
+    let rows = cards_envelope(&fx, &s.path_in(&fx.data()), &fx.data(), "effect", "incomplete");
+    let p = last(&rows, "cards-publication");
+    assert_eq!((p["result"].clone(), p["error"].clone()), (json!("failed"), json!("injected effect failure")));
+    assert_eq!(last(&rows, "cards-cleanup")["result"], json!("removed"), "cleanup is unchanged by the effect failure");
+    assert_eq!(last(&rows, "session-end")["complete"], json!(false));
+}
+
+/// P3: the real 10 s timeout invalidates first, then the child is stopped and reaped.
+#[test]
+fn c612_p3_timeout() {
+    let Some((fx, _g)) = cards_fx("P3-timeout") else { return };
+    let s = Session::open(&fx.data(), provenance(true)).unwrap();
+    let (b, _rx, views, s) = bridge(&fx, Some(s));
+    let observe = cards_mode(&fx, "sleep");
+    let t = std::time::Instant::now();
+    poll(&b);
+    assert!(t.elapsed() >= Duration::from_millis(discovery::TIMEOUT_MS), "the existing timeout");
+    let view = views.lock().unwrap().last().cloned().unwrap();
+    b.shutdown();
+    let rows = cards_envelope(&fx, &s.unwrap().path_in(&fx.data()), &fx.data(), "timeout", "incomplete");
+    external(&fx, "timeout", &observe);
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-invalidate", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-blob", "cards-cleanup"]);
+    assert_eq!(last(&rows, "cards-invalidate")["changed"], json!(true));
+    assert_eq!((last(&rows, "cards-terminal")["end"].clone(), last(&rows, "cards-terminal")["wait_kind"].clone()), (json!("timed_out"), json!("wait")));
+    assert_eq!(last(&rows, "cards-publication")["result"], json!("stale-dropped"));
+    assert_eq!(view.card_line, crate::messages::GENERIC_INGEST);
+}
+
+/// P3: close during a running child (cancel, reap, stale drop, footer after join), and a
+/// due poll paused before admission is refused once stopped.
+#[test]
+fn c612_p3_shutdown() {
+    let Some((fx, _g)) = cards_fx("P3-shutdown") else { return };
+    let observe = cards_mode(&fx, "sleep");
+    let s = Session::open(&fx.data(), provenance(true)).unwrap();
+    let b = Bridge::with_diagnostics(fx.data(), |_| Ok(()), Some(s));
+    let dir = diag_dir(&fx.data());
+    let start = std::time::Instant::now();
+    while !observe.exists() { assert!(start.elapsed() < Duration::from_secs(30)); std::thread::sleep(Duration::from_millis(20)); }
+    b.shutdown();
+    let rows = cards_envelope(&fx, &dir, &fx.data(), "cancel", "incomplete");
+    assert_eq!(last(&rows, "cards-terminal")["end"], json!("cancelled"));
+    assert_eq!(last(&rows, "cards-publication-attempt")["intent"], json!("stale-drop"));
+    let k = kinds(&rows);
+    assert!(k.iter().position(|x| x == "cards-cleanup").unwrap() < k.iter().position(|x| x == "session-end").unwrap(), "footer after the poller joined");
+    assert_eq!(jobs_left(&fx.data()), 0);
+
+    let data = fx.root.join("refused");
+    fs::create_dir_all(&data).unwrap();
+    let s = Session::open(&data, provenance(true)).unwrap();
+    let b = Bridge::with_diagnostics(data.clone(), |_| Ok(()), Some(s));
+    let (paused_tx, paused_rx) = mpsc::channel();
+    let (resume_tx, resume_rx) = mpsc::channel::<()>();
+    *b.before_admission.lock().unwrap() = Some(Box::new(move || { paused_tx.send(()).unwrap(); let _ = resume_rx.recv_timeout(Duration::from_secs(1)); }));
+    paused_rx.recv_timeout(Duration::from_secs(10)).expect("a due poll");
+    let closer = { let b = b.clone(); std::thread::spawn(move || b.shutdown()) };
+    while !b.core.lock().unwrap().stopped { std::thread::sleep(Duration::from_millis(5)); }
+    drop(resume_tx);
+    closer.join().unwrap();
+    let rows = cards_envelope_at(&fx, &data, "refused", "complete");
+    assert_eq!(cards_kinds(&rows), ["cards-admission-refused"]);
+    assert_eq!(kinds(&rows).last().unwrap(), "session-end");
+}
+
+/// P4: the same production poll with diagnostics OFF makes no sink call and no file.
+#[test]
+fn c612_p4_off() {
+    let Some((fx, _g)) = cards_fx("P4-off") else { return };
+    let on_data = fx.root.join("on");
+    fs::create_dir_all(&on_data).unwrap();
+    let s = Session::open_faulty(&on_data, provenance(true), crate::children::nonce(), Some(Fault::DeadFrom(4))).unwrap();
+    let on_views = Arc::new(Mutex::new(Vec::new()));
+    let out = on_views.clone();
+    let (on, _rx1) = Bridge::channel_with(on_data.clone(), Arc::new(move |v| out.lock().unwrap().push(v)), Some(Arc::new(s)));
+    cards_mode(&fx, "offered");
+    poll(&on);
+    let a = on_views.lock().unwrap().last().cloned().unwrap();
+    on.shutdown();
+    let (off, _rx2, off_views, _) = bridge(&fx, None);
+    let observe = cards_mode(&fx, "offered");
+    SINK_CALLS.with(|c| c.set(0));
+    poll(&off);
+    let b = off_views.lock().unwrap().last().cloned().unwrap();
+    off.shutdown();
+    assert_eq!(SINK_CALLS.with(|c| c.get()), 0, "OFF made diagnostic sink calls");
+    assert!(!fx.data().join("control").exists(), "OFF created diagnostic files");
+    let o = external(&fx, "off", &observe);
+    assert_eq!(o["console_window"], json!(false));
+    assert_eq!((a.card_line, a.card_details_available), (b.card_line, b.card_details_available), "a failed sink changes no View");
+    assert_eq!((jobs_left(&on_data), jobs_left(&fx.data())), (0, 0));
+}
+
+/// P5: an occupied cards leaf, the blob limit and the session limit stop collection only.
+#[test]
+fn c612_p5_sink_bounds() {
+    let Some((fx, _g)) = cards_fx("P5-sink") else { return };
+    // Occupied leaf: the first run's report is record 7 after session/contract/admit/
+    // launch/terminal/attempt/publication.
+    {
+        let data = fx.root.join("occupied");
+        fs::create_dir_all(&data).unwrap();
+        let s = Session::open(&data, provenance(true)).unwrap();
+        let leaf = s.path_in(&data).join("blobs").join("00000007-report.bin");
+        fs::write(&leaf, b"foreign leaf").unwrap();
+        let views = Arc::new(Mutex::new(Vec::new()));
+        let out = views.clone();
+        let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(move |v| out.lock().unwrap().push(v)), Some(Arc::new(s)));
+        cards_mode(&fx, "offered");
+        poll(&b);
+        let view = views.lock().unwrap().last().cloned().unwrap();
+        b.shutdown();
+        assert_eq!(fs::read(&leaf).unwrap(), b"foreign leaf", "never overwritten");
+        let rows = cards_envelope_at(&fx, &data, "occupied", "incomplete");
+        assert_eq!(kinds(&rows).last().unwrap(), "incomplete");
+        assert_eq!(view.card_line, "Card ready (64 GB).", "the sink failure changes no View");
+        assert_eq!(jobs_left(&data), 0);
+    }
+    for (tag, mode, runs, reason) in [("blob", "big-stdout", 1, "blob-limit"), ("total", "max-stdout", 4, "session-limit")] {
+        let data = fx.root.join(tag);
+        fs::create_dir_all(&data).unwrap();
+        let s = Session::open(&data, provenance(true)).unwrap();
+        let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(|_| {}), Some(Arc::new(s)));
+        for _ in 0..runs { cards_mode(&fx, mode); poll(&b); }
+        b.shutdown();
+        let rows = cards_envelope_at(&fx, &data, tag, "incomplete");
+        assert_eq!(last(&rows, "incomplete")["reason"], json!(reason));
+        assert_eq!(kinds(&rows).last().unwrap(), "incomplete");
+        assert_eq!(jobs_left(&data), 0, "cleanup continues after the sink stops");
+        let total: u64 = fs::read_dir(diag_dir(&data).join("blobs")).unwrap().flatten().map(|e| e.metadata().unwrap().len()).sum::<u64>()
+            + fs::metadata(diag_dir(&data).join("records.jsonl")).unwrap().len();
+        assert!(total <= diagnostics::SESSION_LIMIT);
+    }
+}
+
+/// One F352 sub-case: its own app data folder, session and recorded Views.
+fn fault_case(fx: &Fx, tag: &str) -> (PathBuf, Arc<Bridge>, Arc<Mutex<Vec<View>>>) {
+    let data = fx.root.join(tag);
+    fs::create_dir_all(&data).unwrap();
+    let s = Session::open(&data, provenance(true)).unwrap();
+    let views = Arc::new(Mutex::new(Vec::new()));
+    let out = views.clone();
+    let (b, _rx) = Bridge::channel_with(data.clone(), Arc::new(move |v| out.lock().unwrap().push(v)), Some(Arc::new(s)));
+    (data, b, views)
+}
+fn last_view(views: &Mutex<Vec<View>>) -> View { views.lock().unwrap().last().cloned().unwrap() }
+
+/// F352-1: stderr's read fails after the child's real bytes. The prefix is never kept as
+/// a complete original; the actual error, its length and hash are, and the Product line is unchanged.
+#[test]
+fn c612_f1_read_error() {
+    let Some((fx, _g)) = cards_fx("F1-read") else { return };
+    let (data, b, views) = fault_case(&fx, "read");
+    let observe = cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::ReadError, "stderr")));
+    poll(&b);
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "read", "incomplete");
+    let o = external(&fx, "read", &observe);
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-missing", "cards-cleanup"]);
+    let m = last(&rows, "cards-missing");
+    let stderr_sha = o["sha256"]["stderr"].as_str().unwrap();
+    assert_eq!(m["role"], json!("stderr"));
+    assert_eq!(m["reason"], json!(format!("injected read failure; 19 bytes read before it, sha256 {stderr_sha}")), "the actual error and the prefix the child wrote");
+    assert_eq!(last(&rows, "session-end")["complete"], json!(false));
+    assert_eq!(view.card_line, "Card ready (64 GB).", "Product judgment unchanged");
+    assert_eq!(last(&rows, "cards-cleanup")["result"], json!("removed"));
+    assert_eq!(jobs_left(&data), 0);
+}
+
+/// F352-1: the stdout reader thread fails. No bytes are known; it is recorded missing with
+/// the actual failure, and Product judges the same empty stdout as before.
+#[test]
+fn c612_f1_reader_failure() {
+    let Some((fx, _g)) = cards_fx("F1-reader") else { return };
+    let (data, b, views) = fault_case(&fx, "reader");
+    cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::ReaderPanic, "stdout")));
+    let (ran, req, judged) = b.discover(Bridge::run_cards).unwrap();
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "reader", "incomplete");
+    let m = last(&rows, "cards-missing");
+    assert_eq!((m["role"].clone(), m["reason"].clone()), (json!("stdout"), json!(format!("reader thread failed: injected stdout reader failure; 0 bytes read before it, sha256 {}", sha(b"")))));
+    assert!(ran.stdout.is_empty() && ran.stdout_error.is_some());
+    assert_eq!(judged.hint, discovery::judge(ran.exit, b"", ran.report.as_deref(), &req.nonce, &req.version).hint, "Product judges what it judged before");
+    assert_eq!(view.card_line, discovery::line(judged.hint.as_ref()));
+    assert_eq!(last(&rows, "session-end")["complete"], json!(false));
+    assert_eq!(jobs_left(&data), 0);
+}
+
+/// F352-1: neither try_wait nor wait observes a terminal. No terminal or exit is invented:
+/// the session stops with the actual errors, while Product keeps its unknown-exit result.
+#[test]
+fn c612_f1_wait_failure() {
+    let Some((fx, _g)) = cards_fx("F1-wait") else { return };
+    let (data, b, views) = fault_case(&fx, "wait");
+    cards_mode(&fx, "offered");
+    discovery::fault::set(Some((discovery::fault::Fault::WaitError, "wait")));
+    let (ran, _, judged) = b.discover(Bridge::run_cards).unwrap();
+    discovery::fault::set(None);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "wait", "incomplete");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch"], "no terminal, publication, capture or cleanup is claimed after an unobserved reap");
+    let run = last(&rows, "cards-launch")["run_id"].as_str().unwrap().to_owned();
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-wait-failed: {run}: try_wait failed: injected try_wait failure; wait failed: injected wait failure")));
+    assert_eq!(kinds(&rows).last().unwrap(), "incomplete");
+    assert_eq!((ran.exit, ran.timed_out, ran.cancelled), (None, false, false), "Product's own unknown exit, as before");
+    assert!(judged.hint.is_none());
+    assert_eq!(view.card_line, discovery::line(None));
+}
+
+/// F352-2: the job's marker no longer matches at cleanup. The ownership guard refuses and
+/// nothing is deleted or attempted; the session says so rather than recording an attempt.
+#[test]
+fn c612_f2_guard_refused() {
+    let Some((fx, _g)) = cards_fx("F2-guard") else { return };
+    let (data, b, views) = fault_case(&fx, "guard");
+    cards_mode(&fx, "offered");
+    let mut kept = None;
+    b.discover(|job, c, t, k, l| {
+        let r = Bridge::run_cards(job, c, t, k, l);
+        fs::write(job.dir.join(jobdir::MARKER), b"not this app's marker").unwrap();
+        kept = Some((job.dir.clone(), r.1.report.clone()));
+        r
+    });
+    let view = last_view(&views);
+    b.shutdown();
+    let (dir, report) = kept.unwrap();
+    let rows = cards_envelope_at(&fx, &data, "guard", "incomplete");
+    assert_eq!(cards_kinds(&rows), ["cards-admit", "cards-launch", "cards-terminal", "cards-publication-attempt", "cards-publication", "cards-blob", "cards-blob", "cards-blob"]);
+    let run = last(&rows, "cards-launch")["run_id"].as_str().unwrap().to_owned();
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-cleanup-refused: {run}: {} failed the ownership check; nothing was removed", dir.display())));
+    assert_eq!(fs::read(dir.join(jobdir::MARKER)).unwrap(), b"not this app's marker", "sentinel retained");
+    let report_blob = of(&rows, "cards-blob").into_iter().find(|x| x["role"] == "report").unwrap();
+    assert_eq!(json!(sha(&fs::read(&report).unwrap())), report_blob["sha256"], "the job was not touched");
+    assert_eq!(view.card_line, "Card ready (64 GB).");
+    assert_eq!(jobdir::clean_stale(&data), 0, "the existing policy still never deletes it");
+}
+
+/// F352-2: remove_dir_all is called and fails on an owned job (a file in it is held open
+/// without delete sharing). The actual error is recorded, never success.
+#[cfg(windows)]
+#[test]
+fn c612_f2_removal_failure() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let Some((fx, _g)) = cards_fx("F2-remove") else { return };
+    let (data, b, views) = fault_case(&fx, "remove");
+    cards_mode(&fx, "offered");
+    let mut held = None;
+    b.discover(|job, c, t, k, l| {
+        let r = Bridge::run_cards(job, c, t, k, l);
+        held = Some((job.dir.clone(), r.1.report.clone(), fs::OpenOptions::new().read(true).share_mode(0).open(&r.1.report).unwrap()));
+        r
+    });
+    let view = last_view(&views);
+    b.shutdown();
+    let (dir, report, file) = held.unwrap();
+    drop(file);
+    let rows = cards_envelope_at(&fx, &data, "remove", "incomplete");
+    let c = last(&rows, "cards-cleanup");
+    assert_eq!((c["attempted"].clone(), c["result"].clone()), (json!(true), json!("failed")));
+    assert!(c["error"].as_str().unwrap().contains("os error 32"), "the actual sharing violation: {}", c["error"]);
+    assert_eq!(last(&rows, "session-end")["reason"], json!("cards-cleanup-not-removed"));
+    // remove_dir_all stops at the held file, so what it already deleted stays deleted.
+    assert!(dir.exists() && report.exists(), "the held original and its job folder are still there");
+    assert_eq!(view.card_line, "Card ready (64 GB).");
+}
+
+/// F352-2: the job directory is created, then a later stage fails. It is neither claimed
+/// created nor not-created; the session stops with the stage, and the partial job is left
+/// for the existing stale cleanup.
+#[test]
+fn c612_f2_partial_create() {
+    let Some((fx, _g)) = cards_fx("F2-partial") else { return };
+    let (data, b, views) = fault_case(&fx, "partial");
+    cards_mode(&fx, "offered");
+    jobdir::fault::arm();
+    poll(&b);
+    let view = last_view(&views);
+    b.shutdown();
+    let rows = cards_envelope_at(&fx, &data, "partial", "incomplete");
+    assert_eq!(kinds(&rows), ["session", "cards-contract", "incomplete"]);
+    let jobs: Vec<PathBuf> = fs::read_dir(data.join("jobs")).unwrap().flatten().map(|e| e.path()).collect();
+    assert_eq!(jobs.len(), 1);
+    assert_eq!(last(&rows, "incomplete")["reason"], json!(format!("cards-job-partially-created: {} exists, then control failed: injected create failure after the job directory", jobs[0].display())));
+    assert!(jobdir::owned(&jobs[0]) && !jobs[0].join("control").exists());
+    assert!(view.card_details_available);
+    assert!(b.raw_details().contains("cannot create the app's own folder: injected create failure after the job directory"), "Product shows the same failure");
+    assert_eq!(jobdir::clean_stale(&data), 1);
 }

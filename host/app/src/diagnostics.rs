@@ -8,6 +8,7 @@
 //! A write failure or limit stops collection with an `incomplete` record when one still
 //! fits. These are first-party observations, not whole-machine absence proof.
 
+use crate::discovery::{Ran, Request};
 use crate::ingest_job::RunReceipt;
 use crate::report::Reading;
 use serde_json::{json, Value};
@@ -153,6 +154,19 @@ struct Ledger {
     roles: BTreeMap<String, BTreeSet<&'static str>>,
     launched: BTreeSet<String>,
     flaws: Vec<&'static str>,
+    /// cards-1: run id -> what the session holds for that discovery run.
+    cards: BTreeMap<String, CardsRun>,
+}
+
+/// One discovery run's recorded steps (cards-1).
+#[derive(Default)]
+struct CardsRun {
+    launched: bool,
+    not_launched: bool,
+    terminal: bool,
+    published: bool,
+    cleaned: bool,
+    roles: BTreeSet<&'static str>,
 }
 
 impl Ledger {
@@ -169,6 +183,7 @@ struct Inner {
     seq: u64,
     total: u64,
     next_drop: u64,
+    next_cards: u64,
     stopped: bool,
     ledger: Ledger,
     #[cfg(test)]
@@ -238,7 +253,7 @@ impl Session {
             let records = win::create_file_at(&session, "records.jsonl")?;
             let blobs = win::create_dir_at(&session, "blobs")?;
             let inner = Inner { id, dirs: Dirs { _root: root, _control: control, _session: session, blobs }, records, seq: 0,
-                total: marker_bytes.len() as u64, next_drop: 0, stopped: false, ledger: Ledger::default(),
+                total: marker_bytes.len() as u64, next_drop: 0, next_cards: 0, stopped: false, ledger: Ledger::default(),
                 #[cfg(test)] fault, #[cfg(test)] creates: 0, #[cfg(test)] writes: 0 };
             let s = Session { inner: Mutex::new(inner), dir_name };
             {
@@ -249,6 +264,8 @@ impl Session {
                 g.record("session", json!({"app_path": provenance.app_path, "app_sha256": provenance.app_sha256, "source_commit": provenance.source_commit,
                     "os": std::env::consts::OS, "os_build": provenance.os_build, "arch": std::env::consts::ARCH, "app_pid": std::process::id(),
                     "app_os_start_ns": provenance.app_os_start_ns.map(|n| n as u64), "pins": pins, "control_scope": "app-private/control", "opt_in": OPT_IN}));
+                // cards-1 (Verification352): the contract record always follows the session record.
+                g.record("cards-contract", json!({"cards_schema": 1}));
                 if g.stopped { return Err(io::Error::other("cannot write the session record")); }
             }
             Ok(s)
@@ -388,6 +405,130 @@ impl Session {
         }
     }
 
+    /// cards-1: a discovery run admitted under a fresh ticket; returns its run id.
+    /// `job` is the owned job directory, or the actual error creating it.
+    pub fn cards_admit(&self, ticket: u64, job: Result<&Path, &str>) -> String {
+        let mut g = self.inner.lock().unwrap();
+        g.next_cards += 1;
+        let run = format!("cards-{}", g.next_cards);
+        let (dir, error) = match job { Ok(d) => (Some(d.to_string_lossy().into_owned()), None), Err(e) => (None, Some(e.to_owned())) };
+        if g.record("cards-admit", json!({"run_id": run, "ticket": ticket, "job_dir": dir, "job_error": error})) {
+            g.ledger.cards.insert(run.clone(), CardsRun::default());
+        }
+        run
+    }
+
+    /// cards-1: the poller asked for a run after the app stopped; nothing was admitted.
+    pub fn cards_admission_refused(&self) {
+        self.inner.lock().unwrap().record("cards-admission-refused", json!({"run_id": null, "ticket": null, "reason": "stopped"}));
+    }
+
+    /// cards-1: right after spawn, before any wait. The exe is hashed here, at launch.
+    pub fn cards_launch(&self, run: &str, ticket: u64, ran: &Ran, request: &Request) {
+        let exe_sha256 = sha_file(&request.exe).ok().map(|x| x.0);
+        let mut g = self.inner.lock().unwrap();
+        let Some(exe_sha256) = exe_sha256 else { g.stop("exe-hash-unavailable"); return };
+        if ran.os_start_ns.is_none() { g.ledger.flaw("unknown-child-creation-time"); }
+        if g.record("cards-launch", json!({"run_id": run, "ticket": ticket, "pid": ran.pid, "os_start_ns": ran.os_start_ns.map(|n| n as u64),
+            "spawn_call_ns": ran.spawn_call_ns as u64, "exe": request.exe.to_string_lossy(), "exe_sha256_observed": exe_sha256,
+            "pin_sha256": crate::children::TAPECTL.sha256, "pin_version_label": crate::children::TAPECTL.version, "argv": request.argv,
+            "cwd": request.cwd.to_string_lossy(), "report_path": request.report.to_string_lossy(), "nonce": request.nonce,
+            "creation_flags": ran.creation_flags, "env_sha256": ran.env_sha256})) {
+            if let Some(r) = g.ledger.cards.get_mut(run) { r.launched = true; }
+        }
+    }
+
+    /// cards-1: no child was started (resolve, spawn or job failure); no PID exists.
+    pub fn cards_not_launched(&self, run: &str, ticket: u64, reason: &str) {
+        let mut g = self.inner.lock().unwrap();
+        if g.record("cards-not-launched", json!({"run_id": run, "ticket": ticket, "reason": reason,
+            "pin_sha256": crate::children::TAPECTL.sha256, "pin_version_label": crate::children::TAPECTL.version})) {
+            if let Some(r) = g.ledger.cards.get_mut(run) { r.not_launched = true; }
+        }
+    }
+
+    /// cards-1: the timeout made this run stale before the child was stopped.
+    pub fn cards_invalidate(&self, run: &str, ticket: u64, changed: bool) {
+        self.inner.lock().unwrap().record("cards-invalidate", json!({"run_id": run, "ticket": ticket, "reason": "timeout", "changed": changed}));
+    }
+
+    /// cards-1: the actual reaped terminal of a launched child. When the wait itself failed no
+    /// terminal was observed, so none is recorded: the session stops with the actual error.
+    pub fn cards_terminal(&self, run: &str, ticket: u64, ran: &Ran) {
+        let end = if ran.timed_out { "timed_out" } else if ran.cancelled { "cancelled" } else { "exited" };
+        let mut g = self.inner.lock().unwrap();
+        if let Some(e) = &ran.wait_error { g.stop(&format!("cards-wait-failed: {run}: {e}")); return; }
+        // A stopped child is never a finished check, whatever its exit code.
+        if end != "exited" { g.ledger.flaw("cards-child-stopped"); }
+        if end == "exited" && ran.exit.is_none() { g.ledger.flaw("cards-exit-unknown"); }
+        if g.record("cards-terminal", json!({"run_id": run, "ticket": ticket, "pid": ran.pid, "exit": ran.exit, "end": end,
+            "wait_kind": ran.wait_kind, "end_ns": ran.end_ns as u64, "timeout_ms": crate::discovery::TIMEOUT_MS})) {
+            if let Some(r) = g.ledger.cards.get_mut(run) { r.terminal = true; }
+        }
+    }
+
+    /// cards-1: before the effect, what publication is about to do.
+    pub fn cards_publication_attempt(&self, run: &str, ticket: u64, intent: &str, state_ref: &str) {
+        self.inner.lock().unwrap().record("cards-publication-attempt", json!({"run_id": run, "ticket": ticket, "state_ref": state_ref, "intent": intent}));
+    }
+
+    /// cards-1: the actual publication result, after the effect.
+    pub fn cards_publication(&self, run: &str, ticket: u64, state_ref: &str, result: &str, error: Option<&str>) {
+        let mut g = self.inner.lock().unwrap();
+        if error.is_some() { g.ledger.flaw("cards-publication-failed"); }
+        if g.record("cards-publication", json!({"run_id": run, "ticket": ticket, "state_ref": state_ref, "result": result, "error": error})) {
+            if let Some(r) = g.ledger.cards.get_mut(run) { r.published = true; }
+        }
+    }
+
+    /// cards-1: after publication and before the job is deleted, the original report,
+    /// stdout and stderr bytes, judged with the same reader the card line uses.
+    pub fn cards_capture(&self, run: &str, ticket: u64, ran: &Ran, request: &Request) {
+        let mut g = self.inner.lock().unwrap();
+        match &ran.report {
+            Some(b) => g.cards_blob(run, ticket, ran.pid, "report", b),
+            None => g.cards_missing(run, ticket, "report", &format!("cannot read the report after the child's terminal: {}", ran.report_error.as_deref().unwrap_or("no error was returned"))),
+        }
+        // A read or reader failure leaves only a prefix (or nothing): never kept as complete.
+        for (role, bytes, error) in [("stdout", &ran.stdout, &ran.stdout_error), ("stderr", &ran.stderr, &ran.stderr_error)] {
+            match error {
+                None => g.cards_blob(run, ticket, ran.pid, role, bytes),
+                Some(e) => g.cards_missing(run, ticket, role, &format!("{e}; {} bytes read before it, sha256 {}", bytes.len(), sha(bytes))),
+            }
+        }
+        if let (Some(exit), Some(b)) = (ran.exit, &ran.report) {
+            if !matches!(crate::report::read(b, crate::report::Tool::Cards, &request.nonce, &request.version, exit, 0), Reading::Usable { .. }) {
+                g.ledger.flaw("invalid-cards-report");
+            } else if exit == 0 && crate::discovery::judge(ran.exit, &ran.stdout, Some(b), &request.nonce, &request.version).hint.is_none() {
+                g.ledger.flaw("invalid-cards-stdout");
+            }
+        }
+    }
+
+    /// cards-1: the actual removal outcome of this run's own job, recorded only afterwards.
+    /// `None`: the job directory was never created, so nothing was attempted. An ownership
+    /// refusal deletes nothing and attempts nothing; cards-1 has no unattempted cleanup of an
+    /// existing job, so the session stops saying so instead of recording one.
+    pub fn cards_cleanup(&self, run: &str, ticket: u64, job: Option<(&Path, &crate::jobdir::Removal)>) {
+        use crate::jobdir::Removal;
+        let mut g = self.inner.lock().unwrap();
+        let (attempted, result, error) = match job {
+            None => (false, "not-created", None),
+            Some((_, Removal::Removed)) => (true, "removed", None),
+            Some((d, Removal::Refused)) => {
+                g.stop(&format!("cards-cleanup-refused: {run}: {} failed the ownership check; nothing was removed", d.display()));
+                return;
+            }
+            Some((_, Removal::Failed(e))) => (true, if e.kind() == io::ErrorKind::NotFound { "missing" } else { "failed" }, Some(e.to_string())),
+        };
+        let job_dir = job.map(|(d, _)| d);
+        if error.is_some() { g.ledger.flaw("cards-cleanup-not-removed"); }
+        if g.record("cards-cleanup", json!({"run_id": run, "ticket": ticket, "job_dir": job_dir.map(|d| d.to_string_lossy()),
+            "attempted": attempted, "result": result, "error": error})) {
+            if let Some(r) = g.ledger.cards.get_mut(run) { r.cleaned = true; }
+        }
+    }
+
     /// Stop collecting because the caller could not observe a required fact.
     pub fn incomplete(&self, reason: &str) {
         self.inner.lock().unwrap().stop(reason);
@@ -434,6 +575,10 @@ impl Inner {
         if l.jobs != l.outcomes || l.jobs != l.cleaned { return Some("work-without-outcome-or-cleanup".into()); }
         let accounted: BTreeSet<String> = l.jobs.union(&l.skipped).cloned().collect();
         if l.scheduled != accounted { return Some("scheduled-work-unaccounted".into()); }
+        for r in l.cards.values() {
+            if r.launched == r.not_launched || !r.published || !r.cleaned { return Some("cards-run-unaccounted".into()); }
+            if r.launched && (!r.terminal || r.roles.len() != 3) { return Some("cards-missing-capture".into()); }
+        }
         for (w, (cancelled, exit)) in &l.terminal {
             let roles = l.roles.get(w).cloned().unwrap_or_default();
             if *cancelled {
@@ -522,6 +667,33 @@ impl Inner {
         drop(file);
         if self.record("blob", serde_json::from_slice::<Value>(&cite).expect("own record")["data"].take()) {
             self.ledger.roles.entry(work_id.into()).or_default().insert(role);
+        }
+    }
+
+    /// cards-1: a capture that could not be kept; never complete.
+    fn cards_missing(&mut self, run: &str, ticket: u64, role: &str, reason: &str) {
+        self.ledger.flaw("cards-missing-capture");
+        self.record("cards-missing", json!({"run_id": run, "ticket": ticket, "role": role, "reason": reason}));
+    }
+
+    /// cards-1: one original, byte-exact, in its own fresh leaf, as `blob` keeps INGEST's.
+    /// Over the blob limit it is named missing and collection stops.
+    fn cards_blob(&mut self, run: &str, ticket: u64, pid: Option<u32>, role: &'static str, bytes: &[u8]) {
+        if self.stopped { return; }
+        if bytes.len() as u64 > BLOB_LIMIT {
+            self.cards_missing(run, ticket, role, &format!("original is {} bytes, over the {BLOB_LIMIT}-byte blob limit", bytes.len()));
+            return self.stop("blob-limit");
+        }
+        let leaf = format!("{:08}-{role}.bin", self.seq);
+        let cite = self.line("cards-blob", json!({"run_id": run, "ticket": ticket, "pid": pid, "role": role, "leaf": format!("blobs/{leaf}"),
+            "bytes": bytes.len(), "original_bytes": bytes.len(), "status": "complete", "sha256": sha(bytes)}));
+        if self.total + bytes.len() as u64 + cite.len() as u64 > SESSION_LIMIT - RESERVE { return self.stop("session-limit"); }
+        let created = self.inject_create().and_then(|_| self.create_blob(&leaf));
+        let mut file = match created { Ok(f) => f, Err(e) => return self.fail(e) };
+        if let Err(e) = self.put(Some(&mut file), bytes) { return self.fail(e); }
+        drop(file);
+        if self.record("cards-blob", serde_json::from_slice::<Value>(&cite).expect("own record")["data"].take()) {
+            if let Some(r) = self.ledger.cards.get_mut(run) { r.roles.insert(role); }
         }
     }
 

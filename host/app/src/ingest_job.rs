@@ -41,7 +41,7 @@ pub struct RunReceipt {
     pub wait_kind: &'static str,
 }
 
-fn now() -> u128 {
+pub fn now() -> u128 {
     std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).expect("system time").as_nanos()
 }
 
