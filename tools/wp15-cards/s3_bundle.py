@@ -373,7 +373,9 @@ def linux_rows(b, a):
         ("combined-system-and-foreign", dict(holds_os=1, mounted=["2:/media/other"]), None),
         ("OS-own-hint-byte-invalid", dict(mounted=["1:/media/DIGITALTAPE"], layout_ok=0), None),
         ("bare-CRC-55AA-mounted", dict(mounted=["1:/media/DIGITALTAPE"], layout_ok=0), None),
-        ("own-p1-unmount-failed", dict(mounted=["1:/nonexistent/dt-p1"], layout_ok=1), None),
+        # Own partition 1 of an exact layout may be unmounted, and only it; here the OS
+        # unmount itself fails (the existing unmount-error control: a real failed call).
+        ("own-p1-unmount-failed", dict(mounted=["1:/media/DIGITALTAPE"], layout_ok=1), None),
     ]
     for name, kw, erase in policy:
         img = pristine(name, bytes(crc) if "55AA" in name else rnd)
@@ -383,7 +385,10 @@ def linux_rows(b, a):
         ftxt = facts_text(nbytes, **kw)
         argv, rep = b.make(dev, wav_path=w[1024], erase=erase)
         before = sha(img)
-        res = b.process(argv, facts=ftxt)
+        env = {k: v for k, v in os.environ.items() if not k.startswith("TAPECTL_TEST")}
+        if name == "own-p1-unmount-failed":
+            env["TAPECTL_TEST_FAULT"] = "unmount-error"
+        res = b.process(argv, env=env, facts=ftxt)
         plat.detach(dev)
         b.session_row(name, scope + "; policy refusal, zero writes", res, rep,
                       oracle_facts(ftxt, erase is None, unmount_failed=name == "own-p1-unmount-failed"), before, sha(img))
@@ -411,14 +416,15 @@ def linux_rows(b, a):
     b.session_row("geometry-before-write", scope + "; GEOMETRY refused before any write", res, rep,
                   oracle_facts(facts_text(small.stat().st_size), True), before, sha(small))
 
-    # Verify findings: one real failed OS read, during verify only.
+    # Verify findings: one real failed OS read of the first chunk (partition LBA 2048,
+    # tapefs §3), during verify only.
     img = pristine("verify-findings", zero); dev = plat.attach(img)
     argv, rep = b.make(dev, wav_path=w[1024]); before = sha(img)
     env = {k: v for k, v in os.environ.items() if not k.startswith("TAPECTL_TEST")}
-    env["TAPECTL_TEST_FAULT"] = "read-error:2058@verify"
+    env["TAPECTL_TEST_FAULT"] = "read-error:2048@verify"
     res = b.process(argv, env=env, facts=facts_text(IMG_BYTES))
     plat.detach(dev)
-    b.session_row("verify-findings", scope + "; real failed OS read during verify (read-error:2058@verify)", res, rep,
+    b.session_row("verify-findings", scope + "; real failed OS read during verify (read-error:2048@verify)", res, rep,
                   oracle_facts(facts_text(IMG_BYTES), True), before, sha(img))
 
     # Generic EIO is not a card change: a device-mapper error target swapped in mid-load.
