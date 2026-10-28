@@ -49,7 +49,7 @@ Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Size rounds to an outcome (ADR-195) and use capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
-**Current routing (24 October, ADR-192): Software is Claude Code on Michael's actual local Windows machine, with model selected by Michael. Verification remains a separate independent context. PM posts GitHub issues only; no automatic lead kickoff, listener wake-up or next-task continuation until Michael explicitly resumes it. Both existing listeners are PAUSED.**
+**Current routing (24 October, ADR-192): Software is Claude Code on Michael's actual local Windows machine, with model selected by Michael. Verification remains a separate independent context. PM posts GitHub issues only; no automatic lead kickoff, listener wake-up or next-task continuation until Michael explicitly resumes it. Both existing listeners are PAUSED. Once started, a lead may continue into the next named stage of the same issue when its input has arrived (ADR-195, Michael 28 Oct); it never starts another issue or polls.**
 
 Current Phase2 family delivery is Windows11 only; macOS is deferred under ADR-191, Linux remains existing CI. Michael may configure issue listeners for lead activation. This agreement does not
 install a listener or enable automatic acceptance, review or merge.

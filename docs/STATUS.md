@@ -36,10 +36,11 @@ stays as CI. The [Phase 2 ledger](PHASE2-LEDGER.md) has every exit criterion row
 |---|---|---|
 | Software | [#624](https://github.com/mmsanders/Digital-Tape/issues/624) | `tapectl make`, UAC elevation of that one child, Make button wired, one Windows candidate ZIP |
 | Verification | [V#364](https://github.com/mmsanders/digital-tape-verification/issues/364) | Stage 1: dispose WP-14 and WP-16 under ADR-195; author WP-15 tests and the C2 checklist. Stage 2: dispose Software's head |
-| Michael | [#623](https://github.com/mmsanders/Digital-Tape/issues/623) | Merge the PM622 PR (the go signal), confirm or veto ADR-195, book the C2 session and G2 |
+| Michael | [#623](https://github.com/mmsanders/Digital-Tape/issues/623) | Answered: ADR-195 approved, same-issue stage continuation allowed, wife agrees to G2, C2 likely 29–30 Oct. Still open: pick the G2 music folder |
 
 Software and Verification Stage 1 run in parallel. Verification Stage 2 waits on Software's
-return. Leads start only when Michael starts them. No listener, kickoff or subworker.
+return. Michael starts each issue; once started, a lead may continue into the next stage of the
+same issue if its input has arrived (ADR-195). No listener, polling, kickoff or subworker.
 
 ## Next rounds
 

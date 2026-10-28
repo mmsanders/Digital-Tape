@@ -4557,9 +4557,10 @@ format and original artifacts remain unchanged.
 
 ## ADR-195 — Phase 2 closeout: proportional evidence and the Make path
 **Date:** 2026-10-28 PDT
-**Status:** ADOPTED by PM (PM622, new PM runtime, explicit activation by Michael). Michael may
-veto in [#623](https://github.com/mmsanders/Digital-Tape/issues/623). Until the PR carrying
-this ADR is merged, nothing here is in force.
+**Status:** ADOPTED by PM (PM622, new PM runtime, explicit activation by Michael) and
+**approved by Michael** on 28 October in reply to [#623](https://github.com/mmsanders/Digital-Tape/issues/623):
+"1. approved 2. probably tomorrow or the next day 3. yes 4. yes … You are going to drive us to
+the end of phase 2." In force from the merge of the PR carrying it.
 
 Michael asked for a roadmap to Phase 2 closeout in three to five rounds and a diagnosis of the
 slowdown. The full review is [PM622](REVIEW/PM622-CLOSEOUT-RESET.md). In short, the evidence
@@ -4670,8 +4671,11 @@ guardrail 10.
 - Rungs keep their meaning. [The Phase 2 ledger](PHASE2-LEDGER.md) becomes the progress record
   under them: one row per criterion, with state, evidence and next owner.
 - STATUS and package pages are written in plain sentences. Line budgets stand.
-- Manual activation (ADR-192) stands. Michael is asked (#623) whether a lead may continue
-  into the next stage of the *same* issue without a fresh manual start.
+- Manual activation (ADR-192) stands for *starting* an issue. **Michael answered yes (#623):**
+  once started, a lead may continue into the next named stage of the *same* issue without a
+  fresh manual start, when that stage's input has arrived (for example, a Software return or a
+  Verification clearance posted in the paired issue). It still never starts another issue, and
+  it never polls or waits: if the input is missing, it returns and stops.
 
 **Rationale.** Close Phase 2 on the evidence its criteria ask for, and build the one missing
 path, instead of extending proofs of mechanism the criteria never required. Safety is
