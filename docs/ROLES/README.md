@@ -9,7 +9,7 @@ Michael assigns roles; opening this index or receiving a label event grants no r
 | PM | Any — Michael assigns (ADR-162) | [PM](pm.md) | pm |
 | Software | Local Windows Claude Code; Michael selects model | [Software](software.md) | software-lead |
 | Hardware | Separate Claude Code / Opus | [Hardware](hardware.md) | hardware-lead |
-| Verification | Separate Work / Sol | [Verification](verification.md) | verification-lead in `digital-tape-verification` |
+| Verification | Separate independent context, runtime chosen by Michael | [Verification](verification.md) | verification-lead in `digital-tape-verification` |
 | Surge | Grok | [Surge](surge.md) | surge |
 | Michael | Human reserved decisions | [Queue locator](../FOR-MICHAEL.md) | michael |
 

@@ -64,7 +64,7 @@ Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape Verification Lead for the current phase, using Sol in a separate ChatGPT Work chat.
+You are the Digital-Tape Verification Lead for the current phase, in a separate independent context selected by Michael (never the Software context).
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/verification.md
 and required onboarding documents. Find your current open issue labeled
 `verification-lead`, read its live body and scope updates, and report the input main

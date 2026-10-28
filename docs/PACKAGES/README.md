@@ -1,12 +1,11 @@
 # Work packages — current roadmap
 
-**PM620 latest-round review.** Current Phase2 target: Windows11 x64;
-macOS deferred, Linux existing CI. Live assignments are GitHub role issues,
-not this index. [Status](../STATUS.md), [Phase2 plan](../PHASE2-PLAN.md) and
-[independent integration](../VERIFICATION-INTEGRATION.md) govern current gates.
+**PM622 · 28 October 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
+Live assignments are GitHub role issues, not this index. [Status](../STATUS.md),
+[Phase 2 plan §8 closeout](../PHASE2-PLAN.md#8-closeout-plan-adr-195) and
+[the Phase 2 ledger](../PHASE2-LEDGER.md) govern current gates.
 
-Phase1 is COMPLETE36/36. Phase2 now7/12; numerical rungs are complete
-criteria, not effort percentages. No new phase/hardware/firmware work is issued.
+Phase 1 is complete (36/36). Phase 2 is at 7/12. Rungs count completed gates, not effort.
 
 ## Phase 0 — foundations and parked hardware
 | Package | Outcome | Owner | Stream | Current boundary |
@@ -35,9 +34,9 @@ criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 ## Phase 2 — current desktop tooling
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
-| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification |3|3/4; nativeA6 request/offset linkage remains held, no new physical test issued. |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;612 corrected source integratedfce1d644, new candidate audit1718ac63 PASS.616 integrated090551e;618 awaits fresh361 method qualification after359 script-policy blocker. ONE native session remains unexecuted; no rebuild/human task. Native/S3/G2 still held. |
-| WP-16 | [Ingest](WP-16.md) | Software/Verification |3|3/4; exact333-cleared598 source integrated1695552d unchanged with122SUCCESS/2expected skips. Full native/own-host acceptance remains held. |
+| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | 3/4. All but A6 passed on Windows 11; A6 evidence in hand, closes in C1 (ADR-195). |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | 1/4. App built and integrated except Make; C1 builds Make, C2 real-card session, C3 G2. |
+| WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | 3/4. Integrated `1695552d`; final disposition in C1 (ADR-195). |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
 No current human action:589 reviewed/partial closed; no repeat or Show Details

@@ -4554,3 +4554,133 @@ Rationale: improve actual usability and provide a current usable artifact while
 human work waits, rather than repeat passed startup/metadata or spin on tooling.
 Reversal cost: a new explicit scope/clarification; historical reports, frozen engine/
 format and original artifacts remain unchanged.
+
+## ADR-195 — Phase 2 closeout: proportional evidence and the Make path
+**Date:** 2026-10-28 PDT
+**Status:** ADOPTED by PM (PM622, new PM runtime, explicit activation by Michael) and
+**approved by Michael** on 28 October in reply to [#623](https://github.com/mmsanders/Digital-Tape/issues/623):
+"1. approved 2. probably tomorrow or the next day 3. yes 4. yes … You are going to drive us to
+the end of phase 2." In force from the merge of the PR carrying it.
+
+Michael asked for a roadmap to Phase 2 closeout in three to five rounds and a diagnosis of the
+slowdown. The full review is [PM622](REVIEW/PM622-CLOSEOUT-RESET.md). In short, the evidence
+demanded grew past what the criteria ask; work flowed to what could be proved rather than what
+was missing; and the one path the exit gate needs, Make, has had no implementation issue since
+about 18 October.
+
+### 1. Proportional evidence (governs all remaining Phase 2 acceptance)
+
+1. A criterion is proved by a test of the outcome it names, plus a negative control showing
+   the test can fail. Kernel tracing, process/thread/IRP attribution, PID lineage, handle
+   forensics and detection of *failed or zero-access* opens are required only where a WP-14,
+   WP-15 or WP-16 criterion names them. None currently does.
+2. Where the operating system enforces a property, that enforcement plus a check that the
+   precondition holds is the proof. On Windows 11, a process at Medium integrity (not elevated)
+   cannot open `\\.\PhysicalDriveN` or a volume device for raw access.
+3. A test method is qualified by its own controls in the tranche that uses it. Separate rounds
+   to qualify a method, admit a session, grant a session or attempt budget, or approve a build
+   count are not issued. A candidate may be rebuilt whenever useful. Its identity is recorded,
+   not rationed.
+4. Michael's witnessed records are evidence as returned (screenshots, logs, files, his
+   statement). Verification checks them for consistency with the criterion and the issued
+   checklist. Edited clips or missing PIDs limit only claims that need them.
+5. Each round closes named rows in [the Phase 2 ledger](PHASE2-LEDGER.md). Each lead issue runs
+   through its stages to the next natural handoff. Verification disposes Software's exact head
+   directly (ADR-158), and PM enters at round end.
+
+This withdraws the added obligations in APP-1A §6 (process-attributed G1 runtime tracing), §7
+(binding before write-mode access, "no weaker guarantee") and §8 (opt-in native-flow receipts
+as an acceptance route), the "native visibility of failed/zero-access opens" requirement on
+WP-16, and the ETW attribution checker as the A6 acceptance route. Those methods, their
+publications and every recorded fact stay in history unchanged. No WP-14/15/16 criterion text,
+guardrail, engine/format freeze, Structural Rule 1 obligation or Verification independence
+changes.
+
+### 2. Acceptance methods, by criterion
+
+- **WP-14 A6.** Proved by: (a) the 14 October Windows 11 run on the 64 GB PNY card. `provision`
+  wrote and `verify`/mount read back the mirror superblock in the last sector, at
+  62,537,072,128 bytes, and load/dump of a full C-60 round-tripped. (b) The 19 October trace's two
+  successful 512-byte reads at that offset, as corroboration. (c) A negative control in CI: a
+  host port that truncates offsets to 32 bits makes `verify` (or provision+verify) fail on an
+  image or device over 4 GiB, and the shipping port passes. The four unattributed post-exit
+  records of other streams are outside A6. No new physical run is required.
+- **WP-16 own-host (INGEST-1 §1/§6, no card or block-device access).** Proved by a static check
+  with a negative control (ingest source contains no raw-device open) plus evidence that ingest
+  runs unelevated: its manifest/launch is `asInvoker`, and the app, its parent, ran at Medium
+  integrity in the #618 session (Verification #361). Failed-open visibility is not required.
+- **WP-15 G1.** Proved by the static CI check with its negative control (no app code opens a
+  block device) plus the app and ingest running unelevated, as above. Only the `tapectl make`
+  child is elevated. The runtime trace in APP-1 §7 is withdrawn.
+- **WP-15 G3 app-origin rows (†).** `DROP_NOT_FOLDER`, `SPAWN_FAILED`, `ELEVATION_DECLINED`,
+  `CARD_RECHECK_MISMATCH`. Proved by component or app-level tests through the production bridge,
+  plus Michael's scripted C2 checklist run on the candidate for the rows a person can trigger
+  (drop a file; decline UAC; pull the card). Child-origin rows stay as issued: real tool
+  outcomes on images in CI.
+- **WP-15 G4 and G5.** G4 from the issued screens and the candidate's actual screens, captured
+  in C2. G5 from Michael installing and running the exact candidate ZIP on his Windows 11
+  machine in C2.
+
+### 3. The Make path (APP-1 §3/§4, APP-1A §7 amended)
+
+`tapectl make` is implemented now, in the shipping binary, against the S3 tests already on
+main (`tests/wp15_cards_make_r1`, imported) and the existing internal composition core.
+
+- **Open and safety.** `make` uses the accepted WP-14 `provision` open and §5 safety sequence
+  unchanged, then keeps that one handle for load and the NULL-write verify. Its refusal
+  guarantee is A4's: zero writes. A refused target never receives a write. The added
+  "zero write-mode opens" and "binding before write-mode access" obligations are withdrawn.
+  Checking the same handle that will write closes the check-to-open gap more directly than a
+  separate pre-open query could.
+- **Continuity.** As issued: a positively reported removal or change on the open handle stops
+  with `CARD_CHANGED` and exit 1, and `make` never reopens. An undetected equal-size swap is a
+  stated limitation. `HOST_QUERY_FAILED` stays as issued. The app's message for both is the
+  existing pulled-card row.
+- **Elevation.** One UAC prompt per Make (Windows `runas` of the `tapectl make` child). The app,
+  `ingest` and `tapectl cards` stay unelevated. Software records the prompt text.
+- **App.** The Make button is enabled exactly when APP-1 §2 allows: one offered card, valid
+  label, successful ingest, nothing running. Steps follow APP-1 §4 unchanged.
+- **Method description.** Software's return answers the five points of the published S3
+  feasibility note (`tests/wp15_cards_make_r1/FEASIBILITY.md`) in a page of prose. Verification
+  reviews it with the exact head in the same round. It is not a prior gate.
+
+### 4. Q-P2-1(b) — ruled: port-level batching, engine unchanged
+
+Inputs: Verification's (a) answer, which showed the two WP-10 modes do not cover any-subset
+persistence and specified a third mode. The any-subset model was published (`tests/wp10_subset_r1`)
+and run against the pinned engine in bounded campaigns (Verification #186/#210). No engine
+violation was found within their stated bounds: 39 of 404 host load faults executed, 365
+deferred, six long-copy cuts unexecuted. Software's call count per C-60 copy is the #379
+estimate: one 512-byte device call per block, about two minutes on an unbatched SD port
+against guardrail 10's 30 seconds.
+
+**Ruling.** Port-level batching. The engine and spec stay unchanged. The Phase 3 firmware SD
+port may coalesce unflushed writes into multi-block commands and read ahead, within
+`tapefs` §8.1, which already permits any subset of unflushed writes to persist before the next
+flush. The multi-block engine API option is not taken. It would need a spec revision, Michael's
+approval and a reopened frozen engine, for a gain the port can get by itself.
+
+**Conditions, carried as Phase 3 entry items.** Before firmware batching is enabled,
+Verification completes any-subset coverage for the deferred load faults and long-copy cuts.
+Guardrail 10 is measured on target hardware in the shipping bus mode, as it always was. If
+target measurement misses 30 s with batching, this ruling is reopened; nothing here waives
+guardrail 10.
+
+### 5. Process
+
+- Rungs keep their meaning. [The Phase 2 ledger](PHASE2-LEDGER.md) becomes the progress record
+  under them: one row per criterion, with state, evidence and next owner.
+- STATUS and package pages are written in plain sentences. Line budgets stand.
+- Manual activation (ADR-192) stands for *starting* an issue. **Michael answered yes (#623):**
+  once started, a lead may continue into the next named stage of the *same* issue without a
+  fresh manual start, when that stage's input has arrived (for example, a Software return or a
+  Verification clearance posted in the paired issue). It still never starts another issue, and
+  it never polls or waits: if the input is missing, it returns and stops.
+
+**Rationale.** Close Phase 2 on the evidence its criteria ask for, and build the one missing
+path, instead of extending proofs of mechanism the criteria never required. Safety is
+unchanged where it matters: A4 zero writes on refusal, unelevated app/ingest enforced by the
+OS, one elevated child that reuses the accepted provision safety path.
+**Reversal cost.** Low for evidence rules: a later ADR can restore any withdrawn method, and
+all its history is intact. Moderate for Make: code would be held again, but nothing ships
+without independent disposition. Q-P2-1(b) is a paper ruling, reopened by measurement.

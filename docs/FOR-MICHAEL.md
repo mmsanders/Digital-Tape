@@ -1,25 +1,16 @@
 # Human actions and queue
 
-**PM620 ·28 October2026 PDT.** No current human/card/admin action requested.
-Original589 remains reviewed/partial and closed; no old564 repeat.
+**PM622 · 28 October 2026 PDT.** Answered in [#623](https://github.com/mmsanders/Digital-Tape/issues/623):
+ADR-195 approved; leads may continue stages within the same issue; your wife agrees to be the
+G2 tester; C2 is likely 29–30 October.
 
-616 packaging is integrated090551e, candidate unchanged, no rebuild/upload.
-Software618 declared current ordinary Windows context but has not launched.
-Verification359's new PowerShell method controls were refused before execution
-by its own local script policy. That is a test-method blocker, not app failure
-or an automatic approval-review rejection. Held launcher must not be used.
+Now:
+1. **Start Software [#624](https://github.com/mmsanders/Digital-Tape/issues/624) and
+   Verification [digital-tape-verification#364](https://github.com/mmsanders/digital-tape-verification/issues/364)**
+   in any order. They run in parallel.
+2. **Pick the G2 music folder**, under 60 minutes. Keep the app out of your wife's sight until G2.
 
-Fresh Verification361 qualifies only pure/file/parser method controls in normal
-isolated Windows CI under default policy. No denied-local-script workaround,
-execution-policy flag/change, provider/mode change or native app test in CI.
-After successful controls/full method review and exact admission on MAIN,
-Michael can manually resume existing618 for its ONE bounded native session.
-No human gesture/card/admin test, new Software duplicate issue or rebuild.
+Next: the **C2 session**, about 45 minutes at the Windows 11 machine with one PNY card and the
+reader. PM will post a Michael issue with Verification's checklist when the candidate is cleared.
 
-Phase2 stays7/12. A6 route1 remains PARKED at missing SplitIo contracts; no new
-capture or duplicate partial decoder. Full native/G1/S3/own-host/fullAPP/G2 holds.
-First-party child receipts never become external child/no-device/no-write proof.
-Manual GitHub-only, Software local Windows Claude and independent Verification.
-Listeners PAUSED; no lead messages/kickoff/subworkers/automatic continuation.
-
-[Current review](REVIEW/PM620-METHOD-CONTROLS.md), [status](STATUS.md).
+[Status](STATUS.md) · [ledger](PHASE2-LEDGER.md) · [closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195)

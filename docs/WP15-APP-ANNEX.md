@@ -200,23 +200,18 @@ undetected swap inside a reader or equal-size pre-launch gap remains a disclosed
 limit, never inferred from image/VHD tests or path+capacity. Native controls must
 bind actual error/lifetime/zero-foreign-write observations.
 
-G1 runtime requires process-attributed detection of actual device-open attempts,
-including failed, transient and zero-access opens; ordinary-file positive controls
-must remain clean. Qualify a candidate method against those controls before using
-absence of records. Handle sampling or app self-logging alone cannot establish
-absence. Windows in-box tracing failed controls; Procmon or another ordinary-settings
-method may be evaluated, not presumed adequate. Historical Mac fs_usage catches paths only on the submitted SIP-disabled runner; Mac qualification is deferred and is not a current Windows release gate (ADR-191). No security change,
-injection, shipping seam, rebuilt tapectl, purchase or new Michael test is licensed.
-Prompts/declines and actual Windows11/macOS family builds remain independently
-unobserved where disclosed. Host authoring/build work may proceed while these
-native acceptance gates stay held. G2 waits for accepted dependencies.
+**G1 runtime, amended by ADR-195.** G1 is proved by the static CI check with its negative
+control plus evidence that the app and `ingest` run unelevated (`asInvoker`, Medium integrity).
+Windows then refuses them raw device access. Process-attributed tracing of failed or zero-access
+opens is no longer required. Earlier method findings stay in history. Prompts and declines are
+observed in Michael's C2 checklist run. G2 waits for accepted dependencies.
 
 ## 7. S3 boundary queries and device binding — ADR-189
 
 These rules apply only to additive `tapectl make`, not existing standalone commands.
-A required initial safety, authorization or object-binding query must succeed before
-any write-mode device open or destructive work. Unknown facts never become safe.
-Known policy refusals retain WP14 exit3 and zero writes/zero write-mode opens.
+A required initial safety or authorization query must succeed before any write or
+destructive work. Unknown facts never become safe. Known policy refusals retain WP14
+exit3 and zero writes (ADR-195).
 An ordinary OS failure of a query required to establish those facts stops with the
 host outcome below; it is not evidence of replacement and is not an engine error.
 
@@ -235,15 +230,17 @@ retain earlier stdout/report/publication facts, never roll back an already commi
 phase or claim the card unchanged, and never reopen the path. A report-write failure
 still obeys §1 and cannot suppress the ordinary child outcome.
 
-Windows S3 device-session method remains HELD pending applicable independent clearance; macOS S3 is DEFERRED (ADR-191). The tested access upgrades and
-post-path-open identity checks do not establish binding before authorized write-mode
-access; no weaker guarantee is adopted. Linux retained-inode/diskseq loop receipts
-are only bounded capability facts, not S3 acceptance or proof that an access upgrade
-cannot reach changed media. Any platform must first obtain independent method/test
-clearance under §5; other platforms need not wait for it. No speculative API-search
-campaign is issued. S2 and other issued host evidence work continue independently.
+**Windows S3 session, amended by ADR-195.** `make` uses the accepted WP-14 `provision` open
+and §5 safety sequence unchanged and keeps that handle for load and verify (APP-1 §3). A refused
+target gets zero writes. The earlier "binding before authorized write-mode access" and
+"zero write-mode opens" obligations, and the requirement for prior independent method clearance,
+are withdrawn. Software describes its method with the exact head and Verification reviews both in
+the same round. macOS S3 stays DEFERRED (ADR-191).
 
 ## 8. Bounded opt-in native-flow receipts — PM593
+
+**Status, ADR-195:** the receipts stay as an optional, default-OFF diagnostic. They are no
+longer an acceptance route, and no criterion waits on a receipt session.
 
 This diagnostic exception serves missing native-flow attribution without racing
 live report files or weakening normal cleanup. It is not a new user feature or
