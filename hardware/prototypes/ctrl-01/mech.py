@@ -55,7 +55,7 @@ def pawl_profile() -> list[tuple[float, float]]:
     back on the right that runs on toward the bar: the "thick latch"."""
     e, top, bot = L.PAWL_EDGE, L.PAWL_TOP, L.PAWL_TOP - L.PAWL_H
     back_end = e + L.PAWL_LEN
-    return [(e, bot), (e, top - L.PAWL_CH), (e + L.PAWL_CH, top), (back_end, top),
+    return [(e, bot), (e, top - L.PAWL_CH), (e + L.PAWL_CH, top), (back_end, top + L.PAWL_RISE),
             (back_end, 0.0), (e + 1.5, 0.0), (e + 1.5, bot)]
 
 

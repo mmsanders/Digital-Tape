@@ -72,6 +72,8 @@ PAWL_TOP = LEDGE - HOOK - REST_GAP  # z' of the pawl top at rest (3.0)
 PAWL_H = 1.6                        # catch region height; the back region runs on to the bar
 PAWL_LEN = 3.9                      # y'; limited by the next key's catch root at full bar travel
 PAWL_CH = 1.0                       # 45 degree chamfer on the corner the ramps meet (LADDER)
+PAWL_RISE = 1.7                     # LADDER rev-3 Stop latch: the top rises this much toward the
+                                    # far end (Michael, 28 Oct: every latch gets the Stop shape)
 PAWL_XP = (7.0, 9.4)                # x' extent: overlaps the catch (6.0..8.2) by 1.2
 BAR_X = (6.0, 12.0)
 BAR_Z = (KEY_Z + PAWL_XP[1], T - WALL - 0.15)            # 22.9 .. 26.35

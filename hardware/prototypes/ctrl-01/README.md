@@ -28,7 +28,7 @@ The real 68 × 110 × 29 mm case, split at mid-depth, with:
 | Catch | P business end (1.2 mm hook, 45° ramp, flat ledge), its lines run on to the edge of the key face |
 | Stop | No ledge. One even ramp, 30° from the press direction, then a flat that runs to the shoulder |
 | Record | **Blocker in the shell, moved by Play** (27 Oct). Record latches on the slide lock like every key, but while Play is up a blocker stops it after 1.2 mm. Play's 45° pin slides the blocker out of the way as Play goes down and pulls it back as Play comes up. A firm press on Record goes into the shell, not into Play. (The first proposal hung the gate on Play itself; a hard press on Record would have pushed Play down.) |
-| Slide lock | Thick latches; prints back face down so each latch stands on a root about 3.9 × 3 mm |
+| Slide lock | Thick latches with the LADDER Stop-tab shape (28 Oct): catch corner and chamfer as before, then the top rises 1.7 mm toward the far end. Length stays 3.9 mm, not LADDER's 7, because at 11 mm pitch a longer latch would meet the next key's catch at full lock travel. Prints back face down |
 | Shell | Full size, back half is the chassis: everything that locates a part is on it; the front half adds flat faces and clearance |
 | Solenoid | None |
 | Files | Generator, tests and STLs committed here |
@@ -85,7 +85,7 @@ Top and bottom cards go in along their 36 mm side (40 mm opening); side cards al
 |---|---|
 | `ctrl01-plate-shell.stl` | Both halves, outer faces down, as a matched pair. **No supports.** Bridges: each slot mouth (40 mm, 2.5 mm deep) and each fin (16.8 mm); small overhangs about 1 mm at rail slots and card rails |
 | `ctrl01-plate-mech.stl` | Keys upright with **support under the caps only** (the cap underside is flat because it is the stop). Spare FF included. Slide lock back face down; blocker flat |
-| `ctrl01-plate-cards.stl` | Flat, no supports |
+| `ctrl01-plate-cards.stl` | Flat, no supports. Also carries a spare slide lock with the rising latches (the first mech plate printed flat-topped ones) |
 
 ## Assembly
 
@@ -147,6 +147,7 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q        # about 2 minutes
 | Plates fit the 180 × 180 bed | — |
 | Plain slots take every card; rib slots grip every card; slot clearances are as specified | — |
 | The detent takes card C into its notch | card A, which has no notch, clashes with the bump |
+| Every latch rises ≥ 1.5 mm toward its far end (the Stop-tab shape) | the flat-topped latch first printed |
 | Record's finger and Play's arm span their key's whole front face and join it across ≥ 20 mm² (24 and 42) | the 27 Oct defect: an arm hanging on a 0.01 mm strip |
 
 Numbers that come from the printer, not this code: key slide 0.15 mm a side, spring
@@ -167,11 +168,11 @@ the check that `key_v1.py` rebuilt it exactly.
 | File | SHA-256 |
 |---|---|
 | `print/ctrl01-plate-shell.stl` | `8608f150cb086d3df2b3e47fcb84e22f38301be8630dd081b5e5b0b02ce0cac1` |
-| `print/ctrl01-plate-mech.stl` | `4edc5d4bc53acb3c68d227f18782d4a9380ff71c4da4b8dc18e2dc25f2cf1cb1` |
-| `print/ctrl01-plate-cards.stl` | `b01aeaae0dc72a20a331e9dea813a38361ca161e286845932b13d24651e385fa` |
+| `print/ctrl01-plate-mech.stl` | `4ea27281da9222114a2aa6832fda90128111aa6a6c599609e94d5a7b3640e753` |
+| `print/ctrl01-plate-cards.stl` | `5de983e20f38742d97c338d2a8f4a94009af63780cf4cc0a2405878e19921335` |
 | `print/ctrl01-front.stl` | `d73380c47740c63af08ac5866aedec0338f74f0d5645a5d3b4d6c76cc3ad90da` |
 | `print/ctrl01-back.stl` | `ac4e3f2376553000bf7e32714eef9ed05f600272136f23fdd39e9f71faa7fbc8` |
-| `print/ctrl01-bar.stl` | `070e8ea0b75cd06d599d4f7dc10a92e12b2d5da7608eafa09db455c6bca7dab4` |
+| `print/ctrl01-bar.stl` | `1f475af9c98d1d3d5f069aa3f6bfc9ebbd3f040b364920da5bdb31045b559bb5` |
 | `print/ctrl01-blocker.stl` | `c6ab517a65b05cb6dd5c0d9d6c538d9f77423dcff57afd12554a811b8ccb0c52` |
 | `print/ctrl01-key-rec.stl` | `6b380e5cacef0ba10ea1300e2d3c84bde0878754660fde78542a9345543a2e4a` |
 | `print/ctrl01-key-play.stl` | `0462d7895a2bcf8ba7bb2a498aca1470c2db1a25065f3b79804ccf33ab9782e3` |

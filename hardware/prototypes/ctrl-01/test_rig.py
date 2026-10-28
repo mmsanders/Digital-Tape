@@ -211,3 +211,23 @@ def test_joint_gate_catches_a_feature_hanging_on_a_sliver():
     x = -L.STEM_XP / 2
     sliver = M._box(x - 0.21, x + 0.3, -3.6, -3.49, 0, 3.5)
     assert M.joint_area(sliver) < MIN_JOINT
+
+
+# --- the slide lock's latches have the Stop shape ------------------------------------
+
+def _rises_toward_far_end(profile) -> float:
+    """How much the latch's top rises from the end of its chamfer to its far end."""
+    tops = [(y, z) for y, z in profile if z >= L.PAWL_TOP - 1e-6]
+    near, far = min(tops), max(tops)
+    return far[1] - near[1]
+
+
+def test_every_latch_has_the_rising_stop_shape():
+    assert _rises_toward_far_end(M.pawl_profile()) >= 1.5
+
+
+def test_rise_gate_catches_the_flat_topped_stub():
+    e, top = L.PAWL_EDGE, L.PAWL_TOP
+    stub = [(e, top - L.PAWL_H), (e, top - L.PAWL_CH), (e + L.PAWL_CH, top), (e + L.PAWL_LEN, top),
+            (e + L.PAWL_LEN, 0.0), (e + 1.5, 0.0), (e + 1.5, top - L.PAWL_H)]
+    assert _rises_toward_far_end(stub) < 1.5

@@ -5,7 +5,7 @@
 Plates (A1 Mini, 180 x 180):
     shell  front and back halves together, so they are a matched pair; outer faces down
     mech   the five keys upright, a spare FF, the slide lock (back face down), the blocker
-    cards  the five card variants, flat
+    cards  the five card variants, flat, and a spare slide lock
 """
 
 from __future__ import annotations
@@ -71,6 +71,9 @@ def plates() -> dict[str, cq.Workplane]:
     for i, v in enumerate(C.CARDS):
         c = _to_bed(pp[f"card-{v}"], 5 + (i % 2) * 48, 5 + (i // 2) * 44)
         cards = c if cards is None else cards.union(c)
+    # a spare slide lock rides on the card plate (Michael, 28 Oct: the mech plate was
+    # already printing with flat-topped latches)
+    cards = cards.union(_to_bed(pp["bar"], 105, 5))
     return {"shell": shell, "mech": mech, "cards": cards}
 
 
