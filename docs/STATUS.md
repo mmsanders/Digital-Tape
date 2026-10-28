@@ -1,6 +1,6 @@
 # Project status
 
-**PM617 ·28 October2026 PDT · input mainfce1d644 · corrected app ready for native collection.**
+**PM620 ·28 October2026 PDT · input main090551e · packaging done / method-controls blocker.**
 Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
 Linux existing CI. Gate counts below are completed criteria, not effort estimates.
 
@@ -38,14 +38,14 @@ is unknown; one-window-throughout is not established. No human rerun is requeste
 
 | Pair | Concrete outcome / dependency |
 |---|---|
-| Software618 / Verification359 | Integrate already-cleared616; publish exact612 native method then ONE manually resumed app-driven poller/receipt/normal-close session. No rebuild or human gestures. |
+| Software618 / Verification361 |616 packaging DONE.359 method held by local script-policy refusal;361 qualifies pure/file/parse controls in ordinary isolated Windows CI before fresh exact admission and ONE manually resumed618 session. No local policy workaround. |
 | A6 PARKED after613/353 | Exact SplitIo32 actual version/export/length absent; DiskIo Init/Flush also unsupported. No useful duplicate partial decoder. Resume only with concrete reviewed schema-observation method and actual operator/privilege authority. |
-| Completed612/352 | F347-1 source extension/correction cleared6fa36426, mergedfce1d644 after122SUCCESS. Final candidate audit1718ac63 PASS;616 exacte8f61975 cleared117SUCCESS, awaiting Software integration. |
+| Completed612/352 | F347-1 source extension/correction cleared6fa36426, mergedfce1d644 after122SUCCESS. Final candidate audit1718ac63 PASS;616 integrated090551e at source-preserving4227dccd,116SUCCESS/1guarded BUILDskip. |
 
 First-party diagnostics are default OFF and are not independent device-open
 absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
 independent methods/tests precede implementation or collection. New612 ZIPf6a90829/appccae0cf5/sourcefce1d644 is BUILD/ARCHIVE PASS, one compilation/one upload.
-618/359 conditionally issues one exact612 session after independent method/main and manual resumption; old585 remains unrun/replaced. No runtime fact yet.
+359/360/7b80c14b returned StageA BLOCKED before controls execution; no native session.361 must qualify method on MAIN before618's single manually resumed session; old585 remains unrun/replaced.
 No card/raw-device/Make/elevation or unsupported human gesture is issued.
 
 Software is local Windows Claude Code, model selected by the user; Verification
@@ -72,7 +72,8 @@ No current action remains for the human tester.589 is reviewed/partial and close
 
 ## Preserved references
 
-Current [PM617 review](REVIEW/PM617-NATIVE-COLLECTION-NEXT.md),
+Current [PM620 review](REVIEW/PM620-METHOD-CONTROLS.md),
+prior [PM617 review](REVIEW/PM617-NATIVE-COLLECTION-NEXT.md),
 prior [PM611 ruling](REVIEW/PM611-UNBLOCKING-RULING.md),
 prior [PM607 review](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md),
 [verification integration](VERIFICATION-INTEGRATION.md),
