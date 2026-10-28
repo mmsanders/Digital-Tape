@@ -12,7 +12,9 @@ on:
       - 'host/**'
       - 'engine/**'
       - 'tools/wp15-cards/s3_bundle.py'
+      - 'tools/app/g1_static.py'
       - 'tests/wp15_cards_make_r1/**'
+      - 'tests/wp15_app1a_r1/**'
       - '.github/workflows/wp15-make-624.yml'
   workflow_dispatch:
 
@@ -20,6 +22,30 @@ permissions:
   contents: read
 
 jobs:
+  g1-static:
+    name: G1 static gate — app source never opens a device (with Verification's controls)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Gate on the app source
+        run: python3 -B tools/app/g1_static.py --json "$RUNNER_TEMP/g1.json"
+      - name: Negative controls (tests/wp15_app1a_r1/static_controls.py, unchanged)
+        run: |
+          python3 -B tests/wp15_app1a_r1/static_controls.py --out "$RUNNER_TEMP/g1-controls.json" host/app src/lib.rs \
+            python3 -B "$GITHUB_WORKSPACE/tools/app/g1_static.py"
+          python3 -c "import json,sys;[print(k,'exit',v['exit']) for k,v in json.load(open(sys.argv[1])).items()]" "$RUNNER_TEMP/g1-controls.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-g1
+          path: |
+            ${{ runner.temp }}/g1.json
+            ${{ runner.temp }}/g1-controls.json
+          retention-days: 90
+
   linux:
     name: make — Linux loop devices (hosted)
     runs-on: ubuntu-latest
@@ -68,6 +94,8 @@ jobs:
       run:
         shell: bash
     steps:
+      # The imported package pins its spec bytes; keep them LF on the Windows checkout.
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}

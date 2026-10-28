@@ -21,6 +21,7 @@
 #include "tseam.h"
 #include "discover.h"
 #include "report.h"
+#include "makereport.h"
 
 /* Engine call-site observations (test build only; no-ops when shipped). */
 #ifdef TAPECTL_TEST
@@ -76,13 +77,13 @@ static void fail_note(const char *id, const char *payload)
 }
 
 /* Optional progress (APP-1A §4), about 1/64 of a step at a time. Without a
-   report, report_progress does nothing. */
+   report, mreport_progress does nothing. */
 static void progress(const char *step, uint64_t done, uint64_t total)
 {
     static const char *last_step;
     static uint64_t last;
     if (last_step == NULL || strcmp(step, last_step) != 0 || done == total || done >= last + total / 64u || done < last) {
-        report_progress(step, done, total);
+        mreport_progress(step, done, total);
         last_step = step;
         last = done;
     }
@@ -1092,10 +1093,10 @@ static int make_stop(int rc)
 #ifdef TAPECTL_TEST
         tseam_make("make_media_change", g_phase_name, g_tgt.hp.gone_error, 0);
 #endif
-        report_refusal_payload("CARD_CHANGED", p);
+        mreport_refusal("CARD_CHANGED", p);
         return EXIT_ENGINE;
     }
-    if (rc != 0 && g_fail.id != NULL) { report_refusal_payload(g_fail.id, g_fail.payload); }
+    if (rc != 0 && g_fail.id != NULL) { mreport_refusal(g_fail.id, g_fail.payload); }
     return rc;
 }
 
@@ -1179,7 +1180,7 @@ static int make_run(int argc, char **argv)
     int dup = 0, unmount_failed, rc;
 
     if (check_args(argc, argv, flags, 1)) {
-        report_refusal("USAGE");
+        mreport_refusal("USAGE", "");
         return make_usage("make: bad arguments");
     }
     path = positional(argc, argv, 0);
@@ -1188,15 +1189,15 @@ static int make_run(int argc, char **argv)
     wav = opt(argc, argv, "--wav", &dup);
     erase = opt(argc, argv, "--erase", &dup);
     if (dup || wav == NULL || label == NULL) {
-        report_refusal("USAGE");
+        mreport_refusal("USAGE", "");
         return make_usage("make: give DEV, --label and --wav, each once");
     }
     if (!label_ok(label)) {
-        report_refusal("LABEL_INVALID");
+        mreport_refusal("LABEL_INVALID", "");
         return make_usage("make: --label must be 1 to 32 bytes of UTF-8");
     }
     if (s_len != NULL && parse_u32(s_len, &length)) {
-        report_refusal("LENGTH_INVALID");
+        mreport_refusal("LENGTH_INVALID", "");
         return make_usage("make: bad --length-s");
     }
 
@@ -1206,7 +1207,7 @@ static int make_run(int argc, char **argv)
     progress("safety", 0, 1);
     rc = target_safety_why(path, 1, erase, 1, &why, &unmount_failed);
     if (rc) {
-        report_refusal_payload(refusal_id(why), unmount_failed ? ",\"unmount_failed\":true" : "");
+        mreport_refusal(refusal_id(why), unmount_failed ? ",\"unmount_failed\":true" : "");
         return rc;
     }
 #ifdef TAPECTL_TEST
@@ -1224,7 +1225,7 @@ static int make_run(int argc, char **argv)
         {
             char p[200];
             snprintf(p, sizeof p, ",\"os_error\":%s", e);
-            report_refusal_payload("DEVICE_OPEN_FAILED", p);
+            mreport_refusal("DEVICE_OPEN_FAILED", p);
         }
         return EXIT_USAGE;
     }
@@ -1253,18 +1254,18 @@ static int cmd_make(int argc, char **argv)
     if (dup || (file == NULL) != (nonce == NULL) || (nonce != NULL && !report_nonce_ok(nonce))) {
         return make_usage("make: --report FILE and --report-nonce N (32 lowercase hex digits) go together, once each");
     }
-    if (file != NULL && report_open_bound(file, "tapectl make", TAPECTL_VERSION, nonce) != 0) {
-        fprintf(stderr, "tapectl: report: cannot create %s (%s)\n", file, report_error());
+    if (file != NULL && mreport_open(file, "tapectl make", TAPECTL_VERSION, nonce) != 0) {
+        fprintf(stderr, "tapectl: report: cannot create %s (%s)\n", file, mreport_error());
         return EXIT_ENGINE;
     }
-    (void)report_capture_stderr();
+    (void)mreport_capture_stderr();
     rc = make_run(argc, argv);
 #ifdef TAPECTL_TEST
     if (g_tgt.open) { tseam_make("make_close", NULL, NULL, 0); }
 #endif
     rc = finish(rc);
-    report_release_stderr();
-    report_end(rc);
+    mreport_release_stderr();
+    mreport_end(rc);
     return rc;
 }
 

@@ -20,7 +20,7 @@ CFLAGS  ?= -O2 -g
 ALL_CFLAGS := -std=c99 $(WARN) $(CFLAGS)
 CPPFLAGS := -I../engine/include -I. -Iport
 
-COMMON  := target.c report.c port/discover.c port/hport.c port/mbr.c port/fat.c port/safety.c port/partview.c port/entropy.c
+COMMON  := target.c report.c makereport.c port/discover.c port/hport.c port/mbr.c port/fat.c port/safety.c port/partview.c port/entropy.c
 
 ifeq ($(OS),Windows_NT)
   EXE      := .exe
@@ -39,7 +39,7 @@ else
 endif
 
 PORT_SRC  := $(COMMON) $(PLATFORM)
-PORT_HDR  := target.h report.h port/discover.h port/hport.h port/layout.h port/safety.h port/entropy.h port/winutf.h port/tseam.h
+PORT_HDR  := target.h report.h makereport.h port/discover.h port/hport.h port/layout.h port/safety.h port/entropy.h port/winutf.h port/tseam.h
 # The test build records its own source commit in every trace.
 HEAD_ID   := $(shell git rev-parse HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet HEAD -- . ../engine 2>/dev/null || echo -dirty)
 

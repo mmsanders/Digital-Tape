@@ -1,6 +1,8 @@
-//! The window's state (APP-1 §2) as plain data, so every transition is testable without
-//! a window. The card line comes from S2 discovery when this build pins its tapectl;
-//! discovery is a hint only and Make cartridge is never enabled (no S3 in this build).
+//! The window's state (APP-1 Â§2) as plain data, so every transition is testable without
+//! a window. The card line comes from S2 discovery when this build pins its tapectl.
+//! Discovery is a hint only: Make cartridge is enabled exactly when APP-1 Â§2/Â§4 allow it
+//! (one offered card, a label, a successful check whose audio the app still holds, nothing
+//! running), and the elevated `tapectl make` child alone decides what happens to a card.
 
 use crate::discovery::{self, Judged};
 use crate::drops::{self, Drop};
@@ -21,6 +23,8 @@ pub struct Cards {
     /// The current details are a diagnostic (a failure, or cards that were not checked),
     /// so Show details offers them whatever the music's state.
     pub diagnostic: bool,
+    /// The one offered card (path, bytes) of the current result; None for 0, 2+ or unknown.
+    pub card: Option<(String, u64)>,
     ticket: u64,
     active: Option<u64>,
 }
@@ -28,9 +32,27 @@ pub struct Cards {
 impl Default for Cards {
     fn default() -> Self {
         let line = if crate::children::TAPECTL.sha256.is_some() { String::new() } else { CARD_LINE_UNBUILT.into() };
-        Cards { line, details: String::new(), diagnostic: false, ticket: 0, active: None }
+        Cards { line, details: String::new(), diagnostic: false, card: None, ticket: 0, active: None }
     }
 }
+
+/// Make cartridge (APP-1 Â§4), once the music check has passed.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Making {
+    Idle,
+    /// The erase confirmation is showing for this rechecked card.
+    Confirm { dev: String, bytes: u64 },
+    /// The elevated child is running; the bar's running maximum and its step.
+    Running { fraction: f64, step: &'static str },
+    Done,
+}
+
+impl Default for Making {
+    fn default() -> Self { Making::Idle }
+}
+
+pub const MADE: &str = "Your cartridge is ready. You can take the card out now.";
+pub const WAIT: &str = "Wait until the cartridge is finished.";
 
 #[derive(Debug, Clone, PartialEq)]
 enum Check {
@@ -45,7 +67,7 @@ enum Check {
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct View {
-    /// "empty" | "ready" | "problem" ("making" and "done" arrive with S3).
+    /// "empty" | "ready" | "problem" | "making" | "done".
     pub view: &'static str,
     pub checking: bool,
     /// 0..=1 of a 60-minute cartridge; None while unknown (indeterminate).
@@ -65,6 +87,8 @@ pub struct View {
     /// Start overs so far. The window owns the label box between them, so only a view
     /// from a newer Start over may rewrite it.
     pub resets: u64,
+    /// The erase confirmation (APP-1 Â§4 step 2) is showing.
+    pub confirm: bool,
 }
 
 #[derive(Debug, Default)]
@@ -78,6 +102,12 @@ pub struct App {
     active_job: Option<String>,
     pub cards: Cards,
     resets: u64,
+    /// The current check's published audio, held by the app for Make; None until the
+    /// bridge has retained it for this generation, and after a cartridge is made.
+    pub audio: Option<PathBuf>,
+    pub making: Making,
+    /// A window close was refused while Making.
+    close_refused: bool,
 }
 
 /// What the shell must do after a drop.
@@ -119,6 +149,7 @@ impl App {
             self.cards.line = discovery::line(None);
             self.cards.details = why;
             self.cards.diagnostic = true;
+            self.cards.card = None;
         }
         true
     }
@@ -127,6 +158,7 @@ impl App {
     pub fn finish_cards(&mut self, ticket: u64, judged: &Judged, details: String) -> bool {
         if self.cards.active != Some(ticket) { return false; }
         self.cards.active = None;
+        self.cards.card = judged.hint.as_ref().filter(|h| h.paths.len() == 1 && h.sizes.len() == 1).map(|h| (h.paths[0].clone(), h.sizes[0]));
         self.cards.line = discovery::line(judged.hint.as_ref());
         self.cards.diagnostic = judged.hint.as_ref().map_or(true, |h| h.unprobed > 0);
         self.cards.details = details;
@@ -152,7 +184,7 @@ impl App {
     }
     pub fn view(&self) -> View {
         let check = self.check.clone().unwrap_or(Check::Idle);
-        let (view, bar, too_long, message) = match &check {
+        let (mut view, mut bar, too_long, mut message) = match &check {
             Check::Problem(m) => ("problem", None, false, Some(m.clone())),
             Check::TooLong { total, excess } => {
                 let _ = total;
@@ -162,6 +194,14 @@ impl App {
             Check::Running => (if self.folders.is_empty() { "empty" } else { "ready" }, None, false, None),
             Check::Idle => ("empty", Some(0.0), false, None),
         };
+        match &self.making {
+            Making::Running { fraction, step } => {
+                (view, bar) = ("making", Some(*fraction));
+                message = Some(if self.close_refused { WAIT.into() } else { crate::make::step_line(step).into() });
+            }
+            Making::Done => (view, bar, message) = ("done", None, Some(MADE.into())),
+            Making::Idle | Making::Confirm { .. } => {}
+        }
         View {
             view,
             total_frames: match &check { Check::Fits(t) => Some(*t), Check::TooLong { total, .. } => Some(*total), _ => None },
@@ -171,11 +211,103 @@ impl App {
             message: message.or_else(|| self.notice.clone()),
             label: self.label.clone(),
             card_line: self.cards.line.clone(),
-            make_enabled: false,
+            make_enabled: self.make_card().is_some(),
             details_available: !self.details.is_empty(),
             card_details_available: self.cards.diagnostic && !self.cards.details.is_empty(),
             resets: self.resets,
+            confirm: matches!(self.making, Making::Confirm { .. }),
         }
+    }
+
+    /// The card Make cartridge would use, exactly when APP-1 Â§2/Â§4 allow Make: one offered
+    /// card, a non-empty label, a successful check whose audio the app still holds, no
+    /// check running and no Make under way.
+    pub fn make_card(&self) -> Option<(String, u64)> {
+        let ready = self.making == Making::Idle && matches!(self.check, Some(Check::Fits(_))) && !self.label.is_empty()
+            && self.audio.is_some() && self.active_job.is_none();
+        if ready { self.cards.card.clone() } else { None }
+    }
+
+    pub fn is_making(&self) -> bool { matches!(self.making, Making::Running { .. }) }
+
+    /// Step 2: show the erase confirmation if the recheck printed the same single card the
+    /// person saw (`seen`, taken before the recheck) and Make is still allowed with it;
+    /// otherwise stay Ready with the card line (CARD_RECHECK_MISMATCH).
+    pub fn confirm(&mut self, seen: &(String, u64), rechecked: Option<(String, u64)>) -> bool {
+        match (self.make_card(), rechecked) {
+            (Some(card), Some(again)) if card == again && &again == seen => {
+                self.notice = None;
+                self.making = Making::Confirm { dev: card.0, bytes: card.1 };
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// Keep card: back to Ready, nothing started.
+    pub fn keep_card(&mut self) {
+        if matches!(self.making, Making::Confirm { .. }) { self.making = Making::Idle; }
+    }
+
+    /// Step 3: the second recheck must still print the confirmed card; then Making starts.
+    /// Returns what to launch: (DEV, label, audio).
+    pub fn start_making(&mut self, rechecked: Option<(String, u64)>) -> Option<(String, String, PathBuf)> {
+        let Making::Confirm { dev, bytes } = &self.making else { return None };
+        let confirmed = (dev.clone(), *bytes);
+        let audio = self.audio.clone();
+        match (rechecked, audio) {
+            (Some(again), Some(audio)) if again == confirmed && self.cards.card.as_ref() == Some(&confirmed) => {
+                self.making = Making::Running { fraction: 0.0, step: "safety" };
+                self.close_refused = false;
+                Some((confirmed.0, self.label.clone(), audio))
+            }
+            _ => {
+                self.making = Making::Idle;
+                None
+            }
+        }
+    }
+
+    /// Progress from the child's report: the bar only ever moves forward.
+    pub fn made_progress(&mut self, f: f64, now: &'static str) -> bool {
+        match &mut self.making {
+            Making::Running { fraction, step } if f > *fraction || (f == *fraction && *step != now) => {
+                (*fraction, *step) = (f.max(*fraction), now);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// The child finished. Success is Done (the bridge has deleted the audio); any other
+    /// outcome returns to Ready with its sentence and Show details.
+    pub fn made(&mut self, message: Option<String>, details: String) {
+        self.close_refused = false;
+        match message {
+            None => {
+                self.making = Making::Done;
+                self.audio = None;
+            }
+            Some(m) => {
+                self.making = Making::Idle;
+                self.notice = Some(m);
+                self.details = details;
+            }
+        }
+    }
+
+    /// Closing the window while Making is refused; true if it was.
+    pub fn refuse_close(&mut self) -> bool {
+        if !self.is_making() { return false; }
+        self.close_refused = true;
+        true
+    }
+
+    /// Make another, after Done: the same folders and label, checked again.
+    pub fn make_another(&mut self) -> Next {
+        if self.making != Making::Done { return Next::Nothing; }
+        self.making = Making::Idle;
+        if self.folders.is_empty() { Next::Nothing } else { Next::RunIngest }
     }
 
     /// A drop gesture. A file or a mix adds nothing (DROP_NOT_FOLDER, zero child calls).
@@ -187,6 +319,9 @@ impl App {
     pub fn admit_drop(&mut self, classified: Drop) -> Next {
         if matches!(self.check, Some(Check::Problem(_))) {
             return Next::Nothing; // Problem offers Start over only
+        }
+        if self.making != Making::Idle {
+            return Next::Nothing; // nothing is added while confirming, Making or Done
         }
         match classified {
             Drop::NotFolder => {
@@ -266,11 +401,56 @@ mod tests {
     use serde_json::json;
 
     fn outcome(exit: i32, reading: Reading, total: Option<u64>) -> Outcome {
-        Outcome { exit: Some(exit), stderr: "ingest: refused: …".into(), reading, total_frames: total, cancelled: false }
+        Outcome { exit: Some(exit), stderr: "ingest: refused: â€¦".into(), reading, total_frames: total, cancelled: false }
+    }
+
+    fn one_card(a: &mut App, path: &str, bytes: u64) {
+        let t = a.begin_cards();
+        let hint = crate::discovery::Hint { sizes: vec![bytes], unprobed: 0, paths: vec![path.into()] };
+        assert!(a.finish_cards(t, &Judged { hint: Some(hint), id_specific: None }, String::new()));
     }
 
     #[test]
-    fn never_offers_make_in_this_slice() {
+    fn make_is_enabled_exactly_when_app1_allows() {
+        let mut a = App::default();
+        a.folders.push("/x".into());
+        a.finished(&outcome(0, Reading::Unusable("no report"), Some(CAPACITY_FRAMES / 2)));
+        a.set_label("Road Trip");
+        one_card(&mut a, "D1", 64_000_000_000);
+        assert!(!a.view().make_enabled, "no retained audio yet");
+        a.audio = Some("/jobs/ready/out/DEST/audio.wav".into());
+        assert!(a.view().make_enabled);
+        a.label.clear();
+        assert!(!a.view().make_enabled, "empty label");
+        a.set_label("Road Trip");
+        let t = a.begin_cards();
+        a.finish_cards(t, &Judged { hint: Some(crate::discovery::Hint { sizes: vec![1, 2], unprobed: 0, paths: vec!["D1".into(), "D2".into()] }), id_specific: None }, String::new());
+        assert!(!a.view().make_enabled, "two cards");
+        one_card(&mut a, "D1", 64_000_000_000);
+        assert!(!a.confirm(&("D1".into(), 64_000_000_000), Some(("D2".into(), 64_000_000_000))), "recheck mismatch stays Ready");
+        assert!(a.confirm(&("D1".into(), 64_000_000_000), Some(("D1".into(), 64_000_000_000))));
+        assert!(a.view().confirm && !a.view().make_enabled);
+        a.keep_card();
+        assert!(!a.view().confirm && a.view().make_enabled);
+        assert!(a.confirm(&("D1".into(), 64_000_000_000), Some(("D1".into(), 64_000_000_000))));
+        assert_eq!(a.start_making(None), None, "a card gone at the second recheck starts nothing");
+        assert!(a.confirm(&("D1".into(), 64_000_000_000), Some(("D1".into(), 64_000_000_000))));
+        let (dev, label, wav) = a.start_making(Some(("D1".into(), 64_000_000_000))).unwrap();
+        assert_eq!((dev.as_str(), label.as_str(), wav), ("D1", "Road Trip", PathBuf::from("/jobs/ready/out/DEST/audio.wav")));
+        assert_eq!(a.view().view, "making");
+        assert!(a.made_progress(0.5, "load") && !a.made_progress(0.4, "load"));
+        assert_eq!(a.view().bar, Some(0.5));
+        assert_eq!(a.dropped(&["/y".into()]), Next::Nothing, "no drops while Making");
+        assert!(a.refuse_close());
+        assert_eq!(a.view().message.as_deref(), Some(WAIT));
+        a.made(None, String::new());
+        assert_eq!((a.view().view, a.view().message.as_deref()), ("done", Some(MADE)));
+        assert_eq!(a.make_another(), Next::RunIngest);
+        assert!(!a.view().make_enabled, "Make another checks the music again");
+    }
+
+    #[test]
+    fn never_offers_make_without_retained_audio() {
         let mut a = App::default();
         assert_eq!(a.view().view, "empty");
         a.folders.push("/x".into());

@@ -7,6 +7,7 @@ pub mod drops;
 pub mod ingest_job;
 pub mod jobdir;
 pub mod label;
+pub mod make;
 pub mod messages;
 pub mod report;
 pub mod state;

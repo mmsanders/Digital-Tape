@@ -11,4 +11,9 @@ progress[data-too-long="true"] { accent-color: #b23d35; }
 button { font: inherit; margin: .5rem .5rem .5rem 0; padding: .6rem 1rem; border-radius: .4rem; border: 1px solid #52645d; background: #fff; color: inherit; }
 button:disabled { opacity: .5; }
 #details { min-height: 8rem; white-space: pre-wrap; overflow-wrap: anywhere; padding: .6rem; border: 1px solid #70817b; }
+#make:not(:disabled) { background: #387c69; color: #fff; border-color: #2c6253; }
+#confirm { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  gap: .5rem; padding: 2rem; background: rgba(246, 244, 237, .97); text-align: center; }
+#confirm-text { font-size: 1.25rem; max-width: 26rem; }
+#replace { background: #b23d35; color: #fff; border-color: #8e2f29; }
 [hidden] { display: none !important; }

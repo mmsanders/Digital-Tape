@@ -1,6 +1,7 @@
-//! The few Windows calls the diagnostic receipts need that std does not offer: actual OS
+//! The few Windows calls std does not offer: for the diagnostic receipts, actual OS
 //! process creation times, the OS build, and handle-relative file creation (NtCreateFile
-//! with a RootDirectory), so a receipt write never walks a path that could be replaced.
+//! with a RootDirectory), so a receipt write never walks a path that could be replaced;
+//! and for Make, starting the one `tapectl make` child elevated (ShellExecuteExW "runas").
 #![cfg(windows)]
 
 use std::ffi::c_void;
@@ -19,10 +20,77 @@ struct ObjectAttributes { length: u32, root: RawHandle, name: *const UnicodeStri
 #[repr(C)]
 struct IoStatusBlock { status: usize, information: usize }
 
+/// SHELLEXECUTEINFOW (shellapi.h), natural C layout.
+#[repr(C)]
+struct ShellExecuteInfo {
+    size: u32, mask: u32, hwnd: isize, verb: *const u16, file: *const u16, params: *const u16, dir: *const u16,
+    show: i32, inst_app: isize, id_list: *mut c_void, class: *const u16, hkey_class: isize, hotkey: u32,
+    icon_or_monitor: isize, process: RawHandle,
+}
+
 #[link(name = "kernel32")]
 extern "system" {
     fn GetProcessTimes(process: RawHandle, creation: *mut FileTime, exit: *mut FileTime, kernel: *mut FileTime, user: *mut FileTime) -> i32;
     fn GetCurrentProcess() -> RawHandle;
+    fn WaitForSingleObject(handle: RawHandle, ms: u32) -> u32;
+    fn GetExitCodeProcess(process: RawHandle, code: *mut u32) -> i32;
+    fn CloseHandle(handle: RawHandle) -> i32;
+    fn GetLastError() -> u32;
+}
+#[link(name = "shell32")]
+extern "system" {
+    fn ShellExecuteExW(info: *mut ShellExecuteInfo) -> i32;
+}
+
+const SEE_MASK_NOCLOSEPROCESS: u32 = 0x40;
+const SEE_MASK_NOASYNC: u32 = 0x100;
+const SEE_MASK_FLAG_NO_UI: u32 = 0x400;
+const SW_HIDE: i32 = 0;
+const ERROR_CANCELLED: u32 = 1223;
+const WAIT_OBJECT_0: u32 = 0;
+
+/// A started child process, closed on drop.
+pub struct Process(RawHandle);
+// SAFETY: a process handle may be waited on from any thread.
+unsafe impl Send for Process {}
+impl Process {
+    /// Its exit code once it has exited, waiting at most `ms`.
+    pub fn wait_ms(&self, ms: u32) -> Option<u32> {
+        // SAFETY: a live process handle owned by self.
+        if unsafe { WaitForSingleObject(self.0, ms) } != WAIT_OBJECT_0 { return None; }
+        let mut code = 0u32;
+        // SAFETY: as above, with a writable u32.
+        (unsafe { GetExitCodeProcess(self.0, &mut code) } != 0).then_some(code)
+    }
+}
+impl Drop for Process {
+    fn drop(&mut self) {
+        // SAFETY: closed exactly once.
+        unsafe { CloseHandle(self.0) };
+    }
+}
+
+pub enum Elevated { Declined, Failed(String), Started(Process) }
+
+fn wide(s: &str) -> Vec<u16> { s.encode_utf16().chain(std::iter::once(0)).collect() }
+
+/// Start `file` with `params` elevated ("runas": the UAC prompt), hidden, owned by `owner`.
+/// A declined prompt is ERROR_CANCELLED and starts nothing.
+pub fn runas(file: &std::path::Path, params: &str, dir: &std::path::Path, owner: isize) -> Elevated {
+    let (verb, file, params, dir) = (wide("runas"), wide(&file.to_string_lossy()), wide(params), wide(&dir.to_string_lossy()));
+    let mut info = ShellExecuteInfo { size: std::mem::size_of::<ShellExecuteInfo>() as u32,
+        mask: SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI, hwnd: owner, verb: verb.as_ptr(),
+        file: file.as_ptr(), params: params.as_ptr(), dir: dir.as_ptr(), show: SW_HIDE, inst_app: 0,
+        id_list: std::ptr::null_mut(), class: std::ptr::null(), hkey_class: 0, hotkey: 0, icon_or_monitor: 0,
+        process: std::ptr::null_mut() };
+    // SAFETY: every pointer refers to a live, NUL-terminated local for the duration of the call.
+    if unsafe { ShellExecuteExW(&mut info) } == 0 {
+        // SAFETY: no other call in between.
+        let e = unsafe { GetLastError() };
+        return if e == ERROR_CANCELLED { Elevated::Declined } else { Elevated::Failed(format!("ShellExecuteExW runas: Windows error {e}")) };
+    }
+    if info.process.is_null() { return Elevated::Failed("ShellExecuteExW returned no process".into()); }
+    Elevated::Started(Process(info.process))
 }
 #[link(name = "ntdll")]
 extern "system" {
