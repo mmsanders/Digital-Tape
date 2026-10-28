@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current boundary — PM607 candidate integration / native-method work
+## Current boundary — PM617 corrected candidate / one native collection
 
 Phase 1 remains 36/36; Phase 2 now 7/12. Complete required WP-15 package
 coverage is not established by the following component/build/startup milestones.
@@ -21,16 +21,20 @@ coverage is not established by the following component/build/startup milestones.
 | #341/#342 / `494f8336` |603 technical source/pin/archive PASS and durable retention; truthful count2 violates old one-build guard. PM604 permits exact scoped exception; new343 final disposition pending. |
 | #345 / `e880e210` | Express exact603 packaging/source integration clearance;605 mergedc3d5b8fd with identical root,117SUCCESS/1guarded BUILDskip. Count exception fixed to existing bytes. |
 | #346 / `653c20b7` | A6 design-only: neither route substantiated for old facts; recommends one off-card route1 feasibility scope, not execution/qualification. |
+| #357 / `6fa36426` |612 correction1 source/COMPONENT PASS;615 integratedfce1d644 after122SUCCESS, unchanged cleared host/app treee658e8b2. Wait/capture/cleanup facts corrected; no native acceptance. |
+| #358 / `1718ac63` | Exact612 BUILD/ARCHIVE PASS, one compilation/one upload, ZIPf6a90829/appccae0cf5;616e8f61975 packaging cleared117SUCCESS, integration assigned618. No runtime yet. |
+| #355 / `10bbe7ad` |353 finite native-layout12positive/63negative controls; missing actual SplitIo32 contract prevents full A6 kit.613/353 closed at BLOCKED return; no duplicate partial decoder or new capture. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
 Human589/Software590 retain partial reviewed closure/no repeat. Source594/599 and
 INGEST595/598 remain integrated under exact clearance.603/605 packaging closeout
 also complete; ZIP/build history unchanged, no third build. Phase2 remains7/12.
-608/347 owns exact585 native/poller/diagnostic method and human-ready kit; ONLY a
-published adequate method can admit the one bounded session, not build readiness.
-609/348 prepares an A6 off-card route1 kit/tests; no new trace/query/admin/card run.
+618/359 owns exact corrected612 method and ONE conditional native collection after
+published method/manual resumption. Parent native observation and source-bound
+first-party child receipts stay distinct; independent G1 absence remains HELD.
+A6 route1 PARKED at353's missing schema; no new trace/query/admin/card run.
 No full native/own-host/session/S3/G1/G2 gain. Make/elevation disabled; manual
-pickup only, no lead activation or current human task. See [PM607](REVIEW/PM607-CANDIDATE-NEXT-STEPS.md).
+pickup only, no lead activation or current human task. See [PM617](REVIEW/PM617-NATIVE-COLLECTION-NEXT.md).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 
