@@ -148,7 +148,7 @@ pub fn command(bin: &Path, version: &str, job: &Job) -> (Command, Request) {
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
-        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW: polled every 2 s from a GUI app
+        cmd.creation_flags(CARDS_CREATION_FLAGS);
     }
     let argv = std::iter::once(bin.to_string_lossy().into_owned()).chain(cmd.get_args().map(|a| a.to_string_lossy().into_owned())).collect();
     (cmd, Request { exe: bin.to_owned(), argv, cwd: job.dir.clone(), report, nonce, version: version.to_owned() })
@@ -166,7 +166,24 @@ pub struct Ran {
     pub timed_out: bool,
     pub cancelled: bool,
     pub spawn_error: Option<String>,
+    /// Receipt-only observations (diagnostics ON); never part of the judged outcome.
+    #[serde(skip)]
+    pub os_start_ns: Option<u128>,
+    #[serde(skip)]
+    pub spawn_call_ns: u128,
+    #[serde(skip)]
+    pub end_ns: u128,
+    /// How the terminal was reaped: "try_wait-terminal" or "wait".
+    #[serde(skip)]
+    pub wait_kind: &'static str,
+    #[serde(skip)]
+    pub creation_flags: u32,
+    #[serde(skip)]
+    pub env_sha256: String,
 }
+
+/// CREATE_NO_WINDOW: polled every 2 s from a GUI app.
+pub const CARDS_CREATION_FLAGS: u32 = 0x0800_0000;
 
 /// A started child as the supervisor sees it.
 pub trait Child {
@@ -222,26 +239,56 @@ pub fn supervise(child: &mut dyn Child, cancel: &AtomicBool, now_ms: &mut dyn Fn
     }
 }
 
+/// The real child, remembering whether its terminal came from try_wait or a blocking wait.
+struct Watched { child: std::process::Child, kind: &'static str }
+impl Child for Watched {
+    fn poll(&mut self) -> Option<Option<i32>> {
+        match self.child.try_wait() {
+            Ok(Some(s)) => { self.kind = "try_wait-terminal"; Some(s.code()) }
+            Ok(None) => None,
+            Err(_) => { self.kind = "wait"; Some(self.child.wait().ok().and_then(|s| s.code())) }
+        }
+    }
+    fn stop(&mut self) -> Option<i32> {
+        self.kind = "wait";
+        self.child.stop()
+    }
+}
+
 /// Run the real child for `request` under `supervise`, capturing stdout, stderr and the report.
-pub fn run(mut cmd: Command, request: &Request, cancel: &AtomicBool, on_timeout: &mut dyn FnMut(), on_cancel: &mut dyn FnMut()) -> Ran {
+/// `on_spawn` sees the started child (pid, OS creation time, flags) before any wait.
+pub fn run(mut cmd: Command, request: &Request, cancel: &AtomicBool, on_timeout: &mut dyn FnMut(), on_cancel: &mut dyn FnMut(), on_spawn: &mut dyn FnMut(&Ran)) -> Ran {
+    let flags = if cfg!(windows) { CARDS_CREATION_FLAGS } else { 0 };
+    let started = Ran { spawn_call_ns: crate::ingest_job::now(), creation_flags: flags, env_sha256: crate::ingest_job::env_sha256(), wait_kind: "none", ..Default::default() };
     let mut child = match cmd.spawn() {
         Ok(c) => c,
-        Err(e) => return Ran { spawn_error: Some(format!("cannot start tapectl: {e}")), ..Default::default() },
+        Err(e) => return Ran { spawn_error: Some(format!("cannot start tapectl: {e}")), end_ns: crate::ingest_job::now(), ..started },
     };
     let pid = Some(child.id());
+    #[allow(unused_mut)]
+    let mut started = Ran { pid, ..started };
+    #[cfg(windows)]
+    {
+        use std::os::windows::io::AsRawHandle;
+        started.os_start_ns = crate::win::process_start_ns(child.as_raw_handle());
+    }
+    on_spawn(&started);
     let mut out = child.stdout.take().expect("piped stdout");
     let mut err = child.stderr.take().expect("piped stderr");
     let out = std::thread::spawn(move || { let mut b = Vec::new(); let _ = out.read_to_end(&mut b); b });
     let err = std::thread::spawn(move || { let mut b = Vec::new(); let _ = err.read_to_end(&mut b); b });
     let clock = std::time::Instant::now();
+    let mut child = Watched { child, kind: "none" };
     let end = supervise(&mut child, cancel, &mut || clock.elapsed().as_millis() as u64, on_timeout, on_cancel);
+    let end_ns = crate::ingest_job::now();
     let stdout = out.join().unwrap_or_default();
     let stderr = err.join().unwrap_or_default();
     let report = std::fs::read(&request.report).ok();
+    let ran = Ran { stdout, stderr, report, end_ns, wait_kind: child.kind, ..started };
     match end {
-        End::Exited(exit) => Ran { pid, exit, stdout, stderr, report, ..Default::default() },
-        End::TimedOut => Ran { pid, stdout, stderr, report, timed_out: true, ..Default::default() },
-        End::Cancelled => Ran { pid, stdout, stderr, report, cancelled: true, ..Default::default() },
+        End::Exited(exit) => Ran { exit, ..ran },
+        End::TimedOut => Ran { timed_out: true, ..ran },
+        End::Cancelled => Ran { cancelled: true, ..ran },
     }
 }
 

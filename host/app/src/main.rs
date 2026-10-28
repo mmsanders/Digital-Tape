@@ -22,7 +22,7 @@ fn main(){
         let args:Vec<std::ffi::OsString>=std::env::args_os().collect();
         let diag=diagnostics::opted_in(&args).then(||Session::open(&data,Provenance::of_running_app()).ok()).flatten();
         let handle:AppHandle=app.handle().clone();
-        app.manage(Bridge::with_diagnostics(data,move|view|{let _=handle.emit("app-state",view);},diag));
+        app.manage(Bridge::with_diagnostics(data,move|view|handle.emit("app-state",view).map_err(|e|e.to_string()),diag));
         Ok(())
     }).on_window_event(|window,event|{
         if let WindowEvent::DragDrop(DragDropEvent::Drop{paths,..})=event{

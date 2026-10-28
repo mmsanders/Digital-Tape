@@ -61,9 +61,9 @@ impl Session {
         for m in self.rx.try_iter() { if let Message::Check(w) = m { self.requests += 1; self.works.push_back(w); } }
     }
     /// A run closure for one typed card outcome that records single-flight occupancy.
-    fn card_run(&self, c: Value) -> impl FnOnce(&jobdir::Job, &AtomicBool, &mut dyn FnMut(), &mut dyn FnMut()) -> (Ran, Request) {
+    fn card_run(&self, c: Value) -> impl FnOnce(&jobdir::Job, &AtomicBool, &mut dyn FnMut(), &mut dyn FnMut(), &mut dyn FnMut(&Ran, &Request)) -> (Ran, Request) {
         let (live, peak) = (self.live.clone(), self.peak.clone());
-        move |job, _, _, _| {
+        move |job, _, _, _, _| {
             let n = live.fetch_add(1, Ordering::SeqCst) + 1;
             peak.fetch_max(n, Ordering::SeqCst);
             live.fetch_sub(1, Ordering::SeqCst);
@@ -119,7 +119,7 @@ impl Session {
                 let polled = Arc::new(AtomicBool::new(false));
                 let (b, e, c, p, live, peak) = (self.b.clone(), exit.clone(), case.clone(), polled.clone(), self.live.clone(), self.peak.clone());
                 let thread = thread::spawn(move || {
-                    b.discover(move |job, cancel, on_timeout, on_cancel| {
+                    b.discover(move |job, cancel, on_timeout, on_cancel, _| {
                         let n = live.fetch_add(1, Ordering::SeqCst) + 1;
                         peak.fetch_max(n, Ordering::SeqCst);
                         let clock = std::time::Instant::now();
@@ -143,7 +143,7 @@ impl Session {
             // The same completion delivered again for the most recent registered run.
             "cards_duplicate" => {
                 let judged = discovery::judge(a["exit"].as_i64().map(|e| e as i32), a["stdout"].as_str().unwrap().as_bytes(), a["report"].as_str().map(str::as_bytes), NONCE, VERSION);
-                self.b.publish_cards(self.tickets(), &judged, discovery::details(&typed(a), &judged));
+                self.b.publish_cards(self.tickets(), &judged, discovery::details(&typed(a), &judged), None);
                 Value::Null
             }
             "poll_pause" => {

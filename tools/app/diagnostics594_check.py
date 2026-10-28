@@ -8,6 +8,10 @@ with the expectation its test declared, and through r2 regressions.limit_stops; 
 command, C08 and C24/C25 projections go through cases.py; C27 first requires the real
 unmodified positive to pass, then mutates it and requires each mutation to be rejected.
 This script adds no predicate of its own: it only routes originals to the frozen ones.
+Since Software612 every session carries the cards-1 contract record, so each envelope
+goes through Verification352's tests/windows_cards_receipts_r1/receipts.py validate(),
+which checks the full original sequence and hands r2 its documented legacy projection.
+These sessions have no discovery runs, so its binding is read from their own header.
 """
 import argparse, copy, hashlib, json, sys, traceback
 from pathlib import Path
@@ -15,6 +19,17 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'tests' / 'windows_diagnostics_r2'))
 import receipts, cases, regressions  # noqa: E402
+import importlib.util  # noqa: E402
+_spec = importlib.util.spec_from_file_location('cards_receipts_r1', REPO / 'tests' / 'windows_cards_receipts_r1' / 'receipts.py')
+cards = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(cards)
+
+def full(files, expect_complete=True):
+    """The cards-1 oracle over the original envelope; it runs r2 on the legacy projection."""
+    head = json.loads(files['records.jsonl'].splitlines()[0])['data']
+    app = head['app_path']
+    binding = dict(app_path=app, app_sha256=head['app_sha256'], exe=str(cards.PureWindowsPath(app).parent / 'tapectl.exe'),
+                   sha256=head['pins']['DT_TAPECTL_SHA256'], version_label=head['pins']['DT_TAPECTL_VERSION'], private_root=str(cards.PureWindowsPath(app).parent))
+    cards.validate(files, binding, expect_complete)
 
 def envelopes(case):
     for env in sorted(case.glob('envelope-*.json')):
@@ -27,7 +42,7 @@ def where(e):
 
 def judge(files, expect):
     try:
-        receipts.validate(files, expect == 'complete')
+        full(files, expect == 'complete')
         regressions.limit_stops([json.loads(l) for l in files['records.jsonl'].splitlines() if l.strip()])
         return 'valid-' + expect if expect in ('complete', 'incomplete') else 'UNEXPECTED-valid'
     except (AssertionError, KeyError, TypeError, ValueError) as e:
@@ -45,7 +60,7 @@ def mutations(files):
             ('sequenceGap', None), ('wrongHash', blob_hash), ('droppedWait', drop_wait), ('cleanupEarly', early_cleanup)], rows
 
 def c27(files):
-    receipts.validate(files)  # the unmodified actual positive must pass first
+    full(files)  # the unmodified actual positive must pass first
     out = {'unmodified': 'valid-complete'}
     muts, rows = mutations(files)
     for name, mutate in muts:
@@ -57,7 +72,7 @@ def c27(files):
             for i, row in enumerate(r): row['seq'] = i
         f = dict(files); f['records.jsonl'] = receipts.encode(r)
         try:
-            receipts.validate(f)
+            full(f)
             out[name] = 'SURVIVED'
         except (AssertionError, KeyError, TypeError, ValueError) as e:
             out[name] = 'rejected at ' + where(e)
