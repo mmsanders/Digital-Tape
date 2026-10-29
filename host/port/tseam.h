@@ -52,6 +52,9 @@
  *                          missing sysfs file or NULL result pointer on Linux):
  *                          POINT is disk-length (the probe's capacity query) or
  *                          open-geometry (the authorized open's own query)
+ *   typed-error:NAME       TYPED, not OS-generated: the census extents answer of
+ *                          a volume on the target (not-ready-target) or on another
+ *                          device (not-ready-other) is replaced by ERROR_NOT_READY
  */
 
 #ifndef HOST_TSEAM_H
@@ -105,6 +108,7 @@ int  tseam_fault_read(uint64_t partition_lba, uint32_t count);
 int  tseam_fault_target_read(uint64_t offset, size_t bytes);
 int  tseam_fault_unmount(void);
 int  tseam_fault_query(const char *point);
+int  tseam_fault_typed(const char *name);
 
 /* hport.c: a real failed OS read at `off` (used by the read-error control). */
 struct hport;

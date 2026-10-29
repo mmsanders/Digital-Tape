@@ -111,6 +111,12 @@ int tseam_fault_query(const char *point)
     const char *f = fault();
     return strncmp(f, "query-error:", 12) == 0 && strcmp(f + 12, point) == 0;
 }
+/* typed-error:NAME: a TYPED error response (the OS did not produce it). */
+int tseam_fault_typed(const char *name)
+{
+    const char *f = fault();
+    return strncmp(f, "typed-error:", 12) == 0 && strcmp(f + 12, name) == 0;
+}
 
 static char g_make_phase[16];   /* make's current phase, from tseam_make */
 

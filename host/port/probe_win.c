@@ -223,13 +223,26 @@ int probe_device(const char *path, struct device_facts *f)
         broken = tseam_fault_query("volume-extents");
 #endif
         n = volume_disks(novs, disks, &start, &len, broken);
+#ifdef TAPECTL_TEST
+        /* TYPED controls (not an OS-generated error): the extents answer of a volume on
+           the target, or of one on another device, replaced by ERROR_NOT_READY. */
+        if (n >= 0) {
+            for (i = 0; i < n; i++) { if (disks[i] == disk) { on = 1; } }
+            if ((on && tseam_fault_typed("not-ready-target")) || (!on && tseam_fault_typed("not-ready-other"))) {
+                on = 0;
+                n = -1;
+                SetLastError(ERROR_NOT_READY);
+            }
+        }
+#endif
         if (n < 0) {
             char why[48];
             e = GetLastError();
             snprintf(why, sizeof why, "%s", hport_os_errname());
-            /* No medium (an empty reader slot or drive): nothing is mounted there.
-               Otherwise it is skipped only if it is provably on another device. */
-            if (e != ERROR_NOT_READY && e != ERROR_NO_MEDIA_IN_DRIVE && !volume_elsewhere(novs, disk)) {
+            /* ERROR_NO_MEDIA_IN_DRIVE: no medium (an empty reader slot or drive), so
+               nothing is mounted there. Anything else, ERROR_NOT_READY included, is
+               skipped only if another query proves the volume is on another device. */
+            if (e != ERROR_NO_MEDIA_IN_DRIVE && !volume_elsewhere(novs, disk)) {
                 census_failed(f, "IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS", why);
                 break;
             }

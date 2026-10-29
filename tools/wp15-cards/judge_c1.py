@@ -112,6 +112,14 @@ def judge(root):
             for point in ("mount-paths", "volume-extents", "volume-enum"):
                 assert names.get(f"census-{point}") == ("HOST_QUERY_FAILED", 1), names
             assert names.get("census-neighbor-known-foreign-mount") == ("REFUSE_FOREIGN_MOUNT", 3), names
+            # A typed ERROR_NOT_READY on the target's volume fails the census; on another
+            # device's volumes it is excluded by that volume's own device number, and the
+            # target's mounted volume is still counted (the known refusal, not a failure).
+            assert names.get("census-not-ready-target") == ("HOST_QUERY_FAILED", 1), names
+            assert names.get("census-not-ready-other") == ("REFUSE_FOREIGN_MOUNT", 3), names
+            other = next(r for r in b["queries"] if r["name"] == "census-not-ready-other")
+            mounted = (json.loads(raw(other["trace"]).read_text()).get("facts") or {}).get("mounted")
+            assert mounted is not None and len(mounted) == 1, mounted
 
     def standalone(r):
         """Standalone provision on an incomplete (or known foreign) census: refused, nothing written."""
@@ -125,7 +133,7 @@ def judge(root):
         out["negative_controls"].append({"of": row["name"], "mutation": "provision authorized (exit 0, one write)",
                                          "rejected": rejected(standalone, dict(r, exit=0, refusal=None, writes=1))})
     if b["platform"] == "windows":
-        assert len(out["standalone"]) == 4, out["standalone"]
+        assert len(out["standalone"]) == 6, out["standalone"]
     assert all(c["rejected"] for c in out["negative_controls"]), out["negative_controls"]
     return out
 

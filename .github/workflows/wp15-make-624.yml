@@ -20,6 +20,8 @@ on:
       - 'tests/wp15_app1a_r1/**'
       - 'tests/wp15_boundary_query_r1/**'
       - 'tests/c1_closeout_r1/**'
+      - 'tests/c1_volume_query_r1/**'
+      - 'tests/c1_volume_query_r2/**'
       - '.github/workflows/wp15-make-624.yml'
   workflow_dispatch:
 
@@ -140,32 +142,41 @@ jobs:
       # Verification's census regression, unchanged: probe.c over a probe_win.c, run by
       # run.ps1, which expects the e36ea492 omission (exit 1). The e36ea492 source must
       # still reproduce it (the regression can go red); this head's must not.
-      - name: Census regression probes (tests/c1_volume_query_r1/probe.c over e36ea492 and this head)
+      # c1_volume_query_r2 (typed ERROR_NOT_READY on the target's volume) the same way:
+      # prepare.py's probe over 39636892 (the unconditional 21 bypass) must reproduce;
+      # over this head it must not.
+      - name: Census regression probes (c1_volume_query_r1 over e36ea492, r2 over 39636892, both over this head)
         run: |
           export PATH="/c/mingw64/bin:$PATH"
-          mkdir -p "$RUNNER_TEMP/vq-old"
-          git show e36ea4922ef845dd6754456db874541a71992ebc:host/port/probe_win.c > "$RUNNER_TEMP/vq-old/probe_win.c"
-          gcc -std=c99 -I"$RUNNER_TEMP/vq-old" -Ihost/port -Ihost -Iengine/include tests/c1_volume_query_r1/probe.c host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/probe-old.exe"
-          gcc -std=c99 -Ihost/port -Ihost -Iengine/include tests/c1_volume_query_r1/probe.c host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/probe-new.exe"
-      - name: Census regression (tests/c1_volume_query_r1/run.ps1, unchanged)
+          W="$RUNNER_TEMP/vq"; mkdir -p "$W/e36" "$W/396" "$W/gen"
+          git show e36ea4922ef845dd6754456db874541a71992ebc:host/port/probe_win.c > "$W/e36/probe_win.c"
+          git show 3963689230cd96e34dd0ee05e160bff6b172c774:host/port/probe_win.c > "$W/396/probe_win.c"
+          (cd "$W/gen" && python -B "$GITHUB_WORKSPACE/tests/c1_volume_query_r2/prepare.py")
+          cc() { gcc -std=c99 $1 -Ihost/port -Ihost -Iengine/include "$2" host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/$3.exe"; }
+          cc "-I$W/e36" tests/c1_volume_query_r1/probe.c probe-r1-old
+          cc "" tests/c1_volume_query_r1/probe.c probe-r1-new
+          cc "-I$W/396" "$W/gen/probe-not-ready.c" probe-r2-old
+          cc "" "$W/gen/probe-not-ready.c" probe-r2-new
+      - name: Census regressions (tests/c1_volume_query_r1/run.ps1, unchanged)
         shell: pwsh
         run: |
           $base = $env:RUNNER_TEMP
           $seen = @{}
-          foreach ($k in 'old', 'new') {
+          foreach ($k in 'r1-old', 'r1-new', 'r2-old', 'r2-new') {
             Copy-Item "$base/probe-$k.exe" "$env:GITHUB_WORKSPACE/probe.exe" -Force
             $env:RUNNER_TEMP = "$base/vq-$k-run"; New-Item -ItemType Directory $env:RUNNER_TEMP | Out-Null
             try { & ./tests/c1_volume_query_r1/run.ps1; $how = 'run.ps1 completed: omission reproduced (probe exit 1)' }
             catch { $how = "run.ps1 threw: $_" }
             $res = Get-Content "$env:RUNNER_TEMP/verifier364-volume-query/RESULT.json" -Raw | ConvertFrom-Json
-            "$k source: $how; required_query_fail_stop_pass=$($res.required_query_fail_stop_pass); failed_mounts=$($res.failed_mounts); actual_os_error=$($res.actual_os_error)"
+            "$k : $how; required_query_fail_stop_pass=$($res.required_query_fail_stop_pass); failed_mounts=$($res.failed_mounts); error=$($res.actual_os_error)$($res.typed_error_code)"
             $seen[$k] = $res.required_query_fail_stop_pass
           }
           $env:RUNNER_TEMP = $base
           Remove-Item "$env:GITHUB_WORKSPACE/probe.exe"
-          if ($seen['old'] -ne $false) { throw 'control: the e36ea492 probe no longer reproduces the omission' }
-          if ($seen['new'] -ne $true) { throw 'this head still omits the failed census query' }
-          'ok: e36ea492 reproduces the omission; this head records the failed query'
+          if ($seen['r1-old'] -ne $false) { throw 'control: the e36ea492 probe no longer reproduces the r1 omission' }
+          if ($seen['r2-old'] -ne $false) { throw 'control: the 39636892 probe no longer reproduces the r2 NOT_READY bypass' }
+          if ($seen['r1-new'] -ne $true -or $seen['r2-new'] -ne $true) { throw 'this head still omits a failed census query' }
+          'ok: e36ea492 and 39636892 reproduce; this head records both failed queries'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -620,7 +620,13 @@ def census_rows(b, a, plat, vhd, wavp):
     scope = ("compiled-test on a Windows Server VHD holding one mounted NTFS volume; real platform probe "
              "(facts seam probe=1 overlays removable=1 only)")
     overlay = "probe=1\nremovable=1\n"
-    for fault in (None, "query-error:mount-paths", "query-error:volume-extents", "query-error:volume-enum"):
+    notes = {"mount-paths": "the mount-paths query really failed in the OS",
+             "volume-extents": "the volume-extents query really failed in the OS",
+             "volume-enum": "the volume enumeration really failed in the OS",
+             "not-ready-target": "TYPED ERROR_NOT_READY replaces the extents answer of the volume on this disk",
+             "not-ready-other": "TYPED ERROR_NOT_READY replaces the extents answer of every volume on another device"}
+    for fault in (None, "query-error:mount-paths", "query-error:volume-extents", "query-error:volume-enum",
+                  "typed-error:not-ready-target", "typed-error:not-ready-other"):
         point = fault.split(":")[1] if fault else None
         v = vhd(f"census-{point or 'neighbor'}")
         dev = plat.attach(v)
@@ -635,7 +641,7 @@ def census_rows(b, a, plat, vhd, wavp):
         argv, rep = b.make(dev, wav_path=wavp)
         res = b.process(argv, env=env, facts=overlay)
         b.query_row(f"census-{point}" if point else "census-neighbor-known-foreign-mount",
-                    f"{scope}; {'the ' + point + ' query really failed in the OS' if point else 'every census query succeeds'}",
+                    f"{scope}; {notes[point] if point else 'every census query succeeds'}",
                     res, rep, probed=True)
         # The same node and fault through standalone provision: it must refuse, never write.
         p = b.process([a.tapectl_test, "provision", dev, "--label", "Census", "--length-s", str(LEN_S), "--erase", dev],
