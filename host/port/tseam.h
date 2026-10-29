@@ -26,6 +26,9 @@
  *   engine_info         each tape_get_info after a mount: needs_repair,
  *                       side_b_valid
  *   unmount             each own-partition-1 unmount: OS call and result
+ *   media_query         make only: a required media query that failed (the
+ *                       probe's facts, or the geometry query of the device
+ *                       open) and its OS error
  * plus target, target_kind, device facts and policy, refusal, engine_used,
  * exit and build identity. The engine is not instrumented: its calls are
  * observed at the existing public API call sites in tapectl.
@@ -38,11 +41,20 @@
  *   native-flush-error     the barrier fails in the OS; failure propagates
  *   nonnull-binding        read-only engine bindings get a write callback
  *   read-error:LBA         an engine read covering partition LBA fails (real
- *                          failed OS read)
+ *                          failed OS read); read-error:LBA@PHASE only during
+ *                          that make phase (e.g. @verify)
  *   target-read-error:LBA  a port read covering absolute target LBA fails
  *                          (real failed OS read), e.g. 0 for LBA 0
  *   unmount-error          the own-partition-1 unmount is a real OS call on
  *                          an invalid target, and fails
+ *   query-error:POINT      a required media query is really issued so that the
+ *                          OS fails it (a zero-size result buffer on Windows; a
+ *                          missing sysfs file or NULL result pointer on Linux):
+ *                          POINT is disk-length (the probe's capacity query) or
+ *                          open-geometry (the authorized open's own query)
+ *   typed-error:NAME       TYPED, not OS-generated: the census extents answer of
+ *                          a volume on the target (not-ready-target) or on another
+ *                          device (not-ready-other) is replaced by ERROR_NOT_READY
  */
 
 #ifndef HOST_TSEAM_H
@@ -70,6 +82,17 @@ void tseam_flush(const char *os_call, int os_success, const char *os_error, int 
 void tseam_bind(uint64_t base_lba, uint32_t blocks, int write_is_null);
 void tseam_unmount(const char *where, const char *os_call, int ok, const char *os_error, const char *fault);
 
+/* make (APP-1 §3) only, so no other command's trace changes:
+   make_safety_pass, make_phase (provision/load/commit/verify, with the
+   current write binding), make_media_change (phase, the OS error that the
+   port classified as removal/change, and stdout bytes written so far) and
+   make_close. tseam_make_pause: with TAPECTL_TEST_PAUSE=PHASE:DIR, at the
+   start of PHASE create DIR/ready and wait for DIR/go, so a CI fixture can
+   remove or swap the device at an exact boundary. Real I/O then detects it. */
+void tseam_make(const char *kind, const char *phase, const char *os_error, int write_is_null);
+void tseam_make_pause(const char *phase);
+void tseam_query(const char *point, const char *os_error);
+
 /* Engine call sites in tapectl. */
 void tseam_engine_used(void);
 void tseam_phase(const char *phase, char side, int64_t frame);   /* side 0 = none, frame -1 = n/a */
@@ -84,6 +107,8 @@ int  tseam_fault_nonnull_binding(void);
 int  tseam_fault_read(uint64_t partition_lba, uint32_t count);
 int  tseam_fault_target_read(uint64_t offset, size_t bytes);
 int  tseam_fault_unmount(void);
+int  tseam_fault_query(const char *point);
+int  tseam_fault_typed(const char *name);
 
 /* hport.c: a real failed OS read at `off` (used by the read-error control). */
 struct hport;

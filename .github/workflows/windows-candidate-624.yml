@@ -1,0 +1,130 @@
+name: "Software624 Windows Make candidate build"
+# One Windows 11 x64 candidate from the exact PR head (#624, ADR-195: rebuilding is free,
+# each build's identity is recorded). BUILD/ARCHIVE only: nothing is launched here.
+# tapectl.exe is the shipping (non-test) build of this head; ingest.exe is the original,
+# authenticated INGEST child, hash-checked, never rebuilt or run. Both pins are compiled
+# into the app.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - 'engine/**'
+      - 'tools/app/package_candidate_624.py'
+      - '.github/workflows/windows-candidate-624.yml'
+  workflow_dispatch:
+concurrency:
+  group: software624-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+env:
+  ENGINE_TREE: d96b4245e04d74078f8938744b1394c3018516f7
+  # Authenticated 564 candidate artifact; its nested ZIP carries the original INGEST child.
+  INGEST_ARTIFACT: '12578829894'
+  INGEST_CONTAINER_SHA256: a19c47d7d474414cfb0c8cf992fd6e984bf9ff160c5e38efdd7e09a45b12aa94
+  INGEST_NESTED_ZIP: Digital-Tape-Windows11-x64-candidate.zip
+  INGEST_BYTES: '889856'
+  DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+jobs:
+  build:
+    name: "Windows11 x64 Make candidate BUILD only (#624)"
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Source identity
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory ev624,stage624 | Out-Null
+          if((git rev-parse HEAD:engine) -ne $env:ENGINE_TREE){throw 'engine tree changed'}
+          foreach($n in 'DT_SOURCE_HEAD','DT_DIAG_REQUIRE','DT_DIAG_EVIDENCE','DT_CARDS_REQUIRE'){if(Test-Path "env:$n"){throw "$n must not be set for the release build"}}
+          $head=(git rev-parse HEAD); "SOURCE_HEAD=$head" >> $env:GITHUB_ENV; "HEAD12=$($head.Substring(0,12))" >> $env:GITHUB_ENV
+          git ls-tree -r HEAD host > ev624/host-tree.txt
+          rustc -Vv > ev624/rustc.txt
+          cargo -V > ev624/cargo.txt
+          "CARGO_TARGET_DIR=$(Join-Path $env:RUNNER_TEMP 'candidate-target')" >> $env:GITHUB_ENV
+      - name: Shipping tapectl.exe from this head (no test seam)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all > ev624/engine-build.stdout.txt
+          CMD="$MAKE -C host CC=gcc HEAD_ID=$HEAD12 ../build/host/tapectl.exe"
+          $CMD > ev624/tapectl-build.stdout.txt
+          test ! -e build/host/tapectl-test.exe
+          cp build/host/tapectl.exe stage624/tapectl.exe
+          if grep -a -q TAPECTL_TEST stage624/tapectl.exe; then echo "test seam present"; exit 1; fi
+          grep -a -c "tapectl-wp15-s2+$HEAD12" stage624/tapectl.exe > /dev/null
+          gcc -v 2> ev624/gcc-v.txt
+          echo "$CMD" > ev624/tapectl-build-command.txt
+          echo "DT_TAPECTL_SHA256=$(sha256sum stage624/tapectl.exe | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "DT_TAPECTL_VERSION=tapectl-wp15-s2+$HEAD12" >> "$GITHUB_ENV"
+      - name: Original INGEST child, hash-checked (not rebuilt, not run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          function Sha($p){(Get-FileHash $p -Algorithm SHA256).Hash.ToLowerInvariant()}
+          gh api "repos/${{ github.repository }}/actions/artifacts/$env:INGEST_ARTIFACT/zip" > ingest-container.zip
+          if($LASTEXITCODE -ne 0){throw 'INGEST transport retrieval failed'}
+          if((Sha ingest-container.zip) -ne $env:INGEST_CONTAINER_SHA256){throw 'INGEST transport container mismatch'}
+          Expand-Archive ingest-container.zip ingest-container
+          Expand-Archive "ingest-container/$env:INGEST_NESTED_ZIP" ingest-nested
+          Copy-Item ingest-nested/ingest.exe stage624/ingest.exe
+          if((Sha stage624/ingest.exe) -ne $env:DT_INGEST_SHA256){throw 'ingest.exe pin mismatch'}
+          if((Get-Item stage624/ingest.exe).Length -ne [long]$env:INGEST_BYTES){throw 'ingest.exe length mismatch'}
+      - name: App build with both child pins compiled in
+        working-directory: host/app
+        run: |
+          $argv='cargo','build','--release','--locked','--bin','digital-tape'
+          [ordered]@{DT_INGEST_SHA256=$env:DT_INGEST_SHA256; DT_INGEST_VERSION=$env:DT_INGEST_VERSION; DT_TAPECTL_SHA256=$env:DT_TAPECTL_SHA256; DT_TAPECTL_VERSION=$env:DT_TAPECTL_VERSION} |
+            ConvertTo-Json | Set-Content -Encoding utf8 ../../ev624/compile-env.json
+          & $argv[0] $argv[1..($argv.Length-1)] 1> ../../ev624/app-build.stdout.txt 2> ../../ev624/app-build.stderr.txt
+          if($LASTEXITCODE -ne 0){Get-Content ../../ev624/app-build.stderr.txt -Tail 40; throw "app build failed: exit $LASTEXITCODE"}
+          Copy-Item "$env:CARGO_TARGET_DIR/release/digital-tape.exe" ../../stage624/digital-tape.exe
+      - name: Compiled pins are in the app bytes
+        run: |
+          $ErrorActionPreference='Stop'
+          $text=[Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes("$PWD/stage624/digital-tape.exe"))
+          foreach($n in 'DT_INGEST_SHA256','DT_INGEST_VERSION','DT_TAPECTL_SHA256','DT_TAPECTL_VERSION'){
+            if(-not $text.Contains((Get-Item "env:$n").Value)){throw "$n value is not in the app"} }
+      - name: Package
+        run: |
+          $ErrorActionPreference='Stop'
+          $facts=[ordered]@{source_head=$env:SOURCE_HEAD; source_tree=(git rev-parse 'HEAD^{tree}'); host_tree=(git rev-parse HEAD:host)
+            host_app_tree=(git rev-parse HEAD:host/app); engine_tree=$env:ENGINE_TREE
+            compile_env=(Get-Content ev624/compile-env.json -Raw | ConvertFrom-Json)
+            tapectl_build=[ordered]@{command=(Get-Content ev624/tapectl-build-command.txt -Raw).Trim(); test_seam=$false}
+            ingest_transport=[ordered]@{artifact_id=[long]$env:INGEST_ARTIFACT; container_sha256=$env:INGEST_CONTAINER_SHA256; nested_zip=$env:INGEST_NESTED_ZIP}
+            app_build_argv=@('cargo','build','--release','--locked','--bin','digital-tape')
+            toolchain=[ordered]@{rustc=(Get-Content ev624/rustc.txt); cargo=(Get-Content ev624/cargo.txt -Raw).Trim(); gcc=(Get-Content ev624/gcc-v.txt | Select-Object -Last 1)}
+            run_id=[long]$env:GITHUB_RUN_ID; run_attempt=[int]$env:GITHUB_RUN_ATTEMPT}
+          [IO.File]::WriteAllText("$PWD/ev624/facts.json", ($facts | ConvertTo-Json -Depth 6) + "`n")
+          python -I tools/app/package_candidate_624.py stage624 ev624/facts.json cand624
+          if($LASTEXITCODE -ne 0){throw 'Packaging failed'}
+          Copy-Item cand624/INVENTORY.json,cand624/BUILD.json ev624/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software624-windows-candidate-${{ env.HEAD12 }}
+          path: |
+            cand624/Digital-Tape-Windows11-x64-make-candidate.zip
+            cand624/INVENTORY.json
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: software624-build-evidence-${{ env.HEAD12 }}
+          path: ev624
+          if-no-files-found: error
+          retention-days: 30

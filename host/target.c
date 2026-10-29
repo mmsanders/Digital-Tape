@@ -43,18 +43,40 @@ static void gather_facts(const char *path, struct device_facts *f, int *seam)
 
 int target_safety(const char *path, int provision, const char *erase, int need_write)
 {
+    enum refusal why;
+    int unmount_failed;
+    return target_safety_why(path, provision, erase, need_write, &why, &unmount_failed, NULL, 0);
+}
+
+int target_safety_why(const char *path, int provision, const char *erase, int need_write,
+                      enum refusal *why, int *unmount_failed, char *query_error, size_t qcap)
+{
     struct device_facts f;
     enum refusal r;
     int seam, i;
 
+    *why = REFUSE_NONE;
+    *unmount_failed = 0;
     gather_facts(path, &f, &seam);
     (void)seam;
+    if (query_error != NULL && f.query_error[0]) {
+        /* An OS failure, not a known fact: the refusing value it left is not judged. */
+#ifdef TAPECTL_TEST
+        tseam_facts(&f, "HOST_QUERY_FAILED", seam);
+        tseam_query("probe", f.query_error);
+        tseam_refusal("HOST_QUERY_FAILED");
+#endif
+        snprintf(query_error, qcap, "%s", f.query_error);
+        fprintf(stderr, "tapectl: HOST_QUERY_FAILED: a required check of the card failed (%s)\n", f.query_error);
+        return EXIT_ENGINE;
+    }
     r = safety_policy(&f, provision, erase != NULL && strcmp(erase, path) == 0);
 #ifdef TAPECTL_TEST
     tseam_facts(&f, refusal_id(r), seam);
     if (r != REFUSE_NONE) { tseam_refusal(refusal_id(r)); }
 #endif
     if (r != REFUSE_NONE) {
+        *why = r;
         fprintf(stderr, "tapectl: %s: %s\n", refusal_id(r), refusal_sentence(r));
         if (f.detail[0]) { fprintf(stderr, "tapectl:   %s\n", f.detail); }
         if (r == REFUSE_FOREIGN_MOUNT) {
@@ -88,6 +110,8 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
 #ifdef TAPECTL_TEST
                 tseam_refusal(refusal_id(REFUSE_FOREIGN_MOUNT));
 #endif
+                *why = REFUSE_FOREIGN_MOUNT;
+                *unmount_failed = 1;
                 fprintf(stderr, "tapectl: %s: cannot unmount partition 1 (%s). Eject it in the operating system first.\n",
                         refusal_id(REFUSE_FOREIGN_MOUNT), f.mounted[i].where);
                 return EXIT_REFUSE;
@@ -234,6 +258,20 @@ int target_open_verify(struct target *t, const char *path, unsigned *findings, i
     *have_view = 0;
     rc = open_common(t, path, 0);
     if (rc) { return rc; }
+    return bind_existing_verify(t, path, findings, have_view);
+}
+
+int target_bind_write(struct target *t, const char *path)
+{
+    if (t == NULL || !t->open) { return EXIT_ENGINE; }
+    return bind_existing(t, path, 1);
+}
+
+int target_bind_verify(struct target *t, const char *path, unsigned *findings, int *have_view)
+{
+    *findings = 0;
+    *have_view = 0;
+    if (t == NULL || !t->open) { return EXIT_ENGINE; }
     return bind_existing_verify(t, path, findings, have_view);
 }
 

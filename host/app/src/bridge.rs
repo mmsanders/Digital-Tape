@@ -1,15 +1,17 @@
-//! One production coordinator, a serial ingest worker and a single-flight discovery poller.
-//! App owns current-result acceptance.
-use crate::{children, diagnostics::{Route, Session}, discovery::{self, Judged, Ran, Request}, drops, ingest_job::{self, Outcome, RunReceipt}, jobdir, state::{App, Next, View}};
+//! One production coordinator, a serial ingest worker, a single-flight discovery poller and
+//! the one Make cartridge run. App owns current-result acceptance.
+use crate::{children, diagnostics::{Route, Session}, discovery::{self, Judged, Ran, Request}, drops, ingest_job::{self, Outcome, RunReceipt}, jobdir, make, state::{App, Next, View}};
 use serde_json::Value;
-use std::{cell::Cell, path::PathBuf, sync::{Arc, Mutex, Weak, mpsc, atomic::{AtomicBool, Ordering}}, thread, time::{Duration, Instant}};
+use std::{cell::Cell, path::PathBuf, sync::{Arc, Mutex, Weak, mpsc, atomic::{AtomicBool, AtomicIsize, Ordering}}, thread, time::{Duration, Instant}};
 
 /// `drop_id` names the receipt ingress that scheduled this work (diagnostics ON only).
 pub struct Work { pub id:String, pub generation:u64, pub folders:Vec<PathBuf>, pub cancel:Arc<AtomicBool>, pub drop_id:Option<String> }
 enum Message { Check(Work), Stop }
 // `stopped` is set under this lock by shutdown, so a discovery run is either registered
 // before shutdown's cancellation pass or refused; none crosses that boundary.
-struct Core { app:App, cancel:Option<Arc<AtomicBool>>, active:Option<(String,u64)>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool }
+// `ready` is the app-owned job holding the current check's published DEST (its audio is
+// `app.audio`), kept for Make until the music changes, Start over or a cartridge is made.
+struct Core { app:App, cancel:Option<Arc<AtomicBool>>, active:Option<(String,u64)>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool, ready:Option<jobdir::Job> }
 type Effect=dyn Fn(View)->Result<(),String>+Send+Sync;
 /// The launch callback a discovery run calls once its child exists, before any wait.
 /// The launch hook, present only with diagnostics ON.
@@ -24,6 +26,11 @@ pub struct Bridge {
     stop_polls:AtomicBool, poller:Mutex<Option<thread::JoinHandle<()>>>,
     /// APP-1A §8 opt-in receipts; None (the default) means no diagnostic I/O at all.
     diag:Option<Arc<Session>>,
+    /// The Make launcher (production: elevated ShellExecuteExW) and the window that owns
+    /// its prompt.
+    launch:Mutex<Arc<make::Launch>>, owner:Arc<AtomicIsize>,
+    /// Controlled tests name the make child here instead of the pinned bundled tapectl.
+    #[cfg(test)] make_child:Mutex<Option<(PathBuf,String)>>,
     #[cfg(test)] trace:Mutex<Vec<String>>,
     /// Controlled tests pause a due poll here, after its stop read and before registration.
     #[cfg(test)] before_admission:Mutex<Option<Box<dyn FnOnce()+Send>>>,
@@ -37,8 +44,11 @@ impl Bridge {
     }
     fn channel_effect(data:PathBuf,emit:Arc<Effect>,diag:Option<Arc<Session>>)->(Arc<Self>,mpsc::Receiver<Message>) {
         let(sender,receiver)=mpsc::channel();
-        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,active:None,cards_cancel:None,stopped:false}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
-            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),diag,#[cfg(test)]trace:Mutex::new(Vec::new()),#[cfg(test)]before_admission:Mutex::new(None)}),receiver)
+        let owner=Arc::new(AtomicIsize::new(0));let window=owner.clone();
+        let launch:Arc<make::Launch>=Arc::new(move|req:&make::Request,tick:&mut dyn FnMut()|make::elevated(window.load(Ordering::SeqCst))(req,tick));
+        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,active:None,cards_cancel:None,stopped:false,ready:None}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
+            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),diag,launch:Mutex::new(launch),owner,#[cfg(test)]make_child:Mutex::new(None),
+            #[cfg(test)]trace:Mutex::new(Vec::new()),#[cfg(test)]before_admission:Mutex::new(None)}),receiver)
     }
     pub fn new(data:PathBuf,emit:impl Fn(View)+Send+Sync+'static)->Arc<Self> {Self::with_diagnostics(data,move|v|{emit(v);Ok(())},None)}
     /// The one production coordinator; `diag` is Some only for an opted-in launch.
@@ -75,8 +85,9 @@ impl Bridge {
     fn poll_once(&self,schedule:&mut discovery::Schedule,ms:&dyn Fn()->u64,
         run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->bool{
         if self.stop_polls.load(Ordering::SeqCst){return false}
-        // S3 Make does not exist in this build, so discovery is never paused for Making.
-        if schedule.tick(ms(),false,false){
+        // No card check runs while Making (APP-1 §2): the make child owns the card.
+        let making=self.core.lock().unwrap().app.is_making();
+        if schedule.tick(ms(),making,false){
             #[cfg(test)]if let Some(pause)=self.before_admission.lock().unwrap().take(){pause()}
             self.discover(run);schedule.terminal(ms());
         }
@@ -172,6 +183,7 @@ impl Bridge {
     #[cfg(test)]
     fn begin(core:&mut Core,id:String)->Work{Self::begin_from(core,id,None)}
     fn begin_from(core:&mut Core,id:String,drop_id:Option<String>)->Work{
+        Self::release_ready(core);
         if let Some(old)=core.cancel.take(){old.store(true,Ordering::SeqCst);}
         let cancel=Arc::new(AtomicBool::new(false));core.cancel=Some(cancel.clone());
         let generation=core.app.begin_job(&id);core.active=Some((id.clone(),generation));
@@ -213,7 +225,9 @@ impl Bridge {
     }
     pub fn start_over(&self)->View{
         let _serial=self.publication.lock().unwrap();
-        let view={let mut core=self.core.lock().unwrap();let old=core.app.generation();core.app.start_over();self.note("invalidate-current");
+        // While Making nothing is reset: the make child is still writing the card.
+        if self.core.lock().unwrap().app.is_making(){return self.snapshot()}
+        let view={let mut core=self.core.lock().unwrap();let old=core.app.generation();core.app.start_over();Self::release_ready(&mut core);self.note("invalidate-current");
             if let Some(d)=&self.diag{if let(Some((w,g)),true)=(&core.active,core.cancel.is_some()){d.cancel_request(w,*g);}d.reset(old,core.app.generation());}
             core.active=None;
             if let Some(cancel)=core.cancel.take(){cancel.store(true,Ordering::SeqCst);self.note("cancel-request");}core.app.view()};
@@ -247,9 +261,115 @@ impl Bridge {
             d.outcome(&work.id,work.generation,disposition,&self.state_ref());
             if let(Ok(o),true)=(&outcome,launched.get()){d.capture(&work.id,work.generation,&receipt,&o.reading);}
         }
+        // A current success's published audio moves to its own owned job for Make.
+        if let(Ok(o),"delivered")=(&outcome,disposition){if o.exit==Some(0)&&o.total_frames.is_some(){self.retain(&job,work.generation);}}
         // Sole target is this worker's freshly created Job, only after run terminates.
         let removed=jobdir::remove(&job);self.note("remove-owned-job");
         if let Some(d)=diag{d.cleanup(&work.id,work.generation,&job.dir,removed);}
+    }
+    /// Keep `job`'s published DEST for Make: renamed into a fresh owned job, kept only while
+    /// `generation` is still current. Anything else leaves Make off; nothing is copied.
+    fn retain(&self,job:&jobdir::Job,generation:u64){
+        let dest=job.out.join("DEST");
+        if !dest.join("audio.wav").is_file(){return}
+        let Ok(keep)=jobdir::create(&self.data,&format!("ready-{}",children::nonce())) else{return};
+        if std::fs::rename(&dest,keep.out.join("DEST")).is_err(){jobdir::remove(&keep);return}
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();
+            if core.app.generation()!=generation||core.app.making!=crate::state::Making::Idle{drop(core);jobdir::remove(&keep);return}
+            Self::release_ready(&mut core);
+            core.app.audio=Some(keep.out.join("DEST").join("audio.wav"));core.ready=Some(keep);core.app.view()};
+        self.note("make:audio-retained");let _=(self.emit)(view);
+    }
+    /// Delete the retained audio's job, if any (the music changed or was made).
+    fn release_ready(core:&mut Core){
+        core.app.audio=None;
+        if let Some(old)=core.ready.take(){jobdir::remove(&old);}
+    }
+    /// The window that owns the elevation prompt (Windows HWND), set once it exists.
+    pub fn set_owner(&self,hwnd:isize){self.owner.store(hwnd,Ordering::SeqCst);}
+    /// Closing the window while Making: refused with "Wait until the cartridge is finished."
+    pub fn close_requested(&self)->bool{
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();if !core.app.refuse_close(){return false}core.app.view()};
+        let _=(self.emit)(view);true
+    }
+    /// The card a recheck printed, if it printed exactly one (APP-1 §4 steps 1 and 3).
+    fn recheck(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->Option<(String,u64)>{
+        let(_,_,judged)=self.discover(run)?;
+        judged.hint.filter(|h|h.paths.len()==1&&h.sizes.len()==1).map(|h|(h.paths[0].clone(),h.sizes[0]))
+    }
+    /// Make cartridge: step 1 (recheck), then the erase confirmation (step 2).
+    pub fn make_cartridge(&self)->View{self.make_request(Self::run_cards)}
+    fn make_request(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->View{
+        let Some(seen)=self.core.lock().unwrap().app.make_card() else{return self.snapshot()};
+        let rechecked=self.recheck(run);self.note("make:recheck-1");
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();if !core.app.confirm(&seen,rechecked){self.note("make:recheck-mismatch");}core.app.view()};
+        let _=(self.emit)(view.clone());view
+    }
+    /// Keep card: back to Ready, nothing started.
+    pub fn make_cancel(&self)->View{
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();core.app.keep_card();core.app.view()};
+        let _=(self.emit)(view.clone());view
+    }
+    /// Replace: step 3 — recheck again, then the one elevated make child, off the caller's thread.
+    pub fn make_confirm(self:&Arc<Self>)->View{self.make_start(Self::run_cards)}
+    fn make_start(self:&Arc<Self>,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->View{
+        if !matches!(self.core.lock().unwrap().app.making,crate::state::Making::Confirm{..}){return self.snapshot()}
+        let rechecked=self.recheck(run);self.note("make:recheck-2");
+        let _serial=self.publication.lock().unwrap();
+        let(view,start)={let mut core=self.core.lock().unwrap();let start=core.app.start_making(rechecked);(core.app.view(),start)};
+        let _=(self.emit)(view.clone());
+        if let Some((dev,label,wav))=start{
+            let me=self.clone();
+            thread::spawn(move||me.run_make(&dev,&label,&wav));
+        }else{self.note("make:recheck-mismatch");}
+        view
+    }
+    fn make_child(&self)->Result<(PathBuf,String),String>{
+        #[cfg(test)]if let Some(c)=self.make_child.lock().unwrap().clone(){return Ok(c)}
+        let bin=children::resolve(&children::TAPECTL).map_err(|e|e.0)?;
+        Ok((bin,children::TAPECTL.version.unwrap_or_default().to_owned()))
+    }
+    /// The make child from launch to terminal, then cleanup: its own job always, and the
+    /// retained audio once a cartridge is made (APP-1 §4 step 4). Never relaunched.
+    fn run_make(&self,dev:&str,label:&str,wav:&std::path::Path){
+        let prepared=self.make_child().and_then(|(bin,version)|{
+            let job=jobdir::create(&self.data,&format!("make-{}",children::nonce())).map_err(|e|format!("cannot create the app's own folder: {e}"))?;
+            Ok((make::request(&bin,&version,&job,dev,label,wav),job))});
+        let(outcome,job)=match prepared{
+            Err(why)=>(make::judge(&make::Launched::NotStarted(why),None,"",""),None),
+            Ok((req,job))=>{
+                self.note("make:launch");
+                let launch=self.launch.lock().unwrap().clone();
+                let launched=launch(&req,&mut||if let Ok(b)=std::fs::read(&req.report){if let Some((f,step))=make::progress(&b){self.make_progress(f,step);}});
+                self.note("make:child-terminal");
+                let report=std::fs::read(&req.report).ok();
+                (make::judge(&launched,report.as_deref(),&req.nonce,&req.version),Some(job))
+            }
+        };
+        if let Some(job)=job{jobdir::remove(&job);self.note("make:remove-owned-job");}
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();
+            if outcome.message.is_none(){Self::release_ready(&mut core);self.note("make:audio-removed");}
+            core.app.made(outcome.message,outcome.details);core.app.view()};
+        let _=(self.emit)(view);self.note("make:published");
+    }
+    fn make_progress(&self,f:f64,step:&'static str){
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();core.app.made_progress(f,step).then(||core.app.view())};
+        if let Some(view)=view{let _=(self.emit)(view);}
+    }
+    /// Make another (after Done): the same folders checked again.
+    pub fn make_another(&self)->View{
+        let _serial=self.publication.lock().unwrap();
+        let(view,work)={let mut core=self.core.lock().unwrap();
+            let work=(core.app.make_another()==Next::RunIngest).then(||Self::begin_from(&mut core,format!("ingest-{}",children::nonce()),None));
+            (core.app.view(),work)};
+        let _=(self.emit)(view.clone());
+        if let Some(work)=work{let _=self.sender.send(Message::Check(work));}view
     }
     fn state_ref(&self)->String{let core=self.core.lock().unwrap();let v=core.app.view();format!("view={} checking={} resets={} generation={}",v.view,v.checking,v.resets,core.app.generation())}
     fn deliver(&self,generation:u64,id:&str,outcome:&Outcome)->bool{
@@ -283,3 +403,9 @@ mod interaction_component;
 #[cfg(test)]
 #[path="../tests/diagnostics_component.rs"]
 mod diagnostics_component;
+#[cfg(test)]
+#[path="../tests/make_component.rs"]
+mod make_component;
+#[cfg(test)]
+#[path="../tests/g3_component.rs"]
+mod g3;

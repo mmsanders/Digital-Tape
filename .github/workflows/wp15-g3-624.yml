@@ -1,0 +1,88 @@
+name: WP15 G3 real-child bridge matrix (#624)
+
+# tests/c1_closeout_r1/g3.py (Verification364, imported unchanged) over the production
+# bridge with REAL children on a hosted Windows Server runner: the original INGEST child
+# (hash-checked, never rebuilt), `tapectl-test make` on VHDs with the bridge's own argv,
+# and the shipping `tapectl cards`. tools/app/g3_624.py prepares each case and
+# host/app/tests/g3_component.rs (TEST-ONLY, inside the bridge module) runs it. No
+# physical disk, no reader, no Windows 11, no UAC prompt, no app window.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - 'tools/app/g3_624.py'
+      - 'tools/wp15-cards/s3_bundle.py'
+      - 'tests/c1_closeout_r1/**'
+      - '.github/workflows/wp15-g3-624.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  # Authenticated 564 candidate artifact; its nested ZIP carries the original INGEST child.
+  INGEST_ARTIFACT: '12578829894'
+  INGEST_CONTAINER_SHA256: a19c47d7d474414cfb0c8cf992fd6e984bf9ff160c5e38efdd7e09a45b12aa94
+  INGEST_NESTED_ZIP: Digital-Tape-Windows11-x64-candidate.zip
+  DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+
+jobs:
+  g3:
+    name: G3 matrix — real children through the production bridge (Windows Server, hosted)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: tapectl (shipping) and tapectl-test
+        shell: bash
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc ../build/host/tapectl.exe ../build/host/tapectl-test.exe
+          sha256sum build/host/tapectl.exe build/host/tapectl-test.exe
+      - name: Original INGEST child, hash-checked (not rebuilt)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          function Sha($p){(Get-FileHash $p -Algorithm SHA256).Hash.ToLowerInvariant()}
+          $d=Join-Path $env:RUNNER_TEMP 'ingest'; New-Item -ItemType Directory $d | Out-Null
+          gh api "repos/${{ github.repository }}/actions/artifacts/$env:INGEST_ARTIFACT/zip" > "$d/container.zip"
+          if($LASTEXITCODE -ne 0){throw 'INGEST transport retrieval failed'}
+          if((Sha "$d/container.zip") -ne $env:INGEST_CONTAINER_SHA256){throw 'INGEST transport container mismatch'}
+          Expand-Archive "$d/container.zip" "$d/container"
+          Expand-Archive "$d/container/$env:INGEST_NESTED_ZIP" "$d/nested"
+          if((Sha "$d/nested/ingest.exe") -ne $env:DT_INGEST_SHA256){throw 'ingest.exe pin mismatch'}
+          "INGEST_EXE=$d\nested\ingest.exe" >> $env:GITHUB_ENV
+      - name: Bridge test binary (backend-component, INGEST pins compiled in)
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'target'
+          rustc -Vv; cargo -V
+          $msgs = cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib --no-run --message-format=json
+          if($LASTEXITCODE -ne 0){throw 'test build failed'}
+          $exe = ($msgs | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.executable -and $_.target.name -eq 'dtapp' }).executable
+          if(@($exe).Count -ne 1){throw "test executable not found: $exe"}
+          "TEST_EXE=$exe" >> $env:GITHUB_ENV
+      - name: G3 matrix (g3.check result recorded in G3-VERDICT.json)
+        run: |
+          python -B tests/c1_closeout_r1/controls.py
+          python -B tools/app/g3_624.py --ingest $env:INGEST_EXE --tapectl build/host/tapectl.exe `
+            --tapectl-test build/host/tapectl-test.exe --test-exe $env:TEST_EXE --out "$env:RUNNER_TEMP/g3" `
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+          if($LASTEXITCODE -ne 0){throw 'G3 matrix failed'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-g3-624
+          path: ${{ runner.temp }}/g3
+          retention-days: 90

@@ -37,6 +37,20 @@ int target_names_device(const char *path);
    the refusal and returns EXIT_REFUSE, or returns 0. Nothing is written. */
 int target_safety(const char *path, int provision, const char *erase, int need_write);
 
+/* target_safety, also saying which rule refused (*why) and whether the refusal
+   was a failed unmount of our own partition 1 (*unmount_failed). make's report.
+   With query_error non-NULL (make only, APP-1A §7), a probe whose required OS
+   query failed stops first: nothing is judged or unmounted, the failed query is
+   copied to query_error and EXIT_ENGINE is returned (HOST_QUERY_FAILED). */
+int target_safety_why(const char *path, int provision, const char *erase, int need_write,
+                      enum refusal *why, int *unmount_failed, char *query_error, size_t qcap);
+
+/* make (APP-1 §3): bind the engine to partition 2 of a target whose device is
+   ALREADY open in t->hp, without opening anything. Same recognition as
+   target_open / target_open_verify; the verify binding has a NULL write. */
+int target_bind_write(struct target *t, const char *path);
+int target_bind_verify(struct target *t, const char *path, unsigned *findings, int *have_view);
+
 /* Open for an engine command: safety for a device, then the §2 recognition.
    A device that is not an exact §3.1 layout is NOT_PROVISIONED (exit 2).
    writable = 0 binds a NULL write callback. Returns 0 or an exit code. */

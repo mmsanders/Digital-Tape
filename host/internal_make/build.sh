@@ -17,7 +17,7 @@ MAKE=$(command -v mingw32-make || command -v make)
 flags=(-std=c99 -O0 -g -Wall -Wextra -Werror -Iengine/include -Ihost -Ihost/port -Ihost/internal_make)
 head=$(git rev-parse HEAD)
 platform=(host/port/hport.c host/port/hport_win.c host/port/probe_win.c host/port/discover_win.c)
-support=(host/wav.c host/report.c host/port/discover.c host/port/mbr.c host/port/fat.c host/port/safety.c host/port/entropy.c)
+support=(host/wav.c host/report.c host/makereport.c host/port/discover.c host/port/mbr.c host/port/fat.c host/port/safety.c host/port/entropy.c)
 objects=()
 for f in "${platform[@]}"; do
   obj="$out/$(basename "$f" .c).o"

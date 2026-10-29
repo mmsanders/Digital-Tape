@@ -53,6 +53,10 @@ impl Schedule {
 pub struct Hint {
     pub sizes: Vec<u64>,
     pub unprobed: u64,
+    /// The offered paths, in the order of `sizes`. Never shown or serialized: make's
+    /// recheck compares them (APP-1 §4) and passes the one path to the make child.
+    #[serde(skip)]
+    pub paths: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -123,7 +127,8 @@ fn offered(stdout: &[u8]) -> Option<Hint> {
         paths.push(path);
         sizes.push(integer(&r["bytes"]).filter(|&n| n > 0)?);
     }
-    (sizes.len() as u64 == count).then_some(Hint { sizes, unprobed })
+    let paths = paths.into_iter().map(str::to_owned).collect();
+    (sizes.len() as u64 == count).then_some(Hint { sizes, unprobed, paths })
 }
 
 /// Ordinary invocation observations; not an outcome selector.
@@ -410,18 +415,18 @@ mod tests {
 
     #[test]
     fn decimal_gb_lines() {
-        let one = |b| line(Some(&Hint { sizes: vec![b], unprobed: 0 }));
+        let one = |b| line(Some(&Hint { sizes: vec![b], unprobed: 0, paths: vec![] }));
         assert_eq!(one(63_600_000_000), "Card ready (64 GB).");
         assert_eq!(one(64_400_000_000), "Card ready (64 GB).");
         assert_eq!(one(1 << 37), "Card ready (137 GB).");
-        assert_eq!(line(Some(&Hint { sizes: vec![], unprobed: 3 })), "Put a card in.");
-        assert_eq!(line(Some(&Hint { sizes: vec![1, 2], unprobed: 0 })), "Leave just one card in the computer.");
+        assert_eq!(line(Some(&Hint { sizes: vec![], unprobed: 3, paths: vec![] })), "Put a card in.");
+        assert_eq!(line(Some(&Hint { sizes: vec![1, 2], unprobed: 0, paths: vec![] })), "Leave just one card in the computer.");
         assert_eq!(line(None), GENERIC_INGEST);
     }
 
     #[test]
     fn stdout_must_be_complete() {
-        assert_eq!(offered(b"{\"t\":\"summary\",\"offered\":0,\"unprobed\":2}\n"), Some(Hint { sizes: vec![], unprobed: 2 }));
+        assert_eq!(offered(b"{\"t\":\"summary\",\"offered\":0,\"unprobed\":2}\n"), Some(Hint { sizes: vec![], unprobed: 2, paths: vec![] }));
         assert_eq!(offered(b"{\"t\":\"summary\",\"offered\":0,\"unprobed\":2}"), None);
         assert_eq!(offered(b"{\"t\":\"card\",\"path\":\"A\",\"bytes\":5,\"bytes\":6}\n{\"t\":\"summary\",\"offered\":1,\"unprobed\":0}\n"), None);
         assert_eq!(offered(b"{\"t\":\"card\",\"path\":\"A\",\"bytes\":5}\n{\"t\":\"summary\",\"offered\":2,\"unprobed\":0}\n"), None);

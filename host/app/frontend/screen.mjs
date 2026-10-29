@@ -28,6 +28,9 @@ export function mountScreen(root, actions = {}) {
   const makeButton = make('button', 'make', 'Make cartridge');
   makeButton.type = 'button';
   makeButton.disabled = true;
+  const another = make('button', 'another', 'Make another');
+  another.type = 'button';
+  another.hidden = true;
   const reset = make('button', 'reset');
   reset.type = 'button';
   const show = make('button', 'show-details', 'Show details');
@@ -36,8 +39,20 @@ export function mountScreen(root, actions = {}) {
   details.tabIndex = 0;
   details.style.userSelect = 'text';
   details.setAttribute('aria-label', 'Details');
+  // APP-1 §4 step 2: the only confirmation before the card is replaced.
+  const confirm = make('section', 'confirm');
+  confirm.setAttribute('role', 'alertdialog');
+  confirm.setAttribute('aria-modal', 'true');
+  confirm.setAttribute('aria-labelledby', 'confirm-text');
+  confirm.hidden = true;
+  const confirmText = make('p', 'confirm-text', 'Everything on this card will be replaced with your music.');
+  const replace = make('button', 'replace', 'Replace');
+  replace.type = 'button';
+  const keep = make('button', 'keep', 'Keep card');
+  keep.type = 'button';
+  confirm.append(confirmText, replace, keep);
   screen.append(heading, drop, caption, label, meterLabel, meter, length,
-    message, card, makeButton, reset, show, details);
+    message, card, makeButton, another, reset, show, details, confirm);
   root.replaceChildren(screen);
   let previousLabel = '';
   // The person owns the box once they edit it or start over: the host only echoes their
@@ -65,7 +80,7 @@ export function mountScreen(root, actions = {}) {
   const empty = () => ({view: 'empty', checking: false, bar: 0,
     total_frames: 0, label: '', message: null, too_long: false,
     card_line: "Finding cards isn't part of this build yet.",
-    make_enabled: false, details_available: false, card_details_available: false});
+    make_enabled: false, details_available: false, card_details_available: false, confirm: false});
   function render(view, detailsText = '') {
     if (disposed) return;
     const state = view.checking ? 'Checking' : view.too_long || view.view === 'problem' || (['empty', 'ready'].includes(view.view) && !!view.message)
@@ -81,6 +96,8 @@ export function mountScreen(root, actions = {}) {
     const bar = state === 'Problem' && view.view === 'empty' ? null : view.bar;
     meter.hidden = state === 'Done' || (state !== 'Checking' && state !== 'Making' && !(typeof bar === 'number' && Number.isFinite(bar)));
     meterLabel.hidden = meter.hidden;
+    meterLabel.textContent = state === 'Making' ? 'Making the cartridge' : 'Music length';
+    length.hidden = state === 'Making';
     meter.dataset.kind = state === 'Making' ? 'writing' : 'length';
     if (state === 'Checking') meter.removeAttribute('value');
     else if (typeof bar === 'number' && Number.isFinite(bar)) meter.value = Math.min(1, Math.max(0, bar));
@@ -100,8 +117,12 @@ export function mountScreen(root, actions = {}) {
       Done: 'Your cartridge is ready. You can take the card out now.'};
     message.textContent = view.message ?? defaults[state] ?? '';
     card.textContent = view.card_line ?? '';
-    reset.textContent = state === 'Done' ? 'Make another' : 'Start over';
-    reset.hidden = !['Ready', 'Problem', 'Done'].includes(state);
+    reset.textContent = 'Start over';
+    reset.hidden = !['Ready', 'Problem', 'Done'].includes(state) || view.confirm === true;
+    another.hidden = state !== 'Done';
+    const confirming = view.confirm === true;
+    if (confirming && confirm.hidden) { replace.disabled = keep.disabled = false; confirm.hidden = false; replace.focus(); }
+    confirm.hidden = !confirming;
     // INGEST details belong to a Problem; a card check's diagnostic is offered in any state.
     show.hidden = !((view.details_available && state === 'Problem') || view.card_details_available === true);
     if (show.hidden || !detailsOpen) {
@@ -110,9 +131,10 @@ export function mountScreen(root, actions = {}) {
       details.textContent = typeof detailsText === 'string' ? detailsText : '';
       details.hidden = true;
     } else fetchDetails(); // unchanged text leaves the panel, its selection and reading place alone
-    // This candidate has no production Make, discovery or elevation action.
-    makeButton.disabled = true;
-    label.disabled = state === 'Making';
+    // The host decides when Make is allowed (APP-1 §2/§4); the page only reflects it.
+    makeButton.disabled = view.make_enabled !== true || confirming;
+    makeButton.hidden = state === 'Making' || state === 'Done';
+    label.disabled = state === 'Making' || confirming;
   }
   function fetchDetails() {
     const ticket = ++request;
@@ -147,10 +169,22 @@ export function mountScreen(root, actions = {}) {
     details.hidden = false;
     fetchDetails();
   };
+  // One press, one host request; the host's next view re-enables what is allowed.
+  const once = (button, act) => () => { if (button.disabled) return; button.disabled = true; act?.(); };
+  const onMake = once(makeButton, () => actions.make?.());
+  const onReplace = () => { replace.disabled = keep.disabled = true; actions.replace?.(); };
+  const onKeep = () => { replace.disabled = keep.disabled = true; actions.keep?.(); };
+  const onAnother = () => actions.another?.();
+  const onKey = event => { if (event.key === 'Escape' && !confirm.hidden) onKeep(); };
   label.addEventListener('beforeinput', onBeforeInput);
   label.addEventListener('input', onInput);
   reset.addEventListener('click', onReset);
   show.addEventListener('click', onDetails);
+  makeButton.addEventListener('click', onMake);
+  replace.addEventListener('click', onReplace);
+  keep.addEventListener('click', onKeep);
+  another.addEventListener('click', onAnother);
+  confirm.addEventListener('keydown', onKey);
   render(empty());
   return {
     render,
@@ -168,6 +202,11 @@ export function mountScreen(root, actions = {}) {
       label.removeEventListener('input', onInput);
       reset.removeEventListener('click', onReset);
       show.removeEventListener('click', onDetails);
+      makeButton.removeEventListener('click', onMake);
+      replace.removeEventListener('click', onReplace);
+      keep.removeEventListener('click', onKeep);
+      another.removeEventListener('click', onAnother);
+      confirm.removeEventListener('keydown', onKey);
       screen.remove();
     }
   };

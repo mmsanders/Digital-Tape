@@ -32,6 +32,15 @@ struct hport {
     const char *flush_how;    /* the OS call flush uses, for diagnostics */
     const char *flush_note;   /* macOS raw: why F_FULLFSYNC was not used (ENOTTY/ENOTSUP) */
     unsigned long long flushes;
+    /* make only (APP-1 §3): with failstop set, the first OS failure that reports
+       media removal or change marks the port gone, and every later read, write
+       or flush fails without an OS call. Other commands never set failstop. */
+    int failstop;
+    int gone;
+    char gone_error[48];      /* the OS error that marked it gone */
+    /* A device open whose geometry query failed (the open itself succeeded and
+       was then closed): that OS error, so make can report HOST_QUERY_FAILED. */
+    char query_error[48];
 };
 
 /* What a target path names, before anything is opened. */
@@ -67,6 +76,12 @@ int hport_os_flush(struct hport *p);    /* sets p->flush_how to the barrier it r
 void hport_os_invalidate(struct hport *p);
 /* The OS error name/number of the last failed OS call, e.g. "EBADF". */
 const char *hport_os_errname(void);
+
+/* Whether the last failed OS call reported that the medium was removed or
+   changed (Windows: ERROR_DEV_NOT_EXIST, ERROR_MEDIA_CHANGED, ERROR_NOT_READY,
+   ERROR_NO_MEDIA_IN_DRIVE, ERROR_DEVICE_NOT_CONNECTED, ERROR_NO_SUCH_DEVICE;
+   POSIX: ENOMEDIUM, ENODEV, ENXIO). Ordinary EIO is not. */
+int hport_os_removed(void);
 
 /* The OS's reason for the last failed hport call, for messages. */
 const char *hport_error(void);
