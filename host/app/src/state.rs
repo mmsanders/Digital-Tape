@@ -1,6 +1,6 @@
-//! The window's state (APP-1 Â§2) as plain data, so every transition is testable without
+//! The window's state (APP-1 §2) as plain data, so every transition is testable without
 //! a window. The card line comes from S2 discovery when this build pins its tapectl.
-//! Discovery is a hint only: Make cartridge is enabled exactly when APP-1 Â§2/Â§4 allow it
+//! Discovery is a hint only: Make cartridge is enabled exactly when APP-1 §2/§4 allow it
 //! (one offered card, a label, a successful check whose audio the app still holds, nothing
 //! running), and the elevated `tapectl make` child alone decides what happens to a card.
 
@@ -36,7 +36,7 @@ impl Default for Cards {
     }
 }
 
-/// Make cartridge (APP-1 Â§4), once the music check has passed.
+/// Make cartridge (APP-1 §4), once the music check has passed.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Making {
     Idle,
@@ -87,7 +87,7 @@ pub struct View {
     /// Start overs so far. The window owns the label box between them, so only a view
     /// from a newer Start over may rewrite it.
     pub resets: u64,
-    /// The erase confirmation (APP-1 Â§4 step 2) is showing.
+    /// The erase confirmation (APP-1 §4 step 2) is showing.
     pub confirm: bool,
 }
 
@@ -219,7 +219,7 @@ impl App {
         }
     }
 
-    /// The card Make cartridge would use, exactly when APP-1 Â§2/Â§4 allow Make: one offered
+    /// The card Make cartridge would use, exactly when APP-1 §2/§4 allow Make: one offered
     /// card, a non-empty label, a successful check whose audio the app still holds, no
     /// check running and no Make under way.
     pub fn make_card(&self) -> Option<(String, u64)> {
@@ -401,7 +401,7 @@ mod tests {
     use serde_json::json;
 
     fn outcome(exit: i32, reading: Reading, total: Option<u64>) -> Outcome {
-        Outcome { exit: Some(exit), stderr: "ingest: refused: â€¦".into(), reading, total_frames: total, cancelled: false }
+        Outcome { exit: Some(exit), stderr: "ingest: refused: …".into(), reading, total_frames: total, cancelled: false }
     }
 
     fn one_card(a: &mut App, path: &str, bytes: u64) {

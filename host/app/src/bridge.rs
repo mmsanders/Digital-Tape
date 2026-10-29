@@ -406,3 +406,6 @@ mod diagnostics_component;
 #[cfg(test)]
 #[path="../tests/make_component.rs"]
 mod make_component;
+#[cfg(test)]
+#[path="../tests/g3_component.rs"]
+mod g3;
