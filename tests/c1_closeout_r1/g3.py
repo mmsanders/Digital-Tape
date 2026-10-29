@@ -46,7 +46,12 @@ def check(rows):
         assert r['message']==c['message'] if c['message'] is not None else r['card_line_current'] is True
         for key in ('new_children','make_children','additions','state','card_line_current'):
             if key in c: assert r[key]==c[key], (c['id'],key)
-        assert r['details_copyable'] and r['auto_relaunches']==0
+        # A rejected drop has no child stderr. Do not demand nonempty copyable
+        # diagnostics from that zero-child notice. This says nothing about the
+        # native Show-details control, which remains a separate G4/C2 check.
+        if c['id'] not in ('drop-file','drop-mixed') or r.get('details'):
+            assert r['details_copyable']
+        assert r['auto_relaunches']==0
         if c['origin']=='child':
             assert r['real_tool_outcome'] and r['exit']!=0
             assert r['report_ref'] and r['process_ref']

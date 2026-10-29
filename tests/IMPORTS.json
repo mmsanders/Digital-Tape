@@ -761,15 +761,28 @@
     },
     {
       "path": "tests/c1_closeout_r1",
-      "tree": "29e99cfe232f8fcd49b64b9b671d5a6a020571bb",
+      "tree": "2401eac8980f0a9efddec2b301c335d6ee448dfc",
       "source_repo": "mmsanders/digital-tape-verification",
-      "source_commit": "a534012bfd6af76a391dfaef8f824b5d8e5d43c5",
-      "attested_in": "Verification364 Stage 1 (PR365, merged 48489cf9) and Stage 2 (PR366, merged a534012b; CI 40795064950/40795064957)",
-      "attestation": "C1 independent outcome tests: g3.py child/app-origin bridge matrix (28 cases), make_supplement.py routing correction beside the immutable wp15_cards_make_r1 oracle (lawful own-p1 unmount success; invalid-label input refusal), static_check.py integrated-source scan, pe_manifest.py, a6.py, bridge_c1.rs and the C2 checklist. controls.py runs synthetic causal controls only; not Product, native, C2, G1-G5 or S3 acceptance.",
+      "source_commit": "c8d137c61380bdc5f09b5fcc55e5ef7f533077c7",
+      "attested_in": "Verification364 Stage 1 (PR365), Stage 2 (PR366) and correction-1 review (PR367, merged c8d137c6; CI 40806722119/40806721983/40806722490)",
+      "attestation": "C1 independent outcome tests: g3.py child/app-origin bridge matrix (28 cases; correction-1 G3-D1: a zero-child rejected drop needs no nonempty diagnostic), make_supplement.py routing correction beside the immutable wp15_cards_make_r1 oracle (lawful own-p1 unmount success; invalid-label input refusal), static_check.py integrated-source scan, pe_manifest.py, a6.py, bridge_c1.rs and the C2 checklist. controls.py runs synthetic causal controls only; not Product, native, C2, G1-G5 or S3 acceptance.",
       "selftest": [
         "python3",
         "-B",
         "tests/c1_closeout_r1/controls.py"
+      ]
+    },
+    {
+      "path": "tests/c1_volume_query_r1",
+      "tree": "a25993fa18e4cf7d330937cc00a0a7b9af27662d",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "c8d137c61380bdc5f09b5fcc55e5ef7f533077c7",
+      "attested_in": "Verification364 correction-1 review (PR367, merged c8d137c6; regression CI 40805800367/40806721983)",
+      "attestation": "Independent APP-1A §7 Windows volume-census regression: probe.c compiles the candidate's probe_win.c with only GetVolumePathNamesForVolumeNameW wrapped to ask the real OS with a zero-size buffer (real ERROR_MORE_DATA) on one private hosted VHD; run.ps1 is Verification's reproduction on e36ea492 (expects exit 1). Probe-only; no make, provision, write or unmount; not Product acceptance. It needs a Windows VHD, so it runs in wp15-make-624.yml; the selftest here only checks both files are present.",
+      "selftest": [
+        "python3",
+        "-c",
+        "import pathlib;assert all(pathlib.Path('tests/c1_volume_query_r1',n).is_file() for n in ('probe.c','run.ps1'))"
       ]
     }
   ],
