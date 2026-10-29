@@ -1,11 +1,11 @@
 # Work packages — current roadmap
 
-**PM622 · 28 October 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
+**PM627 · 29 October 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
 Live assignments are GitHub role issues, not this index. [Status](../STATUS.md),
 [Phase 2 plan §8 closeout](../PHASE2-PLAN.md#8-closeout-plan-adr-195) and
 [the Phase 2 ledger](../PHASE2-LEDGER.md) govern current gates.
 
-Phase 1 is complete (36/36). Phase 2 is at 7/12. Rungs count completed gates, not effort.
+Phase 1 is complete (36/36). Phase 2 is at 11/12. Rungs count completed gates, not effort.
 
 ## Phase 0 — foundations and parked hardware
 | Package | Outcome | Owner | Stream | Current boundary |
@@ -34,9 +34,9 @@ Phase 1 is complete (36/36). Phase 2 is at 7/12. Rungs count completed gates, no
 ## Phase 2 — current desktop tooling
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
-| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | 3/4. All but A6 passed on Windows 11; A6 evidence in hand, closes in C1 (ADR-195). |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | 1/4. App built and integrated except Make; C1 builds Make, C2 real-card session, C3 G2. |
-| WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | 3/4. Integrated `1695552d`; final disposition in C1 (ADR-195). |
+| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | 3/4. Make merged `ea54a41`; C2 real-card session next, then G2. |
+| WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
 No current human action:589 reviewed/partial closed; no repeat or Show Details

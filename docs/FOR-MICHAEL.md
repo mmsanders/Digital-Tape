@@ -1,16 +1,14 @@
 # Human actions and queue
 
-**PM622 · 28 October 2026 PDT.** Answered in [#623](https://github.com/mmsanders/Digital-Tape/issues/623):
-ADR-195 approved; leads may continue stages within the same issue; your wife agrees to be the
-G2 tester; C2 is likely 29–30 October.
+**PM627 · 29 October 2026 PDT.** WP-14 and WP-16 are accepted, and Make is built and merged.
+Phase 2 is at 11/12.
 
-Now:
-1. **Start Software [#624](https://github.com/mmsanders/Digital-Tape/issues/624) and
-   Verification [digital-tape-verification#364](https://github.com/mmsanders/digital-tape-verification/issues/364)**
-   in any order. They run in parallel.
-2. **Pick the G2 music folder**, under 60 minutes. Keep the app out of your wife's sight until G2.
-
-Next: the **C2 session**, about 45 minutes at the Windows 11 machine with one PNY card and the
-reader. PM will post a Michael issue with Verification's checklist when the candidate is cleared.
+1. **C2, when you have about 45 minutes:** [#628](https://github.com/mmsanders/Digital-Tape/issues/628)
+   has the cleared candidate, its hashes and Verification's checklist. Reply on #628.
+2. Then start Verification [#370](https://github.com/mmsanders/digital-tape-verification/issues/370).
+   Its Stage A cleanup can run any time.
+3. **G2 prep:** pick the music folder (under 60 minutes, songs only), and keep the app out of your
+   wife's sight. The procedure is [the G2 protocol](WP15-G2-PROTOCOL.md). PM posts the G2 issue
+   after C2 passes.
 
 [Status](STATUS.md) · [ledger](PHASE2-LEDGER.md) · [closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195)
