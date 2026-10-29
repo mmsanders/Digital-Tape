@@ -4,7 +4,8 @@
 `tests/wp15_cards_make_r1/FEASIBILITY.md` for the exact head on
 [PR #626](https://github.com/mmsanders/Digital-Tape/pull/626), under APP-1 §3 and APP-1A §7 as
 amended by ADR-195. Verification reviews this note with the head; it is not a prior gate.
-**Revised 28 October for Verification364's Stage 2 findings F364-1..3** (§3, §5, §7).
+**Revised 28 October for Verification364's Stage 2 findings F364-1..3** (§3, §5, §7), **and
+again for its correction-1 review** (the Windows volume census, §3 and §5).
 
 ## 1. Who owns which handle, and when
 
@@ -71,9 +72,24 @@ queries are the ones the §5 facts come from.
   is kept in `hport.query_error` and reported the same way, phase "safety" (it is before
   provision). Before this, it was `DEVICE_OPEN_FAILED`, exit 2.
 
-A known refusing fact stays a §5 exit-3 refusal. The volume walk still skips a volume whose
-extents cannot be read (an empty card reader or DVD drive does that normally); that is unchanged.
-No other query is added, so there is no monitoring cadence.
+**The Windows mounted-volume census is a required query too (correction 2, V364 [P1]).**
+Correction 1 still let a mounted volume drop out of the census without a query error. Now
+each of these fails the census:
+- **Mount paths:** a failed `GetVolumePathNamesForVolumeNameW`. `ERROR_MORE_DATA` is retried once,
+  at the size the OS asked for. A successful empty path list still means "not mounted".
+- **Extents:** a failed `IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS`, with two exceptions where the
+  volume cannot be a mounted volume of this disk:
+  - it has no medium (`ERROR_NOT_READY` / `ERROR_NO_MEDIA_IN_DRIVE`: an empty reader slot or
+    drive);
+  - its own device number names another device.
+- **Enumeration:** `FindNextVolumeW` ending with anything but `ERROR_NO_MORE_FILES`.
+
+A failed census sets `query_error`, so make reports `HOST_QUERY_FAILED`. It also leaves the
+mount fact refusing (more mounts than the limit), so standalone `provision`, `load` and `verify`
+refuse with `REFUSE_FOREIGN_MOUNT` instead of judging an incomplete list.
+
+A known refusing fact stays a §5 exit-3 refusal. No other query is added, so there is no
+monitoring cadence.
 
 ## 4. Elevated report and cleanup boundary
 
@@ -118,6 +134,18 @@ bundle with Verification's own predicates:
   - its neighbour on the same kind of node, with every query succeeding, giving the known
     refusal;
   - the authorized open's geometry query failed by the OS.
+  - On Windows only, four census rows on a VHD holding a real mounted NTFS volume. The real
+    probe runs, with the facts seam's `probe=1` overlaying only `removable=1`:
+    - the neighbour with every query succeeding, giving the known `REFUSE_FOREIGN_MOUNT`/3;
+    - `mount-paths`, `volume-extents` and `volume-enum` each really failed by the OS, giving
+      `HOST_QUERY_FAILED`/1.
+    
+    Each is paired with standalone `provision` on the same node and fault. It must refuse
+    with `REFUSE_FOREIGN_MOUNT` and no write-mode open, write or unmount.
+  - Verification's `c1_volume_query_r1` regression runs unchanged over two builds of its
+    `probe.c`. Over the `e36ea492` probe it must still reproduce the omission (the control);
+    over this head's it must record the failed query.
+  
   The test-only control `query-error:POINT` makes the real call fail in the OS: a zero-size
   result buffer on Windows, and a missing sysfs file or a NULL result pointer on Linux.
   `media_query` trace events say which query failed.
@@ -197,11 +225,9 @@ verify_b 15. The bar is a running maximum. Success is never inferred from 100%.
   now judged by `make_supplement.py` (§5).
 - **F3: resolved.** `HOST_QUERY_FAILED` is now emitted and parsed through
   `wp15_boundary_query_r1`.
-- **G3-D1 (correction, for disposition).** `g3.check` asks every row for copyable details. A
-  rejected drop (`drop-file`, `drop-mixed`) starts no child and is not a Problem state, so the
-  app has no diagnostic to copy. APP-1 §6 gives Show details to Problem states. The rows report
-  `details_copyable: false`. `G3-VERDICT.json` records the full check's failure, and beside it
-  the same check with only that field excused for those two rows.
+- **G3-D1: resolved by Verification** (correction-1 review, `g3.py` at `c8d137c6`). A zero-child
+  rejected drop has no diagnostic to require. The native Show-details presentation remains
+  G4/C2.
 - **F4.** S2-era imported app contracts (`windows_interactions_r2`, `windows_discovery_r1`)
   assert "permanently disabled Make". They stay green because their fixtures hold no retained
   ingest audio. The WP-15 acceptance package should state the Make-era rule.
