@@ -186,5 +186,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-194](DECISIONS.md#adr-194--keep-app-work-moving-independently-of-the-planned-card-test) | 2026-10-25 PDT | Useful app work independent of human card test | Discovery318 carried; native317 capability stop; usable editing/details and current bundle manual584/324,585/325; Make disabled |
 | [ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path) | 2026-10-28 PDT | Phase 2 closeout reset | Outcome tests plus negative controls replace mechanism forensics; A6/G1/G3/WP16 own-host methods; `tapectl make` built now on the accepted provision open; Q-P2-1(b) ruled port-level batching; ledger and C1–C4 roadmap |
+| [ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued) | 2026-10-29 PDT | C1 disposition / C2 and G2 queued | WP-14 and WP-16 accepted (#364); Make cleared and merged ea54a41; Phase 2 11/12; G2 protocol; three Phase 2 limitations accepted |
 
 131 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

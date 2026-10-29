@@ -4684,3 +4684,47 @@ OS, one elevated child that reuses the accepted provision safety path.
 **Reversal cost.** Low for evidence rules: a later ADR can restore any withdrawn method, and
 all its history is intact. Moderate for Make: code would be held again, but nothing ships
 without independent disposition. Q-P2-1(b) is a paper ruling, reopened by measurement.
+
+## ADR-196 — C1 disposed; Phase 2 at 11/12; C2 and G2 queued
+**Date:** 2026-10-29 PDT
+**Status:** ADOPTED by PM (PM627, [#627](https://github.com/mmsanders/Digital-Tape/issues/627), Michael's activation).
+
+**C1 disposition.**
+- Verification #364 Stage 1 (`48489cf9`) **accepted WP-14** (A1–A9; A6 by the 64 GB PNY run plus a
+  compiled 32-bit read-offset mutant that turns `verify` OK into NEEDS_REPAIR) and **WP-16**
+  (I1–I8 plus own-host, by static gate with detecting mutants and default-invoker launch).
+- Stage 2 found three defects in Software #624's first head. All were in query-failure handling,
+  including a real Windows volume-census gap that also affected standalone `provision`. Verification
+  qualified A4 at that path, and Software corrected it three times on the same branch.
+- Final clearance (`3ff22aae`) covers exact head `5101e3f3`. PR #626 merged it at `ea54a41` with an
+  identical tree and 130 checks green, which restores unqualified A4. The C2 candidate ZIP is
+  `b8a689cf…`.
+
+The ADR-195 loop worked as intended: four Verification passes and three corrections inside one
+pair of issues, with no PM round in between.
+
+**Rungs.**
+- WP-14 → 4/4, WP-16 → 4/4.
+- WP-15 → 3/4:
+  - **coverage on main:** the imported `tests/c1_closeout_r1` G1/G3/G4/G5 tests plus the published
+    C2 checklist; G2 is a witnessed record by definition;
+  - **implementation merged green:** `ea54a41`.
+- Phase 2 is **11/12**. Rung 3 is not acceptance. G1/G3/G4/G5 close on C2, and G2 after.
+
+**No lead work assigned for the wait.** Anything that changed product code now would invalidate the
+cleared C2 candidate. The one unblocked item is verifier-owned: Software #624's F4, stale S2-era
+"Make permanently disabled" assertions. It goes to Verification #370 Stage A. C2 is issued as
+Michael #628 and Verification #370 Stage B. The G2 procedure is [WP15-G2-PROTOCOL.md](WP15-G2-PROTOCOL.md).
+
+**Accepted limitations for Phase 2**, recorded and not scheduled:
+1. The app hash-checks `tapectl.exe` and then launches it elevated from a user-writable folder.
+   A same-user process could swap it in between. UAC consent within one account is not a
+   security boundary (the prompt shows tapectl, publisher Unknown). Revisit with signing or an
+   installer after Phase 2.
+2. Stale `ready-*` job folders after a crash are not cleaned at next launch. APP-1 §5 permits
+   this cleanup but does not require it.
+3. The `ERROR_NOT_READY` census rows are typed, not OS-generated. An undetected equal-size card
+   swap stays a stated limit (APP-1 §3).
+
+**Rationale.** Record accepted results promptly and keep the C2 candidate stable.
+**Reversal cost.** Low: any limitation can be scheduled later, and rungs follow independent records.

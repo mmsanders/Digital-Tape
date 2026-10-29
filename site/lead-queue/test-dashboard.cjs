@@ -32,11 +32,11 @@ assert.match(roadmap(), new RegExp('aria-valuenow="' + expected + '"'));
 // Segment fills, in order, are exactly the stage rungs -- no stage borrows another's.
 assert.equal([...roadmap().matchAll(/width:(\d+)%/g)].map(m => m[1]).join(),
   Array.from(rungs).map(rung => Math.round(rung / top * 100)).join());
-// A package is only green once it is independently accepted. No Phase 2 package is independently accepted yet.
+// A package is only green once it is independently accepted. WP-14 and WP-16 are (Verification #364, PM627).
 const acceptedNow = Array.from(rungs).filter(rung => rung === top).length;
-assert.equal(acceptedNow, 0);
-assert.equal(Array.from(rungs).join(), '3,3,1');
-assert.match(roadmap(), /7 of 12 gate rungs/);
+assert.equal(acceptedNow, 2);
+assert.equal(Array.from(rungs).join(), '4,4,3');
+assert.match(roadmap(), /11 of 12 gate rungs/);
 assert.match(roadmap(), /Windows 11/);
 assert.match(roadmap(), /software-only PASS is not the final rung/);
 assert.match(roadmap(), /WP-38 is not taken/);

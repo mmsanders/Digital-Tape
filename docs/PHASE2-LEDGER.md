@@ -1,62 +1,70 @@
 # Phase 2 ledger — every exit criterion, one row each
 
-**Opened 28 October 2026 PDT by PM622 ([ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path)).**
+**Opened by PM622 (ADR-195); updated PM627, 29 October 2026 PDT ([ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued)).**
 This is the progress record for Phase 2 closeout. Each round must close named rows. Package
 criteria are in [WP-14](PACKAGES/WP-14.md), [WP-16](PACKAGES/WP-16.md) and [WP-15](PACKAGES/WP-15.md).
 The exit gate is in [the Phase 2 plan](PHASE2-PLAN.md#1-what-phase-2-delivers).
 
-States: **PASSED** means independently passed by Verification on Windows 11 (or platform-independent
-CI where the criterion allows). **EVIDENCE IN HAND** means evidence exists and needs a disposition
-under ADR-195. **TO DO** means work is still needed. "PM reading" marks PM's reading of
-the published record, which Verification confirms or corrects in round C1. PM does not accept.
+States:
+- **PASSED:** independently passed by Verification on Windows 11, or in platform-independent CI
+  where the criterion allows.
+- **READY FOR C2:** tests pass in CI; Michael's real-card observations are still needed.
+- **TO DO:** work is still needed.
 
-## WP-14 — `tapectl` on real cards (rung 3/4)
+PM does not accept.
 
-| # | State | Evidence | Next |
-|---|---|---|---|
-| A1 Provision | PASSED (PM reading) | Verification #146 final Windows witness and README byte supplement, 14 Oct, PNY 64 GB | — |
-| A2 Round trip | PASSED (PM reading) | #146 final witness: C-60 load, physical remove/reinsert, verify OK, dumps A and B byte-identical | — |
-| A3 Durability | PASSED (PM reading) | Ten physical pulls on Windows 11, 10/10 (Verification PULLS, 14 Oct); flush negative control in `tests/wp14_r1` | — |
-| A4 Disk safety | PASSED (PM reading) | `tests/wp14_r1` refusal rules with negative controls, exact head #390 | — |
-| A5 `verify` read-only | PASSED (PM reading) | `tests/wp14_r1` NULL-write binding and five finding controls | — |
-| A6 Large media | EVIDENCE IN HAND | 14 Oct: provision/verify/load/dump on 64 GB card; the mirror superblock is at byte 62,537,072,128. 19 Oct trace: two successful 512-byte reads there | Verification C1: point to (or add) a 32-bit-truncation negative control beside the existing sparse 64 GB image cases in `tests/wp14_r1`, then dispose (ADR-195 §2) |
-| A7 Capacity | PASSED (PM reading) | `tests/wp14_r1` overage refusal, exit 2 | — |
-| A8 Engine pin | PASSED | ADR-175; engine `d96b4245`; goldens green | Re-checked at exit |
-| A9 Load time | RECORDED | 27 min 58 s for a C-60 on PNY 64 GB via USB reader, Windows 11 | — |
+## WP-14 — `tapectl` on real cards: ACCEPTED (4/4)
 
-## WP-16 — Ingest (rung 3/4)
+Verification #364 Stage 1, [disposition](https://github.com/mmsanders/digital-tape-verification/blob/48489cf9a53f390de4ded216dc1f293c15e830ee/findings/P2-364-STAGE1-2026-10-28/DISPOSITION.md) `48489cf9`.
+A4 was briefly qualified at a Windows volume-census failure path that Stage 2 found. It was
+restored when the corrected probe merged at `ea54a41` ([clearance](https://github.com/mmsanders/digital-tape-verification/blob/3ff22aaea8a19b874ea65cea06056e99b3fd0b66/findings/P2-364-CLEARANCE-2026-10-29/DISPOSITION.md)).
 
-| # | State | Evidence | Next |
-|---|---|---|---|
-| I1 Formats | EVIDENCE IN HAND | Stage1/#192 census; #203; #230 Windows 11 observed bytes (Verification #333 table) | Verification C1: final disposition |
-| I2 Conversion | EVIDENCE IN HAND | #192: 1,640 cases, calibration, quality, FIR certificates; #203 | Same |
-| I3 Loudness | EVIDENCE IN HAND | #192 final PCM/manifest; #230 Windows 11 identities | Same |
-| I4 Gapless | EVIDENCE IN HAND | #192 join predicates, exact zero gaps; #230 | Same |
-| I5 Order | EVIDENCE IN HAND | #192 comparator policy; #230 | Same |
-| I6 Determinism | EVIDENCE IN HAND | #192 cross-OS byte equality; #230 Windows 11 1,640 identities | Same |
-| I7 Length | EVIDENCE IN HAND | #192/#203/#230; #234 Windows 11 resource rows | Same |
-| I8 Fixtures | EVIDENCE IN HAND | Stage1 generated/CC0 census, tree `609a4c81` | Same |
-| Own-host (no device access) | EVIDENCE IN HAND | Source review; app parent at Medium integrity (#361) | Verification C1: static check with negative control, plus unelevated launch (ADR-195 §2) |
+| # | State | Basis |
+|---|---|---|
+| A1 Provision | PASSED | #146 final witness and README bytes |
+| A2 Round trip | PASSED | #146: C-60 load, physical reinsert, verify OK, dumps A/B identical |
+| A3 Durability | PASSED | Ten physical pulls, 10/10 |
+| A4 Disk safety | PASSED | `tests/wp14_r1`; census fails closed at `ea54a41` (r1/r2 regressions) |
+| A5 `verify` read-only | PASSED | `tests/wp14_r1` NULL-write and finding controls |
+| A6 Large media | PASSED | 64 GB PNY run plus 19 Oct last-sector reads; compiled 32-bit read-offset mutant turns verify OK/0 into NEEDS_REPAIR/1 |
+| A7 Capacity | PASSED | `tests/wp14_r1` |
+| A8 Engine pin | PASSED | `d96b4245`; re-checked at exit |
+| A9 Load time | RECORDED | 1677.7 s for a C-60 on PNY 64 GB |
 
-The real-card use of ingest output is exercised end to end in WP-15's C2 run.
+## WP-16 — Ingest: ACCEPTED (4/4)
 
-## WP-15 — the app (rung 1/4)
+Verification #364 Stage 1 `48489cf9`. I1–I8 PASS on the integrated ingest tree `83507899`.
+Own-host PASS: an integrated-source static gate with detecting mutants, plus default-invoker
+(unelevated) launch from #361's Medium-integrity parent.
+
+## WP-15 — the app (3/4)
 
 | # | State | Evidence | Next |
 |---|---|---|---|
-| Make path (S3) | TO DO | Not built. Make button hard-wired off. S3 tests `tests/wp15_cards_make_r1` on main; internal core `host/internal_make` | Software C1 builds; Verification C1 disposes |
-| G1 No format logic | PARTIAL | Static/design rule; app at Medium integrity (#361) | Verification C1: confirm static check and its negative control; unelevated manifest on the candidate |
-| G3 Plain errors | PARTIAL | Child-origin rows partly in `tests/wp15_app1a_r1` and report faults; † rows in bridge/interaction components (#314, #329) | Verification C1 authors the remaining rows and the C2 checklist; Michael runs C2 |
-| G4 No lists | PARTIAL | Screen component PASS (#314); human visible rows (#331) | C2 screen capture of the final candidate |
-| G5 Installs | PARTIAL | Earlier candidates started natively (#316, #361) | C2: Michael installs the final candidate ZIP |
-| G2 Unaided test | TO DO | — | C3: Michael's wife, witnessed by Michael |
+| Make path (S3) | DONE | Cleared exact `5101e3f3` (#364 final), merged `ea54a41`, 130 checks. S3 runner 31 Linux plus 10 Windows rows; query, census and own-p1 supplements | — |
+| G1 No format logic | READY FOR C2 | Static check and controls; members `asInvoker`; only tapectl launched via `runas` | C2: observe the UAC prompt names tapectl only |
+| G3 Plain errors | READY FOR C2 | 28 rows (16 real-child, 12 app-origin) through the production bridge, stderr-independent | C2: file drop, too long, non-music, UAC decline, mid-make pull and remake |
+| G4 No lists | READY FOR C2 | Screen component and bridge tests | C2 screenshots against APP-1 §2 |
+| G5 Installs | READY FOR C2 | ZIP `b8a689cf…` identity checked | C2: install and run on Windows 11 |
+| G2 Unaided test | TO DO | [Protocol](WP15-G2-PROTOCOL.md) | After C2 passes |
+
+**Live issues:** Michael [#628](https://github.com/mmsanders/Digital-Tape/issues/628) (C2), Verification
+[#370](https://github.com/mmsanders/digital-tape-verification/issues/370) (stale-assertion cleanup,
+then the C2 disposition).
+
+**Accepted Phase 2 limitations (ADR-196):**
+- The elevated launch of `tapectl.exe` from a user-writable folder can race its hash check
+  (same-user only).
+- Stale job folders are not cleaned after a crash.
+- The `ERROR_NOT_READY` census rows are typed, not OS-generated.
+- An undetected equal-size card swap is a stated limit.
 
 ## Exit gate
 
 | Item | State | Next |
 |---|---|---|
-| 1. WP-14/15/16 accepted | TO DO | Rows above |
-| 2. G2 witnessed | TO DO | C3 |
+| 1. WP-14/15/16 accepted | WP-14, WP-16 DONE; WP-15 TO DO | C2, then G2 |
+| 2. G2 witnessed | TO DO | After C2 |
 | 3. Goldens and Phase 1 replays green on main | PASSING in CI | Re-checked at C4 |
-| 4. Q-P2-1 decided | DONE | ADR-195 §4: port-level batching; Phase 3 entry conditions recorded |
-| 5. Host scope frozen | TO DO | PM declares at C4 |
+| 4. Q-P2-1 decided | DONE | ADR-195 §4 |
+| 5. Host scope frozen | TO DO | PM, at C4 |

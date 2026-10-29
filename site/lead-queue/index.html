@@ -293,18 +293,18 @@
     const PHASE2 = {
       phase: 2,
       title: "A folder of music becomes a cartridge on Windows 11",
-      asOf: "PM622 \u00b7 28 October 2026 PDT. New PM review and ADR-195 closeout reset: outcome tests plus negative controls, Make built now, Q-P2-1(b) ruled. Round C1 issued: Software builds tapectl make and the Make button; Verification closes WP-14 and WP-16 and authors the WP-15 checklist. 7/12 unchanged.",
+      asOf: "PM627 \u00b7 29 October 2026 PDT. Round C1 done: WP-14 and WP-16 independently accepted (Verification #364); tapectl make and the Make button built, cleared and merged at ea54a41. Next: Michael's C2 real-card session with the cleared candidate, then the unaided G2 test.",
       start: "Phase 2 opened · 5 Oct 2026",
       goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
       stages: [
-        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 3,
-          note: "All criteria except A6 passed on Windows 11 by 14 October (provision, C-60 round trip, ten pulls, disk safety, read-only verify, capacity, engine pin, load time 27m58s). A6 evidence is in hand: a 64 GB PNY card provisioned, loaded, verified and dumped, with two successful last-sector reads above 4 GiB under trace. Closes in C1 with a truncation negative control and disposition (ADR-195)." },
-        { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 3,
-          note: "Ingest is built, independently cleared and integrated at 1695552d. I1-I8 evidence is in hand, including Windows 11 byte-identity runs. Final rung closes in C1: disposition of I1-I8 plus the own-host rule (static check with negative control, unelevated launch)." },
-        { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 1,
-          note: "Window, drop, ingest on drop, label editing, card discovery, messages and packaging are built and integrated. Make is not built yet: the button is hard-wired off. C1 builds tapectl make, UAC elevation and the Make button. C2 is Michael's real-card session (G1/G3/G4/G5); C3 is the unaided G2 test." }
+        { id: "WP-14", name: "Real-card CLI · P2-R1", rung: 4,
+          note: "ACCEPTED for Windows 11 by Verification #364 (Stage 1 48489cf9, A4 restored on integration of the census fix at ea54a41). A1-A9 pass; A6 closed by the 64 GB PNY run plus a compiled 32-bit offset mutant that turns verify OK into NEEDS_REPAIR." },
+        { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 4,
+          note: "ACCEPTED by Verification #364 (Stage 1 48489cf9). I1-I8 pass on integrated ingest; own-host passes on a static gate with detecting mutants plus default-invoker (unelevated) launch." },
+        { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 3,
+          note: "Make built, cleared and merged (ea54a41, 130 checks green) after three Verification correction rounds on query-failure handling. G1/G3/G4/G5 tests on main; 28 G3 rows pass through the production bridge with real children. Rung 3, not acceptance: G1/G3/G4/G5 close on Michael's C2 real-card session, then G2." }
       ],
-      context: "Phase 2 closeout follows ADR-195 and the Phase 2 ledger (docs/PHASE2-LEDGER.md). Critical path: Make (C1), Michael's real-card session (C2), unaided G2 (C3), exit ADR (C4). WP-14 and WP-16 closure runs beside it. Q-P2-1(b) is ruled: port-level batching, engine unchanged. Hardware and firmware stay parked; WP-38 is not taken.",
+      context: "Phase 2 closeout follows ADR-195 and the Phase 2 ledger (docs/PHASE2-LEDGER.md). C1 is complete. Remaining path: Michael's real-card C2 session, final WP-15 disposition, the unaided G2 test, exit ADR. Q-P2-1(b) is ruled: port-level batching, engine unchanged. Hardware and firmware stay parked; WP-38 is not taken.",
       exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
     };
 
