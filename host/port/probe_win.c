@@ -28,16 +28,19 @@
 static HANDLE g_locked[4];
 static int g_nlocked;
 
-/* Disk numbers a volume spans. Returns the count, or -1. */
-static int volume_disks(const wchar_t *volume, DWORD disks[8], ULONGLONG *start, ULONGLONG *len)
+/* Disk numbers a volume spans. Returns the count, or -1 (the OS's error stays in
+   GetLastError). `broken`: the volume-extents control, a zero-size result buffer. */
+static int volume_disks(const wchar_t *volume, DWORD disks[8], ULONGLONG *start, ULONGLONG *len, int broken)
 {
     HANDLE h = CreateFileW(volume, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     union { VOLUME_DISK_EXTENTS v; unsigned char raw[sizeof(VOLUME_DISK_EXTENTS) + 8 * sizeof(DISK_EXTENT)]; } ext;
-    DWORD got = 0, i;
+    DWORD got = 0, i, e;
     int n;
     if (h == INVALID_HANDLE_VALUE) { return -1; }
-    if (!DeviceIoControl(h, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0, &ext, sizeof ext, &got, NULL)) {
+    if (!DeviceIoControl(h, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0, &ext, broken ? 0 : sizeof ext, &got, NULL)) {
+        e = GetLastError();
         CloseHandle(h);
+        SetLastError(e);
         return -1;
     }
     CloseHandle(h);
@@ -58,17 +61,45 @@ static int letter_on_disk(const wchar_t *p, DWORD disk)
     if (p[0] == L'\\' && p[1] == L'?' && p[2] == L'?' && p[3] == L'\\') { p += 4; }
     if (!iswalpha(p[0]) || p[1] != L':') { return -1; }
     swprintf(vol, 8, L"\\\\.\\%c:", p[0]);
-    n = volume_disks(vol, disks, NULL, NULL);
+    n = volume_disks(vol, disks, NULL, NULL, 0);
     if (n < 0) { return -1; }
     for (i = 0; i < n; i++) { if (disks[i] == disk) { return 1; } }
     return 0;
 }
 
-/* A query these facts need failed: keep the first, with the OS's own error. */
+/* A volume whose extents could not be read: 1 only if another query proves it is
+   on a different device than disk `disk` (its device number names another disk, or
+   it is not a disk at all); 0 if it may be on this disk. */
+static int volume_elsewhere(const wchar_t *volume, DWORD disk)
+{
+    HANDLE h = CreateFileW(volume, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    STORAGE_DEVICE_NUMBER sdn;
+    DWORD got = 0;
+    BOOL ok;
+    if (h == INVALID_HANDLE_VALUE) { return 0; }
+    ok = DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof sdn, &got, NULL);
+    CloseHandle(h);
+    return ok && (sdn.DeviceType != FILE_DEVICE_DISK || sdn.DeviceNumber != disk);
+}
+
+/* A query these facts need failed: keep the first, with the OS's own error `e`. */
+static void query_failed_as(struct device_facts *f, const char *call, const char *e)
+{
+    if (f->query_error[0] == '\0') { snprintf(f->query_error, sizeof f->query_error, "%s: %s", call, e); }
+}
+
 static void query_failed(struct device_facts *f, const char *call)
 {
-    const char *e = hport_os_errname();
-    if (f->query_error[0] == '\0') { snprintf(f->query_error, sizeof f->query_error, "%s: %s", call, e); }
+    query_failed_as(f, call, hport_os_errname());
+}
+
+/* The mounted-volume census could not be completed: the mount fact refuses
+   (every command), and make reports the failed query. */
+static void census_failed(struct device_facts *f, const char *call, const char *e)
+{
+    query_failed_as(f, call, e);
+    f->n_mounted = SAFETY_MAX_MOUNTS + 1;
+    snprintf(f->detail, sizeof f->detail, "cannot tell which volumes are mounted on this disk (%s: %s)", call, e);
 }
 
 struct pagefile_scan { DWORD disk; int hit; int unknown; };
@@ -164,7 +195,9 @@ int probe_device(const char *path, struct device_facts *f)
     }
     f->holds_os = (r > 0 || ps.hit);
 
-    /* Every volume on this disk that has a mount point. */
+    /* Every volume on this disk that has a mount point. The census is a required
+       query: a volume whose disk or mount paths cannot be read, or an enumeration
+       that ends in an error, leaves it incomplete (census_failed), never smaller. */
     fv = FindFirstVolumeW(vol, MAX_PATH);
     if (fv == INVALID_HANDLE_VALUE) {
         query_failed(f, "FindFirstVolumeW");
@@ -173,30 +206,76 @@ int probe_device(const char *path, struct device_facts *f)
         CloseHandle(h);
         return 0;
     }
-    do {
-        wchar_t names[512], novs[MAX_PATH];
-        DWORD disks[8], need = 0;
+    for (;;) {
+        wchar_t small[512], *names = small, novs[MAX_PATH];
+        DWORD disks[8], need = 0, cap = 512, e;
         ULONGLONG start = 0, len = 0;
         size_t L = wcslen(vol);
-        int n, i, on = 0;
-        if (L == 0 || L >= MAX_PATH) { continue; }
+        int n, i, on = 0, broken = 0, done = 0;
+        BOOL more;
+        if (L == 0 || L >= MAX_PATH) {
+            census_failed(f, "FindNextVolumeW", "malformed volume name");
+            break;
+        }
         wcscpy(novs, vol);
         if (novs[L - 1] == L'\\') { novs[L - 1] = L'\0'; }
-        n = volume_disks(novs, disks, &start, &len);
-        for (i = 0; i < n; i++) { if (disks[i] == disk) { on = 1; } }
-        if (!on) { continue; }
-        names[0] = L'\0';
-        if (!GetVolumePathNamesForVolumeNameW(vol, names, 512, &need) || names[0] == L'\0') { continue; }
-        if (f->n_mounted < SAFETY_MAX_MOUNTS) {
-            struct mounted_volume *m = &f->mounted[f->n_mounted];
-            m->partition = (n == 1 && start == (ULONGLONG)LAYOUT_P1_START * 512u
-                            && len == (ULONGLONG)LAYOUT_P1_SECTORS * 512u) ? 1 : 0;
-            wide_to_utf8(novs, m->where, (int)sizeof m->where);
-            f->n_mounted++;
-        } else {
-            f->n_mounted = SAFETY_MAX_MOUNTS + 1;
+#ifdef TAPECTL_TEST
+        broken = tseam_fault_query("volume-extents");
+#endif
+        n = volume_disks(novs, disks, &start, &len, broken);
+        if (n < 0) {
+            char why[48];
+            e = GetLastError();
+            snprintf(why, sizeof why, "%s", hport_os_errname());
+            /* No medium (an empty reader slot or drive): nothing is mounted there.
+               Otherwise it is skipped only if it is provably on another device. */
+            if (e != ERROR_NOT_READY && e != ERROR_NO_MEDIA_IN_DRIVE && !volume_elsewhere(novs, disk)) {
+                census_failed(f, "IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS", why);
+                break;
+            }
         }
-    } while (FindNextVolumeW(fv, vol, MAX_PATH));
+        for (i = 0; i < n; i++) { if (disks[i] == disk) { on = 1; } }
+        while (on) {
+#ifdef TAPECTL_TEST
+            if (tseam_fault_query("mount-paths")) { cap = 0; }   /* control: the OS really fails the query */
+#endif
+            names[0] = L'\0';
+            if (GetVolumePathNamesForVolumeNameW(vol, names, cap, &need)) { break; }
+            e = GetLastError();
+            if (e == ERROR_MORE_DATA && names == small && need > cap) {
+                names = (wchar_t *)malloc((size_t)need * sizeof *names);
+                if (names != NULL) { cap = need; continue; }
+                names = small;
+                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            }
+            census_failed(f, "GetVolumePathNamesForVolumeNameW", hport_os_errname());
+            done = 1;
+            break;
+        }
+        if (on && !done && names[0] != L'\0') {           /* an empty list: not mounted */
+            if (f->n_mounted < SAFETY_MAX_MOUNTS) {
+                struct mounted_volume *m = &f->mounted[f->n_mounted];
+                m->partition = (n == 1 && start == (ULONGLONG)LAYOUT_P1_START * 512u
+                                && len == (ULONGLONG)LAYOUT_P1_SECTORS * 512u) ? 1 : 0;
+                wide_to_utf8(novs, m->where, (int)sizeof m->where);
+                f->n_mounted++;
+            } else {
+                f->n_mounted = SAFETY_MAX_MOUNTS + 1;
+            }
+        }
+        if (names != small) { free(names); }
+        if (done) { break; }
+#ifdef TAPECTL_TEST
+        if (tseam_fault_query("volume-enum")) {          /* control: the OS really fails the call */
+            more = FindNextVolumeW(fv, vol, 0);
+        } else
+#endif
+        more = FindNextVolumeW(fv, vol, MAX_PATH);
+        if (!more) {
+            if (GetLastError() != ERROR_NO_MORE_FILES) { census_failed(f, "FindNextVolumeW", hport_os_errname()); }
+            break;
+        }
+    }
     FindVolumeClose(fv);
 
     if (f->n_mounted > 0 && f->n_mounted <= SAFETY_MAX_MOUNTS) {

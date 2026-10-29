@@ -5,6 +5,7 @@ BUNDLE.json with Verification's own predicates, unchanged:
   supplement rows   tests/c1_closeout_r1/make_supplement.py  own_p1 / input_refusal,
                     plus the immutable wp15_cards_make_r1 oracle.equivalence
   queries rows      tests/wp15_boundary_query_r1/oracle.check (APP-1A §7)
+  standalone rows   standalone provision on the same census nodes: refused, nothing written
 
 Raw files are authenticated against the bundle's SHA-256 map as runner.py does. Each
 platform must return a real HOST_QUERY_FAILED both before and after the authorized open
@@ -62,7 +63,8 @@ def judge(root):
         assert sha(p) == b["files"][n], n
         return p
 
-    out = {"source": b["source_sha"], "platform": b["platform"], "supplement": [], "queries": [], "negative_controls": []}
+    out = {"source": b["source_sha"], "platform": b["platform"], "supplement": [], "queries": [], "standalone": [],
+           "negative_controls": []}
     for row in b.get("supplement", []):
         r = json.loads(raw(row["record"]).read_text())
         for kind in ("stdout", "stderr", "report"):
@@ -106,6 +108,24 @@ def judge(root):
         assert names.get("host-query-initial-disk-length") == ("HOST_QUERY_FAILED", 1), names
         assert names.get("host-query-open-geometry") == ("HOST_QUERY_FAILED", 1), names
         assert names.get("host-query-neighbor-known-refusal", (None, 0))[1] == 3, names
+        if b["platform"] == "windows":
+            for point in ("mount-paths", "volume-extents", "volume-enum"):
+                assert names.get(f"census-{point}") == ("HOST_QUERY_FAILED", 1), names
+            assert names.get("census-neighbor-known-foreign-mount") == ("REFUSE_FOREIGN_MOUNT", 3), names
+
+    def standalone(r):
+        """Standalone provision on an incomplete (or known foreign) census: refused, nothing written."""
+        assert r["trace_complete"] and r["exit"] == 3 and r["refusal"] == "REFUSE_FOREIGN_MOUNT", r
+        assert r["write_opens"] == r["writes"] == r["unmounts"] == 0, r
+        return "refused-no-device-write"
+
+    for row in b.get("standalone", []):
+        r = json.loads(raw(row["record"]).read_text())
+        out["standalone"].append({"name": row["name"], "result": standalone(r)})
+        out["negative_controls"].append({"of": row["name"], "mutation": "provision authorized (exit 0, one write)",
+                                         "rejected": rejected(standalone, dict(r, exit=0, refusal=None, writes=1))})
+    if b["platform"] == "windows":
+        assert len(out["standalone"]) == 4, out["standalone"]
     assert all(c["rejected"] for c in out["negative_controls"]), out["negative_controls"]
     return out
 
@@ -117,5 +137,5 @@ if __name__ == "__main__":
     a = ap.parse_args()
     res = judge(a.bundle)
     a.out.write_text(json.dumps(res, indent=2) + "\n")
-    print(f"{len(res['supplement'])} supplement, {len(res['queries'])} query rows judged; "
+    print(f"{len(res['supplement'])} supplement, {len(res['queries'])} query, {len(res['standalone'])} standalone rows judged; "
           f"{len(res['negative_controls'])} negative controls refused")

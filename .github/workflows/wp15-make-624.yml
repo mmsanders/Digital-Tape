@@ -110,6 +110,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - name: Build
         run: |
           export PATH="/c/mingw64/bin:$PATH"
@@ -131,11 +132,40 @@ jobs:
           python -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED.json"
           python -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/s3/JUDGED.json"
           python -c "import json,sys;[print('unjudged:',u['name'],'-',u['why']) for u in json.load(open(sys.argv[1]))['unjudged']]" "$RUNNER_TEMP/s3/BUNDLE.json"
-      - name: C1 boundary-query rows (tests/wp15_boundary_query_r1, unchanged)
+      - name: C1 boundary-query and census rows (tests/wp15_boundary_query_r1, unchanged)
         run: |
           python -B tests/wp15_boundary_query_r1/selftest.py > /dev/null
           python -B tools/wp15-cards/judge_c1.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED-C1.json"
-          python -c "import json,sys;d=json.load(open(sys.argv[1]));[print(k,r['name'],r['result']) for k in ('supplement','queries') for r in d[k]];[print('negative control',c) for c in d['negative_controls']]" "$RUNNER_TEMP/s3/JUDGED-C1.json"
+          python -c "import json,sys;d=json.load(open(sys.argv[1]));[print(k,r['name'],r['result']) for k in ('supplement','queries','standalone') for r in d[k]];[print('negative control',c) for c in d['negative_controls']]" "$RUNNER_TEMP/s3/JUDGED-C1.json"
+      # Verification's census regression, unchanged: probe.c over a probe_win.c, run by
+      # run.ps1, which expects the e36ea492 omission (exit 1). The e36ea492 source must
+      # still reproduce it (the regression can go red); this head's must not.
+      - name: Census regression probes (tests/c1_volume_query_r1/probe.c over e36ea492 and this head)
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          mkdir -p "$RUNNER_TEMP/vq-old"
+          git show e36ea4922ef845dd6754456db874541a71992ebc:host/port/probe_win.c > "$RUNNER_TEMP/vq-old/probe_win.c"
+          gcc -std=c99 -I"$RUNNER_TEMP/vq-old" -Ihost/port -Ihost -Iengine/include tests/c1_volume_query_r1/probe.c host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/probe-old.exe"
+          gcc -std=c99 -Ihost/port -Ihost -Iengine/include tests/c1_volume_query_r1/probe.c host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/probe-new.exe"
+      - name: Census regression (tests/c1_volume_query_r1/run.ps1, unchanged)
+        shell: pwsh
+        run: |
+          $base = $env:RUNNER_TEMP
+          $seen = @{}
+          foreach ($k in 'old', 'new') {
+            Copy-Item "$base/probe-$k.exe" "$env:GITHUB_WORKSPACE/probe.exe" -Force
+            $env:RUNNER_TEMP = "$base/vq-$k-run"; New-Item -ItemType Directory $env:RUNNER_TEMP | Out-Null
+            try { & ./tests/c1_volume_query_r1/run.ps1; $how = 'run.ps1 completed: omission reproduced (probe exit 1)' }
+            catch { $how = "run.ps1 threw: $_" }
+            $res = Get-Content "$env:RUNNER_TEMP/verifier364-volume-query/RESULT.json" -Raw | ConvertFrom-Json
+            "$k source: $how; required_query_fail_stop_pass=$($res.required_query_fail_stop_pass); failed_mounts=$($res.failed_mounts); actual_os_error=$($res.actual_os_error)"
+            $seen[$k] = $res.required_query_fail_stop_pass
+          }
+          $env:RUNNER_TEMP = $base
+          Remove-Item "$env:GITHUB_WORKSPACE/probe.exe"
+          if ($seen['old'] -ne $false) { throw 'control: the e36ea492 probe no longer reproduces the omission' }
+          if ($seen['new'] -ne $true) { throw 'this head still omits the failed census query' }
+          'ok: e36ea492 reproduces the omission; this head records the failed query'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

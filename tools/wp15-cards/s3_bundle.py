@@ -190,7 +190,7 @@ class B:
     def __init__(self, a, plat):
         self.a, self.plat, self.out = a, plat, Path(a.out)
         self.files, self.rows, self.unjudged, self.n = {}, [], [], 0
-        self.supplement, self.queries = [], []
+        self.supplement, self.queries, self.standalone = [], [], []
         self.control_seen = False
 
     def keep(self, name, data):
@@ -296,7 +296,22 @@ class B:
         self.unjudged.append({"name": name, "why": why, "exit": res["exit"], "argv": res["argv"], "files": base})
         print(f"{name:44} exit {res['exit']}  (unjudged: {why})", flush=True)
 
-    def query_row(self, name, scope, res, rep):
+    def standalone_row(self, name, scope, res):
+        """A standalone command on the same node: its exit, refusal and device work."""
+        base = f"standalone/{len(self.standalone):03d}"
+        tr = res["trace"] or {"events": []}
+        rec = {"name": name, "scope": scope, "argv": res["argv"], "exit": res["exit"], "refusal": tr.get("refusal"),
+               "facts": tr.get("facts"), "write_opens": sum(1 for e in tr["events"] if e["kind"] == "write_open"),
+               "writes": sum(1 for e in tr["events"] if e["kind"] == "write"),
+               "unmounts": sum(1 for e in tr["events"] if e["kind"] == "unmount" and e.get("os_success")),
+               "trace_complete": res["trace"] is not None}
+        self.standalone.append({"name": name, "record": self.keep(base + ".record.json", json.dumps(rec, indent=1)),
+                                "trace": self.keep(base + ".trace.json", json.dumps(res["trace"], indent=1)),
+                                "stdout": self.keep(base + ".stdout", res["stdout"]),
+                                "stderr": self.keep(base + ".stderr", res["stderr"])})
+        print(f"{name:44} exit {res['exit']}  refusal {rec['refusal']} writes {rec['writes']}", flush=True)
+
+    def query_row(self, name, scope, res, rep, probed=False):
         """An APP-1A §7 boundary-query observation for tests/wp15_boundary_query_r1/oracle.check,
         every field read from this run's own trace, stdout and report (judged by judge_c1.py)."""
         base = f"query/{len(self.queries):03d}"
@@ -317,7 +332,7 @@ class B:
             "phase": refusal.get("phase", "safety") if refusal else "safety",
             "initial": q is not None and opens(before) == 0,
             "required_query": q is not None and opens(before) == 0,
-            "query_performed": q is not None or (trace.get("facts") or {}).get("source") == "platform probe",
+            "query_performed": probed or q is not None or (trace.get("facts") or {}).get("source") == "platform probe",
             "positive_change": any(e["kind"] == "make_media_change" for e in ev),
             "query_error": query_error,
             "policy_refusal": refused if refused and q is None and res["exit"] == 3 else None,
@@ -596,6 +611,39 @@ def query_rows(b, target, wavp, nbytes, scope):
         b.query_row(name, f"{scope}; {note}; backing bytes {'unchanged' if before == sha(backing) else 'CHANGED'}", res, rep)
 
 
+def census_rows(b, a, plat, vhd, wavp):
+    """F364-1, correction 2: the Windows mounted-volume census is a required query. A VHD
+    with a real mounted NTFS volume, probed for real (TAPECTL_TEST_FACTS probe=1 overlays
+    only removable=1, since a VHD is never a card). Each census query really failed by the
+    OS must stop make with HOST_QUERY_FAILED and leave standalone provision refusing; the
+    neighbour with every query succeeding is the known foreign-mount refusal."""
+    scope = ("compiled-test on a Windows Server VHD holding one mounted NTFS volume; real platform probe "
+             "(facts seam probe=1 overlays removable=1 only)")
+    overlay = "probe=1\nremovable=1\n"
+    for fault in (None, "query-error:mount-paths", "query-error:volume-extents", "query-error:volume-enum"):
+        point = fault.split(":")[1] if fault else None
+        v = vhd(f"census-{point or 'neighbor'}")
+        dev = plat.attach(v)
+        number = dev.rsplit("PhysicalDrive", 1)[1]
+        subprocess.run(["powershell", "-NoProfile", "-Command",
+                        f"Get-Disk -Number {number} | Initialize-Disk -PartitionStyle MBR -PassThru | "
+                        "New-Partition -UseMaximumSize -AssignDriveLetter | "
+                        "Format-Volume -FileSystem NTFS -NewFileSystemLabel FOREIGN -Confirm:$false | Out-Null"], check=True)
+        env = {k: v2 for k, v2 in os.environ.items() if not k.startswith("TAPECTL_TEST")}
+        if fault:
+            env["TAPECTL_TEST_FAULT"] = fault
+        argv, rep = b.make(dev, wav_path=wavp)
+        res = b.process(argv, env=env, facts=overlay)
+        b.query_row(f"census-{point}" if point else "census-neighbor-known-foreign-mount",
+                    f"{scope}; {'the ' + point + ' query really failed in the OS' if point else 'every census query succeeds'}",
+                    res, rep, probed=True)
+        # The same node and fault through standalone provision: it must refuse, never write.
+        p = b.process([a.tapectl_test, "provision", dev, "--label", "Census", "--length-s", str(LEN_S), "--erase", dev],
+                      env=env, facts=overlay)
+        b.standalone_row(f"provision-census-{point or 'neighbor'}", f"{scope}; standalone provision", p)
+        plat.detach_file(v)
+
+
 def parent_rows(b, a, dev, nbytes, wavp, junction):
     """Report leaf and parent binding (APP-1A §1). Passing facts on a real device, so a
     refusal that did any device work would show it in the trace."""
@@ -779,6 +827,8 @@ def windows_rows(b, a):
         return plat.attach(v), v, lambda dev: plat.detach_file(v)
     query_rows(b, vhd_target, wavp, nbytes, "compiled-test: tapectl-test make on a Windows Server VHD")
 
+    census_rows(b, a, plat, vhd, wavp)
+
     v = vhd("parent"); dev = plat.attach(v)
     parent_rows(b, a, dev, nbytes, wavp, junction=True)
     plat.detach_file(v)
@@ -814,9 +864,10 @@ def main():
             "observer": {"kind": "compiled-test trace (host/port/trace_test.c)", "positive_control": "control/positive.trace.json",
                          "positive_control_seen": b.control_seen},
             "unjudged": b.unjudged}
-    # `supplement` and `queries` are judged by judge_c1.py; the immutable runner reads `rows`.
+    # `supplement`, `queries` and `standalone` are judged by judge_c1.py; the immutable
+    # runner reads `rows`.
     (out / "BUNDLE.json").write_text(json.dumps(dict(head, files=b.files, rows=b.rows, supplement=b.supplement,
-                                                     queries=b.queries), indent=1))
+                                                     queries=b.queries, standalone=b.standalone), indent=1))
     print(f"{len(b.rows)} rows, {len(b.supplement)} supplement, {len(b.queries)} query, {len(b.unjudged)} unjudged, "
           f"{len(b.files)} files -> {out / 'BUNDLE.json'}")
     if neg is not None:

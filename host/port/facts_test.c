@@ -13,6 +13,10 @@
  *
  * one key=value per line. Missing keys keep their refusing values, so a
  * truncated facts file refuses rather than permits.
+ *
+ * With probe=1 in FILE, the real platform probe runs first and FILE's other
+ * keys then replace only the facts they name (#624: a real volume census and
+ * its query errors, with an injected "is this a card" fact).
  */
 
 #ifdef TAPECTL_TEST
@@ -35,6 +39,11 @@ int tapectl_test_facts_seam(const char *path, struct device_facts *f)
     snprintf(f->detail, sizeof f->detail, "facts injected by TAPECTL_TEST for %s", path);
     fp = fopen(file, "r");
     if (fp == NULL) { f->n_mounted = SAFETY_MAX_MOUNTS + 1; return 1; }
+    while (fgets(line, sizeof line, fp) != NULL) {
+        line[strcspn(line, "\r\n")] = '\0';
+        if (strcmp(line, "probe=1") == 0) { (void)probe_device(path, f); break; }
+    }
+    rewind(fp);
     while (fgets(line, sizeof line, fp) != NULL) {
         char *eq = strchr(line, '='), *v;
         line[strcspn(line, "\r\n")] = '\0';
