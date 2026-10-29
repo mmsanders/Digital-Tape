@@ -5,7 +5,8 @@
 [PR #626](https://github.com/mmsanders/Digital-Tape/pull/626), under APP-1 §3 and APP-1A §7 as
 amended by ADR-195. Verification reviews this note with the head; it is not a prior gate.
 **Revised 28 October for Verification364's Stage 2 findings F364-1..3** (§3, §5, §7), **and
-again for its correction-1 review** (the Windows volume census, §3 and §5).
+again for its correction-1 and correction-2 reviews** (the Windows volume census and its
+`ERROR_NOT_READY` exception, §3 and §5).
 
 ## 1. Who owns which handle, and when
 
@@ -79,9 +80,16 @@ each of these fails the census:
   at the size the OS asked for. A successful empty path list still means "not mounted".
 - **Extents:** a failed `IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS`, with two exceptions where the
   volume cannot be a mounted volume of this disk:
-  - it has no medium (`ERROR_NOT_READY` / `ERROR_NO_MEDIA_IN_DRIVE`: an empty reader slot or
-    drive);
-  - its own device number names another device.
+  - the OS answers `ERROR_NO_MEDIA_IN_DRIVE` (1112), its documented "no medium" (an empty
+    reader slot or drive);
+  - the volume's own `IOCTL_STORAGE_GET_DEVICE_NUMBER` proves it is on another device or is
+    not a disk.
+
+  `ERROR_NOT_READY` (21) only means "device not ready", not that there is no medium, so it is
+  not an exception by itself (correction 3, Verification's correction-2 review). Like any other
+  error, it is skipped only when the device number proves the volume is elsewhere. An empty
+  slot on another reader is excluded that way; the target's own volume answering 21 fails the
+  census. A failed or unknown device-number query is never an exclusion.
 - **Enumeration:** `FindNextVolumeW` ending with anything but `ERROR_NO_MORE_FILES`.
 
 A failed census sets `query_error`, so make reports `HOST_QUERY_FAILED`. It also leaves the
@@ -134,17 +142,25 @@ bundle with Verification's own predicates:
   - its neighbour on the same kind of node, with every query succeeding, giving the known
     refusal;
   - the authorized open's geometry query failed by the OS.
-  - On Windows only, four census rows on a VHD holding a real mounted NTFS volume. The real
+  - On Windows only, six census rows on a VHD holding a real mounted NTFS volume. The real
     probe runs, with the facts seam's `probe=1` overlaying only `removable=1`:
     - the neighbour with every query succeeding, giving the known `REFUSE_FOREIGN_MOUNT`/3;
     - `mount-paths`, `volume-extents` and `volume-enum` each really failed by the OS, giving
-      `HOST_QUERY_FAILED`/1.
+      `HOST_QUERY_FAILED`/1;
+    - two TYPED rows, `typed-error:not-ready-target|not-ready-other`. A typed 21 replaces the
+      extents answer, which is not an OS-generated error:
+      - on the target's volume, the result is `HOST_QUERY_FAILED`/1;
+      - on every other device's volume, the result is the known `REFUSE_FOREIGN_MOUNT`/3, with
+        the target's mounted volume still counted.
     
     Each is paired with standalone `provision` on the same node and fault. It must refuse
     with `REFUSE_FOREIGN_MOUNT` and no write-mode open, write or unmount.
-  - Verification's `c1_volume_query_r1` regression runs unchanged over two builds of its
-    `probe.c`. Over the `e36ea492` probe it must still reproduce the omission (the control);
-    over this head's it must record the failed query.
+  - Verification's regressions run unchanged over the old and new builds:
+    - `c1_volume_query_r1` over the `e36ea492` probe;
+    - `c1_volume_query_r2` (prepare.py's typed-21 probe) over the `39636892` probe.
+    
+    Each must still reproduce its omission on the old build (the controls) and must record
+    the failed query on this head.
   
   The test-only control `query-error:POINT` makes the real call fail in the OS: a zero-size
   result buffer on Windows, and a missing sysfs file or a NULL result pointer on Linux.
