@@ -758,6 +758,19 @@
         "-B",
         "tests/windows_cards_receipts_r1/controls.py"
       ]
+    },
+    {
+      "path": "tests/c1_closeout_r1",
+      "tree": "29e99cfe232f8fcd49b64b9b671d5a6a020571bb",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "a534012bfd6af76a391dfaef8f824b5d8e5d43c5",
+      "attested_in": "Verification364 Stage 1 (PR365, merged 48489cf9) and Stage 2 (PR366, merged a534012b; CI 40795064950/40795064957)",
+      "attestation": "C1 independent outcome tests: g3.py child/app-origin bridge matrix (28 cases), make_supplement.py routing correction beside the immutable wp15_cards_make_r1 oracle (lawful own-p1 unmount success; invalid-label input refusal), static_check.py integrated-source scan, pe_manifest.py, a6.py, bridge_c1.rs and the C2 checklist. controls.py runs synthetic causal controls only; not Product, native, C2, G1-G5 or S3 acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/c1_closeout_r1/controls.py"
+      ]
     }
   ],
   "evidence_bundles": [
