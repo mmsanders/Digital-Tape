@@ -4,6 +4,7 @@
 `tests/wp15_cards_make_r1/FEASIBILITY.md` for the exact head on
 [PR #626](https://github.com/mmsanders/Digital-Tape/pull/626), under APP-1 §3 and APP-1A §7 as
 amended by ADR-195. Verification reviews this note with the head; it is not a prior gate.
+**Revised 28 October for Verification364's Stage 2 findings F364-1..3** (§3, §5, §7).
 
 ## 1. Who owns which handle, and when
 
@@ -55,8 +56,24 @@ write or flush right after the call.
   finding and no `OK`.
 - **Not counted:** ordinary `EIO` stays I/O (`ENGINE`/`IO`).
 
-No other media query is made, so make never emits `HOST_QUERY_FAILED`: an unknown fact is a §5
-refusal, as for provision.
+**A required query that itself fails (correction for F364-1).** The probe now records the first
+OS query it needed that failed, as `CALL: ERROR`, in `device_facts.query_error`; the fact keeps
+its refusing value, so `provision` and every other command are unchanged. Make stops on it in
+`target_safety_why`, before any rule is judged or anything is unmounted, with exit 1
+`HOST_QUERY_FAILED` (`subject` null, `phase` "safety", `op` "media_query", `os_error`). The
+queries are the ones the §5 facts come from.
+- **Windows:** the query open of the disk, `IOCTL_STORAGE_GET_DEVICE_NUMBER`,
+  `IOCTL_STORAGE_QUERY_PROPERTY`, `IOCTL_DISK_GET_LENGTH_INFO`, `GetSystemWindowsDirectoryW`, the
+  system and page-file volume extents, `EnumPageFilesW`, `FindFirstVolumeW`, and the LBA 0 read.
+- **Linux:** sysfs `removable` and `size`, `/proc/self/mountinfo`, `/proc/swaps`, and the LBA 0
+  open/read.
+- **The authorized open's own geometry query** (`IOCTL_DISK_GET_LENGTH_INFO` / `BLKGETSIZE64`)
+  is kept in `hport.query_error` and reported the same way, phase "safety" (it is before
+  provision). Before this, it was `DEVICE_OPEN_FAILED`, exit 2.
+
+A known refusing fact stays a §5 exit-3 refusal. The volume walk still skips a volume whose
+extents cannot be read (an empty card reader or DVD drive does that normally); that is unchanged.
+No other query is added, so there is no monitoring cadence.
 
 ## 4. Elevated report and cleanup boundary
 
@@ -93,6 +110,57 @@ Server, at load, commit and verify.
 The imported `runner.py` judges the bundle unchanged. A second bundle, with a write callback
 during verify, must be refused by it, and is.
 
+**Added by the correction.** `tools/wp15-cards/judge_c1.py` judges two more sections of the same
+bundle with Verification's own predicates:
+- **`queries`** (F364-1), on Linux loop devices and Windows Server VHDs, through
+  `wp15_boundary_query_r1/oracle.check`:
+  - the real probe's capacity query failed by the OS;
+  - its neighbour on the same kind of node, with every query succeeding, giving the known
+    refusal;
+  - the authorized open's geometry query failed by the OS.
+  The test-only control `query-error:POINT` makes the real call fail in the OS: a zero-size
+  result buffer on Windows, and a missing sysfs file or a NULL result pointer on Linux.
+  `media_query` trace events say which query failed.
+- **`supplement`** (F364-3), through `c1_closeout_r1/make_supplement.py`:
+  - `own-p1-valid-exact`: partition 1 of an exact layout really mounted read-only (loopNp1),
+    really unmounted by make, then one session, with an equivalence pair against the standalone
+    sequence;
+  - `label-33`, routed to `input_refusal`.
+  Each section has a negative control (the own-p1 unmount marked failed; a HOST_QUERY_FAILED
+  recorded as exit 3) that the same predicates must refuse.
+
+**G3 (F364-2).** `tools/app/g3_624.py` and `host/app/tests/g3_component.rs` (test-only, compiled
+inside the bridge module) run all 28 `c1_closeout_r1/g3.py` cases on a hosted Windows runner.
+- **Real children** run through the production completion path:
+  - the original INGEST child on real folders, through the production worker closure;
+  - `tapectl-test make` on a VHD, with the argv the bridge built and its report read by
+    `run_make`;
+  - the shipping `tapectl cards`, through `discover`.
+- The launcher runs the request unelevated (the runner is an administrator without UAC) instead
+  of through `runas`.
+- The child's original stdout, stderr and report are kept before the bridge removes its job.
+- **Stderr changed, same exit and report.** For ingest and cards, a second bridge receives the
+  same exit and original report with different stderr. For make, whose stderr reaches the app
+  only as report `stderr` records, those records are reworded and the otherwise identical
+  report is judged again.
+- **How each make row gets its outcome:**
+  - **removed:** VHD detached at the load pause;
+  - **device-io:** the disk set read-only at the load pause, so writes fail with write-protect,
+    not a removal;
+  - **host-query:** `query-error:disk-length` with the real probe;
+  - **verify-findings:** `read-error:2048@verify`;
+  - **small:** a 64 MB VHD;
+  - **safety-refusal:** the real probe on a VHD, which is never a card;
+  - **wav-truncated:** a WAV shorter than its header says;
+  - **generic-make:** a 33-byte label. The app's label box cannot produce one (`label.rs`), so
+    the test sets `App.label` directly; the tool's exit and report are real.
+- **Other fixtures:**
+  - **protected:** `tone.m4a` with its sample entry renamed `drms`, which is how a
+    FairPlay-protected track looks to ingest;
+  - **discovery-unavailable:** more VHDs attached than `tapectl cards` lists (disk number ≥ 64),
+    so its census fails in the OS.
+- The twelve app-origin cases use the same bridge actions, with their typed launcher or recheck.
+
 **Not shown by this route:** a real reader, Windows 11, the real UAC prompt and its decline, a
 card swapped inside a reader, and an equal-size swap between `cards` and `make`. Those are C2,
 or stated limitations.
@@ -125,19 +193,19 @@ verify_b 15. The bar is a running maximum. Success is never inferred from 100%.
 
 ## 7. Findings on the imported package (returned, not edited)
 
-- **F1.** `oracle.session()`'s success branch applies `no_device_mutation` to every event before
-  the authorized open, and that rule counts `unmount` as a mutation. So the WP-14-lawful
-  own-p1-valid-exact positive (unmount own p1, then provision) cannot pass as written. It is not
-  in the judged bundle. The failed-unmount refusal row is.
-- **F2.** `label-33-UTF8-bytes` exits 2 before any device open. `session()` requires either a
-  policy refusal or one authorized open, so the row is kept unjudged, with an unchanged-bytes
-  check.
-- **F3.** The prior `wp15_app1a_r1` closed make IDs (M1) predate `HOST_QUERY_FAILED` (ADR-189).
-  Make never emits it, so there is no conflict today.
+- **F1, F2: resolved by Verification's supplement.** The own-p1 success and label-33 rows are
+  now judged by `make_supplement.py` (§5).
+- **F3: resolved.** `HOST_QUERY_FAILED` is now emitted and parsed through
+  `wp15_boundary_query_r1`.
+- **G3-D1 (correction, for disposition).** `g3.check` asks every row for copyable details. A
+  rejected drop (`drop-file`, `drop-mixed`) starts no child and is not a Problem state, so the
+  app has no diagnostic to copy. APP-1 §6 gives Show details to Problem states. The rows report
+  `details_copyable: false`. `G3-VERDICT.json` records the full check's failure, and beside it
+  the same check with only that field excused for those two rows.
 - **F4.** S2-era imported app contracts (`windows_interactions_r2`, `windows_discovery_r1`)
   assert "permanently disabled Make". They stay green because their fixtures hold no retained
   ingest audio. The WP-15 acceptance package should state the Make-era rule.
 - **No independent test yet** for: a commit-phase engine failure (no lawful trigger without a
   new fault), query-handle access (probe opens are not in the compiled trace),
-  cleanup-substitution of a junction, stderr-record capture, and the app's elevated launcher
-  itself. The launcher is covered by the component tests through a typed launcher only.
+  cleanup-substitution of a junction, and the app's elevated launcher itself. The G3 rows run
+  the bridge's own request unelevated; `runas`, the UAC prompt and its decline are C2.
