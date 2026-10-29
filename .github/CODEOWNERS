@@ -62,6 +62,7 @@
 /tests/wp15_cards_make_r1/            @mmsanders
 /tests/c1_closeout_r1/                @mmsanders
 /tests/c1_volume_query_r1/            @mmsanders
+/tests/c1_volume_query_r2/            @mmsanders
 
 # The frozen spec bundle and its manifest.
 /spec/tapefs-v1.md     @mmsanders

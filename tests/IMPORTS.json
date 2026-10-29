@@ -784,6 +784,19 @@
         "-c",
         "import pathlib;assert all(pathlib.Path('tests/c1_volume_query_r1',n).is_file() for n in ('probe.c','run.ps1'))"
       ]
+    },
+    {
+      "path": "tests/c1_volume_query_r2",
+      "tree": "7c5dad088d3d92c82ebf1197bd9d56be5ef465da",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "98c94677c84feaceb41b23215b34e25e2490a142",
+      "attested_in": "Verification364 correction-2 review (PR368, merged 98c94677; exception-control CI 40816980219)",
+      "attestation": "Typed ERROR_NOT_READY census control: prepare.py generates probe-not-ready.c from c1_volume_query_r1/probe.c, replacing only the extents answer of the volume positively identified on the private hosted VHD with a typed error 21 (not an OS-generated error). Run with r1's run.ps1 in wp15-make-624.yml. Probe-only; not Product acceptance.",
+      "selftest": [
+        "python3",
+        "-c",
+        "import pathlib;assert pathlib.Path('tests/c1_volume_query_r2/prepare.py').is_file()"
+      ]
     }
   ],
   "evidence_bundles": [
