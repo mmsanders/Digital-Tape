@@ -45,11 +45,11 @@ int target_safety(const char *path, int provision, const char *erase, int need_w
 {
     enum refusal why;
     int unmount_failed;
-    return target_safety_why(path, provision, erase, need_write, &why, &unmount_failed);
+    return target_safety_why(path, provision, erase, need_write, &why, &unmount_failed, NULL, 0);
 }
 
 int target_safety_why(const char *path, int provision, const char *erase, int need_write,
-                      enum refusal *why, int *unmount_failed)
+                      enum refusal *why, int *unmount_failed, char *query_error, size_t qcap)
 {
     struct device_facts f;
     enum refusal r;
@@ -59,6 +59,17 @@ int target_safety_why(const char *path, int provision, const char *erase, int ne
     *unmount_failed = 0;
     gather_facts(path, &f, &seam);
     (void)seam;
+    if (query_error != NULL && f.query_error[0]) {
+        /* An OS failure, not a known fact: the refusing value it left is not judged. */
+#ifdef TAPECTL_TEST
+        tseam_facts(&f, "HOST_QUERY_FAILED", seam);
+        tseam_query("probe", f.query_error);
+        tseam_refusal("HOST_QUERY_FAILED");
+#endif
+        snprintf(query_error, qcap, "%s", f.query_error);
+        fprintf(stderr, "tapectl: HOST_QUERY_FAILED: a required check of the card failed (%s)\n", f.query_error);
+        return EXIT_ENGINE;
+    }
     r = safety_policy(&f, provision, erase != NULL && strcmp(erase, path) == 0);
 #ifdef TAPECTL_TEST
     tseam_facts(&f, refusal_id(r), seam);

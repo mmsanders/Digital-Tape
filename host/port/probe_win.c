@@ -5,7 +5,7 @@
  * queries only. Volumes are mapped to disks through their disk extents: the
  * system volume and every page-file volume decide holds_os, and every volume
  * with a mount point on this disk is listed. A fact that cannot be established
- * keeps its refusing value.
+ * keeps its refusing value; when an OS query failed, f->query_error names it.
  */
 
 #if defined(_WIN32)
@@ -13,6 +13,8 @@
 #include "safety.h"
 #include "layout.h"
 #include "winutf.h"
+#include "hport.h"
+#include "tseam.h"
 
 #include <windows.h>
 #include <winioctl.h>
@@ -62,6 +64,13 @@ static int letter_on_disk(const wchar_t *p, DWORD disk)
     return 0;
 }
 
+/* A query these facts need failed: keep the first, with the OS's own error. */
+static void query_failed(struct device_facts *f, const char *call)
+{
+    const char *e = hport_os_errname();
+    if (f->query_error[0] == '\0') { snprintf(f->query_error, sizeof f->query_error, "%s: %s", call, e); }
+}
+
 struct pagefile_scan { DWORD disk; int hit; int unknown; };
 
 static BOOL CALLBACK pagefile_cb(LPVOID ctx, PENUM_PAGE_FILE_INFORMATION info, LPCWSTR name)
@@ -83,6 +92,7 @@ int probe_device(const char *path, struct device_facts *f)
     union { STORAGE_DEVICE_DESCRIPTOR d; unsigned char raw[1024]; } sdd;
     STORAGE_DEVICE_NUMBER sdn;
     GET_LENGTH_INFORMATION li;
+    DWORD li_cap = sizeof li;
     struct pagefile_scan ps;
     int r;
 
@@ -97,12 +107,14 @@ int probe_device(const char *path, struct device_facts *f)
 
     h = CreateFileW(wpath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
     if (h == INVALID_HANDLE_VALUE) {
+        query_failed(f, "CreateFileW");
         snprintf(f->detail, sizeof f->detail, "cannot open %s (error %lu; run as Administrator)",
                  path, (unsigned long)GetLastError());
         return 0;
     }
-    if (DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof sdn, &got, NULL)
-        && sdn.DeviceNumber == disk && sdn.PartitionNumber == 0) {
+    if (!DeviceIoControl(h, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &sdn, sizeof sdn, &got, NULL)) {
+        query_failed(f, "IOCTL_STORAGE_GET_DEVICE_NUMBER");
+    } else if (sdn.DeviceNumber == disk && sdn.PartitionNumber == 0) {
         f->whole_device = 1;
     }
     memset(&q, 0, sizeof q);
@@ -116,9 +128,18 @@ int probe_device(const char *path, struct device_facts *f)
             f->removable = 0;
             f->sd_bus = 0;
         }
+    } else {
+        query_failed(f, "IOCTL_STORAGE_QUERY_PROPERTY");
     }
-    f->bytes = DeviceIoControl(h, IOCTL_DISK_GET_LENGTH_INFO, NULL, 0, &li, sizeof li, &got, NULL)
-               ? (uint64_t)li.Length.QuadPart : UINT64_MAX;
+#ifdef TAPECTL_TEST
+    if (tseam_fault_query("disk-length")) { li_cap = 0; }   /* control: the OS really fails the query */
+#endif
+    if (DeviceIoControl(h, IOCTL_DISK_GET_LENGTH_INFO, NULL, 0, &li, li_cap, &got, NULL)) {
+        f->bytes = (uint64_t)li.Length.QuadPart;
+    } else {
+        query_failed(f, "IOCTL_DISK_GET_LENGTH_INFO");
+        f->bytes = UINT64_MAX;
+    }
     if (!f->whole_device) {
         snprintf(f->detail, sizeof f->detail, "%s is not a whole disk", path);
         CloseHandle(h);
@@ -126,10 +147,16 @@ int probe_device(const char *path, struct device_facts *f)
     }
 
     /* holds_os: the Windows volume, the boot volume (same), and page files. */
-    if (GetSystemWindowsDirectoryW(sysdir, MAX_PATH) == 0) { CloseHandle(h); return 0; }
+    if (GetSystemWindowsDirectoryW(sysdir, MAX_PATH) == 0) {
+        query_failed(f, "GetSystemWindowsDirectoryW");
+        CloseHandle(h);
+        return 0;
+    }
     r = letter_on_disk(sysdir, disk);
+    if (r < 0) { query_failed(f, "IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS (system volume)"); }
     ps.disk = disk; ps.hit = 0; ps.unknown = 0;
-    if (!EnumPageFilesW(pagefile_cb, &ps)) { ps.unknown = 1; }
+    if (!EnumPageFilesW(pagefile_cb, &ps)) { query_failed(f, "EnumPageFilesW"); ps.unknown = 1; }
+    else if (ps.unknown) { query_failed(f, "IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS (page-file volume)"); }
     if (r < 0 || ps.unknown) {
         snprintf(f->detail, sizeof f->detail, "cannot tell which disk holds the system or a page file");
         CloseHandle(h);
@@ -140,6 +167,7 @@ int probe_device(const char *path, struct device_facts *f)
     /* Every volume on this disk that has a mount point. */
     fv = FindFirstVolumeW(vol, MAX_PATH);
     if (fv == INVALID_HANDLE_VALUE) {
+        query_failed(f, "FindFirstVolumeW");
         f->n_mounted = SAFETY_MAX_MOUNTS + 1;
         snprintf(f->detail, sizeof f->detail, "cannot list volumes");
         CloseHandle(h);
@@ -178,6 +206,8 @@ int probe_device(const char *path, struct device_facts *f)
         memset(&ov, 0, sizeof ov);
         if (ReadFile(h, lba0, sizeof lba0, &rd, &ov) && rd == sizeof lba0) {
             f->layout_ok = mbr_is_layout(lba0, f->bytes / 512u);
+        } else {
+            query_failed(f, "ReadFile (LBA 0)");
         }
     }
     CloseHandle(h);

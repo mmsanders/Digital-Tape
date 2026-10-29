@@ -26,6 +26,9 @@
  *   engine_info         each tape_get_info after a mount: needs_repair,
  *                       side_b_valid
  *   unmount             each own-partition-1 unmount: OS call and result
+ *   media_query         make only: a required media query that failed (the
+ *                       probe's facts, or the geometry query of the device
+ *                       open) and its OS error
  * plus target, target_kind, device facts and policy, refusal, engine_used,
  * exit and build identity. The engine is not instrumented: its calls are
  * observed at the existing public API call sites in tapectl.
@@ -44,6 +47,11 @@
  *                          (real failed OS read), e.g. 0 for LBA 0
  *   unmount-error          the own-partition-1 unmount is a real OS call on
  *                          an invalid target, and fails
+ *   query-error:POINT      a required media query is really issued so that the
+ *                          OS fails it (a zero-size result buffer on Windows; a
+ *                          missing sysfs file or NULL result pointer on Linux):
+ *                          POINT is disk-length (the probe's capacity query) or
+ *                          open-geometry (the authorized open's own query)
  */
 
 #ifndef HOST_TSEAM_H
@@ -80,6 +88,7 @@ void tseam_unmount(const char *where, const char *os_call, int ok, const char *o
    remove or swap the device at an exact boundary. Real I/O then detects it. */
 void tseam_make(const char *kind, const char *phase, const char *os_error, int write_is_null);
 void tseam_make_pause(const char *phase);
+void tseam_query(const char *point, const char *os_error);
 
 /* Engine call sites in tapectl. */
 void tseam_engine_used(void);
@@ -95,6 +104,7 @@ int  tseam_fault_nonnull_binding(void);
 int  tseam_fault_read(uint64_t partition_lba, uint32_t count);
 int  tseam_fault_target_read(uint64_t offset, size_t bytes);
 int  tseam_fault_unmount(void);
+int  tseam_fault_query(const char *point);
 
 /* hport.c: a real failed OS read at `off` (used by the read-error control). */
 struct hport;

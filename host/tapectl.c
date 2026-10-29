@@ -1043,8 +1043,21 @@ static int cmd_verify(int argc, char **argv)
    safety sequence, and that one handle serves load and a NULL-write verify;
    nothing is reopened. If the OS reports the medium removed or changed on that
    handle, the port stops all further I/O (hport failstop) and make stops with
-   CARD_CHANGED. No other media query is made, so make never reports
-   HOST_QUERY_FAILED: an unknown safety fact is a §5 refusal, as for provision. */
+   CARD_CHANGED. A required media query that itself fails in the OS (the
+   probe's, or the geometry query of the authorized open) stops make with
+   HOST_QUERY_FAILED, phase safety, before anything is unmounted or written; a
+   known refusing fact stays a §5 refusal, and standalone provision is
+   unchanged. No other media query is made. */
+
+/* HOST_QUERY_FAILED (APP-1A §7): exit 1, the failed query's OS error. */
+static int make_query_failed(const char *os_error)
+{
+    char e[160], p[220];
+    report_json_string(e, sizeof e, os_error);
+    snprintf(p, sizeof p, ",\"phase\":\"safety\",\"op\":\"media_query\",\"os_error\":%s", e);
+    mreport_refusal("HOST_QUERY_FAILED", p);
+    return EXIT_ENGINE;
+}
 
 static int make_usage(const char *why)
 {
@@ -1177,6 +1190,7 @@ static int make_run(int argc, char **argv)
     const char *path, *label, *s_len, *wav, *erase;
     uint32_t length = 3600u;
     enum refusal why;
+    char query_error[96];
     int dup = 0, unmount_failed, rc;
 
     if (check_args(argc, argv, flags, 1)) {
@@ -1205,7 +1219,9 @@ static int make_run(int argc, char **argv)
        and no write-mode open on refusal. */
     g_phase_name = "safety";
     progress("safety", 0, 1);
-    rc = target_safety_why(path, 1, erase, 1, &why, &unmount_failed);
+    query_error[0] = '\0';
+    rc = target_safety_why(path, 1, erase, 1, &why, &unmount_failed, query_error, sizeof query_error);
+    if (rc == EXIT_ENGINE && query_error[0]) { return make_query_failed(query_error); }
     if (rc) {
         mreport_refusal(refusal_id(why), unmount_failed ? ",\"unmount_failed\":true" : "");
         return rc;
@@ -1220,6 +1236,13 @@ static int make_run(int argc, char **argv)
     if (hport_open(&g_tgt.hp, path, 1, 1) != 0) {
         char e[160];
         const char *os = hport_error();
+        if (g_tgt.hp.query_error[0]) {
+#ifdef TAPECTL_TEST
+            tseam_query("open-geometry", g_tgt.hp.query_error);
+#endif
+            fprintf(stderr, "tapectl: HOST_QUERY_FAILED: cannot read the size of %s (%s)\n", path, g_tgt.hp.query_error);
+            return make_query_failed(g_tgt.hp.query_error);
+        }
         report_json_string(e, sizeof e, os);
         fprintf(stderr, "tapectl: cannot open device %s for writing (%s)\n", path, os);
         {

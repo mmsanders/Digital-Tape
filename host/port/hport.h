@@ -38,6 +38,9 @@ struct hport {
     int failstop;
     int gone;
     char gone_error[48];      /* the OS error that marked it gone */
+    /* A device open whose geometry query failed (the open itself succeeded and
+       was then closed): that OS error, so make can report HOST_QUERY_FAILED. */
+    char query_error[48];
 };
 
 /* What a target path names, before anything is opened. */

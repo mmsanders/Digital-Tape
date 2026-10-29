@@ -21,6 +21,13 @@ boundary (TAPECTL_TEST_PAUSE), detach or swap the VHD, and let make's next real 
 meet the OS error. Rows the imported predicates cannot judge as written are run and
 kept under `unjudged/` with the reason, never forced into the bundle.
 
+Two further sections are judged by tools/wp15-cards/judge_c1.py with Verification's own
+predicates (#624 correction): `supplement` (the lawful own-p1 unmount success with its
+equivalence pair, and the invalid-label input refusal; tests/c1_closeout_r1/
+make_supplement.py) and `queries` (APP-1A §7: a required media query really failed by
+the OS before and after the authorized open, and its known-policy-refusal neighbour;
+tests/wp15_boundary_query_r1/oracle.py).
+
   s3_bundle.py --platform linux|windows --tapectl BIN --tapectl-test BIN --out DIR [--source SHA]
 """
 import argparse, hashlib, json, os, random, re, shutil, struct, subprocess, sys, time
@@ -61,6 +68,19 @@ class Linux:
 
     def detach(self, dev):
         subprocess.run(["losetup", "-d", dev], check=True)
+
+    def attach_parts(self, img):
+        """A loop device with its partition nodes (loopNp1), for a real partition-1 mount."""
+        dev = subprocess.run(["losetup", "-f", "-P", "--show", str(img)], check=True, capture_output=True, text=True).stdout.strip()
+        subprocess.run(["udevadm", "settle"], check=False)
+        return dev
+
+    def mount_ro(self, part, at):
+        Path(at).mkdir(parents=True, exist_ok=True)
+        subprocess.run(["mount", "-o", "ro", "-t", "vfat", part, str(at)], check=True)
+
+    def is_mounted(self, at):
+        return subprocess.run(["mountpoint", "-q", str(at)]).returncode == 0
 
     def dm_wrap(self, dev, name):
         size = subprocess.run(["blockdev", "--getsz", dev], check=True, capture_output=True, text=True).stdout.strip()
@@ -170,6 +190,7 @@ class B:
     def __init__(self, a, plat):
         self.a, self.plat, self.out = a, plat, Path(a.out)
         self.files, self.rows, self.unjudged, self.n = {}, [], [], 0
+        self.supplement, self.queries = [], []
         self.control_seen = False
 
     def keep(self, name, data):
@@ -226,8 +247,11 @@ class B:
             argv += ["--report", str(rep), "--report-nonce", NONCE]
         return argv, rep
 
-    def session_row(self, name, scope, res, rep, facts, foreign_before, foreign_after, equivalence=None):
-        base = f"rows/{len(self.rows):03d}"
+    def session_row(self, name, scope, res, rep, facts, foreign_before, foreign_after, equivalence=None, supplement=None):
+        """A session row for the immutable runner, or (supplement="own_p1"/"input_refusal")
+        one for tests/c1_closeout_r1/make_supplement.py, judged by judge_c1.py."""
+        into = self.rows if supplement is None else self.supplement
+        base = f"rows/{len(self.rows):03d}" if supplement is None else f"supplement/{len(self.supplement):03d}"
         ev = journal(res["trace"]) if res["trace"] else []
         change = [e for e in ev if e["op"] == "media_change"]
         after = res["stdout"][change[0]["stdout_bytes"]:] if change else b""
@@ -239,13 +263,13 @@ class B:
                "version": version, "nonce": NONCE, "foreign_before": foreign_before, "foreign_after": foreign_after,
                "stdout_after_change_hex": after.hex(), "paused_at_boundary": res["paused"], "scope": scope,
                "trace": self.keep(base + ".trace.json", json.dumps(res["trace"], indent=1))}
-        row = {"name": name, "kind": "session", "scope": scope,
+        row = {"name": name, "kind": supplement or "session", "scope": scope,
                "record": self.keep(base + ".record.json", json.dumps(rec, indent=1)),
                "stdout": self.keep(base + ".stdout", res["stdout"]), "stderr": self.keep(base + ".stderr", res["stderr"]),
                "report": self.keep(base + ".report.jsonl", report)}
         if equivalence:
             row["equivalence"] = equivalence
-        self.rows.append(row)
+        into.append(row)
         term = report.decode(errors="replace").split("\n")
         refusal = next((l for l in term if '"t":"refusal"' in l), "")
         print(f"{name:44} exit {res['exit']}  {refusal[:110]}", flush=True)
@@ -271,6 +295,54 @@ class B:
             self.keep(base + ".trace.json", json.dumps(res["trace"], indent=1))
         self.unjudged.append({"name": name, "why": why, "exit": res["exit"], "argv": res["argv"], "files": base})
         print(f"{name:44} exit {res['exit']}  (unjudged: {why})", flush=True)
+
+    def query_row(self, name, scope, res, rep):
+        """An APP-1A §7 boundary-query observation for tests/wp15_boundary_query_r1/oracle.check,
+        every field read from this run's own trace, stdout and report (judged by judge_c1.py)."""
+        base = f"query/{len(self.queries):03d}"
+        trace = res["trace"] or {"events": []}
+        ev = trace["events"]
+        q = next((i for i, e in enumerate(ev) if e["kind"] == "media_query"), None)
+        before, after = (ev[:q], ev[q + 1:]) if q is not None else (ev, [])
+        opens = lambda es: sum(1 for e in es if e["kind"] == "write_open")
+        destroys = lambda es: sum(1 for e in es if e["kind"] == "write" or (e["kind"] == "unmount" and e.get("os_success")))
+        report = rep.read_bytes() if rep.exists() else b""
+        lines = [json.loads(l) for l in report.split(b"\n") if l.strip()]
+        refusal = next((l for l in lines if l.get("t") == "refusal"), None)
+        refused = trace.get("refusal")
+        query_error = ev[q]["os_error"] if q is not None else None
+        stdout_at = ev[q]["stdout_bytes"] if q is not None else len(res["stdout"])
+        trace_name = self.keep(base + ".trace.json", json.dumps(res["trace"], indent=1))
+        obs = {
+            "phase": refusal.get("phase", "safety") if refusal else "safety",
+            "initial": q is not None and opens(before) == 0,
+            "required_query": q is not None and opens(before) == 0,
+            "query_performed": q is not None or (trace.get("facts") or {}).get("source") == "platform probe",
+            "positive_change": any(e["kind"] == "make_media_change" for e in ev),
+            "query_error": query_error,
+            "policy_refusal": refused if refused and q is None and res["exit"] == 3 else None,
+            "required_facts_known": q is None,
+            "write_mode_opens_before_query": opens(before), "destructive_ops_before_query": destroys(before),
+            "total_write_mode_opens": opens(ev), "total_destructive_ops": destroys(ev),
+            "continued_device_work": any(e["kind"] in ("read", "write", "flush", "write_open", "open", "unmount") for e in after),
+            "session_reopened": opens(ev) > 1,
+            "stdout_before_hex": res["stdout"][:stdout_at].hex(), "stdout_after_hex": res["stdout"].hex(),
+            "publication_before": [], "publication_after": [], "claimed_card_unchanged": False,
+            "ordinary_error": refusal, "exit": res["exit"],
+            "engine_error_synthesized": any(l.get("id") == "ENGINE" for l in lines),
+            "report_write_failed": False,
+            "report_warning_count": sum(1 for l in res["stderr"].decode(errors="replace").splitlines() if "report:" in l),
+            "report_writes_after_failure": False,
+            "version": lines[0].get("version") if lines else None, "nonce": NONCE,
+            "observer": "compiled-test", "trace_complete": res["trace"] is not None,
+            "positive_control_seen": self.control_seen, "raw_artifact_sha256": self.files[trace_name],
+        }
+        self.queries.append({"name": name, "scope": scope, "argv": res["argv"],
+                             "observation": self.keep(base + ".observation.json", json.dumps(obs, indent=1)),
+                             "trace": trace_name, "stdout": self.keep(base + ".stdout", res["stdout"]),
+                             "stderr": self.keep(base + ".stderr", res["stderr"]),
+                             "report": self.keep(base + ".report.jsonl", report)})
+        print(f"{name:44} exit {res['exit']}  {json.dumps(refusal)[:110] if refusal else ''}", flush=True)
 
 
 def device_work(trace):
@@ -436,12 +508,61 @@ def linux_rows(b, a):
     b.session_row("generic-EIO-not-card-changed", scope + "; dm error target at the load boundary: plain EIO", res, rep,
                   oracle_facts(facts_text(IMG_BYTES), True), None, None)
 
-    # Rows the imported predicates cannot judge as written (reasons recorded).
+    # Invalid label: refused before any device work (F364-3), so it is judged by the C1
+    # supplement's input_refusal, not session().
     img = pristine("label33", zero); dev = plat.attach(img)
     argv, rep = b.make(dev, label="x" * 33, wav_path=w[1024]); before = sha(img)
     res = b.process(argv, facts=facts_text(IMG_BYTES)); plat.detach(dev)
-    b.unjudged_row("label-33-UTF8-bytes", "LABEL_INVALID exits 2 before any device open; session() requires either a "
-                   f"policy refusal or one authorized open. Bytes {'unchanged' if before == sha(img) else 'CHANGED'}", res, rep)
+    b.session_row("label-33-UTF8-bytes", scope + "; LABEL_INVALID before any device work", res, rep,
+                  oracle_facts(facts_text(IMG_BYTES), True), before, sha(img), supplement="input_refusal")
+
+    # Lawful own partition 1 (F364-3): partition 1 of an exact layout really mounted, and
+    # really unmounted by make before its one authorized open; equivalence against the
+    # standalone sequence from the same starting bytes, its p1 also mounted.
+    base = pristine("own-p1-base", zero); dev = plat.attach(base)
+    b.process([TT, "provision", dev, "--label", "Own", "--length-s", str(LEN_S), "--erase", dev], facts=facts_text(IMG_BYTES))
+    plat.detach(dev)
+    a_img, s_img = work / "own-p1-make.img", work / "own-p1-separate.img"
+    shutil.copyfile(base, a_img); shutil.copyfile(base, s_img)
+    da, ds = plat.attach_parts(a_img), plat.attach_parts(s_img)
+    ma, ms = work / "mnt-own-p1-make", work / "mnt-own-p1-separate"
+    plat.mount_ro(da + "p1", ma); plat.mount_ro(ds + "p1", ms)
+    fa = facts_text(IMG_BYTES, mounted=[f"1:{ma}"], layout_ok=1)
+    argv, rep = b.make(da, wav_path=w[1024]); before = sha(a_img)
+    mk = b.process(argv, facts=fa)
+    unmounted = not plat.is_mounted(ma)
+    m = re.match(rb"uuid ([0-9a-f]{32})\nepoch ([0-9]+)\n", mk["stdout"])
+    stages = []
+    if m:
+        p1 = b.process([TT, "provision", ds, "--label", "Make", "--length-s", str(LEN_S), "--uuid", m.group(1).decode(),
+                        "--epoch", m.group(2).decode(), "--erase", ds], facts=facts_text(IMG_BYTES, mounted=[f"1:{ms}"], layout_ok=1))
+        stages.append(p1)
+        if p1["exit"] == 0:
+            p2 = b.process([TT, "load", ds, str(w[1024])], facts=facts_text(IMG_BYTES))
+            stages.append(p2)
+            if p2["exit"] == 0:
+                stages.append(b.process([TT, "verify", ds], facts=facts_text(IMG_BYTES)))
+    for at in (ma, ms):
+        if plat.is_mounted(at):
+            subprocess.run(["umount", str(at)], check=False)
+    plat.detach(da); plat.detach(ds)
+    eqb = "equivalence/own-p1-valid-exact"
+    procs, outs = [], []
+    for i, s in enumerate([mk] + stages + [None] * (3 - len(stages))):
+        desc = {"exit": None, "argv": None} if s is None else {"exit": s["exit"], "argv": s["argv"], "executable_sha256": s["executable_sha256"]}
+        procs.append(b.keep(f"{eqb}/p{i}.json", json.dumps(desc)))
+        outs.append(b.keep(f"{eqb}/p{i}.stdout", b"" if s is None else s["stdout"]))
+    eq = {"processes": procs, "stdout": outs, "make_image": b.keep(f"{eqb}/make.img", a_img),
+          "separate_image": b.keep(f"{eqb}/separate.img", s_img)}
+    b.session_row("own-p1-valid-exact", scope + f"; real ro mount of loopNp1 unmounted by make (gone after: {unmounted}); "
+                  "byte/output equivalence against standalone provision/load/verify", mk, rep,
+                  oracle_facts(fa, True), before, sha(a_img), equivalence=eq if m else None, supplement="own_p1")
+
+    def loop_target(name):
+        img = pristine(name, zero)
+        return plat.attach(img), img, plat.detach
+    query_rows(b, loop_target, w[1024], IMG_BYTES,
+               "compiled-test: tapectl-test make on a Linux loop device")
 
     # Judge negative control: a write callback during verify must fail the imported oracle.
     img = pristine("neg", zero); dev = plat.attach(img)
@@ -450,6 +571,29 @@ def linux_rows(b, a):
     env["TAPECTL_TEST_FAULT"] = "nonnull-binding"
     neg = b.process(argv, env=env, facts=facts_text(IMG_BYTES)); plat.detach(dev)
     return (neg, rep)
+
+
+def query_rows(b, target, wavp, nbytes, scope):
+    """APP-1A §7 (F364-1): a required media query really failed by the OS, with its
+    known-policy-refusal neighbour on the same kind of node, and the authorized open's
+    own geometry query failing. `target(name)` -> (dev, backing file, release(dev))."""
+    for name, fault, facts, note in [
+        ("host-query-initial-disk-length", "query-error:disk-length", None,
+         "real platform probe (no facts seam); its capacity query really fails in the OS"),
+        ("host-query-neighbor-known-refusal", None, None,
+         "real platform probe (no facts seam), every query succeeds: the node's known refusing fact"),
+        ("host-query-open-geometry", "query-error:open-geometry", facts_text(nbytes),
+         "injected passing facts; the authorized open's geometry query really fails in the OS"),
+    ]:
+        dev, backing, release = target(name)
+        argv, rep = b.make(dev, wav_path=wavp)
+        env = {k: v for k, v in os.environ.items() if not k.startswith("TAPECTL_TEST")}
+        if fault:
+            env["TAPECTL_TEST_FAULT"] = fault
+        before = sha(backing)
+        res = b.process(argv, env=env, facts=facts)
+        release(dev)
+        b.query_row(name, f"{scope}; {note}; backing bytes {'unchanged' if before == sha(backing) else 'CHANGED'}", res, rep)
 
 
 def parent_rows(b, a, dev, nbytes, wavp, junction):
@@ -630,6 +774,11 @@ def windows_rows(b, a):
     b.unjudged_row("shipped/vhd-refused", f"shipped tapectl, real probe, no seam: exit {res['exit']}; VHD file "
                    f"{'unchanged' if before == sha(v) else 'CHANGED'}; probe facts are not the oracle's injected facts", res, rep)
 
+    def vhd_target(name):
+        v = vhd(name)
+        return plat.attach(v), v, lambda dev: plat.detach_file(v)
+    query_rows(b, vhd_target, wavp, nbytes, "compiled-test: tapectl-test make on a Windows Server VHD")
+
     v = vhd("parent"); dev = plat.attach(v)
     parent_rows(b, a, dev, nbytes, wavp, junction=True)
     plat.detach_file(v)
@@ -665,8 +814,11 @@ def main():
             "observer": {"kind": "compiled-test trace (host/port/trace_test.c)", "positive_control": "control/positive.trace.json",
                          "positive_control_seen": b.control_seen},
             "unjudged": b.unjudged}
-    (out / "BUNDLE.json").write_text(json.dumps(dict(head, files=b.files, rows=b.rows), indent=1))
-    print(f"{len(b.rows)} rows, {len(b.unjudged)} unjudged, {len(b.files)} files -> {out / 'BUNDLE.json'}")
+    # `supplement` and `queries` are judged by judge_c1.py; the immutable runner reads `rows`.
+    (out / "BUNDLE.json").write_text(json.dumps(dict(head, files=b.files, rows=b.rows, supplement=b.supplement,
+                                                     queries=b.queries), indent=1))
+    print(f"{len(b.rows)} rows, {len(b.supplement)} supplement, {len(b.queries)} query, {len(b.unjudged)} unjudged, "
+          f"{len(b.files)} files -> {out / 'BUNDLE.json'}")
     if neg is not None:
         # The same transport, one row with a write callback during verify: the judge must refuse it.
         nb = B(a, plat); nb.out = out.parent / (out.name + "-negative"); nb.control_seen = b.control_seen

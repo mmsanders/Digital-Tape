@@ -106,6 +106,11 @@ int tseam_fault_hidden_flush_error(void) { return strcmp(fault(), "hidden-flush-
 int tseam_fault_native_flush_error(void) { return strcmp(fault(), "native-flush-error") == 0; }
 int tseam_fault_nonnull_binding(void)    { return strcmp(fault(), "nonnull-binding") == 0; }
 int tseam_fault_unmount(void)            { return strcmp(fault(), "unmount-error") == 0; }
+int tseam_fault_query(const char *point)
+{
+    const char *f = fault();
+    return strncmp(f, "query-error:", 12) == 0 && strcmp(f + 12, point) == 0;
+}
 
 static char g_make_phase[16];   /* make's current phase, from tseam_make */
 
@@ -339,6 +344,25 @@ void tseam_unmount(const char *where, const char *os_call, int ok, const char *o
     fprintf(g_fp, ",\"fault\":");
     str_or_null(flt);
     fputc('}', g_fp);
+}
+
+void tseam_query(const char *point, const char *os_error)
+{
+    const char *f = fault();
+    long long out;
+    if (!g_fp) { return; }
+    run_flush();
+    fflush(stdout);
+    out = (long long)ftell(stdout);
+    event_begin("media_query");
+    fprintf(g_fp, ",\"point\":");
+    json_str(point);
+    fprintf(g_fp, ",\"os_success\":false,\"os_error\":");
+    json_str(os_error);
+    fprintf(g_fp, ",\"fault\":");
+    str_or_null(strncmp(f, "query-error:", 12) == 0 ? f : NULL);
+    fprintf(g_fp, ",\"stdout_bytes\":%lld}", out);
+    fflush(g_fp);
 }
 
 void tseam_make(const char *kind, const char *phase, const char *os_error, int write_is_null)

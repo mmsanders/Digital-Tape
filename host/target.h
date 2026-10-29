@@ -38,9 +38,12 @@ int target_names_device(const char *path);
 int target_safety(const char *path, int provision, const char *erase, int need_write);
 
 /* target_safety, also saying which rule refused (*why) and whether the refusal
-   was a failed unmount of our own partition 1 (*unmount_failed). make's report. */
+   was a failed unmount of our own partition 1 (*unmount_failed). make's report.
+   With query_error non-NULL (make only, APP-1A §7), a probe whose required OS
+   query failed stops first: nothing is judged or unmounted, the failed query is
+   copied to query_error and EXIT_ENGINE is returned (HOST_QUERY_FAILED). */
 int target_safety_why(const char *path, int provision, const char *erase, int need_write,
-                      enum refusal *why, int *unmount_failed);
+                      enum refusal *why, int *unmount_failed, char *query_error, size_t qcap);
 
 /* make (APP-1 §3): bind the engine to partition 2 of a target whose device is
    ALREADY open in t->hp, without opening anything. Same recognition as
