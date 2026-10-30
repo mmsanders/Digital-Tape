@@ -6,7 +6,7 @@ Plates (A1 Mini, 180 x 180):
     shell  front and back halves together, so they are a matched pair; outer faces down
     mech   the five keys upright, a spare FF, the slide lock (back face down), the blocker,
            the key comb (spine down)
-    cards  the five card variants, flat, and a spare slide lock
+    cards  the new front half, the five card variants (flat) and a spare slide lock
     rebuild  the new back half, the key comb and the glue-in blocker guide (30 Oct)
 """
 
@@ -73,13 +73,13 @@ def plates() -> dict[str, cq.Workplane]:
         mech = k if mech is None else mech.union(k)
     mech = mech.union(_to_bed(pp["bar"], 100, 8)).union(_to_bed(pp["blocker"], 120, 8))
     mech = mech.union(_to_bed(pp["comb"], 145, 8))
-    cards = None
+    # the card plate also carries a spare slide lock (Michael, 28 Oct: the mech plate was
+    # already printing with flat-topped latches) and the new front half (30 Oct: so the
+    # blocker guide comes built in rather than glued)
+    cards = _to_bed(pp["front"], 5, 5)
     for i, v in enumerate(C.CARDS):
-        c = _to_bed(pp[f"card-{v}"], 5 + (i % 2) * 48, 5 + (i // 2) * 44)
-        cards = c if cards is None else cards.union(c)
-    # a spare slide lock rides on the card plate (Michael, 28 Oct: the mech plate was
-    # already printing with flat-topped latches)
-    cards = cards.union(_to_bed(pp["bar"], 105, 5))
+        cards = cards.union(_to_bed(pp[f"card-{v}"], 80 + (i % 2) * 45, 5 + (i // 2) * 41))
+    cards = cards.union(_to_bed(pp["bar"], 170, 5))
     # 30 Oct rebuild: the new back half and the comb; the glue-in guide lets a front half
     # printed before 30 Oct be kept
     rebuild = (_to_bed(pp["back"], 5, 5).union(_to_bed(pp["comb"], 85, 5))

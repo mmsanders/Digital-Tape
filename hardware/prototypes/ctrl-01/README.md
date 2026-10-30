@@ -87,7 +87,7 @@ Top and bottom cards go in along their 36 mm side (40 mm opening); side cards al
 | `ctrl01-plate-shell.stl` | Both halves, outer faces down, as a matched pair. **No supports.** Bridges: each slot mouth (40 mm, 2.5 mm deep); small overhangs about 1 mm at card rails |
 | `ctrl01-plate-rebuild.stl` | **30 Oct reprint**: new back half (shell settings), key comb and glue-in guide (mech settings; set per object). Comb prints spine down, no supports |
 | `ctrl01-plate-mech.stl` | Keys upright with **support under the caps only** (the cap underside is flat because it is the stop). Spare FF included. Slide lock back face down; blocker flat; key comb spine down |
-| `ctrl01-plate-cards.stl` | Flat, no supports. Also carries a spare slide lock with the rising latches (the first mech plate printed flat-topped ones) |
+| `ctrl01-plate-cards.stl` | Flat, no supports. Also carries a spare slide lock with the rising latches (the first mech plate printed flat-topped ones; mech settings) and the **new front half** (shell settings), so the blocker guide comes built in |
 
 ## Assembly
 
@@ -101,7 +101,7 @@ The check `assembly.assembly_sequence()` slides every part in along these paths,
 6. Press Stop to free anything that latched.
 7. **Front half** on; press round the rim until the eight ridges click. Coin notch on the right side to open.
 
-A front half printed before 30 Oct: glue `ctrl01-guide-retrofit.stl` in first, its long strip along the side wall, butted against the bay's top end wall and the front wall. It then sits where the new front half has the guide built in.
+Use the new front half from the cards plate. Only if keeping a front half printed before 30 Oct: glue `ctrl01-guide-retrofit.stl` in first, its long strip along the side wall, butted against the bay's top end wall and the front wall. It then sits where the new front half has the guide built in.
 
 ## What to try
 
@@ -177,7 +177,7 @@ the check that `key_v1.py` rebuilt it exactly.
 |---|---|
 | `print/ctrl01-plate-shell.stl` | `12be9974833d0f87ce83c7300ab715fa444d389c1b355184cbf426f91e534dee` |
 | `print/ctrl01-plate-mech.stl` | `53dc160019ee64c9da5e22b5248fb3a741ca6a305b1ab255c9a13c4eb6baad3d` |
-| `print/ctrl01-plate-cards.stl` | `5de983e20f38742d97c338d2a8f4a94009af63780cf4cc0a2405878e19921335` |
+| `print/ctrl01-plate-cards.stl` | `5aea90d0216fc115348fb19f3054a123608465d726c9329223a50af3389ae85b` |
 | `print/ctrl01-front.stl` | `da5874690faf963064143a80e1833f17908296bcb5378326859a6538c52ad309` |
 | `print/ctrl01-back.stl` | `ea76370520eb396d7087864168ca7693423aadceaa1e7d4eebe85b293de58323` |
 | `print/ctrl01-plate-rebuild.stl` | `9d5bea8459f2efd54aa97ff85f76e10d9c140cc8445cba8b443115ea8e7ea87f` |
