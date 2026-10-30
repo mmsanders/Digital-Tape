@@ -4,10 +4,12 @@
 
 Plates (A1 Mini, 180 x 180):
     shell  front and back halves together, so they are a matched pair; outer faces down
-    mech   the five keys upright, a spare FF, the slide lock (back face down), the blocker,
-           the key comb (spine down)
+    mech   the five keys upright, a spare FF, the slide lock (back face down), the Record
+           latch slider, the key comb (spine down)
     cards  the new front half, the five card variants (flat) and a spare slide lock
     rebuild  the new back half, the key comb and the glue-in blocker guide (30 Oct)
+    latch  31 Oct: Record latch slider, new Record and Play keys, slimmer slide lock,
+           the solid portrait card and both halves of the snap-together one
 """
 
 from __future__ import annotations
@@ -38,12 +40,15 @@ def parts() -> dict[str, cq.Workplane]:
     global _PARTS
     if _PARTS is None:
         front, back = S.halves()
-        _PARTS = {"front": front, "back": back, "comb": S.comb(), "bar": M.bar(), "blocker": M.blocker(),
+        _PARTS = {"front": front, "back": back, "comb": S.comb(), "bar": M.bar(), "latch": M.latch(),
                   "guide-retrofit": S.guide_retrofit()}
         for n in L.KEYS:
             _PARTS[f"key-{n}"] = M.key_local(n)
         for v in C.CARDS:
             _PARTS[f"card-{v}"] = C.card(v)
+        _PARTS["card-portrait"] = C.portrait_card()
+        face, back = C.snap_card()
+        _PARTS["card-snap-face"], _PARTS["card-snap-back"] = face, back
     return _PARTS
 
 
@@ -53,7 +58,10 @@ def print_poses() -> dict[str, cq.Workplane]:
         "front": p["front"],                                                   # outer face (Z 0) down
         "back": p["back"].rotate((0, 0, 0), (0, 1, 0), 180),                   # outer face (Z 29) down
         "bar": p["bar"].rotate((0, 0, 0), (1, 0, 0), 180),                     # back face down, pawls up
-        "blocker": p["blocker"],                                               # flat
+        "latch": p["latch"],                                                   # floor down
+        "card-portrait": p["card-portrait"],                                   # face up
+        "card-snap-face": p["card-snap-face"],                                 # face up, groove down
+        "card-snap-back": p["card-snap-back"],                                 # outer face down
         "comb": p["comb"].rotate((0, 0, 0), (0, 1, 0), 90),                    # spine down, fins up
         "guide-retrofit": p["guide-retrofit"],                                 # front-wall face down
     }
@@ -71,7 +79,7 @@ def plates() -> dict[str, cq.Workplane]:
     for i, n in enumerate(L.KEYS + ("ff",)):
         k = _to_bed(pp[f"key-{n}"], 8 + (i % 3) * 30, 8 + (i // 3) * 30)
         mech = k if mech is None else mech.union(k)
-    mech = mech.union(_to_bed(pp["bar"], 100, 8)).union(_to_bed(pp["blocker"], 120, 8))
+    mech = mech.union(_to_bed(pp["bar"], 100, 8)).union(_to_bed(pp["latch"], 120, 8))
     mech = mech.union(_to_bed(pp["comb"], 145, 8))
     # the card plate also carries a spare slide lock (Michael, 28 Oct: the mech plate was
     # already printing with flat-topped latches) and the new front half (30 Oct: so the
@@ -84,7 +92,12 @@ def plates() -> dict[str, cq.Workplane]:
     # printed before 30 Oct be kept
     rebuild = (_to_bed(pp["back"], 5, 5).union(_to_bed(pp["comb"], 85, 5))
                .union(_to_bed(pp["guide-retrofit"], 115, 5)))
-    return {"shell": shell, "mech": mech, "cards": cards, "rebuild": rebuild}
+    # 31 Oct: the Record latch round
+    latch = (_to_bed(pp["latch"], 5, 5).union(_to_bed(pp["key-rec"], 30, 5))
+             .union(_to_bed(pp["key-play"], 55, 5)).union(_to_bed(pp["bar"], 82, 5))
+             .union(_to_bed(pp["card-portrait"], 95, 5)).union(_to_bed(pp["card-snap-face"], 95, 46))
+             .union(_to_bed(pp["card-snap-back"], 95, 87)))
+    return {"shell": shell, "mech": mech, "cards": cards, "rebuild": rebuild, "latch": latch}
 
 
 def build(out: Path = OUT) -> list[Path]:

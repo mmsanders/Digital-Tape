@@ -1,4 +1,4 @@
-"""Gates for the CTRL-01 rig (shrunk keys, slide lock, blocker, shell, cards).
+"""Gates for the CTRL-01 rig (shrunk keys, slide lock, Record latch, shell, cards).
 Each gate has a negative control that must go red.
 
     cd hardware/prototypes/ctrl-01 && python3 -m pytest -q test_rig.py
@@ -28,7 +28,7 @@ def kin(name: str):
     return M.kinematics(name)
 
 
-@pytest.mark.parametrize("name", ["rec", "play", "ff", "rew"])
+@pytest.mark.parametrize("name", ["play", "ff", "rew"])
 def test_latch_keys_latch_on_the_ledge_with_overtravel(name):
     k = kin(name)
     assert k.latched_at is not None and k.hold_is_ledge
@@ -40,10 +40,6 @@ def test_stop_never_latches_and_frees_every_catch_in_time():
     assert k.latched_at is None
     assert k.shift_at[L.STOP_FULL_AT] >= L.STOP_SHIFT - 0.01     # bisection resolution
     assert L.STOP_SHIFT >= L.HOOK + 0.5
-
-
-def test_record_meets_the_lock_well_after_the_blocker_stops_it():
-    assert kin("rec").contact >= L.BLOCK_STOP + 0.5
 
 
 @pytest.mark.parametrize("name", L.KEYS)
@@ -72,12 +68,11 @@ def test_neighbour_gate_catches_too_much_bar_travel():
 def _sweep_states():
     out = dict(A.pressed_states())
     for n in L.KEYS:
+        if n == "rec":
+            continue                       # Record's states are in A.record_states()
         k = kin(n)
-        extra = {"play": L.TRAVEL} if n == "rec" else {}
         for d in (1.0, 2.0, 3.0, 4.0):
-            out[f"{n}@{d}"] = dict(pressed={n: d, **extra}, bar_shift=k.shift_at[d])
-    for d in (1.0, 2.0, 3.0, 4.0):
-        out[f"play+blocker@{d}"] = dict(pressed={"play": d}, bar_shift=kin("play").shift_at[d])
+            out[f"{n}@{d}"] = dict(pressed={n: d}, bar_shift=k.shift_at[d])
     return out
 
 
@@ -92,16 +87,60 @@ def test_clash_gate_catches_a_key_off_its_slot():
     assert any("ff" in (a, b) for a, b, _ in A.clashes(parts))
 
 
-# --- the blocker ------------------------------------------------------------------
+# --- the Record latch (31 Oct): Record latches to Play, never to the slide lock -----
 
-def test_blocker_stops_record_while_play_is_up():
-    assert A.clashes(A.state(pressed={"rec": L.BLOCK_STOP - 0.02})) == []
-    assert ("rec", "blocker") in [(a, b) for a, b, _ in A.clashes(A.state(pressed={"rec": L.BLOCK_STOP + 0.15}))]
+@lru_cache(None)
+def rlatch():
+    return M.record_latch()
 
 
-def test_blocker_gate_goes_quiet_once_play_has_moved_it():
-    hits = A.clashes(A.state(pressed={"rec": L.BLOCK_STOP + 0.15}, play_depth=L.TRAVEL))
-    assert ("rec", "blocker") not in [(a, b) for a, b, _ in hits]
+def test_play_hold_is_the_depth_the_latch_is_built_for():
+    assert kin("play").latched_at == pytest.approx(L.PLAY_HOLD, abs=0.05)
+
+
+def test_record_alone_meets_nothing_and_springs_back():
+    assert rlatch().alone_clear
+
+
+def test_play_brings_the_hook_past_record_without_touching_it():
+    assert rlatch().play_press_clear
+
+
+def test_record_latches_to_play_on_a_ledge():
+    r = rlatch()
+    assert r.held_at is not None and r.hold_is_ledge
+    assert L.TRAVEL - r.held_at >= 0.5                          # overtravel to snap past
+    assert r.max_push <= L.TRAVEL - L.PLAY_HOLD - 0.2           # Play has room to be nudged
+    assert r.push_slope <= 1.5                                  # Record ramps the hook aside
+
+
+def test_play_rising_frees_record_in_time():
+    assert rlatch().released_below is not None and rlatch().released_below >= 0.6
+
+
+def test_record_never_touches_the_slide_lock():
+    from OCP.BRepExtrema import BRepExtrema_DistShapeShape
+    for st in A.record_states().values():
+        parts = A.state(**st)
+        d = BRepExtrema_DistShapeShape(parts["rec"].wrapped, parts["bar"].wrapped)
+        d.Perform()
+        assert d.Value() >= 0.5
+
+
+def test_latch_gate_catches_a_toe_without_its_chamfer(monkeypatch):
+    monkeypatch.setattr(L, "TOE_CH", 0.0)
+    assert M.record_latch().push_slope > 1.5          # flat on flat: the toe would just stall
+
+
+def test_alone_gate_catches_a_hook_left_in_records_lane(monkeypatch):
+    monkeypatch.setattr(L, "HOOK_OVERLAP", -3.0)
+    assert not M.record_latch().alone_clear
+
+
+def test_release_gate_catches_a_hook_too_wide_to_clear(monkeypatch):
+    monkeypatch.setattr(L, "HOOK_W", 4.0)
+    r = M.record_latch()
+    assert r.released_below is None or r.released_below < 0.6
 
 
 # --- parts and plates ---------------------------------------------------------------
@@ -135,8 +174,13 @@ def test_keys_print_upright_with_support_only_under_the_cap(name):
 
 def test_bar_blocker_comb_and_cards_print_without_support():
     poses = BLD.print_poses()
-    for name in ["bar", "blocker", "comb", "guide-retrofit"] + [f"card-{v}" for v in C.CARDS]:
+    for name in ["bar", "latch", "comb", "guide-retrofit", "card-portrait", "card-snap-back"] + [f"card-{v}" for v in C.CARDS]:
         assert overhangs(poses[name].val()) == [], name
+    # the snap card's face half prints face up: only its groove (1.2 wide) and the bead
+    # relief above it are roofed, both bridged across less than 1.5 mm
+    k = C.SNAP
+    roofs = (k["groove_d"] - 0.01, k["bead_z"] + k["bead"] * 1.6 + 0.1)
+    assert overhangs(poses["card-snap-face"].val(), roofs) == []
 
 
 def test_overhang_gate_catches_a_reversed_catch():
@@ -183,6 +227,35 @@ def test_rib_slots_grip_every_card(s):
         assert seated(v, s).intersect(_half(s)).Volume() > 0.5, v
 
 
+def _seated_portrait(card: cq.Workplane) -> cq.Shape:
+    s = next(s for s in C.SLOTS if s.name == "RB")
+    xc = L.W + L.PROUD + (C.P_LEN - C.A) - C.P_LEN / 2
+    return card.translate((xc, C.YC, s.z[0] + s.clr - card.val().BoundingBox().zmin)).val()
+
+
+def test_portrait_cards_grip_in_the_slot_michael_chose_and_touch_only_its_ribs():
+    s = next(s for s in C.SLOTS if s.name == "RB")
+    ribs_only = seated("A", s).intersect(_half(s)).Volume()
+    face, back = C.snap_card()
+    for name, c in (("solid", C.portrait_card()), ("snap", face.union(back))):
+        v = _seated_portrait(c).intersect(_half(s)).Volume()
+        assert 0.5 < v <= ribs_only + 0.2, name
+
+
+def test_snap_card_halves_close_without_overlap_and_make_a_full_card():
+    face, back = C.snap_card()
+    assert face.val().intersect(back.val()).Volume() < 1e-3
+    bb = face.union(back).val().BoundingBox()
+    assert (bb.xlen, bb.ylen, bb.zlen) == pytest.approx((C.P_LEN, C.B, C.TH), abs=1e-3)
+
+
+def test_snap_gate_catches_a_bead_bigger_than_its_relief(monkeypatch):
+    face, _ = C.snap_card()                                  # relief cut for the 0.25 bead
+    monkeypatch.setattr(C, "SNAP", dict(C.SNAP, bead=0.45))
+    _, back = C.snap_card()                                  # tongue carrying a 0.45 bead
+    assert face.val().intersect(back.val()).Volume() > 1e-3
+
+
 def test_detent_holds_card_C_in_its_notch_and_only_C():
     s = next(s for s in C.SLOTS if s.hold == "detent")
     assert seated("C", s).intersect(_half(s)).Volume() < 1e-3
@@ -203,8 +276,8 @@ MIN_JOINT = 20.0     # mm^2: the joint spans the key's whole front face
 
 
 def test_record_finger_and_play_arm_are_joined_across_the_key_face():
-    assert M.joint_area(M._finger()) >= MIN_JOINT
-    assert M.joint_area(M._arm_and_pin()) >= MIN_JOINT
+    assert M.joint_area(M._toe_and_web()) >= MIN_JOINT
+    assert M.joint_area(M._arm_and_rail()) >= MIN_JOINT
 
 
 def test_joint_gate_catches_a_feature_hanging_on_a_sliver():
@@ -270,6 +343,6 @@ def test_glue_in_guide_clears_every_moving_part():
                 assert g.intersect(v).Volume() < 1e-3, (name, k)
 
 
-def test_glue_in_guide_gate_catches_a_guide_set_into_the_blocker():
+def test_glue_in_guide_gate_catches_a_guide_set_into_the_latch():
     g = S.guide_retrofit().translate((0.5, 0, 0)).val()        # 0.5 mm too far in
-    assert g.intersect(A.state()["blocker"]).Volume() > 1e-3
+    assert g.intersect(A.state()["latch"]).Volume() > 1e-3

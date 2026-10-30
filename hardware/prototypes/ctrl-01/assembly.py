@@ -39,7 +39,7 @@ def state(pressed: dict[str, float] | None = None, bar_shift: float = 0.0,
     for n in L.KEYS:
         parts[n] = M.key(n, pressed.get(n, 0.0)).val()
     pd = pressed.get("play", 0.0) if play_depth is None else play_depth
-    parts["blocker"] = M.blocker(pd).val()
+    parts["latch"] = M.latch(pd).val()
     return parts
 
 
@@ -61,20 +61,42 @@ def pressed_states() -> dict[str, dict]:
     """The states the rig must pass through without anything clashing.
 
     Each latch key fully down with the bar at rest (it has snapped back over the
-    ledge); Stop fully down with the bar at its full shift; Record with Play down
-    (the blocker has moved away); and the deepest bar shift any key reaches on
-    the way down, at that depth.
+    ledge); Stop fully down with the bar at its full shift; the deepest bar shift
+    any latch key reaches on the way down, at that depth; and Record through its
+    whole story with Play (record_states).
     """
     out = {"rest": dict()}
     for n in L.KEYS:
+        if n == "rec":
+            continue
         kin = M.kinematics(n)
         d_peak = max(kin.shift_at, key=lambda d: kin.shift_at[d])
-        # Record can only go deep with Play already down
-        extra = {"play": L.TRAVEL} if n == "rec" else {}
-        out[f"{n}-full"] = dict(pressed={n: L.TRAVEL, **extra}, bar_shift=kin.shift_at[L.TRAVEL])
-        out[f"{n}-peak"] = dict(pressed={n: d_peak, **extra}, bar_shift=kin.shift_at[d_peak])
-    out["play+rec"] = dict(pressed={"play": L.TRAVEL, "rec": L.TRAVEL}, bar_shift=0.0)
-    out["rec-blocked"] = dict(pressed={"rec": L.BLOCK_STOP - 0.02}, bar_shift=0.0)
+        out[f"{n}-full"] = dict(pressed={n: L.TRAVEL}, bar_shift=kin.shift_at[L.TRAVEL])
+        out[f"{n}-peak"] = dict(pressed={n: d_peak}, bar_shift=kin.shift_at[d_peak])
+    out.update(record_states())
+    return out
+
+
+def record_states() -> dict[str, dict]:
+    """Record alone; Record pushing past the hook with Play latched (Play nudged as
+    the 2D latch says); Record held; and Stop releasing both."""
+    rl = M.record_latch()
+    out = {}
+    for d in (1.0, 2.5, 4.0, L.TRAVEL):
+        out[f"rec-alone@{d}"] = dict(pressed={"rec": d})
+    _, raised = M.slider_outlines()
+    toe = M.toe_outline()
+    from shapely.affinity import translate as tr
+    for r in (1.0, 2.0, 3.0, 4.0, L.TRAVEL):
+        s = L.PLAY_HOLD
+        while tr(toe, r, 0).intersection(tr(raised, 0, s)).area > 1e-5:
+            s += 0.02
+        out[f"rec-push@{r}"] = dict(pressed={"play": s, "rec": r})
+    out["rec-held"] = dict(pressed={"play": L.PLAY_HOLD, "rec": rl.held_at})
+    stop = M.kinematics("stop")
+    for s in (3.0, 2.0, rl.released_below):
+        out[f"stop-release@{s}"] = dict(pressed={"play": s, "rec": rl.held_at, "stop": L.STOP_FULL_AT},
+                                        bar_shift=stop.shift_at[L.STOP_FULL_AT])
     return out
 
 
@@ -109,7 +131,7 @@ def assembly_sequence() -> list[tuple[str, cq.Shape, list[cq.Shape], tuple, floa
     1. Keys slide into the comb from its outer end, on the bench.
     2. The slide lock snaps into the back half's channel.
     3. The comb, keys in it, drops into the back half over the lock.
-    4. The blocker drops onto Play's pin.
+    4. The latch slider drops onto Play's rail.
     5. The front half closes over everything.
     """
     st = state()
@@ -123,6 +145,6 @@ def assembly_sequence() -> list[tuple[str, cq.Shape, list[cq.Shape], tuple, floa
         seq.append((f"key {n} into comb", st[n], [st["comb"]], (1, 0, 0), 15.0, None))
     seq.append(("slide lock into back half", st["bar"], [back], (0, 0, 1), 28.0, S.snap_lips().val()))
     seq.append(("comb with keys into back half", module, [back, st["bar"]], (0, 0, 1), 28.0, None))
-    seq.append(("blocker onto Play's pin", st["blocker"], [back, st["bar"], module], (0, 0, 1), 28.0, None))
-    seq.append(("front half", front, [st["bar"], module, st["blocker"]], (0, 0, 1), 28.0, None))
+    seq.append(("latch slider onto Play's rail", st["latch"], [back, st["bar"], module], (0, 0, 1), 28.0, None))
+    seq.append(("front half", front, [st["bar"], module, st["latch"]], (0, 0, 1), 28.0, None))
     return seq

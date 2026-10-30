@@ -75,7 +75,7 @@ PAWL_CH = 1.0                       # 45 degree chamfer on the corner the ramps 
 PAWL_RISE = 1.7                     # LADDER rev-3 Stop latch: the top rises this much toward the
                                     # far end (Michael, 28 Oct: every latch gets the Stop shape)
 PAWL_XP = (7.0, 9.4)                # x' extent: overlaps the catch (6.0..8.2) by 1.2
-BAR_X = (6.0, 12.0)
+BAR_X = (6.1, 11.9)                 # 31 Oct: 0.1 off each side (Michael shaved the body sides to fit)
 BAR_Z = (KEY_Z + PAWL_XP[1], T - WALL - 0.15)            # 22.9 .. 26.35
 BAR_Y0 = FIN_Y[0] - 1.8             # rest: the top end sits on the stop block
 BAR_TRAVEL_MAX = 2.8
@@ -84,8 +84,8 @@ SPRING_REST = 11.0                  # bar spring (pencil, 14 free / 4 solid)
 CHANNEL_CLR = 0.15
 LIP = 0.35
 
-# --- Record blocker -------------------------------------------------------------
-BLOCK_STOP = 1.2                    # Record moves this far, then lands on the blocker, while Play is up
+# --- front zone (the shell's pedestal, ground wall and front guide are sized from these) ---
+BLOCK_STOP = 1.2                    # the 27 Oct blocker: kept only for the shell features it sized
 FRONT_ZONE = (WALL, KEY_Z - STEM_XP / 2)   # Z 2.5 .. 7.5, in front of the keys
 BLOCKER_Z = (2.8, 5.6)
 ARM_Z = (5.8, KEY_Z - STEM_XP / 2)
@@ -94,6 +94,22 @@ PIN_SIDE = 1.6                      # square pin turned 45 degrees: its flats ri
 PIN_Y = key_y("play") - 5.5         # 42.5
 PIN_X_REST = 10.2
 SLOT_CLR = 0.15
+
+# --- Record latch (31 Oct): Record latches to Play through a slider Play drives -----
+# Record no longer has a catch, so it never moves the slide lock and cannot pop Play.
+PLAY_HOLD = 3.8                     # Play's latched depth (mech.kinematics("play").latched_at)
+LATCH_FLOOR_Z = (2.7, 3.5)          # the slider's floor; Record's toe passes over it
+LATCH_TOP = BLOCKER_Z[1]            # 5.6: the hook and the slot walls, under the pedestal
+TOE_Z = (3.7, 5.8)                  # Record's toe hangs from its web (WEB_Z)
+WEB_Z = (5.8, KEY_Z - STEM_XP / 2 - 0.2)
+TOE_X = (KEY_BOTTOM - 2.4, KEY_BOTTOM)                 # 9.1 .. 11.5 at rest
+TOE_Y = (key_y("rec") + 7.0, key_y("rec") + 9.0)       # 33 .. 35, inside the pedestal's relief
+TOE_CH = 1.0                        # chamfer on the toe's leading inner corner: pushes the hook aside
+HOOK_OVERLAP = 0.8                  # hook over the toe's back face, Play latched
+HOOK_X = (TOE_X[1] + 0.3, TOE_X[1] + 1.9)              # 11.8 .. 13.4
+HOOK_W = 1.6
+RAIL_C = (8.8, key_y("play") - 3.0)  # Play's diagonal rail, centre at rest (device X, Y)
+RAIL_L, RAIL_T = 4.0, 1.6
 
 # --- bay (the sectioned-off transport) -----------------------------------------
 SPINE_X = (KEY_BOTTOM + TRAVEL + 2.8, KEY_BOTTOM + TRAVEL + 4.8)   # 19.3 .. 21.3
@@ -104,6 +120,7 @@ BACKSTOP_T = 1.2                    # back-half wall behind the spine; takes the
 
 # --- cards and slots ------------------------------------------------------------
 CARD = (40.0, 36.0, 7.0)            # GameCube class (owner layout, 24 Oct)
+CARD_P_LEN = 42.0                   # 31 Oct portrait cards: 2 mm taller, so 5 mm proud of the side slots
 PROUD = 3.0
 POCKET_WALL = 1.2
 RAIL_OVER = 1.2
