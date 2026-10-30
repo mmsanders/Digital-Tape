@@ -1,6 +1,6 @@
 # Phase 2 ledger — every exit criterion, one row each
 
-**Opened by PM622 (ADR-195); updated PM627, 29 October 2026 PDT ([ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued)).**
+**Opened by PM622 (ADR-195); updated PM630, 30 October 2026 PDT ([ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued)).**
 This is the progress record for Phase 2 closeout. Each round must close named rows. Package
 criteria are in [WP-14](PACKAGES/WP-14.md), [WP-16](PACKAGES/WP-16.md) and [WP-15](PACKAGES/WP-15.md).
 The exit gate is in [the Phase 2 plan](PHASE2-PLAN.md#1-what-phase-2-delivers).
@@ -42,15 +42,14 @@ Own-host PASS: an integrated-source static gate with detecting mutants, plus def
 | # | State | Evidence | Next |
 |---|---|---|---|
 | Make path (S3) | DONE | Cleared exact `5101e3f3` (#364 final), merged `ea54a41`, 130 checks. S3 runner 31 Linux plus 10 Windows rows; query, census and own-p1 supplements | — |
-| G1 No format logic | READY FOR C2 | Static check and controls; members `asInvoker`; only tapectl launched via `runas` | C2: observe the UAC prompt names tapectl only |
-| G3 Plain errors | READY FOR C2 | 28 rows (16 real-child, 12 app-origin) through the production bridge, stderr-independent | C2: file drop, too long, non-music, UAC decline, mid-make pull and remake |
-| G4 No lists | READY FOR C2 | Screen component and bridge tests | C2 screenshots against APP-1 §2 |
-| G5 Installs | READY FOR C2 | ZIP `b8a689cf…` identity checked | C2: install and run on Windows 11 |
-| G2 Unaided test | TO DO | [Protocol](WP15-G2-PROTOCOL.md) | After C2 passes |
+| G1 No format logic | PASSED | Static check and controls; C2: unelevated app, one UAC prompt per Make (#370) | — |
+| G3 Plain errors | PASSED | 28 bridge rows; C2: file drop, too long, non-music, UAC decline, mid-make pull and remake (#370). F370-1 exempted (ADR-197) | — |
+| G4 No lists | PASSED | C2 screens: four states, no lists; label/details stay usable under polling (#370 addendum) | — |
+| G5 Installs | PASSED | C2: exact ZIP on Windows 11 Home 25H2 build 26200.9711; real cartridge verify OK, dumps identical | — |
+| G2 Unaided test | TO DO | [Protocol](WP15-G2-PROTOCOL.md); same ZIP `b8a689cf` | Michael [#631](https://github.com/mmsanders/Digital-Tape/issues/631) |
 
-**Live issues:** Michael [#628](https://github.com/mmsanders/Digital-Tape/issues/628) (C2), Verification
-[#370](https://github.com/mmsanders/digital-tape-verification/issues/370) (stale-assertion cleanup,
-then the C2 disposition).
+**Live issue:** Michael [#631](https://github.com/mmsanders/Digital-Tape/issues/631) (G2). C2 is
+complete (#370).
 
 **Accepted Phase 2 limitations (ADR-196):**
 - The elevated launch of `tapectl.exe` from a user-writable folder can race its hash check
@@ -63,8 +62,8 @@ then the C2 disposition).
 
 | Item | State | Next |
 |---|---|---|
-| 1. WP-14/15/16 accepted | WP-14, WP-16 DONE; WP-15 TO DO | C2, then G2 |
-| 2. G2 witnessed | TO DO | After C2 |
+| 1. WP-14/15/16 accepted | WP-14, WP-16 DONE; WP-15 needs only G2 | G2 |
+| 2. G2 witnessed | TO DO | #631 |
 | 3. Goldens and Phase 1 replays green on main | PASSING in CI | Re-checked at C4 |
 | 4. Q-P2-1 decided | DONE | ADR-195 §4 |
 | 5. Host scope frozen | TO DO | PM, at C4 |

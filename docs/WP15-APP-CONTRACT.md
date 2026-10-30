@@ -191,7 +191,9 @@ child exit code plus a report ID, never from free text. An **app-origin** row (m
 from a named app event (P2V15-004): `DROP_NOT_FOLDER`, `SPAWN_FAILED`, `ELEVATION_DECLINED` or
 `CARD_RECHECK_MISMATCH`. App-origin events are tested per §7 (ADR-195). No shipping switch
 fakes either kind. Every Problem state also has **Show details**, which shows
-the raw stderr as copyable text for a grown-up.
+the raw stderr as copyable text for a grown-up. **Clarified by ADR-197:** a rejected drop
+(`DROP_NOT_FOLDER`) is a notice, not a Problem state: it starts no child and has no diagnostic,
+so it shows its sentence without Show details.
 
 | When | Message |
 |---|---|
