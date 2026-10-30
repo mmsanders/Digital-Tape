@@ -1,6 +1,6 @@
 # Independent verification integration
 
-## Current boundary — PM627 (ADR-196)
+## Current boundary — PM630 (ADR-197)
 
 Phase 1 is 36/36; Phase 2 is 11/12 (WP-14 and WP-16 accepted). From PM622 on, remaining acceptance follows ADR-195
 (outcome tests plus negative controls) and is tracked row by row in
@@ -30,10 +30,12 @@ merged so far. They keep their recorded scope.
 | #362/#363 / `5512a2d0` |361 qualified the session method in Windows CI, then disposed the single618 native session: bounded PASS. Window opened/closed normally, two first-party `tapectl cards` polls returned offered0, app parent at Medium integrity. No rung change. |
 | #365 / `48489cf9` |364 Stage 1: **WP-14 ACCEPTED** (A6 by PNY run plus compiled 32-bit offset mutant) and **WP-16 ACCEPTED** (I1–I8, own-host). WP-15 tests and C2 checklist authored. |
 | #366–#369 / `3ff22aae` |364 Stage 2: three findings over four passes (query-failure handling, Windows census, NOT_READY), all corrected. Exact `5101e3f3` cleared; merged `ea54a41` identical tree, 130 checks. C2 candidate ZIP `b8a689cf…`. A4 restored on integration. |
+| #371 / `2a638434` |370 Stage A: S2-era Make-disabled wording superseded; current Bridge readiness 72/72 with constant-false/true controls rejected. |
+| #372/#373 / `1938e651` |370 Stage B: C2 real-card session PASS (verify OK first and remake, dumps byte-identical, pull/remake, G1/G5, G3 messages, no lists, polling usability). Sole hold F370-1 exempted by ADR-197. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Next: Michael's C2 session (#628), then Verification #370 disposes G1/G3/G4/G5 on the exact
-candidate. G2 follows [the G2 protocol](WP15-G2-PROTOCOL.md). See [ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued).
+Next: G2 (#631), Michael's witnessed unaided record per [the G2 protocol](WP15-G2-PROTOCOL.md).
+See [ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 

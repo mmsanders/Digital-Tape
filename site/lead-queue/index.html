@@ -293,7 +293,7 @@
     const PHASE2 = {
       phase: 2,
       title: "A folder of music becomes a cartridge on Windows 11",
-      asOf: "PM627 \u00b7 29 October 2026 PDT. Round C1 done: WP-14 and WP-16 independently accepted (Verification #364); tapectl make and the Make button built, cleared and merged at ea54a41. Next: Michael's C2 real-card session with the cleared candidate, then the unaided G2 test.",
+      asOf: "PM630 \u00b7 30 October 2026 PDT. C2 passed: Michael made a real cartridge through the app with the cleared candidate; verify OK, dumps identical, pull and remake correct, no lists. WP-15 needs only the unaided G2 test (#631).",
       start: "Phase 2 opened · 5 Oct 2026",
       goal: "Milestone: a family member makes a playable cartridge from a folder, unaided.",
       stages: [
@@ -302,7 +302,7 @@
         { id: "WP-16", name: "Ingest: decode, level, join · P2-R2", rung: 4,
           note: "ACCEPTED by Verification #364 (Stage 1 48489cf9). I1-I8 pass on integrated ingest; own-host passes on a static gate with detecting mutants plus default-invoker (unelevated) launch." },
         { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 3,
-          note: "Make built, cleared and merged (ea54a41, 130 checks green) after three Verification correction rounds on query-failure handling. G1/G3/G4/G5 tests on main; 28 G3 rows pass through the production bridge with real children. Rung 3, not acceptance: G1/G3/G4/G5 close on Michael's C2 real-card session, then G2." }
+          note: "Make built and merged (ea54a41). C2 real-card session passed (Verification #370): G1, G3, G4 and G5 complete; F370-1 exempted by ADR-197. Rung 3 until the unaided G2 test (#631) is witnessed." }
       ],
       context: "Phase 2 closeout follows ADR-195 and the Phase 2 ledger (docs/PHASE2-LEDGER.md). C1 is complete. Remaining path: Michael's real-card C2 session, final WP-15 disposition, the unaided G2 test, exit ADR. Q-P2-1(b) is ruled: port-level batching, engine unchanged. Hardware and firmware stay parked; WP-38 is not taken.",
       exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."

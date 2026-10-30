@@ -4728,3 +4728,34 @@ Michael #628 and Verification #370 Stage B. The G2 procedure is [WP15-G2-PROTOCO
 
 **Rationale.** Record accepted results promptly and keep the C2 candidate stable.
 **Reversal cost.** Low: any limitation can be scheduled later, and rungs follow independent records.
+
+## ADR-197 — C2 disposed; rejected-drop notice needs no Show details; G2 issued
+**Date:** 2026-10-30 PDT
+**Status:** ADOPTED by PM (PM630, [#630](https://github.com/mmsanders/Digital-Tape/issues/630), Michael's activation).
+
+**C2 (Verification #370, Stage B `12187bb8`, polling addendum `1938e651`).** Michael ran the
+checklist on Windows 11 Home 25H2 (build 26200.9711), from an administrator account, with the exact
+cleared ZIP `b8a689cf…`. All three executables matched.
+- First and remake `verify`: OK, exit 0. All four dumps exited 0 and were canonical and
+  byte-identical (A = B, first = remake).
+- The mid-make pull showed the card-interrupted message with no automatic retry. The remake
+  succeeded with one new UAC prompt.
+- Verification passed G1 and G5, the required G3 messages and recovery, no lists, and the four
+  screen states. Label editing and the details view stayed usable under polling (Michael's
+  follow-up).
+- SmartScreen and the unknown-publisher warning were recorded. Unsigned builds are allowed (G5).
+
+**F370-1, disposed as intended behaviour, no correction.** The single-song drop shows the correct
+sentence, "Drop a folder of music, not single songs.", with no Show details button. APP-1 §6
+gives Show details to Problem states so a grown-up can copy raw stderr. A rejected drop starts no
+child and has no diagnostic. Verification #364 (G3-D1) already ruled that it has no stderr to
+show, and adding an empty details control would add a control without adding information. APP-1
+§6 now says this explicitly. No rebuild: G2 uses the same cleared candidate.
+
+**Gate state.** Verification's #370 hold rested only on F370-1 pending this PM disposition, so
+WP-15 G1, G3, G4 and G5 are complete on exact `5101e3f3` / ZIP `b8a689cf`. WP-15 stays at rung 3
+until G2. G2 is issued to Michael as [#631](https://github.com/mmsanders/Digital-Tape/issues/631).
+
+**Rationale.** The child should see the same plain sentence; a details control with nothing in it
+is noise. **Reversal cost:** a small presentation change plus re-clearance if Michael prefers the
+control.
