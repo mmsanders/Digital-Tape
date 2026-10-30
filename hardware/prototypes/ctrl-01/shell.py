@@ -1,10 +1,11 @@
 """CTRL-01 shell: the full 68 x 110 x 29 mm case, split at mid-depth.
 
 The back half is the chassis. Inside it the transport is sectioned off in its
-own bay (Michael, 26 Oct: "lock it in" so it carries forward unchanged): a spine
-wall closes the bay on the inside, and everything that locates a key, the slide
-lock or the blocker hangs off the back half. The front half only adds flat faces
-parallel to the seam, the partition that closes the bay, and clearance.
+own bay (Michael, 26 Oct: "lock it in" so it carries forward unchanged). The keys
+ride in a separate comb (spine, fins, spring bosses) that drops into the back half
+after the slide lock (30 Oct). The back half locates the lock, the comb and the
+blocker; the front half adds flat faces parallel to the seam, the partition that
+closes the bay and clamps the comb, and clearance.
 
 The rest of the case is the card-slot test (cards.py).
 """
@@ -90,35 +91,61 @@ def key_apertures() -> cq.Workplane:
 
 # --- the transport bay ---------------------------------------------------------
 
-def bay_back() -> cq.Workplane:
-    """Back-half bay: spine, end walls, fins with rail slots, spring bosses, bar
-    channel with lips, bar stop, spring housing, and the blocker's pedestal."""
+def comb() -> cq.Workplane:
+    """The key comb: spine, the fins between the keys with their rail tunnels, and the
+    key-spring bosses. A separate part (Michael, 30 Oct: the guides printed on the back
+    half covered the slide lock, and the closed tunnels trapped the keys). The keys
+    slide into it from the outer end on the bench; the comb then drops into the back
+    half over the slide lock, located by the end walls and a backstop wall, and the
+    front half's partition clamps it."""
     s0, s1 = L.SPINE_X
     y0, y1 = L.BAY_Y
+    c = L.COMB_CLR
     z_key_front = L.KEY_Z - L.STEM_XP / 2                         # 7.5
-    parts = [
-        _box(s0, s1, y0, y1, z_key_front, L.T - L.WALL + 0.01),   # spine
-        _box(L.WALL - 0.01, s1, y0, y0 + 1.5, L.SEAM, L.T - L.WALL + 0.01),
-        _box(L.WALL - 0.01, s1, y1 - 1.5, y1, L.SEAM, L.T - L.WALL + 0.01),
-    ]
+    parts = [_box(s0, s1, y0 + 1.5 + c, y1 - 1.5 - c, z_key_front, L.T - L.WALL - c)]
     fin_z1 = L.KEY_Z + L.PAWL_XP[0] - 0.2                          # stops short of the pawls (20.3)
     half = (L.PITCH - L.STEM_YP) / 2 - L.SLIDE_CLR                 # 1.85
     slot_x1 = L.KEY_BOTTOM + L.TRAVEL + 0.5
     rz0, rz1 = L.KEY_Z - L.RAIL_W / 2 - L.SLIDE_CLR, L.KEY_Z + L.RAIL_W / 2 + L.SLIDE_CLR
     for b in L.FIN_Y:
-        fin = _box(L.WALL, s0 + 0.01, b - half, b + half, z_key_front, fin_z1)
-        for c in (b - L.PITCH / 2, b + L.PITCH / 2):
-            name = next((n for n in L.KEYS if abs(L.key_y(n) - c) < 1e-6), None)
+        fin = _box(L.WALL + c, s0 + 0.01, b - half, b + half, z_key_front, fin_z1)
+        for yc in (b - L.PITCH / 2, b + L.PITCH / 2):
+            name = next((n for n in L.KEYS if abs(L.key_y(n) - yc) < 1e-6), None)
             if name is None:
                 continue
-            s = 1 if c > b else -1
-            yy = (c - s * (L.STEM_YP / 2 + L.RAIL_P + L.SLIDE_CLR), c - s * (L.STEM_YP / 2))
+            sgn = 1 if yc > b else -1
+            yy = (yc - sgn * (L.STEM_YP / 2 + L.RAIL_P + L.SLIDE_CLR), yc - sgn * (L.STEM_YP / 2))
             fin = fin.cut(_box(L.WALL - 1, slot_x1, min(yy), max(yy), rz0, rz1))
         parts.append(fin)
     for n in L.KEYS:
-        boss = (cq.Workplane("YZ", origin=(s0 - L.SPRING_BOSS_L, 0, 0))
-                .center(L.key_y(n), L.KEY_Z).circle(L.BOSS_D / 2).extrude(L.SPRING_BOSS_L + 0.01))
-        parts.append(boss)
+        parts.append(cq.Workplane("YZ", origin=(s0 - L.SPRING_BOSS_L, 0, 0))
+                     .center(L.key_y(n), L.KEY_Z).circle(L.BOSS_D / 2).extrude(L.SPRING_BOSS_L + 0.01))
+    out = parts[0]
+    for p in parts[1:]:
+        out = out.union(p)
+    return out
+
+
+def snap_lips() -> cq.Workplane:
+    """The 0.35 mm lips the slide lock snaps past: interference on the way in is intended."""
+    bx0, bx1 = L.BAR_X
+    cz = L.BAR_Z[0] - 0.15 - 0.2
+    return (_box(bx0 - L.CHANNEL_CLR - 0.01, bx0 - L.CHANNEL_CLR + L.LIP, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2)
+            .union(_box(bx1 + L.CHANNEL_CLR - L.LIP, bx1 + L.CHANNEL_CLR + 0.01, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2)))
+
+
+def bay_back() -> cq.Workplane:
+    """Back-half bay: end walls, the backstop wall that takes the comb's spring load,
+    bar channel with lips, bar stop, spring housing, and the blocker's pedestal."""
+    s0, s1 = L.SPINE_X
+    y0, y1 = L.BAY_Y
+    c = L.COMB_CLR
+    parts = [
+        _box(L.WALL - 0.01, s1, y0, y0 + 1.5, L.SEAM, L.T - L.WALL + 0.01),
+        _box(L.WALL - 0.01, s1, y1 - 1.5, y1, L.SEAM, L.T - L.WALL + 0.01),
+        _box(s1 + c, s1 + c + L.BACKSTOP_T, y0, y1, L.SEAM, L.T - L.WALL + 0.01),
+    ]
+    half = (L.PITCH - L.STEM_YP) / 2 - L.SLIDE_CLR                 # 1.85
     # bar channel: two walls up from the back wall, lips over the bar's front edges
     bx0, bx1 = L.BAR_X
     cz = L.BAR_Z[0] - 0.15 - 0.2                                    # lip underside 0.15 in front of the bar
@@ -126,8 +153,7 @@ def bay_back() -> cq.Workplane:
     parts += [
         _box(bx0 - L.CHANNEL_CLR - 1.0, bx0 - L.CHANNEL_CLR, wy0, wy1, cz, L.T - L.WALL + 0.01),
         _box(bx1 + L.CHANNEL_CLR, bx1 + L.CHANNEL_CLR + 1.0, wy0, wy1, cz, L.T - L.WALL + 0.01),
-        _box(bx0 - L.CHANNEL_CLR - 0.01, bx0 - L.CHANNEL_CLR + L.LIP, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2),
-        _box(bx1 + L.CHANNEL_CLR - L.LIP, bx1 + L.CHANNEL_CLR + 0.01, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2),
+        snap_lips(),
         _box(bx0 - L.CHANNEL_CLR, bx1 + L.CHANNEL_CLR, wy0, L.BAR_Y0 - 0.15, cz, L.T - L.WALL + 0.01),
     ]
     # spring housing: bore along Y, the spring's seat SPRING_REST below the bar's end at rest
@@ -137,13 +163,12 @@ def bay_back() -> cq.Workplane:
     bore = (cq.Workplane("XZ", origin=(0, h0 - 1, 0)).center(9.0, L.BAR_SPRING_Z)
             .circle(2.5).extrude(-(bar_end + L.SPRING_REST - h0 + 1)))
     parts.append(housing.cut(bore))
-    # blocker pedestal in the gap slot, with relief for Record's finger
-    gy0, gy1 = L.FIN_Y[1] + half, L.FIN_Y[2] - half
-    ped = _box(bx1 + L.CHANNEL_CLR + 1.0, s0, gy0, gy1, L.BLOCKER_Z[1] + 0.2, L.T - L.WALL + 0.01)
+    # blocker pedestal in the gap slot, with relief for Record's finger; clear of the comb
+    gy0, gy1 = L.FIN_Y[1] + half + c, L.FIN_Y[2] - half - c
+    ped = _box(bx1 + L.CHANNEL_CLR + 1.0, s0 - c, gy0, gy1, L.BLOCKER_Z[1] + 0.2, L.T - L.WALL + 0.01)
     ped = ped.cut(_box(7.0, 17.3, gy0 - 0.1, 35.3, 2.5, L.FINGER_Z[1] + 0.2))
-    ground = _box(17.2, 18.7, 33.4, gy1, L.BLOCKER_Z[0], L.BLOCKER_Z[1] + 0.21)
-    column = _box(7.0, 8.0, 36.0, gy1 + 0.01, L.BLOCKER_Z[0], fin_z1)
-    parts += [ped, ground, column]
+    ground = _box(17.2, 18.7, gy0, gy1, L.BLOCKER_Z[0], L.BLOCKER_Z[1] + 0.21)
+    parts += [ped, ground]
     out = parts[0]
     for p in parts[1:]:
         out = out.union(p)
@@ -151,15 +176,17 @@ def bay_back() -> cq.Workplane:
 
 
 def bay_front() -> cq.Workplane:
-    """Front-half bay: the partition and end walls that close the bay, and flat lands
-    on the front of FF, Rew and Stop."""
+    """Front-half bay: the partition and end walls that close the bay, the blocker's
+    inner guide, and flat lands on the front of FF, Rew and Stop."""
     s0, s1 = L.SPINE_X
     y0, y1 = L.BAY_Y
     z_key_front = L.KEY_Z - L.STEM_XP / 2
     parts = [
         _box(s0, s1, y0, y1, L.WALL - 0.01, z_key_front - 0.1),
-        _box(L.WALL - 0.01, s0, y0, y0 + 1.5, L.WALL - 0.01, L.SEAM),     # the spine closes the rest
-        _box(L.WALL - 0.01, s0, y1 - 1.5, y1, L.WALL - 0.01, L.SEAM),
+        _box(L.WALL - 0.01, s1, y0, y0 + 1.5, L.WALL - 0.01, L.SEAM),
+        _box(L.WALL - 0.01, s1, y1 - 1.5, y1, L.WALL - 0.01, L.SEAM),
+        # the blocker's inner guide (it hung from a fin before the comb came out)
+        _box(7.0, 8.0, 36.0, L.FIN_Y[2] - 2.0, L.WALL - 0.01, L.BLOCKER_Z[1] + 0.1),
         _box(s0, s1, y0, y0 + 1.5, L.WALL - 0.01, z_key_front - 0.1),
         _box(s0, s1, y1 - 1.5, y1, L.WALL - 0.01, z_key_front - 0.1),
     ]

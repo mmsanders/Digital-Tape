@@ -4,7 +4,8 @@
 
 Plates (A1 Mini, 180 x 180):
     shell  front and back halves together, so they are a matched pair; outer faces down
-    mech   the five keys upright, a spare FF, the slide lock (back face down), the blocker
+    mech   the five keys upright, a spare FF, the slide lock (back face down), the blocker,
+           the key comb (spine down)
     cards  the five card variants, flat, and a spare slide lock
 """
 
@@ -36,7 +37,7 @@ def parts() -> dict[str, cq.Workplane]:
     global _PARTS
     if _PARTS is None:
         front, back = S.halves()
-        _PARTS = {"front": front, "back": back, "bar": M.bar(), "blocker": M.blocker()}
+        _PARTS = {"front": front, "back": back, "comb": S.comb(), "bar": M.bar(), "blocker": M.blocker()}
         for n in L.KEYS:
             _PARTS[f"key-{n}"] = M.key_local(n)
         for v in C.CARDS:
@@ -51,6 +52,7 @@ def print_poses() -> dict[str, cq.Workplane]:
         "back": p["back"].rotate((0, 0, 0), (0, 1, 0), 180),                   # outer face (Z 29) down
         "bar": p["bar"].rotate((0, 0, 0), (1, 0, 0), 180),                     # back face down, pawls up
         "blocker": p["blocker"],                                               # flat
+        "comb": p["comb"].rotate((0, 0, 0), (0, 1, 0), 90),                    # spine down, fins up
     }
     for n in L.KEYS:
         out[f"key-{n}"] = p[f"key-{n}"]                                        # upright
@@ -67,6 +69,7 @@ def plates() -> dict[str, cq.Workplane]:
         k = _to_bed(pp[f"key-{n}"], 8 + (i % 3) * 30, 8 + (i // 3) * 30)
         mech = k if mech is None else mech.union(k)
     mech = mech.union(_to_bed(pp["bar"], 100, 8)).union(_to_bed(pp["blocker"], 120, 8))
+    mech = mech.union(_to_bed(pp["comb"], 145, 8))
     cards = None
     for i, v in enumerate(C.CARDS):
         c = _to_bed(pp[f"card-{v}"], 5 + (i % 2) * 48, 5 + (i // 2) * 44)

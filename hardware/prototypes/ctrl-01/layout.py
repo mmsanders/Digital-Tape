@@ -99,6 +99,8 @@ SLOT_CLR = 0.15
 SPINE_X = (KEY_BOTTOM + TRAVEL + 2.8, KEY_BOTTOM + TRAVEL + 4.8)   # 19.3 .. 21.3
 BAY_Y = (13.5, 105.0)
 SPRING_BOSS_L = 2.0
+COMB_CLR = 0.15                     # comb to back half, every side (FIT-01 slide clearance)
+BACKSTOP_T = 1.2                    # back-half wall behind the spine; takes the key springs
 
 # --- cards and slots ------------------------------------------------------------
 CARD = (40.0, 36.0, 7.0)            # GameCube class (owner layout, 24 Oct)

@@ -18,6 +18,7 @@ import build as BLD
 import cards as C
 import layout as L
 import mech as M
+import shell as S
 
 
 # --- latch behaviour (2D, the key against the pawl) ------------------------------
@@ -132,9 +133,9 @@ def test_keys_print_upright_with_support_only_under_the_cap(name):
     assert overhangs(M.key_local(name).val(), KEY_ALLOWED) == []
 
 
-def test_bar_blocker_and_cards_print_without_support():
+def test_bar_blocker_comb_and_cards_print_without_support():
     poses = BLD.print_poses()
-    for name in ["bar", "blocker"] + [f"card-{v}" for v in C.CARDS]:
+    for name in ["bar", "blocker", "comb"] + [f"card-{v}" for v in C.CARDS]:
         assert overhangs(poses[name].val()) == [], name
 
 
@@ -231,3 +232,29 @@ def test_rise_gate_catches_the_flat_topped_stub():
     stub = [(e, top - L.PAWL_H), (e, top - L.PAWL_CH), (e + L.PAWL_CH, top), (e + L.PAWL_LEN, top),
             (e + L.PAWL_LEN, 0.0), (e + 1.5, 0.0), (e + 1.5, top - L.PAWL_H)]
     assert _rises_toward_far_end(stub) < 1.5
+
+
+# --- every part has a way in, in build order ----------------------------------------
+
+@lru_cache(None)
+def _sequence():
+    return A.assembly_sequence()
+
+
+@pytest.mark.parametrize("i", range(9), ids=lambda i: f"step{i + 1}")
+def test_every_part_has_a_clear_path_in(i):
+    name, part, obstacles, direction, distance, allowed = _sequence()[i]
+    assert A.path_hits(part, obstacles, direction, distance, allowed) == [], name
+
+
+def test_sequence_covers_every_part():
+    assert len(_sequence()) == 9      # five keys, lock, comb, blocker, front half
+
+
+def test_path_gate_catches_the_30_oct_back_half():
+    # the printed back half had the comb built in: the lock could not get under it
+    st = A.state()
+    old_back = st["back"].fuse(st["comb"])
+    assert A.path_hits(st["bar"], [old_back], (0, 0, 1), 28.0, S.snap_lips().val()) != []
+    # and a key could not drop into its closed rail tunnels
+    assert A.path_hits(st["ff"], [old_back], (0, 0, 1), 28.0) != []

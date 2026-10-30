@@ -29,6 +29,7 @@ The real 68 × 110 × 29 mm case, split at mid-depth, with:
 | Stop | No ledge. One even ramp, 30° from the press direction, then a flat that runs to the shoulder |
 | Record | **Blocker in the shell, moved by Play** (27 Oct). Record latches on the slide lock like every key, but while Play is up a blocker stops it after 1.2 mm. Play's 45° pin slides the blocker out of the way as Play goes down and pulls it back as Play comes up. A firm press on Record goes into the shell, not into Play. (The first proposal hung the gate on Play itself; a hard press on Record would have pushed Play down.) |
 | Slide lock | Thick latches with the LADDER Stop-tab shape (28 Oct): catch corner and chamfer as before, then the top rises 1.7 mm toward the far end. Length stays 3.9 mm, not LADDER's 7, because at 11 mm pitch a longer latch would meet the next key's catch at full lock travel. Prints back face down |
+| Key comb | **Separate part** (30 Oct). The printed back half had the guides built in: the slide lock could not get under them and the keys were trapped in closed rail tunnels. Keys slide into the comb on the bench; the comb drops in over the lock. Generator and gates updated; **`print/` STLs not yet regenerated** (drawings with Michael for review) |
 | Shell | Full size, back half is the chassis: everything that locates a part is on it; the front half adds flat faces and clearance |
 | Solenoid | None |
 | Files | Generator, tests and STLs committed here |

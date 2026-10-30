@@ -12,6 +12,7 @@ import mech as M
 import shell as S
 
 _HALVES = None
+_COMB = None
 
 
 def halves():
@@ -21,12 +22,19 @@ def halves():
     return _HALVES
 
 
+def comb():
+    global _COMB
+    if _COMB is None:
+        _COMB = S.comb()
+    return _COMB
+
+
 def state(pressed: dict[str, float] | None = None, bar_shift: float = 0.0,
           play_depth: float | None = None) -> dict[str, cq.Shape]:
     """All parts placed. `pressed` maps key name to press depth."""
     pressed = pressed or {}
     front, back = halves()
-    parts = {"front": front.val(), "back": back.val(),
+    parts = {"front": front.val(), "back": back.val(), "comb": comb().val(),
              "bar": M.bar(bar_shift).val()}
     for n in L.KEYS:
         parts[n] = M.key(n, pressed.get(n, 0.0)).val()
@@ -68,3 +76,53 @@ def pressed_states() -> dict[str, dict]:
     out["play+rec"] = dict(pressed={"play": L.TRAVEL, "rec": L.TRAVEL}, bar_shift=0.0)
     out["rec-blocked"] = dict(pressed={"rec": L.BLOCK_STOP - 0.02}, bar_shift=0.0)
     return out
+
+
+# --- assembly: every part has a way in -------------------------------------------
+
+STEP = 0.5      # every part and obstacle is at least 1 mm thick along its path
+
+
+def path_hits(part: cq.Shape, obstacles: list[cq.Shape], direction: tuple[float, float, float],
+              distance: float, allowed: cq.Shape | None = None) -> list[tuple[float, float]]:
+    """Slide `part` into its final place along `direction`, starting `distance` back,
+    and report (offset, volume) wherever it overlaps an obstacle. `allowed` is
+    material the part is meant to snap past (the slide lock's lips)."""
+    if allowed is not None:
+        obstacles = [ob.cut(allowed) for ob in obstacles]
+    hits = []
+    n = int(distance / STEP) + 1
+    for i in range(n, 0, -1):
+        d = i * STEP
+        p = part.translate(cq.Vector(*(-c * d for c in direction)))
+        for ob in obstacles:
+            v = p.intersect(ob).Volume()
+            if v > 1e-3:
+                hits.append((d, round(v, 3)))
+                break
+    return hits
+
+
+def assembly_sequence() -> list[tuple[str, cq.Shape, list[cq.Shape], tuple, float, cq.Shape | None]]:
+    """The build, in order: (step, moving part, what is already there, direction, distance, allowed).
+
+    1. Keys slide into the comb from its outer end, on the bench.
+    2. The slide lock snaps into the back half's channel.
+    3. The comb, keys in it, drops into the back half over the lock.
+    4. The blocker drops onto Play's pin.
+    5. The front half closes over everything.
+    """
+    st = state()
+    front, back = st["front"], st["back"]
+    keys = [st[n] for n in L.KEYS]
+    module = st["comb"]
+    for k in keys:
+        module = module.fuse(k)
+    seq = []
+    for n in L.KEYS:
+        seq.append((f"key {n} into comb", st[n], [st["comb"]], (1, 0, 0), 15.0, None))
+    seq.append(("slide lock into back half", st["bar"], [back], (0, 0, 1), 28.0, S.snap_lips().val()))
+    seq.append(("comb with keys into back half", module, [back, st["bar"]], (0, 0, 1), 28.0, None))
+    seq.append(("blocker onto Play's pin", st["blocker"], [back, st["bar"], module], (0, 0, 1), 28.0, None))
+    seq.append(("front half", front, [st["bar"], module, st["blocker"]], (0, 0, 1), 28.0, None))
+    return seq
