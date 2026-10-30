@@ -175,6 +175,19 @@ def bay_back() -> cq.Workplane:
     return out
 
 
+GUIDE_XY = (8.0, 36.0, L.FIN_Y[2] - 2.0)      # x1, y0, y1 of the blocker's inner guide
+GUIDE_Z1 = L.BLOCKER_Z[1] + 0.1
+
+
+def guide_retrofit() -> cq.Workplane:
+    """The blocker guide as a glue-in, for a front half printed before 30 Oct. A low
+    strip runs from the guide to the bay end wall, so the part locates itself on the
+    end wall, the side wall and the front wall."""
+    x1, gy0, gy1 = GUIDE_XY
+    g = _box(L.WALL, x1, gy0, gy1, L.WALL, GUIDE_Z1)
+    return g.union(_box(L.WALL, 5.0, L.BAY_Y[0] + 1.5 + 0.05, gy0 + 0.01, L.WALL, L.WALL + 1.0))
+
+
 def bay_front() -> cq.Workplane:
     """Front-half bay: the partition and end walls that close the bay, the blocker's
     inner guide, and flat lands on the front of FF, Rew and Stop."""
@@ -185,8 +198,9 @@ def bay_front() -> cq.Workplane:
         _box(s0, s1, y0, y1, L.WALL - 0.01, z_key_front - 0.1),
         _box(L.WALL - 0.01, s1, y0, y0 + 1.5, L.WALL - 0.01, L.SEAM),
         _box(L.WALL - 0.01, s1, y1 - 1.5, y1, L.WALL - 0.01, L.SEAM),
-        # the blocker's inner guide (it hung from a fin before the comb came out)
-        _box(7.0, 8.0, 36.0, L.FIN_Y[2] - 2.0, L.WALL - 0.01, L.BLOCKER_Z[1] + 0.1),
+        # the blocker's inner guide (it hung from a fin before the comb came out),
+        # run back to the side wall
+        _box(L.WALL - 0.01, *GUIDE_XY, L.WALL - 0.01, GUIDE_Z1),
         _box(s0, s1, y0, y0 + 1.5, L.WALL - 0.01, z_key_front - 0.1),
         _box(s0, s1, y1 - 1.5, y1, L.WALL - 0.01, z_key_front - 0.1),
     ]

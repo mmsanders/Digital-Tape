@@ -135,7 +135,7 @@ def test_keys_print_upright_with_support_only_under_the_cap(name):
 
 def test_bar_blocker_comb_and_cards_print_without_support():
     poses = BLD.print_poses()
-    for name in ["bar", "blocker", "comb"] + [f"card-{v}" for v in C.CARDS]:
+    for name in ["bar", "blocker", "comb", "guide-retrofit"] + [f"card-{v}" for v in C.CARDS]:
         assert overhangs(poses[name].val()) == [], name
 
 
@@ -258,3 +258,18 @@ def test_path_gate_catches_the_30_oct_back_half():
     assert A.path_hits(st["bar"], [old_back], (0, 0, 1), 28.0, S.snap_lips().val()) != []
     # and a key could not drop into its closed rail tunnels
     assert A.path_hits(st["ff"], [old_back], (0, 0, 1), 28.0) != []
+
+
+def test_glue_in_guide_clears_every_moving_part():
+    # it replaces nothing on the new front half, so it must sit in free space in every state
+    g = S.guide_retrofit().val()
+    for name, st in _sweep_states().items():
+        parts = A.state(**st)
+        for k, v in parts.items():
+            if k != "front":
+                assert g.intersect(v).Volume() < 1e-3, (name, k)
+
+
+def test_glue_in_guide_gate_catches_a_guide_set_into_the_blocker():
+    g = S.guide_retrofit().translate((0.5, 0, 0)).val()        # 0.5 mm too far in
+    assert g.intersect(A.state()["blocker"]).Volume() > 1e-3

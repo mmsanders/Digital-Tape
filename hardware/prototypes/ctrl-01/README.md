@@ -29,7 +29,7 @@ The real 68 × 110 × 29 mm case, split at mid-depth, with:
 | Stop | No ledge. One even ramp, 30° from the press direction, then a flat that runs to the shoulder |
 | Record | **Blocker in the shell, moved by Play** (27 Oct). Record latches on the slide lock like every key, but while Play is up a blocker stops it after 1.2 mm. Play's 45° pin slides the blocker out of the way as Play goes down and pulls it back as Play comes up. A firm press on Record goes into the shell, not into Play. (The first proposal hung the gate on Play itself; a hard press on Record would have pushed Play down.) |
 | Slide lock | Thick latches with the LADDER Stop-tab shape (28 Oct): catch corner and chamfer as before, then the top rises 1.7 mm toward the far end. Length stays 3.9 mm, not LADDER's 7, because at 11 mm pitch a longer latch would meet the next key's catch at full lock travel. Prints back face down |
-| Key comb | **Separate part** (30 Oct). The printed back half had the guides built in: the slide lock could not get under them and the keys were trapped in closed rail tunnels. Keys slide into the comb on the bench; the comb drops in over the lock. Generator and gates updated; **`print/` STLs not yet regenerated** (drawings with Michael for review) |
+| Key comb | **Separate part** (30 Oct). The printed back half had the guides built in: the slide lock could not get under them and the keys were trapped in closed rail tunnels. Keys slide into the comb on the bench; the comb drops in over the lock. A front half printed before 30 Oct is kept: a glue-in piece adds the blocker's inner guide, which used to hang from a fin |
 | Shell | Full size, back half is the chassis: everything that locates a part is on it; the front half adds flat faces and clearance |
 | Solenoid | None |
 | Files | Generator, tests and STLs committed here |
@@ -45,7 +45,7 @@ Device frame: X in from the key side, Y down from the top, Z back from the front
 | Key | Body 12 (depth) × 7 (row) × 9 mm, rails 2.5 × 1.0 on the row faces; extension 9.5 × 4.5 through the 2.5 mm wall (inset 1.25, aperture clearance 0.25, so 1.0 mm of shoulder catches the shell); cap 12 × 8 × 2.5 with a symbol |
 | Travel | **5.0 mm** (LADDER was 6.2). At rest the caps stand 7.5 mm proud of the side face: 5 mm of travel plus the cap |
 | Springs | Pencil springs everywhere (14 free / about 4 solid; FIT-01: Ø3.0 boss, Ø4.5 hole). Key springs run from the key's groove to a boss on the spine, 10 mm at rest, 5 mm pressed. One bar spring, 11 mm at rest |
-| Guidance | Fins between the keys, from the back half's side wall to the spine, with a rail slot for each neighbouring key (FIT-01: 0.15 mm a side). Fins stop 0.2 mm short of the pawls |
+| Guidance | **Key comb** (separate part): fins between the keys, from the side wall to the spine, with a rail slot for each neighbouring key (FIT-01: 0.15 mm a side). Fins stop 0.2 mm short of the pawls |
 | Slide lock | X 6–12, Z 22.9–26.35, Y 18.7–88.4 plus spring boss; runs in a back-half channel with 0.35 mm snap lips; rests up against a stop block, spring at the bottom in the housing |
 
 Latch behaviour, from the 2D simulation in `mech.kinematics()` (catch against pawl):
@@ -84,19 +84,24 @@ Top and bottom cards go in along their 36 mm side (40 mm opening); side cards al
 
 | Plate | Notes |
 |---|---|
-| `ctrl01-plate-shell.stl` | Both halves, outer faces down, as a matched pair. **No supports.** Bridges: each slot mouth (40 mm, 2.5 mm deep) and each fin (16.8 mm); small overhangs about 1 mm at rail slots and card rails |
-| `ctrl01-plate-mech.stl` | Keys upright with **support under the caps only** (the cap underside is flat because it is the stop). Spare FF included. Slide lock back face down; blocker flat |
+| `ctrl01-plate-shell.stl` | Both halves, outer faces down, as a matched pair. **No supports.** Bridges: each slot mouth (40 mm, 2.5 mm deep); small overhangs about 1 mm at card rails |
+| `ctrl01-plate-rebuild.stl` | **30 Oct reprint**: new back half (shell settings), key comb and glue-in guide (mech settings; set per object). Comb prints spine down, no supports |
+| `ctrl01-plate-mech.stl` | Keys upright with **support under the caps only** (the cap underside is flat because it is the stop). Spare FF included. Slide lock back face down; blocker flat; key comb spine down |
 | `ctrl01-plate-cards.stl` | Flat, no supports. Also carries a spare slide lock with the rising latches (the first mech plate printed flat-topped ones) |
 
 ## Assembly
 
-1. Back half on the table, inside up.
-2. Snap the slide lock into its channel; pencil spring on its bottom boss, into the housing.
-3. Pencil springs on the five spine bosses.
-4. For each key: hold it fully pressed, lower it straight into its slot (the extension drops into the half-aperture), let go. Do Play before Record.
-5. Press Stop to free anything that latched.
-6. Drop the blocker onto Play's pin, into its channel in the gap.
-7. Front half on; press round the rim until the eight ridges click. Coin notch on the right side to open.
+The check `assembly.assembly_sequence()` slides every part in along these paths, in this order.
+
+1. **Keys into the comb, on the bench:** each key slides in from the comb's outer end, cap last, rails into its tunnels.
+2. **Slide lock:** back half on the table, inside up. Snap the lock into its channel; pencil spring on its bottom boss, into the housing.
+3. **Comb:** lower it, keys and all, straight into the back half over the lock: spine against the backstop wall, ends between the end walls, each key's extension into its half-aperture.
+4. **Blocker:** drop it onto Play's pin, into its channel in the gap.
+5. **Key springs:** squeeze each with tweezers and slip it between the key's post and its boss on the spine.
+6. Press Stop to free anything that latched.
+7. **Front half** on; press round the rim until the eight ridges click. Coin notch on the right side to open.
+
+A front half printed before 30 Oct: glue `ctrl01-guide-retrofit.stl` in first, its long strip along the side wall, butted against the bay's top end wall and the front wall. It then sits where the new front half has the guide built in.
 
 ## What to try
 
@@ -120,9 +125,9 @@ Top and bottom cards go in along their 36 mm side (40 mm opening); side cards al
 |---|---|
 | `layout.py` | every shared number |
 | `mech.py` | keys, catch and pawl outlines, latch simulation, slide lock, blocker |
-| `shell.py` | halves, tongue/groove/ridges, the bay |
+| `shell.py` | halves, tongue/groove/ridges, the bay, the key comb, the glue-in guide |
 | `cards.py` | slots and cards |
-| `assembly.py` | parts placed in every state; interference check |
+| `assembly.py` | parts placed in every state; interference check; build order and paths in |
 | `build.py` | print poses, plates, STLs |
 | `test_rig.py` | gates below |
 | `key_v1.py`, `test_key_v1.py` | the full-size LADDER-based key from earlier on 26 Oct (superseded; outputs in `print/v1/`) |
@@ -144,11 +149,13 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q        # about 2 minutes
 | No two parts overlap: at rest, every key at full press and at its peak lock push, every key at 1/2/3/4 mm, Play driving the blocker at 1–4 mm, Play + Record (37 states) | a key moved 0.4 mm off its slot |
 | The blocker stops Record at 1.2 mm while Play is up | the blocker where Play would have moved it |
 | Every printed part is one valid solid | — |
-| Keys print upright with support only under the cap; slide lock, blocker and cards need none | a reversed catch |
+| Keys print upright with support only under the cap; slide lock, blocker, comb, glue-in guide and cards need none | a reversed catch |
 | Plates fit the 180 × 180 bed | — |
 | Plain slots take every card; rib slots grip every card; slot clearances are as specified | — |
 | The detent takes card C into its notch | card A, which has no notch, clashes with the bump |
 | Every latch rises ≥ 1.5 mm toward its far end (the Stop-tab shape) | the flat-topped latch first printed |
+| Every part has a clear straight path in, in build order (keys into comb, lock, comb with keys, blocker, front half); only the lock's snap lips are allowed in the way | the back half as printed on 28 Oct, comb built in: neither the lock nor a key gets in |
+| The glue-in guide clears every part in all 37 states | the guide set 0.5 mm too far in hits the blocker |
 | Record's finger and Play's arm span their key's whole front face and join it across ≥ 20 mm² (24 and 42) | the 27 Oct defect: an arm hanging on a 0.01 mm strip |
 
 Numbers that come from the printer, not this code: key slide 0.15 mm a side, spring
@@ -168,11 +175,14 @@ the check that `key_v1.py` rebuilt it exactly.
 
 | File | SHA-256 |
 |---|---|
-| `print/ctrl01-plate-shell.stl` | `8608f150cb086d3df2b3e47fcb84e22f38301be8630dd081b5e5b0b02ce0cac1` |
-| `print/ctrl01-plate-mech.stl` | `4ea27281da9222114a2aa6832fda90128111aa6a6c599609e94d5a7b3640e753` |
+| `print/ctrl01-plate-shell.stl` | `12be9974833d0f87ce83c7300ab715fa444d389c1b355184cbf426f91e534dee` |
+| `print/ctrl01-plate-mech.stl` | `53dc160019ee64c9da5e22b5248fb3a741ca6a305b1ab255c9a13c4eb6baad3d` |
 | `print/ctrl01-plate-cards.stl` | `5de983e20f38742d97c338d2a8f4a94009af63780cf4cc0a2405878e19921335` |
-| `print/ctrl01-front.stl` | `d73380c47740c63af08ac5866aedec0338f74f0d5645a5d3b4d6c76cc3ad90da` |
-| `print/ctrl01-back.stl` | `ac4e3f2376553000bf7e32714eef9ed05f600272136f23fdd39e9f71faa7fbc8` |
+| `print/ctrl01-front.stl` | `da5874690faf963064143a80e1833f17908296bcb5378326859a6538c52ad309` |
+| `print/ctrl01-back.stl` | `ea76370520eb396d7087864168ca7693423aadceaa1e7d4eebe85b293de58323` |
+| `print/ctrl01-plate-rebuild.stl` | `9d5bea8459f2efd54aa97ff85f76e10d9c140cc8445cba8b443115ea8e7ea87f` |
+| `print/ctrl01-comb.stl` | `1eb89001ea7f93927ae96ee6444760df01990c94c9081c2265876e6f7c5edc85` |
+| `print/ctrl01-guide-retrofit.stl` | `ceb57df13f007479139e45bbd0f63c14ad89c32f24c12f0ee544444691755104` |
 | `print/ctrl01-bar.stl` | `1f475af9c98d1d3d5f069aa3f6bfc9ebbd3f040b364920da5bdb31045b559bb5` |
 | `print/ctrl01-blocker.stl` | `c6ab517a65b05cb6dd5c0d9d6c538d9f77423dcff57afd12554a811b8ccb0c52` |
 | `print/ctrl01-key-rec.stl` | `6b380e5cacef0ba10ea1300e2d3c84bde0878754660fde78542a9345543a2e4a` |
