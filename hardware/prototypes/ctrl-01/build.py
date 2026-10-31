@@ -2,10 +2,10 @@
 
     python3 hardware/prototypes/ctrl-01/build.py      writes print/ctrl01-*.stl
 
-Plates (A1 Mini, 180 x 180), 1 Nov Play/Record rig:
-    shell  front and back halves together, so they are a matched pair; outer faces down
-    mech   Record, Play and Stop upright (support under the blocks), a spare Play, the
-           slide lock (back face down), the latch slider (floor down), the comb (spine down)
+Plate (A1 Mini, 180 x 180), 1 Nov Play/Record rig, everything at full scale:
+    rig    both housing halves (outer faces down), the comb (spine down), the slide lock
+           (back face down), the latch slider (floor down), Record, Play, Stop and a spare
+           Play (upright, support under the blocks)
 """
 
 from __future__ import annotations
@@ -63,15 +63,15 @@ def print_poses() -> dict[str, cq.Workplane]:
 
 
 def plates() -> dict[str, cq.Workplane]:
+    """One plate for the 1 Nov Play/Record rig: both housing halves, the comb, the slide
+    lock, the latch slider, Record, Play, Stop and a spare Play."""
     pp = print_poses()
-    shell = _to_bed(pp["front"], 5, 5).union(_to_bed(pp["back"], 85, 5))
-    mech = None
+    rig = (_to_bed(pp["front"], 5, 5).union(_to_bed(pp["back"], 36, 5))
+           .union(_to_bed(pp["comb"], 67, 5)).union(_to_bed(pp["bar"], 92, 5))
+           .union(_to_bed(pp["latch"], 103, 5)))
     for i, n in enumerate(L.KEYS + ("play",)):
-        k = _to_bed(pp[f"key-{n}"], 8 + (i % 2) * 24, 8 + (i // 2) * 24)
-        mech = k if mech is None else mech.union(k)
-    mech = (mech.union(_to_bed(pp["bar"], 60, 8)).union(_to_bed(pp["latch"], 72, 8))
-            .union(_to_bed(pp["comb"], 92, 8)))
-    return {"shell": shell, "mech": mech}
+        rig = rig.union(_to_bed(pp[f"key-{n}"], 122 + (i % 2) * 22, 5 + (i // 2) * 22))
+    return {"rig": rig}
 
 
 def build(out: Path = OUT) -> list[Path]:
