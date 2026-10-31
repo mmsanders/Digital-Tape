@@ -94,7 +94,7 @@ def record_states() -> dict[str, dict]:
         out[f"rec-push@{r}"] = dict(pressed={"play": s, "rec": r})
     out["rec-held"] = dict(pressed={"play": L.PLAY_HOLD, "rec": rl.held_at})
     stop = M.kinematics("stop")
-    for s in (3.0, 2.0, rl.released_below):
+    for s in (L.PLAY_HOLD - 0.4, L.PLAY_HOLD - 1.2, rl.released_below):
         out[f"stop-release@{s}"] = dict(pressed={"play": s, "rec": rl.held_at, "stop": L.STOP_FULL_AT},
                                         bar_shift=stop.shift_at[L.STOP_FULL_AT])
     return out

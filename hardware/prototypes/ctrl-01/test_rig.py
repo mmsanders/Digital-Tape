@@ -28,7 +28,7 @@ def kin(name: str):
     return M.kinematics(name)
 
 
-@pytest.mark.parametrize("name", ["play", "ff", "rew"])
+@pytest.mark.parametrize("name", ["play"])
 def test_latch_keys_latch_on_the_ledge_with_overtravel(name):
     k = kin(name)
     assert k.latched_at is not None and k.hold_is_ledge
@@ -83,8 +83,8 @@ def test_no_clashes(name, st):
 
 def test_clash_gate_catches_a_key_off_its_slot():
     parts = A.state()
-    parts["ff"] = parts["ff"].translate(cq.Vector(0, 0.4, 0))
-    assert any("ff" in (a, b) for a, b, _ in A.clashes(parts))
+    parts["stop"] = parts["stop"].translate(cq.Vector(0, 0.4, 0))
+    assert any("stop" in (a, b) for a, b, _ in A.clashes(parts))
 
 
 # --- the Record latch (31 Oct): Record latches to Play, never to the slide lock -----
@@ -106,16 +106,49 @@ def test_play_brings_the_hook_past_record_without_touching_it():
     assert rlatch().play_press_clear
 
 
-def test_record_latches_to_play_on_a_ledge():
+def test_record_latches_to_play():
     r = rlatch()
-    assert r.held_at is not None and r.hold_is_ledge
+    assert r.held_at is not None
     assert L.TRAVEL - r.held_at >= 0.5                          # overtravel to snap past
     assert r.max_push <= L.TRAVEL - L.PLAY_HOLD - 0.2           # Play has room to be nudged
+    assert L.TRAVEL - r.held_at >= 0.5                          # Record overtravels to snap past
     assert r.push_slope <= 1.5                                  # Record ramps the hook aside
 
 
 def test_play_rising_frees_record_in_time():
     assert rlatch().released_below is not None and rlatch().released_below >= 0.6
+
+
+PLA_FRICTION = 0.3
+
+
+def test_records_spring_helps_push_the_slider_back():
+    # the holding face leans more than friction: Record's push has a component that
+    # drives the slider toward release, so it adds to Play's pull instead of fighting it
+    assert rlatch().hold_lean >= PLA_FRICTION + 0.05
+
+
+def test_lean_gate_catches_a_square_holding_face(monkeypatch):
+    monkeypatch.setattr(L, "HOLD_DEG", 0.0)
+    assert M.record_latch().hold_lean < PLA_FRICTION
+
+
+def _slider_aspect() -> float:
+    y0, y1 = M.slider_y()
+    x0, x1 = L.SLIDER_X
+    return (y1 - y0) / (x1 - x0)
+
+
+def test_slider_is_long_between_its_guides_so_it_cannot_turn():
+    assert _slider_aspect() >= 2.0                           # a drawer longer than twice its width
+    x0, x1 = L.SLIDER_X
+    assert L.GUIDE_X[1] < x0 and x1 < L.SPINE_X[0]           # one guide on each edge
+
+
+def test_turn_gate_catches_a_slider_cut_short(monkeypatch):
+    # a slider ending at the slot, as the 31 Oct one did, is wider than half its length
+    monkeypatch.setattr(L, "SLIDER_TAIL", -14.0)
+    assert _slider_aspect() < 2.0
 
 
 def test_record_never_touches_the_slide_lock():
@@ -133,7 +166,7 @@ def test_latch_gate_catches_a_toe_without_its_chamfer(monkeypatch):
 
 
 def test_alone_gate_catches_a_hook_left_in_records_lane(monkeypatch):
-    monkeypatch.setattr(L, "HOOK_OVERLAP", -3.0)
+    monkeypatch.setattr(L, "HOOK_OVERLAP", -2.0)
     assert not M.record_latch().alone_clear
 
 
@@ -196,41 +229,6 @@ def test_plates_fit_the_a1_mini_bed():
 
 # --- cards in slots ------------------------------------------------------------------
 
-def seated(card: cq.Workplane, s: C.Slot) -> cq.Shape:
-    """A portrait card seated in a slot, P_PROUD out of the face, in the device frame.
-    The card lies proud end +X; turn it so the proud end points out of the face."""
-    turn = -90 if s.loc == "top" else 90
-    c = card.rotate((0, 0, 0), (0, 0, 1), turn)
-    yc = (-C.P_PROUD + C.P_LEN / 2) if s.loc == "top" else (L.H + C.P_PROUD - C.P_LEN / 2)
-    zb = c.val().BoundingBox().zmin
-    return c.translate((C.XC, yc, s.z[0] + s.clr - zb)).val()
-
-
-def _half(s: C.Slot) -> cq.Shape:
-    f, b = A.halves()
-    return (f if s.layer == "front" else b).val()
-
-
-def _plain(w: float = C.B) -> cq.Workplane:
-    return cq.Workplane("XY").box(C.P_LEN, w, C.TH, centered=(True, True, False))
-
-
-@pytest.mark.parametrize("s", C.SLOTS, ids=lambda s: s.name)
-def test_portrait_cards_grip_in_every_slot_and_touch_only_its_ribs(s):
-    ribs_only = seated(_plain(), s).intersect(_half(s)).Volume()
-    assert ribs_only == pytest.approx(C.ribs(s).val().intersect(seated(_plain(), s)).Volume(), abs=0.05)
-    face, back = C.snap_card()
-    for name, c in (("solid", C.portrait_card()), ("snap", face.union(back))):
-        v = seated(c, s).intersect(_half(s)).Volume()
-        assert 0.5 < v <= ribs_only + 0.2, name
-
-
-def test_slot_gate_catches_a_card_too_wide_for_its_clearance():
-    s = C.SLOTS[0]
-    ribs_only = seated(_plain(), s).intersect(_half(s)).Volume()
-    assert seated(_plain(C.B + 0.8), s).intersect(_half(s)).Volume() > ribs_only + 0.2
-
-
 def test_snap_card_halves_close_without_overlap_and_make_a_full_card():
     face, back = C.snap_card()
     assert face.val().intersect(back.val()).Volume() < 1e-3
@@ -243,13 +241,6 @@ def test_snap_gate_catches_a_bead_bigger_than_its_relief(monkeypatch):
     monkeypatch.setattr(C, "SNAP", dict(C.SNAP, bead=0.45))
     _, back = C.snap_card()                                  # tongue carrying a 0.45 bead
     assert face.val().intersect(back.val()).Volume() > 1e-3
-
-
-def test_slot_clearances_are_as_specified():
-    for s in C.SLOTS:
-        x0, x1, y0, y1 = C.footprint(s)
-        assert (x1 - x0) - C.B == pytest.approx(2 * s.clr)
-        assert (s.z[1] - s.z[0]) - C.TH == pytest.approx(2 * s.clr)
 
 
 # --- front-zone features are properly joined to their keys ---------------------------
@@ -296,14 +287,14 @@ def _sequence():
     return A.assembly_sequence()
 
 
-@pytest.mark.parametrize("i", range(9), ids=lambda i: f"step{i + 1}")
+@pytest.mark.parametrize("i", range(7), ids=lambda i: f"step{i + 1}")
 def test_every_part_has_a_clear_path_in(i):
     name, part, obstacles, direction, distance, allowed = _sequence()[i]
     assert A.path_hits(part, obstacles, direction, distance, allowed) == [], name
 
 
 def test_sequence_covers_every_part():
-    assert len(_sequence()) == 9      # five keys, lock, comb, blocker, front half
+    assert len(_sequence()) == 7      # three keys, lock, comb, latch slider, front half
 
 
 def test_path_gate_catches_the_30_oct_back_half():
@@ -312,6 +303,6 @@ def test_path_gate_catches_the_30_oct_back_half():
     old_back = st["back"].fuse(st["comb"])
     assert A.path_hits(st["bar"], [old_back], (0, 0, 1), 28.0, S.snap_lips().val()) != []
     # and a key could not drop into its closed rail tunnels
-    assert A.path_hits(st["ff"], [old_back], (0, 0, 1), 28.0) != []
+    assert A.path_hits(st["stop"], [old_back], (0, 0, 1), 28.0) != []
 
 

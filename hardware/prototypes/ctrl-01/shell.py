@@ -18,6 +18,7 @@ import cadquery as cq
 
 import layout as L
 import cards as C
+import mech as M
 
 
 def _box(x0, x1, y0, y1, z0, z1) -> cq.Workplane:
@@ -50,9 +51,11 @@ def groove() -> cq.Workplane:
     return _rrect(t0, L.SEAM - L.TONGUE_H - L.GROOVE_CLR, L.SEAM + 0.01).cut(_rrect(L.WALL + 0.01, 0, L.T))
 
 
-# left-side ridges sit clear of the key openings (Record ends at Y 27.4, Play starts at 39.6)
-RIDGES = (("top", 14.0), ("top", 54.0), ("bottom", 14.0), ("bottom", 54.0),
-          ("right", 22.0), ("right", 55.0), ("right", 88.0), ("left", 33.5), ("left", 96.5))
+# left-side ridges sit clear of the key openings: between Record and Play, and below Stop
+_gap = (L.key_y("rec") + L.key_y("play")) / 2
+RIDGES = (("top", L.W / 2), ("bottom", L.W / 2),
+          ("right", L.H * 0.25), ("right", L.H * 0.5), ("right", L.H * 0.75),
+          ("left", _gap), ("left", (L.key_y("stop") + L.BLOCK_YP / 2 + L.H - L.CORNER_R) / 2))
 RIDGE_LEN = L.RIDGE_LEN
 
 
@@ -76,7 +79,8 @@ def _ridge(side: str, at: float, grow: float = 0.0) -> cq.Workplane:
 
 
 def coin_notch() -> cq.Workplane:
-    return _box(L.W - 1.5, L.W + 1, 94.0, 100.0, L.SEAM - 1.0, L.SEAM + 1.0)
+    y = L.H - L.CORNER_R - 8.0
+    return _box(L.W - 1.5, L.W + 1, y, y + 6.0, L.SEAM - 1.0, L.SEAM + 1.0)
 
 
 def key_apertures() -> cq.Workplane:
@@ -163,24 +167,19 @@ def bay_back() -> cq.Workplane:
     bore = (cq.Workplane("XZ", origin=(0, h0 - 1, 0)).center((bx0 + bx1) / 2, L.BAR_SPRING_Z)
             .circle(2.5).extrude(-(bar_end + L.SPRING_REST - h0 + 1)))
     parts.append(housing.cut(bore))
-    # pedestal in the gap slot (over the latch slider), and the wall its outer edge rides
+    # pedestal in the gap slot: holds the latch slider down
     gy0, gy1 = L.FIN_Y[1] + half + c, L.FIN_Y[2] - half - c
     ped = _box(bx1 + L.CHANNEL_CLR + 1.0, s0 - c, gy0, gy1, L.BLOCKER_Z[1] + 0.2, L.T - L.WALL + 0.01)
-    ground = _box(*L.GROUND_X, gy0, gy1, L.BLOCKER_Z[0], L.BLOCKER_Z[1] + 0.21)
-    parts += [ped, ground]
+    parts += [ped]
     out = parts[0]
     for p in parts[1:]:
         out = out.union(p)
     return out
 
 
-GUIDE_XY = (L.SLIDER_X0 - 0.2, L.key_y("play") - 12.0, L.key_y("play") - 7.5)   # x1, y0, y1
-GUIDE_Z1 = L.BLOCKER_Z[1] + 0.1
-
-
 def bay_front() -> cq.Workplane:
-    """Front-half bay: the partition and end walls that close the bay, the blocker's
-    inner guide, and flat lands on the front of FF, Rew and Stop."""
+    """Front-half bay: the partition and end walls that close the bay, and the latch
+    slider's inner guide rail."""
     s0, s1 = L.SPINE_X
     y0, y1 = L.BAY_Y
     z_key_front = L.KEY_Z - L.STEM_XP / 2
@@ -188,16 +187,13 @@ def bay_front() -> cq.Workplane:
         _box(s0, s1, y0, y1, L.WALL - 0.01, z_key_front - 0.1),
         _box(L.WALL - 0.01, s1, y0, y0 + 1.5, L.WALL - 0.01, L.SEAM),
         _box(L.WALL - 0.01, s1, y1 - 1.5, y1, L.WALL - 0.01, L.SEAM),
-        # the blocker's inner guide (it hung from a fin before the comb came out),
-        # run back to the side wall
-        _box(L.WALL - 0.01, *GUIDE_XY, L.WALL - 0.01, GUIDE_Z1),
         _box(s0, s1, y0, y0 + 1.5, L.WALL - 0.01, z_key_front - 0.1),
         _box(s0, s1, y1 - 1.5, y1, L.WALL - 0.01, z_key_front - 0.1),
     ]
-    for n in ("ff", "rew", "stop"):
-        c = L.key_y(n)
-        # solid from the front wall: a flat face 0.1 in front of the key, nothing to bridge
-        parts.append(_box(L.FIN_X0 + 0.1, L.KEY_BOTTOM + L.TRAVEL, c - 3.0, c + 3.0, L.WALL - 0.01, z_key_front - 0.1))
+    # the latch slider's inner guide: a rail along the whole of its travel. Its outer
+    # edge runs on the partition. Long guides, so it cannot turn (1 Nov)
+    sy0, sy1 = M.slider_y()
+    parts.append(_box(L.GUIDE_X[0], L.GUIDE_X[1], sy0 - 1.0, sy1 + L.TRAVEL + 1.0, L.WALL - 0.01, L.LATCH_TOP + 0.1))
     out = parts[0]
     for p in parts[1:]:
         out = out.union(p)

@@ -41,12 +41,13 @@ class Slot:
         return (L.FRONT_CARD_Z, L.FRONT_CARD_Z + t) if self.layer == "front" else (L.BACK_CARD_Z - t, L.BACK_CARD_Z)
 
 
-SLOTS = (
+DEVICE_SLOTS = (
     Slot("TF", "top", "front", 0.30, "ribs"),
     Slot("TB", "top", "back", 0.30, "ribs"),
     Slot("BF", "bottom", "front", 0.30, "ribs"),
     Slot("BB", "bottom", "back", 0.30, "ribs"),
 )
+SLOTS = ()                     # the 1 Nov Play/Record rig has no card slots
 
 RIB_INTERFERENCE = 0.10        # crush ribs, per side (LADDER-02's lid insert used 0.10)
 

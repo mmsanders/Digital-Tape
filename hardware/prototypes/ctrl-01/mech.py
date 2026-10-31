@@ -45,7 +45,7 @@ def catch_profile(name: str, raise_: float | None = None) -> list[tuple[float, f
         y0 = tip - z_tip / slope
         return [(y0, 0.0), (tip, z_tip), (tip, L.BODY_H), (back, L.BODY_H), (back, 0.0)]
     if raise_ is None:
-        raise_ = L.RECORD_RAISE if name == "rec" else 0.0
+        raise_ = {"rec": L.RECORD_RAISE, "play": L.PLAY_RAISE}.get(name, 0.0)
     ledge = L.LEDGE + raise_
     tip = L.PAWL_EDGE + L.HOOK
     z_back = ledge - (tip - back)
@@ -217,10 +217,9 @@ def _toe_and_web() -> cq.Workplane:
     yc = L.key_y("rec")
     ty0, ty1 = L.TOE_Y[0] - yc, L.TOE_Y[1] - yc
     web = _box(x0, x1, -JOIN_EDGE, ty1, 0, 3.5).union(_root(-JOIN_EDGE, JOIN_EDGE, 3.5))
-    h = L.TOE_X[1] - L.TOE_X[0]
-    c = L.TOE_CH
-    toe = _prism_yz([(ty0, 0), (ty1 - c, 0), (ty1, c), (ty1, h), (ty0, h)],
-                    L.TOE_Z[0] - L.KEY_Z, x0 + 0.01)
+    # the plan outline (device X, Y) in the key frame: (y', z') = (Y - centre, KEY_BOTTOM - X)
+    pts = [(y - yc, L.KEY_BOTTOM - x) for x, y in toe_outline().exterior.coords[:-1]]
+    toe = _prism_yz(pts, L.TOE_Z[0] - L.KEY_Z, x0 + 0.01)
     return web.union(toe)
 
 
@@ -284,19 +283,27 @@ def bar(shift: float = 0.0) -> cq.Workplane:
 # Record latch: plan outlines (device X, Y; slider at rest) and its kinematics
 # --------------------------------------------------------------------------
 
+def _lean() -> float:
+    return math.tan(math.radians(L.HOLD_DEG))
+
+
 def toe_outline() -> Polygon:
+    """Record's toe, in plan. Leading inner corner chamfered (pushes the hook aside);
+    back face leaning HOLD_DEG to match the hook's holding face."""
     x0, x1 = L.TOE_X
     y0, y1 = L.TOE_Y
-    c = L.TOE_CH
-    return Polygon([(x0, y0), (x1, y0), (x1, y1 - c), (x1 - c, y1), (x0, y1)])
+    c, t = L.TOE_CH, _lean()
+    return Polygon([(x0 + (y1 - y0) * t, y0), (x1, y0), (x1, y1 - c), (x1 - c, y1), (x0, y1)])
 
 
 def hook_outline() -> Polygon:
     """The slider's hook. With Play latched (slider shifted PLAY_HOLD) it overlaps the
-    toe's lane by HOOK_OVERLAP from the far side; its inner corner is chamfered."""
+    toe's lane by HOOK_OVERLAP from the far side. Its inner corner is chamfered; its
+    holding face leans HOLD_DEG so Record's spring pushes the slider toward release."""
     x0, x1 = L.HOOK_X
     y0 = L.TOE_Y[1] - L.HOOK_OVERLAP - L.PLAY_HOLD
-    return Polygon([(x0 + 0.4, y0), (x1, y0), (x1, y0 + L.HOOK_W), (x0, y0 + L.HOOK_W), (x0, y0 + 0.4)])
+    w, t = L.HOOK_W, _lean()
+    return Polygon([(x0 + 0.4, y0), (x1 + w * t, y0), (x1, y0 + w), (x0, y0 + w), (x0, y0 + 0.4)])
 
 
 def rail_outline() -> Polygon:
@@ -316,14 +323,19 @@ def slot_outline() -> Polygon:
 def slider_outlines() -> tuple[Polygon, Polygon]:
     """(floor, raised) plan outlines. The floor runs under Record's lane; everything
     raised stays out of it except the hook."""
-    x0, x1 = L.SLIDER_X0, L.GROUND_X[0] - 0.2
-    y0 = hook_outline().bounds[1] - 0.5
+    x0, x1 = L.SLIDER_X
+    y0, y1 = slider_y()
     sx0, sy0, sx1, sy1 = slot_outline().bounds
-    guide_y1 = L.key_y("play") - 7.5
-    walls = unary_union([box(x0, sy0 - 1.2, x1, sy1 + 1.3), box(sx0 - 1.2, guide_y1 + 0.5, x0, sy1 + 1.3)])
-    floor = unary_union([box(x0, y0, x1, sy0), walls]).difference(slot_outline())
-    raised = unary_union([hook_outline(), box(x0, y0, x0 + 0.5, sy0 - 1.2), walls.difference(slot_outline())])
+    edges = unary_union([box(x0, y0, x0 + 1.0, y1), box(x1 - 1.0, y0, x1, y1)])
+    walls = box(x0, sy0 - 1.2, x1, sy1 + 1.3)
+    floor = box(x0, y0, x1, y1).difference(slot_outline())
+    raised = unary_union([hook_outline(), edges, walls]).difference(slot_outline())
     return floor, raised
+
+
+def slider_y() -> tuple[float, float]:
+    """The slider's ends at rest: from just above the hook to past Stop's centre."""
+    return hook_outline().bounds[1] - 0.5, L.key_y("stop") + L.SLIDER_TAIL
 
 
 def _toe_hits(r: float, s: float) -> bool:
@@ -338,7 +350,7 @@ class RecordLatch:
     max_push: float            # deepest Play is nudged while Record goes past the hook
     push_slope: float          # steepest slider push per mm of Record: a ramp gives ~1, a wall jumps
     held_at: float | None      # Record's depth once released, Play latched (None: not held)
-    hold_is_ledge: bool
+    hold_lean: float           # tan of the holding face's lean: > friction, so Record helps release
     released_below: float | None   # slider shift below which Record is free again
 
 
@@ -363,15 +375,16 @@ def record_latch(step: float = 0.05) -> RecordLatch:
                 lo, hi = (lo, mid) if not hits(r, mid) else (mid, hi)
             s = hi
         pushes.append(s)
-    held, ledge = None, False
+    held = None
     if not hits(L.TRAVEL, L.PLAY_HOLD):
         for r in reversed(rs):
             if hits(r, L.PLAY_HOLD):
                 held = round(r + step, 4)
-                ov = translate(toe, r, 0).intersection(translate(raised, 0, L.PLAY_HOLD))
-                minx, miny, maxx, maxy = ov.bounds
-                ledge = (maxx - minx) <= step * 1.5 and (maxy - miny) >= 0.5
                 break
+    # the face the toe rests on: the hook's +X edge, measured off its outline
+    hk = list(hook_outline().exterior.coords)
+    (ax, ay), (bx, by) = hk[1], hk[2]
+    lean = abs(ax - bx) / abs(by - ay)
     released = None
     if held is not None:
         below = [r for r in rs if r <= held - step]
@@ -380,7 +393,7 @@ def record_latch(step: float = 0.05) -> RecordLatch:
                 released = s
                 break
     slope = max((b - a) / step for a, b in zip(pushes, pushes[1:]))     # the snap back is a drop, not a push
-    return RecordLatch(alone, play_clear, max(pushes) - L.PLAY_HOLD, slope, held, ledge, released)
+    return RecordLatch(alone, play_clear, max(pushes) - L.PLAY_HOLD, slope, held, lean, released)
 
 
 def latch(play_depth: float = 0.0) -> cq.Workplane:

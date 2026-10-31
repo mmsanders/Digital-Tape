@@ -19,10 +19,13 @@ from __future__ import annotations
 import math
 
 # --- shell --------------------------------------------------------------------
-W, H, T = 68.0, 110.0, 29.0
+# 1 Nov (Michael): scaled back to a Play/Record rig -- Record, Play and Stop only, in a
+# housing just big enough for them. The full-device layout of the same keys is at
+# commit 50eaa44; nothing below is specific to the rig except W, H, the row and the bay.
+W, H, T = 26.0, 80.0, 29.0
 WALL = 2.5
 SEAM = 14.5
-CORNER_R = 9.0               # plan corners (WM-F5-style chunky)
+CORNER_R = 5.0
 EDGE_CH = 1.0                # front/back face edge chamfer
 TONGUE_W, TONGUE_H = 1.2, 1.4
 GROOVE_CLR = 0.10            # tongue in groove, per side; plate 0 was planned to pick this
@@ -31,8 +34,8 @@ RIDGE_LEN = 10.0
 
 # --- key row (1 Nov: block keys, no caps; Play..Stop side by side, a gap, then Record) ---
 PITCH = 13.0
-ROW = ("rec", "gap", "play", "ff", "rew", "stop")     # top to bottom (Michael, 26 Oct)
-KEY_Y = {"rec": 21.0, "play": 46.0, "ff": 59.0, "rew": 72.0, "stop": 85.0}
+ROW = ("rec", "gap", "play", "stop")                  # the rig: FF and Rew left out (1 Nov)
+KEY_Y = {"rec": 16.0, "play": 41.0, "stop": 54.0}
 KEY_Z = 13.5                                          # key body centre depth (seam at 14.5)
 
 
@@ -42,7 +45,7 @@ def key_y(name: str) -> float:
 
 KEYS = tuple(n for n in ROW if n != "gap")
 FIN_Y = (KEY_Y["rec"] - PITCH / 2, KEY_Y["rec"] + PITCH / 2) + tuple(
-    KEY_Y["play"] - PITCH / 2 + PITCH * i for i in range(5))           # 14.5, 27.5, 39.5 .. 91.5
+    KEY_Y["play"] - PITCH / 2 + PITCH * i for i in range(3))           # 9.5, 22.5, 34.5, 47.5, 60.5
 
 # --- key ----------------------------------------------------------------------
 STEM_XP, STEM_YP = 12.0, 7.0        # x' (device depth) and y' (row)
@@ -70,8 +73,9 @@ HOOK = 1.2                          # P (LADDER-01 ranking)
 LEDGE = 4.4                         # z' of the flat ledge (5.2 with 5 mm travel); the ramp line runs on to z' = 0
 PAWL_EDGE = 0.5                     # pawl's catch edge, +y' of the key centre, bar at rest (LADDER)
 REST_GAP = 0.4                      # pawl top below the ramp, in the pawl's lane (1.0 with 5 mm travel)
-RECORD_RAISE = 0.0                  # Record's catch height offset. 0: the pawl chamfer already makes
-                                    # every key meet the lock at 2.0 mm, past the blocker's 1.2
+RECORD_RAISE = 0.0                  # (history: Record no longer has a catch)
+PLAY_RAISE = -0.4                   # Play's catch sits 0.4 mm lower, so it latches 0.4 mm sooner: the room
+                                    # it then has below its hold is what lets Record's toe nudge it
 STOP_SHIFT = 2.1                    # LADDER: bar shift under Stop
 STOP_RAMP_DEG = 38.0                # from the press direction (30 with 5 mm travel: 4 mm is too short
                                     # for 30 degrees to shift the lock 2.1 mm)
@@ -107,25 +111,30 @@ SLOT_CLR = 0.15
 
 # --- Record latch (31 Oct): Record latches to Play through a slider Play drives -----
 # Record no longer has a catch, so it never moves the slide lock and cannot pop Play.
-PLAY_HOLD = 3.2                     # Play's latched depth (mech.kinematics("play").latched_at)
+PLAY_HOLD = 2.8                     # Play's latched depth (mech.kinematics("play").latched_at)
 LATCH_FLOOR_Z = (2.7, 3.5)          # the slider's floor; Record's toe passes over it
 LATCH_TOP = BLOCKER_Z[1]            # 5.6: the hook and the slot walls, under the pedestal
 TOE_Z = (3.7, 5.8)                  # Record's toe hangs from its web (WEB_Z)
 WEB_Z = (5.8, KEY_Z - STEM_XP / 2 - 0.2)
 TOE_X = (KEY_BOTTOM - 1.6, KEY_BOTTOM)                 # 10.9 .. 12.5 at rest
-TOE_Y = (key_y("rec") + 7.0, key_y("rec") + 9.0)       # 28 .. 30, under the comb's fin
+TOE_Y = (key_y("rec") + 7.2, key_y("rec") + 9.0)       # 23.2 .. 25, under the comb's fin
 TOE_CH = 1.0                        # chamfer on the toe's leading inner corner: pushes the hook aside
-HOOK_OVERLAP = 0.6                  # hook over the toe's back face, Play latched
+HOOK_OVERLAP = 0.9                  # hook over the toe's back face, Play latched
 HOOK_X = (TOE_X[1] + 0.3, TOE_X[1] + 1.5)              # 12.8 .. 14.0
-HOOK_W = 1.0
+HOOK_W = 1.2
+HOLD_DEG = 25.0                     # the hook's holding face (and the toe's back) lean this far, so
+                                    # Record's own spring pushes the slider toward release: tan 25 =
+                                    # 0.47 > PLA on PLA friction (about 0.3). Play's latch still holds it
 RAIL_C = (KEY_BOTTOM - 2.7, key_y("play") - 3.0)       # Play's diagonal rail, centre at rest (device X, Y)
-SLIDER_X0 = KEY_BOTTOM - 3.3        # the slider's inner edge, riding the front half's guide
-GROUND_X = (17.2, 18.7)             # back-half wall the slider's outer edge rides
+SLIDER_X = (KEY_BOTTOM - 6.7, KEY_BOTTOM + TRAVEL + 2.6)   # 5.8 .. 19.1: a long plate between two
+                                    # long guides (front half), so it cannot turn: 1 Nov
+SLIDER_TAIL = 2.0                   # the slider runs on past Stop's centre by this much (into Stop's lane)
+GUIDE_X = (WALL + 0.5, KEY_BOTTOM - 6.9)   # the inner guide rail on the front half; the outer guide is the partition
 RAIL_L, RAIL_T = 4.0, 1.6
 
 # --- bay (the sectioned-off transport) -----------------------------------------
 SPINE_X = (KEY_BOTTOM + TRAVEL + 2.8, KEY_BOTTOM + TRAVEL + 4.8)   # 19.3 .. 21.3
-BAY_Y = (10.0, 107.0)
+BAY_Y = (5.0, 75.5)
 SPRING_BOSS_L = 2.0
 COMB_CLR = 0.15                     # comb to back half, every side (FIT-01 slide clearance)
 BACKSTOP_T = 1.2                    # back-half wall behind the spine; takes the key springs

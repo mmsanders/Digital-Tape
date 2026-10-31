@@ -2,12 +2,10 @@
 
     python3 hardware/prototypes/ctrl-01/build.py      writes print/ctrl01-*.stl
 
-Plates (A1 Mini, 180 x 180), 1 Nov block-key round:
-    shell  front and back halves together, so they are a matched pair; outer faces down.
-           Card-slot mouths print on supports from the plate
-    mech   the five keys upright (support under the blocks), a spare FF, the slide lock
-           (back face down), the Record latch slider, the key comb (spine down) and the
-           portrait card
+Plates (A1 Mini, 180 x 180), 1 Nov Play/Record rig:
+    shell  front and back halves together, so they are a matched pair; outer faces down
+    mech   Record, Play and Stop upright (support under the blocks), a spare Play, the
+           slide lock (back face down), the latch slider (floor down), the comb (spine down)
 """
 
 from __future__ import annotations
@@ -68,11 +66,11 @@ def plates() -> dict[str, cq.Workplane]:
     pp = print_poses()
     shell = _to_bed(pp["front"], 5, 5).union(_to_bed(pp["back"], 85, 5))
     mech = None
-    for i, n in enumerate(L.KEYS + ("ff",)):
-        k = _to_bed(pp[f"key-{n}"], 8 + (i % 3) * 23, 8 + (i // 3) * 23)
+    for i, n in enumerate(L.KEYS + ("play",)):
+        k = _to_bed(pp[f"key-{n}"], 8 + (i % 2) * 24, 8 + (i // 2) * 24)
         mech = k if mech is None else mech.union(k)
-    mech = (mech.union(_to_bed(pp["bar"], 80, 8)).union(_to_bed(pp["latch"], 92, 8))
-            .union(_to_bed(pp["comb"], 112, 8)).union(_to_bed(pp["card-portrait"], 8, 60)))
+    mech = (mech.union(_to_bed(pp["bar"], 60, 8)).union(_to_bed(pp["latch"], 72, 8))
+            .union(_to_bed(pp["comb"], 92, 8)))
     return {"shell": shell, "mech": mech}
 
 
