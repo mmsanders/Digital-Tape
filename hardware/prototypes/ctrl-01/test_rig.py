@@ -32,7 +32,7 @@ def kin(name: str):
 def test_latch_keys_latch_on_the_ledge_with_overtravel(name):
     k = kin(name)
     assert k.latched_at is not None and k.hold_is_ledge
-    assert L.TRAVEL - k.latched_at >= 0.8
+    assert L.TRAVEL - k.latched_at >= 0.8 - 1e-9
 
 
 def test_stop_never_latches_and_frees_every_catch_in_time():
@@ -164,17 +164,17 @@ def overhangs(shape: cq.Shape, allowed_z=(), max_deg=45.0):
     return bad
 
 
-KEY_ALLOWED = (L.GROOVE_D, L.CAP_Z0)     # spring-groove roof (1 mm bridge) and the cap underside (support)
+KEY_ALLOWED = (L.GROOVE_D, L.BLOCK_Z0)   # spring-groove roof (1 mm bridge) and the block's underside (support)
 
 
 @pytest.mark.parametrize("name", L.KEYS)
-def test_keys_print_upright_with_support_only_under_the_cap(name):
+def test_keys_print_upright_with_support_only_under_the_block(name):
     assert overhangs(M.key_local(name).val(), KEY_ALLOWED) == []
 
 
 def test_bar_blocker_comb_and_cards_print_without_support():
     poses = BLD.print_poses()
-    for name in ["bar", "latch", "comb", "guide-retrofit", "card-portrait", "card-snap-back"] + [f"card-{v}" for v in C.CARDS]:
+    for name in ["bar", "latch", "comb", "card-portrait", "card-snap-back"]:
         assert overhangs(poses[name].val()) == [], name
     # the snap card's face half prints face up: only its groove (1.2 wide) and the bead
     # relief above it are roofed, both bridged across less than 1.5 mm
@@ -196,18 +196,14 @@ def test_plates_fit_the_a1_mini_bed():
 
 # --- cards in slots ------------------------------------------------------------------
 
-def seated(card_name: str, s: C.Slot) -> cq.Shape:
-    """A card seated in a slot, PROUD out of its face, in the device frame."""
-    c = C.card(card_name)
-    x0, x1, y0, y1 = C.footprint(s)
-    z0, z1 = s.z
-    zc = z0 + s.clr
-    if s.loc in ("top", "bottom"):
-        yc = (-L.PROUD + C.B / 2) if s.loc == "top" else (L.H + L.PROUD - C.B / 2)
-        return c.translate((C.XC, yc, zc)).val()
-    # the card already lies 40 along X, 36 along Y: right for every slot
-    xc = L.W + L.PROUD - C.A / 2
-    return c.translate((xc, C.YC, zc)).val()
+def seated(card: cq.Workplane, s: C.Slot) -> cq.Shape:
+    """A portrait card seated in a slot, P_PROUD out of the face, in the device frame.
+    The card lies proud end +X; turn it so the proud end points out of the face."""
+    turn = -90 if s.loc == "top" else 90
+    c = card.rotate((0, 0, 0), (0, 0, 1), turn)
+    yc = (-C.P_PROUD + C.P_LEN / 2) if s.loc == "top" else (L.H + C.P_PROUD - C.P_LEN / 2)
+    zb = c.val().BoundingBox().zmin
+    return c.translate((C.XC, yc, s.z[0] + s.clr - zb)).val()
 
 
 def _half(s: C.Slot) -> cq.Shape:
@@ -215,31 +211,24 @@ def _half(s: C.Slot) -> cq.Shape:
     return (f if s.layer == "front" else b).val()
 
 
-@pytest.mark.parametrize("s", [s for s in C.SLOTS if s.hold == "none"], ids=lambda s: s.name)
-def test_plain_slots_take_every_card(s):
-    for v in C.CARDS:
-        assert seated(v, s).intersect(_half(s)).Volume() < 1e-3, v
+def _plain(w: float = C.B) -> cq.Workplane:
+    return cq.Workplane("XY").box(C.P_LEN, w, C.TH, centered=(True, True, False))
 
 
-@pytest.mark.parametrize("s", [s for s in C.SLOTS if s.hold == "ribs"], ids=lambda s: s.name)
-def test_rib_slots_grip_every_card(s):
-    for v in C.CARDS:
-        assert seated(v, s).intersect(_half(s)).Volume() > 0.5, v
-
-
-def _seated_portrait(card: cq.Workplane) -> cq.Shape:
-    s = next(s for s in C.SLOTS if s.name == "RB")
-    xc = L.W + L.PROUD + (C.P_LEN - C.A) - C.P_LEN / 2
-    return card.translate((xc, C.YC, s.z[0] + s.clr - card.val().BoundingBox().zmin)).val()
-
-
-def test_portrait_cards_grip_in_the_slot_michael_chose_and_touch_only_its_ribs():
-    s = next(s for s in C.SLOTS if s.name == "RB")
-    ribs_only = seated("A", s).intersect(_half(s)).Volume()
+@pytest.mark.parametrize("s", C.SLOTS, ids=lambda s: s.name)
+def test_portrait_cards_grip_in_every_slot_and_touch_only_its_ribs(s):
+    ribs_only = seated(_plain(), s).intersect(_half(s)).Volume()
+    assert ribs_only == pytest.approx(C.ribs(s).val().intersect(seated(_plain(), s)).Volume(), abs=0.05)
     face, back = C.snap_card()
     for name, c in (("solid", C.portrait_card()), ("snap", face.union(back))):
-        v = _seated_portrait(c).intersect(_half(s)).Volume()
+        v = seated(c, s).intersect(_half(s)).Volume()
         assert 0.5 < v <= ribs_only + 0.2, name
+
+
+def test_slot_gate_catches_a_card_too_wide_for_its_clearance():
+    s = C.SLOTS[0]
+    ribs_only = seated(_plain(), s).intersect(_half(s)).Volume()
+    assert seated(_plain(C.B + 0.8), s).intersect(_half(s)).Volume() > ribs_only + 0.2
 
 
 def test_snap_card_halves_close_without_overlap_and_make_a_full_card():
@@ -256,17 +245,10 @@ def test_snap_gate_catches_a_bead_bigger_than_its_relief(monkeypatch):
     assert face.val().intersect(back.val()).Volume() > 1e-3
 
 
-def test_detent_holds_card_C_in_its_notch_and_only_C():
-    s = next(s for s in C.SLOTS if s.hold == "detent")
-    assert seated("C", s).intersect(_half(s)).Volume() < 1e-3
-    assert seated("A", s).intersect(_half(s)).Volume() > 0.5      # control: no notch, the bump is in the way
-
-
 def test_slot_clearances_are_as_specified():
     for s in C.SLOTS:
         x0, x1, y0, y1 = C.footprint(s)
-        width = (x1 - x0) if s.loc in ("top", "bottom") else (y1 - y0)
-        assert width - (C.A if s.loc in ("top", "bottom") else C.B) == pytest.approx(2 * s.clr)
+        assert (x1 - x0) - C.B == pytest.approx(2 * s.clr)
         assert (s.z[1] - s.z[0]) - C.TH == pytest.approx(2 * s.clr)
 
 
@@ -333,16 +315,3 @@ def test_path_gate_catches_the_30_oct_back_half():
     assert A.path_hits(st["ff"], [old_back], (0, 0, 1), 28.0) != []
 
 
-def test_glue_in_guide_clears_every_moving_part():
-    # it replaces nothing on the new front half, so it must sit in free space in every state
-    g = S.guide_retrofit().val()
-    for name, st in _sweep_states().items():
-        parts = A.state(**st)
-        for k, v in parts.items():
-            if k != "front":
-                assert g.intersect(v).Volume() < 1e-3, (name, k)
-
-
-def test_glue_in_guide_gate_catches_a_guide_set_into_the_latch():
-    g = S.guide_retrofit().translate((0.5, 0, 0)).val()        # 0.5 mm too far in
-    assert g.intersect(A.state()["latch"]).Volume() > 1e-3

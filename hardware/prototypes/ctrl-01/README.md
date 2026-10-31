@@ -19,6 +19,11 @@ The real 68 × 110 × 29 mm case, split at mid-depth, with:
 - **six card slots** filling the rest of the case (two top, two bottom, two right),
   and **five card variants** to try in them.
 
+> **1 Nov, in progress: block keys and a new shell.** The generator and gates in this folder
+> now describe the next round (block keys on a 13 mm pitch, 4 mm travel, four portrait card
+> slots in the top and bottom faces, a tighter clasp). `print/` still holds the 31 Oct files
+> and the rest of this README still describes them, until Michael has seen the drawings.
+
 ## Decisions Michael has made
 
 | | |

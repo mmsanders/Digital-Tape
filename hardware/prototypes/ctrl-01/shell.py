@@ -50,9 +50,10 @@ def groove() -> cq.Workplane:
     return _rrect(t0, L.SEAM - L.TONGUE_H - L.GROOVE_CLR, L.SEAM + 0.01).cut(_rrect(L.WALL + 0.01, 0, L.T))
 
 
+# left-side ridges sit clear of the key openings (Record ends at Y 27.4, Play starts at 39.6)
 RIDGES = (("top", 14.0), ("top", 54.0), ("bottom", 14.0), ("bottom", 54.0),
-          ("right", 22.0), ("right", 88.0), ("left", 16.0), ("left", 95.0))
-RIDGE_LEN = 6.0
+          ("right", 22.0), ("right", 55.0), ("right", 88.0), ("left", 33.5), ("left", 96.5))
+RIDGE_LEN = L.RIDGE_LEN
 
 
 def _ridge(side: str, at: float, grow: float = 0.0) -> cq.Workplane:
@@ -79,14 +80,12 @@ def coin_notch() -> cq.Workplane:
 
 
 def key_apertures() -> cq.Workplane:
-    out = None
-    for n in L.KEYS:
-        c = L.key_y(n)
-        ex = L.STEM_XP / 2 - L.INSET + L.HOLE_CLR
-        ey = L.STEM_YP / 2 - L.INSET + L.HOLE_CLR
-        a = _box(-1, L.WALL + 0.1, c - ey, c + ey, L.KEY_Z - ex, L.KEY_Z + ex)
-        out = a if out is None else out.union(a)
-    return out
+    """Two openings: Record on its own, and one for Play..Stop side by side (1 Nov)."""
+    c, hy = L.HOLE_CLR, L.BLOCK_YP / 2
+    z0, z1 = L.BLOCK_Z[0] - c, L.BLOCK_Z[1] + c
+    rec = _box(-1, L.WALL + 0.1, L.key_y("rec") - hy - c, L.key_y("rec") + hy + c, z0, z1)
+    row = _box(-1, L.WALL + 0.1, L.key_y("play") - hy - c, L.key_y("stop") + hy + c, z0, z1)
+    return rec.union(row).edges("|X").fillet(L.BLOCK_R + c)
 
 
 # --- the transport bay ---------------------------------------------------------
@@ -108,14 +107,14 @@ def comb() -> cq.Workplane:
     slot_x1 = L.KEY_BOTTOM + L.TRAVEL + 0.5
     rz0, rz1 = L.KEY_Z - L.RAIL_W / 2 - L.SLIDE_CLR, L.KEY_Z + L.RAIL_W / 2 + L.SLIDE_CLR
     for b in L.FIN_Y:
-        fin = _box(L.WALL + c, s0 + 0.01, b - half, b + half, z_key_front, fin_z1)
+        fin = _box(L.FIN_X0 + 0.02, s0 + 0.01, b - half, b + half, z_key_front, fin_z1)   # the block lands here
         for yc in (b - L.PITCH / 2, b + L.PITCH / 2):
             name = next((n for n in L.KEYS if abs(L.key_y(n) - yc) < 1e-6), None)
             if name is None:
                 continue
             sgn = 1 if yc > b else -1
             yy = (yc - sgn * (L.STEM_YP / 2 + L.RAIL_P + L.SLIDE_CLR), yc - sgn * (L.STEM_YP / 2))
-            fin = fin.cut(_box(L.WALL - 1, slot_x1, min(yy), max(yy), rz0, rz1))
+            fin = fin.cut(_box(L.FIN_X0 - 1, slot_x1, min(yy), max(yy), rz0, rz1))
         parts.append(fin)
     for n in L.KEYS:
         parts.append(cq.Workplane("YZ", origin=(s0 - L.SPRING_BOSS_L, 0, 0))
@@ -130,8 +129,9 @@ def snap_lips() -> cq.Workplane:
     """The 0.35 mm lips the slide lock snaps past: interference on the way in is intended."""
     bx0, bx1 = L.BAR_X
     cz = L.BAR_Z[0] - 0.15 - 0.2
-    return (_box(bx0 - L.CHANNEL_CLR - 0.01, bx0 - L.CHANNEL_CLR + L.LIP, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2)
-            .union(_box(bx1 + L.CHANNEL_CLR - L.LIP, bx1 + L.CHANNEL_CLR + 0.01, L.FIN_Y[0], L.FIN_Y[-1] - 3, cz, cz + 0.2)))
+    ly0, ly1 = L.BAR_Y0 + 1.0, L.FIN_Y[-1] - 3
+    return (_box(bx0 - L.CHANNEL_CLR - 0.01, bx0 - L.CHANNEL_CLR + L.LIP, ly0, ly1, cz, cz + 0.2)
+            .union(_box(bx1 + L.CHANNEL_CLR - L.LIP, bx1 + L.CHANNEL_CLR + 0.01, ly0, ly1, cz, cz + 0.2)))
 
 
 def bay_back() -> cq.Workplane:
@@ -149,7 +149,7 @@ def bay_back() -> cq.Workplane:
     # bar channel: two walls up from the back wall, lips over the bar's front edges
     bx0, bx1 = L.BAR_X
     cz = L.BAR_Z[0] - 0.15 - 0.2                                    # lip underside 0.15 in front of the bar
-    wy0, wy1 = y0 + 1.5, y1 - 1.5
+    wy0, wy1 = L.BAR_Y0 - 2.0, y1 - 1.5            # the lock starts at Play: Record has no pawl
     parts += [
         _box(bx0 - L.CHANNEL_CLR - 1.0, bx0 - L.CHANNEL_CLR, wy0, wy1, cz, L.T - L.WALL + 0.01),
         _box(bx1 + L.CHANNEL_CLR, bx1 + L.CHANNEL_CLR + 1.0, wy0, wy1, cz, L.T - L.WALL + 0.01),
@@ -160,14 +160,13 @@ def bay_back() -> cq.Workplane:
     bar_end = L.FIN_Y[-1] + 1.9
     h0 = bar_end + L.BAR_TRAVEL_MAX + 0.4
     housing = _box(bx0 - L.CHANNEL_CLR, bx1 + L.CHANNEL_CLR, h0, wy1, 21.0, L.T - L.WALL + 0.01)
-    bore = (cq.Workplane("XZ", origin=(0, h0 - 1, 0)).center(9.0, L.BAR_SPRING_Z)
+    bore = (cq.Workplane("XZ", origin=(0, h0 - 1, 0)).center((bx0 + bx1) / 2, L.BAR_SPRING_Z)
             .circle(2.5).extrude(-(bar_end + L.SPRING_REST - h0 + 1)))
     parts.append(housing.cut(bore))
-    # blocker pedestal in the gap slot, with relief for Record's finger; clear of the comb
+    # pedestal in the gap slot (over the latch slider), and the wall its outer edge rides
     gy0, gy1 = L.FIN_Y[1] + half + c, L.FIN_Y[2] - half - c
     ped = _box(bx1 + L.CHANNEL_CLR + 1.0, s0 - c, gy0, gy1, L.BLOCKER_Z[1] + 0.2, L.T - L.WALL + 0.01)
-    ped = ped.cut(_box(7.0, 17.3, gy0 - 0.1, 35.3, 2.5, L.FINGER_Z[1] + 0.2))
-    ground = _box(17.2, 18.7, gy0, gy1, L.BLOCKER_Z[0], L.BLOCKER_Z[1] + 0.21)
+    ground = _box(*L.GROUND_X, gy0, gy1, L.BLOCKER_Z[0], L.BLOCKER_Z[1] + 0.21)
     parts += [ped, ground]
     out = parts[0]
     for p in parts[1:]:
@@ -175,17 +174,8 @@ def bay_back() -> cq.Workplane:
     return out
 
 
-GUIDE_XY = (8.0, 36.0, L.FIN_Y[2] - 2.0)      # x1, y0, y1 of the blocker's inner guide
+GUIDE_XY = (L.SLIDER_X0 - 0.2, L.key_y("play") - 12.0, L.key_y("play") - 7.5)   # x1, y0, y1
 GUIDE_Z1 = L.BLOCKER_Z[1] + 0.1
-
-
-def guide_retrofit() -> cq.Workplane:
-    """The blocker guide as a glue-in, for a front half printed before 30 Oct. A low
-    strip runs from the guide to the bay end wall, so the part locates itself on the
-    end wall, the side wall and the front wall."""
-    x1, gy0, gy1 = GUIDE_XY
-    g = _box(L.WALL, x1, gy0, gy1, L.WALL, GUIDE_Z1)
-    return g.union(_box(L.WALL, 5.0, L.BAY_Y[0] + 1.5 + 0.05, gy0 + 0.01, L.WALL, L.WALL + 1.0))
 
 
 def bay_front() -> cq.Workplane:
@@ -207,7 +197,7 @@ def bay_front() -> cq.Workplane:
     for n in ("ff", "rew", "stop"):
         c = L.key_y(n)
         # solid from the front wall: a flat face 0.1 in front of the key, nothing to bridge
-        parts.append(_box(3.0, L.KEY_BOTTOM + L.TRAVEL, c - 3.0, c + 3.0, L.WALL - 0.01, z_key_front - 0.1))
+        parts.append(_box(L.FIN_X0 + 0.1, L.KEY_BOTTOM + L.TRAVEL, c - 3.0, c + 3.0, L.WALL - 0.01, z_key_front - 0.1))
     out = parts[0]
     for p in parts[1:]:
         out = out.union(p)

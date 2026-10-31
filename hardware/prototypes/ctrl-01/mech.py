@@ -119,7 +119,7 @@ def neighbour_clear(name: str, s_max: float = L.BAR_TRAVEL_MAX) -> bool:
     pawl = Polygon(pawl_profile())
     for s10 in range(0, int(s_max * 10) + 1):
         for d10 in range(0, int(L.TRAVEL * 10) + 1):
-            other = translate(nxt, L.PITCH, -d10 / 10)
+            other = translate(nxt, L.key_y(row[i + 1]) - L.key_y(name), -d10 / 10)
             if other.intersection(translate(pawl, s10 / 10, 0.0)).area > 1e-5:
                 return False
     return True
@@ -173,17 +173,25 @@ def key_local(name: str, raise_: float | None = None, flip: bool = False) -> cq.
             zc = L.BODY_H / 2
             prof = [(y, 2 * zc - z) for y, z in prof]
         body = body.union(_prism_yz(prof, hx - 0.01, hx + L.TOOTH_X))
-    ex, ey = hx - L.INSET, hy - L.INSET
-    body = body.union(_box(-ex, ex, -ey, ey, L.BODY_H - 0.01, L.CAP_Z0 + 0.01))
-    cap = (cq.Workplane("XY").box(L.CAP_XP, L.CAP_YP, L.CAP_T, centered=(True, True, False))
-           .edges("|Z").fillet(L.CAP_R).faces(">Z").edges().fillet(0.6)
-           .translate((0, 0, L.CAP_Z0)))
-    body = body.union(cap).cut(_icon(name, L.CAP_Z0 + L.CAP_T - 0.5))
+    body = body.union(block()).cut(_icon(name, L.BLOCK_TOP - 0.5))
     if name == "rec":
         body = body.union(_toe_and_web())
     if name == "play":
         body = body.union(_arm_and_rail())
     return body
+
+
+def block() -> cq.Workplane:
+    """The block (1 Nov): what sticks out of the shell and what you press. Its
+    section runs straight through the wall; a flange on its back edge, inside the
+    wall, stops it at rest, and its inner face lands on the comb's fins at full press."""
+    bx0, bx1 = L.BLOCK_Z[0] - L.KEY_Z, L.BLOCK_Z[1] - L.KEY_Z
+    hy = L.BLOCK_YP / 2
+    b = (cq.Workplane("XY").box(bx1 - bx0, 2 * hy, L.BLOCK_TOP - L.BLOCK_Z0, centered=False)
+         .translate((bx0, -hy, L.BLOCK_Z0 - 0.01)))
+    b = b.edges("|Z").fillet(L.BLOCK_R).faces(">Z").edges().fillet(L.BLOCK_R)
+    flange = _box(bx1 - 0.5, bx1 + L.FLANGE_ZP, -hy, hy, L.BLOCK_Z0 - 0.01, L.BLOCK_Z0 + L.FLANGE_T)
+    return b.union(flange)
 
 
 FRONT_CLR = 0.2     # finger and arm stay this far in front of the keys' front plane (the fins' edge)
@@ -256,15 +264,17 @@ def bar(shift: float = 0.0) -> cq.Workplane:
     b = _box(x0, x1, L.BAR_Y0, y_end, z0, z1)
     pz0, pz1 = L.KEY_Z + L.PAWL_XP[0], L.KEY_Z + L.PAWL_XP[1] + 0.01
     for n in L.KEYS:
+        if n == "rec":
+            continue                    # Record latches to Play, not to the lock (31 Oct)
         c = L.key_y(n)
         pts = [(L.KEY_BOTTOM - z, c + y) for y, z in pawl_profile()]
         b = b.union(cq.Workplane("XY", origin=(0, 0, pz0)).polyline(pts).close().extrude(pz1 - pz0))
     # spring boss on the bottom end (pencil spring threads on). The bar prints back
     # face (+Z) down, so the boss's teardrop point faces +Z, toward the bed.
-    r = 1.4
-    ring = [(9.0 + r * math.cos(math.radians(a)), L.BAR_SPRING_Z + r * math.sin(math.radians(a)))
-            for a in range(0, 360, 15) if not (45 < a < 135)] + [(9.0, L.BAR_SPRING_Z + r * math.sqrt(2))]
-    ring = sorted(ring, key=lambda p: math.atan2(p[1] - L.BAR_SPRING_Z, p[0] - 9.0))
+    r, xc = 1.4, (x0 + x1) / 2
+    ring = [(xc + r * math.cos(math.radians(a)), L.BAR_SPRING_Z + r * math.sin(math.radians(a)))
+            for a in range(0, 360, 15) if not (45 < a < 135)] + [(xc, L.BAR_SPRING_Z + r * math.sqrt(2))]
+    ring = sorted(ring, key=lambda p: math.atan2(p[1] - L.BAR_SPRING_Z, p[0] - xc))
     boss = (cq.Workplane("XZ", origin=(0, y_end - 0.01, 0)).polyline(ring).close()
             .extrude(-3.0))
     return b.union(boss).translate((0, shift, 0))
@@ -306,10 +316,13 @@ def slot_outline() -> Polygon:
 def slider_outlines() -> tuple[Polygon, Polygon]:
     """(floor, raised) plan outlines. The floor runs under Record's lane; everything
     raised stays out of it except the hook."""
-    floor = unary_union([box(8.2, 29.9, 17.0, 41.0), box(5.0, 41.0, 17.0, 48.5)]).difference(slot_outline())
-    raised = unary_union([hook_outline(), box(8.2, 29.9, 8.7, 36.4),
-                          unary_union([box(8.2, 36.4, 17.0, 41.0), box(5.0, 41.0, 17.0, 48.5)])
-                          .difference(slot_outline())])
+    x0, x1 = L.SLIDER_X0, L.GROUND_X[0] - 0.2
+    y0 = hook_outline().bounds[1] - 0.5
+    sx0, sy0, sx1, sy1 = slot_outline().bounds
+    guide_y1 = L.key_y("play") - 7.5
+    walls = unary_union([box(x0, sy0 - 1.2, x1, sy1 + 1.3), box(sx0 - 1.2, guide_y1 + 0.5, x0, sy1 + 1.3)])
+    floor = unary_union([box(x0, y0, x1, sy0), walls]).difference(slot_outline())
+    raised = unary_union([hook_outline(), box(x0, y0, x0 + 0.5, sy0 - 1.2), walls.difference(slot_outline())])
     return floor, raised
 
 

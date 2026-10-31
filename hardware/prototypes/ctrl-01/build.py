@@ -1,15 +1,13 @@
-"""CTRL-01 build: every printed part in its print pose, three plates, and STLs.
+"""CTRL-01 build: every printed part in its print pose, two plates, and STLs.
 
     python3 hardware/prototypes/ctrl-01/build.py      writes print/ctrl01-*.stl
 
-Plates (A1 Mini, 180 x 180):
-    shell  front and back halves together, so they are a matched pair; outer faces down
-    mech   the five keys upright, a spare FF, the slide lock (back face down), the Record
-           latch slider, the key comb (spine down)
-    cards  the new front half, the five card variants (flat) and a spare slide lock
-    rebuild  the new back half, the key comb and the glue-in blocker guide (30 Oct)
-    latch  31 Oct: Record latch slider, new Record and Play keys, slimmer slide lock,
-           the solid portrait card and both halves of the snap-together one
+Plates (A1 Mini, 180 x 180), 1 Nov block-key round:
+    shell  front and back halves together, so they are a matched pair; outer faces down.
+           Card-slot mouths print on supports from the plate
+    mech   the five keys upright (support under the blocks), a spare FF, the slide lock
+           (back face down), the Record latch slider, the key comb (spine down) and the
+           portrait card
 """
 
 from __future__ import annotations
@@ -40,12 +38,9 @@ def parts() -> dict[str, cq.Workplane]:
     global _PARTS
     if _PARTS is None:
         front, back = S.halves()
-        _PARTS = {"front": front, "back": back, "comb": S.comb(), "bar": M.bar(), "latch": M.latch(),
-                  "guide-retrofit": S.guide_retrofit()}
+        _PARTS = {"front": front, "back": back, "comb": S.comb(), "bar": M.bar(), "latch": M.latch()}
         for n in L.KEYS:
             _PARTS[f"key-{n}"] = M.key_local(n)
-        for v in C.CARDS:
-            _PARTS[f"card-{v}"] = C.card(v)
         _PARTS["card-portrait"] = C.portrait_card()
         face, back = C.snap_card()
         _PARTS["card-snap-face"], _PARTS["card-snap-back"] = face, back
@@ -63,12 +58,9 @@ def print_poses() -> dict[str, cq.Workplane]:
         "card-snap-face": p["card-snap-face"],                                 # face up, groove down
         "card-snap-back": p["card-snap-back"],                                 # outer face down
         "comb": p["comb"].rotate((0, 0, 0), (0, 1, 0), 90),                    # spine down, fins up
-        "guide-retrofit": p["guide-retrofit"],                                 # front-wall face down
     }
     for n in L.KEYS:
         out[f"key-{n}"] = p[f"key-{n}"]                                        # upright
-    for v in C.CARDS:
-        out[f"card-{v}"] = p[f"card-{v}"]
     return {k: _to_bed(v, 0, 0) for k, v in out.items()}
 
 
@@ -77,27 +69,11 @@ def plates() -> dict[str, cq.Workplane]:
     shell = _to_bed(pp["front"], 5, 5).union(_to_bed(pp["back"], 85, 5))
     mech = None
     for i, n in enumerate(L.KEYS + ("ff",)):
-        k = _to_bed(pp[f"key-{n}"], 8 + (i % 3) * 30, 8 + (i // 3) * 30)
+        k = _to_bed(pp[f"key-{n}"], 8 + (i % 3) * 23, 8 + (i // 3) * 23)
         mech = k if mech is None else mech.union(k)
-    mech = mech.union(_to_bed(pp["bar"], 100, 8)).union(_to_bed(pp["latch"], 120, 8))
-    mech = mech.union(_to_bed(pp["comb"], 145, 8))
-    # the card plate also carries a spare slide lock (Michael, 28 Oct: the mech plate was
-    # already printing with flat-topped latches) and the new front half (30 Oct: so the
-    # blocker guide comes built in rather than glued)
-    cards = _to_bed(pp["front"], 5, 5)
-    for i, v in enumerate(C.CARDS):
-        cards = cards.union(_to_bed(pp[f"card-{v}"], 80 + (i % 2) * 45, 5 + (i // 2) * 41))
-    cards = cards.union(_to_bed(pp["bar"], 170, 5))
-    # 30 Oct rebuild: the new back half and the comb; the glue-in guide lets a front half
-    # printed before 30 Oct be kept
-    rebuild = (_to_bed(pp["back"], 5, 5).union(_to_bed(pp["comb"], 85, 5))
-               .union(_to_bed(pp["guide-retrofit"], 115, 5)))
-    # 31 Oct: the Record latch round
-    latch = (_to_bed(pp["latch"], 5, 5).union(_to_bed(pp["key-rec"], 30, 5))
-             .union(_to_bed(pp["key-play"], 55, 5)).union(_to_bed(pp["bar"], 82, 5))
-             .union(_to_bed(pp["card-portrait"], 95, 5)).union(_to_bed(pp["card-snap-face"], 95, 46))
-             .union(_to_bed(pp["card-snap-back"], 95, 87)))
-    return {"shell": shell, "mech": mech, "cards": cards, "rebuild": rebuild, "latch": latch}
+    mech = (mech.union(_to_bed(pp["bar"], 80, 8)).union(_to_bed(pp["latch"], 92, 8))
+            .union(_to_bed(pp["comb"], 112, 8)).union(_to_bed(pp["card-portrait"], 8, 60)))
+    return {"shell": shell, "mech": mech}
 
 
 def build(out: Path = OUT) -> list[Path]:
