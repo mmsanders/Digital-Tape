@@ -188,5 +188,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path) | 2026-10-28 PDT | Phase 2 closeout reset | Outcome tests plus negative controls replace mechanism forensics; A6/G1/G3/WP16 own-host methods; `tapectl make` built now on the accepted provision open; Q-P2-1(b) ruled port-level batching; ledger and C1–C4 roadmap |
 | [ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued) | 2026-10-29 PDT | C1 disposition / C2 and G2 queued | WP-14 and WP-16 accepted (#364); Make cleared and merged ea54a41; Phase 2 11/12; G2 protocol; three Phase 2 limitations accepted |
 | [ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued) | 2026-10-30 PDT | C2 disposition / G2 issued | C2 real-card session passed (#370); F370-1 rejected-drop Show details exempted in APP-1 §6; G1/G3/G4/G5 complete; G2 #631 on the same candidate |
+| [ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed) | 2026-11-01 PDT | Phase 2 exit | Michael defers G2 (#633); exit items met; Phase 2 CLOSED 12/12 with G2 deferred; host scope frozen; Phase 3 bench-firmware plan PROPOSED, decisions #635 |
 
 131 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
