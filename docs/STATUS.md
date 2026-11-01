@@ -1,64 +1,45 @@
 # Project status
 
-**PM634 · 1 November 2026 PDT · input main `3bf43471` · Verification main `1938e651`.**
-**Phase 1 complete (36/36). Phase 2 CLOSED (12/12, G2 deferred) under
-[ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed).**
-Phase 3 (bench firmware) is PROPOSED and waits on Michael's kickoff decisions.
+**1 November 2026 PDT. Phase 2.5 cleanout** ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)).
+Phases 1 and 2 are complete. Phase 3 (bench firmware) opens after this cleanout.
 
-## Phase 2 outcome
+## Completed
 
-| Package | Result |
+| Phase | Result |
 |---|---|
-| WP-14 `tapectl` on real cards | **Accepted**, Windows 11 (Verification #364) |
-| WP-16 Ingest | **Accepted**, Windows 11 (Verification #364) |
-| WP-15 App | **Accepted with G2 deferred**: G1/G3/G4/G5 on exact `5101e3f3` / ZIP `b8a689cf` (Verification #364, #370; ADR-197). Michael made real cartridges through the app in C2 |
+| 1 Audio engine | 36/36 accepted (3 Oct 2026) |
+| 2 Desktop tooling | 12/12, with the G2 unaided test deferred (1 Nov 2026). `tapectl` on real cards, ingest and the one-window app are accepted for Windows 11. Michael made real cartridges through the app |
 
-- Exit items: goldens and replays green on the last code head (`ea54a41`, engine `d96b4245`);
-  Q-P2-1 ruled (ADR-195 §4); host scope frozen (ADR-198).
-- Record: the [Phase 2 ledger](PHASE2-LEDGER.md) and [PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md).
-- The closeout took four PM rounds from the 28 October reset.
+Package detail: [packages](PACKAGES/README.md) and [verification integration](VERIFICATION-INTEGRATION.md).
+The desktop tool's scope is frozen (ADR-198): it loads cartridges, nothing more.
 
-**Deferred, not waived:**
-- **G2** unaided test: before the app goes to anyone else for real use, or on request. A mini
-  app redesign round follows if needed.
-- macOS.
-- The ADR-196 limitations:
-  - elevated-launch race from a user-writable folder;
-  - no stale-job cleanup after a crash;
-  - typed `NOT_READY` rows;
-  - undetected equal-size swap.
-
-## Phase 3 — proposed
+## Next: Phase 3
 
 [Phase 3 plan](PHASE3-PLAN.md):
-- **Goal:** the shared engine runs on a Teensy 4.1 bench build and plays an app-made cartridge
-  through headphones, with real buttons.
-- **Packages:** WP-17 to WP-21.
-- **Also in scope:** card atomicity on the PNY cards, and the Q-P2-1 entry conditions.
+- the shared engine on a Teensy 4.1 bench build, with keys, LED status, headphones and speaker;
+- the card power-cut test on the PNY cards;
+- the deferred crash coverage before firmware write batching.
 
-Michael answers D1–D9 and says what equipment he owns in
-[#635](https://github.com/mmsanders/Digital-Tape/issues/635).
+Hardware returns for bench work and drafts the parts list; Michael owns no bench equipment yet.
+
+The device design has moved: mechanical latching keys and no solenoid, a speaker with its own
+loudness cap, a microphone, two aux ports. See [DEVICE-DESIGN](DEVICE-DESIGN.md). Its
+open questions (§6) are with Michael.
 
 ## Current assignments
 
-| Owner | Issue | Outcome wanted |
-|---|---|---|
-| Michael | [#635](https://github.com/mmsanders/Digital-Tape/issues/635) | Phase 3 kickoff decisions and equipment on hand |
-
-No lead task is open. Leads start only when Michael starts them (ADR-192/195).
+None. Phase 3 issues follow when Michael opens the phase.
 
 ## Holds that stand
 
 - Guardrails 01–13; engine pinned at `d96b4245`; format frozen; Structural Rule 1 for engine
   code; Verification independence.
-- Host scope frozen (ADR-198).
-- The app and ingest never run elevated. WP-14 A4 outranks everything.
-- Hardware stays parked (ADR-160) until Phase 3 D3.
-- Fabrication and charging stay CLOSED. Card atomicity is unqualified.
-- Phase 3 entry items: any-subset coverage before firmware batching; guardrail 10 measured on target.
+- Host scope frozen. The app and ingest never run elevated; WP-14 A4 disk safety outranks
+  everything.
+- Fabrication and charging CLOSED. No card is qualified yet.
+- Deferred, not waived:
+  - G2: run [the protocol](WP15-G2-PROTOCOL.md) before the app goes to anyone else for real use;
+  - macOS;
+  - the ADR-196 limitations.
 
-## Preserved references
-
-[Phase 2 plan](PHASE2-PLAN.md), [verification integration](VERIFICATION-INTEGRATION.md),
-[package index](PACKAGES/README.md), [human queue](FOR-MICHAEL.md). Earlier status revisions are
-unchanged in Git history.
+[Hardware status](STATUS-HARDWARE.md) · [human queue](FOR-MICHAEL.md) · [decisions index](DECISIONS-INDEX.md)

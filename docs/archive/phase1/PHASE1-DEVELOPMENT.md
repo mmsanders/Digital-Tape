@@ -13,7 +13,7 @@ coverage and safety holds remain unchanged.
 | Verification | Sol / separate Work chat | Independent tests, evidence disposition and acceptance |
 | Surge | Grok | Miscellaneous bounded tasks primarily directed by Michael |
 
-Use [role charters](ROLES/README.md) and [the issue workflow](ISSUE-WORKFLOW.md).
+Use [role charters](../../ROLES/README.md) and [the issue workflow](../../ISSUE-WORKFLOW.md).
 Each lead performs its own work; no subworkers. PM creates a new issue for each
 lead assigned useful work in a round, applying the appropriate role label.
 Not every lead must be assigned. Read open issues and their current scope updates,
@@ -30,14 +30,14 @@ it cannot wake leads, issue work, monitor chats or grant acceptance.
 Notifications are prompts to inspect live issue state, not new product authority.
 
 Main remains authoritative for product spec, charters, decisions and evidence.
-[STATUS](STATUS.md), [package scope](PACKAGES/README.md) and
-[freeze record](PHASE0-FREEZE.md) describe facts and gates; they do not assign work.
+[STATUS](../../STATUS.md), [package scope](../../PACKAGES/README.md) and
+[freeze record](../../PHASE0-FREEZE.md) describe facts and gates; they do not assign work.
 Closed issues, Git history and historical reviews must not revive old directions.
 
 **Phase 1 closed on 3 October 2026** (ADR-159): every Phase 1 package is independently
 accepted for laptop scope and the golden suite is green. This file now records how
-Phase 1 was organised; current state is in [STATUS](STATUS.md) and Phase 2 kickoff
-items are in [the roadmap](PACKAGES/README.md#phase-2-kickoff-prep). Independent
+Phase 1 was organised; current state is in [STATUS](../../STATUS.md) and Phase 2 kickoff
+items are in [the roadmap](../../PACKAGES/README.md#phase-2-kickoff-prep). Independent
 hardware acceptance and card qualification remain open and are parked with hardware.
 Fabrication and cell charging stay CLOSED. Only Michael approves purchases and
 reserved physical/signature decisions. Issue closure is not independent acceptance.

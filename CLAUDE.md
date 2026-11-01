@@ -1,11 +1,9 @@
 # Digital Tape — working agreement
 
-**Current agreement: 24 October 2026 PDT** (Phase1 agreement retained; ADR-191 Windows-only/local-context amendment; ADR-195 proportional-evidence amendment, 28 October).
-Applies to every lead, regardless of model or app. Revisions/hashes live in
-spec/VERSION.md; phase and gate state in docs/STATUS.md.
-Fresh context: read [START-HERE](docs/START-HERE.md). This consolidates earlier
-charters and Michael’s latest PM instructions; historical rationale remains in
-docs/DECISIONS.md and Git history.
+**Current agreement: 1 November 2026 PDT.** Applies to every lead, regardless of model or app.
+Spec revisions and hashes are in spec/VERSION.md; phase and gate state is in docs/STATUS.md.
+A fresh context starts at [START-HERE](docs/START-HERE.md). Rationale is in docs/DECISIONS.md
+and Git history.
 
 ## 1. Product guardrails
 
@@ -49,13 +47,10 @@ Model/app choice does not change authority. Preserve a separate independent
 verification context and the standing cross-model separation from implementers;
 Michael assigns the runtime. Size rounds to an outcome (ADR-195) and use capability appropriate to the
 task. Michael controls available platforms and spending; do not assume service limits.
-**Current routing (24 October, ADR-192): Software is Claude Code on Michael's actual local Windows machine, with model selected by Michael. Verification remains a separate independent context. PM posts GitHub issues only; no automatic lead kickoff, listener wake-up or next-task continuation until Michael explicitly resumes it. Both existing listeners are PAUSED. Once started, a lead may continue into the next named stage of the same issue when its input has arrived (ADR-195, Michael 28 Oct); it never starts another issue or polls.**
+**Routing:** Michael starts each issue manually; PM posts issues only, with no kickoff
+messages and no active listener. Details are in §7.
 
-Current Phase2 family delivery is Windows11 only; macOS is deferred under ADR-191, Linux remains existing CI. Michael may configure issue listeners for lead activation. This agreement does not
-install a listener or enable automatic acceptance, review or merge.
-
-The Phase 0 combined PM + Software + Hardware freeze exception expired on 8 September 2026
-(see DECISIONS.md); no lead inherits it.
+**Platforms:** the desktop tools target Windows 11 x64; macOS is deferred; Linux stays as CI.
 
 ## 3. Spec → independent tests → implementation
 
@@ -89,8 +84,7 @@ The Phase 0 combined PM + Software + Hardware freeze exception expired on 8 Sept
    Return these to Verification/PM; never relax tests to fit code.
 Private or unpublished scaffolding is not an exception to a task's tests-first rule.
 Declare interfaces before code where needed; publish the independent expectations
-before implementing covered behavior. The quarantined pre-302 scaffold is recorded
-process debt, not a precedent or a retrospectively certified test-first result.
+before implementing covered behavior.
 
 3. Spec/test disagreement is a PM decision, not bargaining with the implementer.
    An API absent from the spec is a finding; do not invent it to compile a test.
@@ -121,8 +115,7 @@ the live assignment issue/body/scope updates → work only that bounded assignme
 **Required reading is exactly four documents plus the issue:** `AGENTS.md`, `CLAUDE.md`,
 `docs/STATUS.md` and the lead's own charter, with the live issue body and its scope
 updates. Everything else — `docs/DECISIONS.md`, `docs/VERIFICATION-INTEGRATION.md`,
-`docs/PACKAGES/README.md`, `docs/PHASE0-FREEZE.md`, `docs/PHASE1-DEVELOPMENT.md` and the
-frozen specs — is **read on demand, for the sections the tranche touches**, entered
+`docs/PACKAGES/README.md`, `docs/PHASE0-FREEZE.md` and the frozen specs — is **read on demand, for the sections the tranche touches**, entered
 through [the decisions index](docs/DECISIONS-INDEX.md) and
 [spec/NAVIGATION.md](spec/NAVIGATION.md). Not reading a document the tranche does not
 touch is compliance, not a skipped step.
@@ -180,14 +173,12 @@ fields with the response author’s own sign-off. Media atomicity must be establ
 per exact card SKU/revision before qualification; paper review qualifies no card.
 A torn block is a blocker, not a firmware workaround.
 
-The original cheap 4 GB V30 search and later two-arm HTsemi plan are superseded.
-Michael bought three PNY 64 GB V30 cards and characterized those samples alongside
-an existing onn V10 control. The retail family and speed marks are not exact card
-identity: every result and any later qualification must still bind manufacturer part
+Michael owns three PNY 64 GB V30 cards. The retail family and speed marks are not exact
+card identity: every result and any later qualification must bind manufacturer part
 number, capacity, revision and CID. No media is qualified without the independent
 sustained-write and atomicity evidence required by WP-05.
 
-## 6. Implementation boundaries retained from the charter
+## 6. Implementation boundaries
 
 Reject engine dependencies beyond libc, board/chip/peripheral conditionals, heap-returning
 APIs and writes through a read-only binding. Do not add function-pointer dispatch outside
@@ -195,28 +186,23 @@ the contract's callback exemptions and audited funnel. Device progress reports c
 not clocks or timeout policy. Desktop tooling loads cartridges; it is not a music manager,
 tag editor, library or player. Firmware must not fork seek, mixing or other engine behaviour.
 Golden audio must remain bit-identical across desktop and firmware at 1.0×; divergence is
-a release blocker. These limits survive the documentation consolidation.
+a release blocker.
 
 ## 7. Individual leads and issue assignments
 
-Phase 1 ran this way and closed on 3 October 2026; the same format carries into Phase 2
-unless Michael changes it at kickoff. Phase 2 scope, kickoff decisions, rounds and exit gate are in
-[the Phase 2 plan](docs/PHASE2-PLAN.md). Use
-[role instructions](docs/ROLES/README.md); [the Phase 1 plan](docs/PHASE1-DEVELOPMENT.md) is the
-historical record of how Phase 1 was organised.
-PM has no fixed model: Michael assigns whichever runtime has capacity (ADR-162). For current Phase 2, Software is Claude Code on Michael's actual local Windows machine (24 October, ADR-192 amendment to ADR-191). The full Software role remains one active context per task; no cloud-owner/local-runner split is adopted. Verification remains separate and independent. Runtime/model selection is Michael's. Earlier fixed Software/Verification app/model statements are superseded. Hardware remains parked in its separate role. Surge is Grok, primarily
-instructed directly by Michael for miscellaneous scoped tasks.
+Each phase runs with individual leads routed by role-labeled GitHub issues. The current
+phase plan is [the Phase 3 plan](docs/PHASE3-PLAN.md); closed phases are in docs/archive/.
+Role charters are in [docs/ROLES](docs/ROLES/README.md).
 
-Leads perform their own work within their normal authorities. Software implements and
-integrates; Hardware designs and characterizes; Verification independently authors and
-runs tests; PM plans, decides and maintains the specification and handoffs. No subworkers
-or automatic delegation are part of the lead format. Do not make routine direct lead work an exception.
+PM has no fixed model; Michael assigns the runtime. Software is Claude Code on Michael's
+local Windows machine, model chosen by Michael, one active context per task. Verification
+is a separate, independent context. Hardware is a separate context. Surge (Grok) takes
+miscellaneous tasks directly from Michael.
 
-Michael manually activates the selected issue/context. PM posts next-round issues without sending kickoff messages, starting a listener or automatically advancing a lead to another assignment. The prior finite automation windows are historical; both lead listeners are PAUSED until Michael explicitly reauthorizes them. PM maintains
-work directions solely in role-labeled GitHub issues. Each lead reads the live issue,
-fetches main, performs its own assigned work, returns evidence in the issue and stops.
-Do not repeat completed work on a duplicate event or create tasks for idle leads just
-to fill a round. No subworkers or archived signaling/controller infrastructure is
-restored. The repository does not claim listeners are active. Labels and issue
-closure never waive independent acceptance, purchase approval, the signed freeze,
-or physical safety gates.
+Leads do their own work within their authorities, with no subworkers or automatic
+delegation. Michael starts each issue manually. PM posts issues and sends no kickoff
+messages; no listener is active. A lead reads the live issue, fetches main, does the work,
+returns evidence in the issue and stops; it may continue into the next named stage of the
+same issue when that stage's input has already arrived. Do not repeat completed work on a
+duplicate event or create tasks for idle leads. Labels and issue closure never waive
+independent acceptance, purchase approval, the signed freeze or physical safety gates.

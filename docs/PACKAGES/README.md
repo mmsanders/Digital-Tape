@@ -1,93 +1,62 @@
-# Work packages — current roadmap
+# Work packages
 
-**PM634 · 1 November 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
-Live assignments are GitHub role issues, not this index. [Status](../STATUS.md),
-[Phase 2 plan §8 closeout](../PHASE2-PLAN.md#8-closeout-plan-adr-195) and
-[the Phase 2 ledger](../PHASE2-LEDGER.md) govern current gates.
+**1 November 2026.** Live assignments are GitHub role issues, not this index. Current state
+is in [STATUS](../STATUS.md); the next phase is in [the Phase 3 plan](../PHASE3-PLAN.md); the
+device is described in [DEVICE-DESIGN](../DEVICE-DESIGN.md).
 
-Phase 1 is complete (36/36). **Phase 2 is CLOSED (12/12, G2 deferred; ADR-198).** Phase 3 is [proposed](../PHASE3-PLAN.md). Rungs count completed gates, not effort.
+| Phase | State |
+|---|---|
+| 0 Foundations | Specs frozen and signed (docs/PHASE0-FREEZE.md) |
+| 1 Audio engine | **Complete** (36/36), 3 Oct 2026 |
+| 2 Desktop tooling | **Complete** (12/12, G2 deferred), 1 Nov 2026 |
+| 3 Bench firmware | **Planned**; opens after the Phase 2.5 cleanout |
+| 4–6 | Future |
 
-## Phase 0 — foundations and parked hardware
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-01 | Repo, agent docs, decision log | Agent | — | Established foundation; frozen interfaces and reserved approvals remain binding. |
-| WP-02 | TAPEFS v1 specification | **PM** | spec | Established foundation; frozen interfaces and reserved approvals remain binding. |
-| WP-03 | Engine API specification | **PM** | spec | Established foundation; frozen interfaces and reserved approvals remain binding. |
-| WP-04 | Transport spike: Route A vs Route B | You | hardware | Parked through Phase2; safety/fabrication/charging holds and original resume criteria unchanged. |
-| WP-05 | Parts order #1 | You | hardware | Parked through Phase2; safety/fabrication/charging holds and original resume criteria unchanged. |
-| WP-34 | Thermal and safety budget | Hardware | hardware | Parked through Phase2; safety/fabrication/charging holds and original resume criteria unchanged. |
-| WP-35 | Repo access and agent push setup | You | — | Established foundation; frozen interfaces and reserved approvals remain binding. |
+## Foundations and specifications
+| Package | Outcome | State |
+|---|---|---|
+| WP-01 | Repo, agent docs, decision log | Established |
+| WP-02 | TAPEFS v1 specification | Frozen |
+| WP-03 | Engine API specification | Frozen |
+| WP-35 | Repo access and agent setup | Established |
 
-## Phase 1 — audio engine, COMPLETE
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-06 | Block device layer, superblock, index commit | Agent | 1 | **COMPLETE.** Verification #138's DRAFT-10 ledger closes WP-06: 40 rows independently accepted and integrated (mount, writability, NOT_MOUNTED, #297 sequential, #326 closure gaps), 2 WP-06e rows unreachable by spec (V10-002), none open |
-| WP-07 | Chunk allocator, copy-on-write Side B | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #67 accepted the frozen 10,000-sequence allocator/COW package. Product PR #215 mechanically carried the accepted bytes onto post-WP13 main and integrated them unchanged |
-| WP-08 | Playback, seek, variable-rate scrub | Agent | 1 | **COMPLETE.** Every behaviour row is covered. L01/L14 close on the WP-11 goldens approved by Michael (#367). Verification #143 PASS on exact #369 |
-| WP-09 | Record: overwrite, overdub, splice | Agent | 1 | **COMPLETE.** Every behaviour row is covered (#346). L01 closes on the WP-11 goldens approved by Michael (#367). Verification #143 PASS on exact #369 |
-| WP-10 | Crash-injection harness | Verification | 2 | **COMPLETE.** Verification #141 passed exact Product #362 (V10-001) and closed the DRAFT-10 WP-10 ledger: 63 rows, zero open; earlier bounded tranches carried within their exact boundaries |
-| WP-11 | CLI harness and golden-file regression suite | Verification | 2 | **COMPLETE.** `tapectl` per `docs/WP11-CLI-CONTRACT.md`; ten golden references from public-domain Grieg plus a CC0 voice, approved by Michael (#367) and bit-identical in CI; the §8 differential on three configurations; mutation 7/7. Verification #143 PASS on exact #369, merged at `d93ca4e` |
-| WP-12 | Re-spool / defragment pass | Agent | 1 | **COMPLETE.** WP-12/12a ledger: 36 rows, zero open (`wp11_ledgers_r63`; Verification #143) |
-| WP-13 | Embedded-readiness audit | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #66 independently reproduced all six frozen gates from raw evidence and accepted exact product PR #206; integrated on main |
-| WP-36 | Slot capability model | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #57 accepted the frozen package after the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign. Product PR #200 integrated the exact accepted tree unchanged at main `e4a3565...` |
+## Phase 1 — audio engine (complete)
+| Package | Outcome | State |
+|---|---|---|
+| WP-06 | Block device layer, superblock, index commit | Accepted (Verification #138) |
+| WP-07 | Chunk allocator, copy-on-write Side B | Accepted (Verification #67) |
+| WP-08 | [Playback, seek, variable-rate scrub](WP-08.md) | Accepted (Verification #143) |
+| WP-09 | Record: overwrite, overdub, splice | Accepted (Verification #143) |
+| WP-10 | Crash-injection harness | Accepted (Verification #141) |
+| WP-11 | CLI harness and golden suite | Accepted (Verification #143); ten goldens approved by Michael |
+| WP-12 | Re-spool / defragment | Accepted (Verification #143) |
+| WP-13 | Embedded-readiness audit | Accepted (Verification #66) |
+| WP-36 | Slot capability model | Accepted (Verification #57) |
 
-## Phase 2 — desktop tooling, CLOSED
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | **ACCEPTED 4/4, G2 deferred** (ADR-198). |
-| WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
-| WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
+## Phase 2 — desktop tooling (complete)
+| Package | Outcome | State |
+|---|---|---|
+| WP-14 | [`tapectl` on real cards](WP-14.md) | Accepted, Windows 11 (Verification #364) |
+| WP-16 | [Ingest](WP-16.md) | Accepted, Windows 11 (Verification #364) |
+| WP-15 | [One-window app](WP-15.md) | Accepted with G2 deferred (Verification #364/#370, ADR-198) |
+| WP-38 | Phone/web harness | Not taken; a later WASM build stays possible |
 
-No current human action:589 reviewed/partial closed; no repeat or Show Details
-recovery requested. Source fixes do not retrospectively qualify original564 or native585.
-A6 route1 PARKED after353/10bbe7ad: exact SplitIo32 native contract absent;
-no duplicate partial decoder or new recording/admin/card task. Resume only with
-concrete reviewed schema observation and actual operator/privilege authority.
-616 packaging is integrated.618 awaits361's executable method qualification in
-ordinary Windows CI after359 local script-policy refusal; no native session yet.
-[PM620 review](../REVIEW/PM620-METHOD-CONTROLS.md) records exact evidence,
-closures/restoration pointers and remaining gates. Manual role pickup only.
+## Phase 3 — bench firmware (planned)
+| Package | Outcome |
+|---|---|
+| WP-05 | [Cards and bench parts](WP-05.md): bench parts list, card characterisation and the atomicity test |
+| WP-17 | Teensy firmware skeleton, engine integration |
+| WP-18 | Second card slot, insert detect, copy with LED progress |
+| WP-19 | Codec, microphone, aux, speaker amplifier, output caps |
+| WP-20 | Transport key reading and LED status (no solenoid) |
+| WP-21 | Bench acceptance demo |
 
-## Phase 3 — bench firmware, PROPOSED ([plan](../PHASE3-PLAN.md), decisions #635)
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-17 | Teensy firmware skeleton, engine integration | Agent | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-18 | Dual card, hot-swap detect, copy with LED row | Either | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-19 | Line-in, mic, gain staging, output limit | Either | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-20 | Button matrix, solenoid driver, interlock | You | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-21 | Bench acceptance demo | Either | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
+## Later phases
+| Phase | Packages |
+|---|---|
+| 4 Mechanics | WP-22 transport production design, WP-23 enclosure, WP-24 cartridge shell and carrier, WP-25 abuse testing (Guardrail 13) |
+| 5 Board | WP-26 schematic, WP-27 layout/BOM, WP-28 firmware port and UHS-I bring-up, WP-29 bring-up and rev B, WP-30 power budget, WP-34 thermal/safety budget, WP-37 thermal validation |
+| 6 Build | WP-31 build units, WP-32 starter cartridge library, WP-33 field trial |
 
-## Phase 4 — future scope, not activated
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-22 | Transport mechanism, production design | You | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-23 | Enclosure CAD | Either | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-24 | Cartridge shell and carrier PCB | Either | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-25 | Abuse testing | You | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-
-## Phase 5 — future scope, not activated
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-26 | Schematic capture and review | Agent | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-27 | Layout, DFM, assembly BOM | Agent | hardware | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-28 | Firmware port and UHS-I bring-up | Agent | 5 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-29 | Bring-up and rev B | Either | 5 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-30 | Power budget and runtime validation | Either | 5 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-37 | Thermal validation and abuse | Either | 5 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-
-## Phase 6 — future scope, not activated
-| Package | Outcome | Owner | Stream | Current boundary |
-|---|---|---|---|---|
-| WP-31 | Build the units | You | — | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-32 | Starter cartridge library | Either | 3 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-| WP-33 | Field trial | You | — | Not activated; original package/dependency/acceptance and safety boundaries carry. |
-
-## Historical detail and preservation
-
-Prior roadmap revisions, duration estimates, parked PR restore refs, kickoff
-retrospective, technical resume conditions and per-file template remain unchanged
-in Git history. This current index does not republish or link unrelated owner-
-specific historical material. No historical commit, package criterion, raw record
-or restore ref is deleted. Specific package files and normative spec remain
-authoritative; generic future rows do not waive safety or detailed resume conditions.
+The September 2026 hardware package snapshots (WP-04, WP-24, WP-25) describe the superseded
+solenoid design and 86 × 54 mm cartridge; they are in docs/archive/hardware/.

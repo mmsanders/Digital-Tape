@@ -1,8 +1,8 @@
 # Phase 2 ledger — every exit criterion, one row each
 
-Opened by PM622 (ADR-195); closed by PM634, 1 November 2026 PDT ([ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed)). **Phase 2 is CLOSED, 12/12, with G2 deferred by Michael.**
+Opened by PM622 (ADR-195); closed by PM634, 1 November 2026 PDT ([ADR-198](../../DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed)). **Phase 2 is CLOSED, 12/12, with G2 deferred by Michael.**
 This is the progress record for Phase 2 closeout. Each round must close named rows. Package
-criteria are in [WP-14](PACKAGES/WP-14.md), [WP-16](PACKAGES/WP-16.md) and [WP-15](PACKAGES/WP-15.md).
+criteria are in [WP-14](../../PACKAGES/WP-14.md), [WP-16](../../PACKAGES/WP-16.md) and [WP-15](../../PACKAGES/WP-15.md).
 The exit gate is in [the Phase 2 plan](PHASE2-PLAN.md#1-what-phase-2-delivers).
 
 States:
@@ -46,7 +46,7 @@ Own-host PASS: an integrated-source static gate with detecting mutants, plus def
 | G3 Plain errors | PASSED | 28 bridge rows; C2: file drop, too long, non-music, UAC decline, mid-make pull and remake (#370). F370-1 exempted (ADR-197) | — |
 | G4 No lists | PASSED | C2 screens: four states, no lists; label/details stay usable under polling (#370 addendum) | — |
 | G5 Installs | PASSED | C2: exact ZIP on Windows 11 Home 25H2 build 26200.9711; real cartridge verify OK, dumps identical | — |
-| G2 Unaided test | DEFERRED by Michael (#633, ADR-198) | [Protocol](WP15-G2-PROTOCOL.md) | Before the app goes to anyone else for real use, or on request |
+| G2 Unaided test | DEFERRED by Michael (#633, ADR-198) | [Protocol](../../WP15-G2-PROTOCOL.md) | Before the app goes to anyone else for real use, or on request |
 
 **Live issue:** none. C2 is complete (#370); G2 is deferred.
 

@@ -1,11 +1,14 @@
 # host/ — Stream 3
 
-**Built (Phase 1, #366):** `tapectl`, exactly per [the WP-11 CLI contract](../docs/WP11-CLI-CONTRACT.md):
-`format`, `load`, `play`, `scrub`, `record`, `reset-b`, `promote`, `respool`, `dump`.
-
-**Built (Phase 2 P2-R1, #385, pending Verification):** WP-14, real cards, per
-[the WP-14 contract](../docs/WP14-CLI-CONTRACT.md). It adds `provision` and `verify`, and every command
-takes a bare image, a provisioned image or a whole removable device.
+The desktop tools, all accepted for Windows 11:
+- **`tapectl`**: the [WP-11 contract](../docs/WP11-CLI-CONTRACT.md) commands (`format`, `load`,
+  `play`, `scrub`, `record`, `reset-b`, `promote`, `respool`, `dump`). It adds `provision`,
+  `verify`, `cards` and `make` from the [WP-14 contract](../docs/WP14-CLI-CONTRACT.md) and
+  [APP-1](../docs/WP15-APP-CONTRACT.md). Every command takes a bare image, a provisioned
+  image or a whole removable device.
+- **`ingest/`**: a folder of music becomes one canonical WAV ([INGEST-1](../docs/WP16-INGEST-CONTRACT.md)).
+- **`app/`**: the one-window Tauri app that runs `ingest` and an elevated `tapectl make`
+  ([APP-1](../docs/WP15-APP-CONTRACT.md)).
 
 | Path | What |
 |---|---|
@@ -49,20 +52,7 @@ sudo tapectl verify /dev/disk4
   - the disk-safety probe, since a browser has no raw devices;
   - `provision`'s entropy and clock (`port/entropy.c`).
 
-The rest of this file is the Phase 2 plan beyond WP-14.
-
-`tapectl` (format, load, dump, verify, promote) plus a Tauri drag-and-drop GUI over the same
-engine through FFI. Also the ingest chain: gapless concatenation and loudness normalisation,
-so a folder of mixed-source music becomes one stream with consistent level and no clicks at
-the joins.
-
-**Packages:** WP-14, 15, 16
-**Depends on:** Stream 1 through the C FFI. **Never reimplements format logic in Rust.**
-
-**Done when** a real microSD formats, round-trips through dump byte-identical, and someone who
-is not Michael can load a cartridge unaided.
-
-## Scope frozen at Phase 2 exit
+## Scope (frozen, ADR-198)
 
 It loads cartridges. It is not a music manager, a tag editor, a library, or a player.
 

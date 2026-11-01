@@ -1,10 +1,9 @@
 # WP-16 ingest contract — INGEST-1
 
-**ISSUED by PM, 14 October 2026 PDT, ADR-177; amended ADR-178 (P2V16-001) and ADR-180 (P2V16-002; Software #429 interpretations (a)–(e)).** D3–D5 and WP16 I1–I8 are qualified by the rules below; this document controls where their earlier wording is ambiguous. Basis: [independent preflight #166](https://github.com/mmsanders/Digital-Tape-Verification/blob/c690be9a5f3188333f04ef52a552fcf4c82a0030/findings/P2-R2-WP16-PREFLIGHT-2026-10-14/README.md). Its experiments are planning evidence, not normative waveform goldens or Product acceptance. Changes require PM issuance and paired issue updates. Frozen engine/format bytes remain unchanged.
-
-**Amended 28 October 2026 PDT, [ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path):** "Ingest opens no card/block device" (§1, §6) is proved by a static source check with a negative control plus evidence that ingest runs unelevated, so Windows refuses it raw device access. Kernel-level visibility of failed or zero-access opens is not required. WP-16's final rung does not wait on WP-14 A6; the real-card use of ingest output is exercised in WP-15's C2 run.
-
-**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+**Status:** frozen host contract INGEST-1 (scope frozen by ADR-198); WP-16 accepted on
+Windows 11. D3–D5 and WP-16 I1–I8 are qualified by the rules below. "Ingest opens no card or
+block device" (§1, §6) is proved by a static check with a negative control plus an unelevated
+launch (ADR-195). Windows 11 x64 is the release platform; Linux stays as CI.
 
 ## 1. Interface and scope
 

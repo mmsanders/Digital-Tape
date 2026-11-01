@@ -2830,7 +2830,7 @@ park ends on a one-line Michael request. Documentation changes are text.
 intake #379
 
 **Decision.**
-1. **The Phase 2 plan is [docs/PHASE2-PLAN.md](PHASE2-PLAN.md), status PROPOSED.** It sets the goal and
+1. **The Phase 2 plan is [docs/PHASE2-PLAN.md](archive/phase2/PHASE2-PLAN.md), status PROPOSED.** It sets the goal and
    milestone, the exit gate, kickoff decisions D1–D9 with recommended defaults, the rounds P2-R0…R3 plus an
    optional WP-38 lane, and Q-P2-1. Package interfaces and acceptance criteria are in
    `docs/PACKAGES/WP-14.md`, `WP-15.md` and `WP-16.md`. The criteria are PM package definitions. Folding
@@ -2861,7 +2861,7 @@ has not been made.
 PM issue #381 (Michael's answers verbatim); intake #379
 
 **Decision.**
-1. **Phase 2 is open (D1).** [The Phase 2 plan](PHASE2-PLAN.md) changes from PROPOSED to ADOPTED.
+1. **Phase 2 is open (D1).** [The Phase 2 plan](archive/phase2/PHASE2-PLAN.md) changes from PROPOSED to ADOPTED.
    **No P2-R1 assignment issue is opened until Michael says go to assign** (his instruction at kickoff).
 2. **Platforms (D2): Windows 10 and current macOS**, plus Linux in CI. Michael gave no macOS version
    ("basically up to date"); Software records the exact macOS and Windows builds tested, and WP-14 A1/A6
@@ -3074,7 +3074,7 @@ code or media migration. #384 remains open for its original unmet round gate.
 **Input:** Product main `d3f1e7bc20e87f7b3143b68a094459706f5930e9`;
 Software #390 `dbe6283dd6393e615e2bc18ef4a6c81673c7efc1`;
 Verification main `56e25cc1736fdc62a6d9bc4e6cdc09d5f8cac1b2`.
-**Publication:** [revised performance review](PERFORMANCE-REVIEW.md).
+**Publication:** [revised performance review](archive/phase2/PERFORMANCE-REVIEW.md).
 **Supersedes:** ADR-166's remedy recommendation only; its operational holds stand.
 
 **Finding.** Reusing samples alone can leave millions of tiny reads or repeated
@@ -3115,7 +3115,7 @@ No code, on-media bytes, accepted evidence or guardrail changes in this publicat
 **Input main:** `9b300a8c4ef9b05bdcacceec7bb27a09254891d5`.
 **Authority:** Michael requests a Software framework including read/write overlap,
 prioritized with existing work; he explicitly rejects relaxing the copy limit.
-**Framework:** [software performance plan](PERFORMANCE-PLAN.md).
+**Framework:** [software performance plan](archive/phase2/PERFORMANCE-PLAN.md).
 **Supersedes:** ADR-167's optional copy-limit relaxation, not its safety holds.
 
 **Decision.**
@@ -3150,7 +3150,7 @@ and Michael's decision; the withdrawn option is not an implied fallback.
 **Date:** 2026-10-07 · **Owner:** PM #384, Michael's #405 return-review activation.
 **Inputs:** Product main `4ec0b3c81c9ada0b327112bc16b9d9faf4ee835a`;
 Software design `76d4eeee33daea429f91f7dadc57516d2de265a9`, published by #407.
-**Authority:** [playback performance addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md).
+**Authority:** [playback performance addendum](archive/phase2/PLAYBACK-PERFORMANCE-ADDENDUM.md).
 
 **Disposition.** #405 supplies the requested design deliverables. Accept the design
 direction, not implementation, ABI issuance or independent acceptance. The read-only
@@ -3195,7 +3195,7 @@ The five budget/request arithmetic rows are consistent. This is a partial paper
 preflight, zero executable acceptance cases/Product runs/controls, not complete
 READ-1 or Product acceptance. Preserve it; no import/implementation activation.
 
-**Decision.** Revise [the public addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md) with
+**Decision.** Revise [the public addendum](archive/phase2/PLAYBACK-PERFORMANCE-ADDENDUM.md) with
 fixed mapping-visit ceilings: forward traversal 4E+4B+32; individual seek 2E+32;
 fixed-direction/rate episodes 4E+4B+4F+32 including initiating setup. Define resets,
 all actual inspections, empty/fragmented mappings and F as requested render frames.
@@ -3674,7 +3674,7 @@ ba8b95cf46d964d4f02630d0dcabe751b1670324 (#176). Active leads keep their assigne
 
 **Intake431 disposition: RECORDED—PARKED.** Primary WP04 RouteA; downstream WP22,
 WP20,WP23,WP25 and printed-material contextWP24. Durable source and filing are
-[owner prototype record](PACKAGES/WP04-OWNER-PROTOTYPES-2026-10.md) and its linked
+[owner prototype record](archive/hardware/WP04-OWNER-PROTOTYPES-2026-10.md) and its linked
 unaltered issue-text snapshot. Snapshot SHA256 (UTF8 with terminal newline)
 d075f2f8aad2683ee39bec7ce92494da0e1019538fb774e82d83f8765c722f26.
 Michael's explicit no-further-round-now preference is retained. This is owner-run
@@ -4584,7 +4584,7 @@ about 18 October.
 4. Michael's witnessed records are evidence as returned (screenshots, logs, files, his
    statement). Verification checks them for consistency with the criterion and the issued
    checklist. Edited clips or missing PIDs limit only claims that need them.
-5. Each round closes named rows in [the Phase 2 ledger](PHASE2-LEDGER.md). Each lead issue runs
+5. Each round closes named rows in [the Phase 2 ledger](archive/phase2/PHASE2-LEDGER.md). Each lead issue runs
    through its stages to the next natural handoff. Verification disposes Software's exact head
    directly (ADR-158), and PM enters at round end.
 
@@ -4668,7 +4668,7 @@ guardrail 10.
 
 ### 5. Process
 
-- Rungs keep their meaning. [The Phase 2 ledger](PHASE2-LEDGER.md) becomes the progress record
+- Rungs keep their meaning. [The Phase 2 ledger](archive/phase2/PHASE2-LEDGER.md) becomes the progress record
   under them: one row per criterion, with state, evidence and next owner.
 - STATUS and package pages are written in plain sentences. Line budgets stand.
 - Manual activation (ADR-192) stands for *starting* an issue. **Michael answered yes (#623):**
@@ -4805,3 +4805,47 @@ Not open until he answers. Hardware stays parked until D3.
 **Rationale.** Michael owns the D6 test and chose to defer it. Every other exit item is met on
 independent evidence. **Reversal cost:** low. G2 can be run any time, and a defect it finds is
 handled by a bounded app round.
+
+## ADR-199 — Phase 2.5 cleanout, device design baseline and Phase 3 answers
+**Date:** 2026-11-01 PDT
+**Status:** ADOPTED by PM ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)) on
+Michael's instructions of 1 November.
+
+**Cleanout.** Between phases, PM runs a cleanout round:
+- zero open PRs and issues in both repositories;
+- every current document restored to the exact present baseline;
+- closed-phase plans, superseded hardware snapshots and round records moved to
+  docs/archive/ (docs/REVIEW/ and docs/verification/ stay put because test manifests
+  cite them).
+
+History is in Git. Michael's CTRL-01 owner prototype (PR #597) is filed in
+`hardware/prototypes/ctrl-01/`.
+
+**Phase 3 answers (Michael, on #635).**
+- D1: open Phase 3 after this cleanout.
+- D3: Hardware returns for bench work.
+- D4: Hardware drafts one parts list for his approval.
+- D7: run the card power-cut (atomicity) test on the PNY cards in Phase 3.
+- Verification finishes the deferred any-subset crash testing.
+- Michael owns no bench equipment beyond headphones, so the bench list starts from zero.
+
+**Design decisions** ([DEVICE-DESIGN.md](DEVICE-DESIGN.md)):
+1. **No solenoid.** Keys latch mechanically (CTRL-01: Play on a slide lock, Record latched
+   only to Play, Stop releases both). Nothing pops up by itself; the LED ring shows state.
+   - Product behaviours that relied on a firmware-released key ("end of tape releases
+     Play within 50 ms"; "cartridge full mid-record releases the buttons") and the
+     solenoid safety limits in spec/acceptance.md are revised at Phase 3 kickoff by a
+     spec revision. Until then they stand as written.
+2. **Speaker.** The player has a speaker with its own amplifier and **its own loudness cap**.
+   - Like the headphone cap, it is enforced in hardware or codec, re-asserted at boot and
+     unreachable from controls.
+   - The value is set at Phase 3 kickoff from toy-safety acoustic limits researched by
+     Hardware and recorded as a guardrail 11 revision.
+3. **Inputs.** An input microphone and two aux ports. Their roles and the record-source
+   rules are open questions in DEVICE-DESIGN §6.
+
+**Rationale.** A clean baseline makes Phase 3 start from facts, not chronicles. The
+mechanical transport removes the coil, its driver and its safety limits, at the cost of
+auto-release; LED status replaces it.
+**Reversal cost.** Low for documents (Git history). The solenoid decision is reversible
+until enclosure CAD in Phase 4.

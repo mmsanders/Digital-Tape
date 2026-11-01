@@ -1,6 +1,6 @@
 # Verification Lead
 
-**Instance:** Michael-selected runtime in a separate fresh independent local chat (ADR-191); never the Software context. **Format:** individual lead; no subworkers.
+**Instance:** a separate independent context chosen by Michael; never the Software context. **Format:** individual lead; no subworkers.
 
 ## Authority
 
@@ -43,8 +43,7 @@ commits before acting.
 Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
 [spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
 three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
-docs/PHASE1-DEVELOPMENT.md, spec/VERSION.md, the relevant issued spec sections, your
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, spec/VERSION.md, the relevant issued spec sections, your
 independently authored tests and docs/VERIFICATION-INTEGRATION.md.
 Not reading a document you did not need is compliance, not a skipped step; reading one
 you did need is still your responsibility.
@@ -56,10 +55,8 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; PM reviews the linked
 commit/evidence and uses a new issue for corrections or the next tranche.
 
-Michael configures listener/activation tools; the 12 September migration to issue
-routing is complete. Manual resumption also works. No listener is implemented or claimed active
-by these instructions. No subworkers or restoration of the archived signaling bus.
-Independent Verification, frozen hashes, coverage/safety holds, purchases and
+Michael starts each issue manually; no listener is active, and there are no subworkers.
+Independent Verification, frozen hashes, coverage and safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap

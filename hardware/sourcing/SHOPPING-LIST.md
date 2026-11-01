@@ -28,7 +28,7 @@ Recorded verbatim in substance, because two of them change standing text:
 
 **PM reconciliation needed.** Decisions 1 and 5 conflict with standing text that PM owns:
 `CLAUDE.md` §5 (*"No 64 GB cards. Seek cheap 4 GB V30 first"*), `docs/PACKAGES/WP-05.md`
-(purchasing boundary and the six-SKU comparison intent) and `docs/FOR-MICHAEL-ORDER-1A.md`.
+(purchasing boundary and the six-SKU comparison intent) and `docs/archive/hardware/FOR-MICHAEL-ORDER-1A.md`.
 **Hardware does not edit those**; this file records the decision and flags the conflict.
 
 ## The list

@@ -1,9 +1,9 @@
 # Hardware Lead
 
-> **Parked through Phase 2** (#309, ADR-160). No PM-issued Hardware work until Phase 3 opens
-> or Michael requests it; on resume, start from [the roadmap's parked hardware PR record](../PACKAGES/README.md#parked-hardware-pr-record).
+> **Resumes for bench work when Phase 3 opens** (Michael, 1 Nov 2026). Start from
+> [the device design](../DEVICE-DESIGN.md) and [hardware status](../STATUS-HARDWARE.md).
 
-**Instance:** Opus in a separate Claude Code chat. **Format:** individual lead; no subworkers.
+**Instance:** a separate Claude Code context; model chosen by Michael. **Format:** individual lead; no subworkers.
 
 ## Authority
 
@@ -29,8 +29,7 @@ commits before acting.
 Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
 [spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
 three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
-docs/PHASE1-DEVELOPMENT.md, docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, docs/DEVICE-DESIGN.md, docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md
 and the packages/evidence named by the issue.
 Not reading a document you did not need is compliance, not a skipped step; reading one
 you did need is still your responsibility.
@@ -42,15 +41,13 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; PM reviews the linked
 PR/evidence and uses a new issue for corrections or the next tranche.
 
-Michael configures listener/activation tools; the 12 September migration to issue
-routing is complete. Manual resumption also works. No listener is implemented or claimed active
-by these instructions. No subworkers or restoration of the archived signaling bus.
-Independent Verification, frozen hashes, coverage/safety holds, purchases and
+Michael starts each issue manually; no listener is active, and there are no subworkers.
+Independent Verification, frozen hashes, coverage and safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
 
-You are the Digital-Tape Hardware Lead for the current phase, using Opus in a separate Claude Code chat.
+You are the Digital-Tape Hardware Lead for the current phase, in a separate context chosen by Michael.
 Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/hardware.md
 and required onboarding documents. Find your current open issue labeled
 `hardware-lead`, read its live body and scope updates, and report the input main

@@ -1,57 +1,39 @@
 # Start here — a fresh lead context
 
-This repo is sufficient to resume the checkpoint. Do not begin by loading every
-archived round or the entire decision log.
+This repository is enough to resume work. Don't load every archived round or the whole
+decision log.
 
-1. Fetch main; note its commit. Read [Michael's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) and surface open
-   human questions before technical review; do not re-ask answered ones.
-2. Read [CLAUDE](../CLAUDE.md) and [STATUS](STATUS.md). Required reading is capped at
-   four documents plus your issue — see CLAUDE.md §4 and your charter. The table below
-   is **read on demand**, for the sections your tranche touches, not a mandate.
-3. Read your [role instructions](ROLES/README.md) and [issue workflow](ISSUE-WORKFLOW.md).
-   Phase scope and parked work are in [the roadmap](PACKAGES/README.md); the current phase's
-   rounds and criteria are in [the Phase 2 plan](PHASE2-PLAN.md).
-   Read your current open assignment issue and scope updates, then the inputs below.
-   No eligible issue means unassigned; historical documents do not supply a task.
+1. Fetch main and note its commit. Read [Michael's issue queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
+2. Read [CLAUDE.md](../CLAUDE.md), [STATUS](STATUS.md) and your [role charter](ROLES/README.md).
+   That, plus your live issue, is the required reading.
+3. Read your open assignment issue and its scope updates. No open issue for your role means
+   you are unassigned. Historical documents never supply a task.
+4. Read anything else on demand, for the sections your task touches:
 
-| Role | Read next | Deliver |
-|---|---|---|
-| PM | spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md, docs/VERIFICATION-INTEGRATION.md | Decisions, labeled assignment issues, gate state and exact spec issuance |
-| Software | tests/IMPORTS.json (every imported verifier package), the COVERAGE/ADAPTER files of the packages your tranche touches, engine/README.md, tools/README.md, docs/WP11-CLI-CONTRACT.md | Mechanical integration and covered implementation; keep uncovered code held |
-| Hardware | **Parked through Phase 2.** On resume: docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md, WP-04/05/24/25 | Reproducible designs, sourced parts, auditable measurements |
-| Verification | Current verification-lead issue, spec/VERSION.md, relevant spec sections and independent tests | Independent tests/result disposition; no premature implementation inspection |
-| Surge | Current authorized surge issue and referenced authoritative inputs | Results, evidence and unknowns returned to Michael and the responsible lead |
+| Role | Usually needed |
+|---|---|
+| PM | [Phase 3 plan](PHASE3-PLAN.md), [packages](PACKAGES/README.md), [device design](DEVICE-DESIGN.md), spec/VERSION.md |
+| Software | tests/IMPORTS.json and the COVERAGE/ADAPTER files of packages you touch, engine/README.md, tools/README.md, the contract named in your issue |
+| Hardware | [device design](DEVICE-DESIGN.md), [hardware status](STATUS-HARDWARE.md), hardware/README.md, spec/hw/VERSION.md |
+| Verification | Your verification-lead issue, spec/VERSION.md, the spec sections and contracts it names |
+| Surge | Your surge issue and the inputs it names |
 
-Product authority is spec/; hardware authority is spec/hw/. Test-package spec copies
-are authenticated historical inputs. Status never overrides the contract.
-Paper review, test return and integration evidence are under docs/verification/.
+Product authority is spec/; hardware authority is spec/hw/. Status never overrides the spec.
+Find decisions through [the decisions index](DECISIONS-INDEX.md) and spec sections through
+[spec/NAVIGATION.md](../spec/NAVIGATION.md).
 
-“Done” in an old report does not mean merged, and merged does not mean accepted:
-acceptance is the independent disposition recorded in STATUS. Verification still
-authors tests for new behaviour without reading the implementation first.
-
-Search the append-only DECISIONS log for relevant ADRs rather than ingesting it all.
-docs/archive/pre-phase0/ is superseded round traffic; do not execute old assignments.
-Original out-of-repo charters/Plan Rev B are not checkpoint dependencies: the current
-agreement, package index and concrete spec/package files carry operating scope.
-Report a missing requirement rather than inventing text from an absent document.
-
-Current activation is manual (ADR-192): PM posts GitHub issues only; Michael starts
-the selected task/context. No automatic lead kickoff or listener is enabled.
-Software is local Windows Claude Code; Verification remains independent. Current
-owner hardware layout is [filed and parked](PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md).
+Merged does not mean accepted. Acceptance is the independent disposition recorded in STATUS.
+Verification authors tests for new behaviour without reading the implementation first.
 
 ## Reproduce
 
-Raw evidence over 1 MiB lives in release `evidence-2026-09`, not the tree. Before any
-command that replays a retained bundle, run `tools/fetch-evidence.sh`, which verifies
-each asset against its committed `.sha256` and refuses a mismatch.
+Raw evidence over 1 MiB lives in release `evidence-2026-09`. Before replaying a retained
+bundle, run `tools/fetch-evidence.sh`, which checks each asset against its committed hash.
 
-Run the spec bundle gate, independent package checks, build and unit scripts:
-tools/ci/verify-spec-bundle.sh; make -C tests/mount_draft8 check;
-tools/ci/build.sh; tools/ci/unit.sh.
-Then run make -C hardware fabrication-gate-test.
-The separate make -C hardware fabrication-gate must currently fail with CLOSED.
+- Spec bundle: `tools/ci/verify-spec-bundle.sh`
+- Package checks: `make -C tests/mount_draft8 check`
+- Build and units: `tools/ci/build.sh`, `tools/ci/unit.sh`
+- Hardware gate self-test: `make -C hardware fabrication-gate-test`. The real
+  `make -C hardware fabrication-gate` must fail with CLOSED.
 
-The golden suite is green on main; a red golden run is a real regression. CAD requires CadQuery;
-hardware CI records the tested environment. A missing dependency is not a passing test.
+The golden suite is green on main; a red golden run is a real regression.

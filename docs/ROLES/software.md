@@ -1,6 +1,6 @@
 # Software Lead
 
-**Instance:** Claude Code on Michael's actual local Windows machine; model selected by Michael (24 October 2026, ADR-192 amendment to ADR-191). The full role stays here; no cloud/local split. **Format:** individual lead; no subworkers.
+**Instance:** Claude Code on Michael's local Windows machine; model selected by Michael. **Format:** individual lead; no subworkers. In Phase 3 Software also owns `firmware/` and works with the Teensy over USB.
 
 ## Authority
 
@@ -33,8 +33,7 @@ commits before acting.
 Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
 [spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
 three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
-docs/PHASE1-DEVELOPMENT.md, tests/IMPORTS.json and the COVERAGE/ADAPTER files of the
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, tests/IMPORTS.json and the COVERAGE/ADAPTER files of the
 packages your tranche touches,
 docs/VERIFICATION-INTEGRATION.md and the issue's exact test/source inputs.
 Not reading a document you did not need is compliance, not a skipped step; reading one
@@ -47,12 +46,10 @@ completed work on another notification. Issue closure is not package acceptance.
 After returning or explicitly blocking, close your own issue; PM reviews the linked
 PR/evidence and uses a new issue for corrections or the next tranche.
 
-**Manual activation:** PM posts issues only. Do not start from an old event, resume a listener or auto-advance to a second assignment. Michael selects/starts the context/task; return and stop. Existing listeners are PAUSED (24 October, ADR-192).
+**Manual activation:** don't start from an old event or move on to a second assignment. You may continue into the next named stage of the same issue when its input has arrived.
 
-Michael configures listener/activation tools; the 12 September migration to issue
-routing is complete. Manual resumption also works. No listener is implemented or claimed active
-by these instructions. No subworkers or restoration of the archived signaling bus.
-Independent Verification, frozen hashes, coverage/safety holds, purchases and
+Michael starts each issue manually; no listener is active, and there are no subworkers.
+Independent Verification, frozen hashes, coverage and safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap
