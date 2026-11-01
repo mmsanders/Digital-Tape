@@ -11,11 +11,9 @@ in main. Do not implement/review/merge product code or supply independent accept
 Maintain the signed freeze, disposition independent returns and resolve coverage
 dependencies. Only assign leads with useful bounded work.
 
-**Tranche minimum.** A Phase 1 tranche closes at at least three coverage rows or
-twenty-five cases, whichever comes first. Anything smaller needs a written PM
-exception in the issue saying why the slice is worth a full round's overhead. The
-minimum shapes what you ask for; it never widens a tranche past its documented
-coverage boundary and never pads a return.
+**Outcome-sized rounds (ADR-195).** Size each assignment to an outcome that closes named
+criteria, not to a step. Corrections stay inside the same pair of issues. Track progress
+in the current phase's criterion ledger.
 
 **Intake, and the phase rule.** Every unscheduled input from Michael opens one
 `intake`-labeled issue carrying his words verbatim, your classification and a
@@ -66,8 +64,7 @@ commits before acting.
 Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
 [spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
 three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md,
-docs/PHASE1-DEVELOPMENT.md, spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md
+in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, spec/VERSION.md, spec/README.md, docs/PACKAGES/README.md
 and docs/VERIFICATION-INTEGRATION.md.
 Not reading a document you did not need is compliance, not a skipped step; reading one
 you did need is still your responsibility.
@@ -94,8 +91,8 @@ PM may merge a ready publication PR unchanged as a backstop.
 A green gate authenticates; it does not accept. Authorship, harness checks, engine
 execution, independent disposition, merge and package acceptance stay separate facts.
 
-Before closing every activated PM round, refresh the hand-maintained `PHASE1`
-snapshot in `site/lead-queue/index.html` from the newly dispositioned facts. Update
+Before closing every PM round, refresh the hand-maintained phase snapshot in
+`site/lead-queue/index.html` from the newly disposed facts. Update
 the `asOf` round/date and any stale package notes even when no rung advances; advance
 a rung only when its stated gate is fully reached, never from issue closure or a
 lead-owned green run. From `site/lead-queue/`, run `node test-dashboard.cjs` and
@@ -108,13 +105,16 @@ completed work on another notification. Issue closure is not package acceptance.
 Assess lead returns from their linked PRs/commits even though leads close their own
 issues. Open no issue for an idle lead; use a fresh issue for each useful correction
 or next tranche. Close your own PM issue after posting its disposition.
-Do not post routine round-refresh comments on Michael's issue; add to it only when
-his work changes or becomes blocking. Do not publish or refresh branch KEEP lists.
+Don't post routine round-refresh comments on Michael's issue; add to it only when his
+work changes or becomes blocking.
 
-Michael configures listener/activation tools; the 12 September migration to issue
-routing is complete. Manual resumption also works. No listener is implemented or claimed active
-by these instructions. No subworkers or restoration of the archived signaling bus.
-Independent Verification, frozen hashes, coverage/safety holds, purchases and
+**Between phases** PM runs a cleanout round on Michael's request:
+- zero open PRs and issues in both repos;
+- every current document restored to the exact present baseline;
+- closed-phase material moved to docs/archive/.
+
+Michael starts each issue manually; no listener is active, and there are no subworkers.
+Independent Verification, frozen hashes, coverage and safety holds, purchases and
 Michael's reserved approvals survive issue routing.
 
 ## Bootstrap

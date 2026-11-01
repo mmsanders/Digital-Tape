@@ -2,7 +2,7 @@
 
 **Filed by PM, 14 October 2026 PDT, intake [#431](https://github.com/mmsanders/Digital-Tape/issues/431), ADR-179. Disposition: RECORDED — PARKED.** Primary home: WP-04 Route A transport spike. Michael explicitly says these are brainstorming/notes and no further round is wanted now. This is owner-directed work outside PM-issued hardware rounds, as allowed by #309, consistent with the owner-directed hardware arrangement; it supplies no independent acceptance.
 
-The [unaltered intake text](../archive/intake/431-slide-lock-owner-prototypes.md) preserves Michael's words, numeric observations and Hardware's proposed interpretation. It is a source snapshot, not new work directions. Derived mechanisms/friction/flex estimates there remain hypotheses; PM has not validated the CAD, dimensions, material, force or simulation claims.
+The [unaltered intake text](../intake/431-slide-lock-owner-prototypes.md) preserves Michael's words, numeric observations and Hardware's proposed interpretation. It is a source snapshot, not new work directions. Derived mechanisms/friction/flex estimates there remain hypotheses; PM has not validated the CAD, dimensions, material, force or simulation claims.
 
 ## Where it lands
 

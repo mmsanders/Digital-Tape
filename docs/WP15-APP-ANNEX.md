@@ -1,14 +1,9 @@
 # APP-1 host interface annex — APP-1A
 
-**Issued by PM, 17 October 2026 PDT, ADR-185.** This closes APP-1 §3's interface
-bindings. It governs the additive commands/flags only; existing no-flag commands,
-exit meanings, audio/manifest bytes, engine and format remain unchanged. Independent
-preflight/tests and exact-head disposition are still required before acceptance.
-Basis: Software444/448 proposal59a868e; independent APP preflight fe8f3bdf.
-The Software proposal's implementation-site map and capability probes are evidence,
-not normative source or a licence to inspect uncovered implementation before authoring tests.
-
-**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+**Status:** frozen interface annex APP-1A to [APP-1](WP15-APP-CONTRACT.md) (scope frozen by
+ADR-198). It binds only the additive commands and flags (`tapectl cards`, `tapectl make`,
+`--report`); existing commands, exit meanings, audio and manifest bytes, engine and format are
+unchanged. Windows 11 x64 is the release platform.
 
 ## 1. Diagnostic reports
 

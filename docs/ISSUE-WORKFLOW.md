@@ -1,176 +1,97 @@
 # Work directions through GitHub issues
 
-**Michael-directed workflow · adopted 12 September 2026; manual activation restored 24 October 2026 (ADR-192).**
-Issues are the single source for active work assignments. Main stores enduring role
-charters, normative specifications, decisions, evidence, package definitions and
-factual status. Do not keep a second current task list or per-round brief on main.
+Issues are the only source of active work assignments. Main holds role charters, specs,
+decisions, evidence, package definitions and status. Don't keep a second task list or a
+per-round brief on main.
 
 ## Routing labels
 
-| Role | Exact label | Open assignment queue |
+| Role | Label | Open queue |
 |---|---|---|
 | Software Lead | `software-lead` | [Software](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asoftware-lead) |
 | Hardware Lead | `hardware-lead` | [Hardware](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead) |
-| Verification Lead | `verification-lead` | [Verification](https://github.com/mmsanders/digital-tape-verification/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead) |
+| Verification Lead | `verification-lead` | [Verification](https://github.com/mmsanders/digital-tape-verification/issues?q=is%3Aissue%20is%3Aopen%20label%3Averification-lead) (in the verification repo) |
 | Surge | `surge` | [Surge](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asurge) |
 | Michael | `michael` | [Michael](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael) |
 | PM | `pm` | [PM](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Apm) |
-| — (inbound, no lead) | `intake` | [Intake](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Aintake) |
+| Inbound, no lead | `intake` | [Intake](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Aintake) |
 
-`intake` is the one **inbound** queue: unscheduled input from Michael, default
-disposition `RECORDED — PARKED`, no lead assigned and no work created. It is not an
-assignment label. See [intake](INTAKE.md).
+`intake` holds unscheduled input from Michael. It is not an assignment; see [intake](INTAKE.md).
+Each assignment carries exactly one role label. Labels are routing, not model identity or
+authority.
 
-These are routing labels, not model identities or GitHub user assignees. Give each
-assignment one responsible-role label. Dependencies are linked issues, not extra
-role labels that dispatch the same task to multiple leads. Label-only events and
-GitHub author identity do not expand the role's product authority.
+## Activation
 
-## PM issues the round
+Michael starts each issue manually. PM posts issues and sends no kickoff messages; no
+listener is active. Once started, a lead may continue into the next named stage of the
+same issue if that stage's input has already arrived. It never starts another issue,
+polls or waits.
 
-1. On Michael's explicit activation of a new PM round, create or refresh one open
-   `pm`-labeled issue before acting. Record exact inputs, authority, bounded task,
-   dependencies, holds and stop condition; post Started and final return comments,
-   then close it at stop. Without that activation or an eligible PM issue, stop.
-2. Decide useful bounded work and dependencies. Not every lead needs a task.
-3. Create a new issue per assigned lead for that round, with the complete directions
-   in its body and its role label. Use a title such as
-   `[P1-R2-SW] Software Lead — <bounded outcome>`.
-4. Include issuer/role, round and task ID, exact input commits/spec hashes or
-   authoritative manifest, scope, dependencies, deliverables, checks/evidence,
-   permissions/holds, next owner and stop condition. An immutable review link may
-   provide evidence, but it must not substitute for the assignment body.
-   A Verification publishing assignment's stop condition includes merging the
-   publication PR into verification main (merge commit only). Cite only merged
-   commits; a PR head is a candidate, not a publication (ADR-157).
-   A round may be pre-routed (ADR-158): the Verification and Software issues each carry two
-   named stages, Verification disposes Software's exact head directly, and PM enters once.
-5. Do not create a no-work issue: an issue is an activation signal, not a round
-   attendance record. Do not create another active copy of the same assignment.
-   When superseding work, link the replacement and carry forward completed work
-   and evidence. Historical reports are never fresh assignments.
-6. PM/Michael scope changes must be explicit in the issue body and documented in a
-   comment describing the change. A lead's progress report does not change scope.
-   Unresolved conflicting instructions mean report a blocker, not choose a wider task.
-7. Before closing the PM issue, manually refresh the Phase 1 roadmap snapshot in
-   `site/lead-queue/index.html`, including its round/date and factual package notes,
-   and run its dashboard test. Rungs reflect completed gates only; issue closure,
-   implementation evidence and a green run do not imply acceptance.
-8. Do not post routine round-refresh comments on Michael's issue. Comment there only
-   when his work changes or becomes blocking. Do not publish or maintain branch KEEP
-   lists; branch cleanup is no longer a PM round deliverable.
+## PM issues a round
 
-## Tranche size and ordering
+1. When Michael starts a PM round, PM opens one `pm` issue with inputs, authority, bounded
+   task, holds and stop condition. PM posts its return there and closes it at the stop.
+2. PM decides the useful work. Not every lead needs a task, and PM doesn't create no-work
+   issues.
+3. Each assigned lead gets its own issue with complete directions in the body:
+   - inputs, with exact commits or hashes;
+   - scope and stages;
+   - deliverables and evidence;
+   - holds;
+   - next owner and stop condition.
+   
+   Title it like `[P3-R1-SW] Software Lead — <outcome>`.
+4. A Verification publishing task stops only when its PR is merged into verification main
+   (merge commit). Cite only merged commits; a PR head is a candidate (ADR-157).
+5. Rounds may be pre-routed (ADR-158): Verification disposes Software's exact head
+   directly, and the Software issue authorizes integrating that head once cleared.
+6. Scope changes go in the issue body or a scope-update comment from PM or Michael. A
+   lead's progress report doesn't change scope.
+7. Before closing a PM issue, PM refreshes `site/lead-queue/index.html` from the newly
+   disposed facts and runs `node test-dashboard.cjs` in that folder. Rungs move only
+   when their gate is fully reached.
 
-These two rules exist because the fixed overhead of a tranche — PM read, PM
-disposition, status rewrite, dashboard refresh, and the independent round itself —
-now exceeds the variable cost of the tranche. Observed sizes fell from 289 mount
-cases to ten playback families to **two operation cases**, and a two-case tranche
-pays full freight. Neither rule changes what acceptance means or lowers any bar.
+## Size and ordering
 
-**Tranche minimum.** A Phase 1 tranche closes at **at least three coverage rows or
-twenty-five cases, whichever comes first**. A smaller tranche requires a written PM
-exception recorded in the issue, stating why the smaller slice is worth a full round.
-The minimum governs what PM *asks for* in an assignment; it never licenses widening a
-tranche past its documented coverage boundary, and it is not a reason to bundle
-unrelated behaviour into one candidate. A tranche that turns out smaller than planned
-is returned as it is, with the exception recorded — never padded.
+- Size each issue to an outcome (ADR-195), not a step. Corrections found by Verification
+  stay inside the same pair of issues.
+- If a candidate needs a clean base, assign it **before** independent disposition. Never
+  send already-accepted evidence through another independent round because its base
+  changed. Record that the disposition carries over to identical evidence.
 
-**No rebase re-acceptance.** When a candidate needs a clean split from current main,
-**the split happens before independent disposition, never after.** Assign the clean
-base with the candidate, so Verification disposes exactly the evidence that will be
-integrated.
+## A lead picks up and returns
 
-R21 accepted two operation cases and R23 re-accepted *the same two cases* on a clean
-base — a full round of credits spent on provenance hygiene that ordering alone would
-have made free. Re-disposition of already-accepted evidence is not a second
-acceptance; it is the same acceptance paid for twice. If a clean split becomes
-necessary after disposition, PM records that the existing disposition carries over to
-the identical evidence rather than re-running the independent round, and the carry-over
-is authenticated against exact evidence identity, not against a claim.
+1. Re-read the live issue. It must be in the right repository, carry your role label, be
+   open and be in scope. Read the comments for scope updates.
+2. Closed, superseded or already returned work is not run again. Missing dependencies
+   mean report blocked and stop.
+3. Fetch main. Record the main SHA, issue number and exact input hashes. Post a short
+   Started comment.
+4. Do only that issue's work, with no subworkers.
+5. Return in an issue comment, headed **[Software Lead]**, **[Verification Lead]**,
+   **[Hardware Lead]** or **[PM]**, with:
+   - what changed, with exact commits and PRs;
+   - the commands actually run and their outcomes;
+   - evidence links;
+   - exclusions, remaining holds and next owner.
+6. Mark the return Ready for review or Blocked. Close your own issue. Closure means you
+   stopped. It doesn't mean the work is correct, merged or accepted.
 
-## Lead picks up and returns
+**Citing CI:**
+- The `engine` workflow (`ci.yml`) runs on pull requests, main pushes and manual
+  dispatch. Cite the PR's `pull_request` run, which tests the head merged with current
+  main.
+- For an exact-head run, dispatch the workflow on the branch and cite that run.
+- A docs-only PR (`docs/**` outside `docs/verification/**`, `site/**`, root `*.md`)
+  skips the engine jobs. That is not engine evidence.
 
-On manual activation or a Michael-configured notification, re-read the live issue.
-Require the correct repository, matching role label, open state and authorized
-bounded scope. Read comments for explicit scope changes, dependencies and prior
-work. If it is closed, superseded or already returned, do not execute it again.
-If dependencies are missing, report blocked and stop; do not start a polling loop.
-If multiple independent issues exist, follow stated priority/dependency order;
-report conflicts rather than silently combining scopes.
+PM assesses linked PRs and evidence regardless of issue state, and opens a fresh issue for
+any correction or next task rather than reopening. Michael closes his own items.
 
-Fetch current main and follow the role's onboarding. Record main SHA, issue number
-and update timestamp, and exact input/spec/test hashes. Post a short Started
-comment so another activation can see work is in progress. There is one active
-lead context per role; a label is not a lock and a duplicate event is not a second
-worker assignment.
+## Independence
 
-Perform only that issue's work, without subworkers. Return in an issue comment:
-changes, exact output commits/PRs, meaningful commands actually run and outcomes,
-immutable raw evidence, exclusions, remaining holds and next owner. Source,
-fixtures and substantial reports remain versioned in the appropriate repository;
-link them from the return. Mark the comment Ready for PM review or Blocked and stop.
-Do not mark your own implementation independently accepted.
-
-**Citing CI (#347).** The `engine` workflow (`ci.yml`) runs on `pull_request`, on `main`
-pushes and on `workflow_dispatch`. It no longer runs on pushes to other branches. As CI
-evidence, cite the PR's `pull_request` run: that run tests the merge of the head into
-current main, which equals the head tree once the head is up to date with main, as the
-ruleset requires before merge. When an exact-head run is needed, dispatch the workflow on
-that branch and cite that run with its SHA. A newer push cancels the PR's older run. A
-docs-only PR (only `docs/**` outside `docs/verification/**`, `site/**` and root `*.md`)
-skips the engine jobs, which report "skipped". It is not engine evidence.
-
-After posting the return, the lead closes its own issue. Closure means only that the
-lead has stopped work on that bounded assignment; it does **not** mean the return is
-correct, merged, accepted or independently verified. A blocked return may also be
-closed once the blocker and next owner are explicit. Waiting for PM review is not
-permission to rerun or start another task.
-
-PM assesses the linked PRs, commits and evidence regardless of issue state. If a
-correction or next tranche is useful, PM opens a new role-labeled issue with fresh
-scope; PM does not use reopening as a substitute for a new assignment. Check success,
-merge, issue closure and independent acceptance remain separate facts. Verification
-signs only its documented scope. Michael closes his own resolved or superseded items.
-
-## Activation and independence
-
-**Current override, 24 October (ADR-192): PM posts issues only.** No automatic
-kickoff messages, listener wake-ups or same-activation next-assignment jumps.
-Michael manually selects/starts the task/context; the lead returns and stops.
-Once started, a lead may continue into the next named stage of the *same* issue when that
-stage's input has already arrived (ADR-195); it never starts another issue, polls or waits.
-Both previous finite listeners are PAUSED. This overrides historical overnight
-queue instructions without reopening completed work. Software's full role is local
-Windows Claude Code, model selected by Michael; one active context per task.
-
-New issue returns, PR descriptions and review comments start with a readable
-**[PM]**, **[Software Lead]**, **[Verification Lead]** or **[Hardware Lead]** header.
-The shared GitHub account is retained. Role-local Git author names/trailers may help
-attribution but are not independent acceptance or a new mandatory CI gate. No new
-accounts, bots, tokens or trailer-enforcement project is issued.
-
-Michael configures external listeners; the 12 September migration to issue routing is complete.
-This repository change does not install listeners, guarantee delivery or claim a
-chat has awakened. The read-only Pages lead queue reports open issues only. No
-automatic approval, delegation, old signaling bus, activity dashboard, controller
-or subordinate worker is restored.
-
-Keep Verification issues free of uncovered implementation source/private tests and
-mixed implementation discussion. Link raw observations and verifier-owned sources;
-put implementation findings in Software's issue and route spec questions to PM.
-Preserve the signed freeze, test-first merge rule, all product/safety holds and
-Michael's purchase/physical/final-signature authority.
-
-## Migration record
-
-At input main `d9bc6ebd10983711acade6d148895e78fd1a17e3`, P1-R1 work moved to
-[Software #41](https://github.com/mmsanders/Digital-Tape/issues/41),
-[Hardware #42](https://github.com/mmsanders/Digital-Tape/issues/42),
-[Verification #3](https://github.com/mmsanders/digital-tape-verification/issues/3)
-(which replaced the misrouted, closed Digital-Tape #43),
-[Michael #44](https://github.com/mmsanders/Digital-Tape/issues/44), and
-[PM #45](https://github.com/mmsanders/Digital-Tape/issues/45).
-[Surge #46](https://github.com/mmsanders/Digital-Tape/issues/46) is a closed
-not-planned record: no Surge work was invented. These are historical migration
-links; query the open role queues above to determine live work.
+- Keep Verification issues free of uncovered implementation source and implementation
+  discussion. Put implementation findings in Software's issue and spec questions in a
+  PM issue.
+- The signed freeze, the tests-first rule, product and safety holds, and Michael's
+  purchase, physical and sign-off authority survive issue routing.

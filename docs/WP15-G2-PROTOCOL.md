@@ -1,13 +1,13 @@
 # WP-15 G2 — unaided test protocol
 
-**Issued by PM627, 29 October 2026 PDT ([ADR-196](DECISIONS.md#adr-196--c1-disposed-phase-2-at-1112-c2-and-g2-queued)).**
+**Status:** deferred by Michael (ADR-198); run before the app goes to anyone else for real use.
 Criterion ([WP-15 G2](PACKAGES/WP-15.md)): the D6 tester, with no instructions beyond what the app
 shows, makes a cartridge from a folder Michael provides. `tapectl verify` passes and `dump` plays
 it correctly. One attempt, under 10 minutes excluding load time. Michael witnesses and records the
 outcome and every point where the tester hesitated. G2 is Michael's witnessed record. PM checks
 it against this protocol; Verification does not sign it.
 
-**When:** after Verification #370 passes C2 on the exact candidate. Use that same ZIP. A rebuilt
+**Candidate:** the cleared ZIP `b8a689cf…` that passed C2 (Verification #370). A rebuilt
 candidate needs its own C2 clearance first.
 
 ## Before she sits down (Michael alone)
@@ -58,7 +58,7 @@ ordinary speakers. Expect no clicks at the joins and the songs in folder order.
 Otherwise record what happened. Don't retry with the same tester. If G2 fails, PM decides any fix.
 A second G2 needs a tester who hasn't seen the app (D6 fallback).
 
-Return everything on the G2 issue PM posts:
+Return everything on the G2 issue PM opens when the test is scheduled:
 - the times;
 - the hesitation notes;
 - screenshots if taken;

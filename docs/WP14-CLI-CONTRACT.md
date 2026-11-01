@@ -1,15 +1,11 @@
 # WP-14 `tapectl` on real cards — contract (PM-issued, P2-R1)
 
-**Status:** ISSUED 5 October 2026 (ADR-163); amended 6 October (ADR-164), resolving Q1–Q11 and
-P2V-001…004; ADR-176 replaces the mistaken Windows 10 target with Windows 11 on Michael's 13 October PDT direction. Historical verifier copies and observations remain unchanged. ADR-165 corrects the P2V-005 bare-image CRC/signature collision. Normative for both leads. Michael approved E-1's FAT16 default on 5 October Pacific time;
-see the exact supplemental erratum and integrity manifest in [SPEC-ERRATA.md](SPEC-ERRATA.md). Changing this file after issue is a PM decision recorded here, in `docs/DECISIONS.md`
-and on both issues. Package criteria: [WP-14](PACKAGES/WP-14.md). This contract **extends**
-[the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule and command holds unless a line below
-changes it.
-
-**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
-
-The port syntax/flush semantics below are retained for historical tests and later port support; current package acceptance requires the Windows11 route only (ADR-191).
+**Status:** frozen host contract (scope frozen by ADR-198); WP-14 accepted on Windows 11.
+The supplemental erratum and its integrity manifest are in [SPEC-ERRATA.md](SPEC-ERRATA.md).
+Package criteria: [WP-14](PACKAGES/WP-14.md). This contract **extends**
+[the WP-11 contract](WP11-CLI-CONTRACT.md); every WP-11 rule holds unless a line below changes it.
+Windows 11 x64 is the release platform; the Linux and macOS port semantics below remain for
+CI and later support.
 
 ## 1. Scope and what does not change
 
@@ -268,6 +264,6 @@ from the shipped binary. Their expectations belong to Verification; transport be
 
 GUI (WP-15), ingest (WP-16), `dup` on the desktop, warm start, write batching (Q-P2-1), label art in
 partition 1, and any engine change within WP14. ADR-169 separately permits the read-only playback correction
-under [the addendum](PLAYBACK-PERFORMANCE-ADDENDUM.md); WP14 must match its independently
+under [the addendum](archive/phase2/PLAYBACK-PERFORMANCE-ADDENDUM.md); WP14 must match its independently
 accepted/integrated engine-tree pin `d96b4245e04d74078f8938744b1394c3018516f7` (ADR-175), with all Phase 1 goldens/replays green.
 Pin recorded after independent READ-2 PASS and unchanged #419 integration; WP14 A8 still requires exact comparison/execution. Adding a command or a finding is a PM change.

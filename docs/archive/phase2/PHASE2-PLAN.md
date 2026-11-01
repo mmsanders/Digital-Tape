@@ -2,9 +2,9 @@
 
 **Issued by PM, 4 October 2026 (ADR-161). Status: ADOPTED 5 October 2026 (ADR-162).** Michael
 answered D1–D8 and PM declared D9; answers are in §2. Phase2 was activated on5October; live role issues carry current assignments. Nothing in this file assigns work. Work is assigned in role-labeled
-issues ([issue workflow](ISSUE-WORKFLOW.md)), each citing the section of this plan it carries out.
-Package detail and acceptance criteria are in [WP-14](PACKAGES/WP-14.md),
-[WP-15](PACKAGES/WP-15.md) and [WP-16](PACKAGES/WP-16.md). Current state is in [STATUS](STATUS.md).
+issues ([issue workflow](../../ISSUE-WORKFLOW.md)), each citing the section of this plan it carries out.
+Package detail and acceptance criteria are in [WP-14](../../PACKAGES/WP-14.md),
+[WP-15](../../PACKAGES/WP-15.md) and [WP-16](../../PACKAGES/WP-16.md). Current state is in [STATUS](../../STATUS.md).
 
 **Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
 
@@ -19,9 +19,9 @@ in order, at a consistent level, with no clicks at the joins.
 
 | Package | Delivers | Owner |
 |---|---|---|
-| [WP-14](PACKAGES/WP-14.md) `tapectl` on real cards | Provision a real microSD (MBR, FAT16 README partition, TAPEFS partition), load, verify, dump, promote, all on removable media, safely and durably | Software builds · Verification accepts |
-| [WP-16](PACKAGES/WP-16.md) Ingest | A folder of mixed-source music becomes one 44.1 kHz / 16-bit stereo stream: decoded, resampled, gain-normalised, joined gaplessly | Software builds · Verification accepts |
-| [WP-15](PACKAGES/WP-15.md) Drag-and-drop app | One window over WP-14 and WP-16: drop a folder, type a label, pick the card, press one button | Software builds · Verification accepts · Michael runs the unaided test |
+| [WP-14](../../PACKAGES/WP-14.md) `tapectl` on real cards | Provision a real microSD (MBR, FAT16 README partition, TAPEFS partition), load, verify, dump, promote, all on removable media, safely and durably | Software builds · Verification accepts |
+| [WP-16](../../PACKAGES/WP-16.md) Ingest | A folder of mixed-source music becomes one 44.1 kHz / 16-bit stereo stream: decoded, resampled, gain-normalised, joined gaplessly | Software builds · Verification accepts |
+| [WP-15](../../PACKAGES/WP-15.md) Drag-and-drop app | One window over WP-14 and WP-16: drop a folder, type a label, pick the card, press one button | Software builds · Verification accepts · Michael runs the unaided test |
 | ~~WP-38~~ Phone test harness | **Not taken (D7).** No explicit development; Phase 2 design must not exclude a later WebAssembly build | — |
 
 **Milestone:** someone who is not Michael makes a playable cartridge from a folder, unaided.
@@ -68,7 +68,7 @@ Each has a recommended default. "Go with the defaults" is a complete answer.
 ## 3. How the work is organised
 
 Lead format, authorities and the issue workflow are unchanged from Phase 1 (CLAUDE.md §2 and §7).
-Phase 2 adopts these from the retrospective (#372, [roadmap R1–R9](PACKAGES/README.md#phase-2-kickoff-prep)):
+Phase 2 adopts these from the retrospective (#372, [roadmap R1–R9](../../PACKAGES/README.md#phase-2-kickoff-prep)):
 
 - **Pre-routed rounds (R5, ADR-158).** PM issues a contract. Software builds against it while
   Verification writes the acceptance tests from the same contract, without reading Software's code.
@@ -76,7 +76,7 @@ Phase 2 adopts these from the retrospective (#372, [roadmap R1–R9](PACKAGES/RE
   that exact head once it passes, with no separate "merge" round. PM enters for scope and the final
   disposition.
 - **Contracts first.** Each package gets a PM-issued contract before code, as WP-11 did with
-  [`WP11-CLI-CONTRACT.md`](WP11-CLI-CONTRACT.md). Changing a contract after issue is a PM decision
+  [`WP11-CLI-CONTRACT.md`](../../WP11-CLI-CONTRACT.md). Changing a contract after issue is a PM decision
   recorded in the contract and both issues.
 - **Thin end-to-end path first (R6).** Round 1 proves the whole path on one real card: format,
   load, verify, dump. Ingest and the app build onto a path that already works.
@@ -111,7 +111,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
     - **regression:** current-engine replays, goldens and changed packages;
     - **qualification:** full campaigns, mutation, historical replay. These run on a schedule and at phase gates.
   - Job names and the ruleset must change in one coordinated step. GitHub matches required checks by name, so renaming a job before the ruleset changes blocks every PR. Software ships the CI side; Michael switches the ruleset (D8) the same day.
-- **PM: issue `docs/WP14-CLI-CONTRACT.md`** from [WP-14](PACKAGES/WP-14.md). It covers device naming, the refusal rules, exit codes, `provision`, `verify`, and `load`/`dump`/`promote` on a device.
+- **PM: issue `docs/WP14-CLI-CONTRACT.md`** from [WP-14](../../PACKAGES/WP-14.md). It covers device naming, the refusal rules, exit codes, `provision`, `verify`, and `load`/`dump`/`promote` on a device.
 - **Software: WP-14 build** against that contract:
   - a partition-view port over a raw device;
   - a durable flush;
@@ -128,7 +128,7 @@ Round numbers are planning labels. Each round's issues name their exact inputs a
 - **Stop:** Verification PASS on an exact WP-14 head, integrated; the real-card run recorded.
 
 ### P2-R2 — ingest
-[INGEST-1](WP16-INGEST-CONTRACT.md) is issued after independent preflight #166 (ADR-177). Host fixture authoring/implementation may overlap WP14 physical A6 closure under the host-tool independence rule; real-card integration and dependent full acceptance remain held. This does not advance the WP14 stop.
+[INGEST-1](../../WP16-INGEST-CONTRACT.md) is issued after independent preflight #166 (ADR-177). Host fixture authoring/implementation may overlap WP14 physical A6 closure under the host-tool independence rule; real-card integration and dependent full acceptance remain held. This does not advance the WP14 stop.
 - PM issues the WP-16 contract, using D3–D5.
 - Software builds the tool. Verification builds the fixtures and acceptance tests in parallel. Fixtures are generated tones and public-domain or CC0 recordings only, like the WP-11 goldens.
 - PM rules on Q-P2-1(b), §5.
@@ -169,7 +169,7 @@ cheaper to settle now, on paper, than after firmware exists.
 ## 6. Out of scope, recorded for later phases
 
 From #379 (Michael, 4 Oct: "make SDR50 the primary path"). Hardware is parked, so this is recorded,
-not scheduled. It is in [the roadmap](PACKAGES/README.md) under WP-05, WP-26 and WP-28:
+not scheduled. It is in [the roadmap](../../PACKAGES/README.md) under WP-05, WP-26 and WP-28:
 - SDR50 at 1.8 V as the primary card bus, with High Speed 4-bit at 3.3 V as the fallback.
 - Fit the 1.8 V parts on rev A. The footprints already exist.
 - A thermal recheck at SDR50.
@@ -192,7 +192,7 @@ After two corrections of the same kind, the shared mechanism gets fixed rather t
 
 ## 8. Closeout plan (ADR-195)
 
-Issued by PM622, 28 October 2026 PDT. Diagnosis and rationale: [PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md).
+Issued by PM622, 28 October 2026 PDT. Diagnosis and rationale: [PM622 review](../../REVIEW/PM622-CLOSEOUT-RESET.md).
 Evidence rule: outcome tests plus a negative control; no separate method-qualification rounds;
 Michael's witnessed records count as returned (ADR-195 §1). Each round closes named
 [ledger](PHASE2-LEDGER.md) rows. Rounds are as long as their work needs, not calendar days.

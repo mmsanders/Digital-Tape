@@ -1,52 +1,61 @@
 # Phase 3 plan — bench firmware
 
-**PROPOSED by PM634, 1 November 2026 PDT ([ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed)).**
-Nothing in this file assigns work or opens Phase 3. Michael answers the kickoff decisions in §4
-(issue [#635](https://github.com/mmsanders/Digital-Tape/issues/635)). "Go with the defaults" is a
-complete answer. Work is then assigned in role-labeled issues, as in Phase 2.
+**Planned; opens after the Phase 2.5 cleanout** (Michael, 1 Nov 2026; [ADR-199](DECISIONS.md#adr-199--phase-25-cleanout-device-design-baseline-and-phase-3-answers)).
+Work is assigned in role-labeled issues once Michael opens the phase. The device is described
+in [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 ## 1. What Phase 3 delivers
 
-**Goal:** the Phase 1 engine runs on a Teensy 4.1 bench build and plays a cartridge made by the
-Phase 2 app through headphones, with real buttons.
+**Goal:** the shared engine runs on a Teensy 4.1 bench build and plays a cartridge made by the
+desktop app, through headphones and a speaker, with real keys and LED status.
 
 **Milestone:** Michael makes a cartridge with the app, puts it in the bench build, presses Play
-and hears it. Scrub, stop and a short overdub work. Pulling the cartridge and putting it back
+and hears it. Scrub, stop and a short recording work. Pulling the cartridge and putting it back
 resumes near where it stopped.
 
-| Package | Delivers | Key criteria (`spec/acceptance.md` "Firmware criteria", guardrails) |
+| Package | Delivers | Key criteria |
 |---|---|---|
-| WP-17 Firmware skeleton, engine integration | Teensy port: SD device read/write/flush, I²S audio out, the shared engine unchanged | Goldens bit-identical to desktop at 1.0× (a divergence blocks release, CLAUDE.md §6); RAM/stack/.rodata budgets measured on target (G08); warm instant-on < 100 ms on a logic analyser (G04); commit latency < 200 ms; resume position; end of tape |
-| WP-18 Dual card, hot-swap, copy with LED row | Second card slot, insert/remove detect, cartridge copy with progress LEDs | Copy *correctness* and progress from the callback, never a timer. Copy *time* is not provable on the bench (ADR-103: SPI second slot); guardrail 10 stays a Phase 5 measurement |
-| WP-19 Line-in, mic, gain, output limit | Codec bring-up, record inputs, output cap | 85 dB SPL cap set in the codec, re-asserted every boot, unreachable from controls; measured with SPL meter and coupler, **witnessed by Michael** (G11) |
-| WP-20 Button matrix, transport, interlock | Play/stop/scrub/record controls and record interlock | Record light and interlock per spec; scrub ramp per spec. Transport mechanism (solenoid or not) depends on the WP-04/owner-layout decision (D5) |
-| WP-21 Bench acceptance demo | The firmware criteria table run end to end | Michael-witnessed record; Verification audits method and raw data |
+| WP-05 Cards and bench parts | Bench parts list (Michael approves); card power-cut rig; card characterisation | Atomicity: ≥ 1,000 qualifying cuts per exact SKU/revision, zero torn blocks (a torn block is a format blocker); sustained-write on 80%-filled media |
+| WP-17 Firmware skeleton, engine integration | Teensy port (SD read/write/flush, I²S out), shared engine unchanged | Goldens bit-identical to desktop at 1.0× (divergence blocks release); RAM/stack/.rodata budgets measured on target (G08); warm instant-on < 100 ms on a logic analyser (G04); commit latency < 200 ms; resume position |
+| WP-18 Second slot, insert detect, copy | Rear-slot source, front-slot destination, copy with LED-ring progress | Copy correctness; progress from the callback, never a timer. Copy *time* is not provable on the bench (SPI second slot); guardrail 10 stays a Phase 5 measurement |
+| WP-19 Audio paths and caps | Codec, headphone out, speaker amplifier, microphone, two aux ports | Headphone cap 85 dB SPL (G11) and a separate speaker cap, both set in hardware/codec, re-asserted at boot, unreachable from controls; measured with an SPL meter, **witnessed by Michael** |
+| WP-20 Transport reading and status | Read the mechanical keys; LED-ring status; record light | No solenoid: firmware never moves a key. End of tape and cartridge-full shown on the LED ring (spec revision at kickoff); record light per spec; scrub ramp per spec |
+| WP-21 Bench acceptance demo | The firmware criteria run end to end | Michael-witnessed record; Verification audits method and raw data |
 
-**Phase 3 exit gate (proposed):**
-1. WP-17 to WP-21 independently accepted on the bench build.
-2. Goldens bit-identical on firmware at 1.0×. Phase 1/2 goldens and replays still green on main.
-3. Media atomicity (WP-05 A-6) run on the PNY cards: at least 1,000 qualifying cuts per exact
-   SKU/revision, zero torn blocks. A torn block is a blocker for the format, not a firmware fix.
-4. Q-P2-1 entry conditions met before any firmware write batching is enabled (ADR-195 §4).
+**Exit gate:**
+1. WP-05 and WP-17 to WP-21 independently accepted on the bench build.
+2. Goldens bit-identical on firmware at 1.0×; Phase 1/2 goldens and replays still green.
+3. Atomicity passed on the PNY cards (or a torn block escalated as a format blocker).
+4. Q-P2-1 entry conditions met before any firmware write batching is enabled.
 
 **Not in Phase 3:**
-- board fabrication, cells or charging (the fabrication gate stays CLOSED);
+- board fabrication, cells or charging (the gate stays CLOSED; the bench runs on USB);
 - enclosure and cartridge CAD (Phase 4);
 - the SDR50/UHS-I port and the < 30 s copy proof (Phase 5);
-- any engine or format change, apart from ADR-169's read-only exception;
-- desktop app changes, except the deferred G2 work below.
+- any engine or format change;
+- desktop app changes, except the deferred G2 work.
 
-## 2. Carried into Phase 3
+## 2. Kickoff work (round 1)
 
-- **Q-P2-1 (ADR-195 §4):** port-level batching, engine unchanged. Before firmware batching is
-  enabled, Verification completes any-subset coverage of the 365 deferred load faults and the six
-  unexecuted long-copy cuts.
-- **Hardware park (ADR-160)** ends only for the bench scope in D3. Owner layout #569 and the
-  prototype record stay filed for Phase 4.
-- **Deferred from Phase 2 (ADR-198):**
-  - the G2 unaided app test (pinned, with a possible mini app redesign round);
-  - macOS;
-  - the Phase 2 limitations in ADR-196.
+- **PM:** a spec revision covering
+  - the speaker cap value (guardrail 11 revision);
+  - end-of-tape and cartridge-full behaviour without a solenoid;
+  - removal of the coil limits.
+  
+  Also the WP-17 contract (port interface, bench pin map, golden-on-target method). These
+  follow Michael's answers to DEVICE-DESIGN §6.
+- **Hardware:**
+  - the bench parts list for Michael's approval: Teensy 4.1, audio board, breadboard and
+    wiring, keys and LEDs, second microSD breakout, small speaker and amplifier, MEMS mic,
+    aux jacks, logic analyser, and SPL meter plus coupler;
+  - the atomicity rig design;
+  - toy-safety acoustic limits for the speaker cap.
+- **Verification:**
+  - the Q-P2-1 any-subset completion;
+  - WP-17 acceptance authored from the contract;
+  - review of the atomicity rig method.
+- **Software:** firmware skeleton and engine-on-port tests off-target until parts arrive.
+- **Michael:** approve and order the parts list.
 
 ## 3. How the work runs
 
@@ -55,33 +64,16 @@ ADR-195 carries over:
 - no separate method rounds;
 - outcome-sized issues;
 - same-issue stage continuation;
-- the criterion ledger as the progress record.
+- a criterion ledger as the progress record.
 
-Structural Rule 1 still governs engine code. Firmware is a port and consumer: it must not fork
-seek, mixing or any other engine behaviour (CLAUDE.md §6). Verification authors firmware tests from
-`spec/acceptance.md` and the WP-17 contract without reading firmware first. Physical safety
-measurements are witnessed by Michael and audited by Verification (method, instrument,
-calibration, raw data, uncertainty).
+Structural Rule 1 governs engine code. Firmware is a port and consumer: it must not fork seek,
+mixing or any other engine behaviour (CLAUDE.md §6). Physical safety measurements are witnessed
+by Michael and audited by Verification.
 
-**Proposed first round (R1), if D1–D9 are answered:**
-- **PM:** issue the WP-17 contract: port interface, bench pin map (a subset of `spec/hw/board-rev-a.md`), the golden-on-target method.
-- **Hardware:** draft the bench parts cart and wiring for Michael's approval. Also draft the atomicity rig.
-- **Verification:**
-  - author WP-17 acceptance: goldens on target, budgets, wake latency method;
-  - complete the Q-P2-1 any-subset coverage.
-- **Software:** start the firmware skeleton, building and running engine-on-port tests off-target until parts arrive.
-- **Michael:** approve and order the cart.
+## 4. Carried in
 
-## 4. Kickoff decisions
-
-| # | Decision | Owner | Recommended default |
-|---|---|---|---|
-| D1 | Open Phase 3 | Michael | Go |
-| D2 | Thin path first | PM/Michael | WP-17 plays an app-made cartridge over headphones with Play/Stop before WP-18–21 start |
-| D3 | Unpark Hardware for the bench | Michael | Yes, bench-only: parts cart, wiring, atomicity rig. No fabrication, no cells, no enclosure |
-| D4 | Bench parts purchase | Michael (wallet) | Hardware drafts one cart; Michael approves it before anything is ordered. Tell PM what you already own (Teensy 4.1? audio board? logic analyser? SPL meter and coupler? reference headphones?) |
-| D5 | Transport on the bench | Michael | Plain momentary switches. The solenoid or solenoid-free decision waits for WP-04/WP-22 and owner layout #569 |
-| D6 | WP-19 order | PM | Output cap with first codec bring-up (safety first); line-in and mic after WP-17/18 |
-| D7 | Card atomicity in Phase 3 | Michael | Yes, as a parallel Hardware/Verification lane on the PNY cards, using the Teensy as the rig controller |
-| D8 | Roles and runtimes | Michael | As Phase 2: Software (firmware) is local Windows Claude Code with the Teensy over USB; Verification separate and independent; Hardware unparked bench-only; PM as now |
-| D9 | Process | PM | ADR-195 carries over (§3) |
+- Q-P2-1: port-level batching, engine unchanged (ADR-195 §4).
+- Deferred from Phase 2:
+  - the G2 unaided app test;
+  - macOS;
+  - the ADR-196 limitations.

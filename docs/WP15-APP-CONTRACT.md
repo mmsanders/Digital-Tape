@@ -1,21 +1,10 @@
 # WP-15 one-window app — contract APP-1
 
-**ISSUED by PM for host authoring/build, 17 October 2026 PDT, ADR-185, with
-[closed interface annex APP-1A](WP15-APP-ANNEX.md).** Originally preflighted under
-ADR-182/183; Software444's Q1–Q7 are resolved by APP-1A. Package criteria are
-[WP-15](PACKAGES/WP-15.md) G1–G5. This document and its annex control ambiguities;
-APP-1A controls the amended discovery/report interfaces. No engine, format or
-frozen-spec change. Independent preflight/tests/disposition remain required.
-**Michael's taste items** (§8) carry defaults. They may change wording or defaults without a new
-round until Software starts the build.
-
-**Amended 28 October 2026 PDT by [ADR-195](DECISIONS.md#adr-195--phase-2-closeout-proportional-evidence-and-the-make-path).**
-`tapectl make` (S3) is implemented now against the S3 tests already on main. It reuses the
-accepted WP-14 provision open and safety sequence (§3). The G1 runtime trace is withdrawn (§7).
-App-origin G3 rows are proved by bridge-level tests plus Michael's scripted C2 checklist (§6, §7).
-Earlier S3 feasibility gating (ADR-188/189) is superseded; its history is unchanged.
-
-**Current scope,22 October2026 / ADR-191:** Windows11 x64 is the sole current family release/acceptance target; macOS is deferred until Michael explicitly resumes it. Linux remains existing CI support. Retained Mac/Server code, observations and old dispositions are historical/supplemental, not current Windows11 qualification. Unchanged Windows safety/native/audio criteria still require independent acceptance.
+**Status:** frozen host contract APP-1 (scope frozen by ADR-198), with its
+[interface annex APP-1A](WP15-APP-ANNEX.md). Package criteria: [WP-15](PACKAGES/WP-15.md)
+G1–G5. Acceptance methods follow ADR-195. No engine, format or frozen-spec change.
+**Michael's taste items** (§8) may change wording or defaults; any new feature needs his
+`REQUEST:` and a contract amendment.
 
 ## 1. What the app is
 

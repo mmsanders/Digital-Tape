@@ -1,39 +1,8 @@
 # WP-14 native A6 capture, #423 load diagnosis and reload wording — Software #425/#428
 
-**Status:** corrected Software method (#428, sixth correction after Verification #175), 14 October 2026 UTC. **Not normative, not acceptance,
-not ready for a card until Verification #146 passes the corrected method.** Verification #167
-(`df637f7`) found four false passes in #426's first head `1fbe762`. Verification #171 (`112557e`)
-then found three more in `f5b4f1c`: an ended process, a closed and reused FileObject, and a
-duplicate tracer step. Verification #172 (`ad3dae7`) found one more in `0dd869a`: a read and an
-OpEnd that both lacked `IrpPtr` were joined through an empty key. Verification #173 (`7afc98f`) found
-one more in `418138e`: one completion of two overlapping requests reset the ambiguity, so a reused
-`IrpPtr` took the leftover completion. Verification #174 (`16e148a`) found two more families in
-`8f0014d`: FileIo request classes 69–75/77 were ignored in pending accounting, and missing/invalid
-FileObject keys still bound the target. Verification #175 (`2beb743`) found that a selected-process
-Cleanup, Close or Write with an invalid FileObject still passed. §3 shows every one now rejected.
-Final Windows provision/load/reinsert/verify/A+B/A9 and README are **complete** (#167, #168);
-nothing here asks for another load, dump, pull or README. WP-14 is held only on physical native A6.
-Input main `56bfdc5ad17dcfcdb97960a9dabe112beb8cf992`; tested release
-[`wp14-tapectl-5e2df5aaf23e`](https://github.com/mmsanders/Digital-Tape/releases/tag/wp14-tapectl-5e2df5aaf23e).
-Tooling: [`tools/wp14-capture/`](../tools/wp14-capture/). No `engine/`, `host/`, port, verifier
-tree, oracle, workflow, ruleset or gate change.
-
-| Shipped binary (unchanged, from the release) | SHA-256 |
-|---|---|
-| `tapectl-macos` (arm64, macOS ≥ 26) | `e7550d8bedbb0c784fd528c387a87cca2bad8d1b411c39217d25377329bb0beb` |
-| `tapectl-windows.exe` (x64) | `82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9` |
-| `tapectl-linux` (rehearsal only) | `4d8c97a44f163bcd513c98c0903db6a01418001f169cfd6aa126823f6f7a785c` |
-
-## Current PM disposition — 19 October 2026 (ADR-190)
-
-The historical status above describes earlier method development. Verification194
-accepted the Windows441 method/rehearsal; Verification219 corrected collector scope.
-Michael's authorized physical return is now published in Verification221 at
-`0482c0d8c9fb7f6bd026bcc2a4d5cd1b1b35b08a`: successful complete final-sector reads,
-zero observed target writes, but the old checker FAILs on four post-exit records.
-§2.5 issues the narrow retained-evidence clarification for independent disposition;
-it does not relabel the old result. No new physical collection is requested.
-Mac A6 and full-package acceptance remain held. Michael473 controls current tasks.
+**Status: historical.** This is the kernel-trace capture method built for WP-14 A6 in October 2026.
+It is no longer an acceptance route: ADR-195 closed A6 with outcome tests, and WP-14 is
+accepted. It stays because `tools/wp14-capture/` cites it.
 
 ## 1. What a capture can show
 

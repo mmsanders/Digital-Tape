@@ -24,4 +24,4 @@ price and reader cost before asking Michael to buy. Minimal capacity is a proxy
 for low cost, not a reason to buy a more expensive industrial card without discussion.
 V30 marking does not establish atomicity or product copy time.
 
-[WP-05](PACKAGES/WP-05.md) retains the characterization and independent-audit requirements.
+[WP-05](../../PACKAGES/WP-05.md) retains the characterization and independent-audit requirements.

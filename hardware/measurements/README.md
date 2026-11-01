@@ -1,6 +1,6 @@
 # hardware/measurements — audit-ready records
 
-> **Dated snapshot, 12 September 2026; hardware parked through Phase 2.** "PM Decisions 00N"
+> **Written 12 September 2026 for the earlier (solenoid) design; the procedure template still applies.** "PM Decisions 00N"
 > citations point at documents outside this repo; the matching ADRs are in
 > [docs/DECISIONS.md](../../docs/DECISIONS.md). ADR-121/124/125 supersede ADR-116's solenoid
 > working point. Nothing here is a measurement or an acceptance.

@@ -87,7 +87,7 @@ than every small buffer drain.
 Ordinary recording writes fresh chunks; the committed index still names the
 old recording. Flushing those fresh chunks repeatedly does **not** make an
 unfinished recording recoverable: no committed index names it.
-[tapefs §7–8](../spec/tapefs-v1.md#7-ownership-reference-and-allocation) already provides the useful
+[tapefs §7–8](../../../spec/tapefs-v1.md#7-ownership-reference-and-allocation) already provides the useful
 separation: payload before durable entries before durable header publication.
 
 Model four different events explicitly: accepted by the engine, transferred
@@ -139,7 +139,7 @@ large-case masks; do not claim sampled masks exhaust a full C60's combinations.
 ## 3. Hardware and battery: stop unnecessary work, then let the CPU wait
 
 The planned board is RT1062 at up to 600 MHz, with two USDHC controllers and
-I²S audio. [#379 / the package roadmap](PACKAGES/README.md) makes SDR50 the
+I²S audio. [#379 / the package roadmap](../../PACKAGES/README.md) makes SDR50 the
 primary path and High Speed the fallback; older board prose has not yet been
 revised because Hardware is parked.
 

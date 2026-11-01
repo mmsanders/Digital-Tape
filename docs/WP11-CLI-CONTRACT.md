@@ -1,9 +1,8 @@
 # WP-11 `tapectl` contract (PM-issued, P1-R63)
 
-**Status:** shipped contract. Issued 2 Oct 2026 under ADR-158 for Software #366 and
-Verification #143; `tapectl` was implemented against it and independently accepted on exact
-Product #369 (merged at `d93ca4e`, WP-11 complete, ADR-159). A change to this file is a PM
-decision recorded in `docs/DECISIONS.md`, and WP-14 builds on it rather than replacing it.
+**Status:** frozen host contract (scope frozen by ADR-198). `tapectl` was built against it and
+independently accepted (WP-11). Changes are PM decisions recorded in docs/DECISIONS.md.
+WP-14 extends it rather than replacing it.
 
 `tapectl` is host tooling in `host/` (C99, links `engine/` and `engine/port/dev_file.c`). It
 **composes the public engine API and reimplements no engine behaviour** (guardrail 12). It loads
