@@ -1,9 +1,11 @@
 # Independent verification integration
 
-## Current boundary — 26 October2026 PDT (PM593)
+## Current boundary — PM630 (ADR-197)
 
-Phase 1 remains 36/36; Phase 2 remains 6/12. Complete required WP-15 package
-coverage is not established by the following component/build/startup milestones.
+Phase 1 is 36/36; Phase 2 is 11/12 (WP-14 and WP-16 accepted). From PM622 on, remaining acceptance follows ADR-195
+(outcome tests plus negative controls) and is tracked row by row in
+[the Phase 2 ledger](PHASE2-LEDGER.md). The rows below are the independent publications
+merged so far. They keep their recorded scope.
 
 | Merged independent publication | Current disposition |
 |---|---|
@@ -16,16 +18,24 @@ coverage is not established by the following component/build/startup milestones.
 | #329 / `91815bc1` |584 component FINAL PASS32/32, old renderer18/32;587 integrated679e01ec,120/120checks success, accepted source unchanged. |
 | #330 / `2ffd014d` | Original564 human visible-row method admitted; proposed collector refused, internal chains held. |
 | #331 / `42619272` | Actual human visible observations reviewed/partial; Show Details/NUL and internal chains held. F328-1 terminal finding, owner unknown. No repeat requested. |
+| #336 / `e7f61d43` | Exact598 source integration-only clearance; merged1695552d with identical root,122SUCCESS/2expected skips. WP16 rung3 complete, not final native acceptance. |
+| #339 / `fcad6b0c` | Effective actual-parent console C01false/C02true PASS; express599 source clearance, integrated1731f6ec with121SUCCESS. |
+| #341/#342 / `494f8336` |603 technical source/pin/archive PASS and durable retention; truthful count2 violates old one-build guard. PM604 permits exact scoped exception; new343 final disposition pending. |
+| #345 / `e880e210` | Express exact603 packaging/source integration clearance;605 mergedc3d5b8fd with identical root,117SUCCESS/1guarded BUILDskip. Count exception fixed to existing bytes. |
+| #346 / `653c20b7` | A6 design-only: neither route substantiated for old facts; recommends one off-card route1 feasibility scope, not execution/qualification. |
+| #357 / `6fa36426` |612 correction1 source/COMPONENT PASS;615 integratedfce1d644 after122SUCCESS, unchanged cleared host/app treee658e8b2. Wait/capture/cleanup facts corrected; no native acceptance. |
+| #358 / `1718ac63` | Exact612 BUILD/ARCHIVE PASS, one compilation/one upload, ZIPf6a90829/appccae0cf5;616e8f61975 packaging cleared117SUCCESS, integrated090551e at4227dccd with116SUCCESS/1guardedBUILDskip. No runtime yet. |
+| #355 / `10bbe7ad` |353 finite native-layout12positive/63negative controls; missing actual SplitIo32 contract prevents full A6 kit.613/353 closed at BLOCKED return; no duplicate partial decoder or new capture. |
+| #360 / `7b80c14b` |359 StageA BLOCKED before PowerShell controls execution by local script policy; Python preparation PASS only, launcher unconditional STOP. No native admission/session. Fresh361 owns isolated Windows-CI pure/file/parser qualification. |
+| #362/#363 / `5512a2d0` |361 qualified the session method in Windows CI, then disposed the single618 native session: bounded PASS. Window opened/closed normally, two first-party `tapectl cards` polls returned offered0, app parent at Medium integrity. No rung change. |
+| #365 / `48489cf9` |364 Stage 1: **WP-14 ACCEPTED** (A6 by PNY run plus compiled 32-bit offset mutant) and **WP-16 ACCEPTED** (I1–I8, own-host). WP-15 tests and C2 checklist authored. |
+| #366–#369 / `3ff22aae` |364 Stage 2: three findings over four passes (query-failure handling, Windows census, NOT_READY), all corrected. Exact `5101e3f3` cleared; merged `ea54a41` identical tree, 130 checks. C2 candidate ZIP `b8a689cf…`. A4 restored on integration. |
+| #371 / `2a638434` |370 Stage A: S2-era Make-disabled wording superseded; current Bridge readiness 72/72 with constant-false/true controls rejected. |
+| #372/#373 / `1938e651` |370 Stage B: C2 real-card session PASS (verify OK first and remake, dumps byte-identical, pull/remake, G1/G5, G3 messages, no lists, polling usability). Sole hold F370-1 exempted by ADR-197. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Human589/Software590 close at bounded partial return;592 retired unmerged with
-restore refs, not integrated or accepted as a collector. Historical reports carry.
-Manual594/332 fixes console and tests bounded first-party receipts, not G1 absence.
-595/333 decides exact INGEST integration-only scope versus final native holds.
-585/325 packaging waits for final cleared594 source;584 dependency is complete.
-No current human action, native/poller run or automatic lead activation is issued.
-Phase2 stays6/12; full coverage/native/session/S3/A6/own-hostINGEST/G2 remain held
-where unmet. Make/elevation disabled. See [PM593](REVIEW/PM593-CLOSEOUT-2026-10-26.md).
+Next: G2 (#631), Michael's witnessed unaided record per [the G2 protocol](WP15-G2-PROTOCOL.md).
+See [ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued).
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 

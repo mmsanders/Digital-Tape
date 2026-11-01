@@ -1,12 +1,11 @@
 # Work packages — current roadmap
 
-**26 October2026 PDT · PM593.** Current Phase2 target: Windows11 x64;
-macOS deferred, Linux existing CI. Live assignments are GitHub role issues,
-not this index. [Status](../STATUS.md), [Phase2 plan](../PHASE2-PLAN.md) and
-[independent integration](../VERIFICATION-INTEGRATION.md) govern current gates.
+**PM630 · 30 October 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
+Live assignments are GitHub role issues, not this index. [Status](../STATUS.md),
+[Phase 2 plan §8 closeout](../PHASE2-PLAN.md#8-closeout-plan-adr-195) and
+[the Phase 2 ledger](../PHASE2-LEDGER.md) govern current gates.
 
-Phase1 is COMPLETE36/36. Phase2 remains6/12; numerical rungs are complete
-criteria, not effort percentages. No new phase/hardware/firmware work is issued.
+Phase 1 is complete (36/36). Phase 2 is at 11/12. Rungs count completed gates, not effort.
 
 ## Phase 0 — foundations and parked hardware
 | Package | Outcome | Owner | Stream | Current boundary |
@@ -35,15 +34,19 @@ criteria, not effort percentages. No new phase/hardware/firmware work is issued.
 ## Phase 2 — current desktop tooling
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
-| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification |3|3/4; nativeA6 request/offset linkage remains held, no new physical test issued. |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification |3|1/4;584 source integrated,328 human visual partial reviewed.594/332 fixes console/receipts;585/325 final bundle waits. Full native/S3/G2 coverage incomplete. |
-| WP-16 | [Ingest](WP-16.md) | Software/Verification |3|2/4;595/333 resolves exact459/454 integration scope versus final own-host/native gates; no unchecked merge or obsolete Mac condition. |
+| WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | 3/4. G1/G3/G4/G5 complete after C2 (#370); G2 #631 remains. |
+| WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
 No current human action:589 reviewed/partial closed; no repeat or Show Details
-recovery requested. Source fixes do not retrospectively qualify original564 or585.
-Shipping Make/elevation disabled. No current G1 observer or raw-card/S3 run issued.
-[PM593 closeout](../REVIEW/PM593-CLOSEOUT-2026-10-26.md) records exact evidence,
+recovery requested. Source fixes do not retrospectively qualify original564 or native585.
+A6 route1 PARKED after353/10bbe7ad: exact SplitIo32 native contract absent;
+no duplicate partial decoder or new recording/admin/card task. Resume only with
+concrete reviewed schema observation and actual operator/privilege authority.
+616 packaging is integrated.618 awaits361's executable method qualification in
+ordinary Windows CI after359 local script-policy refusal; no native session yet.
+[PM620 review](../REVIEW/PM620-METHOD-CONTROLS.md) records exact evidence,
 closures/restoration pointers and remaining gates. Manual role pickup only.
 
 ## Phase 3 — future scope, not activated

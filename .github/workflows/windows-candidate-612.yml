@@ -1,0 +1,239 @@
+name: "Software612 Windows replacement candidate build"
+# ONE uploaded NEW replacement candidate (PM611/#612, Verification #352 candidate.py):
+# at most TWO compilation attempts in total. App source is main fce1d644, the exact
+# V352 correction1 SOURCE PASS (6fa36426) of PR615 7d1fd979, integrated through normal
+# protected CI. BUILD/ARCHIVE only: nothing is launched here. ingest.exe and tapectl.exe
+# are the same authenticated children as 585, hash-checked, never rebuilt or invoked.
+# package_candidate.py is unchanged, so the 564/585 build workflows do not run again.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/windows-candidate-612.yml'
+      - 'tools/app/package_candidate_612.py'
+concurrency:
+  group: software612-candidate
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+env:
+  APP_SOURCE: fce1d644f03ed1220e40133be0c33bd30e519203
+  HOST_APP_TREE: e658e8b227c8df08ed9cb0dbabc31852cdc48fa8
+  TOOLS_APP_TREE: be6eecf128a79c8ae5064b5d15330788c9df3bc1
+  ENGINE_TREE: d96b4245e04d74078f8938744b1394c3018516f7
+  INTERACTION_PUBLICATION: 91815bc1fcceff90a3980db53fe2f0d70d48402e
+  INTERACTION_PRODUCT: 679e01ec90b0cf18d79e15aa85387b1c1b3aebca
+  CONSOLE_PUBLICATION: fcad6b0cba06478a54294ea7298e7d3dc0da5819
+  CONSOLE_PRODUCT: 1731f6ecef2d6cb72a228f2c88c297cf4b59553f
+  # V352 correction1 SOURCE PASS of PR615 7d1fd979, and its protected integration as main.
+  CARDS_PUBLICATION: 6fa36426d865f212174d3df1108766d9902dc435
+  CARDS_CLEARED_HEAD: 7d1fd9791c62bbda09fee5a61a49075428583ae0
+  CARDS_CLEARANCE_REF: https://github.com/mmsanders/Digital-Tape/issues/612#issuecomment-6461392174
+  CARDS_CLEARANCE_AT: '2026-10-28T05:24:32Z'
+  INTEGRATION_REF: https://github.com/mmsanders/Digital-Tape/pull/615 merged as main fce1d644f03ed1220e40133be0c33bd30e519203
+  INTEGRATION_AT: '2026-10-28T05:35:10Z'
+  CARDS_ORIGINALS: Actions artifact 12793413199 (evidence612, run 40636090229), 20 envelopes judged by V352 6fa36426
+  SOURCE_CORRECTION_RESPONSES: '1'
+  # Every earlier compilation attempt of this candidate, in order. Empty before attempt 1;
+  # a failed attempt 1 is recorded here, from its own evidence, before attempt 2.
+  PRIOR_ATTEMPTS: '[]'
+  # Authenticated 564 candidate artifact; its nested ZIP carries the original INGEST child.
+  INGEST_ARTIFACT: '12578829894'
+  INGEST_CONTAINER_SHA256: a19c47d7d474414cfb0c8cf992fd6e984bf9ff160c5e38efdd7e09a45b12aa94
+  INGEST_NESTED_ZIP: Digital-Tape-Windows11-x64-candidate.zip
+  INGEST_BYTES: '889856'
+  # Accepted S2 child from Software578 build 40225724763.
+  TAPECTL_ARTIFACT: '12610149859'
+  TAPECTL_BUILD_RUN: '40225724763'
+  TAPECTL_CONTAINER_SHA256: 83fa0d72d76948615613c388187a114d9fd03107b85d7842f37ead558f0f3b9b
+  TAPECTL_BYTES: '493712'
+  DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+  DT_TAPECTL_SHA256: 44ef26869ba2d01a8a183660a2c7a050d0e7e9ff37c40b727131512739ea6ded
+  DT_TAPECTL_VERSION: tapectl-wp15-s2+f9306c2c5a42
+  CANDIDATE_ARTIFACT: software612-windows-candidate
+  EVIDENCE_ARTIFACT: software612-build-evidence
+jobs:
+  guard:
+    name: "Two-attempt / one-upload budget guard (#612)"
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.count.outputs.build }}
+    steps:
+      - id: count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Each attempt uploads one evidence artifact, whatever its result. Build only while no
+          # candidate exists, fewer than two attempts were made, and every one is recorded.
+          c=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=$CANDIDATE_ARTIFACT" -q .total_count)
+          e=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=$EVIDENCE_ARTIFACT" -q .total_count)
+          p=$(echo "$PRIOR_ATTEMPTS" | jq length)
+          echo "candidates: $c, attempt evidence: $e, recorded prior attempts: $p"
+          if [ "$c" = "0" ] && [ "$e" -lt 2 ] && [ "$e" = "$p" ]; then echo build=true >> "$GITHUB_OUTPUT"; else echo build=false >> "$GITHUB_OUTPUT"; fi
+  build:
+    name: "Windows11 x64 replacement candidate BUILD only (#612)"
+    needs: guard
+    if: needs.guard.outputs.build == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: tooling
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APP_SOURCE }}
+          path: app-src
+          fetch-depth: 0
+      - name: Source identity is the cleared, integrated tree
+        run: |
+          $ErrorActionPreference='Stop'
+          New-Item -ItemType Directory evidence,stage | Out-Null
+          if((git -C app-src rev-parse HEAD) -ne $env:APP_SOURCE){throw 'App source is not the integrated head'}
+          if((git -C app-src rev-parse HEAD:host/app) -ne $env:HOST_APP_TREE){throw 'host/app tree is not the cleared tree'}
+          if((git -C app-src rev-parse "$($env:CARDS_CLEARED_HEAD):host/app") -ne $env:HOST_APP_TREE){throw 'host/app tree differs from the cleared PR head'}
+          if((git -C app-src rev-parse HEAD:tools/app) -ne $env:TOOLS_APP_TREE){throw 'tools/app tree is not the integrated tree'}
+          if((git -C app-src rev-parse HEAD:engine) -ne $env:ENGINE_TREE){throw 'engine tree changed'}
+          foreach($n in 'DT_SOURCE_HEAD','DT_DIAG_REQUIRE','DT_DIAG_EVIDENCE','DT_CARDS_REQUIRE'){if(Test-Path "env:$n"){throw "$n must not be set for the release build"}}
+          rustc -Vv > evidence/rustc.txt
+          cargo -V > evidence/cargo.txt
+          git -C app-src ls-tree -r HEAD host/app > evidence/host-app-tree.txt
+          Copy-Item app-src/host/app/Cargo.lock evidence/Cargo.lock
+          (Get-FileHash app-src/host/app/Cargo.lock -Algorithm SHA256).Hash.ToLowerInvariant() > evidence/Cargo.lock.sha256
+          Select-String -Path app-src/host/app/src/children.rs -Pattern 'option_env!' | ForEach-Object { "children.rs:$($_.LineNumber): $($_.Line.Trim())" } > evidence/pin-source.txt
+          Select-String -Path app-src/host/app/src/diagnostics.rs,app-src/host/app/src/main.rs -Pattern 'OPT_IN|SESSION_LIMIT|opted_in|control' | ForEach-Object { "$(Split-Path $_.Path -Leaf):$($_.LineNumber): $($_.Line.Trim())" } > evidence/diagnostics-source.txt
+          "CARGO_TARGET_DIR=$(Join-Path $env:RUNNER_TEMP 'candidate-target')" >> $env:GITHUB_ENV
+          [IO.File]::WriteAllText("$PWD/evidence/prior-attempts.json", $env:PRIOR_ATTEMPTS + "`n")
+      - name: Children, hash-checked (not rebuilt, not run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          function Sha($p){(Get-FileHash $p -Algorithm SHA256).Hash.ToLowerInvariant()}
+          gh api "repos/${{ github.repository }}/actions/artifacts/$env:INGEST_ARTIFACT/zip" > ingest-container.zip
+          if($LASTEXITCODE -ne 0){throw 'INGEST transport retrieval failed'}
+          if((Sha ingest-container.zip) -ne $env:INGEST_CONTAINER_SHA256){throw 'INGEST transport container mismatch'}
+          Expand-Archive ingest-container.zip ingest-container
+          $nested=Sha "ingest-container/$env:INGEST_NESTED_ZIP"
+          Expand-Archive "ingest-container/$env:INGEST_NESTED_ZIP" ingest-nested
+          Copy-Item ingest-nested/ingest.exe stage/ingest.exe
+          if((Sha stage/ingest.exe) -ne $env:DT_INGEST_SHA256){throw 'ingest.exe pin mismatch'}
+          if((Get-Item stage/ingest.exe).Length -ne [long]$env:INGEST_BYTES){throw 'ingest.exe length mismatch'}
+          gh api "repos/${{ github.repository }}/actions/artifacts/$env:TAPECTL_ARTIFACT/zip" > tapectl-container.zip
+          if($LASTEXITCODE -ne 0){throw 'S2 tapectl transport retrieval failed'}
+          if((Sha tapectl-container.zip) -ne $env:TAPECTL_CONTAINER_SHA256){throw 'S2 tapectl transport container mismatch'}
+          Expand-Archive tapectl-container.zip tapectl-container
+          Copy-Item tapectl-container/tapectl.exe stage/tapectl.exe
+          if((Sha stage/tapectl.exe) -ne $env:DT_TAPECTL_SHA256){throw 'tapectl.exe pin mismatch'}
+          if((Get-Item stage/tapectl.exe).Length -ne [long]$env:TAPECTL_BYTES){throw 'tapectl.exe length mismatch'}
+          [ordered]@{ ingest=[ordered]@{artifact_id=[long]$env:INGEST_ARTIFACT; container_sha256=(Sha ingest-container.zip); nested_zip=$env:INGEST_NESTED_ZIP; nested_zip_sha256=$nested; member_sha256=(Sha stage/ingest.exe); member_bytes=(Get-Item stage/ingest.exe).Length}
+            tapectl=[ordered]@{artifact_id=[long]$env:TAPECTL_ARTIFACT; build_run=[long]$env:TAPECTL_BUILD_RUN; container_sha256=(Sha tapectl-container.zip); member_sha256=(Sha stage/tapectl.exe); member_bytes=(Get-Item stage/tapectl.exe).Length} } |
+            ConvertTo-Json -Depth 3 | Set-Content -Encoding utf8 evidence/transports.json
+      - name: Candidate compilation attempt, all four child pins compiled in
+        working-directory: app-src/host/app
+        run: |
+          $argv='cargo','build','--release','--locked','--bin','digital-tape'
+          $argv | ConvertTo-Json | Set-Content -Encoding utf8 ../../../evidence/build-argv.json
+          [ordered]@{DT_INGEST_SHA256=$env:DT_INGEST_SHA256; DT_INGEST_VERSION=$env:DT_INGEST_VERSION; DT_TAPECTL_SHA256=$env:DT_TAPECTL_SHA256; DT_TAPECTL_VERSION=$env:DT_TAPECTL_VERSION} |
+            ConvertTo-Json | Set-Content -Encoding utf8 ../../../evidence/compile-env.json
+          $start=[DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+          & $argv[0] $argv[1..($argv.Length-1)] 1> ../../../evidence/app-build.stdout.txt 2> ../../../evidence/app-build.stderr.txt
+          $code=$LASTEXITCODE
+          $end=[DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+          $record=[ordered]@{run_id=[long]$env:GITHUB_RUN_ID; run_attempt=[int]$env:GITHUB_RUN_ATTEMPT; started_at=$start; finished_at=$end; exit=[int]$code}
+          [IO.File]::WriteAllText((Join-Path $PWD '../../../evidence/attempt.json'), ($record | ConvertTo-Json) + "`n")
+          if($code -ne 0){Get-Content ../../../evidence/app-build.stderr.txt -Tail 40; throw "Windows app build failed: exit $code"}
+          Copy-Item "$env:CARGO_TARGET_DIR/release/digital-tape.exe" ../../../stage/digital-tape.exe
+      - name: Compiled pins are present in the app bytes
+        run: |
+          $ErrorActionPreference='Stop'
+          $text=[Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes("$PWD/stage/digital-tape.exe"))
+          $found=[ordered]@{}
+          foreach($n in 'DT_INGEST_SHA256','DT_INGEST_VERSION','DT_TAPECTL_SHA256','DT_TAPECTL_VERSION'){
+            $v=(Get-Item "env:$n").Value; $found[$n]=$text.Contains($v); if(-not $found[$n]){throw "$n value is not in the app"} }
+          $found | ConvertTo-Json | Set-Content -Encoding utf8 evidence/pins-in-app.json
+      - name: Package the five-member replacement candidate
+        run: |
+          $ErrorActionPreference='Stop'
+          $t=Get-Content evidence/transports.json -Raw | ConvertFrom-Json
+          # The attempt number, times and exit are taken by the packager from attempt.json and
+          # prior-attempts.json as written, so the shell never reformats them.
+          $run="Actions run $env:GITHUB_RUN_ID attempt $env:GITHUB_RUN_ATTEMPT"
+          $attempt=[ordered]@{source_head=$env:APP_SOURCE
+            source_clearance_ref="digital-tape-verification@$env:CARDS_PUBLICATION V352 correction1 SOURCE PASS of PR615 $env:CARDS_CLEARED_HEAD ($env:CARDS_CLEARANCE_REF)"
+            integration_ref=$env:INTEGRATION_REF; clearance_at=$env:CARDS_CLEARANCE_AT; integration_at=$env:INTEGRATION_AT
+            log_ref="$run, job build: $env:EVIDENCE_ARTIFACT/app-build.stdout.txt + app-build.stderr.txt"}
+          $facts=[ordered]@{
+            source_head=$env:APP_SOURCE; source_tree=(git -C app-src rev-parse 'HEAD^{tree}')
+            host_app_tree=$env:HOST_APP_TREE; tools_app_tree=$env:TOOLS_APP_TREE; engine_tree=$env:ENGINE_TREE
+            current_base='${{ github.event.pull_request.base.sha }}'
+            interaction_clearance=[ordered]@{publication=$env:INTERACTION_PUBLICATION; product_commit=$env:INTERACTION_PRODUCT; kind='exact source PASS integrated'
+              exact_source_refs=@("digital-tape-verification@$env:INTERACTION_PUBLICATION V324 FINAL PASS of #584, integrated as $env:INTERACTION_PRODUCT")}
+            console_receipt_clearance=[ordered]@{publication=$env:CONSOLE_PUBLICATION; product_commit=$env:CONSOLE_PRODUCT; kind='exact332 source PASS integrated'
+              exact_source_refs=@("digital-tape-verification@$env:CONSOLE_PUBLICATION V338 clearance of PR599 d384624a, integrated as $env:CONSOLE_PRODUCT")}
+            cards_receipt_clearance=[ordered]@{publication=$env:CARDS_PUBLICATION; product_commit=$env:APP_SOURCE; kind='exact352 source PASS integrated'; contract='cards-1'
+              exact_source_refs=@("digital-tape-verification@$env:CARDS_PUBLICATION V352 correction1 SOURCE PASS of PR615 $env:CARDS_CLEARED_HEAD (host/app $env:HOST_APP_TREE), integrated as $env:APP_SOURCE")
+              component_original_refs=@($env:CARDS_ORIGINALS)}
+            compile_env=(Get-Content evidence/compile-env.json -Raw | ConvertFrom-Json)
+            build_argv=@(Get-Content evidence/build-argv.json -Raw | ConvertFrom-Json)
+            ingest_transport=$t.ingest; tapectl_transport=$t.tapectl
+            packager_source=(git -C tooling rev-parse HEAD)
+            toolchain=[ordered]@{rustc=(Get-Content evidence/rustc.txt); cargo=(Get-Content evidence/cargo.txt -Raw).Trim()}
+            run_id=[long]$env:GITHUB_RUN_ID; run_attempt=[int]$env:GITHUB_RUN_ATTEMPT
+            opt_in_omitted_from_build_environment=$true
+            source_correction_responses=[int]$env:SOURCE_CORRECTION_RESPONSES
+            attempt=$attempt
+            attempt_artifact_ref="$run, artifact $env:CANDIDATE_ARTIFACT, ZIP member digital-tape.exe"
+            ci_build_inventory=@(
+              'Normal PR CI test builds on the packaging PR head (app-bridge-component.yml, windows-interactions-584.yml and the always-on checks) are not candidate compilations; their run ids are listed in the Software612 return',
+              'package_candidate.py is byte-unchanged, so windows-candidate-build.yml (564) and windows-candidate-585.yml are not triggered: no old564 or old585 rebuild',
+              'PR615 source CI, including windows-cards-612.yml run 40636090229, built test binaries before clearance; none is a candidate')
+            evidence=[ordered]@{compiler=@('rustc.txt','cargo.txt'); lock=@('Cargo.lock','Cargo.lock.sha256'); pin_source=@('pin-source.txt','compile-env.json','pins-in-app.json')
+              build_log=@('app-build.stdout.txt','app-build.stderr.txt','build-argv.json','attempt.json','prior-attempts.json'); source_crosswalk=@('host-app-tree.txt','facts.json','transports.json')
+              diagnostics_source=@('diagnostics-source.txt')} }
+          [IO.File]::WriteAllText("$PWD/evidence/facts.json", ($facts | ConvertTo-Json -Depth 8) + "`n")
+          python -I tooling/tools/app/package_candidate_612.py stage evidence/facts.json candidate
+          if($LASTEXITCODE -ne 0){throw 'Packaging failed'}
+          Copy-Item candidate/INVENTORY.json,candidate/RECORD.json,candidate/REGISTRY.draft.json,candidate/MANUAL-TEST-SHEET.txt evidence/
+          Copy-Item candidate/Digital-Tape/BUILD.json,candidate/Digital-Tape/README.txt evidence/
+      - name: Verification352 candidate judge, positive and negative mismatch control
+        run: |
+          # Continue: the negative control is expected to write a refusal to stderr; exit codes decide.
+          $ErrorActionPreference='Continue'
+          $zip='candidate/Digital-Tape-Windows11-x64-replacement-candidate.zip'
+          foreach($p in 'windows_preview_r1/archive.py','windows_discovery_candidate_r1/contract.py','windows_discovery_candidate_r2/contract.py','windows_cards_receipts_r1/candidate.py'){
+            python -B "tooling/tests/$p" >> evidence/judge-selftests.txt; if($LASTEXITCODE -ne 0){throw "$p self-test failed"} }
+          python -B tooling/tools/app/package_candidate_612.py --judge $zip candidate/REGISTRY.draft.json candidate/RECORD.json *> evidence/positive-judge.txt
+          $pos=$LASTEXITCODE; "exit $pos" >> evidence/positive-judge.txt
+          if($pos -ne 0){Get-Content evidence/positive-judge.txt; throw 'V352 candidate judge refused the candidate'}
+          # One changed pin: the old 564 tapectl hash in place of S2. The unmodified archive is reused; nothing is executed.
+          $g=Get-Content candidate/REGISTRY.draft.json -Raw | ConvertFrom-Json
+          $g.components.'tapectl.exe'.sha256='82798af2899e9364b9c9bfaa2021daf6cc51ccd0c6562598d50e0a86944bb7a9'
+          [IO.File]::WriteAllText("$PWD/evidence/negative-registry.json", ($g | ConvertTo-Json -Depth 6) + "`n")
+          python -B tooling/tools/app/package_candidate_612.py --judge $zip evidence/negative-registry.json candidate/RECORD.json *> evidence/negative-mismatch.txt
+          $neg=$LASTEXITCODE; "exit $neg" >> evidence/negative-mismatch.txt
+          if($neg -eq 0){throw 'negative mismatch control was accepted'}
+          Get-Content evidence/positive-judge.txt, evidence/negative-mismatch.txt
+          # The expected refusal left LASTEXITCODE=1, which the runner would report as the step's result.
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.CANDIDATE_ARTIFACT }}
+          path: |
+            candidate/Digital-Tape-Windows11-x64-replacement-candidate.zip
+            candidate/INVENTORY.json
+            candidate/MANUAL-TEST-SHEET.txt
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ env.EVIDENCE_ARTIFACT }}
+          path: evidence
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,56 @@
+[package]
+name = "ingest"
+version = "0.1.1"
+edition = "2021"
+rust-version = "1.80"
+description = "Digital Tape INGEST-1: ordered audio folders to one canonical WAV and manifest"
+license = "MIT"
+publish = false
+build = "build.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+# Test-build observation seam (src/observe.rs). Never enabled in the shipping build.
+observe = []
+
+[[bin]]
+name = "ingest"
+path = "src/main.rs"
+
+[dependencies]
+libm = { version = "=0.2.16", default-features = false }
+sha2 = { version = "=0.10.9", default-features = false }
+md-5 = { version = "=0.10.6", default-features = false }
+unicode-normalization = { version = "=0.1.25", default-features = false, features = ["std"] }
+symphonia-core = { version = "=0.6.1", default-features = false }
+symphonia-common = { version = "=0.6.1", default-features = false }
+symphonia-bundle-mp3 = { version = "=0.6.1", default-features = false, features = ["mp3"] }
+symphonia-codec-aac = { version = "=0.6.1", default-features = false }
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.177"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "=0.59.0", features = ["Win32_Storage_FileSystem", "Win32_Foundation"] }
+
+[build-dependencies]
+sha2 = { version = "=0.10.9", default-features = false }
+
+[patch.crates-io]
+symphonia-core = { path = "vendor/symphonia-core" }
+symphonia-common = { path = "vendor/symphonia-common" }
+symphonia-bundle-mp3 = { path = "vendor/symphonia-bundle-mp3" }
+symphonia-codec-aac = { path = "vendor/symphonia-codec-aac" }
+
+[profile.release]
+# One arithmetic path on every target: no fast-math exists in Rust, and these keep the
+# build free of per-CPU code selection.
+opt-level = 3
+codegen-units = 1
+lto = "thin"
+panic = "abort"
+overflow-checks = true
+
+[workspace]

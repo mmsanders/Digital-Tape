@@ -49,28 +49,77 @@ pub fn owned(dir: &Path) -> bool {
     std::fs::symlink_metadata(&m).is_ok_and(|md| md.is_file()) && std::fs::read(&m).is_ok_and(|b| b == MARKER_TEXT)
 }
 
+/// A job that could not be fully created: the stage that failed, its actual error and,
+/// once the job directory itself exists, its path (it is left for `clean_stale`).
+#[derive(Debug)]
+pub struct Partial {
+    pub created: Option<PathBuf>,
+    pub stage: &'static str,
+    pub error: std::io::Error,
+}
+
 /// A fresh job directory with its marker, control directory and DEST parent.
 pub fn create(data: &Path, name: &str) -> std::io::Result<Job> {
+    create_staged(data, name).map_err(|p| p.error)
+}
+
+/// `create`, saying how far it got.
+pub fn create_staged(data: &Path, name: &str) -> Result<Job, Partial> {
+    fn fail<'a>(created: Option<&'a Path>, stage: &'static str) -> impl FnOnce(std::io::Error) -> Partial + 'a {
+        move |error| Partial { created: created.map(Path::to_owned), stage, error }
+    }
     let root = jobs_root(data);
-    std::fs::create_dir_all(&root)?;
+    std::fs::create_dir_all(&root).map_err(fail(None, "jobs-root"))?;
     if !is_plain_dir(&root) {
-        return Err(std::io::Error::other("the app's jobs folder is not a plain directory"));
+        return Err(fail(None, "jobs-root")(std::io::Error::other("the app's jobs folder is not a plain directory")));
     }
     let dir = root.join(name);
-    std::fs::create_dir(&dir)?; // fails if anything already has this name
+    std::fs::create_dir(&dir).map_err(fail(None, "job-dir"))?; // fails if anything already has this name
     std::fs::OpenOptions::new().write(true).create_new(true).open(dir.join(MARKER)).and_then(|mut f| {
         use std::io::Write;
         f.write_all(MARKER_TEXT)
-    })?;
+    }).map_err(fail(Some(&dir), "marker"))?;
     let (control, out) = (dir.join("control"), dir.join("out"));
-    std::fs::create_dir(&control)?;
-    std::fs::create_dir(&out)?;
+    #[cfg(test)]
+    if fault::take() { return Err(fail(Some(&dir), "control")(std::io::Error::other("injected create failure after the job directory"))); }
+    std::fs::create_dir(&control).map_err(fail(Some(&dir), "control"))?;
+    std::fs::create_dir(&out).map_err(fail(Some(&dir), "out"))?;
     Ok(Job { dir, control, out })
+}
+
+/// What removing one job directory actually did.
+#[derive(Debug)]
+pub enum Removal {
+    Removed,
+    /// It failed the ownership check, so nothing was deleted or attempted.
+    Refused,
+    /// `remove_dir_all` was called and returned this error.
+    Failed(std::io::Error),
 }
 
 /// Remove one job directory, only if it is ours.
 pub fn remove(job: &Job) -> bool {
-    owned(&job.dir) && std::fs::remove_dir_all(&job.dir).is_ok()
+    matches!(removal(job), Removal::Removed)
+}
+
+/// `remove`, with its actual outcome.
+pub fn removal(job: &Job) -> Removal {
+    if !owned(&job.dir) {
+        return Removal::Refused;
+    }
+    match std::fs::remove_dir_all(&job.dir) {
+        Ok(()) => Removal::Removed,
+        Err(e) => Removal::Failed(e),
+    }
+}
+
+/// A controlled failure after the job directory exists (tests only), for this thread's next create.
+#[cfg(test)]
+pub mod fault {
+    use std::cell::Cell;
+    thread_local! { static AFTER_DIR: Cell<bool> = const { Cell::new(false) }; }
+    pub fn arm() { AFTER_DIR.with(|c| c.set(true)); }
+    pub fn take() -> bool { AFTER_DIR.with(|c| c.replace(false)) }
 }
 
 /// At launch: remove only stale directories that carry this app's marker. Anything else

@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "actual_wav_bytes": 4294967300,
+  "source_frames": 178956969,
+  "output_frames": 1073741814,
+  "controls": [
+    "nonzero-final-byte"
+  ],
+  "scope": "verifier sparse-file selftest only; no Product/native/card acceptance"
+}

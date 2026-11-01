@@ -1,39 +1,66 @@
-//! One production coordinator, a serial ingest worker and a single-flight discovery poller.
-//! App owns current-result acceptance.
-use crate::{children, discovery::{self, Judged, Ran, Request}, drops, ingest_job::{self, Outcome}, jobdir, state::{App, Next, View}};
+//! One production coordinator, a serial ingest worker, a single-flight discovery poller and
+//! the one Make cartridge run. App owns current-result acceptance.
+use crate::{children, diagnostics::{Route, Session}, discovery::{self, Judged, Ran, Request}, drops, ingest_job::{self, Outcome, RunReceipt}, jobdir, make, state::{App, Next, View}};
 use serde_json::Value;
-use std::{path::PathBuf, sync::{Arc, Mutex, Weak, mpsc, atomic::{AtomicBool, Ordering}}, thread, time::{Duration, Instant}};
+use std::{cell::Cell, path::PathBuf, sync::{Arc, Mutex, Weak, mpsc, atomic::{AtomicBool, AtomicIsize, Ordering}}, thread, time::{Duration, Instant}};
 
-pub struct Work { pub id:String, pub generation:u64, pub folders:Vec<PathBuf>, pub cancel:Arc<AtomicBool> }
+/// `drop_id` names the receipt ingress that scheduled this work (diagnostics ON only).
+pub struct Work { pub id:String, pub generation:u64, pub folders:Vec<PathBuf>, pub cancel:Arc<AtomicBool>, pub drop_id:Option<String> }
 enum Message { Check(Work), Stop }
 // `stopped` is set under this lock by shutdown, so a discovery run is either registered
 // before shutdown's cancellation pass or refused; none crosses that boundary.
-struct Core { app:App, cancel:Option<Arc<AtomicBool>>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool }
+// `ready` is the app-owned job holding the current check's published DEST (its audio is
+// `app.audio`), kept for Make until the music changes, Start over or a cartridge is made.
+struct Core { app:App, cancel:Option<Arc<AtomicBool>>, active:Option<(String,u64)>, cards_cancel:Option<Arc<AtomicBool>>, stopped:bool, ready:Option<jobdir::Job> }
+type Effect=dyn Fn(View)->Result<(),String>+Send+Sync;
+/// The launch callback a discovery run calls once its child exists, before any wait.
+/// The launch hook, present only with diagnostics ON.
+type Launched<'a>=Option<&'a mut dyn FnMut(&Ran,&Request)>;
 pub struct Bridge {
     core:Mutex<Core>,
     // Mutations/publications are serialized; emit never holds the core lock.
-    publication:Mutex<()>, data:PathBuf, emit:Arc<dyn Fn(View)+Send+Sync>,
+    // The effect reports a failed delivery (production: the Tauri emit); only discovery
+    // receipts record it, and no outcome depends on it.
+    publication:Mutex<()>, data:PathBuf, emit:Arc<Effect>,
     sender:mpsc::Sender<Message>, worker:Mutex<Option<thread::JoinHandle<()>>>,
     stop_polls:AtomicBool, poller:Mutex<Option<thread::JoinHandle<()>>>,
+    /// APP-1A §8 opt-in receipts; None (the default) means no diagnostic I/O at all.
+    diag:Option<Arc<Session>>,
+    /// The Make launcher (production: elevated ShellExecuteExW) and the window that owns
+    /// its prompt.
+    launch:Mutex<Arc<make::Launch>>, owner:Arc<AtomicIsize>,
+    /// Controlled tests name the make child here instead of the pinned bundled tapectl.
+    #[cfg(test)] make_child:Mutex<Option<(PathBuf,String)>>,
     #[cfg(test)] trace:Mutex<Vec<String>>,
     /// Controlled tests pause a due poll here, after its stop read and before registration.
     #[cfg(test)] before_admission:Mutex<Option<Box<dyn FnOnce()+Send>>>,
 }
 impl Bridge {
-    fn channel(data:PathBuf,emit:Arc<dyn Fn(View)+Send+Sync>)->(Arc<Self>,mpsc::Receiver<Message>) {
-        let(sender,receiver)=mpsc::channel();
-        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,cards_cancel:None,stopped:false}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
-            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),#[cfg(test)]trace:Mutex::new(Vec::new()),#[cfg(test)]before_admission:Mutex::new(None)}),receiver)
+    #[cfg(test)]
+    fn channel(data:PathBuf,emit:Arc<dyn Fn(View)+Send+Sync>)->(Arc<Self>,mpsc::Receiver<Message>) {Self::channel_with(data,emit,None)}
+    #[cfg(test)]
+    fn channel_with(data:PathBuf,emit:Arc<dyn Fn(View)+Send+Sync>,diag:Option<Arc<Session>>)->(Arc<Self>,mpsc::Receiver<Message>) {
+        Self::channel_effect(data,Arc::new(move|v|{emit(v);Ok(())}),diag)
     }
-    pub fn new(data:PathBuf,emit:impl Fn(View)+Send+Sync+'static)->Arc<Self> {
-        let(bridge,receiver)=Self::channel(data,Arc::new(emit));
+    fn channel_effect(data:PathBuf,emit:Arc<Effect>,diag:Option<Arc<Session>>)->(Arc<Self>,mpsc::Receiver<Message>) {
+        let(sender,receiver)=mpsc::channel();
+        let owner=Arc::new(AtomicIsize::new(0));let window=owner.clone();
+        let launch:Arc<make::Launch>=Arc::new(move|req:&make::Request,tick:&mut dyn FnMut()|make::elevated(window.load(Ordering::SeqCst))(req,tick));
+        (Arc::new(Self{core:Mutex::new(Core{app:App::default(),cancel:None,active:None,cards_cancel:None,stopped:false,ready:None}),publication:Mutex::new(()),data,emit,sender,worker:Mutex::new(None),
+            stop_polls:AtomicBool::new(false),poller:Mutex::new(None),diag,launch:Mutex::new(launch),owner,#[cfg(test)]make_child:Mutex::new(None),
+            #[cfg(test)]trace:Mutex::new(Vec::new()),#[cfg(test)]before_admission:Mutex::new(None)}),receiver)
+    }
+    pub fn new(data:PathBuf,emit:impl Fn(View)+Send+Sync+'static)->Arc<Self> {Self::with_diagnostics(data,move|v|{emit(v);Ok(())},None)}
+    /// The one production coordinator; `diag` is Some only for an opted-in launch.
+    pub fn with_diagnostics(data:PathBuf,emit:impl Fn(View)->Result<(),String>+Send+Sync+'static,diag:Option<Session>)->Arc<Self> {
+        let(bridge,receiver)=Self::channel_effect(data,Arc::new(emit),diag.map(Arc::new));
         let weak:Weak<Self>=Arc::downgrade(&bridge);
         let worker=thread::spawn(move||while let Ok(message)=receiver.recv(){
             let Message::Check(work)=message else{break};
             let Some(bridge)=weak.upgrade() else{break};
-            bridge.execute(work,|job,work|{
+            bridge.execute_with(work,|job,work,receipt,spawned|{
                 let bin=children::resolve(&children::INGEST).map_err(|e|e.0)?;
-                Ok(ingest_job::run(&bin,children::INGEST.version.unwrap_or_default(),job,&work.folders,work.cancel.clone()))
+                Ok(ingest_job::run_hooked(&bin,children::INGEST.version.unwrap_or_default(),job,&work.folders,work.cancel.clone(),receipt,spawned))
             });
         });
         *bridge.worker.lock().unwrap()=Some(worker);
@@ -56,55 +83,88 @@ impl Bridge {
     /// One poller step; false once polls are stopped. The stop read here is only a fast
     /// exit: `discover` rechecks under the core lock before registering a run.
     fn poll_once(&self,schedule:&mut discovery::Schedule,ms:&dyn Fn()->u64,
-        run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut())->(Ran,Request))->bool{
+        run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->bool{
         if self.stop_polls.load(Ordering::SeqCst){return false}
-        // S3 Make does not exist in this build, so discovery is never paused for Making.
-        if schedule.tick(ms(),false,false){
+        // No card check runs while Making (APP-1 §2): the make child owns the card.
+        let making=self.core.lock().unwrap().app.is_making();
+        if schedule.tick(ms(),making,false){
             #[cfg(test)]if let Some(pause)=self.before_admission.lock().unwrap().take(){pause()}
             self.discover(run);schedule.terminal(ms());
         }
         true
     }
     /// The production discovery child: the pinned tapectl beside the app, cards only.
-    fn run_cards(job:&jobdir::Job,cancel:&AtomicBool,on_timeout:&mut dyn FnMut(),on_cancel:&mut dyn FnMut())->(Ran,Request){
+    fn run_cards(job:&jobdir::Job,cancel:&AtomicBool,on_timeout:&mut dyn FnMut(),on_cancel:&mut dyn FnMut(),launched:Launched)->(Ran,Request){
         let version=children::TAPECTL.version.unwrap_or_default();
         match children::resolve(&children::TAPECTL){
-            Ok(bin)=>{let(cmd,request)=discovery::command(&bin,version,job);(discovery::run(cmd,&request,cancel,on_timeout,on_cancel),request)}
+            Ok(bin)=>{let(cmd,request)=discovery::command(&bin,version,job);let q=&request;let mut hook=launched.map(|l|move|r:&Ran|l(r,q));
+                let ran=discovery::run(cmd,&request,cancel,on_timeout,on_cancel,hook.as_mut().map(|h|h as &mut dyn FnMut(&Ran)));(ran,request)}
             Err(e)=>(Ran{spawn_error:Some(e.0),..Default::default()},Request{version:version.into(),..Default::default()}),
         }
     }
     /// One discovery run, shared by the poller and controlled tests: a fresh ticket and owned
     /// job, the child, current-only publication, then removal of only this run's job.
-    fn discover(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut())->(Ran,Request))->Option<(Ran,Request,Judged)>{
+    /// With diagnostics ON each step is also recorded (cards-1); nothing waits on it.
+    fn discover(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->Option<(Ran,Request,Judged)>{
         let(ticket,cancel)={let mut core=self.core.lock().unwrap();
-            if core.stopped{drop(core);self.note("cards:admission-refused");return None}
+            if core.stopped{drop(core);self.note("cards:admission-refused");if let Some(d)=&self.diag{d.cards_admission_refused();}return None}
             let cancel=Arc::new(AtomicBool::new(false));core.cards_cancel=Some(cancel.clone());(core.app.begin_cards(),cancel)};
         self.note("cards:worker-start");
-        let job=match jobdir::create(&self.data,&format!("cards-{}",children::nonce())){
+        let created=jobdir::create_staged(&self.data,&format!("cards-{}",children::nonce()));
+        let failed=created.as_ref().err().map(|p|format!("Card check failed: cannot create the app's own folder: {}",p.error));
+        // A job directory that exists but failed later is neither created nor not-created in
+        // cards-1; the session stops with the actual stage. The policy is unchanged: it is left for clean_stale.
+        if let(Some(d),Err(jobdir::Partial{created:Some(dir),stage,error}))=(&self.diag,&created){d.incomplete(&format!("cards-job-partially-created: {} exists, then {stage} failed: {error}",dir.display()));}
+        let rid=self.diag.as_ref().map(|d|d.cards_admit(ticket,match &created{Ok(job)=>Ok(job.dir.as_path()),Err(_)=>Err(failed.as_deref().unwrap_or_default())}));
+        let diag=self.diag.as_deref().zip(rid.as_deref());
+        let job=match created{
             Ok(job)=>job,
-            Err(e)=>{self.publish_cards(ticket,&Judged{hint:None,id_specific:None},format!("Card check failed: cannot create the app's own folder: {e}"));return None}
+            Err(_)=>{
+                let why=failed.unwrap_or_default();
+                if let Some((d,r))=diag{d.cards_not_launched(r,ticket,&why);}
+                self.publish_cards(ticket,&Judged{hint:None,id_specific:None},why,rid.as_deref());
+                if let Some((d,r))=diag{d.cards_cleanup(r,ticket,None);}
+                return None}
         };
-        let(ran,request)=run(&job,&cancel,&mut||self.invalidate_cards(ticket,true),&mut||self.note("cards:cancel"));
+        let launched=Cell::new(false);
+        let flag=&launched;let mut hook=diag.map(|(d,id)|move|r:&Ran,q:&Request|{flag.set(true);d.cards_launch(id,ticket,r,q);});
+        let(ran,request)=run(&job,&cancel,&mut||self.invalidate_cards(ticket,true,rid.as_deref()),&mut||self.note("cards:cancel"),
+            hook.as_mut().map(|h|h as &mut dyn FnMut(&Ran,&Request)));
         self.note("cards:child-terminal");
+        if let Some((d,r))=diag{
+            if launched.get(){d.cards_terminal(r,ticket,&ran);}
+            else{d.cards_not_launched(r,ticket,ran.spawn_error.as_deref().unwrap_or("no child was started"));}
+        }
         let judged=discovery::judge(ran.exit,&ran.stdout,ran.report.as_deref(),&request.nonce,&request.version);
-        self.publish_cards(ticket,&judged,discovery::details(&ran,&judged));
+        self.publish_cards(ticket,&judged,discovery::details(&ran,&judged),rid.as_deref());
+        // Originals are kept after publication and before the job they live in is removed.
+        if let(Some((d,r)),true)=(diag,launched.get()){d.cards_capture(r,ticket,&ran,&request);}
         // Sole target is this run's freshly created Job, only after the child's terminal.
-        jobdir::remove(&job);self.note("cards:remove-owned-job");
+        let removal=jobdir::removal(&job);self.note("cards:remove-owned-job");
+        if let Some((d,r))=diag{d.cards_cleanup(r,ticket,Some((&job.dir,&removal)));}
         let mut core=self.core.lock().unwrap();
         if core.cards_cancel.as_ref().is_some_and(|c|Arc::ptr_eq(c,&cancel)){core.cards_cancel=None;}
         Some((ran,request,judged))
     }
-    fn publish_cards(&self,ticket:u64,judged:&Judged,details:String){
+    /// The state a card publication leaves, for its receipt.
+    fn cards_ref(view:&View,generation:u64)->String{format!("view={} card_line={:?} card_details_available={} generation={}",view.view,view.card_line,view.card_details_available,generation)}
+    fn publish_cards(&self,ticket:u64,judged:&Judged,details:String,rid:Option<&str>){
         let _serial=self.publication.lock().unwrap();
-        let view={let mut core=self.core.lock().unwrap();if !core.app.finish_cards(ticket,judged,details){drop(core);self.note("cards:stale-dropped");return}core.app.view()};
-        (self.emit)(view);self.note("cards:published");
+        let(current,view,state)={let mut core=self.core.lock().unwrap();let current=core.app.finish_cards(ticket,judged,details);
+            let view=core.app.view();let state=Self::cards_ref(&view,core.app.generation());(current,view,state)};
+        let diag=self.diag.as_deref().zip(rid);
+        if let Some((d,r))=diag{d.cards_publication_attempt(r,ticket,if current{"publish"}else{"stale-drop"},&state);}
+        if !current{self.note("cards:stale-dropped");if let Some((d,r))=diag{d.cards_publication(r,ticket,&state,"stale-dropped",None);}return}
+        let delivered=(self.emit)(view);self.note("cards:published");
+        if let Some((d,r))=diag{match &delivered{Ok(())=>d.cards_publication(r,ticket,&state,"published",None),Err(e)=>d.cards_publication(r,ticket,&state,"failed",Some(e))}}
     }
     /// A timeout: this run stops being current and the old hint is cleared before the child is stopped.
-    fn invalidate_cards(&self,ticket:u64,timed_out:bool){
+    fn invalidate_cards(&self,ticket:u64,timed_out:bool,rid:Option<&str>){
         let _serial=self.publication.lock().unwrap();
         let why=timed_out.then(||"Card check failed: tapectl cards took too long and was stopped.".to_owned());
         let view={let mut core=self.core.lock().unwrap();let changed=core.app.invalidate_cards(ticket,why);self.note("cards:invalidate-current");changed.then(||core.app.view())};
-        if let Some(view)=view{(self.emit)(view);}
+        if let(Some(d),Some(r),true)=(&self.diag,rid,timed_out){d.cards_invalidate(r,ticket,view.is_some());}
+        if let Some(view)=view{let _=(self.emit)(view);}
     }
     fn note(&self,event:&str){
         #[cfg(test)]self.trace.lock().unwrap().push(event.to_owned());
@@ -118,55 +178,208 @@ impl Bridge {
     pub fn set_label(&self,text:&str)->View{
         let _serial=self.publication.lock().unwrap();
         let view={let mut core=self.core.lock().unwrap();core.app.set_label(text);core.app.view()};
-        (self.emit)(view.clone());view
+        let _=(self.emit)(view.clone());view
     }
-    fn begin(core:&mut Core,id:String)->Work{
+    #[cfg(test)]
+    fn begin(core:&mut Core,id:String)->Work{Self::begin_from(core,id,None)}
+    fn begin_from(core:&mut Core,id:String,drop_id:Option<String>)->Work{
+        Self::release_ready(core);
         if let Some(old)=core.cancel.take(){old.store(true,Ordering::SeqCst);}
         let cancel=Arc::new(AtomicBool::new(false));core.cancel=Some(cancel.clone());
-        Work{generation:core.app.begin_job(&id),id,folders:core.app.folders.clone(),cancel}
+        let generation=core.app.begin_job(&id);core.active=Some((id.clone(),generation));
+        Work{generation,id,folders:core.app.folders.clone(),cancel,drop_id}
     }
-    pub fn drop_paths(&self,payload:Value)->View{self.drop_using(payload,drops::classify)}
-    fn drop_using(&self,payload:Value,classify:impl FnOnce(&[PathBuf],&[PathBuf])->drops::Drop)->View{
+    /// A drop from an actual boundary: the native window callback or the Tauri command.
+    pub fn drop_from(&self,route:Route,payload:Value)->View{self.drop_routed(route,payload,drops::classify)}
+    #[cfg(test)]
+    fn drop_using(&self,payload:Value,classify:impl FnOnce(&[PathBuf],&[PathBuf])->drops::Drop)->View{self.drop_routed(Route::ControlledTest,payload,classify)}
+    fn drop_routed(&self,route:Route,payload:Value,classify:impl FnOnce(&[PathBuf],&[PathBuf])->drops::Drop)->View{
         let _serial=self.publication.lock().unwrap();
-        let Some(array)=payload.as_array()else{return self.snapshot()};
-        if array.is_empty(){return self.snapshot()}
-        let Some(paths)=array.iter().map(|x|x.as_str().filter(|s|!s.is_empty()&&!s.contains('\0')).map(PathBuf::from)).collect::<Option<Vec<_>>>()else{return self.snapshot()};
+        let ingress=self.diag.as_ref().map(|d|{
+            let raw:Vec<String>=payload.as_array().map(|a|a.iter().map(|x|x.as_str().map_or_else(||x.to_string(),str::to_owned)).collect()).unwrap_or_default();
+            let generation=self.core.lock().unwrap().app.generation();(d.clone(),d.ingress(route,&raw,generation))
+        });
+        // Refused before classification: recorded with its reason, then the unchanged view.
+        let refuse=|reason:&str|{let view=self.snapshot();if let Some((d,id))=&ingress{
+            d.drop_decision(id,if reason=="empty"{"no-change"}else{"reject"},Some(reason),"Nothing",self.core.lock().unwrap().app.generation(),None);}view};
+        let Some(array)=payload.as_array()else{return refuse("not-a-list")};
+        if array.is_empty(){return refuse("empty")}
+        let Some(paths)=array.iter().map(|x|x.as_str().filter(|s|!s.is_empty()&&!s.contains('\0')).map(PathBuf::from)).collect::<Option<Vec<_>>>()else{return refuse("invalid-path")};
         let(view,work)={
             let mut core=self.core.lock().unwrap();
             let classified=classify(&paths,&core.app.folders);
+            let(decision,reason)=match &classified{drops::Drop::NotFolder=>("reject","not-folder"),drops::Drop::NoChange=>("no-change","no-change"),drops::Drop::Folders(_)=>("no-change","problem-shown")};
             let next=core.app.admit_drop(classified);
             let work=if next==Next::RunIngest{
-                if core.cancel.is_some(){self.note("cancel-request");}
-                Some(Self::begin(&mut core,format!("ingest-{}",children::nonce())))
-            }else{None};(core.app.view(),work)
+                if core.cancel.is_some(){self.note("cancel-request");if let(Some((d,_)),Some((w,g)))=(&ingress,&core.active){d.cancel_request(w,*g);}}
+                let work=Self::begin_from(&mut core,format!("ingest-{}",children::nonce()),ingress.as_ref().map(|x|x.1.clone()));
+                if let Some((d,id))=&ingress{d.drop_decision(id,"schedule",None,"RunIngest",work.generation,Some(&work.id));}
+                Some(work)
+            }else{
+                if let Some((d,id))=&ingress{d.drop_decision(id,decision,Some(reason),"Nothing",core.app.generation(),None);}
+                None
+            };(core.app.view(),work)
         };
-        (self.emit)(view.clone());
+        let _=(self.emit)(view.clone());
         if let Some(work)=work{let _=self.sender.send(Message::Check(work));}view
     }
     pub fn start_over(&self)->View{
         let _serial=self.publication.lock().unwrap();
-        let view={let mut core=self.core.lock().unwrap();core.app.start_over();self.note("invalidate-current");
+        // While Making nothing is reset: the make child is still writing the card.
+        if self.core.lock().unwrap().app.is_making(){return self.snapshot()}
+        let view={let mut core=self.core.lock().unwrap();let old=core.app.generation();core.app.start_over();Self::release_ready(&mut core);self.note("invalidate-current");
+            if let Some(d)=&self.diag{if let(Some((w,g)),true)=(&core.active,core.cancel.is_some()){d.cancel_request(w,*g);}d.reset(old,core.app.generation());}
+            core.active=None;
             if let Some(cancel)=core.cancel.take(){cancel.store(true,Ordering::SeqCst);self.note("cancel-request");}core.app.view()};
-        (self.emit)(view.clone());self.note("empty-view");view
+        let _=(self.emit)(view.clone());self.note("empty-view");view
     }
     // Both production and controlled tests enter this same worker/completion closure.
-    fn execute(&self,work:Work,run:impl FnOnce(&jobdir::Job,&Work)->Result<Outcome,String>){
-        if work.cancel.load(Ordering::SeqCst){return;}
+    #[cfg(test)]
+    fn execute(&self,work:Work,run:impl FnOnce(&jobdir::Job,&Work)->Result<Outcome,String>){self.execute_with(work,|job,work,_,_|run(job,work))}
+    /// The serial worker: admission, the child (reporting its spawn through `spawned`),
+    /// current-only delivery, then removal of only this work's job. With diagnostics ON
+    /// each step is also recorded; capture happens after the wait and before the removal.
+    fn execute_with(&self,work:Work,run:impl FnOnce(&jobdir::Job,&Work,&mut RunReceipt,&dyn Fn(&RunReceipt))->Result<Outcome,String>){
+        let diag=self.diag.as_deref().filter(|_|work.drop_id.is_some());
+        if work.cancel.load(Ordering::SeqCst){if let Some(d)=diag{d.work_skipped(&work.id,work.generation);}return;}
         self.note("worker-enter");
-        let job=match jobdir::create(&self.data,&work.id){Ok(job)=>job,Err(error)=>{self.fail(work.generation,&work.id,&format!("cannot create the app's own folder: {error}"));return}};
-        let outcome=run(&job,&work);self.note("worker-terminal");
-        match outcome{Ok(outcome)=>{self.deliver(work.generation,&work.id,&outcome);},Err(why)=>self.fail(work.generation,&work.id,&why)}
+        let job=match jobdir::create(&self.data,&work.id){Ok(job)=>job,Err(error)=>{
+            if let Some(d)=diag{d.incomplete("job-directory-not-created");}
+            self.fail(work.generation,&work.id,&format!("cannot create the app's own folder: {error}"));return}};
+        if let(Some(d),Some(drop_id))=(diag,&work.drop_id){d.job_admit(&work.id,work.generation,drop_id,&job.dir);}
+        let(mut receipt,launched)=(RunReceipt::default(),std::cell::Cell::new(false));
+        let spawned=|r:&RunReceipt|{launched.set(true);if let Some(d)=diag{d.child_launch(&work.id,work.generation,r);}};
+        let outcome=run(&job,&work,&mut receipt,&spawned);self.note("worker-terminal");
+        if let Some(d)=diag{
+            if launched.get(){d.child_terminal(&work.id,work.generation,&receipt);}
+            else{d.child_not_launched(&work.id,work.generation,&match(&outcome,&receipt.spawn_error){(Err(why),_)=>why.clone(),(Ok(_),Some(e))=>e.clone(),_=>"no child was started".into()});}
+        }
+        let disposition=match &outcome{
+            Ok(o)=>if self.deliver(work.generation,&work.id,o){"delivered"}else{"stale-dropped"},
+            Err(why)=>if self.fail(work.generation,&work.id,why){"failed"}else{"stale-dropped"}};
+        if let Some(d)=diag{
+            d.outcome(&work.id,work.generation,disposition,&self.state_ref());
+            if let(Ok(o),true)=(&outcome,launched.get()){d.capture(&work.id,work.generation,&receipt,&o.reading);}
+        }
+        // A current success's published audio moves to its own owned job for Make.
+        if let(Ok(o),"delivered")=(&outcome,disposition){if o.exit==Some(0)&&o.total_frames.is_some(){self.retain(&job,work.generation);}}
         // Sole target is this worker's freshly created Job, only after run terminates.
-        jobdir::remove(&job);self.note("remove-owned-job");
+        let removed=jobdir::remove(&job);self.note("remove-owned-job");
+        if let Some(d)=diag{d.cleanup(&work.id,work.generation,&job.dir,removed);}
     }
+    /// Keep `job`'s published DEST for Make: renamed into a fresh owned job, kept only while
+    /// `generation` is still current. Anything else leaves Make off; nothing is copied.
+    fn retain(&self,job:&jobdir::Job,generation:u64){
+        let dest=job.out.join("DEST");
+        if !dest.join("audio.wav").is_file(){return}
+        let Ok(keep)=jobdir::create(&self.data,&format!("ready-{}",children::nonce())) else{return};
+        if std::fs::rename(&dest,keep.out.join("DEST")).is_err(){jobdir::remove(&keep);return}
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();
+            if core.app.generation()!=generation||core.app.making!=crate::state::Making::Idle{drop(core);jobdir::remove(&keep);return}
+            Self::release_ready(&mut core);
+            core.app.audio=Some(keep.out.join("DEST").join("audio.wav"));core.ready=Some(keep);core.app.view()};
+        self.note("make:audio-retained");let _=(self.emit)(view);
+    }
+    /// Delete the retained audio's job, if any (the music changed or was made).
+    fn release_ready(core:&mut Core){
+        core.app.audio=None;
+        if let Some(old)=core.ready.take(){jobdir::remove(&old);}
+    }
+    /// The window that owns the elevation prompt (Windows HWND), set once it exists.
+    pub fn set_owner(&self,hwnd:isize){self.owner.store(hwnd,Ordering::SeqCst);}
+    /// Closing the window while Making: refused with "Wait until the cartridge is finished."
+    pub fn close_requested(&self)->bool{
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();if !core.app.refuse_close(){return false}core.app.view()};
+        let _=(self.emit)(view);true
+    }
+    /// The card a recheck printed, if it printed exactly one (APP-1 §4 steps 1 and 3).
+    fn recheck(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->Option<(String,u64)>{
+        let(_,_,judged)=self.discover(run)?;
+        judged.hint.filter(|h|h.paths.len()==1&&h.sizes.len()==1).map(|h|(h.paths[0].clone(),h.sizes[0]))
+    }
+    /// Make cartridge: step 1 (recheck), then the erase confirmation (step 2).
+    pub fn make_cartridge(&self)->View{self.make_request(Self::run_cards)}
+    fn make_request(&self,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->View{
+        let Some(seen)=self.core.lock().unwrap().app.make_card() else{return self.snapshot()};
+        let rechecked=self.recheck(run);self.note("make:recheck-1");
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();if !core.app.confirm(&seen,rechecked){self.note("make:recheck-mismatch");}core.app.view()};
+        let _=(self.emit)(view.clone());view
+    }
+    /// Keep card: back to Ready, nothing started.
+    pub fn make_cancel(&self)->View{
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();core.app.keep_card();core.app.view()};
+        let _=(self.emit)(view.clone());view
+    }
+    /// Replace: step 3 — recheck again, then the one elevated make child, off the caller's thread.
+    pub fn make_confirm(self:&Arc<Self>)->View{self.make_start(Self::run_cards)}
+    fn make_start(self:&Arc<Self>,run:impl FnOnce(&jobdir::Job,&AtomicBool,&mut dyn FnMut(),&mut dyn FnMut(),Launched)->(Ran,Request))->View{
+        if !matches!(self.core.lock().unwrap().app.making,crate::state::Making::Confirm{..}){return self.snapshot()}
+        let rechecked=self.recheck(run);self.note("make:recheck-2");
+        let _serial=self.publication.lock().unwrap();
+        let(view,start)={let mut core=self.core.lock().unwrap();let start=core.app.start_making(rechecked);(core.app.view(),start)};
+        let _=(self.emit)(view.clone());
+        if let Some((dev,label,wav))=start{
+            let me=self.clone();
+            thread::spawn(move||me.run_make(&dev,&label,&wav));
+        }else{self.note("make:recheck-mismatch");}
+        view
+    }
+    fn make_child(&self)->Result<(PathBuf,String),String>{
+        #[cfg(test)]if let Some(c)=self.make_child.lock().unwrap().clone(){return Ok(c)}
+        let bin=children::resolve(&children::TAPECTL).map_err(|e|e.0)?;
+        Ok((bin,children::TAPECTL.version.unwrap_or_default().to_owned()))
+    }
+    /// The make child from launch to terminal, then cleanup: its own job always, and the
+    /// retained audio once a cartridge is made (APP-1 §4 step 4). Never relaunched.
+    fn run_make(&self,dev:&str,label:&str,wav:&std::path::Path){
+        let prepared=self.make_child().and_then(|(bin,version)|{
+            let job=jobdir::create(&self.data,&format!("make-{}",children::nonce())).map_err(|e|format!("cannot create the app's own folder: {e}"))?;
+            Ok((make::request(&bin,&version,&job,dev,label,wav),job))});
+        let(outcome,job)=match prepared{
+            Err(why)=>(make::judge(&make::Launched::NotStarted(why),None,"",""),None),
+            Ok((req,job))=>{
+                self.note("make:launch");
+                let launch=self.launch.lock().unwrap().clone();
+                let launched=launch(&req,&mut||if let Ok(b)=std::fs::read(&req.report){if let Some((f,step))=make::progress(&b){self.make_progress(f,step);}});
+                self.note("make:child-terminal");
+                let report=std::fs::read(&req.report).ok();
+                (make::judge(&launched,report.as_deref(),&req.nonce,&req.version),Some(job))
+            }
+        };
+        if let Some(job)=job{jobdir::remove(&job);self.note("make:remove-owned-job");}
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();
+            if outcome.message.is_none(){Self::release_ready(&mut core);self.note("make:audio-removed");}
+            core.app.made(outcome.message,outcome.details);core.app.view()};
+        let _=(self.emit)(view);self.note("make:published");
+    }
+    fn make_progress(&self,f:f64,step:&'static str){
+        let _serial=self.publication.lock().unwrap();
+        let view={let mut core=self.core.lock().unwrap();core.app.made_progress(f,step).then(||core.app.view())};
+        if let Some(view)=view{let _=(self.emit)(view);}
+    }
+    /// Make another (after Done): the same folders checked again.
+    pub fn make_another(&self)->View{
+        let _serial=self.publication.lock().unwrap();
+        let(view,work)={let mut core=self.core.lock().unwrap();
+            let work=(core.app.make_another()==Next::RunIngest).then(||Self::begin_from(&mut core,format!("ingest-{}",children::nonce()),None));
+            (core.app.view(),work)};
+        let _=(self.emit)(view.clone());
+        if let Some(work)=work{let _=self.sender.send(Message::Check(work));}view
+    }
+    fn state_ref(&self)->String{let core=self.core.lock().unwrap();let v=core.app.view();format!("view={} checking={} resets={} generation={}",v.view,v.checking,v.resets,core.app.generation())}
     fn deliver(&self,generation:u64,id:&str,outcome:&Outcome)->bool{
         let _serial=self.publication.lock().unwrap();
-        let view={let mut core=self.core.lock().unwrap();if !core.app.finish_job(generation,id,outcome){return false;}core.cancel=None;core.app.view()};
-        (self.emit)(view);self.note("completion-delivered");true
+        let view={let mut core=self.core.lock().unwrap();if !core.app.finish_job(generation,id,outcome){return false;}core.cancel=None;core.active=None;core.app.view()};
+        let _=(self.emit)(view);self.note("completion-delivered");true
     }
-    fn fail(&self,generation:u64,id:&str,why:&str){
+    fn fail(&self,generation:u64,id:&str,why:&str)->bool{
         let _serial=self.publication.lock().unwrap();
-        let view={let mut core=self.core.lock().unwrap();if !core.app.fail_job(generation,id,why){return;}core.cancel=None;core.app.view()};(self.emit)(view);
+        let view={let mut core=self.core.lock().unwrap();if !core.app.fail_job(generation,id,why){return false;}core.cancel=None;core.active=None;core.app.view()};let _=(self.emit)(view);true
     }
     pub fn shutdown(&self){
         self.stop_polls.store(true,Ordering::SeqCst);self.note("stop-polls");
@@ -175,6 +388,7 @@ impl Bridge {
             if let Some(cancel)=core.cards_cancel.take(){cancel.store(true,Ordering::SeqCst);}}
         if let Some(poller)=self.poller.lock().unwrap().take(){let _=poller.join();}
         self.start_over();let _=self.sender.send(Message::Stop);if let Some(worker)=self.worker.lock().unwrap().take(){let _=worker.join();}
+        if let Some(d)=&self.diag{d.finish();}
     }
 }
 #[cfg(test)]
@@ -186,3 +400,12 @@ mod discovery_component;
 #[cfg(test)]
 #[path="../tests/interaction_component.rs"]
 mod interaction_component;
+#[cfg(test)]
+#[path="../tests/diagnostics_component.rs"]
+mod diagnostics_component;
+#[cfg(test)]
+#[path="../tests/make_component.rs"]
+mod make_component;
+#[cfg(test)]
+#[path="../tests/g3_component.rs"]
+mod g3;

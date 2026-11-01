@@ -1,31 +1,10 @@
 # Human actions and queue
 
-**26 October2026 PDT · PM593.**
-Active reserved/hands-on actions live in
-[open michael issues](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Amichael).
-There is currently no new action requested from the human tester.
+**PM630 · 30 October 2026 PDT.** C2 passed. WP-14 and WP-16 are accepted, and WP-15 needs only G2.
 
-Human589's original564 test is independently reviewed/partial and closed.
-Verification331/42619272 accepted the supported visible observations with the
-edited-media/launch/identity/timing limits preserved. Show Details and NUL were
-not observed. No repeat, recovery click or new raw-card procedure is requested.
-A terminal appeared automatically during Music; F328-1 is assigned to594/332.
+1. **G2:** [#631](https://github.com/mmsanders/Digital-Tape/issues/631). Your wife's unaided test,
+   with the same ZIP you used for C2, from your administrator account. The procedure is
+   [the G2 protocol](WP15-G2-PROTOCOL.md). Reply on #631.
+2. Then start PM for the Phase 2 sign-off round.
 
-The source app now includes independently cleared editing/details fixes:
-584/324, integrated through587/679e01ec. Final585/325 packaging waits for594/332's
-console correction and bounded diagnostic-source clearance; no premature build.
-Software595/Verification333 targets the remaining INGEST integration decision.
-These are manually selected role tasks, not new human test instructions.
-Make/elevation stay disabled; full native/A6/S3/INGEST/G2 gates remain held.
-
-Software uses local Windows Claude Code; Verification remains independent.
-GitHub-only manual pickup/resumption, both listeners PAUSED. No lead was started,
-messaged or automatically advanced by PM593.
-
-Current decisions and limits:
-[PM593 closeout](REVIEW/PM593-CLOSEOUT-2026-10-26.md),
-[status](STATUS.md), [packages](PACKAGES/README.md).
-Historical revisions remain in Git history; unrelated prior owner-specific
-material is not copied or linked here. Hardware execution remains parked through
-Phase2; safety gates/reserved signatures and purchase authority are unchanged.
-No history or raw evidence deleted.
+[Status](STATUS.md) · [ledger](PHASE2-LEDGER.md) · [closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195)

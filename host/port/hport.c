@@ -11,12 +11,33 @@
  * returns the failure (EBADF / ERROR_INVALID_HANDLE) and that result is what is
  * recorded and propagated. Nothing is reported as an OS result that the OS did
  * not return.
+ *
+ * failstop (make only): a failed OS call whose error reports media removal or
+ * change marks the port gone, and from then on reads, writes and flushes fail
+ * here without reaching the OS. The error is read immediately after the failed
+ * call, before anything else can overwrite it.
  */
 
 #include "hport.h"
 #include "tseam.h"
 
+#include <stdio.h>
 #include <string.h>
+
+static int stopped(const struct hport *p)
+{
+    return p->failstop && p->gone;
+}
+
+/* The OS call just failed: note a removal or change, then report failure. */
+static int failed(struct hport *p)
+{
+    if (p->failstop && !p->gone && hport_os_removed()) {
+        p->gone = 1;
+        snprintf(p->gone_error, sizeof p->gone_error, "%s", hport_os_errname());
+    }
+    return -1;
+}
 
 int hport_open(struct hport *p, const char *path, int is_device, int writable)
 {
@@ -40,6 +61,8 @@ int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
 {
 #ifdef TAPECTL_TEST
     int rc;
+    const char *why;
+    if (stopped(p)) { return -1; }
     if (tseam_fault_target_read(off, len)) {      /* control: a real failed OS read */
         struct hport broken = *p;
         hport_os_invalidate(&broken);
@@ -48,10 +71,13 @@ int hport_read(struct hport *p, uint64_t off, void *buf, size_t len)
         return rc == 0 ? 0 : -1;
     }
     rc = hport_os_read(p, off, buf, len);
-    tseam_read(off, len, rc == 0, rc == 0 ? NULL : hport_os_errname(), NULL);
+    if (rc != 0) { (void)failed(p); }
+    why = rc == 0 ? NULL : (p->gone ? p->gone_error : hport_os_errname());
+    tseam_read(off, len, rc == 0, why, NULL);
     return rc;
 #else
-    return hport_os_read(p, off, buf, len);
+    if (stopped(p)) { return -1; }
+    return hport_os_read(p, off, buf, len) == 0 ? 0 : failed(p);
 #endif
 }
 
@@ -71,7 +97,10 @@ int hport_read_failing(struct hport *p, uint64_t off, void *buf, size_t len)
 
 int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 {
-    int rc = hport_os_write(p, off, buf, len);
+    int rc;
+    if (stopped(p)) { return -1; }
+    rc = hport_os_write(p, off, buf, len);
+    if (rc != 0) { (void)failed(p); }
 #ifdef TAPECTL_TEST
     tseam_write(off, len, buf, rc == 0);
 #endif
@@ -81,6 +110,7 @@ int hport_write(struct hport *p, uint64_t off, const void *buf, size_t len)
 int hport_flush(struct hport *p)
 {
     int rc;
+    if (stopped(p)) { return -1; }
     p->flushes++;
 #ifdef TAPECTL_TEST
     if (tseam_fault_noop_flush()) {             /* control: no barrier at all */
@@ -102,10 +132,12 @@ int hport_flush(struct hport *p)
         return hidden ? 0 : rc;
     }
     rc = hport_os_flush(p);
-    tseam_flush(p->flush_how, rc == 0, rc == 0 ? NULL : hport_os_errname(), rc == 0, p->flush_note, NULL);
+    if (rc != 0) { (void)failed(p); }
+    tseam_flush(p->flush_how, rc == 0, rc == 0 ? NULL : (p->gone ? p->gone_error : hport_os_errname()), rc == 0,
+                p->flush_note, NULL);
     return rc;
 #else
     rc = hport_os_flush(p);
-    return rc;
+    return rc == 0 ? 0 : failed(p);
 #endif
 }

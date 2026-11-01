@@ -34,6 +34,10 @@ struct device_facts {
     int n_mounted;            /* mounted volumes on this disk */
     struct mounted_volume mounted[SAFETY_MAX_MOUNTS];
     char detail[256];         /* the probe's own explanation, for the message */
+    /* The first OS query the probe needed for these facts that itself failed,
+       "CALL: ERROR". Its fact keeps the refusing value (provision is unchanged);
+       make stops on it with HOST_QUERY_FAILED (APP-1A §7). */
+    char query_error[96];
 };
 
 enum refusal {
@@ -58,7 +62,8 @@ int safety_mount_is_own_p1(const struct device_facts *f, int i);
 
 /* Platform probe. Fills `f` for `path` without writing or opening for write.
    Returns 0; a probe that cannot establish a fact leaves it at its refusing
-   value (not whole, not removable, holds the OS) and explains in f->detail. */
+   value (not whole, not removable, holds the OS) and explains in f->detail.
+   When that is because an OS query failed, f->query_error names it. */
 int probe_device(const char *path, struct device_facts *f);
 
 /* Unmount partition 1 (mounted[i]) before provision rewrites it. 0 on success. */

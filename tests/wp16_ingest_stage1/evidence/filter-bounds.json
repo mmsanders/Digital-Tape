@@ -1,0 +1,278 @@
+[
+  {
+    "rate": 7350,
+    "passband_lower_db": -0.008751401875354621,
+    "passband_upper_db": 0.008762007874148346,
+    "passband_nodes": 9497,
+    "derivative_amplitude_per_hz": 0.006503644239503199,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 8000,
+    "passband_lower_db": -0.008750170796873742,
+    "passband_upper_db": 0.00876274807852851,
+    "passband_nodes": 9503,
+    "derivative_amplitude_per_hz": 0.005976087959674136,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 11025,
+    "passband_lower_db": -0.008752471400695043,
+    "passband_upper_db": 0.008761939537542729,
+    "passband_nodes": 9517,
+    "derivative_amplitude_per_hz": 0.004334972728519282,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 12000,
+    "passband_lower_db": -0.008750142193330842,
+    "passband_upper_db": 0.008762669880004709,
+    "passband_nodes": 9523,
+    "derivative_amplitude_per_hz": 0.0039840585744272345,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 16000,
+    "passband_lower_db": -0.008750061797680047,
+    "passband_upper_db": 0.008762639311051658,
+    "passband_nodes": 9533,
+    "derivative_amplitude_per_hz": 0.002988043979837068,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 22050,
+    "passband_lower_db": -0.00875704410677893,
+    "passband_upper_db": 0.008762465588990034,
+    "passband_nodes": 9529,
+    "derivative_amplitude_per_hz": 0.0021653508294183425,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 24000,
+    "passband_lower_db": -0.008750069755807222,
+    "passband_upper_db": 0.008762597596842824,
+    "passband_nodes": 9543,
+    "derivative_amplitude_per_hz": 0.0019920292872136172,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 32000,
+    "passband_lower_db": -0.00875000755494747,
+    "passband_upper_db": 0.00876258518364225,
+    "passband_nodes": 9548,
+    "derivative_amplitude_per_hz": 0.001494021989918534,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 48000,
+    "passband_lower_db": -0.009498620389826186,
+    "passband_upper_db": 0.008792323976377343,
+    "passband_nodes": 9748,
+    "derivative_amplitude_per_hz": 0.001084097410547893,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.62074939856956,
+    "alias_nodes": 52851,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 64000,
+    "passband_lower_db": -0.009498500758755768,
+    "passband_upper_db": 0.00879245378319375,
+    "passband_nodes": 9748,
+    "derivative_amplitude_per_hz": 0.0010840975759037294,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.61852242821489,
+    "alias_nodes": 269671,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 88200,
+    "passband_lower_db": -0.009512573389678215,
+    "passband_upper_db": 0.008776283029496453,
+    "passband_nodes": 9735,
+    "derivative_amplitude_per_hz": 0.0010826754147091713,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.84635076873838,
+    "alias_nodes": 596826,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 96000,
+    "passband_lower_db": -0.009498540835409236,
+    "passband_upper_db": 0.00879241078748871,
+    "passband_nodes": 9748,
+    "derivative_amplitude_per_hz": 0.0010840975486054772,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.61924897240186,
+    "alias_nodes": 703310,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 176400,
+    "passband_lower_db": -0.009505921276360546,
+    "passband_upper_db": 0.008785732051239918,
+    "passband_nodes": 9744,
+    "derivative_amplitude_per_hz": 0.0010837431821298204,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.73621771395624,
+    "alias_nodes": 1792242,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 192000,
+    "passband_lower_db": -0.009498500758755768,
+    "passband_upper_db": 0.00879245378319375,
+    "passband_nodes": 9748,
+    "derivative_amplitude_per_hz": 0.0010840975759037299,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -91.61850656406473,
+    "alias_nodes": 2004227,
+    "profile": "ref_fir_a"
+  },
+  {
+    "rate": 7350,
+    "passband_lower_db": -0.008690980798045622,
+    "passband_upper_db": 0.008682349797827085,
+    "passband_nodes": 10723,
+    "derivative_amplitude_per_hz": 0.007343559953518733,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 8000,
+    "passband_lower_db": -0.008691021188235204,
+    "passband_upper_db": 0.008682288006630153,
+    "passband_nodes": 10751,
+    "derivative_amplitude_per_hz": 0.00676077930642622,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 11025,
+    "passband_lower_db": -0.008691053535147396,
+    "passband_upper_db": 0.00868247015684029,
+    "passband_nodes": 10764,
+    "derivative_amplitude_per_hz": 0.004903276000224652,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 12000,
+    "passband_lower_db": -0.008690647147189364,
+    "passband_upper_db": 0.008681917664479975,
+    "passband_nodes": 10774,
+    "derivative_amplitude_per_hz": 0.0045071862105473355,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 16000,
+    "passband_lower_db": -0.008690864000115513,
+    "passband_upper_db": 0.008682131133017355,
+    "passband_nodes": 10785,
+    "derivative_amplitude_per_hz": 0.00338038965321311,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 22050,
+    "passband_lower_db": -0.008690926880237582,
+    "passband_upper_db": 0.008682468432669205,
+    "passband_nodes": 10772,
+    "derivative_amplitude_per_hz": 0.002447853544757276,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 24000,
+    "passband_lower_db": -0.008691080158323877,
+    "passband_upper_db": 0.008682349809069541,
+    "passband_nodes": 10796,
+    "derivative_amplitude_per_hz": 0.0022535931052736677,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 32000,
+    "passband_lower_db": -0.008690785777147146,
+    "passband_upper_db": 0.0086820530665752,
+    "passband_nodes": 10802,
+    "derivative_amplitude_per_hz": 0.001690194826606555,
+    "numerical_allowance": 1e-08,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 48000,
+    "passband_lower_db": -0.00869127758526103,
+    "passband_upper_db": 0.008682629633508469,
+    "passband_nodes": 11027,
+    "derivative_amplitude_per_hz": 0.0012264490343592768,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92224571130666,
+    "alias_nodes": 59791,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 64000,
+    "passband_lower_db": -0.008691281145075815,
+    "passband_upper_db": 0.008682631873258437,
+    "passband_nodes": 11027,
+    "derivative_amplitude_per_hz": 0.0012264494019907867,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92222040607746,
+    "alias_nodes": 305081,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 88200,
+    "passband_lower_db": -0.00869069916625409,
+    "passband_upper_db": 0.008682153956562211,
+    "passband_nodes": 11005,
+    "derivative_amplitude_per_hz": 0.001223926772378638,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92049201322814,
+    "alias_nodes": 674691,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 96000,
+    "passband_lower_db": -0.008691280306603117,
+    "passband_upper_db": 0.008682631474863119,
+    "passband_nodes": 11027,
+    "derivative_amplitude_per_hz": 0.001226449328700177,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92219688128206,
+    "alias_nodes": 795661,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 176400,
+    "passband_lower_db": -0.00869071756841285,
+    "passband_upper_db": 0.008682129236573589,
+    "passband_nodes": 11022,
+    "derivative_amplitude_per_hz": 0.001225819000056163,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92055597751357,
+    "alias_nodes": 2027200,
+    "profile": "ref_fir_b"
+  },
+  {
+    "rate": 192000,
+    "passband_lower_db": -0.008691281145074852,
+    "passband_upper_db": 0.008682631873258437,
+    "passband_nodes": 11027,
+    "derivative_amplitude_per_hz": 0.0012264494019907867,
+    "numerical_allowance": 1e-08,
+    "alias_upper_db": -93.92220283138086,
+    "alias_nodes": 2267400,
+    "profile": "ref_fir_b"
+  }
+]

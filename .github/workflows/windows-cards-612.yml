@@ -1,0 +1,85 @@
+name: "Software612 cards-poller receipts"
+# Verification352's tests/windows_cards_receipts_r1 obligations P1-P6. The TEST-ONLY
+# harmless probe_child is pinned as this test build's discovery child (DT_TAPECTL_SHA256
+# = its measured hash) and copied beside the test executable, so the production
+# poll_once/discover/run_cards/discovery::command/run path starts it as it would start
+# the real S2 tapectl. Never the real tapectl, INGEST, an app window or a device. These
+# are COMPONENT facts only; nothing here is native, G1/A4, own-HOST, A6, S3, fullAPP or G2
+# evidence. Verification352's own receipts.py then judges the session originals.
+on:
+  pull_request:
+    paths:
+      - 'host/app/**'
+      - 'tests/windows_cards_receipts_r1/**'
+      - 'tools/app/cards612_check.py'
+      - '.github/workflows/windows-cards-612.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  DT_INGEST_SHA256: 3895f3f356c91b8a9fe870c33694da64bf2765df308bef118d657c1be4bb9a20
+  DT_INGEST_VERSION: 0.1.1 INGEST-1 arithmetic-profile INGEST1-AP4
+  # A label for the test-only probe pin; the shipping S2 pin is never used here.
+  DT_TAPECTL_VERSION: probe612-TEST-ONLY
+jobs:
+  controlled:
+    name: "Windows controlled cards-1 P1-P6 (#612)"
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verification352 oracle self-tests
+        shell: pwsh
+        run: |
+          python -B tests/windows_cards_receipts_r1/controls.py; if($LASTEXITCODE -ne 0){throw 'controls.py'}
+          python -B tests/windows_cards_receipts_r1/candidate.py; if($LASTEXITCODE -ne 0){throw 'candidate.py'}
+      - name: P1-P5 and F352 correction cases with the pinned test-only probe
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:CARGO_TARGET_DIR=Join-Path $env:RUNNER_TEMP 'target612'
+          $env:DT_SOURCE_HEAD=git rev-parse HEAD
+          $env:DT_DIAG_REQUIRE='1'
+          $env:DT_CARDS_REQUIRE='1'
+          $env:DT_DIAG_EVIDENCE=Join-Path $env:GITHUB_WORKSPACE 'evidence612/raw'
+          New-Item -ItemType Directory -Force $env:DT_DIAG_EVIDENCE | Out-Null
+          rustc -vV; cargo -V
+          cargo build --manifest-path host/app/backend-component/Cargo.toml --locked --example probe_child
+          if($LASTEXITCODE -ne 0){throw 'probe build'}
+          $probe=Join-Path $env:CARGO_TARGET_DIR 'debug/examples/probe_child.exe'
+          $env:DT_TAPECTL_SHA256=(Get-FileHash $probe).Hash.ToLower()
+          $env:DT_TAPECTL_SHA256 | Set-Content -Encoding ascii evidence612/probe_child.sha256
+          git rev-parse HEAD:host/app/examples/probe_child.rs | Set-Content -Encoding ascii evidence612/probe_child.source-blob
+          cargo test --manifest-path host/app/backend-component/Cargo.toml --locked --lib c612_ -- --test-threads=4 --nocapture 2>&1 | Tee-Object evidence612/cargo-test.txt
+          if($LASTEXITCODE -ne 0){throw 'cargo test c612_'}
+          if((Select-String -Path evidence612/cargo-test.txt -Pattern 'UNEXECUTED' -Quiet)){throw 'a c612 case did not execute'}
+          if(-not (Select-String -Path evidence612/cargo-test.txt -Pattern 'test result: ok\. 15 passed' -Quiet)){throw 'expected exactly 15 c612 cases'}
+      - name: P6 shipping-source boundary
+        shell: python
+        run: |
+          import pathlib, re
+          src = {p.name: p.read_text(encoding='utf-8') for p in pathlib.Path('host/app/src').glob('*.rs')}
+          bridge = src['bridge.rs']
+          note = re.search(r'fn note\(&self,event:&str\)\{(.*?)\n    \}', bridge, re.S).group(1)
+          assert note.split() == ['#[cfg(test)]self.trace.lock().unwrap().push(event.to_owned());', '#[cfg(not(test))]let', '_=event;'], 'note() stays test-only with no sink'
+          calls = [l for l in bridge.splitlines() if re.search(r'\bd\.cards_', l)]
+          assert calls and not any('cfg(test)' in l for l in calls), 'every cards-1 record call is shipping code'
+          assert 'on_spawn(&started);' in src['discovery.rs'] and '#[cfg(test)]' not in src['discovery.rs'].split('pub fn run(')[1].split('\n}\n')[0], 'the launch callback is in the shipping run()'
+          assert 'DT_DIAG' not in ''.join(src.values()) and 'DT_CARDS' not in ''.join(src.values()), 'no environment switch'
+          assert [n for n, t in src.items() if '"--diagnostic-receipts"' in t] == ['diagnostics.rs'], 'one opt-in literal'
+          assert 'probe' not in pathlib.Path('tools/app/package_candidate.py').read_text(encoding='utf-8').lower(), 'helper never packaged'
+          print('P6 source boundary PASS (supplementary; P1-P5 component runs are the wiring evidence)')
+      - name: Verification352 oracle on the actual originals
+        shell: pwsh
+        run: |
+          python -B tools/app/cards612_check.py --evidence evidence612/raw --out evidence612/summary.json
+          $q=$LASTEXITCODE; "checker exit $q" | Tee-Object evidence612/checker-exit.txt
+          if($q -ne 0){throw 'Verification352 oracle rejected actual originals; see summary.json'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence612
+          path: evidence612
+          if-no-files-found: error

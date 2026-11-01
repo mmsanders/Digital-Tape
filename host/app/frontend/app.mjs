@@ -6,7 +6,11 @@ export async function mountApp(root, host) {
     label: text => { host.set_label(text).catch(() => {}); },
     dropPaths: paths => { host.drop_paths(paths).catch(() => {}); },
     startOver: () => { host.start_over().catch(() => {}); },
-    details: () => host.raw_details()
+    details: () => host.raw_details(),
+    make: () => { host.make_cartridge?.().catch(() => {}); },
+    replace: () => { host.make_confirm?.().catch(() => {}); },
+    keep: () => { host.make_cancel?.().catch(() => {}); },
+    another: () => { host.make_another?.().catch(() => {}); }
   });
   let disposed = false;
   const apply = view => { if (!disposed) screen.render(view); };
@@ -27,6 +31,10 @@ if (window.__TAURI__) {
     drop_paths: paths => invoke('drop_paths', { paths }),
     start_over: () => invoke('start_over'),
     raw_details: () => invoke('raw_details'),
+    make_cartridge: () => invoke('make_cartridge'),
+    make_confirm: () => invoke('make_confirm'),
+    make_cancel: () => invoke('make_cancel'),
+    make_another: () => invoke('make_another'),
     async subscribe(callback) {
       let arrivals = 0;
       const off = await listen('app-state', event => { arrivals++; callback(event.payload); });

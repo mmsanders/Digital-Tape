@@ -3,7 +3,8 @@
  *
  * Everything comes from sysfs and /proc. Nothing is opened for write; LBA 0 is
  * read through a read-only open, and only to test the partition-1 exception.
- * A fact the probe cannot establish keeps its refusing value.
+ * A fact the probe cannot establish keeps its refusing value; when an OS query
+ * failed, f->query_error names it.
  */
 
 #if defined(__linux__)
@@ -13,6 +14,8 @@
 
 #include "safety.h"
 #include "layout.h"
+#include "hport.h"
+#include "tseam.h"
 
 #include <dirent.h>
 #include <errno.h>
@@ -33,6 +36,13 @@ static int copy_str(char *dst, size_t cap, const char *src)
     if (n >= cap) { dst[0] = '\0'; return -1; }
     memcpy(dst, src, n + 1);
     return 0;
+}
+
+/* A query these facts need failed: keep the first, with the OS's own error. */
+static void query_failed(struct device_facts *f, const char *call)
+{
+    const char *e = hport_os_errname();
+    if (f->query_error[0] == '\0') { snprintf(f->query_error, sizeof f->query_error, "%s: %s", call, e); }
 }
 
 static int read_line(const char *path, char *out, size_t cap)
@@ -158,7 +168,11 @@ int probe_device(const char *path, struct device_facts *f)
     }
 
     snprintf(sys, sizeof sys, "/sys/block/%s/removable", disk);
-    f->removable = read_line(sys, line, sizeof line) == 0 && strcmp(line, "1") == 0;
+    if (read_line(sys, line, sizeof line) == 0) {
+        f->removable = strcmp(line, "1") == 0;
+    } else {
+        query_failed(f, "read /sys/block/DEV/removable");
+    }
     /* ADR-164 §5: virtual media is never a card (a loop device is refused by
        its path form already; this keeps the fact honest for `probe`). */
     if (strncmp(disk, "loop", 4) == 0 || strncmp(disk, "nbd", 3) == 0 || strncmp(disk, "zram", 4) == 0
@@ -171,15 +185,22 @@ int probe_device(const char *path, struct device_facts *f)
         f->sd_bus = realpath(sys, real) != NULL && strstr(real, "/mmc_host/") != NULL;
     }
     snprintf(sys, sizeof sys, "/sys/block/%s/size", disk);
+#ifdef TAPECTL_TEST
+    if (tseam_fault_query("disk-length")) {      /* control: the OS really fails the query */
+        snprintf(sys, sizeof sys, "/sys/block/%s/size.dt-fault", disk);
+    }
+#endif
     if (read_line(sys, line, sizeof line) == 0) {
         f->bytes = strtoull(line, NULL, 10) * 512ull;
     } else {
+        query_failed(f, "read /sys/block/DEV/size");
         f->bytes = UINT64_MAX;
     }
 
     /* Mounts: the system ones decide holds_os, any on this disk are listed. */
     mi = fopen("/proc/self/mountinfo", "re");
     if (mi == NULL) {
+        query_failed(f, "open /proc/self/mountinfo");
         snprintf(f->detail, sizeof f->detail, "cannot read /proc/self/mountinfo");
         f->n_mounted = SAFETY_MAX_MOUNTS + 1;
         return 0;
@@ -236,6 +257,7 @@ int probe_device(const char *path, struct device_facts *f)
         }
         fclose(mi);
     } else {
+        query_failed(f, "open /proc/swaps");
         os_hit = 1;
     }
 
@@ -251,8 +273,12 @@ int probe_device(const char *path, struct device_facts *f)
         if (fd >= 0) {
             if (pread(fd, lba0, sizeof lba0, 0) == (ssize_t)sizeof lba0) {
                 f->layout_ok = mbr_is_layout(lba0, f->bytes / 512u);
+            } else {
+                query_failed(f, "pread (LBA 0)");
             }
             close(fd);
+        } else {
+            query_failed(f, "open (LBA 0)");
         }
     }
     return 0;

@@ -41,7 +41,7 @@ fn request(job: &jobdir::Job) -> Request {
 }
 fn run_case(b: &Bridge, c: &Value) -> (Ran, Request, Judged) {
     let ran = typed(c);
-    b.discover(move |job, _, _, _| (ran, request(job))).unwrap()
+    b.discover(move |job, _, _, _, _| (ran, request(job))).unwrap()
 }
 fn row(b: &Bridge, judged: &Judged) -> Value {
     let v = b.snapshot();
@@ -98,7 +98,7 @@ fn capture() {
         if judged.hint.is_none() && b.snapshot().card_line == seeded { failure_clears = false; }
         let mut quiet = typed(c);
         quiet.stderr = b"Card ready (999 GB).\n".to_vec();
-        let other = b.discover(move |job, _, _, _| (quiet, request(job))).unwrap().2;
+        let other = b.discover(move |job, _, _, _, _| (quiet, request(job))).unwrap().2;
         if other != judged { stderr_selected = true; }
         raw_rows.push(json!({"id": c["id"], "ran": ran, "request": req, "hint": judged.hint, "id_specific": judged.id_specific, "view": b.snapshot(), "details": b.raw_details()}));
         rows.insert(c["id"].as_str().unwrap().into(), r);
@@ -165,7 +165,7 @@ fn capture() {
     for t in (0..20_000).step_by(500) {
         if sched.tick(t, false, false) {
             let (live, peak, c) = (live.clone(), peak.clone(), one.clone());
-            b.discover(move |job, _, _, _| {
+            b.discover(move |job, _, _, _, _| {
                 let n = live.fetch_add(1, Ordering::SeqCst) + 1;
                 peak.fetch_max(n, Ordering::SeqCst);
                 live.fetch_sub(1, Ordering::SeqCst);
@@ -179,8 +179,8 @@ fn capture() {
     let before = views.lock().unwrap().len();
     let ticket = b.core.lock().unwrap().app.begin_cards();
     let judged = discovery::judge(Some(0), one["stdout"].as_str().unwrap().as_bytes(), one["report"].as_str().map(str::as_bytes), NONCE, VERSION);
-    b.publish_cards(ticket, &judged, String::new());
-    b.publish_cards(ticket, &judged, String::new());
+    b.publish_cards(ticket, &judged, String::new(), None);
+    b.publish_cards(ticket, &judged, String::new(), None);
     let duplicate = views.lock().unwrap().len() - before - 1;
 
     // Timeout: logical clock, a blocked typed child, the real supervisor.
@@ -190,7 +190,7 @@ fn capture() {
     let mark = trace(&b).len();
     let polled = Arc::new(AtomicBool::new(false));
     let p = polled.clone();
-    let (ran, _, _) = b.discover(move |job, cancel, on_timeout, on_cancel| {
+    let (ran, _, _) = b.discover(move |job, cancel, on_timeout, on_cancel, _| {
         let mut clock = 0u64;
         let end = discovery::supervise(&mut Blocked { polled: p }, cancel, &mut || { clock += 2500; clock }, on_timeout, on_cancel);
         assert_eq!(end, End::TimedOut);
@@ -223,7 +223,7 @@ fn capture() {
     let p = polled.clone();
     let worker = {
         let b = b.clone();
-        std::thread::spawn(move || b.discover(move |job, cancel, on_timeout, on_cancel| {
+        std::thread::spawn(move || b.discover(move |job, cancel, on_timeout, on_cancel, _| {
             let clock = std::time::Instant::now();
             let end = discovery::supervise(&mut Blocked { polled: p }, cancel, &mut || clock.elapsed().as_millis() as u64, on_timeout, on_cancel);
             (Ran { cancelled: end == End::Cancelled, ..Default::default() }, request(job))
@@ -317,7 +317,7 @@ fn correction1() {
         let (b, callbacks, one) = (b.clone(), callbacks.clone(), case("one64"));
         std::thread::spawn(move || {
             let mut schedule = discovery::Schedule::new(0);
-            b.poll_once(&mut schedule, &|| INTERVAL_MS, move |job, _, _, _| { callbacks.fetch_add(1, Ordering::SeqCst); (typed(&one), request(job)) })
+            b.poll_once(&mut schedule, &|| INTERVAL_MS, move |job, _, _, _, _| { callbacks.fetch_add(1, Ordering::SeqCst); (typed(&one), request(job)) })
         })
     };
     paused_rx.recv().unwrap();
@@ -348,7 +348,7 @@ fn correction1() {
         scenarios.push(json!({"id": id, "music": music, "card_check": card, "view": b.snapshot(), "details": b.raw_details()}));
     };
     let timeout = |b: &Bridge| {
-        b.discover(|job, cancel, on_timeout, on_cancel| {
+        b.discover(|job, cancel, on_timeout, on_cancel, _| {
             let mut clock = 0u64;
             let end = discovery::supervise(&mut Blocked { polled: Arc::new(AtomicBool::new(false)) }, cancel, &mut || { clock += 2500; clock }, on_timeout, on_cancel);
             (Ran { timed_out: end == End::TimedOut, ..Default::default() }, request(job))

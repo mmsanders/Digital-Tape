@@ -1,0 +1,185 @@
+name: WP15 S3 tapectl make (#624)
+
+# Software's actual `tapectl make` observations for tests/wp15_cards_make_r1 (APP-1 §3,
+# ADR-195): hosted runners only, on Linux loop devices and Windows Server VHDs; no
+# physical disk, no reader, no Windows 11. tools/wp15-cards/s3_bundle.py runs the rows
+# and writes BUNDLE.json; the imported runner.py (unchanged) judges it. A second bundle
+# with one write callback during verify must be REFUSED by the same judge (its negative
+# control). tools/wp15-cards/judge_c1.py judges the bundle's two further sections with
+# Verification's own predicates: the lawful own-p1 success and invalid-label routing
+# (tests/c1_closeout_r1/make_supplement.py) and the APP-1A §7 boundary-query rows
+# (tests/wp15_boundary_query_r1/oracle.py). Raw observations and judgments only: no acceptance.
+on:
+  pull_request:
+    paths:
+      - 'host/**'
+      - 'engine/**'
+      - 'tools/wp15-cards/**'
+      - 'tools/app/g1_static.py'
+      - 'tests/wp15_cards_make_r1/**'
+      - 'tests/wp15_app1a_r1/**'
+      - 'tests/wp15_boundary_query_r1/**'
+      - 'tests/c1_closeout_r1/**'
+      - 'tests/c1_volume_query_r1/**'
+      - 'tests/c1_volume_query_r2/**'
+      - '.github/workflows/wp15-make-624.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  g1-static:
+    name: G1 static gate — app source never opens a device (with Verification's controls)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Gate on the app source
+        run: python3 -B tools/app/g1_static.py --json "$RUNNER_TEMP/g1.json"
+      - name: Negative controls (tests/wp15_app1a_r1/static_controls.py, unchanged)
+        run: |
+          python3 -B tests/wp15_app1a_r1/static_controls.py --out "$RUNNER_TEMP/g1-controls.json" host/app src/lib.rs \
+            python3 -B "$GITHUB_WORKSPACE/tools/app/g1_static.py"
+          python3 -c "import json,sys;[print(k,'exit',v['exit']) for k,v in json.load(open(sys.argv[1])).items()]" "$RUNNER_TEMP/g1-controls.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-g1
+          path: |
+            ${{ runner.temp }}/g1.json
+            ${{ runner.temp }}/g1-controls.json
+          retention-days: 90
+
+  linux:
+    name: make — Linux loop devices (hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build and host tests
+        run: make -C engine all && make -C host test
+      - name: Binaries
+        run: sha256sum build/host/tapectl build/host/tapectl-test; uname -a; . /etc/os-release; echo "$PRETTY_NAME"
+      - name: S3 bundle (loop devices and device-mapper, as root)
+        run: |
+          sudo python3 -B tools/wp15-cards/s3_bundle.py --platform linux --tapectl build/host/tapectl \
+            --tapectl-test build/host/tapectl-test --out "$RUNNER_TEMP/s3" \
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+          sudo chown -R "$(id -u):$(id -g)" "$RUNNER_TEMP"
+      - name: Imported runner judges the bundle (tests/wp15_cards_make_r1, unchanged)
+        run: |
+          python3 -B tests/wp15_cards_make_r1/selftest.py > /dev/null
+          python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/s3/JUDGED.json"
+          python3 -c "import json,sys;[print('unjudged:',u['name'],'-',u['why']) for u in json.load(open(sys.argv[1]))['unjudged']]" "$RUNNER_TEMP/s3/BUNDLE.json"
+      - name: Judge negative control (a write callback during verify must be refused)
+        run: |
+          if python3 -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3-negative" --out "$RUNNER_TEMP/negative.json" 2> "$RUNNER_TEMP/negative.err"; then
+            echo "FAIL: the judge accepted a session with a write callback during verify"; exit 1
+          fi
+          echo "ok: refused"; tail -2 "$RUNNER_TEMP/negative.err"
+      - name: C1 supplement and boundary-query rows (Verification's predicates, unchanged)
+        run: |
+          python3 -B tests/c1_closeout_r1/controls.py
+          python3 -B tests/wp15_boundary_query_r1/selftest.py > /dev/null
+          python3 -B tools/wp15-cards/judge_c1.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED-C1.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));[print(k,r['name'],r['result']) for k in ('supplement','queries') for r in d[k]];[print('negative control',c) for c in d['negative_controls']]" "$RUNNER_TEMP/s3/JUDGED-C1.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-linux
+          path: |
+            ${{ runner.temp }}/s3
+            ${{ runner.temp }}/s3-negative
+            ${{ runner.temp }}/negative.err
+          retention-days: 90
+
+  windows:
+    name: make — Windows Server VHDs (hosted, supplementary)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The imported package pins its spec bytes; keep them LF on the Windows checkout.
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Build
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          MAKE=$(command -v mingw32-make || command -v make)
+          "$MAKE" -C engine CC=gcc all
+          "$MAKE" -C host CC=gcc test-bins
+      - name: Binaries
+        run: |
+          sha256sum build/host/tapectl.exe build/host/tapectl-test.exe
+          powershell -NoProfile -Command "\$o=Get-CimInstance Win32_OperatingSystem; \$o.Caption + ' ' + \$o.Version + ' build ' + \$o.BuildNumber"
+      - name: S3 bundle (VHDs; removal, re-insertion and equal-size swap at phase boundaries)
+        run: |
+          python -B tools/wp15-cards/s3_bundle.py --platform windows --tapectl build/host/tapectl.exe \
+            --tapectl-test build/host/tapectl-test.exe --out "$RUNNER_TEMP/s3" \
+            --source "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Imported runner judges the bundle (tests/wp15_cards_make_r1, unchanged)
+        run: |
+          python -B tests/wp15_cards_make_r1/selftest.py > /dev/null
+          python -B tests/wp15_cards_make_r1/runner.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED.json"
+          python -c "import json,sys;d=json.load(open(sys.argv[1]));print(len(d['rows']),'rows judged');[print(r['name'],r['result']) for r in d['rows']]" "$RUNNER_TEMP/s3/JUDGED.json"
+          python -c "import json,sys;[print('unjudged:',u['name'],'-',u['why']) for u in json.load(open(sys.argv[1]))['unjudged']]" "$RUNNER_TEMP/s3/BUNDLE.json"
+      - name: C1 boundary-query and census rows (tests/wp15_boundary_query_r1, unchanged)
+        run: |
+          python -B tests/wp15_boundary_query_r1/selftest.py > /dev/null
+          python -B tools/wp15-cards/judge_c1.py "$RUNNER_TEMP/s3" --out "$RUNNER_TEMP/s3/JUDGED-C1.json"
+          python -c "import json,sys;d=json.load(open(sys.argv[1]));[print(k,r['name'],r['result']) for k in ('supplement','queries','standalone') for r in d[k]];[print('negative control',c) for c in d['negative_controls']]" "$RUNNER_TEMP/s3/JUDGED-C1.json"
+      # Verification's census regression, unchanged: probe.c over a probe_win.c, run by
+      # run.ps1, which expects the e36ea492 omission (exit 1). The e36ea492 source must
+      # still reproduce it (the regression can go red); this head's must not.
+      # c1_volume_query_r2 (typed ERROR_NOT_READY on the target's volume) the same way:
+      # prepare.py's probe over 39636892 (the unconditional 21 bypass) must reproduce;
+      # over this head it must not.
+      - name: Census regression probes (c1_volume_query_r1 over e36ea492, r2 over 39636892, both over this head)
+        run: |
+          export PATH="/c/mingw64/bin:$PATH"
+          W="$RUNNER_TEMP/vq"; mkdir -p "$W/e36" "$W/396" "$W/gen"
+          git show e36ea4922ef845dd6754456db874541a71992ebc:host/port/probe_win.c > "$W/e36/probe_win.c"
+          git show 3963689230cd96e34dd0ee05e160bff6b172c774:host/port/probe_win.c > "$W/396/probe_win.c"
+          (cd "$W/gen" && python -B "$GITHUB_WORKSPACE/tests/c1_volume_query_r2/prepare.py")
+          cc() { gcc -std=c99 $1 -Ihost/port -Ihost -Iengine/include "$2" host/port/safety.c host/port/mbr.c -lpsapi -o "$RUNNER_TEMP/$3.exe"; }
+          cc "-I$W/e36" tests/c1_volume_query_r1/probe.c probe-r1-old
+          cc "" tests/c1_volume_query_r1/probe.c probe-r1-new
+          cc "-I$W/396" "$W/gen/probe-not-ready.c" probe-r2-old
+          cc "" "$W/gen/probe-not-ready.c" probe-r2-new
+      - name: Census regressions (tests/c1_volume_query_r1/run.ps1, unchanged)
+        shell: pwsh
+        run: |
+          $base = $env:RUNNER_TEMP
+          $seen = @{}
+          foreach ($k in 'r1-old', 'r1-new', 'r2-old', 'r2-new') {
+            Copy-Item "$base/probe-$k.exe" "$env:GITHUB_WORKSPACE/probe.exe" -Force
+            $env:RUNNER_TEMP = "$base/vq-$k-run"; New-Item -ItemType Directory $env:RUNNER_TEMP | Out-Null
+            try { & ./tests/c1_volume_query_r1/run.ps1; $how = 'run.ps1 completed: omission reproduced (probe exit 1)' }
+            catch { $how = "run.ps1 threw: $_" }
+            $res = Get-Content "$env:RUNNER_TEMP/verifier364-volume-query/RESULT.json" -Raw | ConvertFrom-Json
+            "$k : $how; required_query_fail_stop_pass=$($res.required_query_fail_stop_pass); failed_mounts=$($res.failed_mounts); error=$($res.actual_os_error)$($res.typed_error_code)"
+            $seen[$k] = $res.required_query_fail_stop_pass
+          }
+          $env:RUNNER_TEMP = $base
+          Remove-Item "$env:GITHUB_WORKSPACE/probe.exe"
+          if ($seen['r1-old'] -ne $false) { throw 'control: the e36ea492 probe no longer reproduces the r1 omission' }
+          if ($seen['r2-old'] -ne $false) { throw 'control: the 39636892 probe no longer reproduces the r2 NOT_READY bypass' }
+          if ($seen['r1-new'] -ne $true -or $seen['r2-new'] -ne $true) { throw 'this head still omits a failed census query' }
+          'ok: e36ea492 and 39636892 reproduce; this head records both failed queries'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp15-make-624-windows
+          path: ${{ runner.temp }}/s3
+          retention-days: 90

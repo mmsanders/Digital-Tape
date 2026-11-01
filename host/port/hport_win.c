@@ -9,6 +9,7 @@
 #if defined(_WIN32)
 
 #include "hport.h"
+#include "tseam.h"
 #include "winutf.h"
 
 #include <windows.h>
@@ -53,8 +54,12 @@ int hport_os_open(struct hport *p, const char *path, int is_device, int writable
     if (open_handle(p, path, OPEN_EXISTING, writable, is_device)) { return -1; }
     if (is_device) {
         GET_LENGTH_INFORMATION li;
-        DWORD got = 0;
-        if (!DeviceIoControl(p->h, IOCTL_DISK_GET_LENGTH_INFO, NULL, 0, &li, sizeof li, &got, NULL)) {
+        DWORD got = 0, cap = sizeof li;
+#ifdef TAPECTL_TEST
+        if (tseam_fault_query("open-geometry")) { cap = 0; }   /* control: the OS really fails the query */
+#endif
+        if (!DeviceIoControl(p->h, IOCTL_DISK_GET_LENGTH_INFO, NULL, 0, &li, cap, &got, NULL)) {
+            snprintf(p->query_error, sizeof p->query_error, "%s", hport_os_errname());
             hport_close(p);
             return -1;
         }
@@ -131,9 +136,33 @@ const char *hport_os_errname(void)
 {
     static char buf[48];
     DWORD e = GetLastError();
-    if (e == ERROR_INVALID_HANDLE) { return "ERROR_INVALID_HANDLE"; }
+    switch (e) {
+    case ERROR_INVALID_HANDLE: return "ERROR_INVALID_HANDLE";
+    case ERROR_DEV_NOT_EXIST: return "ERROR_DEV_NOT_EXIST";
+    case ERROR_MEDIA_CHANGED: return "ERROR_MEDIA_CHANGED";
+    case ERROR_NOT_READY: return "ERROR_NOT_READY";
+    case ERROR_NO_MEDIA_IN_DRIVE: return "ERROR_NO_MEDIA_IN_DRIVE";
+    case ERROR_DEVICE_NOT_CONNECTED: return "ERROR_DEVICE_NOT_CONNECTED";
+    case ERROR_NO_SUCH_DEVICE: return "ERROR_NO_SUCH_DEVICE";
+    default: break;
+    }
     snprintf(buf, sizeof buf, "Windows error %lu", (unsigned long)e);
     return buf;
+}
+
+int hport_os_removed(void)
+{
+    switch (GetLastError()) {
+    case ERROR_DEV_NOT_EXIST:            /* observed on a held handle after VHD detach (#448) */
+    case ERROR_MEDIA_CHANGED:
+    case ERROR_NOT_READY:
+    case ERROR_NO_MEDIA_IN_DRIVE:
+    case ERROR_DEVICE_NOT_CONNECTED:
+    case ERROR_NO_SUCH_DEVICE:
+        return 1;
+    default:
+        return 0;
+    }
 }
 
 const char *hport_error(void)

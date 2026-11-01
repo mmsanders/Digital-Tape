@@ -1,75 +1,72 @@
 # Project status
 
-**26 October2026 PDT · PM593 · input main679e01ec.**
-Phase1 complete36/36. Phase2 Windows11 x64 family target; macOS deferred,
-Linux existing CI. Gate counts below are completed criteria, not effort estimates.
+**PM630 · 30 October 2026 PDT · input main `1d341573` · Verification main `1938e651`.**
+Phase 1 is complete (36/36). Phase 2 is at **11/12** rungs, in closeout under ADR-195/196 and
+[ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued). Windows 11 x64 is
+the only current release platform; macOS is deferred and Linux stays as CI.
+- [Phase 2 ledger](PHASE2-LEDGER.md): every exit criterion, row by row.
+- [Closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195): the rounds.
 
-| Phase2 package | Rungs | Current boundary |
+## Packages
+
+| Package | Rungs | Where it stands |
 |---|---:|---|
-| WP14 CLI |3/4| NativeA6 request/offset-space linkage still unproved; existing real-card/witness facts carry. |
-| WP16 INGEST |2/4|459/454 not integrated; published Windows byte/resource PASSs carry.333/595 decides exact source-integration scope versus final native holds. |
-| WP15 app |1/4| Many components and bounded human visual facts accepted; complete required native/S3/package coverage absent. |
-| **Total** |**6/12**| No rung gain from issue closure, component tests or edited video alone. |
+| WP-14 `tapectl` on real cards | 4/4 | **Accepted** (Verification #364). A1–A9 pass on Windows 11. |
+| WP-16 Ingest | 4/4 | **Accepted** (Verification #364). I1–I8 and own-host pass. |
+| WP-15 App | 3/4 | G1, G3, G4 and G5 complete: C2 real-card session passed (Verification #370). Only G2 remains. |
+| **Total** | **11/12** | |
 
-## Completed and closed
+## What happened in round C1
 
-| Delivery | Independent disposition and limit |
-|---|---|
-| Backend551/internal Make550 |286/297 and299 carry accepted ordinary-file/component scope; no shipping Make/session qualification. |
-| Screen/bridge567 |305/306 source scope integrated266bdcaa; original564 source/build/archive315 and native startup/quit316 carry only for that binary. |
-| Discovery580 |318/fdffea57 source integrated26ed8491;323/e4c7237d one metadata result exit0/offered0/unprobed0. Allowance consumed; no GUI/poller grant. |
-| Editing/details584 |324/91815bc1 exact source3104e04e PASS32/32 versus old18/32;587 merged679e01ec with accepted source unchanged and120/120checks SUCCESS. |
-| Human589/support590 |328/331/42619272 reviewed partial visual result. Both envelopes closed;592 proposal retired unmerged with exact restore refs. No repeat requested. |
+- **Verification #364 Stage 1** accepted WP-14 and WP-16 under ADR-195. A6 closed with a compiled
+  32-bit offset mutant beside the existing 64 GB card evidence. It also authored the WP-15
+  tests and the C2 checklist.
+- **Software #624** built `tapectl make` and the app's Make button:
+  - provision's own safety and open, with one retained handle for load and NULL-write verify;
+  - `CARD_CHANGED` on a reported removal;
+  - one UAC prompt, naming tapectl only.
+- **Verification found three defects across four passes**, all in query-failure handling,
+  including a real Windows volume-census gap that also affected standalone `provision`. Software
+  corrected them on the same branch. The final exact head `5101e3f3` was cleared and merged at
+  `ea54a41` with an identical tree and 130 checks green.
+- The cleared C2 candidate is ZIP `b8a689cf…`; hashes are in [#628](https://github.com/mmsanders/Digital-Tape/issues/628).
 
-Actual original564 human clips support initial page, seven natural label cases,
-file gesture/new refusal, mixed gesture/persistent refusal, Music Checking and
-displayed2seconds, Empty plain message/button, visible reset and close.
-Show Details was not clicked; NUL unsupported/unexecuted. Full child/IPC/argv/
-nonce/report/OS-exit/pair/zero-request/cleanup claims remain held.
-Edited clips, multiple launches and missing running-PID snapshot limit identity/
-timing claims; source/kit hashes do not establish an actual current process link.
-F328-1: a terminal appeared automatically during Music checking. Its owner/PID
-is unknown; one-window-throughout is not established. No human rerun is requested.
+## Round C2 (done)
 
-## Current ownership — manual issues only
+Michael ran the C2 checklist with the exact cleared ZIP on Windows 11 Home 25H2. Verify was OK
+on the first make and on the remake. Dumps were byte-identical. The mid-make pull and remake
+behaved as specified, there were no lists, and polling stayed usable. The one finding (F370-1,
+no Show details on a rejected single-song drop) is ruled intended in ADR-197. No rebuild.
 
-| Pair | Concrete outcome / dependency |
-|---|---|
-| Software594 / Verification332 | Fix GUI-owned INGEST console behavior; independently test bounded opt-in first-party receipts before normal job cleanup. New source, no564 patch/run or G1 observer. |
-| Software595 / Verification333 | Decide459/454 exact integration-only scope or supersession against existing evidence; integrate safely if expressly cleared, otherwise one precise missing fact. |
-| Software585 / Verification325 | Final discovery-enabled bundle from cleared integrated594 source;584 dependency DONE. One final build, correct existing children/pins; no premature package/rebuild loop. |
+## Current assignment (manual activation, ADR-192/195)
 
-First-party diagnostics are default OFF and are not independent device-open
-absence proof. PM593 APP-1A §8 grants only bounded owned CONTROL receipts;
-new tests/method precede code. Future native receipt collection needs a separately
-admitted final candidate. No new app/poller/card/Make/elevation run is issued.
+| Owner | Issue | Outcome wanted |
+|---|---|---|
+| Michael | [#631](https://github.com/mmsanders/Digital-Tape/issues/631) | G2: his wife's unaided run with the same ZIP, per [the protocol](WP15-G2-PROTOCOL.md). Return on #631 |
 
-Software is local Windows Claude Code, model selected by the user; Verification
-is separate. GitHub-only manual selection/resumption. Both listeners checked PAUSED.
-No lead messages/kickoff, next-task auto transition, new chat or subworkers.
-No current action remains for the human tester.589 is reviewed/partial and closed.
+No Software or Verification task is open; none is needed before G2.
 
-## Remaining rung blockers
+## Next rounds
 
-- WP14 rung4: native physicalA6 linkage; previous two final-sector reads/zero
-  observed card writes and prior witness facts do not prove the missing relation.
-- WP16 rung3: no independently cleared protected integration of459/454 yet.
- 333 must distinguish covered source from whole native acceptance; Mac is not
- a current gate. Windows failed/zero-access own-HOST visibility remains genuine.
-- WP16 rung4: all applicable Windows/own-host/full package and physical integration
- criteria, with conditional numerical claims kept at their proven bounds.
-- WP15 rung2: complete required package coverage, including native child/IPC
- attribution, remaining error/runtime rows and production S3/session feasibility.
- Component/headless-DOM or source receipts alone do not supply that coverage.
-- WP15 rung3/4 and G2: integrated full behavior/accepted dependencies, native
- G1/G3/G4/G5 and witnessed unaided family trial. Shipping Make/elevation disabled.
-- Crash41/404/global proof, batching/async, firmware/hardware, card atomicity,
- fabrication/charging and frozen engine/format boundaries remain unchanged.
+1. **C3:** G2 (#631). If it fails, PM decides any fix; a second G2 needs a tester who hasn't seen
+   the app.
+2. **C4:** the exit ADR: host scope frozen, goldens green, Q-P2-1 recorded.
+
+## Holds that stand
+
+- Guardrails 01–13; engine pinned at A8 `d96b4245`; format frozen; Structural Rule 1 for engine
+  code; Verification independence.
+- WP-14 A4 outranks everything. The app and ingest never run elevated.
+- Hardware, firmware, fabrication and charging are parked. Card atomicity is unqualified.
+- Phase 3 entry items: any-subset coverage of deferred faults, and guardrail 10 measured on target.
+- Accepted Phase 2 limitations (ADR-196):
+  - elevated-launch race from a user-writable folder (same-user only);
+  - no stale job cleanup after a crash;
+  - typed `NOT_READY` rows;
+  - undetected equal-size swap.
 
 ## Preserved references
 
-Current [PM593 closeout](REVIEW/PM593-CLOSEOUT-2026-10-26.md),
-[verification integration](VERIFICATION-INTEGRATION.md),
-[package index](PACKAGES/README.md) and [human queue](FOR-MICHAEL.md).
-Prior status revisions remain unchanged in Git history. This current table omits
-unrelated owner-specific history rather than republishing or linking that material. No historical report, raw evidence or commit was deleted or rewritten.
+[PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md), [verification integration](VERIFICATION-INTEGRATION.md),
+[package index](PACKAGES/README.md), [human queue](FOR-MICHAEL.md). Earlier status revisions are
+unchanged in Git history.

@@ -138,6 +138,8 @@ signs only its documented scope. Michael closes his own resolved or superseded i
 **Current override, 24 October (ADR-192): PM posts issues only.** No automatic
 kickoff messages, listener wake-ups or same-activation next-assignment jumps.
 Michael manually selects/starts the task/context; the lead returns and stops.
+Once started, a lead may continue into the next named stage of the *same* issue when that
+stage's input has already arrived (ADR-195); it never starts another issue, polls or waits.
 Both previous finite listeners are PAUSED. This overrides historical overnight
 queue instructions without reopening completed work. Software's full role is local
 Windows Claude Code, model selected by Michael; one active context per task.

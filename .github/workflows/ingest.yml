@@ -1,0 +1,219 @@
+name: ingest
+
+# INGEST-1 host tool (WP-16, #429). Software's own build/test and cross-platform
+# byte-identity evidence; it accepts nothing (independent acceptance is Verification's).
+#
+# GitHub-hosted runners: ubuntu-latest (Linux x64), macos-latest (macOS arm64) and
+# windows-latest (Windows Server x64). Windows Server is NOT the Windows 11 desktop the
+# contract qualifies; a Windows 11 run is a separate native step, never substituted.
+
+on:
+  pull_request:
+    paths:
+      - 'host/ingest/**'
+      - 'tests/wp16_ingest_stage1/**'
+      - '.github/workflows/ingest.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'host/ingest/**'
+      - 'tests/wp16_ingest_stage1/**'
+      - '.github/workflows/ingest.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+    working-directory: host/ingest
+
+jobs:
+  vendor:
+    name: vendored decoder integrity (and its negative controls)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -B tools/check_vendor.py --selftest
+      - run: python3 -B tools/compare_identity.py --selftest
+      - run: python3 -B tools/check_win11_script.py --selftest
+
+  build:
+    name: build, test and identity run (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: toolchain (pinned by rust-toolchain.toml)
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: platform identity
+        run: |
+          rustc -vV
+          uname -a || true
+          case "$RUNNER_OS" in
+            macOS) sw_vers ;;
+            Windows) cmd //c ver ;;
+            Linux) cat /etc/os-release | head -3 ;;
+          esac
+      - name: unit and integration tests
+        run: cargo test --release --locked
+      - name: identity run
+        run: ./tools/identity_run.sh "$RUNNER_TEMP/identity-${{ runner.os }}-${{ runner.arch }}.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: identity-${{ runner.os }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/identity-*
+          if-no-files-found: error
+
+  identity:
+    name: byte-identical outputs across platforms
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: identity-*
+          path: ${{ runner.temp }}/id
+          merge-multiple: true
+      - run: python3 -B tools/compare_identity.py "$RUNNER_TEMP"/id/identity-*.txt
+
+  # INGEST-1 Stage1 observation packets (#435): the imported Verification #169 package
+  # (tests/wp16_ingest_stage1) is the oracle; this job only produces the observation
+  # packet INTERFACE.md asks for. It judges nothing: review.py/campaign.py need
+  # Verification's own receipts. A platform without a qualified native observer still
+  # produces its packet, marked observer "none" -- never a PASS.
+  stage1-packet:
+    name: Stage1 observation packet (${{ matrix.os }})
+    # Candidates stacked on the AP4 base (the APP-1A S1 report, #452; the #457
+    # exhaustion correction) rerun only their impacted scopes in app1a-s1.yml and
+    # ingest-exhaustion.yml; the full Stage1 campaign belongs to the AP4 base candidate.
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 340
+    steps:
+      # The imported package is pinned byte for byte (check_pins.py); Windows runners
+      # default to core.autocrlf=true, which would rewrite its text files on checkout.
+      - name: check out bytes exactly as committed
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: package requirements and native observer
+        working-directory: .
+        run: |
+          python -m pip install -r tests/wp16_ingest_stage1/requirements.txt
+          if [ "$RUNNER_OS" = Linux ]; then sudo apt-get update -qq && sudo apt-get install -y -qq strace; fi
+          if [ "$RUNNER_OS" = Windows ]; then
+            # Process Monitor (Sysinternals) is the Windows native observer; its PML is
+            # read with procmon-parser to align Procmon's own CSV export record by record.
+            curl -sSfL -o "$RUNNER_TEMP/procmon.zip" https://download.sysinternals.com/files/ProcessMonitor.zip
+            sha256sum "$RUNNER_TEMP/procmon.zip"
+            # The same Procmon that stage1/win11_packet.ps1 pins, so the observer qualified
+            # here is the one Michael's script will run; a Microsoft update shows up here first.
+            pin=$(sed -n 's/^\$ProcmonZipSha256 = "\([0-9a-f]*\)".*/\1/p' host/ingest/stage1/win11_packet.ps1)
+            got=$(sha256sum < "$RUNNER_TEMP/procmon.zip" | cut -d' ' -f1)   # stdin: Git-Bash escapes a backslash path with a leading "\"
+            [ -n "$pin" ] && [ "$got" = "$pin" ] || { echo "ProcessMonitor.zip is $got; win11_packet.ps1 pins '$pin': re-pin both after qualifying the new one"; exit 1; }
+            unzip -o -q "$RUNNER_TEMP/procmon.zip" -d "$RUNNER_TEMP/procmon"
+            python -m pip install procmon-parser==0.4.0
+            echo "PROCMON=$RUNNER_TEMP/procmon/Procmon64.exe" >> "$GITHUB_ENV"
+          fi
+      - name: authenticated source pack (the package's own fetcher)
+        working-directory: .
+        run: |
+          python -B tests/wp16_ingest_stage1/check_pins.py
+          python -B tests/wp16_ingest_stage1/portability_selftest.py
+          python -B tests/wp16_ingest_stage1/asset.py --destination "$RUNNER_TEMP/sources"
+      - name: build shipping and observation binaries
+        run: |
+          cargo build --release --locked
+          cargo build --release --locked --features observe --target-dir target/observe
+          cargo run --release --locked --quiet --example profile_file -- "$RUNNER_TEMP/profile"
+      - name: shipping binary carries no observation seam
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B tools/check_seam.py target/release/ingest$ext target/observe/release/ingest$ext
+      - name: run every census case
+        timeout-minutes: 300   # so a slow host still uploads what it produced (below)
+        run: |
+          ext=""; [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python -B stage1/run_packet.py --package ../../tests/wp16_ingest_stage1 \
+            --sources "$RUNNER_TEMP/sources" --observe-bin target/observe/release/ingest$ext \
+            --shipping-bin target/release/ingest$ext --profile-dir "$RUNNER_TEMP/profile" \
+            --out "$RUNNER_TEMP/packet" --work "$RUNNER_TEMP/work" \
+            --candidate-sha "${{ github.event.pull_request.head.sha || github.sha }}"
+          python -B stage1/summarize_packet.py "$RUNNER_TEMP/packet" --package ../../tests/wp16_ingest_stage1
+      - name: Windows 11 kit (the exact binaries and profile for stage1/win11_packet.ps1)
+        if: runner.os == 'Windows'
+        run: |
+          kit="$RUNNER_TEMP/win11-kit"; mkdir -p "$kit/observe"
+          cp target/release/ingest.exe "$kit/ingest.exe"
+          cp target/observe/release/ingest.exe "$kit/observe/ingest.exe"
+          cp -r "$RUNNER_TEMP/profile" "$kit/profile"
+          sha256sum "$kit/ingest.exe" "$kit/observe/ingest.exe"
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: win11-kit
+          path: ${{ runner.temp }}/win11-kit
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage1-packet-${{ runner.os }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/packet
+          if-no-files-found: error
+          retention-days: 90
+
+  win11-script-rehearsal:
+    if: github.event_name == 'workflow_dispatch'
+    # stage1/win11_packet.ps1 is what Michael runs on the Windows 11 desktop. This runs it
+    # end to end on Windows Server against the same candidate and win11-kit, so a script
+    # failure is found here, not on his machine. The packet is labelled windows-server.
+    name: Windows 11 packet script, rehearsed on Windows Server
+    needs: stage1-packet
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: win11-kit
+          path: ${{ runner.temp }}/kit
+      - name: run win11_packet.ps1 -Rehearsal
+        shell: pwsh
+        # this job has no checkout: the workflow default (host/ingest) does not exist here
+        working-directory: ${{ runner.temp }}
+        run: |
+          $sha = "${{ github.event.pull_request.head.sha || github.sha }}"
+          $kitzip = Join-Path $env:RUNNER_TEMP "win11-kit.zip"
+          Compress-Archive -Path (Join-Path $env:RUNNER_TEMP "kit\*") -DestinationPath $kitzip
+          $ship = (Get-FileHash (Join-Path $env:RUNNER_TEMP "kit\ingest.exe")).Hash
+          $obs = (Get-FileHash (Join-Path $env:RUNNER_TEMP "kit\observe\ingest.exe")).Hash
+          Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/mmsanders/Digital-Tape/$sha/host/ingest/stage1/win11_packet.ps1" -OutFile win11_packet.ps1
+          New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "out") | Out-Null
+          powershell -ExecutionPolicy Bypass -File .\win11_packet.ps1 -Candidate $sha -Kit $kitzip `
+            -ShippingSha256 $ship -ObserveSha256 $obs -Work (Join-Path $env:RUNNER_TEMP "w") `
+            -Out (Join-Path $env:RUNNER_TEMP "out") -Rehearsal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win11-script-rehearsal-packet
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 30
+

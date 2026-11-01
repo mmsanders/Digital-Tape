@@ -12,6 +12,7 @@
 #endif
 
 #include "hport.h"
+#include "tseam.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -36,17 +37,19 @@ enum hport_path hport_classify(const char *path)
     return HPORT_OTHER;
 }
 
-static int device_bytes(int fd, uint64_t *out)
+/* `broken`: the open-geometry control passes the kernel a NULL result pointer,
+   so the query really fails (EFAULT). */
+static int device_bytes(int fd, uint64_t *out, int broken)
 {
 #if defined(__APPLE__)
     uint64_t count = 0;
     uint32_t size = 0;
-    if (ioctl(fd, DKIOCGETBLOCKCOUNT, &count) != 0 || ioctl(fd, DKIOCGETBLOCKSIZE, &size) != 0) { return -1; }
+    if (ioctl(fd, DKIOCGETBLOCKCOUNT, broken ? NULL : &count) != 0 || ioctl(fd, DKIOCGETBLOCKSIZE, &size) != 0) { return -1; }
     *out = count * size;
     return 0;
 #else
     uint64_t bytes = 0;
-    if (ioctl(fd, BLKGETSIZE64, &bytes) != 0) { return -1; }
+    if (ioctl(fd, BLKGETSIZE64, broken ? NULL : &bytes) != 0) { return -1; }
     *out = bytes;
     return 0;
 #endif
@@ -74,7 +77,16 @@ int hport_os_open(struct hport *p, const char *path, int is_device, int writable
     if (p->fd < 0) { return -1; }
     if (fstat(p->fd, &st) != 0) { (void)close(p->fd); p->fd = -1; return -1; }
     if (is_device) {
-        if (device_bytes(p->fd, &p->bytes) != 0) { (void)close(p->fd); p->fd = -1; return -1; }
+        int broken = 0;
+#ifdef TAPECTL_TEST
+        broken = tseam_fault_query("open-geometry");
+#endif
+        if (device_bytes(p->fd, &p->bytes, broken) != 0) {
+            snprintf(p->query_error, sizeof p->query_error, "%s", hport_os_errname());
+            (void)close(p->fd);
+            p->fd = -1;
+            return -1;
+        }
     } else {
         if (!S_ISREG(st.st_mode)) { (void)close(p->fd); p->fd = -1; return -1; }
         p->bytes = (uint64_t)st.st_size;
@@ -175,10 +187,23 @@ const char *hport_os_errname(void)
     case ENOTSUP: return "ENOTSUP";
     case EPERM: return "EPERM";
     case EACCES: return "EACCES";
+    case ENXIO: return "ENXIO";
+    case ENODEV: return "ENODEV";
+#ifdef ENOMEDIUM
+    case ENOMEDIUM: return "ENOMEDIUM";
+#endif
     default: break;
     }
     snprintf(buf, sizeof buf, "errno %d", errno);
     return buf;
+}
+
+int hport_os_removed(void)
+{
+#ifdef ENOMEDIUM
+    if (errno == ENOMEDIUM) { return 1; }
+#endif
+    return errno == ENXIO || errno == ENODEV;
 }
 
 int hport_close(struct hport *p)

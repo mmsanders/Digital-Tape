@@ -14,6 +14,11 @@ path = "../src/lib.rs"
 name = "lifecycle_adapter"
 path = "../tests/lifecycle_adapter.rs"
 
+# TEST-ONLY harmless child for the Software594 controlled method; never bundled.
+[[example]]
+name = "probe_child"
+path = "../examples/probe_child.rs"
+
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
