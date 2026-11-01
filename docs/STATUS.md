@@ -1,72 +1,64 @@
 # Project status
 
-**PM630 · 30 October 2026 PDT · input main `1d341573` · Verification main `1938e651`.**
-Phase 1 is complete (36/36). Phase 2 is at **11/12** rungs, in closeout under ADR-195/196 and
-[ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued). Windows 11 x64 is
-the only current release platform; macOS is deferred and Linux stays as CI.
-- [Phase 2 ledger](PHASE2-LEDGER.md): every exit criterion, row by row.
-- [Closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195): the rounds.
+**PM634 · 1 November 2026 PDT · input main `3bf43471` · Verification main `1938e651`.**
+**Phase 1 complete (36/36). Phase 2 CLOSED (12/12, G2 deferred) under
+[ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed).**
+Phase 3 (bench firmware) is PROPOSED and waits on Michael's kickoff decisions.
 
-## Packages
+## Phase 2 outcome
 
-| Package | Rungs | Where it stands |
-|---|---:|---|
-| WP-14 `tapectl` on real cards | 4/4 | **Accepted** (Verification #364). A1–A9 pass on Windows 11. |
-| WP-16 Ingest | 4/4 | **Accepted** (Verification #364). I1–I8 and own-host pass. |
-| WP-15 App | 3/4 | G1, G3, G4 and G5 complete: C2 real-card session passed (Verification #370). Only G2 remains. |
-| **Total** | **11/12** | |
+| Package | Result |
+|---|---|
+| WP-14 `tapectl` on real cards | **Accepted**, Windows 11 (Verification #364) |
+| WP-16 Ingest | **Accepted**, Windows 11 (Verification #364) |
+| WP-15 App | **Accepted with G2 deferred**: G1/G3/G4/G5 on exact `5101e3f3` / ZIP `b8a689cf` (Verification #364, #370; ADR-197). Michael made real cartridges through the app in C2 |
 
-## What happened in round C1
+- Exit items: goldens and replays green on the last code head (`ea54a41`, engine `d96b4245`);
+  Q-P2-1 ruled (ADR-195 §4); host scope frozen (ADR-198).
+- Record: the [Phase 2 ledger](PHASE2-LEDGER.md) and [PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md).
+- The closeout took four PM rounds from the 28 October reset.
 
-- **Verification #364 Stage 1** accepted WP-14 and WP-16 under ADR-195. A6 closed with a compiled
-  32-bit offset mutant beside the existing 64 GB card evidence. It also authored the WP-15
-  tests and the C2 checklist.
-- **Software #624** built `tapectl make` and the app's Make button:
-  - provision's own safety and open, with one retained handle for load and NULL-write verify;
-  - `CARD_CHANGED` on a reported removal;
-  - one UAC prompt, naming tapectl only.
-- **Verification found three defects across four passes**, all in query-failure handling,
-  including a real Windows volume-census gap that also affected standalone `provision`. Software
-  corrected them on the same branch. The final exact head `5101e3f3` was cleared and merged at
-  `ea54a41` with an identical tree and 130 checks green.
-- The cleared C2 candidate is ZIP `b8a689cf…`; hashes are in [#628](https://github.com/mmsanders/Digital-Tape/issues/628).
-
-## Round C2 (done)
-
-Michael ran the C2 checklist with the exact cleared ZIP on Windows 11 Home 25H2. Verify was OK
-on the first make and on the remake. Dumps were byte-identical. The mid-make pull and remake
-behaved as specified, there were no lists, and polling stayed usable. The one finding (F370-1,
-no Show details on a rejected single-song drop) is ruled intended in ADR-197. No rebuild.
-
-## Current assignment (manual activation, ADR-192/195)
-
-| Owner | Issue | Outcome wanted |
-|---|---|---|
-| Michael | [#631](https://github.com/mmsanders/Digital-Tape/issues/631) | G2: his wife's unaided run with the same ZIP, per [the protocol](WP15-G2-PROTOCOL.md). Return on #631 |
-
-No Software or Verification task is open; none is needed before G2.
-
-## Next rounds
-
-1. **C3:** G2 (#631). If it fails, PM decides any fix; a second G2 needs a tester who hasn't seen
-   the app.
-2. **C4:** the exit ADR: host scope frozen, goldens green, Q-P2-1 recorded.
-
-## Holds that stand
-
-- Guardrails 01–13; engine pinned at A8 `d96b4245`; format frozen; Structural Rule 1 for engine
-  code; Verification independence.
-- WP-14 A4 outranks everything. The app and ingest never run elevated.
-- Hardware, firmware, fabrication and charging are parked. Card atomicity is unqualified.
-- Phase 3 entry items: any-subset coverage of deferred faults, and guardrail 10 measured on target.
-- Accepted Phase 2 limitations (ADR-196):
-  - elevated-launch race from a user-writable folder (same-user only);
-  - no stale job cleanup after a crash;
+**Deferred, not waived:**
+- **G2** unaided test: before the app goes to anyone else for real use, or on request. A mini
+  app redesign round follows if needed.
+- macOS.
+- The ADR-196 limitations:
+  - elevated-launch race from a user-writable folder;
+  - no stale-job cleanup after a crash;
   - typed `NOT_READY` rows;
   - undetected equal-size swap.
 
+## Phase 3 — proposed
+
+[Phase 3 plan](PHASE3-PLAN.md):
+- **Goal:** the shared engine runs on a Teensy 4.1 bench build and plays an app-made cartridge
+  through headphones, with real buttons.
+- **Packages:** WP-17 to WP-21.
+- **Also in scope:** card atomicity on the PNY cards, and the Q-P2-1 entry conditions.
+
+Michael answers D1–D9 and says what equipment he owns in
+[#635](https://github.com/mmsanders/Digital-Tape/issues/635).
+
+## Current assignments
+
+| Owner | Issue | Outcome wanted |
+|---|---|---|
+| Michael | [#635](https://github.com/mmsanders/Digital-Tape/issues/635) | Phase 3 kickoff decisions and equipment on hand |
+
+No lead task is open. Leads start only when Michael starts them (ADR-192/195).
+
+## Holds that stand
+
+- Guardrails 01–13; engine pinned at `d96b4245`; format frozen; Structural Rule 1 for engine
+  code; Verification independence.
+- Host scope frozen (ADR-198).
+- The app and ingest never run elevated. WP-14 A4 outranks everything.
+- Hardware stays parked (ADR-160) until Phase 3 D3.
+- Fabrication and charging stay CLOSED. Card atomicity is unqualified.
+- Phase 3 entry items: any-subset coverage before firmware batching; guardrail 10 measured on target.
+
 ## Preserved references
 
-[PM622 review](REVIEW/PM622-CLOSEOUT-RESET.md), [verification integration](VERIFICATION-INTEGRATION.md),
+[Phase 2 plan](PHASE2-PLAN.md), [verification integration](VERIFICATION-INTEGRATION.md),
 [package index](PACKAGES/README.md), [human queue](FOR-MICHAEL.md). Earlier status revisions are
 unchanged in Git history.

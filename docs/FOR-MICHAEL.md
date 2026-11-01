@@ -1,10 +1,10 @@
 # Human actions and queue
 
-**PM630 · 30 October 2026 PDT.** C2 passed. WP-14 and WP-16 are accepted, and WP-15 needs only G2.
+**PM634 · 1 November 2026 PDT.** Phase 2 is closed, with G2 deferred at your request.
 
-1. **G2:** [#631](https://github.com/mmsanders/Digital-Tape/issues/631). Your wife's unaided test,
-   with the same ZIP you used for C2, from your administrator account. The procedure is
-   [the G2 protocol](WP15-G2-PROTOCOL.md). Reply on #631.
-2. Then start PM for the Phase 2 sign-off round.
+1. **Phase 3 kickoff:** [#635](https://github.com/mmsanders/Digital-Tape/issues/635). Answer
+   D1–D9 ("defaults" is fine) and list the equipment you already own.
+2. **Pinned for later:** the G2 unaided test ([protocol](WP15-G2-PROTOCOL.md)), before the app
+   goes to anyone else for real use.
 
-[Status](STATUS.md) · [ledger](PHASE2-LEDGER.md) · [closeout plan](PHASE2-PLAN.md#8-closeout-plan-adr-195)
+[Status](STATUS.md) · [Phase 3 plan](PHASE3-PLAN.md) · [Phase 2 ledger](PHASE2-LEDGER.md)

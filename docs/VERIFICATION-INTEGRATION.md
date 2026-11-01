@@ -1,8 +1,8 @@
 # Independent verification integration
 
-## Current boundary — PM630 (ADR-197)
+## Current boundary — PM634 (ADR-198)
 
-Phase 1 is 36/36; Phase 2 is 11/12 (WP-14 and WP-16 accepted). From PM622 on, remaining acceptance follows ADR-195
+Phase 1 is 36/36. Phase 2 is CLOSED at 12/12 with G2 deferred by Michael. From PM622 on, remaining acceptance follows ADR-195
 (outcome tests plus negative controls) and is tracked row by row in
 [the Phase 2 ledger](PHASE2-LEDGER.md). The rows below are the independent publications
 merged so far. They keep their recorded scope.
@@ -34,8 +34,8 @@ merged so far. They keep their recorded scope.
 | #372/#373 / `1938e651` |370 Stage B: C2 real-card session PASS (verify OK first and remake, dumps byte-identical, pull/remake, G1/G5, G3 messages, no lists, polling usability). Sole hold F370-1 exempted by ADR-197. |
 | PM576 / ADR-193 | Administrative action closed with record limitation retained, not retrospective compliance or a new independent code acceptance; no repeated run. |
 
-Next: G2 (#631), Michael's witnessed unaided record per [the G2 protocol](WP15-G2-PROTOCOL.md).
-See [ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued).
+Next: no Verification task. Phase 3 is proposed ([plan](PHASE3-PLAN.md)); its first round would
+carry Q-P2-1 any-subset completion and WP-17 acceptance authoring.
 
 ## Earlier recorded boundary — 19 October 2026 PDT (ADR-190 / PM477)
 

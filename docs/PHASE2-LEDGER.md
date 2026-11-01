@@ -1,6 +1,6 @@
 # Phase 2 ledger — every exit criterion, one row each
 
-**Opened by PM622 (ADR-195); updated PM630, 30 October 2026 PDT ([ADR-197](DECISIONS.md#adr-197--c2-disposed-rejected-drop-notice-needs-no-show-details-g2-issued)).**
+Opened by PM622 (ADR-195); closed by PM634, 1 November 2026 PDT ([ADR-198](DECISIONS.md#adr-198--phase-2-closed-g2-deferred-host-scope-frozen-phase-3-proposed)). **Phase 2 is CLOSED, 12/12, with G2 deferred by Michael.**
 This is the progress record for Phase 2 closeout. Each round must close named rows. Package
 criteria are in [WP-14](PACKAGES/WP-14.md), [WP-16](PACKAGES/WP-16.md) and [WP-15](PACKAGES/WP-15.md).
 The exit gate is in [the Phase 2 plan](PHASE2-PLAN.md#1-what-phase-2-delivers).
@@ -37,7 +37,7 @@ Verification #364 Stage 1 `48489cf9`. I1–I8 PASS on the integrated ingest tree
 Own-host PASS: an integrated-source static gate with detecting mutants, plus default-invoker
 (unelevated) launch from #361's Medium-integrity parent.
 
-## WP-15 — the app (3/4)
+## WP-15 — the app: ACCEPTED with G2 deferred (4/4)
 
 | # | State | Evidence | Next |
 |---|---|---|---|
@@ -46,10 +46,9 @@ Own-host PASS: an integrated-source static gate with detecting mutants, plus def
 | G3 Plain errors | PASSED | 28 bridge rows; C2: file drop, too long, non-music, UAC decline, mid-make pull and remake (#370). F370-1 exempted (ADR-197) | — |
 | G4 No lists | PASSED | C2 screens: four states, no lists; label/details stay usable under polling (#370 addendum) | — |
 | G5 Installs | PASSED | C2: exact ZIP on Windows 11 Home 25H2 build 26200.9711; real cartridge verify OK, dumps identical | — |
-| G2 Unaided test | TO DO | [Protocol](WP15-G2-PROTOCOL.md); same ZIP `b8a689cf` | Michael [#631](https://github.com/mmsanders/Digital-Tape/issues/631) |
+| G2 Unaided test | DEFERRED by Michael (#633, ADR-198) | [Protocol](WP15-G2-PROTOCOL.md) | Before the app goes to anyone else for real use, or on request |
 
-**Live issue:** Michael [#631](https://github.com/mmsanders/Digital-Tape/issues/631) (G2). C2 is
-complete (#370).
+**Live issue:** none. C2 is complete (#370); G2 is deferred.
 
 **Accepted Phase 2 limitations (ADR-196):**
 - The elevated launch of `tapectl.exe` from a user-writable folder can race its hash check
@@ -62,8 +61,8 @@ complete (#370).
 
 | Item | State | Next |
 |---|---|---|
-| 1. WP-14/15/16 accepted | WP-14, WP-16 DONE; WP-15 needs only G2 | G2 |
-| 2. G2 witnessed | TO DO | #631 |
-| 3. Goldens and Phase 1 replays green on main | PASSING in CI | Re-checked at C4 |
+| 1. WP-14/15/16 accepted | DONE (WP-15 with G2 deferred) | — |
+| 2. G2 witnessed | DEFERRED by Michael | ADR-198 resume condition |
+| 3. Goldens and Phase 1 replays green on main | DONE | Last code head `5101e3f3`/`ea54a41`: golden, regression, qualification, mutation, replays all green; engine `d96b4245` |
 | 4. Q-P2-1 decided | DONE | ADR-195 §4 |
-| 5. Host scope frozen | TO DO | PM, at C4 |
+| 5. Host scope frozen | DONE | ADR-198 |
