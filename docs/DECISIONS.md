@@ -4759,3 +4759,49 @@ until G2. G2 is issued to Michael as [#631](https://github.com/mmsanders/Digital
 **Rationale.** The child should see the same plain sentence; a details control with nothing in it
 is noise. **Reversal cost:** a small presentation change plus re-clearance if Michael prefers the
 control.
+
+## ADR-198 — Phase 2 closed; G2 deferred; host scope frozen; Phase 3 proposed
+**Date:** 2026-11-01 PDT
+**Status:** ADOPTED by PM (PM634, [#634](https://github.com/mmsanders/Digital-Tape/issues/634)) on
+Michael's decision recorded verbatim in intake [#633](https://github.com/mmsanders/Digital-Tape/issues/633).
+
+**Michael's decision.** The unaided test (WP-15 G2, exit-gate item 2, his D6) is **deferred, not
+waived**: "if the app is literally functional … and if I'm able to use it, I think it's okay to put
+a pin in this … we can do like a mini app redesign round later if we need to."
+
+**Resume condition.** Before the app is handed to anyone other than Michael for real use, or at
+Michael's request, run [the G2 protocol](WP15-G2-PROTOCOL.md) with a tester who has not seen the
+app. If it shows problems, a bounded app redesign round follows under the frozen scope below.
+Michael ran the full app path himself in C2.
+
+**Exit-gate check.**
+1. WP-14 and WP-16 were accepted by Verification #364.
+   - WP-15 G1, G3, G4 and G5 were accepted on exact `5101e3f3` / ZIP `b8a689cf`: Verification #364
+     plus #370, with the sole hold F370-1 disposed by ADR-197.
+   - G2 is deferred as above, so **WP-15 is recorded accepted with G2 deferred**.
+2. G2: DEFERRED by Michael.
+3. Goldens and Phase 1 replays are green. On the last code head (`5101e3f3`, merged `ea54a41`):
+   golden suite, regression, qualification, mutation gate and every product replay succeeded. Only
+   docs have merged since, and the engine is still `d96b4245`.
+4. Q-P2-1 decided (ADR-195 §4).
+5. Host scope frozen (below).
+
+**Phase 2 is CLOSED. Rungs 12/12, with G2 deferred.**
+
+**Host scope frozen.** The desktop tooling loads cartridges. It is not a music manager, tag
+editor, library or player (plan §1, CLAUDE.md §6). Frozen surfaces at main `3bf43471`:
+- `tapectl` per WP11/WP14 contracts plus APP-1 §3 `cards`/`make`/`--report`;
+- `ingest` per INGEST-1;
+- the app per APP-1/APP-1A.
+
+Bug fixes and safety fixes need no PM scope decision. Any new feature, screen, list or command
+needs a Michael `REQUEST:` and a contract amendment. The deferred G2 redesign round is
+pre-authorized within the existing screens and wording (APP-1 §8 taste items).
+
+**Phase 3.** Proposed in [PHASE3-PLAN.md](PHASE3-PLAN.md): Teensy 4.1 bench firmware, WP-17 to
+WP-21, with kickoff decisions D1–D9 to Michael in [#635](https://github.com/mmsanders/Digital-Tape/issues/635).
+Not open until he answers. Hardware stays parked until D3.
+
+**Rationale.** Michael owns the D6 test and chose to defer it. Every other exit item is met on
+independent evidence. **Reversal cost:** low. G2 can be run any time, and a defect it finds is
+handled by a bounded app round.

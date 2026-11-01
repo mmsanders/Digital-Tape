@@ -1,11 +1,11 @@
 # Work packages — current roadmap
 
-**PM630 · 30 October 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
+**PM634 · 1 November 2026.** Phase 2 target: Windows 11 x64; macOS deferred, Linux CI.
 Live assignments are GitHub role issues, not this index. [Status](../STATUS.md),
 [Phase 2 plan §8 closeout](../PHASE2-PLAN.md#8-closeout-plan-adr-195) and
 [the Phase 2 ledger](../PHASE2-LEDGER.md) govern current gates.
 
-Phase 1 is complete (36/36). Phase 2 is at 11/12. Rungs count completed gates, not effort.
+Phase 1 is complete (36/36). **Phase 2 is CLOSED (12/12, G2 deferred; ADR-198).** Phase 3 is [proposed](../PHASE3-PLAN.md). Rungs count completed gates, not effort.
 
 ## Phase 0 — foundations and parked hardware
 | Package | Outcome | Owner | Stream | Current boundary |
@@ -31,11 +31,11 @@ Phase 1 is complete (36/36). Phase 2 is at 11/12. Rungs count completed gates, n
 | WP-13 | Embedded-readiness audit | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #66 independently reproduced all six frozen gates from raw evidence and accepted exact product PR #206; integrated on main |
 | WP-36 | Slot capability model | Agent | 1 | **COMPLETE / independently accepted.** Verification PR #57 accepted the frozen package after the deterministic 5/5 precursor plus the exact 100,000-sequence / 1,997,914-operation literal-NULL source-slot campaign. Product PR #200 integrated the exact accepted tree unchanged at main `e4a3565...` |
 
-## Phase 2 — current desktop tooling
+## Phase 2 — desktop tooling, CLOSED
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
 | WP-14 | [Real-card CLI](WP-14.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
-| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | 3/4. G1/G3/G4/G5 complete after C2 (#370); G2 #631 remains. |
+| WP-15 | [One-window Windows app](WP-15.md) | Software/Verification | 3 | **ACCEPTED 4/4, G2 deferred** (ADR-198). |
 | WP-16 | [Ingest](WP-16.md) | Software/Verification | 3 | **ACCEPTED 4/4** (Verification #364). |
 | WP-38 | Phone/web harness | — |3|Not taken in Phase2. Future WASM possibility preserved; resume only on explicit authorization. |
 
@@ -49,7 +49,7 @@ ordinary Windows CI after359 local script-policy refusal; no native session yet.
 [PM620 review](../REVIEW/PM620-METHOD-CONTROLS.md) records exact evidence,
 closures/restoration pointers and remaining gates. Manual role pickup only.
 
-## Phase 3 — future scope, not activated
+## Phase 3 — bench firmware, PROPOSED ([plan](../PHASE3-PLAN.md), decisions #635)
 | Package | Outcome | Owner | Stream | Current boundary |
 |---|---|---|---|---|
 | WP-17 | Teensy firmware skeleton, engine integration | Agent | 4 | Not activated; original package/dependency/acceptance and safety boundaries carry. |
