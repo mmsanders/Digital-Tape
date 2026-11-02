@@ -321,30 +321,30 @@
     // as rig design or a host-only check; it never contributes to passed progress.
     // Later contracts have no criteria yet, so no overall Phase 3 % is claimed.
     const PHASE3 = {
-      asOf: "PM648 · 2 November 2026 PDT · Round 1 reviewed (ADR-202); Software candidate ee478a91 held for V378",
+      asOf: "PM650 · 2 November 2026 PDT · V378 cleared; firmware integrated aa472667; off-target Round 2 issued (ADR-203)",
       entry: [
-        { id: "DRAFT-11", name: "Spec revision", state: "IN ROUND", next: "Preflight requires revision (F374-1…5). Corrected proposal awaits re-review, S2 disposition and Michael authorization; not in force." },
+        { id: "DRAFT-11", name: "Spec revision", state: "IN ROUND", next: "V380 reviews the revised proposal; S2 disposition, open parameters and Michael authorization remain. Not in force." },
         { id: "Q-P2-1", name: "Any-subset crash coverage", state: "BLOCKED", next: "365/365 deferred faults pass (404/404 with prior receipts). Six long cuts unavailable on the three-unit fixture, zero executed. Batching/large-epoch coverage remains held by PM." },
-        { id: "Parts", name: "Bench parts approved and ordered", state: "IN ROUND", next: "Hardware drafts minimum and full lists; Michael approves purchases." }
+        { id: "Parts", name: "Bench parts approved and ordered", state: "IN ROUND", next: "Minimum bench + rig selected; Michael confirms NOT ORDERED. Hardware651 reconciles the corrected-rig cart delta; changed items need approval." }
       ],
       packages: [
-        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware + Verification", issue: 641,
-          note: "Rig method NOT CLEARED (V3d616c14, R374-1…5). Hardware #641 owns corrections before independent review; no physical tear claimed or card qualified.", criteria: [
+        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware + Verification", issue: 651,
+          note: "Rig method NOT CLEARED (V3d616c14, R374-1…5). Hardware651 corrects, V380 authors tests then reviews; no physical tear claimed or card qualified.", criteria: [
             { id: "A-1", name: "Exact card identity", state: "TO DO", next: "Part number, capacity, revision and CID; needs a reader or rig that reads CID." },
             { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "Method re-review, then run." },
             { id: "A-3", name: "Against the C-60 copy requirement", state: "TO DO", next: "After A-2; production copy-time proof remains Phase 5." },
             { id: "A-4", name: "Reader not the bottleneck", state: "TO DO", next: "With A-2." },
-            { id: "A-5", name: "Parts support the bench and rig", state: "IN ROUND", next: "Hardware Round 1." },
-            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per SKU/revision, zero torn blocks", state: "BLOCKED", next: "Resolve skipped-tear/stale-busy judge gaps, actual cut timing and electrical evidence. SPI characterization does not qualify SD4; no physical run cleared." }
+            { id: "A-5", name: "Parts support the bench and rig", state: "IN ROUND", next: "Hardware651 reconciles selected parts with the corrected method. Parts not ordered; no independent acceptance." },
+            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per SKU/revision, zero torn blocks", state: "BLOCKED", next: "Hardware651 / V380: skipped-tear/stale-busy regressions, actual cut timing and electrical proof. SPI characterization does not qualify SD4; no physical run cleared." }
           ] },
-        { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software + Verification", issue: 642,
-          note: "Returned #647 ee478a91, 117 checks pass. Vd7540127 confirms host PCM/static budgets/tree. Integration HELD for V378's explicit recognition correction; no firmware defect established by that policy mismatch.", criteria: [
-            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 byte-exact PCM comparisons, 28/28 controls per platform. Target PCM/I²S pending; host success alone does not pass F1." },
-            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. Painted target stack pending." },
+        { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software + Verification", issue: 652,
+          note: "V378 correction 98f46c94 clears off-target integration; #647 merged aa472667 after 117 current-base checks. Software652/V380 prepare the BE-1 offline capture kit. No target/package acceptance yet.", criteria: [
+            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 PCM comparisons, 28/28 controls per platform carried onto main. BE-1 kit in Round 2; target PCM/I²S pending." },
+            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. BE-1 capture kit now; actual target instance/stack still pending." },
             { id: "F3", name: "Warm instant-on <100 ms", state: "TO DO", next: "Needs the logic analyser." },
             { id: "F4", name: "Commit latency <200 ms", state: "TO DO", next: "With recording (WP-19)." },
             { id: "F5", name: "Play, Stop and removal", state: "TO DO", next: "Bench evidence witnessed by Michael." },
-            { id: "F6", name: "Engine unchanged", state: "PASSED", next: "Independent Vd7540127 confirms full engine tree d96b4245 on held, unmerged candidate ee478a91. This is not WP-17 package acceptance." }
+            { id: "F6", name: "Engine unchanged", state: "PASSED", next: "Vd7540127 / V98f46c94 confirm engine d96b4245; PM650 authenticates unchanged integration aa472667. This is not WP-17 package acceptance." }
           ] },
         { id: "WP-18", name: "Second slot and copy", owner: "Contract after Round 1", note: "Read-only source slot, copy correctness and LED progress from the callback. Criteria pending contract.", criteria: [] },
         { id: "WP-19", name: "Audio paths and output caps", owner: "Contract after Round 1", note: "Codec, microphone, aux and speaker; two output caps, speaker mute and record-source selection. Criteria pending contract.", criteria: [] },
@@ -388,11 +388,11 @@
           ${PHASE3.packages.map(pkg => `<li class="stage"><span class="num">${escapeHtml(pkg.id)}</span><span class="nm">${escapeHtml(pkg.name)}</span>
             <p class="why">${escapeHtml(pkg.owner)}${pkg.issue ? ` · <a href="https://github.com/mmsanders/Digital-Tape/issues/${pkg.issue}">#${pkg.issue}</a>` : ""}</p>
             <p class="why">${escapeHtml(pkg.note)}</p>${pkg.criteria.length ? criterionList(pkg.criteria) : `<p class="empty">Not yet assigned · criteria pending</p>`}</li>`).join("")}</ul></details>
-        <p class="why">Round 1: <a href="https://github.com/mmsanders/Digital-Tape/issues/641">Hardware #641</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/642">Software #642</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/378">Verification #378 correction</a>. <a href="https://github.com/mmsanders/digital-tape-verification/issues/374">V374 returns</a> carry. Michael starts issues manually.</p>
+        <p class="why">Round 2: <a href="https://github.com/mmsanders/Digital-Tape/issues/651">Hardware #651</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/652">Software #652</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/380">Verification #380</a>. Independent expectations before new covered behavior; Michael starts issues manually. Parts not ordered; no target session ready.</p>
         <p class="why">Exit: WP-05 and WP-17–WP-21 independently accepted on the bench; firmware goldens byte-identical with earlier regressions green; atomicity passed or a torn block escalated as a format blocker; Q-P2-1 cleared before write batching.</p>
         <p class="rmnote">USB-powered bench only. Fabrication and charging CLOSED; no qualified card. Engine pinned at d96b4245. Production &lt;30 s copy proof belongs to Phase 5. DRAFT-11 remains proposed.</p>
         <p class="rmnote">Snapshot: ${escapeHtml(PHASE3.asOf)} — PM-maintained, not live. Issue queues below refresh separately; closing an issue does not pass a criterion.</p>
-        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-FIRMWARE-CONTRACT.md">FW-1 contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM648-P3-R1-2026-11-02.md">PM review</a></p>`;
+        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-BENCH-EVIDENCE.md">BE-1 evidence contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM650-P3-R2-2026-11-02.md">PM review</a></p>`;
     }
 
     function rungOf(stage) {

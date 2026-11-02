@@ -195,4 +195,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-202](DECISIONS.md#adr-202--round-1-disposition-and-fw-1-recognition-clarification) | 2026-11-02 PDT | Round 1 disposition / FW-1 recognition | Desktop admission retained; explicit verifier correction V378; F6 candidate PASS, target and integration holds; 365 faults pass/six cuts unavailable; DRAFT-11 and rig findings retained |
 
-132 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-203](DECISIONS.md#adr-203--firmware-integration-recorded-off-target-round-2-issued) | 2026-11-02 PDT | Latest disposition / Round 2 | V378 correction carried to integrated aa472667; BE-1 kit Software652, rig/cart correction Hardware651, independent tests/review V380; parts not ordered, target/physical holds carry |
+
+133 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

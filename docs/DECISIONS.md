@@ -4971,3 +4971,37 @@ Retain achieved coverage and separate candidate, target and qualification facts.
 **Reversal cost.** Low for contract/test-publication correction; no product behavior
 or frozen artifact changes. Tightening admission later would require explicit scope
 and independent coverage for the compatibility change.
+
+## ADR-203 — Firmware integration recorded; off-target Round 2 issued
+**Date:** 2026-11-02 PDT
+**Status:** ADOPTED by PM [#650](https://github.com/mmsanders/Digital-Tape/issues/650)
+on Michael's request to review latest and assign next work.
+
+**Disposition.** V378 correction `98f46c94` clears ee478a91 for the authorized
+off-target scope: 28 cases and four detecting controls; prior evidence unchanged.
+Software #647 integrated at `aa472667` after docs-only base sync `aebf31c7` and
+117 passing checks. PM confirms scoped implementation identities unchanged.
+Integration hold closed; F6 remains PASSED; target/package acceptance still pending.
+[Full review](REVIEW/PM650-P3-R2-2026-11-02.md).
+
+**Parts.** Michael confirms parts are not ordered. His minimum bench + rig selection
+is retained, not asked again; derived old cart total is not a new quote or order.
+Hardware must expose any corrected-rig parts delta before an order. No spending
+or physical authorization follows from this PM round.
+
+**Issued.** [BE-1](WP17-BENCH-EVIDENCE.md) defines an offline evidence kit for existing
+FW-1 criteria, with actual/simulated/absent provenance, hash/PCM/frame/budget checks,
+and incomplete target observations kept visible. Hardware651 corrects R374-1…5
+and the selected cart on existing PR646. Software652 prepares the BE-1 kit.
+Verification380 authors tests before new covered behavior, publishes and then
+disposes exact returned heads. Public interface declarations may precede code;
+private scaffolding does not waive tests-first. Method qualification and controls
+stay inside those tranches. No polling or automatic activation.
+
+**Boundaries.** No target/physical runs before a separately ready session. No
+card/system qualification, native-mode transfer, batching, acoustic-cap acceptance
+or DRAFT-11 issuance. All prior frozen/engine/golden and fabrication/charging holds
+carry. Ordinary unbatched bench playback is separate from the unqualified power-cut rig.
+**Rationale.** Use the parts lead time to prepare trustworthy captures and remove
+the known rig blockers, without repeating accepted evidence or claiming measurements.
+**Reversal cost.** Low: offline kit and method documents; no new engine/media semantics.
