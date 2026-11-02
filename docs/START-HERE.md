@@ -12,8 +12,8 @@ decision log.
 
 | Role | Usually needed |
 |---|---|
-| PM | [Phase 3 plan](PHASE3-PLAN.md), [packages](PACKAGES/README.md), [device design](DEVICE-DESIGN.md), spec/VERSION.md |
-| Software | tests/IMPORTS.json and the COVERAGE/ADAPTER files of packages you touch, engine/README.md, tools/README.md, the contract named in your issue |
+| PM | [Phase 3 plan](PHASE3-PLAN.md) and [ledger](PHASE3-LEDGER.md), [packages](PACKAGES/README.md), [device design](DEVICE-DESIGN.md), spec/VERSION.md |
+| Software | The contract named in your issue (for firmware, [FW-1](WP17-FIRMWARE-CONTRACT.md)), tests/IMPORTS.json and the COVERAGE/ADAPTER files of packages you touch, engine/README.md, firmware/README.md |
 | Hardware | [device design](DEVICE-DESIGN.md), [hardware status](STATUS-HARDWARE.md), hardware/README.md, spec/hw/VERSION.md |
 | Verification | Your verification-lead issue, spec/VERSION.md, the spec sections and contracts it names |
 | Surge | Your surge issue and the inputs it names |

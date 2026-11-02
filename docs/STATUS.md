@@ -1,7 +1,7 @@
 # Project status
 
-**2 November 2026 PDT. Phase 2.5 cleanout complete** ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)).
-Phases 1 and 2 are complete. Phase 3 (bench firmware) is ready to open on Michael's word.
+**2 November 2026 PDT. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
+Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Completed
 
@@ -13,14 +13,12 @@ Phases 1 and 2 are complete. Phase 3 (bench firmware) is ready to open on Michae
 Package detail: [packages](PACKAGES/README.md) and [verification integration](VERIFICATION-INTEGRATION.md).
 The desktop tool's scope is frozen (ADR-198): it loads cartridges, nothing more.
 
-## Next: Phase 3
+## Phase 3
 
 [Phase 3 plan](PHASE3-PLAN.md):
 - the shared engine on a Teensy 4.1 bench build, with keys, LED status, headphones and speaker;
 - the card power-cut test on the PNY cards;
 - the deferred crash coverage before firmware write batching.
-
-Hardware returns for bench work and drafts the parts list; Michael owns no bench equipment yet.
 
 The device design has moved:
 - mechanical latching side keys and no solenoid (LED status instead);
@@ -33,7 +31,15 @@ key combination.
 
 ## Current assignments
 
-None: zero open issues and PRs in both repositories. Phase 3 issues follow when Michael opens the phase.
+Round 1 (Michael starts each):
+
+| Owner | Issue | Outcome |
+|---|---|---|
+| Hardware | [#641](https://github.com/mmsanders/Digital-Tape/issues/641) | Bench parts list (minimum and full, for Michael's approval); card power-cut rig design; speaker loudness limit research; Rew/FF depth-sensing approach; copy-button options |
+| Software | [#642](https://github.com/mmsanders/Digital-Tape/issues/642) | Teensy firmware skeleton per [FW-1](WP17-FIRMWARE-CONTRACT.md): build, SD partition view, play path, golden hook, CI size gates |
+| Verification | [V#374](https://github.com/mmsanders/digital-tape-verification/issues/374) | Q-P2-1 completion; WP-17 acceptance tests; [DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md) preflight; its repo's baseline; then Software's head and the rig method |
+
+All three can start now; none needs parts. Target-side checks wait for the bench.
 
 ## Holds that stand
 
