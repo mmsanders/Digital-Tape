@@ -31,20 +31,25 @@ key combination.
 
 ## Current assignments
 
-Round 1 (Michael starts each):
+Round 2 (Michael starts each; parts not ordered):
 
 | Owner | Issue | Outcome |
 |---|---|---|
-| Hardware | [#641](https://github.com/mmsanders/Digital-Tape/issues/641) | Bench parts list (minimum and full, for Michael's approval); card power-cut rig design; speaker loudness limit research; Rew/FF depth-sensing approach; copy-button options |
-| Software | [#642](https://github.com/mmsanders/Digital-Tape/issues/642) | Returned #647 `ee478a91`, 117 checks pass; integration HELD pending V378 corrected admission disposition. Host F1/static F2 pass; target halves pending |
-| Verification | [V#378](https://github.com/mmsanders/digital-tape-verification/issues/378) | Publish explicit FW-1 recognition correction, preserve original package, re-dispose unchanged Software head; V374 publications carry |
+| Hardware | [#651](https://github.com/mmsanders/Digital-Tape/issues/651) | Correct rig method/judge R374-1…5 and reconcile the selected cart on existing PR646; no physical run |
+| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | [BE-1](WP17-BENCH-EVIDENCE.md) offline bench-evidence kit; public schema first, independent tests before covered behavior |
+| Verification | [V#380](https://github.com/mmsanders/digital-tape-verification/issues/380) | Author rig/kit expectations, publish, then review exact Hardware/Software heads; no physical acceptance |
 
-Latest [PM648 review](REVIEW/PM648-P3-R1-2026-11-02.md) / ADR-202: F6 passes on the held
-candidate (**1/12** defined package criteria). V41995965 passes all 365 deferred faults;
+Latest [PM650 review](REVIEW/PM650-P3-R2-2026-11-02.md) / ADR-203: V378 `98f46c94`
+cleared the admission correction (28 cases / four controls). Software integrated at
+`aa472667` with unchanged cleared implementation and 117 current-base checks passing.
+F6 remains PASSED (**1/12** defined criteria); target/package acceptance is pending.
+V41995965 passes all 365 deferred faults;
 six long cuts are unavailable on the issued fixture, not executed. Batching stays held.
-V3d616c14: rig method NOT CLEARED (R374-1…5); Hardware #641 owns corrections. SPI
+V3d616c14: rig method NOT CLEARED (R374-1…5); Hardware #651 owns corrections. SPI
 characterization is not native SD4 qualification. DRAFT-11 preflight requires revision;
 proposal remains unissued. Target PCM/I²S, stack, timing and controls/removal await the bench.
+Michael's minimum bench + rig selection stands; parts **not ordered** (2 November).
+No fresh physical session is ready. A corrected-rig cart delta is not an approved purchase.
 
 ## Holds that stand
 
