@@ -36,10 +36,15 @@ Round 1 (Michael starts each):
 | Owner | Issue | Outcome |
 |---|---|---|
 | Hardware | [#641](https://github.com/mmsanders/Digital-Tape/issues/641) | Bench parts list (minimum and full, for Michael's approval); card power-cut rig design; speaker loudness limit research; Rew/FF depth-sensing approach; copy-button options |
-| Software | [#642](https://github.com/mmsanders/Digital-Tape/issues/642) | Teensy firmware skeleton per [FW-1](WP17-FIRMWARE-CONTRACT.md): build, SD partition view, play path, golden hook, CI size gates |
-| Verification | [V#374](https://github.com/mmsanders/digital-tape-verification/issues/374) | Q-P2-1 completion; WP-17 acceptance tests; [DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md) preflight; its repo's baseline; then Software's head and the rig method |
+| Software | [#642](https://github.com/mmsanders/Digital-Tape/issues/642) | Returned #647 `ee478a91`, 117 checks pass; integration HELD pending V378 corrected admission disposition. Host F1/static F2 pass; target halves pending |
+| Verification | [V#378](https://github.com/mmsanders/digital-tape-verification/issues/378) | Publish explicit FW-1 recognition correction, preserve original package, re-dispose unchanged Software head; V374 publications carry |
 
-All three can start now; none needs parts. Target-side checks wait for the bench.
+Latest [PM648 review](REVIEW/PM648-P3-R1-2026-11-02.md) / ADR-202: F6 passes on the held
+candidate (**1/12** defined package criteria). V41995965 passes all 365 deferred faults;
+six long cuts are unavailable on the issued fixture, not executed. Batching stays held.
+V3d616c14: rig method NOT CLEARED (R374-1…5); Hardware #641 owns corrections. SPI
+characterization is not native SD4 qualification. DRAFT-11 preflight requires revision;
+proposal remains unissued. Target PCM/I²S, stack, timing and controls/removal await the bench.
 
 ## Holds that stand
 
