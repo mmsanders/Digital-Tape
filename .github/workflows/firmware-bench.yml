@@ -118,10 +118,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Build tapectl and fwhost
+      - name: Build tapectl (gcc, the reference producer) and fwhost (${{ matrix.cc }})
+        # engine/Makefile's stack-analysis flags are GCC-only, so tapectl,
+        # which only builds the cartridges, stays on gcc. fwhost compiles the
+        # engine and the firmware modules itself, under the matrix compiler.
         run: |
-          make -C engine all CC=${{ matrix.cc }}
-          make -C host CC=${{ matrix.cc }}
+          make -C engine all
+          make -C host
           make -C firmware/bench/host CC=${{ matrix.cc }}
       - name: Reference package integrity (SHA256SUMS)
         run: cd tests/golden && sha256sum -c SHA256SUMS
