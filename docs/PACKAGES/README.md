@@ -9,7 +9,7 @@ device is described in [DEVICE-DESIGN](../DEVICE-DESIGN.md).
 | 0 Foundations | Specs frozen and signed (docs/PHASE0-FREEZE.md) |
 | 1 Audio engine | **Complete** (36/36), 3 Oct 2026 |
 | 2 Desktop tooling | **Complete** (12/12, G2 deferred), 1 Nov 2026 |
-| 3 Bench firmware | **Planned**; opens after the Phase 2.5 cleanout |
+| 3 Bench firmware | **Open** since 2 Nov 2026 ([ledger](../PHASE3-LEDGER.md)) |
 | 4–6 | Future |
 
 ## Foundations and specifications
@@ -41,11 +41,11 @@ device is described in [DEVICE-DESIGN](../DEVICE-DESIGN.md).
 | WP-15 | [One-window app](WP-15.md) | Accepted with G2 deferred (Verification #364/#370, ADR-198) |
 | WP-38 | Phone/web harness | Not taken; a later WASM build stays possible |
 
-## Phase 3 — bench firmware (planned)
+## Phase 3 — bench firmware (open)
 | Package | Outcome |
 |---|---|
 | WP-05 | [Cards and bench parts](WP-05.md): bench parts list, card characterisation and the atomicity test |
-| WP-17 | Teensy firmware skeleton, engine integration |
+| WP-17 | Teensy firmware skeleton, engine integration ([FW-1](../WP17-FIRMWARE-CONTRACT.md)) |
 | WP-18 | Second card slot, insert detect, copy with LED progress |
 | WP-19 | Codec, microphone, aux, speaker amplifier, output caps |
 | WP-20 | Transport key reading and LED status (no solenoid) |

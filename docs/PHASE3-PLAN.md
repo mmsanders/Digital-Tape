@@ -1,7 +1,7 @@
 # Phase 3 plan — bench firmware
 
-**Planned; opens after the Phase 2.5 cleanout** (Michael, 1 Nov 2026; [ADR-199](DECISIONS.md#adr-199--phase-25-cleanout-device-design-baseline-and-phase-3-answers)).
-Work is assigned in role-labeled issues once Michael opens the phase. The device is described
+**OPEN since 2 November 2026** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Work is assigned in
+role-labeled issues; progress is in [the Phase 3 ledger](PHASE3-LEDGER.md). The device is described
 in [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 ## 1. What Phase 3 delivers
@@ -35,7 +35,9 @@ resumes near where it stopped.
 - any engine or format change;
 - desktop app changes, except the deferred G2 work.
 
-## 2. Kickoff work (round 1)
+## 2. Round 1 (issued 2 Nov)
+
+Contract: [FW-1](WP17-FIRMWARE-CONTRACT.md). Spec draft: [DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md).
 
 - **PM:** a spec revision covering
   - the speaker cap value (guardrail 11 revision);

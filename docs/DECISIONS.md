@@ -4885,3 +4885,43 @@ answers to DEVICE-DESIGN §6.
 
 **Reversal cost.** Low: behaviour lives in firmware and the spec revision, and the engine is
 untouched.
+
+## ADR-201 — Phase 3 opened; round 1 issued
+**Date:** 2026-11-02 PDT
+**Status:** ADOPTED by PM ([#640](https://github.com/mmsanders/Digital-Tape/issues/640)) on
+Michael's word: "Yup, let's do it! Go phase 3".
+
+**Opened.** Phase 3, bench firmware, per [PHASE3-PLAN.md](PHASE3-PLAN.md). Progress is tracked
+in [PHASE3-LEDGER.md](PHASE3-LEDGER.md).
+
+**Issued.**
+- [WP17-FIRMWARE-CONTRACT.md](WP17-FIRMWARE-CONTRACT.md) (FW-1):
+  - Teensy 4.1 plus an SGTL5000 audio board;
+  - `engine/` byte-identical, including `engine/port`, so Teensy code lives in
+    `firmware/bench/`;
+  - a partition-2 block view over the built-in slot;
+  - the play path;
+  - criteria F1–F6.
+- [SPEC-DRAFT-11-PROPOSAL.md](SPEC-DRAFT-11-PROPOSAL.md): firmware behaviour and safety
+  rows for the no-solenoid, speaker and depth-scrub design. It is not in force until
+  Verification preflights it, Hardware supplies the speaker value and Michael authorizes it.
+
+**Independence.** Firmware is a port and consumer. Like the desktop tools (ADR-158), its
+acceptance tests are authored in parallel from the contract and disposed blind on Software's
+exact head. Any engine change would still need Structural Rule 1; none is licensed.
+
+**Round 1.**
+- **Hardware:** bench parts list for Michael's approval, the atomicity rig design, speaker
+  acoustic-limit research, a depth-sensing approach for Rew/FF, and copy-button options.
+- **Software:** the firmware build, the SD partition view, the play path, CI compile and
+  size gates.
+- **Verification:**
+  - Q-P2-1 any-subset completion;
+  - WP-17 acceptance authored from FW-1;
+  - DRAFT-11 preflight;
+  - the atomicity rig method review once Hardware returns;
+  - its own repository's docs brought to the current baseline.
+
+**Rationale.** Start every stream that doesn't need parts now. The parts list gates only
+the target halves of the tests.
+**Reversal cost.** Low: contracts and the proposal are documents, and the engine is untouched.

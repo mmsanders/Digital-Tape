@@ -7,7 +7,7 @@ are no tracks, titles or browsing. Scrub changes playback rate without filtering
 **Where the project is:**
 - Phase 1, the audio engine, is complete.
 - Phase 2, the Windows desktop tools that make cartridges from a folder of music, is complete.
-- Phase 3, bench firmware on a Teensy 4.1, is planned.
+- Phase 3, bench firmware on a Teensy 4.1, is under way.
 
 Current state is in [STATUS](docs/STATUS.md). This is not yet a finished player or a
 safety-qualified hardware design.
