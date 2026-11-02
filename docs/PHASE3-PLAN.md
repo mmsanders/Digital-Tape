@@ -18,8 +18,8 @@ resumes near where it stopped.
 | WP-05 Cards and bench parts | Bench parts list (Michael approves); card power-cut rig; card characterisation | Atomicity: ≥ 1,000 qualifying cuts per exact SKU/revision, zero torn blocks (a torn block is a format blocker); sustained-write on 80%-filled media |
 | WP-17 Firmware skeleton, engine integration | Teensy port (SD read/write/flush, I²S out), shared engine unchanged | Goldens bit-identical to desktop at 1.0× (divergence blocks release); RAM/stack/.rodata budgets measured on target (G08); warm instant-on < 100 ms on a logic analyser (G04); commit latency < 200 ms; resume position |
 | WP-18 Second slot, insert detect, copy | Rear-slot source, front-slot destination, copy with LED-ring progress | Copy correctness; progress from the callback, never a timer. Copy *time* is not provable on the bench (SPI second slot); guardrail 10 stays a Phase 5 measurement |
-| WP-19 Audio paths and caps | Codec, headphone out, speaker amplifier, microphone, two aux ports | Headphone cap 85 dB SPL (G11) and a separate speaker cap, both set in hardware/codec, re-asserted at boot, unreachable from controls; measured with an SPL meter, **witnessed by Michael** |
-| WP-20 Transport reading and status | Read the mechanical keys; LED-ring status; record light | No solenoid: firmware never moves a key. End of tape and cartridge-full shown on the LED ring (spec revision at kickoff); record light per spec; scrub ramp per spec |
+| WP-19 Audio paths and caps | Codec; headphone/aux-out jack; aux in; speaker amplifier; microphone. Speaker mutes with headphones and while recording; aux in wins over mic as record source | Headphone cap 85 dB SPL (G11) and a separate speaker cap, both set in hardware/codec, re-asserted at boot, unreachable from controls; measured with an SPL meter, **witnessed by Michael** |
+| WP-20 Transport reading and status | Read the mechanical keys; depth-sensitive Rew/FF; copy button; LED-ring status; record light | No solenoid: firmware never moves a key. End of tape and cartridge-full shown on the LED ring; Rew/FF scrub speed follows press depth and works while Play is latched (spec revision at kickoff); record light per spec |
 | WP-21 Bench acceptance demo | The firmware criteria run end to end | Michael-witnessed record; Verification audits method and raw data |
 
 **Exit gate:**
@@ -42,14 +42,16 @@ resumes near where it stopped.
   - end-of-tape and cartridge-full behaviour without a solenoid;
   - removal of the coil limits.
   
-  Also the WP-17 contract (port interface, bench pin map, golden-on-target method). These
-  follow Michael's answers to DEVICE-DESIGN §6.
+  Also the depth-sensitive scrub behaviour (ADR-200), and the WP-17 contract (port interface,
+  bench pin map, golden-on-target method).
 - **Hardware:**
   - the bench parts list for Michael's approval: Teensy 4.1, audio board, breadboard and
     wiring, keys and LEDs, second microSD breakout, small speaker and amplifier, MEMS mic,
     aux jacks, logic analyser, and SPL meter plus coupler;
   - the atomicity rig design;
-  - toy-safety acoustic limits for the speaker cap.
+  - toy-safety acoustic limits for the speaker cap;
+  - a depth-sensing approach for Rew/FF;
+  - a copy-button placement.
 - **Verification:**
   - the Q-P2-1 any-subset completion;
   - WP-17 acceptance authored from the contract;

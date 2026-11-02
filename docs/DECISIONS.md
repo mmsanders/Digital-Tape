@@ -4849,3 +4849,39 @@ mechanical transport removes the coil, its driver and its safety limits, at the 
 auto-release; LED status replaces it.
 **Reversal cost.** Low for documents (Git history). The solenoid decision is reversible
 until enclosure CAD in Phase 4.
+
+## ADR-200 — Device behaviour answers
+**Date:** 2026-11-02 PDT
+**Status:** ADOPTED by PM ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)) on Michael's
+answers to DEVICE-DESIGN §6.
+
+1. **Aux.** One aux in and one aux out. The aux out is the headphone jack.
+2. **Speaker.**
+   - Headphones mute the speaker.
+   - The speaker mutes while recording; headphones keep playing during a recording.
+3. **End of tape.** Audio stops, Play stays down, and the LED ring shows "end" until Stop.
+4. **Record source.** Aux in when plugged in, otherwise the microphone.
+5. **Copy.** Likely a dedicated button separate from the transport keys; still open. The
+   key combination for promote B→A is open.
+6. **Rew/FF.**
+   - Momentary, and they work while Play is latched.
+   - **Depth-sensitive:** light press scrubs slowly, full depth scrubs fast, with a smooth
+     gradient between.
+   - Both pressed: no action until one is released.
+   - This replaces the fixed time-based scrub ramp in spec/acceptance.md at the Phase 3
+     kickoff spec revision. The engine is unchanged: firmware maps depth to `tape_set_rate`,
+     and guardrail 02 still holds.
+7. **Cartridge full while recording.** Recording stops and is kept, keys stay down, and the
+   ring shows red until Stop.
+8. **Keys.** Side keys for now. A face-key variant may follow later as a key-section-only
+   shell change.
+
+**Consequences for Phase 3.**
+- WP-19 covers aux in/out, the mute rules and source selection.
+- WP-20 covers reading the mechanical keys, depth sensing on Rew/FF (Hardware proposes the
+  sensor) and LED status.
+- The kickoff spec revision covers end of tape, cartridge full, the scrub behaviour, the
+  speaker cap and removal of the coil limits.
+
+**Reversal cost.** Low: behaviour lives in firmware and the spec revision, and the engine is
+untouched.
