@@ -1,0 +1,26 @@
+{
+  "name": "tape_engine",
+  "version": "0.0.0",
+  "description": "The unchanged shared engine (engine/src, engine/include), built from the repository tree. Nothing is copied: FW-1 \u00c2\u00a72 keeps engine/ byte-identical.",
+  "build": {
+    "srcDir": "../../../../engine/src",
+    "includeDir": "../../../../engine/include",
+    "flags": [
+      "-std=c99",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Wshadow",
+      "-Wconversion",
+      "-Wstrict-prototypes",
+      "-Wmissing-prototypes",
+      "-Wvla",
+      "-Wcast-qual",
+      "-Wpointer-arith",
+      "-Wwrite-strings",
+      "-fno-common"
+    ],
+    "extraScript": "gate_control.py"
+  }
+}

@@ -1,0 +1,136 @@
+name: WP17 firmware bench (Teensy 4.1)
+# FW-1 (docs/WP17-FIRMWARE-CONTRACT.md) §3 and §6, issue #642:
+#   F6  engine/ equals the pinned tree d96b4245, with a negative control;
+#   F2  the Teensy 4.1 build and its static budgets, printed, with a negative
+#       control for each budget that must fail the same gate;
+#   F1  host half: the firmware's portable modules over dev_file, against the
+#       WP-11 goldens and the WP-14 image fixtures, with negative controls.
+# CI never flashes hardware. Target halves (playback, stack high-water, wake
+# time, F1 on target) need the bench and are not run here.
+on:
+  pull_request:
+    paths:
+      - 'firmware/**'
+      - 'engine/**'
+      - 'host/port/mbr.c'
+      - 'host/port/layout.h'
+      - 'host/tapectl.c'
+      - 'tests/golden/**'
+      - 'tests/wp14_r1/fixtures.py'
+      - 'tests/wp14_r1/oracle.py'
+      - 'tests/wp14_r1/catalog.py'
+      - '.github/workflows/firmware-bench.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'firmware/**'
+      - 'engine/**'
+      - '.github/workflows/firmware-bench.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  engine-pin:
+    name: "F6 engine/ equals d96b4245"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: engine/ tree equals the pin
+        run: bash firmware/bench/tools/engine_pin.sh HEAD
+      - name: Negative control (an altered engine tree must be reported)
+        run: bash firmware/bench/tools/engine_pin.sh --control
+
+  teensy-build:
+    name: "F2 Teensy 4.1 build and static budgets"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the pinned PlatformIO Core
+        run: |
+          python -m pip install -r firmware/bench/tools/requirements.txt
+          pio --version
+      - name: Build firmware and both F2 negative controls
+        run: pio run -d firmware/bench -e teensy41 -e teensy41_ctl_ram -e teensy41_ctl_rodata
+      - name: Toolchain identity
+        run: |
+          mkdir -p fw-evidence
+          pio pkg list -d firmware/bench -e teensy41 > fw-evidence/packages.txt
+          TC="$HOME/.platformio/packages/toolchain-gccarmnoneeabi-teensy/bin"
+          "$TC/arm-none-eabi-gcc" --version > fw-evidence/gcc.txt
+          cat fw-evidence/packages.txt fw-evidence/gcc.txt
+      - name: F2 budgets on the firmware (must pass)
+        run: |
+          B=firmware/bench/.pio/build
+          TC="$HOME/.platformio/packages/toolchain-gccarmnoneeabi-teensy/bin"
+          python3 -B firmware/bench/tools/size_gate.py --map $B/teensy41/firmware.map \
+            --elf $B/teensy41/firmware.elf --nm "$TC/arm-none-eabi-nm" \
+            --size-tool "$TC/arm-none-eabi-size" | tee fw-evidence/size-gate.txt
+          test "${PIPESTATUS[0]}" -eq 0
+      - name: F2 negative controls (each must fail the same gate, for its own reason)
+        run: |
+          set +e   # the gate's own exit status is what this step judges
+          B=firmware/bench/.pio/build
+          TC="$HOME/.platformio/packages/toolchain-gccarmnoneeabi-teensy/bin"
+          rc=0
+          for c in ram:"FAIL  RAM " rodata:"FAIL  engine .rodata "; do
+            env="teensy41_ctl_${c%%:*}"; want="${c#*:}"
+            python3 -B firmware/bench/tools/size_gate.py --map $B/$env/firmware.map \
+              --elf $B/$env/firmware.elf --nm "$TC/arm-none-eabi-nm" > fw-evidence/size-gate-$env.txt
+            got=$?
+            cat fw-evidence/size-gate-$env.txt
+            if [ $got -eq 1 ] && grep -q "^$want" fw-evidence/size-gate-$env.txt; then
+              echo "PASS  control $env failed the gate with: $want"
+            else
+              echo "FAIL  control $env: gate exit $got, expected 1 with '$want'"; rc=1
+            fi
+          done
+          exit $rc
+      - name: Keep the image, map and identity
+        if: always()
+        run: |
+          B=firmware/bench/.pio/build/teensy41
+          cp $B/firmware.hex $B/firmware.elf $B/firmware.map fw-evidence/ 2>/dev/null || true
+          (cd fw-evidence && sha256sum firmware.* > SHA256SUMS) || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp17-firmware-teensy41
+          path: fw-evidence
+
+  host-checks:
+    name: "F1 host half and partition view (${{ matrix.cc }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build tapectl and fwhost
+        run: |
+          make -C engine all CC=${{ matrix.cc }}
+          make -C host CC=${{ matrix.cc }}
+          make -C firmware/bench/host CC=${{ matrix.cc }}
+      - name: Reference package integrity (SHA256SUMS)
+        run: cd tests/golden && sha256sum -c SHA256SUMS
+      - name: Off-target checks (goldens, partition view, controls)
+        run: |
+          python3 -B firmware/bench/host/run_checks.py --fwhost build/fwhost/fwhost \
+            --tapectl build/host/tapectl --out build/fwhost/checks
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp17-host-checks-${{ matrix.cc }}
+          path: build/fwhost/checks/summary.json
