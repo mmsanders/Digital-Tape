@@ -1,0 +1,11 @@
+{
+  "name": "tape_layout",
+  "version": "0.0.0",
+  "description": "The card layout recognition tapectl uses (host/port/mbr.c, host/port/layout.h), built unchanged from the repository tree, so the firmware and tapectl apply the same exact WP-14 §3.1 test.",
+  "build": {
+    "srcDir": "../../../../host/port",
+    "includeDir": "../../../../host/port",
+    "srcFilter": ["-<*>", "+<mbr.c>"],
+    "flags": ["-std=c99", "-Wall", "-Wextra", "-Werror"]
+  }
+}
