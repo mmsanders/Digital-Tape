@@ -9,6 +9,22 @@ for [P3-R1-HW (#641)](https://github.com/mmsanders/Digital-Tape/issues/641).
 > Michael's to approve, edit, place and pay for. A parts order never opens board fabrication or cell
 > charging.
 
+## Decision: 2 November 2026
+
+Michael approved **"Minimum bench + rig"** (on the #641 thread). That is:
+
+| Lines | What | Total |
+|---|---|---:|
+| 1–7 | Minimum set | $71.95 |
+| 19–25 | Atomicity rig | $30.50 |
+| 8 (qty 1, not 2) | The rig's card slot, which the rig section lists as part of the rig | $3.50 |
+| 18 | Logic analyser, which the rig's dry-run control A needs. Backordered; any 24 MHz FX2-class clone is fine | $26.95 |
+| | **Approved cart** | **$132.90** |
+
+Deferred: the rest of lines 8–17 (second slot, speaker, mic, jacks, LEDs, Hall sensors, magnets)
+and the measurement kit M1–M3. Michael places and pays for the order; prices marked ≈ are confirmed
+in the cart.
+
 ## How the prices were read
 
 - **Read live on 1 Nov 2026** from the vendor's product page: SparkFun, Adafruit, K&J Magnetics,
