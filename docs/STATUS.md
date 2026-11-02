@@ -1,7 +1,7 @@
 # Project status
 
-**1 November 2026 PDT. Phase 2.5 cleanout** ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)).
-Phases 1 and 2 are complete. Phase 3 (bench firmware) opens after this cleanout.
+**2 November 2026 PDT. Phase 2.5 cleanout complete** ([#637](https://github.com/mmsanders/Digital-Tape/issues/637)).
+Phases 1 and 2 are complete. Phase 3 (bench firmware) is ready to open on Michael's word.
 
 ## Completed
 
@@ -22,13 +22,18 @@ The desktop tool's scope is frozen (ADR-198): it loads cartridges, nothing more.
 
 Hardware returns for bench work and drafts the parts list; Michael owns no bench equipment yet.
 
-The device design has moved: mechanical latching keys and no solenoid, a speaker with its own
-loudness cap, a microphone, two aux ports. See [DEVICE-DESIGN](DEVICE-DESIGN.md). Its
-open questions (§6) are with Michael.
+The device design has moved:
+- mechanical latching side keys and no solenoid (LED status instead);
+- depth-sensitive Rew/FF;
+- a speaker with its own loudness cap;
+- a microphone, aux in, and aux out shared with the headphone jack.
+
+See [DEVICE-DESIGN](DEVICE-DESIGN.md). Still open: the copy button and the promote-B-to-A
+key combination.
 
 ## Current assignments
 
-None. Phase 3 issues follow when Michael opens the phase.
+None: zero open issues and PRs in both repositories. Phase 3 issues follow when Michael opens the phase.
 
 ## Holds that stand
 
