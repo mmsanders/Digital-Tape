@@ -28,6 +28,7 @@ function, not speed, and is never reported against guardrail 10 (Stream 5's).
 | `src/fw_storage.c` | Static, caller-owned engine storage in OCRAM: instance, play ring, record ring |
 | `src/main.cpp` | Teensy glue: audio graph, buttons, card attach/removal, serial commands |
 | `host/` | `fwhost` and `run_checks.py`: the portable modules run off target, in CI |
+| `host/partition_adapter.py` | Verification's published FW-1 partition-adapter protocol, over the real `fw_part` binding (`fwhost viewio`) |
 | `tools/size_gate.py` | F2 budgets from the linked image's map and symbols |
 | `tools/engine_pin.sh` | F6 check that `engine/` equals `d96b4245` |
 | `tools/golden_serial.py` | F1 on target, over USB serial (bench only) |

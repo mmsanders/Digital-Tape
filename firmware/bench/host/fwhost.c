@@ -11,6 +11,7 @@
  *   fwhost part  WHOLE.img [--writable]   partition view + mount, as the firmware does
  *   fwhost bare  BARE.img                 the same mount over a bare image (reference)
  *   fwhost write WHOLE.img LBA COUNT      write COUNT blocks of a pattern through the view
+ *   fwhost viewio WHOLE.img               view reads/writes from stdin (partition_adapter.py)
  *   fwhost golden WHOLE.img --side A|B --from F --frames N --mode det|live -o OUT.pcm
  *                [--control flip|rate]
  *
@@ -156,6 +157,66 @@ static int cmd_write(int argc, char **argv)
     if (r == 0) { r = g_dev.flush(g_dev.ctx); }
     printf(",\"write\":%d,\"card_writes\":%" PRIu32 ",\"card_max_count\":%" PRIu32 ",\"card_flushes\":%" PRIu32 "}\n",
            r, g_count.writes, g_count.max_write_count, g_count.flushes);
+    tape_dev_file_close(&g_file);
+    return 0;
+}
+
+/* viewio: the partition view, driven one operation per stdin line, for
+   host/partition_adapter.py (Verification's published adapter protocol):
+     R LBA        -> "OK <hex of the 512-byte view block>" or "REFUSED <rc>"
+     W LBA HEX    -> "OK <absolute card LBA written>"      or "REFUSED <rc>"
+   LBAs are view LBAs, parsed signed and passed to the binding as uint32_t, so
+   -1 reaches it as 0xFFFFFFFF, as a wild caller's would. */
+static uint32_t g_last_abs;
+static int v_write(void *ctx, uint32_t lba, uint32_t count, const void *src)
+{
+    g_last_abs = lba;
+    return c_write(ctx, lba, count, src);
+}
+
+static int hexval(int c)
+{
+    return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
+}
+
+static int cmd_viewio(int argc, char **argv)
+{
+    static char line[2 * TAPE_BLOCK_SIZE + 64];
+    uint8_t blk[TAPE_BLOCK_SIZE];
+    int rc;
+    (void)argc;
+    rc = open_whole(argv[2], 1);
+    if (rc != 0) { fflush(stdout); tape_dev_file_close(&g_file); return rc; }
+    printf("}\n");
+    fflush(stdout);
+    g_card.write = v_write;
+    while (fgets(line, sizeof line, stdin) != NULL) {
+        char *p = line + 1;
+        long lba = strtol(p, &p, 10);
+        uint32_t i;
+        int r;
+        if (line[0] == 'R') {
+            r = g_dev.read(g_dev.ctx, (uint32_t)lba, 1u, blk);
+            if (r != 0) { printf("REFUSED %d\n", r); continue; }
+            printf("OK ");
+            for (i = 0; i < TAPE_BLOCK_SIZE; i++) { printf("%02x", blk[i]); }
+            printf("\n");
+        } else if (line[0] == 'W') {
+            while (*p == ' ') { p++; }
+            for (i = 0; i < TAPE_BLOCK_SIZE; i++) {
+                int hi = hexval(p[2u * i]), lo = hi < 0 ? -1 : hexval(p[2u * i + 1u]);
+                if (lo < 0) { break; }
+                blk[i] = (uint8_t)(hi * 16 + lo);
+            }
+            if (i != TAPE_BLOCK_SIZE) { printf("REFUSED bad-hex\n"); continue; }
+            g_last_abs = 0xFFFFFFFFu;
+            r = g_dev.write(g_dev.ctx, (uint32_t)lba, 1u, blk);
+            if (r == 0) { r = g_dev.flush(g_dev.ctx); }
+            if (r != 0) { printf("REFUSED %d\n", r); continue; }
+            printf("OK %" PRIu32 "\n", g_last_abs);
+        }
+        fflush(stdout);
+    }
     tape_dev_file_close(&g_file);
     return 0;
 }
@@ -331,6 +392,7 @@ int main(int argc, char **argv)
     if (argc >= 3 && strcmp(argv[1], "part") == 0) { return cmd_part(argc, argv); }
     if (argc >= 3 && strcmp(argv[1], "bare") == 0) { return cmd_bare(argc, argv); }
     if (argc >= 3 && strcmp(argv[1], "write") == 0) { return cmd_write(argc, argv); }
+    if (argc >= 3 && strcmp(argv[1], "viewio") == 0) { return cmd_viewio(argc, argv); }
     if (argc >= 3 && strcmp(argv[1], "golden") == 0) { return cmd_golden(argc, argv); }
     fprintf(stderr, "usage: fwhost sha-selftest | part IMG [--writable] | bare IMG | write IMG LBA COUNT |\n"
                     "       golden IMG --side A|B --from F --frames N --mode det|live -o OUT.pcm [--control flip|rate]\n");
