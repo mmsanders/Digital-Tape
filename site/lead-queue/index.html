@@ -210,6 +210,11 @@
     .stage .nm { display: block; margin-top: .15rem; font-size: .9rem; line-height: 1.3; }
     .why { margin: .5rem 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
     .rmnote { margin: 1rem 0 0; font-size: 12px; line-height: 1.5; color: var(--subtle); }
+    .criteria { padding-left: 1.2rem; font-size: 12px; line-height: 1.6; color: var(--muted); }
+    .criteria li { margin-top: .5rem; }
+    .state { color: var(--yellow); font-weight: 600; }
+    .state.passed { color: var(--green); }
+    .state.todo { color: var(--muted); }
     footer {
       margin-top: 2rem;
       color: var(--subtle);
@@ -231,6 +236,10 @@
       <div class="meta" id="meta"></div>
     </header>
     <section class="roadmap" id="roadmap"></section>
+    <details class="roadmap">
+      <summary>Phase 2 · complete · G2 unaided test deferred</summary>
+      <div id="phase2"></div>
+    </details>
     <details class="roadmap">
       <summary>Phase 1 · complete · 36 of 36 rungs</summary>
       <div id="phase1"></div>
@@ -265,7 +274,7 @@
     const PHASE1 = {
       phase: 1,
       title: "Audio engine, on a laptop",
-      asOf: "P1-R64 · 3 October 2026 UTC. All nine packages accepted; WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369, golden CI green on d93ca4e. Phase 1 rungs remain final; snapshot refreshed PM620 / packaging complete and method-controls blocker; Phase 1 boundaries unchanged",
+      asOf: "PM644 · 1 November 2026 PDT. Phase 1 complete since 3 October; all nine packages accepted. WP-11 goldens approved by Michael (#367), Verification #143 PASS at #369. Acceptance boundaries unchanged.",
       start: "Phase 0 scope signed · 8 Sep 2026",
       goal: "Milestone: splice your own voice into the middle of a song on a laptop and hear it.",
       stages: [
@@ -304,9 +313,87 @@
         { id: "WP-15", name: "One-window drag-and-drop app · P2-R3", rung: 4,
           note: "ACCEPTED with G2 deferred (ADR-198). G1/G3/G4/G5 on exact 5101e3f3 / ZIP b8a689cf (Verification #364, #370); Michael made real cartridges through the app in C2. The unaided G2 test is pinned for before the app goes to anyone else." }
       ],
-      context: "Phase 2 is closed (ADR-198); the Phase 2 ledger is the record. G2 is deferred, not waived. Q-P2-1(b) is ruled: port-level batching, engine unchanged. Phase 3 (bench firmware) is proposed. Hardware stays parked until Michael opens it; WP-38 is not taken.",
-      exit: "Phase exit also requires the unaided witnessed test, Phase 1 goldens and replays green on main, Q-P2-1 decided before firmware, and loader-only host scope frozen. Full package acceptance includes every required physical/platform criterion; a software-only PASS is not the final rung."
+      context: "Phase 2 is closed (ADR-198). G2 is deferred, not waived: run the unaided test before anyone else uses the app for real. Windows 11 accepted; macOS deferred; loader-only host scope frozen. WP-38 is not taken. Phase 3 bench firmware is open; Hardware has resumed for bench work.",
+      exit: "The Phase 2 ledger records the completed scope and deferrals. Phase 1 goldens and replays remain required. Q-P2-1 completion carries into Phase 3 and gates firmware write batching."
     };
+
+    // Criterion states mirror PHASE3-LEDGER.md. IN ROUND includes partial work such
+    // as rig design or a host-only check; it never contributes to passed progress.
+    // Later contracts have no criteria yet, so no overall Phase 3 % is claimed.
+    const PHASE3 = {
+      asOf: "PM648 · 2 November 2026 PDT · Round 1 reviewed (ADR-202); Software candidate ee478a91 held for V378",
+      entry: [
+        { id: "DRAFT-11", name: "Spec revision", state: "IN ROUND", next: "Preflight requires revision (F374-1…5). Corrected proposal awaits re-review, S2 disposition and Michael authorization; not in force." },
+        { id: "Q-P2-1", name: "Any-subset crash coverage", state: "BLOCKED", next: "365/365 deferred faults pass (404/404 with prior receipts). Six long cuts unavailable on the three-unit fixture, zero executed. Batching/large-epoch coverage remains held by PM." },
+        { id: "Parts", name: "Bench parts approved and ordered", state: "IN ROUND", next: "Hardware drafts minimum and full lists; Michael approves purchases." }
+      ],
+      packages: [
+        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware + Verification", issue: 641,
+          note: "Rig method NOT CLEARED (V3d616c14, R374-1…5). Hardware #641 owns corrections before independent review; no physical tear claimed or card qualified.", criteria: [
+            { id: "A-1", name: "Exact card identity", state: "TO DO", next: "Part number, capacity, revision and CID; needs a reader or rig that reads CID." },
+            { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "Method re-review, then run." },
+            { id: "A-3", name: "Against the C-60 copy requirement", state: "TO DO", next: "After A-2; production copy-time proof remains Phase 5." },
+            { id: "A-4", name: "Reader not the bottleneck", state: "TO DO", next: "With A-2." },
+            { id: "A-5", name: "Parts support the bench and rig", state: "IN ROUND", next: "Hardware Round 1." },
+            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per SKU/revision, zero torn blocks", state: "BLOCKED", next: "Resolve skipped-tear/stale-busy judge gaps, actual cut timing and electrical evidence. SPI characterization does not qualify SD4; no physical run cleared." }
+          ] },
+        { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software + Verification", issue: 642,
+          note: "Returned #647 ee478a91, 117 checks pass. Vd7540127 confirms host PCM/static budgets/tree. Integration HELD for V378's explicit recognition correction; no firmware defect established by that policy mismatch.", criteria: [
+            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 byte-exact PCM comparisons, 28/28 controls per platform. Target PCM/I²S pending; host success alone does not pass F1." },
+            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. Painted target stack pending." },
+            { id: "F3", name: "Warm instant-on <100 ms", state: "TO DO", next: "Needs the logic analyser." },
+            { id: "F4", name: "Commit latency <200 ms", state: "TO DO", next: "With recording (WP-19)." },
+            { id: "F5", name: "Play, Stop and removal", state: "TO DO", next: "Bench evidence witnessed by Michael." },
+            { id: "F6", name: "Engine unchanged", state: "PASSED", next: "Independent Vd7540127 confirms full engine tree d96b4245 on held, unmerged candidate ee478a91. This is not WP-17 package acceptance." }
+          ] },
+        { id: "WP-18", name: "Second slot and copy", owner: "Contract after Round 1", note: "Read-only source slot, copy correctness and LED progress from the callback. Criteria pending contract.", criteria: [] },
+        { id: "WP-19", name: "Audio paths and output caps", owner: "Contract after Round 1", note: "Codec, microphone, aux and speaker; two output caps, speaker mute and record-source selection. Criteria pending contract.", criteria: [] },
+        { id: "WP-20", name: "Transport keys and LED status", owner: "Contract after Round 1", note: "Mechanical keys, depth-sensitive Rew/FF, copy button and record light. No solenoid. Criteria pending contract.", criteria: [] },
+        { id: "WP-21", name: "Witnessed bench demo", owner: "Contract after Round 1", note: "Michael makes a cartridge in the app, plays it on the bench, scrubs, stops and records. Verification audits the evidence. Criteria pending contract.", criteria: [] }
+      ]
+    };
+
+    function criterionState(row) {
+      if (!["PASSED", "IN ROUND", "TO DO", "BLOCKED"].includes(row.state)) {
+        throw new Error("Roadmap criterion " + row.id + " has no valid state; progress is unknown.");
+      }
+      return row.state;
+    }
+
+    function criterionList(rows) {
+      return `<ul class="criteria">${rows.map(row => {
+        const state = criterionState(row);
+        return `<li><strong>${escapeHtml(row.id)} · ${escapeHtml(row.name)}</strong> — <span class="state ${state === "PASSED" ? "passed" : state === "TO DO" ? "todo" : ""}">${state}</span><br>${escapeHtml(row.next)}</li>`;
+      }).join("")}</ul>`;
+    }
+
+    function renderPhase3() {
+      const rows = PHASE3.packages.flatMap(pkg => pkg.criteria);
+      const count = (items, state) => items.filter(row => criterionState(row) === state).length;
+      const passed = count(rows, "PASSED");
+      const inRound = count(rows, "IN ROUND");
+      const blocked = count(rows, "BLOCKED");
+      const entryPassed = count(PHASE3.entry, "PASSED");
+      document.getElementById("roadmap").innerHTML = `
+        <div class="rmhead"><div><div class="kicker">Roadmap · Phase 3 · open</div>
+          <h2>From an app-made cartridge to a working bench player</h2></div>
+          <div class="pct${passed === rows.length ? " full" : ""}">${passed}/${rows.length}<small>defined package criteria passed</small></div></div>
+        <p class="why">Teensy 4.1 · shared engine · keys, LED status, headphones and speaker.</p>
+        <div class="track" role="progressbar" aria-label="Phase 3 currently defined package criteria passed" aria-valuemin="0" aria-valuemax="${rows.length}" aria-valuenow="${passed}">
+          ${rows.map(row => `<div class="seg${criterionState(row) === "PASSED" ? " done" : ""}" title="${escapeHtml(row.id + " · " + row.name + " — " + row.state)}"><i style="width:${row.state === "PASSED" ? 100 : 0}%"></i></div>`).join("")}</div>
+        <div class="legend"><span class="pill acc"><b>${passed}</b> passed</span><span class="pill"><b>${inRound}</b> in round</span><span class="pill"><b>${blocked}</b> blocked</span><span class="pill off"><b>${rows.length - passed - inRound - blocked}</b> to do</span></div>
+        <p class="rmnote">Counts cover the ${rows.length} currently defined WP-05 / WP-17 criteria. WP-18–WP-21 criteria arrive with their contracts after Round 1; this is not an overall phase percentage. Assigned work and partial checks do not count as passed.</p>
+        <details open><summary>Spec and entry items · ${entryPassed} of ${PHASE3.entry.length} passed</summary>${criterionList(PHASE3.entry)}</details>
+        <details open><summary>6 packages · criteria and next steps</summary><ul class="stages">
+          ${PHASE3.packages.map(pkg => `<li class="stage"><span class="num">${escapeHtml(pkg.id)}</span><span class="nm">${escapeHtml(pkg.name)}</span>
+            <p class="why">${escapeHtml(pkg.owner)}${pkg.issue ? ` · <a href="https://github.com/mmsanders/Digital-Tape/issues/${pkg.issue}">#${pkg.issue}</a>` : ""}</p>
+            <p class="why">${escapeHtml(pkg.note)}</p>${pkg.criteria.length ? criterionList(pkg.criteria) : `<p class="empty">Not yet assigned · criteria pending</p>`}</li>`).join("")}</ul></details>
+        <p class="why">Round 1: <a href="https://github.com/mmsanders/Digital-Tape/issues/641">Hardware #641</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/642">Software #642</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/378">Verification #378 correction</a>. <a href="https://github.com/mmsanders/digital-tape-verification/issues/374">V374 returns</a> carry. Michael starts issues manually.</p>
+        <p class="why">Exit: WP-05 and WP-17–WP-21 independently accepted on the bench; firmware goldens byte-identical with earlier regressions green; atomicity passed or a torn block escalated as a format blocker; Q-P2-1 cleared before write batching.</p>
+        <p class="rmnote">USB-powered bench only. Fabrication and charging CLOSED; no qualified card. Engine pinned at d96b4245. Production &lt;30 s copy proof belongs to Phase 5. DRAFT-11 remains proposed.</p>
+        <p class="rmnote">Snapshot: ${escapeHtml(PHASE3.asOf)} — PM-maintained, not live. Issue queues below refresh separately; closing an issue does not pass a criterion.</p>
+        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-FIRMWARE-CONTRACT.md">FW-1 contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM648-P3-R1-2026-11-02.md">PM review</a></p>`;
+    }
 
     function rungOf(stage) {
       if (!Number.isInteger(stage.rung) || stage.rung < 0 || stage.rung > RUNGS.length) {
@@ -322,7 +409,7 @@
       }).join("")}</span>`;
     }
 
-    function renderRoadmap(phase = PHASE2, target = "roadmap") {
+    function renderRoadmap(phase = PHASE2, target = "phase2") {
       const stages = phase.stages;
       const top = RUNGS.length;
       const filled = stages.reduce((sum, stage) => sum + rungOf(stage), 0);
@@ -549,7 +636,8 @@
       }
     }
 
-    renderRoadmap();
+    renderPhase3();
+    renderRoadmap(PHASE2, "phase2");
     renderRoadmap(PHASE1, "phase1");
     render();
     setInterval(() => { if (!document.hidden) render(); }, POLL_MS);

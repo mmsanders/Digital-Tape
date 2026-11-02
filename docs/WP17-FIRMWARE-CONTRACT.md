@@ -2,6 +2,8 @@
 
 **Status:** ISSUED by PM, 2 November 2026 PDT ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)).
 Changes after issue are PM decisions recorded here and in both lead issues.
+**2 November clarification (ADR-202 / PM #648):** admission follows WP-14 §2;
+F1 compares the seven normal-rate golden PCM payloads, not whole-WAV hashes.
 
 The device is described in [DEVICE-DESIGN](DEVICE-DESIGN.md) and the phase in
 [the Phase 3 plan](PHASE3-PLAN.md). The normative engine behaviour is spec/engine-api.md and
@@ -46,9 +48,16 @@ belong to WP-18 to WP-20, under their own contracts.
 - A `tape_dev` over the built-in SDIO slot (the Teensy core's SD/SdFat raw sector access),
   in `firmware/bench/`.
 - **Partition view:** the binding reads the MBR and presents TAPEFS partition 2 (`tapefs` §3)
-  as LBA 0, exactly as the desktop `tapectl` does. It refuses a card whose layout isn't the
-  §3 layout. Software may reuse portable `host/port/` layout code or write an equivalent; it
-  is then tested by the same image tests.
+  as LBA 0, exactly as the desktop `tapectl` does. **Admission uses WP-14 §2 exact
+  recognition**, with the approved [E-1 overlay](SPEC-ERRATA.md): `55 AA`, entries 1/2
+  matching the prescribed fields/extents, entries 3/4 zero, and safe view bounds.
+  A change only to bootstrap bytes 0–439, disk signature 440–443 or reserved bytes
+  444–445 does not by itself refuse admission. Provisioning still writes the §3.1
+  values; full desktop `verify` diagnostics remain WP-14 §4.1 and can report an
+  `MBR_LAYOUT` finding on an admitted card. Recognition is not full validation or
+  permission to write outside the view. Bad signature/entries/extents still refuse;
+  an unreadable MBR is I/O failure. Software may reuse portable `host/port/` layout
+  code or an equivalent, tested against the independent recognition cases.
 - `flush` returns success only after the card has left the busy state (engine-api §3).
 - This WP-17 slot is the **work** slot, so it binds `write`. The read-only source slot,
   bound with `write == NULL` (guardrail 06), arrives with WP-18.
@@ -72,7 +81,7 @@ belong to WP-18 to WP-20, under their own contracts.
 
 | # | Criterion | How it is shown |
 |---|---|---|
-| F1 Goldens on target | At 1.0×, the firmware's rendered PCM for each WP-11 golden cartridge is **byte-identical** to the desktop reference | The firmware renders a golden cartridge, which `tapectl` makes from the WP-11 sources, and either streams the PCM over USB serial for host comparison or prints its SHA-256 for comparison with `tests/golden/SHA256SUMS`. Negative control: a deliberately altered sample (or a ±1 rate) must fail |
+| F1 Goldens on target | At 1.0×, the firmware's rendered PCM for the seven normal-rate WP-11 cases is **byte-identical** to the reference PCM | Prepare the exact MANIFEST side, position and frame count. Stream PCM over USB for exact comparison, or hash the extracted PCM payload on both sides. `SHA256SUMS` authenticates whole reference WAV files; it is not a raw-PCM digest. Negative control: an altered sample or ±1 Q16.16 rate unit must fail |
 | F2 Budgets | RAM (.data + .bss + instance) ≤ 200 KiB; stack ≤ 8 KiB; engine .rodata ≤ 32 KiB (guardrail 08) | Map-file sizes printed in CI; stack high-water from a painted stack on target. Negative control: an injected oversized static must fail the gate |
 | F3 Warm instant-on | Wake from sleep with a mounted cartridge to first non-silent frame < 100 ms (guardrail 04) | Logic analyser on I²S plus a wake GPIO, once the analyser arrives. Before then, a firmware timestamp is a development aid only, not acceptance |
 | F4 Commit latency | Synchronous `tape_commit` at `TAPE_MAX_ENTRIES` < 200 ms on the slowest candidate card | Measured with WP-18/19 recording; listed here because it uses the WP-17 port |
@@ -81,6 +90,14 @@ belong to WP-18 to WP-20, under their own contracts.
 
 F1, F2 and F6 run without bench hardware (F1's host half and F2's static sizes in CI). F3,
 F5 and the target halves need the bench.
+
+F1's seven cases are `play-1x-quiet`, `play-1x-fortissimo`, `splice`, `overdub`,
+`overwrite`, `reset-b`, and `promote`. The three `scrub-*` cases retain their actual
+rates/schedule in `tests/golden/MANIFEST`; all ten original desktop/engine regressions
+remain required and byte-unchanged. They are not ten firmware-at-1.0× vectors.
+The host half proves the portable render path only, not target I²S output.
+F2 reports engine .data/.bss plus caller instance once, separately from board/core
+storage; static accounting does not pass the target stack criterion.
 
 ## 7. Independence
 
