@@ -4,7 +4,7 @@
 
 Plate (A1 Mini, 180 x 180), 1 Nov Play/Record rig, everything at full scale:
     rig    both housing halves (outer faces down), the comb (spine down), the slide lock
-           (back face down), the latch slider (floor down), Record, Play, Stop and a spare
+           (back face down), the latch slider (on its end, brim), Record, Play, Stop and a spare
            Play (upright, support under the blocks)
 """
 
@@ -51,7 +51,9 @@ def print_poses() -> dict[str, cq.Workplane]:
         "front": p["front"],                                                   # outer face (Z 0) down
         "back": p["back"].rotate((0, 0, 0), (0, 1, 0), 180),                   # outer face (Z 29) down
         "bar": p["bar"].rotate((0, 0, 0), (1, 0, 0), 180),                     # back face down, pawls up
-        "latch": p["latch"],                                                   # floor down
+        # standing on its end (2 Nov): the hook's layers then run across its loads instead
+        # of leaving it on one layer line, which is where the 1 Nov hook snapped
+        "latch": p["latch"].rotate((0, 0, 0), (1, 0, 0), -90),
         "card-portrait": p["card-portrait"],                                   # face up
         "card-snap-face": p["card-snap-face"],                                 # face up, groove down
         "card-snap-back": p["card-snap-back"],                                 # outer face down

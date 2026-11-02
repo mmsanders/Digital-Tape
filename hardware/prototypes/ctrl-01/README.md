@@ -5,7 +5,7 @@ layout (#569, `docs/PACKAGES/WP04-OWNER-LAYOUT-2026-10-24.md`) and the LADDER-01
 latch prototypes (#431). It is **not a PM-issued hardware round and not acceptance**.
 Nothing here qualifies a latch, a shell, a material, a card slot or Guardrail 13.
 
-## This round (1 Nov): the Play/Record rig
+## This round (1–2 Nov): the Play/Record rig
 
 Michael scaled the test back to the one thing that has not worked yet: Record latching
 to Play. The rig is a 26 × 80 × 29 mm housing holding **Record, Play and Stop only**,
@@ -21,13 +21,13 @@ full-device block-key layout (commit 50eaa44).
 
 | | |
 |---|---|
-| Keys | **Blocks, no caps** (1 Nov): 12.4 (row) × 16 (depth), running straight out of the shell, 1 mm round on the edges, symbol engraved. **4 mm proud, 4 mm travel.** A 1 mm flange inside the wall stops a key at rest; at full press its block lands on the comb |
+| Keys | **Blocks, no caps** (1 Nov): 12.4 (row) × 15 (depth), running straight out of the shell, 1 mm round on the edges, symbol engraved. **4 mm proud, 4 mm travel.** A **lip inside the wall** stops a key at rest (2 Nov: 1.5 mm at the front, 1.1 at the back, 1.0 on each side that has no neighbour; the 1 Nov 0.55 mm back-only lip let keys out). At full press the block lands on the comb |
 | Row | Record on its own, a 10.6 mm gap, then Play and Stop side by side in one opening with a 0.6 mm gap (13 mm pitch) |
 | Play symbol | Turned round (31 Oct): the triangle points toward the front face |
 | Catch | P business end (1.2 mm hook, 45° ramp, flat ledge), lines run on to the edge of the key face. Play's sits 0.4 mm lower so it latches sooner |
 | Stop | No ledge: one even ramp, then a flat to the shoulder. **38°** from the press direction: 4 mm of travel is too short for the 30° Michael chose to shift the lock 2.1 mm |
 | Record | **Latches to Play, never to the slide lock** (31 Oct). Record has no catch. Play's diagonal rail drives a latch slider (both ways) carrying a hook. Play up: the hook is out of Record's way, so Record alone goes down and springs back (accepted). Play latched: Record's toe ramps the hook aside and the hook drops in behind it. Stop lifts Play, which pulls the hook out, and Record comes up too |
-| Latch slider | **Long, between two long guides** (1 Nov, after Michael asked about an extension onto another ledge): a 35 mm plate from Record's lane past Play's rail into Stop's lane, 13.3 mm wide, its inner edge on a guide rail in the front half and its outer edge on the partition, so it cannot turn. The hook's holding face and the back of Record's toe **lean 25°**, so Record's spring pushes the slider toward release instead of against it |
+| Latch slider | **Long, between two long guides** (1 Nov, after Michael asked about an extension onto another ledge): a 37 mm plate from Record's lane past Play's rail into Stop's lane, 11.4 mm wide, its inner edge on a guide rail in the front half and its outer edge on the partition, so it cannot turn. The hook's holding face and the back of Record's toe **lean 25°**, so Record's spring pushes the slider toward release instead of against it. **2 Nov, after the 1.2 mm hook snapped off:** the slider moves 1.5 mm per mm of Play, which lets the hook grow to 2.2 × 1.5 mm and still clear Record in time; it prints **standing on its end**, so the hook's layers run across its loads |
 | Slide lock | Latches with LADDER's Stop-tab shape (top rises 1.7 mm), now 5.5 mm long on the 13 mm pitch. Body 0.1 mm slimmer each side (Michael shaved the sides to fit, 31 Oct). Pawls for Play and Stop only |
 | Key comb | Separate part (30 Oct): keys slide into it on the bench, it drops in over the lock |
 | Clasp | Snap ridges 0.45 mm (were 0.25: the halves pulled apart too easily), 10 mm long, seven of them |
@@ -44,7 +44,7 @@ Device frame: X in from the key side, Y down from the top, Z back from the front
 | Springs | Pencil springs (14 free / about 4 solid). Key springs from the key's groove to a boss on the comb's spine, 9 mm at rest, 5 mm pressed. One lock spring, 11 mm at rest |
 | Guidance | Comb fins from X 7.5 to the spine (X 19.3), rail tunnels 0.15 mm a side; the blocks run in the shell openings (0.2 mm a side) and land on the fins |
 | Slide lock | X 7.1–12.9, Z 20.5–26.35, Y 32.7–65.4 plus spring boss, in a back-half channel with 0.35 mm snap lips |
-| Latch slider | X 5.8–19.1, Z 2.7–5.6 (floor 0.8 mm where Record's toe passes over it), Y 20.8–56 at rest, moving +Y with Play one for one |
+| Latch slider | X 7.7–19.1, Z 2.7–5.6 (floor 0.8 mm where Record's toe passes over it), Y 19.4–56 at rest, moving +Y 1.5 mm per mm of Play |
 
 From the simulations (`mech.kinematics()`, `mech.record_latch()`):
 
@@ -54,7 +54,7 @@ From the simulations (`mech.kinematics()`, `mech.record_latch()`):
 | Stop | moves the lock from 0.5 mm, 2.1 mm by 3.2 mm, never latches |
 | Record alone | meets nothing |
 | Play pressed, Record up | the hook passes in front of the toe without touching it |
-| Record after Play | ramps the hook aside, nudging Play 0.9 mm deeper (of 1.2), is held at 3.25 mm (0.75 mm overtravel); hook over toe 0.9 mm |
+| Record after Play | ramps the hook aside (the slider moves 0.9 mm, nudging Play 0.6 mm deeper of its 1.2), is held at 3.4 mm (0.6 mm overtravel); hook over toe 0.9 mm |
 | Stop while recording | Record is free once Play is back within 0.7 mm of the top |
 
 **Why the slider should come back.** It is driven both ways: Play's rail runs in a
@@ -72,8 +72,8 @@ the long guides: roughly four times the force needed, where the 31 Oct slider ha
 | Front and back halves | outer faces down | 3 walls, 4 top/bottom, 15% infill. No supports: the key openings split at the seam, so nothing is bridged |
 | Comb | spine down | 4 walls, 40% infill, no supports |
 | Slide lock | back face down | 4 walls, 40%, no supports |
-| Latch slider | floor down | 4 walls, 40%, no supports |
-| Record, Play, Stop, spare Play | upright | 4 walls, 40%; **tree supports from the plate under the blocks only** (30° threshold) |
+| Latch slider | **standing on its end** | 4 walls, 40%, **brim**, no supports (short ledges up to 2.1 mm) |
+| Record, Play, Stop, spare Play | upright | 4 walls, 40%; **tree supports from the plate under the blocks and lips only** (30° threshold). Play's rail leans 56° but starts on the bed |
 
 ## Assembly
 
@@ -82,7 +82,7 @@ The check `assembly.assembly_sequence()` slides every part in along these paths,
 1. **Keys into the comb, on the bench:** each slides in from the comb's outer end, block last.
 2. **Slide lock:** back half on the table, inside up. Snap the lock into its channel; pencil spring on its bottom boss, into the housing.
 3. **Comb:** lower it, keys and all, into the back half over the lock, each block into its half-opening.
-4. **Latch slider:** drop it onto Play's rail, floor toward the front, hook toward Record.
+4. **Latch slider:** drop it onto Play's rail, floor toward the front, hook toward Record. The rail sits in the long diagonal slot.
 5. **Key springs:** squeeze each with tweezers and slip it between the key's post and its boss on the spine.
 6. Press Stop to free anything that latched.
 7. **Front half** on (its guide rail goes beside the slider's inner edge); press round the rim until the ridges click. Coin notch on the right side to open.
@@ -124,14 +124,14 @@ cd hardware/prototypes/ctrl-01 && python3 -m pytest -q        # about a minute
 | A pawl, anywhere in the lock's travel, never meets the next key | 6 mm of lock travel |
 | Every latch rises ≥ 1.5 mm toward its far end (the Stop-tab shape) | the flat-topped latch first printed |
 | No two parts overlap: at rest, Play and Stop at full press and peak lock push and at 1/2/3/4 mm, Record alone, Record pushing past the hook, Record held, Stop releasing both (24 states) | a key moved 0.4 mm off its slot |
-| Record latch: alone Record meets nothing; Play brings the hook past the resting toe; Record ramps the hook aside (slope ≤ 1.5, Play nudged ≤ 1.0 mm) and is held with ≥ 0.5 mm overtravel; Record is free before Play is fully up (≥ 0.6 mm) | a toe without its chamfer stalls; a hook left in Record's lane catches Record alone; a hook too wide never lets go |
+| Record latch: alone Record meets nothing; Play brings the hook past the resting toe; Record ramps the hook aside (slope ≤ 1.5, Play nudged ≤ 1.0 mm; it is 0.6) and is held with ≥ 0.5 mm overtravel; Record is free before Play is fully up (≥ 0.6 mm) | a toe without its chamfer stalls; a hook left in Record's lane catches Record alone; a hook too wide never lets go |
 | The holding face leans more than PLA friction (tan ≥ 0.35), so Record helps the slider back | a square holding face |
 | The slider is at least twice as long as it is wide, with a guide on each edge | a slider cut short at the slot, like 31 Oct's |
 | Play's latched depth is the depth the latch is built for (2.8 mm) | — |
 | Record never comes within 0.5 mm of the slide lock | — |
 | Every part has a clear straight path in, in build order; only the lock's snap lips are allowed in the way | the 28 Oct back half with the comb built in: neither the lock nor a key gets in |
 | Record's web and Play's arm join their key across ≥ 20 mm² (24 and 42) | an arm hanging on a 0.01 mm strip (the 27 Oct defect) |
-| Every printed part is one valid solid; keys print upright with support only under the block; lock, slider, comb and cards need none | a reversed catch |
+| Every printed part is one valid solid; keys print upright with support only under the block and lips; lock, comb and cards need none; the slider on its end leaves no ledge over 2.2 mm | a reversed catch |
 | The plate fits the 180 × 180 bed | — |
 | The snap card's halves close without overlap into a full 42 × 36 × 7 card | a bead bigger than its relief |
 
@@ -153,15 +153,15 @@ the check that `key_v1.py` rebuilt it exactly.
 
 | File | SHA-256 |
 |---|---|
-| `print/ctrl01-plate-rig.stl` | `8236c1baf468fcd934c566df7288543dd2a8acbbcd1855e1ea469ca105e14dd3` |
-| `print/ctrl01-back.stl` | `668f62f8db252f6ea6132db745ee3957e5d3b57b48d91a6e07508ed4a1e6e30d` |
+| `print/ctrl01-plate-rig.stl` | `45ea85e737158aa933616f9cc116e2905f629cb6612392f78ca4f73806292486` |
+| `print/ctrl01-back.stl` | `c498c6b0896a3bf39afbaba9bc11ae392c4b72dea2335412730341fb125bd830` |
 | `print/ctrl01-bar.stl` | `eff52f354f070fcd8b771554884902e543fb832c8f22bdb1973599ad1bb068e0` |
 | `print/ctrl01-card-portrait.stl` | `32dc9f0b4d3210a9820f4e5b5201ede57e17620f1c64c052349f44201c02aa92` |
 | `print/ctrl01-card-snap-back.stl` | `3595cd367e1b370de68dec6417dfe69b4b1bf860107b193675a7d3a5a6b6ebdf` |
 | `print/ctrl01-card-snap-face.stl` | `33f9dc3a41d05a188b7248d2e31aa8e87c43344f256c7f9e07a4fcb044507c4b` |
 | `print/ctrl01-comb.stl` | `34935bec0da0f79a1fcbf55aef0f84cbbd0235dc68f53300bbaf2c86de3cd6f2` |
-| `print/ctrl01-front.stl` | `338b3fdb5300edad8acf115c5d0a3987fac62bebaf418fd980e2eb492b928e79` |
-| `print/ctrl01-key-play.stl` | `92195d61aa264aef2bf8eb0ee1e6fec7eb6810390fb78c9fd8e0017e657ee2b8` |
-| `print/ctrl01-key-rec.stl` | `d64243b6ba88288ce8c051954f2cd16f703d4bb47c3904c489b60c8688c9607a` |
-| `print/ctrl01-key-stop.stl` | `55775b84901ddca29cfb88b6de639c4f091069a6ec9b262fb4fa3f3e3204a046` |
-| `print/ctrl01-latch.stl` | `213922b5ccc5354c73d9cfef6309cb9ee481a23d115893a56e80fb9fbbf68071` |
+| `print/ctrl01-front.stl` | `6b9ff39c2f7c79584cc3d2731bf84c8a485f86f80f2d2045db5358c35c2bc2ba` |
+| `print/ctrl01-key-play.stl` | `5c123ed46de02900591b1e6195f9a9d71057513f2b9620338b9cf11ed8cf8032` |
+| `print/ctrl01-key-rec.stl` | `2e6b3fda7ececf8eb8c7b6f3b1eee35f15264a1ae93369431eec3de6537d65b3` |
+| `print/ctrl01-key-stop.stl` | `c1b8cb50345ecdea90853c20bb82c1ed9cd0b25104c76d843946fe3670668f51` |
+| `print/ctrl01-latch.stl` | `2c42edc43809728d49af8732b8a4dcc8acf5c2370ef71e038f3a3a2d8162371c` |

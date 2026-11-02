@@ -193,7 +193,8 @@ def bay_front() -> cq.Workplane:
     # the latch slider's inner guide: a rail along the whole of its travel. Its outer
     # edge runs on the partition. Long guides, so it cannot turn (1 Nov)
     sy0, sy1 = M.slider_y()
-    parts.append(_box(L.GUIDE_X[0], L.GUIDE_X[1], sy0 - 1.0, sy1 + L.TRAVEL + 1.0, L.WALL - 0.01, L.LATCH_TOP + 0.1))
+    parts.append(_box(L.GUIDE_X[0], L.GUIDE_X[1], sy0 - 1.0, sy1 + M.slider_shift(L.TRAVEL) + 1.0,
+                      L.WALL - 0.01, L.GUIDE_Z1))
     out = parts[0]
     for p in parts[1:]:
         out = out.union(p)

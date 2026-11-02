@@ -88,10 +88,10 @@ def record_states() -> dict[str, dict]:
     toe = M.toe_outline()
     from shapely.affinity import translate as tr
     for r in (1.0, 2.0, 3.0, 4.0, L.TRAVEL):
-        s = L.PLAY_HOLD
+        s = M.slider_shift(L.PLAY_HOLD)
         while tr(toe, r, 0).intersection(tr(raised, 0, s)).area > 1e-5:
             s += 0.02
-        out[f"rec-push@{r}"] = dict(pressed={"play": s, "rec": r})
+        out[f"rec-push@{r}"] = dict(pressed={"play": s / L.SLIDER_K, "rec": r})
     out["rec-held"] = dict(pressed={"play": L.PLAY_HOLD, "rec": rl.held_at})
     stop = M.kinematics("stop")
     for s in (L.PLAY_HOLD - 0.4, L.PLAY_HOLD - 1.2, rl.released_below):

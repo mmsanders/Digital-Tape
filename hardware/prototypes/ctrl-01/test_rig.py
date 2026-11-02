@@ -202,13 +202,26 @@ KEY_ALLOWED = (L.GROOVE_D, L.BLOCK_Z0)   # spring-groove roof (1 mm bridge) and 
 
 @pytest.mark.parametrize("name", L.KEYS)
 def test_keys_print_upright_with_support_only_under_the_block(name):
-    assert overhangs(M.key_local(name).val(), KEY_ALLOWED) == []
+    bad = overhangs(M.key_local(name).val(), KEY_ALLOWED)
+    if name == "play":
+        # Play's rail lies along the 1.5:1 slot, so its guiding face leans 56 degrees; it
+        # starts on the bed and climbs about 1.7 mm, which prints without support
+        bad = [b for b in bad if b[0] > 0.05]
+    assert bad == []
 
 
 def test_bar_blocker_comb_and_cards_print_without_support():
     poses = BLD.print_poses()
-    for name in ["bar", "latch", "comb", "card-portrait", "card-snap-back"]:
+    for name in ["bar", "comb", "card-portrait", "card-snap-back"]:
         assert overhangs(poses[name].val()) == [], name
+    # the latch slider prints on its end so its hook is strong across the layers; what it
+    # leaves is short ledges standing off the 0.8 mm floor and the slot's far end, none
+    # reaching out more than 2.2 mm
+    for f in poses["latch"].val().Faces():
+        bb = f.BoundingBox()
+        if bb.zmin > 0.3 and f.normalAt(f.Center()).z < -0.72:
+            # short ledges, and the far end of the slot (a roof as wide as the slot)
+            assert min(bb.xlen, bb.ylen) <= 2.2 + 1e-6, (round(bb.zmin, 2), round(bb.xlen, 2))
     # the snap card's face half prints face up: only its groove (1.2 wide) and the bead
     # relief above it are roofed, both bridged across less than 1.5 mm
     k = C.SNAP

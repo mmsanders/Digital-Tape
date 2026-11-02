@@ -55,11 +55,14 @@ GROOVE_OD, BOSS_D, GROOVE_D = 5.0, 3.0, 2.2   # pencil spring (FIT-01: OD fits 4
 TRAVEL = 4.0                        # 1 Nov (Michael): was 5.0; the block's inner face lands on the comb
 # the block: what you see and press. It runs straight out of the shell, no cap.
 BLOCK_YP = 12.4                     # along the row; 0.6 mm gaps on the 13 mm pitch
-BLOCK_Z = (5.8, 21.8)               # device Z: 16 mm of the side face's 29
+BLOCK_Z = (6.3, 21.3)               # device Z: 15 mm of the side face's 29 (16 on 1 Nov; 1 mm went to the flanges)
 BLOCK_PROUD = 4.0                   # stands this far out of the side face at rest
 BLOCK_R = 1.0                       # round on the block's edges
-FLANGE_T, FLANGE_ZP = 1.0, 0.55     # inside the wall: stops the key at rest. Back edge only;
-                                    # the front zone (Record's toe, the latch slider) lives in front
+FLANGE_T = 1.0                      # inside the wall: the lip that stops the key at rest (X thickness)
+FLANGE_FRONT, FLANGE_BACK, FLANGE_SIDE = 1.5, 1.1, 1.0   # how far it stands out past the block
+                                    # (2 Nov, Michael: the 0.55 back-only lip did not hold). Back is
+                                    # limited by the lock's channel; sides only where no neighbour
+FLANGE_SIDES = {"rec": (-1, 1), "play": (-1,), "stop": (1,)}   # which +/-y' sides get one
 HOLE_CLR = 0.2                      # aperture round the block, per side
 KEY_BOTTOM = WALL + FLANGE_T + BODY_H   # X of the key's underside at rest (12.5)
 BLOCK_Z0 = BODY_H                   # z' where the block (and the flange) start
@@ -120,17 +123,22 @@ TOE_X = (KEY_BOTTOM - 1.6, KEY_BOTTOM)                 # 10.9 .. 12.5 at rest
 TOE_Y = (key_y("rec") + 7.2, key_y("rec") + 9.0)       # 23.2 .. 25, under the comb's fin
 TOE_CH = 1.0                        # chamfer on the toe's leading inner corner: pushes the hook aside
 HOOK_OVERLAP = 0.9                  # hook over the toe's back face, Play latched
-HOOK_X = (TOE_X[1] + 0.3, TOE_X[1] + 1.5)              # 12.8 .. 14.0
-HOOK_W = 1.2
+HOOK_X = (TOE_X[1] + 0.3, TOE_X[1] + 1.8)              # 12.8 .. 14.3
+HOOK_W = 2.2                        # 2 Nov: 1.2 snapped off; this is as wide as release timing allows
 HOLD_DEG = 25.0                     # the hook's holding face (and the toe's back) lean this far, so
                                     # Record's own spring pushes the slider toward release: tan 25 =
                                     # 0.47 > PLA on PLA friction (about 0.3). Play's latch still holds it
-RAIL_C = (KEY_BOTTOM - 2.7, key_y("play") - 3.0)       # Play's diagonal rail, centre at rest (device X, Y)
-SLIDER_X = (KEY_BOTTOM - 6.7, KEY_BOTTOM + TRAVEL + 2.6)   # 5.8 .. 19.1: a long plate between two
-                                    # long guides (front half), so it cannot turn: 1 Nov
+SLIDER_K = 1.5                      # the slider moves 1.5 mm per mm of Play (2 Nov; was 1): a bigger
+                                    # hook still clears Record in time, and Record nudges Play less
+RAIL_C = (KEY_BOTTOM - 1.5, key_y("play") - 3.0)       # Play's rail, centre at rest; its outer corner sits on the
+                                    # print bed, so its 56 degree face grows straight off the bed
+SLIDER_X = (KEY_BOTTOM - 4.8, KEY_BOTTOM + TRAVEL + 2.6)   # 7.7 .. 19.1: a long plate between two
+                                    # long guides (front half), so it cannot turn: 1 Nov. Starts past
+                                    # X 7.5, where the keys' front lips reach at full press (2 Nov)
 SLIDER_TAIL = 2.0                   # the slider runs on past Stop's centre by this much (into Stop's lane)
-GUIDE_X = (WALL + 0.5, KEY_BOTTOM - 6.9)   # the inner guide rail on the front half; the outer guide is the partition
-RAIL_L, RAIL_T = 4.0, 1.6
+GUIDE_X = (WALL + 2.0, KEY_BOTTOM - 5.0)   # 4.5 .. 7.5: inner guide rail on the front half; the outer is the partition
+GUIDE_Z1 = 4.6                      # under the keys' front lips (Z 4.8 up)
+RAIL_L, RAIL_T = 3.0, 1.6
 
 # --- bay (the sectioned-off transport) -----------------------------------------
 SPINE_X = (KEY_BOTTOM + TRAVEL + 2.8, KEY_BOTTOM + TRAVEL + 4.8)   # 19.3 .. 21.3

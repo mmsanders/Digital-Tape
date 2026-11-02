@@ -173,7 +173,7 @@ def key_local(name: str, raise_: float | None = None, flip: bool = False) -> cq.
             zc = L.BODY_H / 2
             prof = [(y, 2 * zc - z) for y, z in prof]
         body = body.union(_prism_yz(prof, hx - 0.01, hx + L.TOOTH_X))
-    body = body.union(block()).cut(_icon(name, L.BLOCK_TOP - 0.5))
+    body = body.union(block(name)).cut(_icon(name, L.BLOCK_TOP - 0.5))
     if name == "rec":
         body = body.union(_toe_and_web())
     if name == "play":
@@ -181,16 +181,20 @@ def key_local(name: str, raise_: float | None = None, flip: bool = False) -> cq.
     return body
 
 
-def block() -> cq.Workplane:
+def block(name: str) -> cq.Workplane:
     """The block (1 Nov): what sticks out of the shell and what you press. Its
-    section runs straight through the wall; a flange on its back edge, inside the
-    wall, stops it at rest, and its inner face lands on the comb's fins at full press."""
+    section runs straight through the wall; a lip round it, inside the wall, stops it
+    at rest (front and back on every key, and the sides that have no neighbour: 2 Nov),
+    and its inner face lands on the comb's fins at full press."""
     bx0, bx1 = L.BLOCK_Z[0] - L.KEY_Z, L.BLOCK_Z[1] - L.KEY_Z
     hy = L.BLOCK_YP / 2
     b = (cq.Workplane("XY").box(bx1 - bx0, 2 * hy, L.BLOCK_TOP - L.BLOCK_Z0, centered=False)
          .translate((bx0, -hy, L.BLOCK_Z0 - 0.01)))
     b = b.edges("|Z").fillet(L.BLOCK_R).faces(">Z").edges().fillet(L.BLOCK_R)
-    flange = _box(bx1 - 0.5, bx1 + L.FLANGE_ZP, -hy, hy, L.BLOCK_Z0 - 0.01, L.BLOCK_Z0 + L.FLANGE_T)
+    sides = L.FLANGE_SIDES.get(name, ())
+    y0 = -hy - (L.FLANGE_SIDE if -1 in sides else 0.0)
+    y1 = hy + (L.FLANGE_SIDE if 1 in sides else 0.0)
+    flange = _box(bx0 - L.FLANGE_FRONT, bx1 + L.FLANGE_BACK, y0, y1, L.BLOCK_Z0 - 0.01, L.BLOCK_Z0 + L.FLANGE_T)
     return b.union(flange)
 
 
@@ -301,23 +305,29 @@ def hook_outline() -> Polygon:
     toe's lane by HOOK_OVERLAP from the far side. Its inner corner is chamfered; its
     holding face leans HOLD_DEG so Record's spring pushes the slider toward release."""
     x0, x1 = L.HOOK_X
-    y0 = L.TOE_Y[1] - L.HOOK_OVERLAP - L.PLAY_HOLD
-    w, t = L.HOOK_W, _lean()
-    return Polygon([(x0 + 0.4, y0), (x1 + w * t, y0), (x1, y0 + w), (x0, y0 + w), (x0, y0 + 0.4)])
+    y0 = L.TOE_Y[1] - L.HOOK_OVERLAP - slider_shift(L.PLAY_HOLD)
+    w, h, t = L.HOOK_W, L.HOOK_OVERLAP, _lean()
+    # the lean runs only over the part that meets the toe; beyond it the face is square
+    return Polygon([(x0 + 0.4, y0), (x1 + h * t, y0), (x1, y0 + h), (x1, y0 + w), (x0, y0 + w), (x0, y0 + 0.4)])
 
 
 def rail_outline() -> Polygon:
+    """Play's rail, lying along the slot: (1, -SLIDER_K) in plan."""
     cx, cy = L.RAIL_C
     r = box(cx - L.RAIL_L / 2, cy - L.RAIL_T / 2, cx + L.RAIL_L / 2, cy + L.RAIL_T / 2)
-    return rotate(r, -45, origin=(cx, cy))
+    return rotate(r, -math.degrees(math.atan(L.SLIDER_K)), origin=(cx, cy))
 
 
 def slot_outline() -> Polygon:
-    """The rail's path through the slider: Play moves the rail +X, the slider moves +Y
-    by the same amount, so in the slider the rail runs along its own axis."""
-    d = L.TRAVEL + 0.4                                  # 0.2 spare at each end
-    swept = rail_outline().union(translate(rail_outline(), d, -d)).convex_hull
-    return translate(swept, -0.2, 0.2).buffer(L.SLOT_CLR, join_style=2)
+    """The rail's path through the slider: Play moves the rail +X by p, the slider moves
+    +Y by SLIDER_K * p, so in the slider the rail runs along its own axis."""
+    k, d = L.SLIDER_K, L.TRAVEL + 0.4                   # 0.2 spare at each end
+    swept = rail_outline().union(translate(rail_outline(), d, -k * d)).convex_hull
+    return translate(swept, -0.2, 0.2 * k).buffer(L.SLOT_CLR, join_style=2)
+
+
+def slider_shift(play_depth: float) -> float:
+    return L.SLIDER_K * play_depth
 
 
 def slider_outlines() -> tuple[Polygon, Polygon]:
@@ -359,14 +369,15 @@ def record_latch(step: float = 0.05) -> RecordLatch:
     toe = toe_outline()
     hits = lambda r, s: translate(toe, r, 0).intersection(translate(raised, 0, s)).area > 1e-5
     rs = [round(i * step, 4) for i in range(int(L.TRAVEL / step) + 1)]
+    hold = slider_shift(L.PLAY_HOLD)
     alone = not any(hits(r, 0.0) for r in rs)
-    play_clear = not any(hits(0.0, s) for s in rs)
+    play_clear = not any(hits(0.0, slider_shift(p)) for p in rs)
     # Record pressed with Play latched: the slider is pushed only as far as it must be
     pushes = []
     for r in rs:
-        s = L.PLAY_HOLD
+        s = hold
         if hits(r, s):
-            lo, hi = s, L.TRAVEL + 1.0
+            lo, hi = s, slider_shift(L.TRAVEL + 1.0)
             if hits(r, hi):
                 pushes.append(math.inf)
                 continue
@@ -376,9 +387,9 @@ def record_latch(step: float = 0.05) -> RecordLatch:
             s = hi
         pushes.append(s)
     held = None
-    if not hits(L.TRAVEL, L.PLAY_HOLD):
+    if not hits(L.TRAVEL, hold):
         for r in reversed(rs):
-            if hits(r, L.PLAY_HOLD):
+            if hits(r, hold):
                 held = round(r + step, 4)
                 break
     # the face the toe rests on: the hook's +X edge, measured off its outline
@@ -388,12 +399,13 @@ def record_latch(step: float = 0.05) -> RecordLatch:
     released = None
     if held is not None:
         below = [r for r in rs if r <= held - step]
-        for s in [round(L.PLAY_HOLD - i * step, 4) for i in range(int(L.PLAY_HOLD / step) + 1)]:
-            if not any(hits(r, s2) for r in below for s2 in (s,)):
-                released = s
+        for p in [round(L.PLAY_HOLD - i * step, 4) for i in range(int(L.PLAY_HOLD / step) + 1)]:
+            if not any(hits(r, slider_shift(p)) for r in below):
+                released = p
                 break
+    # slope in slider mm per mm of Record (a 45 degree chamfer gives 1); push in Play mm
     slope = max((b - a) / step for a, b in zip(pushes, pushes[1:]))     # the snap back is a drop, not a push
-    return RecordLatch(alone, play_clear, max(pushes) - L.PLAY_HOLD, slope, held, lean, released)
+    return RecordLatch(alone, play_clear, (max(pushes) - hold) / L.SLIDER_K, slope, held, lean, released)
 
 
 def latch(play_depth: float = 0.0) -> cq.Workplane:
@@ -412,4 +424,4 @@ def latch(play_depth: float = 0.0) -> cq.Workplane:
 
     z0, z1 = L.LATCH_FLOOR_Z
     b = solid(floor, z0, z1).union(solid(raised, z1 - 0.01, L.LATCH_TOP))
-    return b.translate((0, play_depth, 0))
+    return b.translate((0, slider_shift(play_depth), 0))
