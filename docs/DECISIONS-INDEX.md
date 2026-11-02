@@ -193,4 +193,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 | [ADR-200](DECISIONS.md#adr-200--device-behaviour-answers) | 2026-11-02 PDT | Device behaviour | Aux in + aux out (= headphone jack); speaker mutes with headphones and while recording; end of tape and cartridge full shown on LEDs; aux in wins over mic; depth-sensitive Rew/FF working while Play latched; side keys; copy button and promote combo open |
 | [ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued) | 2026-11-02 PDT | Phase 3 opened | FW-1 firmware contract; DRAFT-11 spec proposal; Phase 3 ledger; firmware tests authored in parallel; round-1 Hardware/Software/Verification issues |
 
-131 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-202](DECISIONS.md#adr-202--round-1-disposition-and-fw-1-recognition-clarification) | 2026-11-02 PDT | Round 1 disposition / FW-1 recognition | Desktop admission retained; explicit verifier correction V378; F6 candidate PASS, target and integration holds; 365 faults pass/six cuts unavailable; DRAFT-11 and rig findings retained |
+
+132 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

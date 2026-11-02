@@ -4925,3 +4925,49 @@ exact head. Any engine change would still need Structural Rule 1; none is licens
 **Rationale.** Start every stream that doesn't need parts now. The parts list gates only
 the target halves of the tests.
 **Reversal cost.** Low: contracts and the proposal are documents, and the engine is untouched.
+
+## ADR-202 — Round 1 disposition and FW-1 recognition clarification
+**Date:** 2026-11-02 PDT
+**Status:** ADOPTED by PM on Michael's request to review Software and Verification;
+technical arbitration [#648](https://github.com/mmsanders/Digital-Tape/issues/648).
+
+**Inputs.** Product main `57c605829a402cb68be9d07ed2bcc99ee2d21103`; Software642
+`ee478a913613a16a90e38c85112fb67cbbf53887` (#647); merged Verification publications
+`41995965` (#375), `3d616c14` (#376), `d7540127` (#377).
+[Full disposition](REVIEW/PM648-P3-R1-2026-11-02.md).
+
+**FW-1 admission.** Follow WP-14 §2's exact recognition with E-1: prescribed signature,
+partition entries/extents and bounds; bootstrap/disk-signature/reserved-prefix-only
+changes do not by themselves refuse admission. Provisioned bytes and full WP-14 §4.1
+diagnostics are unchanged. Recognition is not full validation or authority outside P2.
+No Product behavior change is requested to satisfy the verifier-owned bootstrap case.
+
+**F1 artifacts.** Seven normal-rate firmware cases compare exact PCM payloads or their
+digests. Whole-WAV SHA256SUMS authenticates reference files, not raw PCM. All ten frozen
+desktop regressions and the actual MANIFEST scrub rates stay byte-unchanged.
+Verification publishes the explicit admission correction and re-disposition in
+[V378](https://github.com/mmsanders/digital-tape-verification/issues/378), preserving
+the old publication. Software #642 remains integration owner only after independent
+clearance and required current-base CI. No PM implementation merge or blanket acceptance.
+
+**Recorded progress.** F6 independently passes on held candidate ee478a91; F1 host
+and F2 static pass, target halves pending. Candidate remains unmerged. All 365 deferred
+actual faults pass (404/404 with prior receipts); six long-cut coordinates are absent
+from the exact three-unit fixture. That closes reachability investigation, not six
+executed cuts or large-epoch/repeated-LBA completeness. Batching remains disabled.
+
+**Preflight/method.** F374-1…4 require DRAFT-11 descriptive policy, Record-light,
+commit-failure and golden-vector corrections; F374-5 is clarified in FW-1. Revised
+proposal is not issuance. S2 and unresolved firmware transition parameters still need
+review; DRAFT-10 hashes, goldens and engine pin remain unchanged.
+Rig R374-1…5 remain NOT CLEARED. Hardware #641 owns the method/judge/electrical
+corrections before independent review/physical work. SPI observations remain bounded
+characterization, with no SD4/SDR50 or production qualification transfer. No physical
+tear is claimed. No purchase, physical campaign, fabrication or charging authorized.
+
+**Rationale.** Keep firmware compatible with the existing desktop admission rule and
+correct the independent expectation openly, without rewriting historical evidence.
+Retain achieved coverage and separate candidate, target and qualification facts.
+**Reversal cost.** Low for contract/test-publication correction; no product behavior
+or frozen artifact changes. Tightening admission later would require explicit scope
+and independent coverage for the compatibility change.
