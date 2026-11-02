@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const source = fs.readFileSync('index.html', 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const nodes = Object.fromEntries(['board','meta','warn','roadmap','phase1'].map(id => [id, {innerHTML:'',textContent:''}]));
+const nodes = Object.fromEntries(['board','meta','warn','roadmap','phase1','phase2'].map(id => [id, {innerHTML:'',textContent:''}]));
 let mode = 'ok';
 let requests = [];
 const ctx = vm.createContext({document:{hidden:false,getElementById:id=>nodes[id]},AbortSignal,Date,Set,Number,String,Math,
@@ -25,7 +25,7 @@ vm.runInContext(source,ctx);
 const rungs = vm.runInContext('PHASE2.stages.map(s => s.rung)', ctx);
 const top = vm.runInContext('RUNGS.length', ctx);
 const expected = Math.round(rungs.reduce((a,b)=>a+b,0) / (rungs.length * top) * 100);
-const roadmap = () => nodes.roadmap.innerHTML;
+const roadmap = () => nodes.phase2.innerHTML;
 assert.equal((roadmap().match(/class="seg[ "]/g)||[]).length, rungs.length);
 assert.match(roadmap(), new RegExp('>' + expected + '%<'));
 assert.match(roadmap(), new RegExp('aria-valuenow="' + expected + '"'));
@@ -38,7 +38,7 @@ assert.equal(acceptedNow, 3);
 assert.equal(Array.from(rungs).join(), '4,4,4');
 assert.match(roadmap(), /12 of 12 gate rungs/);
 assert.match(roadmap(), /Windows 11/);
-assert.match(roadmap(), /software-only PASS is not the final rung/);
+assert.match(roadmap(), /G2 is deferred, not waived/);
 assert.match(roadmap(), /WP-38 is not taken/);
 assert.match(nodes.phase1.innerHTML, />100%</);
 assert.match(nodes.phase1.innerHTML, /36 of 36 gate rungs/);
@@ -55,37 +55,82 @@ assert.equal(Array.from(vm.runInContext('PHASE2.stages.map(s => s.id)', ctx)).so
 
 // Negative control: the bar is derived, not a hardcoded picture of today.
 const original = JSON.stringify(rungs);
-vm.runInContext('PHASE2.stages.forEach(s => { s.rung = RUNGS.length; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = RUNGS.length; }); renderRoadmap(PHASE2, "phase2");', ctx);
 assert.match(roadmap(), />100%</);
 assert.equal((roadmap().match(/class="seg done"/g)||[]).length, rungs.length);
 assert.match(roadmap(), new RegExp('<b>' + rungs.length + '</b> accepted'));
-vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); renderRoadmap(PHASE2, "phase2");', ctx);
 assert.match(roadmap(), />0%</);
 assert.equal(roadmap().includes('width:0%'), true);
 
 // Negative control: a stage with no stated rung is unknown progress, not zero progress
 // and not the last good number. It must stop the render loudly.
 vm.runInContext('PHASE2.stages[0].rung = null;', ctx);
-assert.throws(() => vm.runInContext('renderRoadmap()', ctx), /WP-14 has no valid rung/);
+assert.throws(() => vm.runInContext('renderRoadmap(PHASE2, "phase2")', ctx), /WP-14 has no valid rung/);
 vm.runInContext('PHASE2.stages[0].rung = 5;', ctx);
-assert.throws(() => vm.runInContext('renderRoadmap()', ctx), /no valid rung/);
+assert.throws(() => vm.runInContext('renderRoadmap(PHASE2, "phase2")', ctx), /no valid rung/);
 
 // A complete coverage rung alone is neither merged implementation nor acceptance.
-vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); PHASE2.stages[0].rung = 2; renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach(s => { s.rung = 0; }); PHASE2.stages[0].rung = 2; renderRoadmap(PHASE2, "phase2");', ctx);
 assert.equal(roadmap().includes('class="seg done"'), false);
 assert.match(roadmap(), /<b>0<\/b> accepted/);
 assert.match(roadmap(), /width:50%/);
 
 // Stage prose is escaped on the same path as issue titles.
 const name0 = vm.runInContext('PHASE2.stages[0].name', ctx);
-vm.runInContext('PHASE2.stages[0].rung = 1; PHASE2.stages[0].name = "<img src=x> & co"; renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages[0].rung = 1; PHASE2.stages[0].name = "<img src=x> & co"; renderRoadmap(PHASE2, "phase2");', ctx);
 assert.match(roadmap(), /&lt;img src=x&gt; &amp; co/);
 assert(!roadmap().includes('<img'));
 
 vm.runInContext('PHASE2.stages[0].name = ' + JSON.stringify(name0) + ';', ctx);
-vm.runInContext('PHASE2.stages.forEach((s, i) => { s.rung = ' + original + '[i]; }); renderRoadmap();', ctx);
+vm.runInContext('PHASE2.stages.forEach((s, i) => { s.rung = ' + original + '[i]; }); renderRoadmap(PHASE2, "phase2");', ctx);
 const settled = roadmap();
 assert.match(settled, new RegExp('>' + expected + '%<'));
+
+
+// Phase 3 counts the issued ledger criteria, never assignment or partial work.
+const phase3 = () => nodes.roadmap.innerHTML;
+const baseline3 = phase3();
+assert.match(phase3(), /Roadmap · Phase 3 · open/);
+assert.match(phase3(), />0\/12</);
+assert.match(phase3(), /<b>5<\/b> in round/);
+assert.match(phase3(), /<b>7<\/b> to do/);
+assert.match(phase3(), /entry items · 0 of 3 passed/);
+assert.match(phase3(), /not an overall phase percentage/);
+assert.match(phase3(), /criteria pending/);
+assert.match(phase3(), /Fabrication and charging CLOSED/);
+assert.match(phase3(), /DRAFT-11 remains proposed/);
+for (const issue of ['Digital-Tape/issues/641', 'Digital-Tape/issues/642', 'digital-tape-verification/issues/374']) {
+  assert(phase3().includes(issue));
+}
+const ledger = fs.readFileSync('../../docs/PHASE3-LEDGER.md', 'utf8');
+const packageLedger = [...ledger.matchAll(/^\| (A-[1-6]|F[1-6])\b[^|]*\| (TO DO|IN ROUND(?: \(rig design\))?|PASSED) \|/gm)]
+  .map(m => [m[1], m[2].replace(' (rig design)', '')]);
+const snapshot = JSON.parse(vm.runInContext('JSON.stringify(PHASE3.packages.flatMap(p => p.criteria).map(c => [c.id, c.state]))', ctx));
+assert.equal(packageLedger.length, 12);
+assert.deepEqual(snapshot, packageLedger);
+const entries = [...ledger.split('## WP-05')[0].matchAll(/^\| [^|]+\| (PASSED|IN ROUND|TO DO) \|/gm)].map(m => m[1]);
+assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(PHASE3.entry.map(c => c.state))', ctx)), entries);
+const packageIndex3 = fs.readFileSync('../../docs/PACKAGES/README.md', 'utf8').split(/^## /m)
+  .find(section => section.startsWith('Phase 3'));
+const ids3 = [...packageIndex3.matchAll(/^\| (WP-\d+) \|/gm)].map(m => m[1]);
+assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(PHASE3.packages.map(p => p.id))', ctx)), ids3);
+// Prove that a passed row changes the count and only that segment; assigned does not.
+vm.runInContext('PHASE3.packages[0].criteria[0].state = "PASSED"; renderPhase3();', ctx);
+assert.match(phase3(), />1\/12</);
+assert.match(phase3(), /aria-valuenow="1"/);
+assert.equal((phase3().match(/class="seg done"/g)||[]).length, 1);
+vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; renderPhase3();', ctx);
+assert.match(phase3(), />0\/12</);
+for (const invalid of [null, 'DONE', '']) {
+  vm.runInContext('PHASE3.packages[0].criteria[0].state = ' + JSON.stringify(invalid), ctx);
+  assert.throws(() => vm.runInContext('renderPhase3()', ctx), /A-1 has no valid state/);
+}
+vm.runInContext('PHASE3.packages[0].criteria[0].state = "TO DO"; PHASE3.packages[0].criteria[0].name = "<img src=x> & card"; renderPhase3();', ctx);
+assert.match(phase3(), /&lt;img src=x&gt; &amp; card/);
+assert(!phase3().includes('<img'));
+vm.runInContext('PHASE3.packages[0].criteria[0].name = "Exact card identity"; renderPhase3();', ctx);
+assert.equal(phase3(), baseline3);
 
 (async()=>{
   await new Promise(resolve=>setImmediate(resolve));
@@ -100,6 +145,8 @@ assert.match(settled, new RegExp('>' + expected + '%<'));
   assert(!nodes.warn.innerHTML.includes('<img'));
   // The roadmap reads main, not GitHub, so a failed queue refresh must not blank it.
   assert.equal(roadmap(), settled);
+  assert.equal(phase3(), baseline3);
   console.log('PASS pagination, PR exclusion, dual-repo routing, escaping, failure clears status, five-minute polling');
+  console.log('PASS Phase 3 ledger identity, package coverage, passed-only counts, invalid-state controls and escaping');
   console.log('PASS roadmap computed from stage table, unaccepted stays amber, unknown rung fails loudly, survives queue failure');
 })().catch(e=>{console.error(e);process.exitCode=1;});
