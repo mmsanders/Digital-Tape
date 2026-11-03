@@ -1,6 +1,6 @@
 # Independent verification integration
 
-**1 November 2026.** Which independent publications back each accepted package, and where
+**2 November 2026.** Which independent publications back each accepted package, and where
 their evidence is. Imported verifier trees and their source commits are declared in
 [tests/IMPORTS.json](../tests/IMPORTS.json); CI proves byte identity and ordering
 (`.github/workflows/evidence-integrity.yml`, `verifier-publication.yml`).
@@ -26,11 +26,24 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
 
 ## Carried into Phase 3
 
+- **Round 1 disposition:** [PM648 review](REVIEW/PM648-P3-R1-2026-11-02.md).
+  Verification `41995965` (PR #375), `3d616c14` (#376) and `d7540127` (#377) are merged publications.
+  V378 `98f46c94` (PR #379) publishes the explicit ADR-202 correction: 28 cases/four controls,
+  exact ee478a91 off-target clearance, predecessor bytes unchanged. Software #647 integrated
+  at `aa472667` after docs-only base sync and 117 passing checks; scoped code identities match.
+  F6 passes, F1 host/F2 static carry, target halves do not. Full WP-17 acceptance pending.
+  [PM650](REVIEW/PM650-P3-R2-2026-11-02.md) routes BE-1 kit Software652 and rig correction
+  Hardware651 to independent test-authoring/exact-head review V380; no target run authorized.
+
 - **Q-P2-1 any-subset coverage** (ADR-195 §4). The model is published (`tests/wp10_subset_r1`)
-  and bounded campaigns found no violation (Verification #186, #210). Before firmware write
-  batching is enabled, the 365 deferred load faults and six unexecuted long-copy cuts must run.
+  and bounded campaigns found no violation (Verification #186, #210). Verification `41995965`
+  executes all 365 deferred faults without violation (404/404 with prior receipts). The six
+  requested long cuts are unavailable on the exact three-unit fixture, not executed cuts.
+  Broader large-epoch/repeated-LBA completeness and firmware batching remain held by PM.
 - **Media atomicity** (WP-05 A-6) has no physical result yet. The judge
-  (`hardware/characterisation/media_atomicity.py`) has its own negative controls.
+  (`hardware/characterisation/media_atomicity.py`) has its own negative controls, but
+  Verification `3d616c14` finds skipped non-qualifying tears/stale-busy admission plus
+  electrical/timing and SPI-to-SD4 scope gaps. Method NOT CLEARED; no physical tear claimed.
 
 ## Where the history is
 
