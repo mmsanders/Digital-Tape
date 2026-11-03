@@ -1,4 +1,4 @@
-# WP-17 bench evidence: interface declaration (BE1-IF/1)
+# WP-17 bench evidence: interface declaration (BE1-IF/2)
 
 **Software Lead declaration for #652 (P3-R2-SW), 2 November 2026.** This is the public
 schema, transcript grammar, CLI and report contract that
@@ -7,7 +7,13 @@ offline checker. Verification may author expectations from this document and BE-
 checker code, private test or fixture comes with it. Normative authority stays with
 BE-1 and FW-1; where this declaration is narrower, it narrows the kit's behaviour,
 not those documents. A change after Verification publishes is a new version
-(`BE1-IF/2`), returned to the pair issue, not a silent edit.
+(`BE1-IF/3`), returned to the pair issue, not a silent edit.
+
+**Version history.** `BE1-IF/1` (5808fddf) refused a physical session that held
+`simulated` observations. `BE1-IF/2` admits that mixed bundle so that each
+observation keeps its own provenance, matching V380 `BE1-EXPECTATIONS.md`
+(d23a90f7). Simulation can still never make `physical_run` or `complete` true.
+Nothing else changed.
 
 Firmware behaviour is unchanged. The grammar below is exactly what the integrated FW-1
 firmware (`aa472667`, `firmware/bench/src/main.cpp`) prints today. No new serial hook is declared.
@@ -110,7 +116,7 @@ Every observation has:
 
 **Provenance rules.** Each violation is `INVALID` (`provenance_conflict`), except a witness on a simulation, which is `witness_on_simulation`.
 - A `simulation` session holds only `simulated` and `not_run` observations.
-- A `physical` session holds only `actual` and `not_run` observations.
+- A `physical` session may hold `actual`, `simulated` and `not_run` observations. Each keeps its own provenance in the report, and only `actual` observations can decide `complete`.
 - A `simulated` observation, and every observation in a simulation session, carries no witness. That means a `null` session witness and no F5 `witness` object.
 - A `not_run` observation has exactly `id`, `criterion`, `provenance`, `sequence` and `reason`, and references no file.
 
@@ -200,8 +206,9 @@ Each observation and each criterion gets a state, and each carries a list of rea
 | `NOT_RUN` | No observation, a declared `not_run`, or an observation missing data the criterion needs |
 | `CONSISTENT` | Every check of the criterion holds. This is artifact consistency, never target acceptance or PASS. |
 
-A `simulated` observation is judged by the same checks. It never makes `physical_run`
-or `complete` true.
+A `simulated` observation is judged by the same checks and always carries
+`simulated_not_physical`. It never makes `physical_run` or `complete` true, and in a
+mixed physical session it cannot stand in for an `actual` observation.
 
 ### F1 target
 The checker reads the reference first:
@@ -323,7 +330,7 @@ Each F5 observation is checked in this order. The first problem decides its stat
 ```json
 {
   "schema": "digital-tape/be1-report/1",
-  "tool": {"name": "bench_evidence.py", "version": "BE1-IF/1", "sha256": "<script bytes>"},
+  "tool": {"name": "bench_evidence.py", "version": "BE1-IF/2", "sha256": "<script bytes>"},
   "bundle": {"path": "<as given>", "manifest_sha256": "<hex>"},
   "golden": {"sha256sums_sha256": "<hex>", "manifest_sha256": "<hex>"},
   "candidate": {"…": "copied from the manifest"},
@@ -349,7 +356,7 @@ Each F5 observation is checked in this order. The first problem decides its stat
 - The report is UTF-8 JSON with sorted keys.
 - Apart from `bundle.path` it is a pure function of the bundle bytes, the `--golden` bytes and the tool bytes. It contains no wall-clock time.
 - All five criteria are always present.
-- Reasons are listed in the order the checks run. Tests may assert any listed code; codes are never removed within `BE1-IF/1`.
+- Reasons are listed in the order the checks run. Tests may assert any listed code; codes are never removed within a declaration version.
 
 **Reason codes:**
 
