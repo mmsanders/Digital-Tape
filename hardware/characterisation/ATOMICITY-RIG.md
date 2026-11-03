@@ -1,219 +1,274 @@
-# Card power-cut rig — design (WP-05 A-6)
+# Card power-cut rig — design, revision 2 (WP-05 A-6)
 
-**Owner:** Hardware Lead · **Status:** DESIGN for method review. Nothing is built or run.
-**Drafted:** 1 November 2026 for [P3-R1-HW (#641)](https://github.com/mmsanders/Digital-Tape/issues/641),
-input main `3826018`.
+**Owner:** Hardware Lead · **Status:** DESIGN for independent method review. **Nothing is built,
+energised, bought or run.** Revision 2 drafted 2 November 2026 for
+[P3-R2-HW (#651)](https://github.com/mmsanders/Digital-Tape/issues/651). Base: main `cc23b87`.
 
-**Verification reviews this method before any run** (WP-05, "Independent acceptance"). The rig
-firmware and raw transaction and rail traces must be reviewable before any physical-atomicity
-acceptance. This document is the method; the firmware comes after Verification's review.
+It answers the independent findings R374-1…5 (Verification `3d616c14`,
+`findings/P3-R1-374/RIG-METHOD.md`, disposition NOT CLEARED). Revision 1 (#641) is preserved
+unchanged at blob `641dbfe22812faebead895b264a40966999068b3` (PR #646 head `80d26364`). §9 lists every
+revision-1 claim this revision withdraws or replaces.
 
-**Procedure this implements:** [WP-05](../../docs/PACKAGES/WP-05.md) "Atomicity procedure".
-**Judge:** [media_atomicity.py](media_atomicity.py) (plan revision 3, IR-018). Every field named
-below is a field that `judge` validates or qualifies on.
+- **Procedure:** [WP-05](../../docs/PACKAGES/WP-05.md), "Atomicity procedure".
+- **Evidence schema and judge rules:** [ATOMICITY-SCHEMA-R2.md](ATOMICITY-SCHEMA-R2.md). That file
+  is a declaration. [media_atomicity.py](media_atomicity.py) stays at revision 3 until Verification's
+  independent regressions are merged and imported (§8).
+
+**What this rig can establish:** SPI-mode characterisation of one exact card. It can't qualify a card
+for the product's SD 4-bit / SDR50 bus, or for the card system (R374-5, §6).
 
 ## 1. What the rig is
 
-A Teensy 4.1 drives one microSD card in **SPI mode** through a breakout whose 3.3 V rail the
-Teensy can switch off within about a microsecond, and discharge to 0 V. For each planned trial
-the rig:
-1. establishes the old block and neighbours;
+A Teensy 4.1 drives one microSD card in **SPI mode at 4 MHz**. The card's 3.3 V rail runs through a
+load switch with a built-in output discharge. For each planned trial the rig:
+1. establishes the old block and the neighbours;
 2. starts a single-block write;
-3. watches the protocol to the busy phase;
-4. opens the rail at the planned point in busy;
-5. powers back up and reads everything again.
+3. enters the busy phase;
+4. commands the rail off;
+5. **measures** when the rail actually fell out of the card's operating range, and whether busy
+   ended before that;
+6. powers back up and reads everything again, including the CID.
 
-It emits one JSON row per planned trial over USB serial.
+Revision 1 inferred the cut from a software timestamp. Revision 2 measures two electrical events on
+one hardware timer:
+- **A, rail opening:** VCARD falls below a specified threshold that is always below 2.70 V.
+- **B, busy end:** the card's DO rises above a specified threshold.
 
-Parts are lines 8, 18 and 19–25 of [PHASE3-BENCH.md](../sourcing/PHASE3-BENCH.md). The rig can borrow
-the bench Teensy, since the rig needs no audio board, but a dedicated second Teensy keeps the rig
-wiring permanent. That choice is Michael's (+$35.95).
+The judge qualifies a trial from those two edges and a fixed uncertainty, and fails closed on
+anything ambiguous (schema §4).
 
-### Why SPI mode, and what that leaves open
-
-The Teensy's built-in slot runs native 4-bit SDIO, but its card rail is wired straight to the board's
-3.3 V and can't be switched. Its DAT0 busy is also not exposed at a timestamped pin. An external slot
-on GPIO in SPI mode gives the rig:
-- a switchable rail;
-- full software visibility of every protocol phase, byte by byte;
-- a bus slow enough (4 MHz) for the $27 analyser to decode every transaction.
-
-`judge` accepts `bus_mode: "spi"` with `busy_line: "MISO"` (IR-018-07).
-
-**Open for Verification and PM:** the product bus is SD 4-bit (SDR50, Phase 5). This design assumes
-the card's internal power-loss behaviour during programming doesn't depend on which host bus
-delivered the block. That is an assumption, not a measurement. If Verification requires native-mode
-evidence, a 4-bit variant needs a separate switched slot on the Teensy's SDIO pins plus DAT0 capture.
-That is a later rig change; this one doesn't preclude it.
-
-## 2. Wiring
+## 2. Circuit
 
 ```
- Teensy 4.1 (3V3 out) ──┬──────────────────────────── U3 VCC (always on)
-                        │
-                        S
-                   Q1  DMG2305UX (P-FET)        VCARD ──┬── card VDD (Adafruit 4682 "3V" pin)
-       pin 2 ──┬─[10k]──G   D ───────────────────────┤     ├── U2 VCC (SN74LVC125A, switched)
-   (CUT, high = off)    │                             │     ├── 10 µF + 100 nF at the socket
-               └─[1N4148]┘ (anode at pin: fast off)    │     ├── pull-ups for card side, to VCARD only
-                    22 nF gate-to-source (soft start)  │     ├── U3 input A1 ─► U3 Y1 ─► pin 4  RAIL_OK
-                    100k gate-to-source (off at boot)  │     └── pin 14 (A0) VCARD sense
-                                                       │
-       pin 3 ──[100R]── G  Q2 BSS138 (N-FET)  D ─[10R]─┘
-       (DISCHARGE)      100k G-to-GND           S ── GND
+ Teensy 3V3 (always on) ─┬──────────── U1 TPS22918 VIN (1 µF + 100 nF at VIN)
+                         │             U1 ON  ◄── Teensy pin CUTn (high = rail on), 100 kΩ to GND
+                         │             U1 CT  ── 1 nF C0G to GND        (soft start, ≈1.7 ms typ.)
+                         │             U1 QOD ── R_EXT 100 Ω ── U1 VOUT (discharge when ON low)
+                         │             U1 VOUT = VCARD ─┬── card VDD (Adafruit 4682 "3V" pin)
+                         │                              ├── 10 µF + 100 nF at the socket
+                         │                              ├── U2a/U2b/U2c VCC (3 × SN74LVC1G125, switched)
+                         │                              ├── card-side pull-ups (to VCARD only)
+                         │                              ├── divider 10.0 kΩ / 37.4 kΩ (0.1 %) ─► U3 1IN+
+                         │                              └── 100 kΩ ─► Teensy ADC pin (monitor only)
+                         │
+                         ├── U3 TLV3202 VCC (always on), 100 nF
+                         └── 1.0 kΩ ── LM4040A 2.048 V (REF) ─┬─► U3 1IN−          (A threshold)
+                                                              └─ 10.0 k / 10.0 k (0.1 %) ─► U3 2IN−  (1.024 V, B)
 
- Teensy  pin 10 CS   ──► U2 A1 ─► Y1 ─► card CS (DAT3)        U2 = SN74LVC125A powered from VCARD.
- Teensy  pin 11 MOSI ──► U2 A2 ─► Y2 ─► card DI (CMD)         LVC inputs have no clamp diode to VCC,
- Teensy  pin 13 SCK  ──► U2 A3 ─► Y3 ─► card CLK              so a high Teensy pin cannot feed the
- card DO (DAT0) ───────────────────────► Teensy pin 12 MISO   card through them when VCARD is off.
-                                         (pull-down, never pull-up: a pull-up to 3V3 would back-power)
+ Teensy CS   ─► U2a A ─► Y ─► card CS        U2 OE̅ pins tied to GND (always enabled while powered).
+ Teensy MOSI ─► U2b A ─► Y ─► card DI        No unused gates: three single-gate parts.
+ Teensy SCK  ─► U2c A ─► Y ─► card CLK       Ioff: ±10 µA max per input at VCC = 0 (datasheet §5.5).
+ card DO ──────┬───────────────────────────► Teensy MISO (100 kΩ pull-down, never a pull-up)
+               └───────────────────────────► U3 2IN+  (B: DO above 1.024 V = busy ended)
 
- Analyser CH0 SCK · CH1 MOSI · CH2 MISO · CH3 CS · CH4 pin 2 CUT · CH5 RAIL_OK · CH6 pin 5 PHASE · CH7 pin 3 DISCHARGE
+ U3 1OUT (A: high while VCARD above the threshold) ─► Teensy capture input A ┐ same timer,
+ U3 2OUT (B: high when DO is high)                 ─► Teensy capture input B ┘ e.g. GPT, 150 MHz
+ Test points: VCARD, U1 ON, U3 1OUT, U3 2OUT, DO, GND (for the scope and analyser)
 ```
 
-The parts of this circuit that matter:
-- **No back-powering.** A card held up through its I/O protection diodes doesn't lose power when
-  the rail opens, and every "cut" would be fiction. The rig removes every path:
-  - every line into the card comes from U2, which is powered from VCARD;
-  - card-side pull-ups go to VCARD;
-  - MISO has a pull-down only.
+- **Switch, R374-4.** The TPS22918 replaces the discrete P-FET, the N-FET discharge, the gate RC
+  and the diode. When ON is low it disconnects VIN and connects VOUT to GND through the internal
+  pull-down (R_PD) plus R_EXT. When ON is high it connects VIN to VOUT. Source: datasheet §8.3.2,
+  Table 4, and the block diagram in §8.2.
+- **Buffers, R374-3 and back-power.** Revision 1's SN74LVC125A doesn't state an Ioff
+  (partial-power-down) rating in the current datasheet (SCAS290T), so "no clamp to VCC" was
+  unsupported. The SN74LVC1G125 states Ioff ≤ ±10 µA at VCC = 0 with an input or output at 5.5 V
+  (SCES223U, §5.5) and lists "Ioff … back-drive protection" as a feature. Each buffer's OE̅ is tied to
+  GND. Each part has a single gate, so there are no unused inputs to tie off. When VCARD is 0 V the
+  Teensy also drives CS, MOSI and SCK low (§3, step 9).
+- **Rail threshold, R374-3.** Revision 1's always-on LVC gate (U3, RAIL_OK) is **removed**. A logic
+  input has no specified threshold between VIL 0.8 V and VIH 2.0 V, and a maximum input transition
+  rate of 8 ns/V, which a 100 µs RC tail violates. Its replacement is a comparator built for slow
+  inputs, with a precision reference (§4.1).
 
-  The negative control in §7 (control C) proves it.
-- **Clean cut.** Pin 2 high turns Q1 off through the diode in about a microsecond. About 2 µs
-  later pin 3 turns Q2 on. Q1 and Q2 are never on together (Q2 would short 3.3 V through 10 Ω). Q2
-  then pulls VCARD down with a time constant of about 0.1 ms on 10 µF.
-- **Soft start.** The 10 kΩ / 22 nF gate network ramps VCARD over a few hundred microseconds,
-  inside the SD power-up window (about 0.1–35 ms ramp). The value is tuned on the bench.
-- **Safe at boot.** The 100 kΩ resistors hold Q1 off and Q2 off until the firmware drives them.
-- **Rail evidence.** RAIL_OK (U3, always on, input from VCARD) gives a timestamped logic edge when
-  VCARD falls through the LVC input threshold (about 1.5 V at 3.3 V). Pin 14 reads VCARD with the
-  ADC to confirm it is below 0.5 V before every re-power. The SD specification's power-cycle rule is
-  below 0.5 V for at least 1 ms; the rig holds it below for 50 ms.
+### Part data used (primary sources, read 2 November 2026)
+
+| Part | Datasheet | Values used |
+|---|---|---|
+| TPS22918 load switch | TI SLVSD76C (Jul 2017) | VIN 1–5.5 V. ON: VIH ≥ 1 V, VIL ≤ 0.5 V. R_PD 25 Ω typ., 35 Ω max at 3.3 V. QOD active only with ON low (Table 4). t_OFF 2 µs typ. (only typical values are given, §6.6). Rise time 1680 µs typ. with CT 1 nF at 3.3 V (Table 2). Load ≤ 200 µF with internal R_PD (§8.3.2.2) |
+| TLV3202 dual comparator | TI SBOS561C (May 2024) | Supply 2.7–5.5 V. V_IO ≤ 6 mV over −40 to 125 °C (TLV3202). t_PD ≤ 55 ns over temperature, 20 mV overdrive. Input common mode from (VEE − 0.2) to (VCC + 0.2) V. Inputs clamp to the supply rails. Push-pull output. Internal hysteresis 1.2 mV typ. |
+| LM4040A-2.048 reference | TI SNOS633N (Aug 2025) | ±0.1 % at 25 °C (A grade). ≤ 100 ppm/°C. Operating current 60 µA to 15 mA (front-page figures for the 2.5 V part; confirm the 2.048 V row in the cart) |
+| SN74LVC1G125 buffer | TI SCES223U (Aug 2026) | Ioff ≤ ±10 µA at VCC = 0. Inputs tolerate 5.5 V. VIH 2 V, VIL 0.8 V at 3–3.6 V. t_pd ≤ 4.7 ns |
+| SN74LVC125A (revision 1, removed) | TI SCAS290T (Sep 2024) | No Ioff rating stated. Δt/Δv ≤ 8 ns/V |
+
+**SD card signal levels**, from the SD Physical Layer Simplified Specification's 3.3 V bus figures:
+VDD 2.7–3.6 V, VOH ≥ 0.75 VDD, VOL ≤ 0.125 VDD. **I didn't re-read this in this round;**
+Verification should confirm it against the version it pins.
 
 ## 3. One trial, step by step
 
-Clock: the Teensy's DWT cycle counter at 600 MHz, converted to microseconds from trial start
-(resolution 1.7 ns). In practice it is quantised by the SPI byte time, 2 µs at 4 MHz. PHASE (pin 5)
-pulses at every step boundary so the analyser trace can be aligned to the row.
+The capture timer is one hardware timer with two input-capture channels (A, B). Its counter is also
+read at software events, so every time in the row is on one timebase. The budget in §4.3 assumes a
+150 MHz clock and also covers 24 MHz. The manifest records the actual timer, clock and pins.
 
-| Step | Action | Recorded |
+| Step | Action | Recorded (schema §4) |
 |---|---|---|
 | 0 | Host sends `{iteration N, cut_offset_fraction f}` from the committed plan | — |
-| 1 | Power up: VCARD ramps, wait ≥ 1 ms, ≥ 74 clocks at 400 kHz with CS high, CMD0, CMD8, ACMD41 loop, CMD58 (CCS), **CMD59 CRC on**. Then SCK goes to 4 MHz | init time; failures are recorded, not hidden |
-| 2 | **CMD10, read the CID** (16 bytes, CRC checked) every trial, after every power-up | `card_cid`: from the card, never from the plan |
-| 3 | Write `pattern(N−1)` to the target LBA (CMD24), wait for busy to end, read it back (CMD17) | `precondition_ok`, `precondition_readback_hex` (must equal pattern N−1 exactly) |
-| 4 | Read LBAs target−2, −1, +1, +2 | `neighbour_baseline` {-2,-1,+1,+2}: fresh each trial, never carried over |
-| 5 | CMD24 with `pattern(N)`: R1, start token 0xFE, 512 bytes, CRC16 | `payload_complete`: true only if all 512 + 2 bytes were clocked out |
-| 6 | Read the data-response token | `data_response_accepted`: true only if `token & 0x1F == 0x05` (accepted, not CRC or write error) |
-| 7 | Clock 0xFF and read MISO. The first 0x00 byte is busy entry | `busy_entry_us` |
-| 8 | Keep polling. Target cut time: `t_cut = busy_entry_us + f × T_ref`. On each 0x00 byte, if now ≥ t_cut: **pin 2 high (cut)**, then pin 3 high | `busy_sampled_us` (the last 0x00 byte, ending within one byte time of the cut); `cut_us` (time pin 2 was written) |
-| 8′ | If a non-zero byte is read before t_cut, programming finished: the write completed, so cut anyway (to keep the trial shape) and record it | `busy_deassert_us ≤ cut_us`, so `judge` scores the trial **non-qualifying**, as intended |
-| 9 | RAIL_OK falls; hold the rail off for 50 ms; confirm VCARD < 0.5 V on pin 14 | `rail_low_us`, `vcard_mv_before_repower` (extra fields; `judge` ignores unknown fields) |
-| 10 | Pin 3 low, pin 2 low: power up and initialise as in step 1, then CID again | the CID must equal step 2's, or the row is flagged |
-| 11 | Read the target and four neighbours. There's no host cache: the Teensy holds nothing between power cycles | `readback_hex`, `neighbours` {-2,-1,+1,+2} |
-| 12 | Emit the row and go back to step 0 | — |
+| 1 | ON high. VCARD soft-starts (≈ 1.7 ms typ.). Wait ≥ 1 ms more, then ≥ 74 clocks at 400 kHz with CS high, CMD0, CMD8, the ACMD41 loop, CMD58 and **CMD59 (CRC on)**. Then SCK to 4 MHz | `init_ms`. Failures are recorded, not hidden |
+| 2 | **CMD10: read the CID** | `card_cid` |
+| 3 | Write `pattern(N−1)` (CMD24), wait for busy to end, read it back (CMD17) | `precondition_ok`, `precondition_readback_hex` |
+| 4 | Read LBAs target −2, −1, +1, +2 | `neighbour_baseline` |
+| 5 | CMD24 with `pattern(N)`: R1, 0xFE, 512 bytes, CRC16 | `payload_complete` |
+| 6 | Read the data-response token. **Arm capture A and B** | `data_response_accepted` (`token & 0x1F == 0x05`), `capture_armed_us` |
+| 7 | Clock 0xFF continuously. The first 0x00 byte is busy entry | `busy_entry_us` |
+| 8 | At `busy_entry + f × T_sched`, ON low (cut command). **Keep clocking 0xFF** until capture ends, so the busy signal never depends on the clock stopping | `cut_command_us` |
+| 9 | Capture runs until `rail_open + 50 µs`, or `cut_command + 2 ms` if A never trips. Then CS, MOSI and SCK are driven low. The rail stays off for 50 ms. The ADC monitor is read | `rail_open_us`, `rail_edges_us`, `busy_end_edges_us`, `capture_end_us`, `vcard_mv_before_repower` |
+| 10 | ON high, initialise as in step 1, **CMD10 again** | `card_cid_after_cut`. A mismatch, or a failed initialisation, is a run problem |
+| 11 | Read the target and its four neighbours. Nothing is cached between power cycles | `readback_hex`, `neighbours` |
+| 12 | Emit the row, unchanged after emission | — |
 
-Every row also carries `bus_mode: "spi"`, `busy_line: "MISO"`, `T_ref` (`busy_ref_us`), the SCK rate
-and the rig firmware's commit hash.
-
-**T_ref, the cut scale.** Before the campaign, the rig does 100 uncut writes of the same pattern
-cycle to the same block and records each busy duration, from busy entry to the first non-zero byte.
-`T_ref` is the **minimum** observed duration, not the median, so every fraction below 1.0 lands in
-busy. The calibration file is committed with the plan, before the run.
-
-The plan's fractions are spread uniformly over 0–1.5, so about one attempt in three is expected to
-land after programming finished and score non-qualifying. A 1,500-attempt plan
-(`--attempts 1500`, as WP-05 states) therefore yields about 1,000 qualifying cuts, right at the
-threshold. Expect to need `plan --extend` once. The extension is auditable and under the same run id.
+**T_sched only spreads the cuts.** It's the median busy time from 100 uncut writes, committed with
+the plan. Revision 1 claimed that using the *minimum* would put every fraction below 1 inside busy;
+that claim is withdrawn (R374, clarification 1). Whether a cut landed in busy is decided per trial
+from A and B, never from f. With f spread over 0–1.5, misses are expected. `plan --extend` continues
+the run under the same run id until 1,000 rows qualify.
 
 **What the rig never does:**
-- it never issues CMD49/CMD48, so the card's optional cache stays at its power-on default (disabled);
+- it never issues CMD48 or CMD49;
 - it never retries a failed write within a trial;
 - it never drops a row;
 - it never edits a row after emitting it.
 
-An initialisation failure after a cut is itself a result. The row is emitted with what is known, and
-`judge` reports it as a problem.
+## 4. Electrical analysis
 
-## 4. Cuts per hour
+These figures are **analysis from datasheets, not measurements.** §7 lists the measurements that
+must confirm each one before a campaign.
 
-| Phase | Typical |
-|---|---|
-| Off time (fixed) | 50 ms |
-| Power-up and init (ACMD41 loop) | 100–400 ms, card dependent; measured in the dry run |
-| Precondition write, verify, 4 baseline reads | ≈ 8 ms |
-| Cut write | ≤ 3 ms |
-| Second init and 5 reads | 100–400 ms |
-| Row out (≈ 6 KiB hex over USB) | ≈ 1 ms |
-| **Per trial** | **≈ 0.3–0.9 s** |
+### 4.1 Threshold A, rail opening (R374-3)
 
-**Rate: about 4,000–12,000 trials per hour in principle. Plan on 2,000 per hour.** At that rate a
-1,500-attempt plan runs in under an hour per card, and one extension adds minutes. The dry run (§7,
-control A) reports the real rate before the committed run.
+- **The point to measure:** the first moment VCARD is below 2.70 V, the bottom of the SD operating
+  range. A busy end that happens while VCARD ≥ 2.70 V is signalled by a card that's in specification,
+  and it must be caught.
+- **Divider and reference:** 37.4 / (10.0 + 37.4) = 0.78903. The nominal trip point is
+  2.048 / 0.78903 = **2.596 V**.
+- **Worst case:**
+  - reference ±0.1 %, plus 100 ppm/°C over ±10 °C on the bench;
+  - resistors at 0.1 %;
+  - comparator offset ≤ 6 mV.
 
-The target block is rewritten about 3,000 times per campaign, which is negligible wear.
+  That gives a trip point between **2.582 V and 2.610 V**, which is at least **90 mV below 2.70 V**.
+- **Why this direction is fail-closed:** after the switch opens, VCARD falls monotonically (control
+  E1 confirms it). So A trips no earlier than the moment VCARD actually crossed 2.70 V, and the
+  capture window always extends past that moment. Any busy end in-spec is inside the window.
+- **Slow input:** a comparator has no maximum input transition rate. Near the threshold, the
+  discharge alone falls at about 1.9 V/ms (R_QOD × 10 µF ≈ 1.35 ms), and faster with card current.
+  Noise could make A chatter, so all A edges are recorded and the **first** falling edge counts.
+  An early chatter edge would need about 90 mV of noise, and E0/E1 measure the actual noise.
+- **No back-power path through this circuit:** the comparator's inputs see VCARD through 47.4 kΩ to
+  GND. The inputs clamp only above VCC + 0.5 V, and VCARD can't exceed the switch's VIN, which is
+  the same 3V3.
 
-## 5. From the rig to the verdict
+### 4.2 Threshold B, busy end (R374-2)
 
-```
-make -C hardware atomicity-test                       # judge self-tests first (WP-05)
-media_atomicity.py plan --sku S --revision R --cid C --attempts 1500 --out plan.json
-git commit plan.json + tref-calibration.json          # committed BEFORE the run
-rig host script: streams each trial in plan.json to the rig, appends every returned row to
-                 run.jsonl (line-buffered, fsync per row), adds run_id/sku/revision/plan_digest
-media_atomicity.py judge --plan plan.json [--plan ext.json] --results run.jsonl --json RESULT
-```
+- **Trip point:** 1.024 V nominal, 1.015–1.033 V worst case.
+- **Card levels:** at VDD 2.70–3.6 V the card's DO is ≤ 0.45 V low and ≥ 2.03 V high (0.125 and
+  0.75 × VDD).
+- **Margin:** about 0.57 V below the trip point for a low and 1.0 V above it for a high. So any busy
+  end while the card is in specification gives a B rising edge.
+- **What B adds to the line:** the 100 kΩ MISO pull-down and the comparator's 2 pF input. That
+  doesn't change the card's levels.
 
-- The host script (`hardware/characterisation/atomicity_host.py`, not yet written) takes `run_id`,
-  `sku`, `revision` and `plan_digest` from the committed plan. **`card_cid` comes from the card in
-  every row** (steps 2 and 10). The judge cross-checks it against the plan, and a mismatch fails the
-  row, so a swapped card is caught.
-- One planned attempt produces exactly one row. If the rig resets mid-trial, the host writes a row
-  for that iteration with `precondition_ok: false` and the reason, rather than skipping it. Missing
-  is a broken run (IR-018-02).
-- Analyser traces: every trial of the dry run, and every 50th trial plus every non-qualifying and
-  every problem trial of the committed run. Each trace's SHA-256 is recorded beside the run. Traces
-  over 1 MiB go to a release asset (CLAUDE.md §4).
+### 4.3 Edge-alignment uncertainty U
 
-## 6. Card identity (A-1)
+| Term | Bound |
+|---|---:|
+| Capture quantisation, both channels (1 tick each at 150 MHz) | 13 ns |
+| Input synchroniser asymmetry (2 ticks) | 13 ns |
+| Comparator propagation, A vs B (each 0–55 ns; only the maximum is specified) | 55 ns |
+| DO rise from VOL to 1.024 V (≥ 2 mA into ≤ 30 pF is ≤ 15 ns; bounded at) | 100 ns |
+| **Sum** | **≈ 0.18 µs** (≈ 0.32 µs at a 24 MHz capture clock) |
 
-USB card readers on Windows generally can't read the CID; they don't pass CMD10 through. The rig
-reads it natively in step 2, so **the rig is also the A-1 identity reader.** A one-shot "identify"
-mode prints and decodes, for each card:
+The judge uses **U = 1.0 µs** (schema §2), more than 3× the analysed sum. Control E3 measures the
+real A–B skew on a common edge. A busy end within ±U of rail opening is ambiguous, and the trial
+**doesn't qualify**.
 
-| CID field | Bits | Use |
-|---|---|---|
-| MID, manufacturer ID | [127:120] | Identity |
-| OID, OEM/application ID | [119:104] | Identity |
-| PNM, product name (5 ASCII) | [103:64] | Identity, shown next to the retail name |
-| PRV, product revision (BCD n.m) | [63:56] | **Proposed as `--revision`** |
-| PSN, serial | [55:24] | Distinguishes the three cards |
-| MDT, manufacture date | [19:8] | Revision drift between purchases |
+### 4.4 Switch and discharge overlap (R374-4)
 
-It also prints the CSD (CMD9) for capacity. The manufacturer part number isn't in the CID: Michael
-photographs the card and packaging markings, and the photo's hash goes in the identity record.
-**Which string is the "revision" in the plan is for Verification and PM to fix.** My proposal is
-`PNM/PRV` plus MDT recorded alongside.
+The datasheet doesn't specify dead time between the pass FET and the discharge FET; both are driven
+from one control through an inverter (§8.2). The design therefore **bounds the consequence instead of
+claiming non-overlap.**
+- **Overlap current:** the discharge path is R_EXT 100 Ω in series with R_PD, so even with both FETs
+  fully on together, the current is ≤ 3.3 V / 100 Ω = **33 mA** and ≤ 109 mW, mostly in R_EXT. A 1/4 W
+  part is enough. That's small next to the Teensy's 3.3 V supply (PJRC rates it at about 250 mA; I
+  didn't re-read that figure this round), so an overlap of any length is neither a hazard nor a short.
+- **Inrush at power-up:** C_load dV/dt = 10 µF × 3.3 V / 1.68 ms ≈ 20 mA (typical rise, CT 1 nF).
+  That's inside the SD power-up ramp window and doesn't sag the Teensy rail.
+- **Discharge:** τ = R_QOD × C ≈ (100 + 25…35) Ω × 10 µF ≈ 1.25–1.35 ms. The SD reset condition is
+  below 0.5 V; VCARD reaches it within about 2.6 ms. The 50 ms off-time leaves it effectively at
+  0 V (below 1 µV by calculation). The ADC reading is only a monitor; the analogue evidence comes
+  from E1 and E2.
+- **Back-power bound:** at most 3 × 10 µA of Ioff into R_QOD ≈ 135 Ω gives about **4 mV** on VCARD,
+  far below 0.5 V. The 4682 board's own pull-ups go to VCARD. MISO has only a pull-down. E2 measures it.
 
-## 7. Controls: each one must be able to fail
+## 5. Cuts per hour
+
+These are unchanged from revision 1. The off-time is still 50 ms, and capture adds at most 2 ms per
+trial. **Plan on about 2,000 trials an hour.** Dry-run control A reports the real rate.
+
+## 6. Scope: SPI characterisation only (R374-5)
+
+The judge's support for `bus_mode: "spi"` makes SPI a recorded protocol, not evidence that results
+transfer to the product's SD 4-bit (SDR50) bus. Every row and verdict carries the bus mode, SCK, the
+switch revision and the manifest hash, and an SPI verdict reports
+`qualification_scope: "spi-characterisation"`. **A PASS from this rig doesn't qualify a card for the
+product** unless PM disposes the exact qualification scope, or a native-mode rig campaign exists.
+A native-mode rig is a separate future design: a switched SDIO slot with DAT0 on comparator B. This
+design doesn't extend to SDR50 or to card-system qualification.
+
+## 7. Controls: each must be able to fail
+
+### Before any card is powered in a campaign
+
+These need the circuit energised, which is **not authorised now**. They're listed so that review can
+judge the method. Each one's raw files, instrument identities and hashes go into the manifest.
+
+| Control | How | Pass | What it detects |
+|---|---|---|---|
+| **E0, thresholds (static)** | No card. Drive the divider input and DO input from a potentiometer, read the trip voltages with a DMM, falling for A and rising for B, 5 repeats each | A trips between 2.58 and 2.61 V, B between 1.01 and 1.04 V | A wrong resistor or reference, or an offset beyond the datasheet |
+| **E1, switch and discharge** | No card. 10 µF + 100 Ω dummy load. Scope VCARD, ON and A's output; measure the 3V3 dip with a 1 Ω shunt in series | VCARD falls monotonically from the cut, with no ringing back above the A threshold. Below 0.5 V within 3 ms. Rise 0.5–5 ms. 3V3 dip < 100 mV | A non-monotonic fall that would break §4.1, a failed QOD, inrush |
+| **E2, back-power** | Card in, rail off. CS, MOSI and SCK first driven high, then toggled at 4 MHz for 1 s. Scope and DMM on VCARD | VCARD < 50 mV (analysis says ≈ 4 mV) | Any path that keeps the card alive. If it fails, no cut is real |
+| **E3, capture skew** | No card. One GPIO step into both comparator inputs through a jumper, 1,000 edges | max \|A − B\| capture difference ≤ 300 ns. That's below U/3 | A slow channel or the wrong capture configuration |
+
+### Dry run (card in, no campaign)
 
 | Control | How | What it proves |
 |---|---|---|
-| A — Dry run, card in, no campaign | 50 trials with traces of every one; compare the rig's row timestamps and tokens to the decoded analyser trace | The rig reports what's on the wire: token value, busy entry and the cut edge |
-| B — Late cut | Force f = 3.0 for 20 trials | Every one has `busy_deassert_us ≤ cut_us`, and `judge` counts it non-qualifying. Shows a completed write can't be scored as a cut |
-| C — Back-power | Rail off, SPI pins toggling at full rate for 1 s, VCARD on pin 14 and RAIL_OK | VCARD stays < 0.5 V. If it rises, the isolation has failed and no cut is real |
-| D — Wrong card | Swap in a second PNY card mid-dry-run | Its CID differs, and `judge` rejects those rows |
-| E — Response decode | Lift MISO (open) for 5 trials | `data_response_accepted` is false, and the trial doesn't qualify |
-| F — Judge | The existing `test_media_atomicity.py` cases, including TORN and neighbour damage | The verdict path goes red on a tear. This is already in the repo; run it first |
+| **A, wire truth** | 50 trials, all with analyser traces of SCK, MOSI, MISO, CS, ON, A out, B out | The row's tokens and edge times match the wire |
+| **B, late cut** | f = 3.0 for 20 trials | Every one: "busy ended before the rail opened", non-qualifying, with the target and neighbours still classified |
+| **B2, near busy end** | 200 trials with f swept 0.9–1.1 | Qualifying, ambiguous and ended-before-cut outcomes all appear, and each matches its trace |
+| **C, no cut** | Jumper ON permanently high | "rail opening not observed", non-qualifying |
+| **D, delayed cut** | Insert a ~1 ms RC on ON | "rail opening outside the cut delay bound", non-qualifying |
+| **E, response decode** | DO opened for 5 trials | `data_response_accepted` false |
+| **F, identity** | A second card mid-run | `card_cid` ≠ plan: a problem, FAIL |
+| **G, judge** | Verification's independently published rig-r2 regressions (V#380), imported unchanged | The verdict path goes red on every declared failure, including damage on non-qualifying rows |
 
-Controls A–E are part of the dry run, and their traces and rows are evidence. A rig that passes A
-but fails C is not a rig.
+## 8. Sequencing and open questions
 
-## 8. What this design does not claim
+1. **Judge code:** the revision-2 rules (schema §4–6) are implemented only after V#380's
+   regressions are merged on verification main and imported unchanged. The import goes under
+   `hardware/characterisation/verification/` with a source commit, tree and hash manifest. If shared
+   `tests/IMPORTS.json` or CI plumbing is needed, the exact delta goes to Software and PM.
+2. **Rig firmware and host script** (`atomicity_host.py`) live under `hardware/characterisation/`.
+   They're written after method clearance; their hashes go into the manifest.
+3. **For PM: `completed_write_reverted`.** If busy ended before the rail opened and the target still
+   reads OLD, the card reported a write complete and then lost it. That isn't a tear, and revision 3
+   didn't look for it. Revision 2 reports it without changing the verdict. Whether it should fail a
+   run is a criterion decision for PM, not for Hardware.
+4. **For PM: the SPI qualification scope** (§6).
+5. **Card identity (A-1):** `--revision` = `PNM/PRV`. The manifest also records the raw CID, the
+   decoded MID/OID/PNM/PRV/PSN/MDT, capacity from the CSD, and the photographed manufacturer part
+   number with its hash. Nothing infers controller or silicon equivalence, and no retail speed label
+   stands in for identity.
 
-- No card is qualified by this document, by a dry run or by `judge`'s self-test. Those are three
-  separate facts (WP-05).
-- SPI-mode evidence and the 4-bit product bus: see §1, open.
-- The rig's own firmware is characterisation tooling under `hardware/characterisation/`, not product
-  firmware. It doesn't touch `firmware/` or `engine/`. PM can say if that placement should change.
-- A torn block is a format blocker, escalated to PM. It is never worked around in firmware.
+## 9. Revision-1 claims withdrawn or replaced
+
+| Revision-1 claim | Status in revision 2 | Finding |
+|---|---|---|
+| Late-cut rows need no classification | Withdrawn: every validated row is classified | R374-1 |
+| `busy_sampled_us` (last 0x00 byte) and `cut_us` (GPIO write time) prove busy at the cut | Withdrawn: measured A and B edges, ±U, fail-closed | R374-2 |
+| The minimum of 100 busy durations makes every fraction below 1 land in busy | Withdrawn: T_sched is a schedule, qualification is per trial | R374 clarification |
+| U3 (LVC) gives a ≈ 1.5 V rail threshold from the RC tail | Withdrawn: U3 removed, comparator plus reference instead | R374-3 |
+| "LVC inputs have no clamp diode to VCC" (SN74LVC125A) | Withdrawn as unsupported: SN74LVC1G125 with a stated Ioff | R374-3 |
+| Q1 off in about 1 µs, Q2 on 2 µs later, never both on | Withdrawn: one load switch with built-in discharge; overlap bounded to ≤ 33 mA by R_EXT | R374-4 |
+| SPI evidence stands in for the 4-bit bus | Withdrawn: SPI characterisation only | R374-5 |
+| CID compared once, implicitly | Both CID reads recorded; any mismatch is a problem | R374-2 |

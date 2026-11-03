@@ -25,6 +25,67 @@ Deferred: the rest of lines 8–17 (second slot, speaker, mic, jacks, LEDs, Hall
 and the measurement kit M1–M3. Michael places and pays for the order; prices marked ≈ are confirmed
 in the cart.
 
+**Not ordered** (Michael, 2 November, PM650). The $132.90 is a planning figure, not a quote.
+
+## Round 2 correction delta (P3-R2-HW #651)
+
+The independent rig review (R374) changed the rig circuit, so the rig half of the selection above no
+longer matches [ATOMICITY-RIG.md](../characterisation/ATOMICITY-RIG.md) revision 2. This is the one
+concrete delta for PM and Michael. **Nothing in it is approved:** not the substitutions, the
+instruments, the optional second Teensy, nor the changed total. The two parts are separate
+decisions.
+
+### Part 1: ordinary firmware bench. Unchanged, and doesn't depend on the rig
+
+| Lines | What | Price | Status |
+|---|---|---:|---|
+| 1–7 | Minimum set | $71.95 | Reusable as selected. Ordinary unbatched playback doesn't need the rig (PM650) |
+| 18 | Logic analyser | $26.95 | Reusable. Serves F3 on the bench and rig control A. Backordered 1 Nov |
+
+### Part 2: power-cut rig. Still NOT CLEARED, so don't order before Verification clears revision 2
+
+| Revision-1 line | Revision 2 | Read price | ≈ price |
+|---|---|---:|---:|
+| 8 (4682 slot ×1) | **Reused** | $3.50 | |
+| 19 SN74LVC125AN ×2 | **Replaced:** TI SN74LVC1G125DBVR ×4 (3 + 1 spare). It has a stated Ioff rating | | ≈$1.60 |
+| 20 DMG2305UX ×3 | **Replaced:** TI TPS22918DBVR ×2 (1 + spare). A load switch with built-in discharge | | ≈$1.20 |
+| 21 BSS138 ×3 | **Dropped** (discharge is inside the TPS22918) | — | — |
+| 22 SOT-23 adapters ≈$5 | **Replaced:** SparkFun BOB-00717 SOT23-to-DIP ×6 ($1.25, in stock 2 Nov). Confirm it takes the 5- and 6-pin SOT-23 | $7.50 | |
+| 23 1N4148 ×5 | **Dropped** | — | — |
+| 24 Resistor kit | **Reused** (R_EXT 100 Ω, pull-downs). Backordered 1 Nov | $9.95 | |
+| 25 Capacitor kit | **Reused** (10 µF, 1 µF, 100 nF). Check it has a 1 nF C0G for CT; if not, see below | $11.50 | |
+| new | TI TLV3202AIDR dual comparator ×2 (1 + spare), SOIC-8 | | ≈$2.00 |
+| new | SparkFun BOB-13655 SOIC-8-to-DIP adapter ×1 ($3.75, in stock 2 Nov) | $3.75 | |
+| new | TI LM4040AIZ-2.0 reference (A grade, TO-92) ×2 | | ≈$3.00 |
+| new | 0.1 % resistors: 10.0 kΩ ×4, 37.4 kΩ ×2 | | ≈$3.00 |
+| new | 1 nF C0G capacitor ×2, 10 kΩ trimmer pot ×1 (for control E0) | | ≈$1.40 |
+| | **Rig parts, revision 2, including line 8** | **$36.20** | **≈$12.20** |
+
+- **Rig parts including line 8:** revision 1 was $34.00 (lines 8 and 19–25), revision 2 is ≈$48.40,
+  so **+≈$14.40**.
+- **The selected cart** (lines 1–7, 8, 18 and the rig) goes from $132.90 to **≈$147.30**, before
+  tax and shipping.
+- **≈ means not read.** DigiKey's bot check blocked part pages again; these are typical
+  distributor prices. Confirm them in the cart.
+
+### Part 2a: instruments that revision 2 needs before the rig is energised
+
+R374-3 and R374-4 need analogue evidence (controls E0–E2). Revision 1 said "no oscilloscope", and
+that no longer holds.
+
+| Need | Option | Price | Note |
+|---|---|---:|---|
+| 2-channel scope, ≥ 20 MHz, for E1 and E2 | **(a)** Hantek 6022BE class USB scope | ≈$70, not read | Cheapest that meets E1/E2. 8-bit, so it isn't the threshold instrument |
+| | **(b)** Digilent Analog Discovery 3 | $379.00, read 2 Nov at digilent.com | 2-channel 125 MS/s scope plus a 16-channel logic analyser. It could replace line 18 |
+| DMM for the E0 thresholds | M3 brought forward (true-RMS, e.g. UNI-T UT61E+) | ≈$60, not read | Skip it if Michael has a DMM with a dated calibration. Verification approves the instrument |
+
+**Totals with instruments:** ≈$277.30 with option (a) and a new DMM, or ≈$586.30 with option (b).
+Without a new DMM, take $60 off either. Whether the instruments are bought, borrowed or substituted
+is Michael's call, and Verification approves the models.
+
+**A second Teensy** ($35.95) is still optional, and not approved. Without it, the rig borrows the bench
+Teensy.
+
 ## How the prices were read
 
 - **Read live on 1 Nov 2026** from the vendor's product page: SparkFun, Adafruit, K&J Magnetics,
@@ -139,8 +200,9 @@ These are estimates for planning. The measured figures come from Verification's 
 - **Cards.** The three owned PNY 64 GB V30 cards are the atomicity and WP-05 samples. The rig reads
   each card's CID itself (ATOMICITY-RIG §6), so no special reader is needed for A-1 identity.
 - **Battery, charger, cells and any board fabrication.** CLOSED. The bench runs on USB.
-- **An oscilloscope.** The rig records its rail with a logic threshold and the Teensy's own timestamps,
-  which the analyser cross-checks. If Verification wants an analog rail trace, a two-channel USB
-  scope is the next line to add. I haven't priced it.
+- **An oscilloscope** *(revision 1; superseded by the round 2 delta, Part 2a).* The rig records its
+  rail with a logic threshold and the Teensy's own timestamps, which the analyser cross-checks. If
+  Verification wants an analog rail trace, a two-channel USB scope is the next line to add. I haven't
+  priced it.
 - **An ear simulator (IEC 60318-4).** It costs thousands. The electrical method plus the printed
   coupler stands in for the bench; the compliance lab has one.
