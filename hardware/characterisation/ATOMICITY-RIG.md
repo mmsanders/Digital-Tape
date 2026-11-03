@@ -244,10 +244,13 @@ judge the method. Each one's raw files, instrument identities and hashes go into
 
 ## 8. Sequencing and open questions
 
-1. **Judge code:** the revision-2 rules (schema §4–6) are implemented only after V#380's
-   regressions are merged on verification main and imported unchanged. The import goes under
-   `hardware/characterisation/verification/` with a source commit, tree and hash manifest. If shared
-   `tests/IMPORTS.json` or CI plumbing is needed, the exact delta goes to Software and PM.
+1. **Judge code:**
+   - **R374-1 is implemented.** V380's regressions (`bab04466`) were imported unchanged under
+     `hardware/characterisation/verification/` with a source, tree and hash manifest, and
+     `make -C hardware atomicity-test` runs them.
+   - **The R374-2 timing rules (schema §4) wait** for Verification to bind its R374-2 cases to the
+     schema.
+   - If shared `tests/IMPORTS.json` or CI plumbing is needed, the exact delta goes to Software and PM.
 2. **Rig firmware and host script** (`atomicity_host.py`) live under `hardware/characterisation/`.
    They're written after method clearance; their hashes go into the manifest.
 3. **For PM: `completed_write_reverted`.** If busy ended before the rail opened and the target still

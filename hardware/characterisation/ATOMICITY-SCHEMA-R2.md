@@ -8,9 +8,14 @@ This declares what a revision-2 plan, row, manifest and verdict look like, and t
 will apply. It's published **before** any judge change, so that Verification can author its
 regression tests independently ([V#380](https://github.com/mmsanders/digital-tape-verification/issues/380)).
 
-[media_atomicity.py](media_atomicity.py) stays at plan revision 3 until those tests are merged on
-verification main. They are then imported unchanged under `hardware/characterisation/verification/`,
-with a source commit, tree and hash manifest. Only after that is the judge changed. Nothing here
+**Status, 3 November:**
+- **R374-1 (§1, and the damage fields in §6) is implemented.** It was implemented only after V380's
+  independent regressions (`bab04466`, tree `1ca703a4`) were imported unchanged to
+  `verification/rig_correction_r2/` (manifest `verification/IMPORT-rig_correction_r2.json`). The
+  plan stays at revision 3.
+- **The R374-2 and R374-5 rules (§2–5, and the other §6 fields) are not implemented.** Their
+  independent cases (`EXPECTATIONS.md`) still have to be bound to this declaration in a new
+  Verification publication. Nothing here
 lowers the 1,000-qualifying-cut minimum or the zero-tear / zero-neighbour-damage requirement.
 
 The circuit and procedure this schema records are in [ATOMICITY-RIG.md](ATOMICITY-RIG.md) revision 2.
