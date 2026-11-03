@@ -1,0 +1,16 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_correction_r2",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "bab04466daae68203c41786f8ce6034580fd92bd",
+  "source_merge_on_main": "d23a90f71b88662b6fe08a5bca96b90931bc8dd8",
+  "source_path": "tests/rig_correction_r2",
+  "source_tree": "1ca703a44cdffc940201068b24b9ad8673fee644",
+  "files": {
+    "EXPECTATIONS.md": "c5932cc2fe5903ae6444415fba411984291985bf",
+    "README.md": "98de0757e7f771e7a39473b43cffa226b7784345",
+    "run.py": "6e77866224608ec55de744486510b0830d1a43ec"
+  },
+  "issue": "P3-R2-HW #651 / V#380",
+  "mode": "unchanged mechanical import; assertions are Verification's",
+  "covers": "R374-1 aggregation only. R374-2 cases (EXPECTATIONS.md) are unbound and not licensed for implementation."
+}
