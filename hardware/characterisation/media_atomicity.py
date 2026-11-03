@@ -41,6 +41,12 @@ ways this tool could say PASS without the evidence to justify it. What changed:
 Every planned attempt must still be reported exactly once. Non-qualifying is a
 result; missing is a broken run.
 
+R374-1 (independent rig review, P3-R2-HW #651): qualification decides only what
+counts toward the minimum. Every row that passes validation has its target and
+neighbours classified whether or not it qualifies, so a tear on a late-cut row
+can no longer disappear from a PASS. Imported regressions:
+hardware/characterisation/verification/rig_correction_r2 (V380, bab04466).
+
     ./media_atomicity.py plan --sku S --revision R --cid C --attempts 1500 --out plan.json
     ./media_atomicity.py judge --plan plan.json [--plan ext.json] --results run.jsonl
 """
@@ -283,6 +289,8 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION) -> d
         problems.append(f"trial {n}: planned but not reported")
 
     verdicts, tears, corrupt, neigh_bad = Counter(), [], [], []
+    verdicts_nq: Counter = Counter()
+    damage_nq: list = []
     qualifying = 0
     non_qualifying: Counter = Counter()
     identity: set[tuple] = set()
@@ -295,19 +303,26 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION) -> d
             continue
         identity.add((r["sku"], r["revision"], r["card_cid"]))
         q, why = qualifies(r)
-        if not q:
+        if q:
+            qualifying += 1
+        else:
             non_qualifying[why] += 1
-            continue
-        qualifying += 1
+        # R374-1: a miss earns no credit, but its returned data is still audited.
         v = classify(bytes.fromhex(r["readback_hex"]), n)
-        verdicts[v] += 1
+        (verdicts if q else verdicts_nq)[v] += 1
+        damaged = False
         if v == "TORN":
             tears.append(n)
+            damaged = True
         elif v == "CORRUPT":
             corrupt.append(n)
+            damaged = True
         for off in NEIGHBOUR_OFFSETS:
             if bytes.fromhex(r["neighbours"][off]) != bytes.fromhex(r["neighbour_baseline"][off]):
                 neigh_bad.append([n, off])
+                damaged = True
+        if damaged and not q:
+            damage_nq.append(n)
 
     if len(identity) > 1:
         problems.append(f"results span {len(identity)} distinct cards; expected one")
@@ -325,6 +340,8 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION) -> d
         "qualifying": qualifying, "required_qualifying": policy.min_qualifying,
         "non_qualifying": dict(non_qualifying),
         "verdicts": dict(verdicts),
+        "verdicts_non_qualifying": dict(verdicts_nq),
+        "damage_on_non_qualifying": damage_nq,
         "torn_iterations": tears, "corrupt_iterations": corrupt,
         "neighbour_damage": neigh_bad,
         "problems": problems,
@@ -346,7 +363,13 @@ def cmd_judge(a) -> int:
         print(f"  not counted: {k:>6}  {why}")
     for k in ("OLD", "NEW", "TORN", "CORRUPT"):
         print(f"  {k:<8} {res['verdicts'].get(k, 0):>6}")
+    if res["verdicts_non_qualifying"]:
+        print("  not counted, still audited: " + ", ".join(
+            f"{k} {res['verdicts_non_qualifying'].get(k, 0)}"
+            for k in ("OLD", "NEW", "TORN", "CORRUPT")))
     print(f"neighbour damage: {len(res['neighbour_damage'])}")
+    if res["damage_on_non_qualifying"]:
+        print(f"  damage on non-qualifying trials: {res['damage_on_non_qualifying'][:8]}")
     if res["problems"]:
         print(f"run integrity problems: {len(res['problems'])}")
         for p in res["problems"][:8]:
