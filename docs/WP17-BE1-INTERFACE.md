@@ -13,7 +13,7 @@ not those documents. A change after Verification publishes is a new version
 `simulated` observations. `BE1-IF/2` admits that mixed bundle so that each
 observation keeps its own provenance, matching V380 `BE1-EXPECTATIONS.md`
 (d23a90f7). Simulation can still never make `physical_run` or `complete` true.
-Nothing else changed.
+It also states when the already-listed `simulated_not_physical` code is reported.
 
 Firmware behaviour is unchanged. The grammar below is exactly what the integrated FW-1
 firmware (`aa472667`, `firmware/bench/src/main.cpp`) prints today. No new serial hook is declared.
