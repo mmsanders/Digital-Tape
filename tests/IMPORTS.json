@@ -811,6 +811,20 @@
         "-c",
         "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/be1_binding_r1/run.py','--selftest','--golden','tests/golden','--out',os.path.join(d,'s')]) or subprocess.call([sys.executable,'-B','tests/be1_binding_r1/capture.py','--selftest','--out',os.path.join(d,'c')]))"
       ]
+    },
+    {
+      "path": "tests/be1_if3_r1",
+      "tree": "b8b7ce9f02e6aa551cdd526a91dfe21c2c70e7ae",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "ace75d8f044603f04553f56fc03551e031f0ada9",
+      "attested_in": "Verification IF/3 binding for Software652 on Michael's direct activation (PR385, merged 458be603; CI 41855577922)",
+      "attestation": "Independent executable binding of BE1-IF/3 (Product f9db5832): 53 checker bundles (F5 all-check precedence, witness/card/verify combinations, retained superseded failures in overall/exit, exact firmware.hex identity) and 47 fake-port capture cases (stop modes, info/send/reset/flush, exclusive output, deadlines with a controlled clock, partial-byte retention, all exits). Depends at runtime on tests/be1_binding_r1. Artifact consistency only; never physical, complete or target acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/be1_if3_r1/run.py','--selftest','--golden','tests/golden','--out',os.path.join(d,'s')]) or subprocess.call([sys.executable,'-B','tests/be1_if3_r1/capture.py','--selftest','--out',os.path.join(d,'c')]))"
+      ]
     }
   ],
   "evidence_bundles": [
