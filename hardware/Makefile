@@ -204,6 +204,9 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) -B verification/rig_correction_r2/run.py --judge media_atomicity.py \
 	  --out $${TMPDIR:-/tmp}/v380-rig-r2.json >/dev/null \
 	  && echo "OK  atomicity judge: V380 rig_correction_r2 (R374-1) independent regressions pass"
+	@cd $(CHAR) && $(PY) -B verification/rig_timing_r1/run.py --qualifier media_atomicity.py \
+	  --out $${TMPDIR:-/tmp}/v382-rig-timing.json >/dev/null \
+	  && echo "OK  atomicity judge: V382 rig_timing_r1 (rig-r2 row predicate) independent regressions pass"
 
 ## spec-check — spec/hw content and revision must move together
 ##

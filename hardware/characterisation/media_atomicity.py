@@ -47,6 +47,12 @@ neighbours classified whether or not it qualifies, so a tear on a late-cut row
 can no longer disappear from a PASS. Imported regressions:
 hardware/characterisation/verification/rig_correction_r2 (V380, bab04466).
 
+Rig revision 2 (ATOMICITY-SCHEMA-R2, correction 1): qualifies() judges a row
+that carries `method: "rig-r2"` from the measured rail-opening and busy-end
+edges, with U and the cut-delay bound fixed in Policy. Imported regressions:
+verification/rig_timing_r1 (V382, 8879dbac). Plan v4 and the manifest loader
+are not implemented yet, so the judge below refuses rig-r2 rows as a problem.
+
     ./media_atomicity.py plan --sku S --revision R --cid C --attempts 1500 --out plan.json
     ./media_atomicity.py judge --plan plan.json [--plan ext.json] --results run.jsonl
 """
@@ -56,6 +62,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import random
 import secrets
 import struct
@@ -71,6 +78,7 @@ REQUIRED_QUALIFYING = 1000          # normative, from acceptance.md. Not negotia
 DEFAULT_SURPLUS = 1.5               # plan this many attempts per required cut
 NEIGHBOUR_OFFSETS = ("-2", "-1", "+1", "+2")
 BUS_MODES = {"sd4": "DAT0", "spi": "MISO"}
+METHOD_R2 = "rig-r2"                # ATOMICITY-SCHEMA-R2 section 2
 
 
 @dataclass(frozen=True)
@@ -79,8 +87,12 @@ class Policy:
 
     IR-018-06: the production minimum is a property of the criterion, not of a
     file the operator writes. Tests construct their own Policy; the CLI cannot.
+    The rig-r2 timing constants are the same kind of thing: a row field called
+    U_US or CUT_DELAY_MAX_US is ignored.
     """
     min_qualifying: int = REQUIRED_QUALIFYING
+    u_us: float = 1.0                # edge-alignment uncertainty U (model value)
+    cut_delay_max_us: float = 500.0  # cut command to measured rail opening
 
 
 PRODUCTION = Policy()
@@ -189,6 +201,10 @@ def _hex(v, n=BLOCK):
 def validate_trial(r: dict, n: int, plan: dict) -> tuple[bool, str]:
     if r.get("iteration") != n:
         return False, f"iteration mismatch: {r.get('iteration')} != {n}"
+    # Schema R2 correction 1: plan v4 and its manifest checks aren't implemented,
+    # so a rig-r2 row can't earn credit through this revision-3 judge.
+    if "method" in r:
+        return False, "rig-r2 rows need the plan-v4 judge, which is not implemented"
 
     # IR-018-08: identity on every row, exact, no None.
     for field in ("sku", "revision", "card_cid"):
@@ -220,7 +236,76 @@ def validate_trial(r: dict, n: int, plan: dict) -> tuple[bool, str]:
     return True, ""
 
 
-def qualifies(r: dict) -> tuple[bool, str]:
+def _time(v) -> bool:
+    """A rig-r2 time: a finite real number >= 0. A bool is not a number."""
+    return (isinstance(v, (int, float)) and not isinstance(v, bool)
+            and math.isfinite(v) and v >= 0)
+
+
+def _r2_record(r: dict) -> str:
+    """Schema R2 section 4.3: why the timing record contradicts itself, or ''."""
+    scalars = ("capture_armed_us", "busy_entry_us", "cut_command_us", "capture_end_us")
+    lists = ("rail_edges_us", "busy_end_edges_us")
+    for k in scalars + lists + ("rail_open_us",):
+        if k not in r:
+            return f"{k} missing"                                        # R1
+    for k in scalars:
+        if not _time(r[k]):
+            return f"{k} is not a finite time >= 0"                      # R2
+    ro = r["rail_open_us"]
+    if ro is not None and not _time(ro):
+        return "rail_open_us is not a finite time >= 0 or null"
+    for k in lists:                                                      # R3
+        v = r[k]
+        if not isinstance(v, list) or not all(_time(e) for e in v):
+            return f"{k} is not a list of finite times >= 0"
+        if any(b <= a for a, b in zip(v, v[1:])):
+            return f"{k} is not strictly increasing"
+    lo, hi = r["capture_armed_us"], r["capture_end_us"]
+    if lo > hi:                                                          # R4
+        return "capture ended before it was armed"
+    for k in lists:                                                      # R5
+        if any(not lo <= e <= hi for e in r[k]):
+            return f"{k} has an edge outside the capture window"
+    edges = r["rail_edges_us"]                                           # R6
+    if (ro is None) != (not edges) or (edges and ro != edges[0]):
+        return "rail_open_us is not the first recorded rail edge"
+    if r.get("rail_high_at_arm", True) is not True:                      # R7
+        return "rail was not high when capture was armed"
+    return ""
+
+
+def _qualifies_r2(r: dict, policy: Policy) -> tuple[bool, str]:
+    """Schema R2 section 4.4: qualify from the measured A and B edges.
+
+    R374-2: no software timestamp stands in for an electrical event. ADR-204:
+    completed-before is strictly busy_end < rail_open - U, and equality at
+    either boundary is ambiguous, so it can never become completion proof.
+    """
+    bad = _r2_record(r)
+    if bad:
+        return False, f"rig-r2 record invalid: {bad}"
+    u = policy.u_us
+    entry, ro = r["busy_entry_us"], r["rail_open_us"]
+    if r["capture_armed_us"] > entry:
+        return False, "busy capture not armed at busy entry"
+    if ro is None or ro <= entry:
+        return False, "rail opening not observed after busy entry"
+    if not 0 <= ro - r["cut_command_us"] <= policy.cut_delay_max_us:
+        return False, "rail opening outside the cut delay bound"
+    if r["capture_end_us"] < ro + u:
+        return False, "capture did not cover the uncertainty window"
+    ends = [e for e in r["busy_end_edges_us"] if e >= entry]
+    if any(e < ro - u for e in ends):
+        return False, "busy ended before the rail opened"
+    if any(e <= ro + u for e in ends):
+        return False, "busy end within +/-U of rail opening (ambiguous)"
+    if len(r["rail_edges_us"]) != 1:
+        return False, "rail chatter after opening"
+    return True, ""
+
+
+def qualifies(r: dict, policy: Policy = PRODUCTION) -> tuple[bool, str]:
     """IR-018-07: qualify from protocol state, not from a pin level.
 
     A DAT0-low sample proves nothing on its own. In 4-bit mode DAT0 carries data
@@ -240,6 +325,11 @@ def qualifies(r: dict) -> tuple[bool, str]:
         return False, "single-block payload not proven complete"
     if r.get("data_response_accepted") is not True:
         return False, "data-response token not accepted"
+
+    if "method" in r:
+        if r["method"] != METHOD_R2:
+            return False, f"method must be {METHOD_R2!r}"
+        return _qualifies_r2(r, policy)
 
     be, bs, cut = (r.get("busy_entry_us"), r.get("busy_sampled_us"), r.get("cut_us"))
     if not all(isinstance(v, (int, float)) for v in (be, bs, cut)):
@@ -302,7 +392,7 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION) -> d
             problems.append(f"trial {n}: {why}")
             continue
         identity.add((r["sku"], r["revision"], r["card_cid"]))
-        q, why = qualifies(r)
+        q, why = qualifies(r, policy)
         if q:
             qualifying += 1
         else:
