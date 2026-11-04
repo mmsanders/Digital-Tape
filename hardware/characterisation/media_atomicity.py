@@ -180,7 +180,11 @@ def _is_hex(v, n: int) -> bool:
 
 
 def _num(v) -> bool:
-    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+    """A finite JSON number. Never raises: math.isfinite overflows on a huge int,
+    and every int is finite, so ints skip it (HW651-R2)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return isinstance(v, int) or math.isfinite(v)
 
 
 def _pos_int(v) -> bool:
@@ -221,7 +225,8 @@ class _Manifest:
         p, h = v["path"], v["sha256"]
         if not _is_hex(h, 64):
             return self.bad(where, "sha256 is not 64 lowercase hex")
-        if (not isinstance(p, str) or not p or "\\" in p or p.startswith("/") or ":" in p
+        if (not isinstance(p, str) or not p or "\\" in p or "\0" in p
+                or p.startswith("/") or ":" in p
                 or any(part in ("", ".", "..") for part in p.split("/"))):
             return self.bad(where, f"path {p!r} is not a relative path inside the evidence")
         f = self.evidence / p
@@ -229,8 +234,8 @@ class _Manifest:
             if self.evidence.resolve() not in f.resolve().parents:
                 return self.bad(where, f"path {p!r} leaves the evidence directory")
             data = f.read_bytes()
-        except OSError:
-            return self.bad(where, f"evidence file {p} is missing")
+        except (OSError, ValueError):
+            return self.bad(where, f"evidence file {p!r} is missing or unreadable")
         if _sha256(data) != h:
             self.bad(where, f"evidence file {p} does not match its sha256")
 
@@ -258,10 +263,21 @@ def load_manifest(path, evidence_dir, policy: Policy = PRODUCTION):
     except (UnicodeDecodeError, ValueError) as e:
         return None, digest, [f"manifest is not strict UTF-8 JSON: {e}"]
     c = _Manifest(Path(evidence_dir))
+    try:
+        _check_manifest(m, c, policy)
+    except Exception as e:
+        # HW651-R2 backstop: the contract is problems, never an exception. Any
+        # problem refuses the manifest, so this can only fail closed.
+        c.bad("manifest", f"check stopped on bad input ({type(e).__name__})")
+    return (m if isinstance(m, dict) else None), digest, c.problems
+
+
+def _check_manifest(m, c: _Manifest, policy: Policy) -> None:
+    """The grammar of schema R2 section 5.3. Every finding goes to c.problems."""
     if not c.obj(m, ("method", "rig_doc", "firmware", "host_script", "judge_sha256", "bus",
                      "capture", "switch", "thresholds_measured", "skew_measured_ns",
                      "controls", "card"), "manifest"):
-        return (m if isinstance(m, dict) else None), digest, c.problems
+        return
 
     c.check("method", m["method"] == METHOD_R2, f"must be {METHOD_R2!r}")
     if c.obj(m["rig_doc"], ("path", "git_blob"), "rig_doc"):
@@ -343,7 +359,6 @@ def load_manifest(path, evidence_dir, policy: Policy = PRODUCTION):
             for k, v in card["decoded"].items():
                 c.check(f"card.decoded.{k}", isinstance(v, (int, str)) and not isinstance(v, bool),
                         "not a string or integer")
-    return m, digest, c.problems
 
 
 # --------------------------------------------------------------------------
@@ -545,6 +560,7 @@ def _r2_record(r: dict) -> str:
     return ""
 
 
+SETUP_UNPROVEN = "rig setup not authenticated"
 R2_COMPLETED_BEFORE = "busy ended before the rail opened"
 
 
@@ -663,6 +679,11 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION,
                     problems.append("plan sku/revision/card_cid do not match the manifest's card")
                     mf = None
 
+    # HW651-R1 / ADR-204: a plan-v4 row earns qualifying credit or completion
+    # proof only against an authenticated manifest whose card matches the plan.
+    # Without one, rows are still validated, classified and reported as damage.
+    unproven = v4 and mf is None
+
     trials: dict[int, dict] = {}
     for p in plans:
         for t in p["trials"]:
@@ -708,6 +729,8 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION,
         bus_seen.add(r.get("bus_mode"))
         sck_seen.add(r.get("sck_hz"))
         q, why = qualifies(r, policy)
+        if unproven:
+            q, why = False, SETUP_UNPROVEN
         if q:
             qualifying += 1
         else:
