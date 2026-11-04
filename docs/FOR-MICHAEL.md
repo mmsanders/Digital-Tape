@@ -1,12 +1,12 @@
 # Human queue
 
-**2 November 2026. Phase 3 is open.**
+**3 November 2026. Phase 3 is open.**
 
-1. **Start the round-2 leads** after the PM650 update is merged:
-   - Verification [V#380](https://github.com/mmsanders/digital-tape-verification/issues/380): independent expectations, then exact-head review;
+1. **Start fresh Verification work** after PM655 is merged:
+   - Verification [V#382](https://github.com/mmsanders/digital-tape-verification/issues/382): bind the now-received interfaces, then review returned heads;
    - Hardware [#651](https://github.com/mmsanders/Digital-Tape/issues/651): rig method and cart correction;
    - Software [#652](https://github.com/mmsanders/Digital-Tape/issues/652): offline bench-evidence kit.
-   Hardware/Software can declare interfaces/documents now; new covered behavior waits for tests.
+   Hardware651 and Software652 continue their existing tasks after the corresponding executable tests are published. Both declarations are already received; no repeat declaration or new Product issue is needed.
 2. **Parts:** your minimum bench + rig selection is recorded. You confirmed they are **not
    ordered** (2 Nov). Hardware will return any corrected-rig/instrument cart delta; changed
    parts or totals are not automatically approved. No physical session is ready yet; no

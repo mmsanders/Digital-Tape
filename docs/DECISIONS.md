@@ -5005,3 +5005,39 @@ carry. Ordinary unbatched bench playback is separate from the unqualified power-
 **Rationale.** Use the parts lead time to prepare trustworthy captures and remove
 the known rig blockers, without repeating accepted evidence or claiming measurements.
 **Reversal cost.** Low: offline kit and method documents; no new engine/media semantics.
+
+## ADR-204 — Bind returned interfaces; fail unexplained completed-write rollback
+**Date:** 2026-11-03 PDT
+**Status:** ADOPTED by PM [#655](https://github.com/mmsanders/Digital-Tape/issues/655)
+on Michael's request to review latest and assign new work.
+
+**Inputs/disposition.** Product main cc23b87f; V380 publication d23a90f7 / source
+bab04466 and CI41584226631 authenticated. Its 27-case rig baseline exposes six
+old late-corruption failures, not new candidate clearance. Hardware651 returned
+2faa1180 (R374-1 after test import; R374-2/5 declared only); Software652 returned
+BE1-IF/2 97a55022 (no checker code). Their declarations arrived after the bounded
+V380 stop. [Full review](REVIEW/PM655-P3-R2-2026-11-03.md).
+
+**Rule.** An otherwise valid accepted-payload row with matching identity/readbacks
+and independently qualified proof of busy completion strictly before actual
+power opening outside U must fail run integrity on OLD (`completed_write_reverted`).
+It earns no qualifying-cut credit and is not automatically TORN or a media defect.
+Completed-before means busy_end < rail_open−U; equality at either ±U boundary is
+ambiguous. Unqualified/ambiguous evidence establishes no completed-write proof.
+WP-05 records the rule; normal mid-busy OLD/NEW and fixed1000 remain. Declared
+electrical thresholds/uncertainty values are not qualified by this PM decision.
+
+**Assigned.** Fresh Verification382 binds executable BE1-IF/2 and R374-2/5 fixtures,
+publishes ready lanes separately, reviews the implemented R374-1 candidate and
+later exact returned heads. Existing Hardware651/PR646 and Software652/PR654
+continue after corresponding independent publication; no duplicate Product issues.
+Capture-helper behavior, if shipped, needs fake-port tests. No renewed request for
+already supplied declarations, campaign repetition, polling or automatic activation.
+
+**Holds.** No new passed target/package criterion: 1/12. Rig remains NOT CLEARED;
+revision-2 circuit is analysis, E0–E3/physical controls unmeasured, changed cart
+unapproved. DRAFT-11, target, media, batching and fabrication/charging holds carry.
+**Rationale.** Remove the actual executable-test dependency and keep an unexplained
+completed-write rollback visible without confusing method uncertainty with tearing.
+**Reversal cost.** Low for interface/test binding; rollback policy changes the judge's
+summary decision and requires explicit independent regression coverage before code.

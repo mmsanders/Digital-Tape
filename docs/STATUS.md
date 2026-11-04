@@ -1,6 +1,6 @@
 # Project status
 
-**2 November 2026 PDT. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
+**3 November 2026 PDT. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
 Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Completed
@@ -35,11 +35,11 @@ Round 2 (Michael starts each; parts not ordered):
 
 | Owner | Issue | Outcome |
 |---|---|---|
-| Hardware | [#651](https://github.com/mmsanders/Digital-Tape/issues/651) | Correct rig method/judge R374-1…5 and reconcile the selected cart on existing PR646; no physical run |
-| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | [BE-1](WP17-BENCH-EVIDENCE.md) offline bench-evidence kit; public schema first, independent tests before covered behavior |
-| Verification | [V#380](https://github.com/mmsanders/digital-tape-verification/issues/380) | Author rig/kit expectations, publish, then review exact Hardware/Software heads; no physical acceptance |
+| Hardware | [#651](https://github.com/mmsanders/Digital-Tape/issues/651) | Returned 2faa1180: R374-1 implemented, R374-2/5 declared; awaits V382 bindings/review on existing PR646 |
+| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | BE1-IF/2 declared at 97a55022 / PR654; checker waits for V382 executable fixtures |
+| Verification | [V#382](https://github.com/mmsanders/digital-tape-verification/issues/382) | Bind both received schemas to executable fixtures, review R374-1 and later exact heads; ready lanes publish separately |
 
-Latest [PM650 review](REVIEW/PM650-P3-R2-2026-11-02.md) / ADR-203: V378 `98f46c94`
+Latest [PM655 review](REVIEW/PM655-P3-R2-2026-11-03.md) / ADR-204: V378 `98f46c94`
 cleared the admission correction (28 cases / four controls). Software integrated at
 `aa472667` with unchanged cleared implementation and 117 current-base checks passing.
 F6 remains PASSED (**1/12** defined criteria); target/package acceptance is pending.
@@ -50,6 +50,10 @@ characterization is not native SD4 qualification. DRAFT-11 preflight requires re
 proposal remains unissued. Target PCM/I²S, stack, timing and controls/removal await the bench.
 Michael's minimum bench + rig selection stands; parts **not ordered** (2 November).
 No fresh physical session is ready. A corrected-rig cart delta is not an approved purchase.
+
+V380 d23a90f7 published 27 rig regressions and preflight; no corrected-head clearance.
+Both declarations are now received. Completed-write OLD rollback fails run integrity
+only with qualified proof outside uncertainty; boundary equality remains ambiguous.
 
 ## Holds that stand
 
