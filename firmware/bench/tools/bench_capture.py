@@ -49,18 +49,26 @@ class Capture:
         self.sha = hashlib.sha256()
         self.count = 0
 
+    def expired(self):
+        return self.deadline is not None and time.monotonic() >= self.deadline
+
     def read(self, n):
-        """Up to n bytes, recorded as they arrive; b"" only at the deadline."""
+        """Up to n bytes, recorded as they arrive. The deadline is wall time, not
+        inactivity: it is checked before every port read and again after bytes
+        arrive (so a stop line completed late is a timeout), and every byte
+        received is recorded before TimedOut is raised (SW652-R1)."""
         while True:
+            if self.expired():
+                raise TimedOut()
             part = self.port.read(n)
             if part:
                 self.out.write(part)
                 self.out.flush()
                 self.sha.update(part)
                 self.count += len(part)
+                if self.expired():
+                    raise TimedOut()
                 return part
-            if self.deadline is not None and time.monotonic() >= self.deadline:
-                raise TimedOut()
 
     def read_exact(self, n):
         got = bytearray()

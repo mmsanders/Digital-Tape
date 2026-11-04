@@ -216,6 +216,9 @@ def parse_transcript(raw):
 # ---- manifest schema --------------------------------------------------------
 
 is_str = lambda v: isinstance(v, str)
+# A value used as a lookup key: a non-string (list, object) already fails its
+# field_type check and must never reach a dict or set lookup (SW652-R3).
+text = lambda v: v if isinstance(v, str) else None
 is_int = lambda v: isinstance(v, int) and not isinstance(v, bool)
 opt_str = lambda v: v is None or isinstance(v, str)
 hex40 = lambda v: is_str(v) and HEX40.fullmatch(v) is not None
@@ -278,6 +281,11 @@ class Checker:
         self.listed = {}            # listed path -> entry state Judged
         self.observations = []
         self.criteria = {}
+
+    def inside(self, full):
+        """The path, with every link and junction resolved, is BUNDLE or below it."""
+        real = os.path.realpath(full)
+        return real == self.bundle or real.startswith(self.bundle.rstrip(os.sep) + os.sep)
 
     # files referenced by observations
     def ref_bytes(self, path, j):
@@ -364,6 +372,11 @@ class Checker:
                 rec.update(path=path, declared_sha256=e.get("sha256"))
                 if not safe_path(path) or path in self.listed or path == "manifest.json":
                     j.add("INVALID", "path_unsafe")
+                elif not self.inside(os.path.join(self.bundle, *path.split("/"))):
+                    # A symlink or junction anywhere on the path that resolves
+                    # outside BUNDLE: never opened (SW652-R2).
+                    self.listed[path] = j
+                    j.add("INVALID", "path_unsafe")
                 else:
                     self.listed[path] = j
                     full = os.path.join(self.bundle, *path.split("/"))
@@ -385,7 +398,10 @@ class Checker:
             for code in j.reasons:
                 self.top.add(j.state if code in ("path_unsafe", "file_missing", "field_type", "field_unknown",
                                                  "field_missing") else "MISMATCH", code)
-        for dirpath, _dirs, names in os.walk(self.bundle):
+        for dirpath, dirs, names in os.walk(self.bundle):
+            # Never descend through an alias that leaves BUNDLE; files listed
+            # under it were already refused above.
+            dirs[:] = [d for d in dirs if self.inside(os.path.join(dirpath, d))]
             for n in names:
                 rel = os.path.relpath(os.path.join(dirpath, n), self.bundle).replace(os.sep, "/")
                 if rel != "manifest.json" and rel not in self.listed:
@@ -402,7 +418,7 @@ class Checker:
             if not isinstance(o, dict):
                 top.add("INVALID", "field_type")
                 continue
-            crit, prov = o.get("criterion"), o.get("provenance")
+            crit, prov = text(o.get("criterion")), o.get("provenance")
             if prov == "not_run":
                 check_keys(o, dict(COMMON, reason=is_str), {}, j)
             else:
@@ -430,7 +446,7 @@ class Checker:
             if "supersede_reason" in o and "superseded_by" not in o:
                 top.add("INVALID", "supersede_invalid")
             if "superseded_by" in o:
-                t = ids.get(o["superseded_by"])
+                t = ids.get(text(o["superseded_by"]))
                 if t is None or "supersede_reason" not in o or t is o or t.get("criterion") != o.get("criterion") \
                         or (o.get("criterion") == "F1" and t.get("case") != o.get("case")) \
                         or not (is_int(t.get("sequence")) and is_int(o.get("sequence"))
@@ -672,7 +688,7 @@ class Checker:
                             and o.get("provenance") in ("actual", "simulated") and is_int(o.get("sequence"))],
                            default=-1)
         for o, j in valid:
-            crit, prov = o.get("criterion"), o.get("provenance")
+            crit, prov = text(o.get("criterion")), o.get("provenance")
             if prov == "not_run":
                 j.add("NOT_RUN", "not_run_declared")
             elif not j.reasons:
