@@ -797,6 +797,20 @@
         "-c",
         "import pathlib;assert pathlib.Path('tests/c1_volume_query_r2/prepare.py').is_file()"
       ]
+    },
+    {
+      "path": "tests/be1_binding_r1",
+      "tree": "b094d319e184bd6c410d93604e9ec784c60ba490",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "c77a4dfaea7b7d3fe6c69358540a170ebd26e222",
+      "attested_in": "Verification382 ready BE1 lane (PR383, merged 89bc424e; CI 41781423733)",
+      "attestation": "Independent executable binding of BE1-IF/2 (Product 97a55022): 109 generated simulated bundles for bench_evidence.py --offline under an audit-hook offline guard, plus four fake-port raw capture cases for bench_capture.py. Ready subset only: F5 full witness/card/verify combinations, retained-failure aggregation, file-role and capture timeout/info/send behaviour are outside it. Artifact consistency only; never physical, complete or target acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/be1_binding_r1/run.py','--selftest','--golden','tests/golden','--out',os.path.join(d,'s')]) or subprocess.call([sys.executable,'-B','tests/be1_binding_r1/capture.py','--selftest','--out',os.path.join(d,'c')]))"
+      ]
     }
   ],
   "evidence_bundles": [
