@@ -31,27 +31,33 @@ key combination.
 
 ## Current assignments
 
-Round 2 continuation (Michael starts each):
+Round 2 continuation after [PM661 review](REVIEW/PM661-P3-2026-11-04.md)
+and ADR-206 (Michael starts each issue manually):
 
 | Owner | Issue | Outcome |
 |---|---|---|
-| Software | [#658](https://github.com/mmsanders/Digital-Tape/issues/658) | First priority: separate CI-only change; deferred macOS manual-only, supported-platform aggregates remain fail closed |
-| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | Kit d62e0de0 implemented, awaits V388 exact-head review; scoped CODEOWNERS approval recorded, owner entries still to add |
-| Hardware | [#651](https://github.com/mmsanders/Digital-Tape/issues/651) | Exact18852b5 HOLD for setup-proof/credit and loader-exception defects; import PR387 only after merged publication, fix in same PR646 |
-| Verification | [V#388](https://github.com/mmsanders/digital-tape-verification/issues/388) | Publish ready Hardware review/tests, dispose kit now, then returned CI658 policy and Hardware fixes |
+| Software | [#663](https://github.com/mmsanders/Digital-Tape/issues/663) | First: own Hardware PR646 current-main integration/CI/merge; conditional PM scope sign-off issued |
+| Software | [#658](https://github.com/mmsanders/Digital-Tape/issues/658) | Restore mandatory Windows/Linux retained census; separate narrow review-regression gate PR after independent tests |
+| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | Corrected kit0db6ce5c awaits independent disposition; preserve original/import/fix lineage |
+| Verification | [V#394](https://github.com/mmsanders/digital-tape-verification/issues/394) | Dispose ready corrected kit; publish new two-platform census and ordering-policy tests before implementation |
 
-Latest [PM657 review](REVIEW/PM657-P3-2026-11-04.md) / ADR-205 records Michael's
-explicit CODEOWNERS approval for the scoped imports/workflow/owner additions and
-bounded CI658 policy. Ownership, independent disposition and required CI remain.
-Kit's 109/4 and53/47 self/CI results are readiness evidence, not clearance.
-Both macOS jobs in41857074135 were cancelled with no runner/steps; the required
-aggregate failures block merge until CI658 lands. Normal required CI is Windows11
-plus Linux; macOS remains manual-only and deferred, with historical evidence retained.
-V382/IF3/records bindings are published; Hardware independently passes27/71/229,
-but PR387 reproduces two new defects (six red cases). Its CI is green, publication
-still pending. No target/package advance: **1/12** (F6); integrated FW-1 aa472667 carries.
-All365 deferred faults pass; six long cuts remain unavailable/unexecuted; batching held.
-Rig NOT CLEARED; E0-E4/dry-run controls unmeasured; SPI is not native qualification.
+Hardware651 is returned/closed. V392 publication2fc2298b clears the exact c55e5ad
+judge's bounded artifact-consistency corrections (339 published +3 CLI cases).
+PR646 head443a5a53 keeps judge blobd4ab1866 and adds published CLI regressions/wiring;
+CI41907017746 and integrity41907017664 are green, but current-main integration remains.
+Software663 owns that handoff. Carry clearance by identity; no repeat acceptance for
+a base-only change. Physical method remains NOT CLEARED.
+Kit0db6ce5c reports fixed SW652-R1..R3 and passing controls; V394 must dispose it.
+CI660/e0b6bb02 remains HOLD SW658-R1 despite111 green checks: Git identity does not
+replace downloaded Windows/Linux evidence completeness and byte authentication.
+PM retains that mandatory coverage and the unchanged three-platform manual route.
+Review-regression imports get a narrow independently tested provenance/order route;
+ordinary new behavior stays tests-first, no history rewrite or gate bypass.
+Michael's CODEOWNERS approval covers matching @mmsanders entries for these bounded
+imports/corrections, including be1_review_r1; protection and independent review remain.
+No target/package advance: **1/12** (F6); integrated FW-1 aa472667 carries.
+All365 deferred faults pass; six long cuts unavailable/unexecuted; batching held.
+Rig unbuilt/NOT CLEARED; E0-E4/dry controls unmeasured; SPI is not native qualification.
 Target PCM/I2S/instance/stack/timing/removal and DRAFT-11 remain pending. No physical
 session ready. Last owner-confirmed parts status: not ordered; changed cart unapproved.
 
