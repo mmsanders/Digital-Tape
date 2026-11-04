@@ -3,6 +3,10 @@
 **Owner:** Hardware Lead · **Status:** DESIGN for independent method review. **Nothing is built,
 energised, bought or run.** Revision 2 drafted 2 November 2026 for
 [P3-R2-HW (#651)](https://github.com/mmsanders/Digital-Tape/issues/651). Base: main `cc23b87`.
+**Correction 1, 4 November 2026** (base main `51d0f8f`, ADR-204), answering V382's declaration
+findings: A gets 15 mV of hysteresis (§2, §4.1); arming, polarity and record rules are explicit
+(§3); §4.3 now states which direction each timing error pushes the verdict; control E4 tests A on
+slow ramps (§7).
 
 It answers the independent findings R374-1…5 (Verification `3d616c14`,
 `findings/P3-R1-374/RIG-METHOD.md`, disposition NOT CLEARED). Revision 1 (#641) is preserved
@@ -11,8 +15,8 @@ revision-1 claim this revision withdraws or replaces.
 
 - **Procedure:** [WP-05](../../docs/PACKAGES/WP-05.md), "Atomicity procedure".
 - **Evidence schema and judge rules:** [ATOMICITY-SCHEMA-R2.md](ATOMICITY-SCHEMA-R2.md). That file
-  is a declaration. [media_atomicity.py](media_atomicity.py) stays at revision 3 until Verification's
-  independent regressions are merged and imported (§8).
+  is a declaration, implemented only where Verification's independent tests have been imported first
+  (its status table, and §8 here).
 
 **What this rig can establish:** SPI-mode characterisation of one exact card. It can't qualify a card
 for the product's SD 4-bit / SDR50 bus, or for the card system (R374-5, §6).
@@ -61,6 +65,7 @@ anything ambiguous (schema §4).
  card DO ──────┬───────────────────────────► Teensy MISO (100 kΩ pull-down, never a pull-up)
                └───────────────────────────► U3 2IN+  (B: DO above 1.024 V = busy ended)
 
+ U3 1OUT ── 2.2 MΩ (1 %) ─► U3 1IN+   (positive feedback: ≈ 15 mV of hysteresis at VCARD)
  U3 1OUT (A: high while VCARD above the threshold) ─► Teensy capture input A ┐ same timer,
  U3 2OUT (B: high when DO is high)                 ─► Teensy capture input B ┘ e.g. GPT, 150 MHz
  Test points: VCARD, U1 ON, U3 1OUT, U3 2OUT, DO, GND (for the scope and analyser)
@@ -109,13 +114,19 @@ read at software events, so every time in the row is on one timebase. The budget
 | 3 | Write `pattern(N−1)` (CMD24), wait for busy to end, read it back (CMD17) | `precondition_ok`, `precondition_readback_hex` |
 | 4 | Read LBAs target −2, −1, +1, +2 | `neighbour_baseline` |
 | 5 | CMD24 with `pattern(N)`: R1, 0xFE, 512 bytes, CRC16 | `payload_complete` |
-| 6 | Read the data-response token. **Arm capture A and B** | `data_response_accepted` (`token & 0x1F == 0x05`), `capture_armed_us` |
-| 7 | Clock 0xFF continuously. The first 0x00 byte is busy entry | `busy_entry_us` |
-| 8 | At `busy_entry + f × T_sched`, ON low (cut command). **Keep clocking 0xFF** until capture ends, so the busy signal never depends on the clock stopping | `cut_command_us` |
+| 6 | Read the data-response token. Check A's output reads high, then **arm capture A and B**. If A reads low, the firmware arms anyway and records `rail_high_at_arm: false`, which the judge treats as a run problem | `data_response_accepted` (`token & 0x1F == 0x05`), `capture_armed_us`, `rail_high_at_arm` |
+| 7 | Clock 0xFF continuously. The timer is read when the first 0x00 byte finishes: busy entry | `busy_entry_us` |
+| 8 | At `busy_entry + f × T_sched`, read the timer, **then** drive ON low (cut command), so the pin edge is never earlier than the recorded time. **Keep clocking 0xFF** until capture ends, so the busy signal never depends on the clock stopping | `cut_command_us` |
 | 9 | Capture runs until `rail_open + 50 µs`, or `cut_command + 2 ms` if A never trips. Then CS, MOSI and SCK are driven low. The rail stays off for 50 ms. The ADC monitor is read | `rail_open_us`, `rail_edges_us`, `busy_end_edges_us`, `capture_end_us`, `vcard_mv_before_repower` |
 | 10 | ON high, initialise as in step 1, **CMD10 again** | `card_cid_after_cut`. A mismatch, or a failed initialisation, is a run problem |
 | 11 | Read the target and its four neighbours. Nothing is cached between power cycles | `readback_hex`, `neighbours` |
-| 12 | Emit the row, unchanged after emission | — |
+| 12 | Emit the row, unchanged after emission. Every row also carries the firmware's built-in source commit and switch revision, and the SCK | `firmware_source_commit`, `switch_revision`, `sck_hz` |
+
+**Edge records.** Every A and B edge between arming and the end of capture is recorded, in order.
+Because A is high at arming, A's edges alternate falling, rising, falling… starting with a falling
+edge, and `rail_open_us` is the first one. More than one A edge is "rail chatter", a non-qualifying
+miss. A record that contradicts itself (an edge outside the window, out of order, or a claimed opening
+that isn't the first recorded edge) is a run problem. The exact rules are schema §4.3–4.4.
 
 **T_sched only spreads the cuts.** It's the median busy time from 100 uncut writes, committed with
 the plan. Revision 1 claimed that using the *minimum* would put every fraction below 1 inside busy;
@@ -139,21 +150,28 @@ must confirm each one before a campaign.
 - **The point to measure:** the first moment VCARD is below 2.70 V, the bottom of the SD operating
   range. A busy end that happens while VCARD ≥ 2.70 V is signalled by a card that's in specification,
   and it must be caught.
-- **Divider and reference:** 37.4 / (10.0 + 37.4) = 0.78903. The nominal trip point is
-  2.048 / 0.78903 = **2.596 V**.
+- **Divider and reference:** 37.4 / (10.0 + 37.4) = 0.78903, Thevenin resistance 7.89 kΩ. Without
+  feedback the trip point is 2.048 / 0.78903 = 2.596 V.
+- **Hysteresis (correction 1):** 2.2 MΩ from 1OUT to 1IN+. While the output is high it lifts IN+ by
+  about 4.5 mV, so VCARD has to fall further to trip. Nominal: **falling 2.590 V, rising 2.605 V**,
+  15 mV apart, against the comparator's own 1.2 mV.
 - **Worst case:**
   - reference ±0.1 %, plus 100 ppm/°C over ±10 °C on the bench;
-  - resistors at 0.1 %;
-  - comparator offset ≤ 6 mV.
+  - divider resistors at 0.1 %, the feedback resistor at 1 %;
+  - comparator offset ≤ 6 mV;
+  - output high level 3.0–3.4 V.
 
-  That gives a trip point between **2.582 V and 2.610 V**, which is at least **90 mV below 2.70 V**.
+  That gives a **falling trip between 2.575 V and 2.606 V**, at least **94 mV below 2.70 V**, and a
+  rising trip between 2.591 V and 2.619 V. (Without hysteresis it was 2.582–2.610 V.)
 - **Why this direction is fail-closed:** after the switch opens, VCARD falls monotonically (control
   E1 confirms it). So A trips no earlier than the moment VCARD actually crossed 2.70 V, and the
   capture window always extends past that moment. Any busy end in-spec is inside the window.
 - **Slow input:** a comparator has no maximum input transition rate. Near the threshold, the
   discharge alone falls at about 1.9 V/ms (R_QOD × 10 µF ≈ 1.35 ms), and faster with card current.
-  Noise could make A chatter, so all A edges are recorded and the **first** falling edge counts.
-  An early chatter edge would need about 90 mV of noise, and E0/E1 measure the actual noise.
+  Once A trips, VCARD has to come back up by the 15 mV hysteresis to undo it, and after the cut it
+  only falls. So a clean opening gives exactly one A edge. Any second edge is recorded and makes the
+  trial a miss ("rail chatter"). An A edge **earlier** than the 2.70 V crossing would need about
+  94 mV of noise on VCARD; control E4 checks for it on slow ramps.
 - **No back-power path through this circuit:** the comparator's inputs see VCARD through 47.4 kΩ to
   GND. The inputs clamp only above VCC + 0.5 V, and VCARD can't exceed the switch's VIN, which is
   the same 3V3.
@@ -168,19 +186,44 @@ must confirm each one before a campaign.
 - **What B adds to the line:** the 100 kΩ MISO pull-down and the comparator's 2 pF input. That
   doesn't change the card's levels.
 
-### 4.3 Edge-alignment uncertainty U
+### 4.3 Edge-alignment uncertainty U, and which way each error goes
+
+Correction 1 replaces the single error sum with a directional argument, because the two comparators
+see very different edges: A sees VCARD falling at volts per millisecond, and B sees DO switching in
+nanoseconds.
+
+**Definitions.** t70 is when VCARD actually falls through 2.70 V. tA and tB are the recorded A and B
+edges. t_end is when the card actually raised DO at the end of busy. d_B is B's total recording delay.
+
+**A is never early, only late.** A's falling threshold is at least 94 mV below 2.70 V, VCARD falls
+monotonically after the cut (E1), and a comparator's delay is never negative. So tA ≥ t70, unless
+about 94 mV of noise trips A early, which E4 excludes. A can be **late** by a lot: at 1.9 V/ms,
+falling the last 125 mV takes up to about 65 µs, plus up to 55 ns of propagation (at 20 mV overdrive;
+it's longer at very small overdrive). U doesn't need to cover that lag, because a late tA only pushes
+decisions in the safe direction:
+- **Qualification is safe.** A trial qualifies only if every busy end satisfies tB > tA + U. If the
+  card actually ended busy at or before t70 (in specification), then tB = t_end + d_B ≤ t70 + d_B ≤
+  tA + d_B. So if d_B ≤ U, that trial can't qualify. A's lag only makes it harder to qualify.
+- **The rollback rule over-reports.** Completed-before needs tB < tA − U. Because tA can be later than
+  t70, a busy end that came after VCARD left the operating range can still count as completed-before.
+  That over-reports `completed_write_reverted` (a FAIL), and never hides one. Schema §6 notes it.
+
+**So U must cover B's path, plus any channel offset that makes A read early:**
 
 | Term | Bound |
 |---|---:|
 | Capture quantisation, both channels (1 tick each at 150 MHz) | 13 ns |
 | Input synchroniser asymmetry (2 ticks) | 13 ns |
-| Comparator propagation, A vs B (each 0–55 ns; only the maximum is specified) | 55 ns |
+| B propagation (≤ 55 ns at 20 mV overdrive; DO's overdrive is ≥ 1 V) | 55 ns |
 | DO rise from VOL to 1.024 V (≥ 2 mA into ≤ 30 pF is ≤ 15 ns; bounded at) | 100 ns |
 | **Sum** | **≈ 0.18 µs** (≈ 0.32 µs at a 24 MHz capture clock) |
 
-The judge uses **U = 1.0 µs** (schema §2), more than 3× the analysed sum. Control E3 measures the
-real A–B skew on a common edge. A busy end within ±U of rail opening is ambiguous, and the trial
-**doesn't qualify**.
+The judge uses **U = 1.0 µs** (schema §2), more than 3× the sum. It's a **model value until measured**:
+- **E3** drives one fast edge into both channels. That's the waveform B actually sees, so it
+  measures the capture skew and B's path. It isn't meant to represent A.
+- **E4** drives A with representative slow ramps and checks the one property the safety argument
+  needs from A: it never trips before VCARD reaches 2.70 V, and it gives one edge.
+- **Dry-run controls A and B2** compare recorded B edges with the analyser trace of DO on a real card.
 
 ### 4.4 Switch and discharge overlap (R374-4)
 
@@ -220,14 +263,17 @@ design doesn't extend to SDR50 or to card-system qualification.
 ### Before any card is powered in a campaign
 
 These need the circuit energised, which is **not authorised now**. They're listed so that review can
-judge the method. Each one's raw files, instrument identities and hashes go into the manifest.
+judge the method. Each one's raw files, instrument identities and hashes go into the manifest, **with
+its result, pass or fail**. A failed control stays recorded, and the judge refuses a run whose
+manifest records any control as failed or missing (schema §5.3). A re-run is a new manifest.
 
 | Control | How | Pass | What it detects |
 |---|---|---|---|
-| **E0, thresholds (static)** | No card. Drive the divider input and DO input from a potentiometer, read the trip voltages with a DMM, falling for A and rising for B, 5 repeats each | A trips between 2.58 and 2.61 V, B between 1.01 and 1.04 V | A wrong resistor or reference, or an offset beyond the datasheet |
+| **E0, thresholds (static)** | No card. Drive the divider input and DO input from a potentiometer, read the trip voltages with a DMM: A falling and rising, B rising, 5 repeats each | A falls between 2.57 and 2.61 V, B rises between 1.01 and 1.04 V (schema §2 windows). A's rising trip is recorded and must be above the falling one | A wrong resistor or reference, missing hysteresis, an offset beyond the datasheet |
 | **E1, switch and discharge** | No card. 10 µF + 100 Ω dummy load. Scope VCARD, ON and A's output; measure the 3V3 dip with a 1 Ω shunt in series | VCARD falls monotonically from the cut, with no ringing back above the A threshold. Below 0.5 V within 3 ms. Rise 0.5–5 ms. 3V3 dip < 100 mV | A non-monotonic fall that would break §4.1, a failed QOD, inrush |
 | **E2, back-power** | Card in, rail off. CS, MOSI and SCK first driven high, then toggled at 4 MHz for 1 s. Scope and DMM on VCARD | VCARD < 50 mV (analysis says ≈ 4 mV) | Any path that keeps the card alive. If it fails, no cut is real |
-| **E3, capture skew** | No card. One GPIO step into both comparator inputs through a jumper, 1,000 edges | max \|A − B\| capture difference ≤ 300 ns. That's below U/3 | A slow channel or the wrong capture configuration |
+| **E3, capture skew (fast edges)** | No card. One GPIO step into both comparator inputs through a jumper, 1,000 edges | max \|A − B\| capture difference ≤ 300 ns. That's below U/3 | A slow channel or the wrong capture configuration. It qualifies B's path; it says nothing about A on slow ramps |
+| **E4, A on slow ramps** | No card. The real switch and discharge, with no load, 1 kΩ and 33 Ω on VCARD (about 3 mA and 100 mA). Scope VCARD and A's output on a common trigger. 100 cuts per load, plus 20 with a 50 mV, 100 kHz disturbance coupled onto VCARD | On every cut A falls once, no earlier than VCARD's 2.70 V crossing on the scope (allowing the scope's stated timebase error), and doesn't rise again before VCARD is below 0.5 V | An early or chattering A edge: the one A failure that could make a trial qualify wrongly (§4.3) |
 
 ### Dry run (card in, no campaign)
 
@@ -245,18 +291,18 @@ judge the method. Each one's raw files, instrument identities and hashes go into
 ## 8. Sequencing and open questions
 
 1. **Judge code:**
-   - **R374-1 is implemented.** V380's regressions (`bab04466`) were imported unchanged under
-     `hardware/characterisation/verification/` with a source, tree and hash manifest, and
-     `make -C hardware atomicity-test` runs them.
-   - **The R374-2 timing rules (schema §4) wait** for Verification to bind its R374-2 cases to the
-     schema.
+   - **R374-1 is implemented** against V380 (`bab04466`), imported unchanged. V382 disposed it PASS
+     on `2faa1180`.
+   - **The rig-r2 row predicate is implemented** against V382 `rig_timing_r1` (`8879dbac`, tree
+     `ccf9bd21`), imported unchanged before the code.
+   - **Plan v4, the manifest loader, rig-r2 row validation and `completed_write_reverted` wait** for
+     V382 to bind its authored cases to schema correction 1. Until then the plan-v3 judge refuses
+     rig-r2 rows.
    - If shared `tests/IMPORTS.json` or CI plumbing is needed, the exact delta goes to Software and PM.
 2. **Rig firmware and host script** (`atomicity_host.py`) live under `hardware/characterisation/`.
    They're written after method clearance; their hashes go into the manifest.
-3. **For PM: `completed_write_reverted`.** If busy ended before the rail opened and the target still
-   reads OLD, the card reported a write complete and then lost it. That isn't a tear, and revision 3
-   didn't look for it. Revision 2 reports it without changing the verdict. Whether it should fail a
-   run is a criterion decision for PM, not for Hardware.
+3. **`completed_write_reverted` is decided** (ADR-204): it fails run integrity, earns no credit, and
+   isn't relabelled TORN. Completed-before is strictly `busy_end < rail_open − U`.
 4. **For PM: the SPI qualification scope** (§6).
 5. **Card identity (A-1):** `--revision` = `PNM/PRV`. The manifest also records the raw CID, the
    decoded MID/OID/PNM/PRV/PSN/MDT, capacity from the CSD, and the photographed manufacturer part

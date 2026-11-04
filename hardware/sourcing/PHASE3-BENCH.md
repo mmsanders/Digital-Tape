@@ -59,11 +59,12 @@ decisions.
 | new | TI LM4040AIZ-2.0 reference (A grade, TO-92) ×2 | | ≈$3.00 |
 | new | 0.1 % resistors: 10.0 kΩ ×4, 37.4 kΩ ×2 | | ≈$3.00 |
 | new | 1 nF C0G capacitor ×2, 10 kΩ trimmer pot ×1 (for control E0) | | ≈$1.40 |
-| | **Rig parts, revision 2, including line 8** | **$36.20** | **≈$12.20** |
+| new (correction 1, 4 Nov) | 2.2 MΩ 1 % resistor ×2 (A hysteresis, 1 + spare). E4's 1 kΩ and 33 Ω dummy loads come from the kit (33 Ω at ≥ 1/2 W: two 68 Ω 1/4 W in parallel) | | ≈$0.20 |
+| | **Rig parts, revision 2, including line 8** | **$36.20** | **≈$12.40** |
 
-- **Rig parts including line 8:** revision 1 was $34.00 (lines 8 and 19–25), revision 2 is ≈$48.40,
-  so **+≈$14.40**.
-- **The selected cart** (lines 1–7, 8, 18 and the rig) goes from $132.90 to **≈$147.30**, before
+- **Rig parts including line 8:** revision 1 was $34.00 (lines 8 and 19–25), revision 2 is ≈$48.60,
+  so **+≈$14.60**.
+- **The selected cart** (lines 1–7, 8, 18 and the rig) goes from $132.90 to **≈$147.50**, before
   tax and shipping.
 - **≈ means not read.** DigiKey's bot check blocked part pages again; these are typical
   distributor prices. Confirm them in the cart.
@@ -79,7 +80,7 @@ that no longer holds.
 | | **(b)** Digilent Analog Discovery 3 | $379.00, read 2 Nov at digilent.com | 2-channel 125 MS/s scope plus a 16-channel logic analyser. It could replace line 18 |
 | DMM for the E0 thresholds | M3 brought forward (true-RMS, e.g. UNI-T UT61E+) | ≈$60, not read | Skip it if Michael has a DMM with a dated calibration. Verification approves the instrument |
 
-**Totals with instruments:** ≈$277.30 with option (a) and a new DMM, or ≈$586.30 with option (b).
+**Totals with instruments:** ≈$277.50 with option (a) and a new DMM, or ≈$586.50 with option (b).
 Without a new DMM, take $60 off either. Whether the instruments are bought, borrowed or substituted
 is Michael's call, and Verification approves the models.
 
