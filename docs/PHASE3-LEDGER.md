@@ -10,7 +10,7 @@ States:
 - **TO DO:** not yet assigned.
 - **BLOCKED:** a named unresolved prerequisite prevents the criterion from passing.
 
-PM #655 review (3 November): [ADR-204](DECISIONS.md#adr-204--bind-returned-interfaces-fail-unexplained-completed-write-rollback).
+PM #657 review (4 November): [ADR-205](DECISIONS.md#adr-205--approve-scoped-protected-changes-defer-macos-ci-to-manual-runs).
 States cite independent results; candidate evidence is not merged implementation or package acceptance.
 
 ## Spec and entry items
@@ -30,14 +30,14 @@ States cite independent results; candidate evidence is not merged implementation
 | A-3 Against the C-60 copy requirement | TO DO | After A-2 |
 | A-4 Reader not the bottleneck | TO DO | With A-2 |
 | A-5 Bench parts support the bench and the rig | IN ROUND | Hardware651 reconciles selected cart with corrected method; no parts in hand or independent acceptance |
-| A-6 Atomicity ≥ 1,000 qualifying cuts per SKU/revision, zero torn | BLOCKED | V3d616c14 method NOT CLEARED: R374-1…5. Hardware651 returned R374-1 and R374-2/5 declaration; V382 binds/tests/reviews. No physical run; SPI characterization is not SD4 qualification |
+| A-6 Atomicity ≥ 1,000 qualifying cuts per SKU/revision, zero torn | BLOCKED | V3d616c14 method NOT CLEARED: R374-1…5. Hardware18852b5 passes independent27/71/229 but HOLD for HW651-R1/R2; V388 publishes PR387 regressions/reviews fixes. No physical run; SPI characterization is not SD4 qualification |
 
 ## WP-17 — firmware skeleton ([FW-1](WP17-FIRMWARE-CONTRACT.md))
 
 | # | State | Next |
 |---|---|---|
-| F1 Goldens byte-identical on target | IN ROUND | V98f46c94 carries host 14/14 PCM and 28/28 controls per platform onto integrated aa472667. Software652/V382 bind BE1-IF/2 then prepare BE-1; target PCM/I²S pending |
-| F2 RAM/stack/.rodata budgets | IN ROUND | V98f46c94 carries static RAM 191600/204800, .rodata 1040/32768 PASS; Software652/V382 bind BE1-IF/2 then prepare capture kit; actual target instance/stack pending |
+| F1 Goldens byte-identical on target | IN ROUND | V98f46c94 carries host 14/14 PCM and 28/28 controls per platform onto integrated aa472667. BE1-IF/3 kit d62e0de0 awaits V388 disposition and CI658 platform fix; target PCM/I²S pending |
+| F2 RAM/stack/.rodata budgets | IN ROUND | V98f46c94 carries static RAM 191600/204800, .rodata 1040/32768 PASS; Kit d62e0de0 awaits V388 review, scoped protected changes approved; actual target instance/stack pending |
 | F3 Warm instant-on < 100 ms | TO DO | Needs the logic analyser |
 | F4 Commit latency < 200 ms | TO DO | With recording (WP-19) |
 | F5 Play/Stop and removal | TO DO | Bench, Michael witnesses |
