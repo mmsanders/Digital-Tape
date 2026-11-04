@@ -215,6 +215,10 @@ atomicity-test:
 	  && cd $(CHAR) && $(PY) -B verification/rig_review_r1/run.py --judge media_atomicity.py \
 	  --out $$out >/dev/null && rm -rf $$out \
 	  && echo "OK  atomicity judge: V388 rig_review_r1 (no proof without setup, total loader) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-loader-review-r2.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_loader_review_r2/run.py --judge media_atomicity.py \
+	  --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: V390 rig_loader_review_r2 (loader boundary, damage kept without setup) independent regressions pass"
 
 ## spec-check — spec/hw content and revision must move together
 ##

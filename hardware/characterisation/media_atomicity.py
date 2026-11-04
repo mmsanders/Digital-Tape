@@ -250,18 +250,32 @@ def load_manifest(path, evidence_dir, policy: Policy = PRODUCTION):
     """Read, hash, parse and authenticate a rig manifest (schema R2 section 5.3).
 
     Returns (manifest, sha256 of its exact bytes, problems). An empty problem list
-    is the only success. What it can't establish: that a certificate is genuine,
-    that a measurement was taken as described, or which binary actually ran.
+    is the only success. Never raises on bad input: acquiring the file, parsing it
+    and checking its grammar all report problems instead (HW651-R2/R3). What it
+    can't establish: that a certificate is genuine, that a measurement was taken
+    as described, or which binary actually ran.
     """
     try:
+        return _load_manifest(path, evidence_dir, policy)
+    except Exception as e:
+        # HW651-R3 outer backstop. A problem refuses the manifest: fails closed.
+        return None, None, [f"manifest could not be loaded ({type(e).__name__})"]
+
+
+def _load_manifest(path, evidence_dir, policy: Policy):
+    try:
         raw = Path(path).read_bytes()
-    except OSError as e:
-        return None, None, [f"manifest {path} cannot be read: {e.strerror}"]
+    except (OSError, ValueError) as e:
+        # ValueError: a NUL in the filename (HW651-R3).
+        why = e.strerror if isinstance(e, OSError) else str(e)
+        return None, None, [f"manifest {path!r} cannot be read: {why}"]
     digest = _sha256(raw)
     try:
         m = strict_loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError) as e:
-        return None, digest, [f"manifest is not strict UTF-8 JSON: {e}"]
+    except (UnicodeDecodeError, ValueError, RecursionError) as e:
+        # RecursionError: JSON nested deeper than the parser can follow (HW651-R3).
+        why = "nested too deeply" if isinstance(e, RecursionError) else str(e)
+        return None, digest, [f"manifest is not strict UTF-8 JSON: {why}"]
     c = _Manifest(Path(evidence_dir))
     try:
         _check_manifest(m, c, policy)
@@ -799,7 +813,7 @@ def cmd_judge(a) -> int:
         plans = [strict_loads(Path(p).read_text(encoding="utf-8")) for p in a.plan]
         rows = [strict_loads(l) for l in Path(a.results).read_text(encoding="utf-8").splitlines()
                 if l.strip()]
-    except (UnicodeDecodeError, ValueError) as e:
+    except (UnicodeDecodeError, ValueError, RecursionError) as e:
         print(f"judge: refused, not strict JSON: {e}", file=sys.stderr)
         return 2
     manifest = None
