@@ -219,6 +219,10 @@ atomicity-test:
 	  && cd $(CHAR) && $(PY) -B verification/rig_loader_review_r2/run.py --judge media_atomicity.py \
 	  --out $$out >/dev/null && rm -rf $$out \
 	  && echo "OK  atomicity judge: V390 rig_loader_review_r2 (loader boundary, damage kept without setup) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-cli-review-r1.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_cli_review_r1/run.py --judge media_atomicity.py \
+	  --negative-judge negative-controls/media_atomicity_baf176c.py --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: V392 rig_cli_review_r1 (CLI refuses deep JSON, exit 2) independent regressions pass"
 
 ## spec-check — spec/hw content and revision must move together
 ##
