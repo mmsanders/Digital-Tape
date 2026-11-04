@@ -21,6 +21,7 @@ on:
       - 'tests/wp14_r1/catalog.py'
       - 'tests/be1_binding_r1/**'
       - 'tests/be1_if3_r1/**'
+      - 'tests/be1_review_r1/**'
       - 'docs/WP17-BE1-INTERFACE.md'
       - '.github/workflows/firmware-bench.yml'
   push:
@@ -148,13 +149,14 @@ jobs:
     # network/serial/subprocess/bundle writes, false flags, blanket success,
     # dropped or rewritten bytes) are shown to go red before the candidate runs.
     # Simulated bundles and a fake port only; no device, no physical claim.
-    name: "BE-1 offline kit (V382 and IF/3 bindings)"
+    name: "BE-1 offline kit (V382, IF/3 and V388 review bindings)"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -174,6 +176,14 @@ jobs:
         run: |
           python3 -B tests/be1_binding_r1/capture.py --helper firmware/bench/tools/bench_capture.py --out build/be1/capture
           python3 -B tests/be1_if3_r1/capture.py --helper firmware/bench/tools/bench_capture.py --out build/be1/if3-capture
+      - name: V388 review regressions (SW652-R1..R3), default mode, all 8 must pass
+        run: |
+          python3 -B tests/be1_review_r1/run.py --checker firmware/bench/tools/bench_evidence.py             --helper firmware/bench/tools/bench_capture.py --golden tests/golden --out build/be1/review
+      - name: V388 review controls (historical mode over the original d62e0de0 pair, exactly six failures)
+        run: |
+          mkdir -p build/be1/orig
+          for n in bench_evidence.py bench_capture.py; do git show d62e0de07c81dc5abe1c8ffbf378bd077a2a7eab:firmware/bench/tools/$n > build/be1/orig/$n; done
+          python3 -B tests/be1_review_r1/run.py --record-known-findings --checker build/be1/orig/bench_evidence.py             --helper build/be1/orig/bench_capture.py --golden tests/golden --out build/be1/review-historical
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -187,3 +197,5 @@ jobs:
             build/be1/if3-capture/RESULT.json
             build/be1/if3-selftest/RESULT.json
             build/be1/if3-capture-selftest/RESULT.json
+            build/be1/review/RESULT.json
+            build/be1/review-historical/RESULT.json
