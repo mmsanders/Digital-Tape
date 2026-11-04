@@ -1,4 +1,4 @@
-# WP-17 bench evidence: interface declaration (BE1-IF/2)
+# WP-17 bench evidence: interface declaration (BE1-IF/3)
 
 **Software Lead declaration for #652 (P3-R2-SW), 2 November 2026.** This is the public
 schema, transcript grammar, CLI and report contract that
@@ -7,13 +7,20 @@ offline checker. Verification may author expectations from this document and BE-
 checker code, private test or fixture comes with it. Normative authority stays with
 BE-1 and FW-1; where this declaration is narrower, it narrows the kit's behaviour,
 not those documents. A change after Verification publishes is a new version
-(`BE1-IF/3`), returned to the pair issue, not a silent edit.
+(`BE1-IF/4`), returned to the pair issue, not a silent edit.
 
 **Version history.** `BE1-IF/1` (5808fddf) refused a physical session that held
 `simulated` observations. `BE1-IF/2` admits that mixed bundle so that each
 observation keeps its own provenance, matching V380 `BE1-EXPECTATIONS.md`
 (d23a90f7). Simulation can still never make `physical_run` or `complete` true.
 It also states when the already-listed `simulated_not_physical` code is reported.
+
+`BE1-IF/3` answers the four V382 conflicts (Product #652, 4 November). Every
+behaviour bound by V382 `tests/be1_binding_r1` (tree `b094d319`) is unchanged.
+1. **All checks run.** An observation's state is the worst outcome of all its checks (§4). A missing witness, sequence or verify can no longer hide supplied bad evidence.
+2. **Firmware image.** The firmware image is the bundle file at path exactly `firmware.hex`. There is no `role` key; the files schema stays closed.
+3. **Superseded failures.** A superseded observation's `INVALID` or `MISMATCH` still counts in `overall` and the exit status. It never decides its criterion's state.
+4. **Capture helper.** The helper's stop modes, `info` completion, send terminator, timeout and partial-byte retention, exit codes and fake-port interface are now exact (§6).
 
 Firmware behaviour is unchanged. The grammar below is exactly what the integrated FW-1
 firmware (`aa472667`, `firmware/bench/src/main.cpp`) prints today. No new serial hook is declared.
@@ -87,8 +94,10 @@ error. It gets a report with overall `INVALID` and exit 2.
 - `toolchain` must equal the five pins above, which are this kit version's copy of `firmware/bench/platformio.ini` and `tools/requirements.txt`.
 - Either difference is a `MISMATCH` (`engine_tree_mismatch`, `toolchain_mismatch`).
 - The manifest has exactly one candidate. Every other identity in the bundle must agree with it:
-  - a file with role `firmware_hex`;
+  - the bundle file whose `path` is exactly `firmware.hex`, if one is listed: both its declared and its measured SHA-256;
   - the `firmware.hex` line of an F2 `sha256sums` file.
+
+  No other file is treated as the firmware image, and file entries have no `role` key.
 - Disagreement is a `MISMATCH` (`candidate_conflict`).
 
 ### File rules
@@ -198,6 +207,8 @@ A transcript is the device's raw output. It is text lines, plus one binary regio
 
 Each observation and each criterion gets a state, and each carries a list of reason codes from §5.
 
+**Every check runs.** An observation's checks are all evaluated; none is skipped because another failed or because data is missing. The observation's state is the worst of their outcomes (precedence below), and every failing check's reason code is listed. So supplied malformed or failing evidence is always `INVALID` or `MISMATCH`, never hidden behind a `NOT_RUN` for missing data elsewhere in the same observation.
+
 ### State definitions
 | State | Meaning |
 |---|---|
@@ -265,7 +276,7 @@ One observation is `CONSISTENT` only if all of these hold:
 - **Measured values:** the report gives `instance`, `reserve`, `stack_high_water`, `ram` and `rodata`. A value that was not observed is `null`, never 0 and never inferred from the map.
 
 ### F5
-Each F5 observation is checked in this order. The first problem decides its state.
+Each F5 observation runs all six checks below, as §4's opening says. Its state is the worst of them. For example, a failed manual verify gives `MISMATCH` even when the witness is missing. A check that depends on missing data contributes only that data's `NOT_RUN` code. For instance, a `null` transcript gives `f5_transcript_missing` and the sequence and line-value checks add nothing.
 
 1. **Missing data.** `transcript` must be present. Otherwise `NOT_RUN` (`f5_transcript_missing`).
 2. **Required sequence of lines.** Other lines of the §3 vocabulary may sit between them. A missing line gives `NOT_RUN` (`f5_sequence_missing`).
@@ -308,14 +319,26 @@ Each F5 observation is checked in this order. The first problem decides its stat
 
 ### Precedence and summary flags
 - **Precedence:** `INVALID` > `MISMATCH` > `NOT_RUN` > `CONSISTENT`.
-- **Superseded observations:** still checked and listed, but they do not decide their criterion. Their failures appear in `criteria.Fx.superseded_failures`.
-- **What exit status counts** (§1), whether or not the criterion is requested:
+- **Superseded observations:** still fully checked and listed. They never decide their criterion's state, so a later `CONSISTENT` attempt can make the case `CONSISTENT`. But a superseded observation that is `INVALID` or `MISMATCH` is never erased:
+  - it is listed in `criteria.Fx.superseded_failures`;
+  - it counts in `overall` and in the exit status, exactly as an unsuperseded failure would;
+  - so `complete` is false while any failed attempt is retained.
+
+  A retry therefore stays visible to the audit and can never turn a session's exit to 0.
+- **What exit status counts** (§1). Each of these counts whether or not the criterion is requested:
   - manifest problems;
   - file problems;
   - candidate and identity problems;
   - provenance problems;
-  - the state of any criterion evaluated.
-- **`overall`:** the worst of manifest, file and candidate checks and the requested criteria's states.
+  - the state of any criterion evaluated;
+  - every superseded observation's state.
+- **`overall`:** the worst of:
+  - the manifest, file and candidate checks;
+  - the requested criteria's states;
+  - any `INVALID` or `MISMATCH` criterion, requested or not;
+  - every superseded observation's `INVALID` or `MISMATCH`.
+
+  So exit status and `overall` always agree.
 - **`physical_run`:** true only when `session.kind` is `physical` and at least one observation is `actual`.
 - **`complete`:** true only when all of these hold:
   - `physical_run` is true;
@@ -330,7 +353,7 @@ Each F5 observation is checked in this order. The first problem decides its stat
 ```json
 {
   "schema": "digital-tape/be1-report/1",
-  "tool": {"name": "bench_evidence.py", "version": "BE1-IF/2", "sha256": "<script bytes>"},
+  "tool": {"name": "bench_evidence.py", "version": "BE1-IF/3", "sha256": "<script bytes>"},
   "bundle": {"path": "<as given>", "manifest_sha256": "<hex>"},
   "golden": {"sha256sums_sha256": "<hex>", "manifest_sha256": "<hex>"},
   "candidate": {"…": "copied from the manifest"},
@@ -377,14 +400,67 @@ Each F5 observation is checked in this order. The first problem decides its stat
 **`firmware/bench/tools/bench_capture.py`** is the raw capture tool the packet will use.
 
 ```
-bench_capture.py --port PORT --out FILE [--send LINE] [--until-digest | --until-interrupt] [--timeout S]
+bench_capture.py --port PORT --out FILE (--until-digest | --until-info | --until-interrupt) [--send LINE] [--timeout S]
 ```
 
-- **Behaviour:** it writes every byte received after `--send` to `FILE`, unmodified, and prints the exact sent line for the manifest's `command`.
-- **Name and version:** it records its own name and version for `session.capture_tool`.
-- **Stopping:** `--until-digest` stops after the first `SHA256 …` line, so it works for F1 and is harmless for `info`. `--until-interrupt` runs until the operator stops it, for the F5 session.
-- **Safety:** it never writes a card, flashes or provisions.
+**Arguments:**
 
-It needs pyserial and the bench, and is not part of the offline checker.
+| Argument | Rule |
+|---|---|
+| `--port PORT` | The serial port name, passed to `serial.Serial` unchanged |
+| `--out FILE` | Created exclusively. If `FILE` already exists, the run is refused with exit 64 and the file is not touched, so an earlier attempt is never overwritten. The helper creates no directory and writes no other file. |
+| `--send LINE` | Optional. ASCII only, 1–63 bytes, with no CR, LF or NUL; otherwise exit 64. Sent as `LINE` followed by one `\n` byte. 63 bytes is the firmware's line buffer less its terminator. |
+| `--until-digest` / `--until-info` / `--until-interrupt` | Exactly one stop mode (below); otherwise exit 64 |
+| `--timeout S` | Positive seconds of wall time, counted from the end of the send (or from open, without `--send`). Default 600 for `--until-digest`, 10 for `--until-info`, none for `--until-interrupt`. |
+
+**Port sequence:**
+1. `import serial` happens only after the arguments are accepted.
+2. `serial.Serial(PORT, baudrate=115200, timeout=0.05)` opens the port.
+3. With `--send`: `reset_input_buffer()`, then `write(LINE + b"\n")`, then `flush()`. Recording starts after that, so bytes from before the send are discarded and not evidence.
+4. Without `--send`: no reset and no write. Recording starts at open.
+5. Bytes are read with `read(n)`; a short or empty read is not end of data.
+6. `close()` at the end.
+
+**Exact bytes.** Every byte returned by `read` is appended to `FILE` unmodified and flushed at once, in arrival order, with no newline translation, decoding or framing. When the stop condition completes, nothing further is read. The helper parses the protocol only to know when to stop, and asks `read` for no more bytes than the current protocol element needs:
+- in text, up to the next `\n`;
+- in a stream run, the 4-byte count, then exactly `n × 4` data bytes.
+
+So `FILE` ends exactly at the stop line's `\n`.
+
+**Stop modes.** Text lines follow §3. After a `PCM` line, the binary region is consumed by its framing up to the zero terminator, and line parsing resumes only after it. A digest-shaped byte sequence inside PCM data therefore never stops the capture.
+
+| Mode | Stops after the first complete line that is |
+|---|---|
+| `--until-digest` | `SHA256 …` (a `golden`, `stream` or `live` reply), or any `ERR …` (a refused command) |
+| `--until-info` | `INFO …`, `FATAL …` or `ERR …` |
+| `--until-interrupt` | None. It runs until the operator's Ctrl+C or the optional `--timeout`. For the F5 session; no command is sent. |
+
+**Exit status.** In every case the bytes already received stay in `FILE`, unmodified, and are never deleted or truncated.
+
+| Code | `stop` | When |
+|---|---|---|
+| 0 | `digest`, `info`, `err` | The stop line was completed |
+| 0 | `interrupt`, `timeout` | `--until-interrupt` ended by Ctrl+C or `--timeout` |
+| 3 | `timeout` | `--until-digest` or `--until-info` reached `--timeout` before completion. The partial bytes are the file. |
+| 4 | `port_error` | Opening, reading or writing raised `serial.SerialException` or `OSError` |
+| 130 | `interrupt` | Ctrl+C in `--until-digest` or `--until-info` |
+| 64 | (none) | Usage error. No port is opened and no file is created. |
+
+**Standard output.** On every exit except 64 the helper prints one JSON line to stdout:
+
+```json
+{"tool": "bench_capture.py", "version": "BE1-IF/3", "port": "…", "command": "LINE or null", "out": "FILE", "bytes": 0, "sha256": "<of FILE>", "stop": "…", "exit": 0}
+```
+
+`command` is the manifest's `command` value, and `tool`/`version` its `session.capture_tool`.
+
+**Injection interface (fake port).** The helper uses only:
+- `serial.Serial(port, baudrate=..., timeout=...)`;
+- the methods `read(n)`, `write(b)`, `flush()`, `reset_input_buffer()` and `close()`;
+- `serial.SerialException`.
+
+A test may supply any module named `serial` providing these. The helper never uses `in_waiting`, `readline`, port enumeration, sockets or subprocesses. It reads no file other than its own source and standard-library modules, and writes only `FILE`.
+
+**Safety:** it never writes a card, flashes or provisions. It needs pyserial (or an injected fake) and, for real evidence, the bench. It is not part of the offline checker.
 
 **`tools/golden_serial.py`** keeps its interface and stays a bench convenience. Its output is not evidence; only `bench_capture.py` files are.
