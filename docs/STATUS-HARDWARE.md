@@ -4,8 +4,8 @@
 
 | Area | State |
 |---|---|
-| Hardware Lead | Round 1 returned; fresh [#651](https://github.com/mmsanders/Digital-Tape/issues/651) corrects rig/judge R374-1…5 and reconciles the selected cart; judge18852b5 implemented; independent27/71/229 pass, but HOLD for HW651-R1/R2; V388 publishes new tests and reviews fixes |
-| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 `2faa1180` returns a revised circuit/instrument delta; not approved or ordered |
+| Hardware Lead | #651 returned/closed. V392/2fc2298b clears c55e5ad bounded judge corrections; same judge in PR646/443a5a53. [Software663](https://github.com/mmsanders/Digital-Tape/issues/663) owns current-main integration/CI/merge with conditional PM sign-off; no Hardware base-update task |
+| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 returns revised circuit/instrument delta; changed items/totals not approved or ordered |
 | Atomicity rig | Method NOT CLEARED by Verification `3d616c14`; revision-2 circuit analysis and E0–E4 controls still unqualified; no physical run. SPI results would be bounded characterization only, no native SD4 qualification |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |
 | Equipment Michael owns | A1 Mini printer, PLA, headphones, three PNY 64 GB V30 cards, a USB card reader, basic hand tools, likely access to a soldering iron. **No** Teensy, audio board, breadboard, LEDs, logic analyser or sound level meter |

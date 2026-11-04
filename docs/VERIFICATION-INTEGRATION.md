@@ -38,10 +38,18 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
   [PM655](REVIEW/PM655-P3-R2-2026-11-03.md) receives both declarations and routes executable
   BE1-IF/2 / R374-2 bindings to V382. Published89bc424e (109/4),7df60b14 (71 timing),
   458be603 (53/47 IF3) and84c95d0e (229 records) bind the ready scopes; old bytes carry.
-  Kit d62e0de0 still needs independent review. Hardware18852b5 passes27/71/229 but
-  review candidate PR387/d474aec3 is HOLD for false setup proof/credit and loader exceptions.
-  CI41876912450 succeeds; publication is pending. PM657 routes V388 and CI-only Software658;
-  scoped protected changes approved, no new target/package acceptance.
+  [PM661](REVIEW/PM661-P3-2026-11-04.md) carries the later publications:
+  V388 ebe20e08 (source7927f905, be1_review_r1 treea2540d46) holds kit d62e0de0 for
+  SW652-R1..R3; corrected0db6ce5c awaits V394 disposition. V3905b791e02
+  (source5c6a5c1a) holds CI660/e0b6bb02 for removed supported-platform retained census;
+  green111 checks authenticate execution, not coverage acceptance. V3922fc2298b
+  (sourcef07495df) clears Hardware c55e5ad artifact-consistency correction:339 published
+  plus3 CLI scenarios pass. Judge blobd4ab1866324cc8b87a0f80c2f3b48e3d664c33ee carries
+  unchanged into443a5a53, which imports CLI treee52f7a5c and wires regression/negative
+  controls. Software663 owns current-base integration/CI; conditional PM scope sign-off
+  carries V392 by identity. Physical method remains NOT CLEARED. V394 binds new
+  supported-platform census and narrow review-regression policy tests before Software658
+  implements; existing imported trees remain immutable. No new target/package acceptance.
 
 - **Q-P2-1 any-subset coverage** (ADR-195 §4). The model is published (`tests/wp10_subset_r1`)
   and bounded campaigns found no violation (Verification #186, #210). Verification `41995965`
