@@ -1,6 +1,6 @@
 # Atomicity rig evidence schema and judge rules, revision 2 (declaration, correction 1)
 
-**Owner:** Hardware Lead · **Status:** PUBLIC INTERFACE DECLARATION, partly implemented (below).
+**Owner:** Hardware Lead · **Status:** PUBLIC INTERFACE DECLARATION, implemented after each part's independent tests (below).
 **Drafted:** 2 November 2026 for [P3-R2-HW (#651)](https://github.com/mmsanders/Digital-Tape/issues/651),
 answering findings R374-1, R374-2 and R374-5 (Verification `3d616c14`, `findings/P3-R1-374/RIG-METHOD.md`).
 **Correction 1:** 4 November 2026. It answers V382's four declaration findings on #651 and adopts
@@ -16,11 +16,10 @@ regression tests independently.
 |---|---|---|
 | R374-1 aggregation (§1, the damage fields in §6) | **Implemented** at `dc38a4d` | V380 `bab04466`, tree `1ca703a4`, imported unchanged; disposed PASS on `2faa1180` by V382 |
 | Row predicate `qualifies(row)` for rig-r2 rows (§4.2–4.5) | **Implemented** after this correction | V382 `8879dbac`, `tests/rig_timing_r1` tree `ccf9bd21`, imported unchanged before the code |
-| Plan v4 (§3), manifest loading and authentication (§5), rig-r2 row validation (§4.1), `completed_write_reverted` and the scope fields (§6) | **Declared, not implemented** | Unbound. V382 has authored the cases (`rig_timing_r1/README.md`) and binds them to this correction |
+| Plan v4 (§3), manifest loading and authentication (§5), rig-r2 row validation (§4.1), `completed_write_reverted` and the scope fields (§6) | **Implemented** 4 November | Verification `45a6dda0`, `tests/rig_records_r1` tree `0d38fbe2`, imported unchanged before the code |
 
-Until plan v4 is implemented, the plan-v3 judge **refuses any row that carries `method`** as a run
-problem ("rig-r2 rows need the plan-v4 judge"). A rig-r2 row can't earn credit through the
-revision-3 judge. Nothing here lowers the 1,000-qualifying-cut minimum or the zero-tear /
+A plan-v3 run still **refuses any row that carries `method`** as a run problem. A rig-r2 row earns
+credit only under a plan-v4 run with an authenticated manifest. Nothing here lowers the 1,000-qualifying-cut minimum or the zero-tear /
 zero-neighbour-damage requirement.
 
 The circuit and procedure this schema records are in [ATOMICITY-RIG.md](ATOMICITY-RIG.md) revision 2.
@@ -92,7 +91,7 @@ is a JSON number: an integer or a float that is **finite and ≥ 0**. A boolean 
 neither is a string. Wire JSON with `NaN` or `Infinity` is refused by the complete judge's reader
 (§5.1); the predicate also refuses non-finite values given to it directly.
 
-### 4.1 Row validation (complete judge; failure is a run problem). Not implemented
+### 4.1 Row validation (complete judge; failure is a run problem)
 
 | Field | Type | Rule |
 |---|---|---|
@@ -176,7 +175,7 @@ artefact. They stay in the row.
 | 151.001 | Qualifies | |
 | equal to `busy_entry_us`, below 149 | Miss, completed-before | Counted, because `E` includes equality (busy that ended at once) |
 
-## 5. Rig manifest (committed before the plan). Not implemented
+## 5. Rig manifest (committed before the plan)
 
 ### 5.1 Interface
 
@@ -248,9 +247,9 @@ alone are not treated as calibrated evidence.
 | `torn_iterations`, `corrupt_iterations`, `neighbour_damage` | Over **all validated rows**, qualifying or not | Implemented |
 | `damage_on_non_qualifying` | The subset of those lists from non-qualifying rows | Implemented |
 | `verdicts` / `verdicts_non_qualifying` | OLD/NEW/TORN/CORRUPT counts for qualifying / validated non-qualifying rows | Implemented |
-| `completed_write_reverted` | Iterations of validated rows whose reason is "busy ended before the rail opened" and whose target reads OLD. **Each one is a run-integrity problem (FAIL)** under ADR-204. No credit. Not counted as TORN or as a media defect. A completed-before row that reads NEW is a lawful late miss (no credit, no problem) | Declared |
-| `method`, `rig_manifest_sha256`, `bus_mode`, `sck_hz` | From evidence, cross-checked (§5.3). One value each, or a problem | Declared |
-| `qualification_scope` | `"spi-characterisation"` when the bus mode is spi. `"sd4"` is reserved for a native-mode rig. Neither is a card qualification by itself | Declared |
+| `completed_write_reverted` | Iterations of validated rows whose reason is "busy ended before the rail opened" and whose target reads OLD. **Each one is a run-integrity problem (FAIL)** under ADR-204. No credit. Not counted as TORN or as a media defect. A completed-before row that reads NEW is a lawful late miss (no credit, no problem) | Implemented |
+| `method`, `rig_manifest_sha256`, `bus_mode`, `sck_hz` | From evidence, cross-checked (§5.3). One value each, or a problem | Implemented |
+| `qualification_scope` | `"spi-characterisation"` when the bus mode is spi. `"sd4"` is reserved for a native-mode rig. Neither is a card qualification by itself | Implemented |
 
 The verdict is PASS only if there are no problems, no tears, no corrupt blocks, no neighbour damage
 and no `completed_write_reverted` on any validated row, at least 1,000 qualifying rows, and exactly
@@ -269,9 +268,7 @@ Verification authors the tests and owns their assertions; this list doesn't repl
 - **Bound:** V380 `rig_correction_r2` (R374-1 aggregation, 27 cases) and V382 `rig_timing_r1` (71
   row-predicate cases: boundaries, arming, opening, delay, legacy diagnostics, operator overrides,
   protocol, missing fields, typing, and contradictory or out-of-window records).
-- **Still to bind, against this correction:** plan v4 and `load_manifest` (positive production run
-  with an authenticated manifest and controls; 999 short and operator override; row identity, CID,
-  method, SCK, firmware and switch conflicts; changed or missing manifest, calibration or control
-  bytes; a recorded failed control), the complete judge's record-invalid run problems,
-  `completed_write_reverted` (OLD strictly before fails; boundary OLD doesn't; NEW adds no credit),
-  chatter, and damage on any otherwise valid miss.
+- **Bound:** Verification `rig_records_r1` (`45a6dda0`, tree `0d38fbe2`): 133 manifest and evidence
+  cases, 85 complete-judge cases at the production 1,000 (including ADR-204 rollback and its
+  "otherwise qualified" condition), 9 rail-high and chatter predicate cases, 11 plan-v4 and
+  strict-reader CLI scenarios, and the interim plan-v3 refusal. All records in it are synthetic.

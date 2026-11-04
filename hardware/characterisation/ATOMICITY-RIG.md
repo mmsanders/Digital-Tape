@@ -295,9 +295,10 @@ manifest records any control as failed or missing (schema §5.3). A re-run is a 
      on `2faa1180`.
    - **The rig-r2 row predicate is implemented** against V382 `rig_timing_r1` (`8879dbac`, tree
      `ccf9bd21`), imported unchanged before the code.
-   - **Plan v4, the manifest loader, rig-r2 row validation and `completed_write_reverted` wait** for
-     V382 to bind its authored cases to schema correction 1. Until then the plan-v3 judge refuses
-     rig-r2 rows.
+   - **Plan v4, the manifest loader, rig-r2 row validation and `completed_write_reverted` are
+     implemented** against Verification's `rig_records_r1` (`45a6dda0`, tree `0d38fbe2`), imported
+     unchanged before the code. Its records are synthetic: a passing judge proves artifact
+     consistency, not calibration, a physical cut or a card result.
    - If shared `tests/IMPORTS.json` or CI plumbing is needed, the exact delta goes to Software and PM.
 2. **Rig firmware and host script** (`atomicity_host.py`) live under `hardware/characterisation/`.
    They're written after method clearance; their hashes go into the manifest.

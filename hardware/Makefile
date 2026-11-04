@@ -207,6 +207,10 @@ atomicity-test:
 	@cd $(CHAR) && $(PY) -B verification/rig_timing_r1/run.py --qualifier media_atomicity.py \
 	  --out $${TMPDIR:-/tmp}/v382-rig-timing.json >/dev/null \
 	  && echo "OK  atomicity judge: V382 rig_timing_r1 (rig-r2 row predicate) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-records-r1.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_records_r1/run.py --judge media_atomicity.py \
+	  --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: rig_records_r1 (plan v4, manifest, complete judge, ADR-204) independent regressions pass"
 
 ## spec-check — spec/hw content and revision must move together
 ##
