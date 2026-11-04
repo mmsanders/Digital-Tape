@@ -5041,3 +5041,98 @@ unapproved. DRAFT-11, target, media, batching and fabrication/charging holds car
 completed-write rollback visible without confusing method uncertainty with tearing.
 **Reversal cost.** Low for interface/test binding; rollback policy changes the judge's
 summary decision and requires explicit independent regression coverage before code.
+
+## ADR-205 — Approve scoped protected changes; defer macOS CI to manual runs
+**Date:** 2026-11-04 PDT
+**Status:** ADOPTED by PM [#657](https://github.com/mmsanders/Digital-Tape/issues/657)
+on Michael's latest review/assignment request and explicit CODEOWNERS approval.
+
+**Approval.** Michael: “re: software, I approve CODEOWNERS changes”. Applies to
+Software652's two exact verifier imports/IMPORTS entries, BE-1 workflow additions
+and matching @mmsanders owner lines, plus bounded CI scheduling work in Software658.
+No repeated approval request for these changes; ownership/independence/integrity
+rules remain. No ruleset edit, general waiver or physical/purchase authority.
+
+**CI policy.** Windows11 plus Linux CI remain mandatory. Deferred macOS build,
+package and disk-image checks remain available as a manual-only route, outside
+normal PR/main-push/scheduled required aggregate dependencies. Preserve old evidence
+and runnable commands. Required selected supported-platform/golden/integrity lanes
+remain nonempty and fail closed, with failure/cancel/missing/unexpected-skip and
+classifier-uncertainty controls. No always-green or continue-on-error shortcut.
+
+**Evidence.** Software PR654 d62e0de0 passes bounded self/CI kit tests but awaits
+independent review; both macOS jobs in41857074135 were cancelled with no runner or
+steps. Hardware18852b5 passes independent27/71/229 but is HOLD for false setup-proof/
+credit and loader exception findings. PR387/d474aec3 has successful CI41876912450,
+but is not a publication until Verification merges it. [Review](REVIEW/PM657-P3-2026-11-04.md).
+
+**Issued.** Software658 separate CI-only task first, then existing652 kit integration.
+Fresh Verification388 publishes PR387, reviews exact kit and CI-policy heads and
+later Hardware fixes. Hardware651 keeps the same correction pair/PR646. Ready
+independent review proceeds without waiting for CI policy. Prior evidence carries
+by exact identity, not by repeating accepted campaigns on a new base.
+
+**Holds.** 1/12 criteria; no target/physical/rig/card/output-cap or package clearance.
+CODEOWNERS approval is separate from independent disposition and green required CI.
+**Rationale.** Required CI must reflect the adopted supported-platform scope while
+retaining detecting gates; finish the now-implemented off-target work independently.
+**Reversal cost.** Low: restore macOS required selection/dependencies when resumed;
+historical evidence and manual commands remain available.
+
+## ADR-206 — Own Hardware integration; retain census and review-regression provenance
+**Date:** 2026-11-04 PDT
+**Status:** ADOPTED by PM [#661](https://github.com/mmsanders/Digital-Tape/issues/661),
+disposing technical arbitration [#662](https://github.com/mmsanders/Digital-Tape/issues/662).
+
+**Hardware handoff.** Michael asked to review latest, specifically Hardware's
+statement that bringing PR646 onto main and obtaining CI/PM sign-off belongs to
+Software/PM. Correct. V392 merged2fc2298b clears c55e5ad bounded artifact-consistency
+corrections, not the physical method. Judge blobd4ab1866 is unchanged at443a5a53;
+new CLI regressions/wiring and retained negative control need mechanical integration
+authentication. Software663 owns current-main synchronization, meaningful required
+CI, integration review and merge. PM grants conditional scope sign-off now for
+identical cleared judge/imports plus mechanical wiring; no extra PM round or
+independent re-acceptance solely for a base change. Any substantive behavioral,
+assertion, evidence-identity or coverage delta stops for responsible disposition.
+Hardware651 is complete; no new Hardware issue for integration.
+
+**Required census.** V3905b791e02 holds CI660/e0b6bb02 despite111 green checks:
+Git identity does not replace downloaded supported-platform retained-evidence
+authentication/completeness. Adopt Software658's declared two-platform contract
+(comment6640086870): required Windows/Linux census authenticates retained bytes,
+relocations and closed per-platform cases; the original default three-platform
+manual route and old imported trees remain unchanged. Verification394 publishes
+a new companion oracle/cases before Software658 changes adapter/CI. No coverage
+waiver, fabricated macOS result or assertion edit to ignore missing evidence.
+
+**Review regressions.** PM662 option A, narrowly constrained, preserves reviewed
+lineage. Original tests-first rule stays for new engine/firmware behavior. A late
+import is allowed only for a NEW immutable review-regression path, protected
+IMPORTS metadata with full review_of naming the reviewed implementation ancestor,
+independent published attestation of that candidate, and proven publication/import
+before the corresponding later corrective implementation. No changes to previously
+imported trees, simultaneous import/fix, unrelated late imports or timestamp-only
+lineage claims. Verification394 declares machine-readable provenance/fixtures and
+negative controls before Software658 implements a separate CI-only gate PR.
+Missing/invalid provenance fails closed. Existing identity, publication-main,
+ownership and gate controls remain. No rewrite of d62e0de0's reviewed lineage,
+retrospective tests-first claim or merging the held original to evade the gate.
+Until the tested correction lands, the existing red gate remains blocking.
+
+**Approval and routing.** Michael's explicit CODEOWNERS approval covers matching
+@mmsanders owner entries for these bounded current imports/corrections, including
+/tests/be1_review_r1/ and their protected metadata/workflow additions. Preserve
+owners/protections; no general ruleset waiver or repeat approval request. Software
+does663 first, then existing658's CI corrections, then652 final integration.
+Verification394 disposes ready corrected kit0db6ce5c without waiting for policy;
+it publishes census/gate tests independently and reviews returned exact heads.
+Michael manually starts issues; no kickoff messages, listeners or subworkers.
+
+**Holds.** Phase3 remains1/12. Rig unbuilt/NOT CLEARED, E0-E4 unmeasured, zero cards
+qualified, parts not ordered and changed cart unapproved. Target, batching,
+DRAFT-11, fabrication/charging, physical and purchase holds carry.
+**Evidence:** [PM661 review](REVIEW/PM661-P3-2026-11-04.md).
+**Rationale.** Put integration with its owner, preserve accepted evidence and repair
+two precise CI coverage/provenance conflicts without weakening detecting gates.
+**Reversal cost.** Low for routing; policy changes require new independent controls
+and explicit disposition before relaxing supported-platform or tests-first coverage.

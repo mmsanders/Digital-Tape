@@ -1,14 +1,14 @@
 # Human queue
 
-**3 November 2026. Phase 3 is open.**
+**4 November 2026. Phase 3 is open.**
 
-1. **Start fresh Verification work** after PM655 is merged:
-   - Verification [V#382](https://github.com/mmsanders/digital-tape-verification/issues/382): bind the now-received interfaces, then review returned heads;
-   - Hardware [#651](https://github.com/mmsanders/Digital-Tape/issues/651): rig method and cart correction;
-   - Software [#652](https://github.com/mmsanders/Digital-Tape/issues/652): offline bench-evidence kit.
-   Hardware651 and Software652 continue their existing tasks after the corresponding executable tests are published. Both declarations are already received; no repeat declaration or new Product issue is needed.
+1. **Next lead work** after PM661 is published:
+   - Software [#663](https://github.com/mmsanders/Digital-Tape/issues/663) first: bring Hardware PR646 onto current main, authenticate unchanged cleared evidence, get required CI green and merge under conditional PM scope sign-off;
+   - Verification [V#394](https://github.com/mmsanders/digital-tape-verification/issues/394): review the ready corrected kit now; independently bind the supported-platform census and narrow review-regression gate correction;
+   - Software existing [#658](https://github.com/mmsanders/Digital-Tape/issues/658), then [#652](https://github.com/mmsanders/Digital-Tape/issues/652): finish independently covered CI corrections and kit integration. Hardware651 is complete; no base-update task for Hardware.
+   Your **CODEOWNERS approval is recorded**, including matching @mmsanders ownership for current review-regression imports. No repeat approval is needed. Independent clearance and meaningful required CI still apply.
 2. **Parts:** your minimum bench + rig selection is recorded. You confirmed they are **not
-   ordered** (2 Nov). Hardware will return any corrected-rig/instrument cart delta; changed
+   ordered** (2 Nov). Hardware returned the corrected-rig/instrument cart delta; changed
    parts or totals are not automatically approved. No physical session is ready yet; no
    lead places an order. Ordinary firmware bench preparation is separate from the blocked rig.
 3. **Authorize spec revision DRAFT-11** ([proposal](SPEC-DRAFT-11-PROPOSAL.md)) once

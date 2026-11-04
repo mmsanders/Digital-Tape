@@ -65,6 +65,16 @@ messages and no active listener. Details are in §7.
    disposes blind → PM disposes. What disappears is a round whose only product was a
    separate merge commit; what does not disappear is blindness.
 
+   Review-discovered regressions on a held branch preserve the original reviewed
+   lineage (ADR-206). A new, immutable review package may follow the reviewed
+   implementation only under the independently tested provenance/order contract:
+   full reviewed-ancestor identity, independent publication attestation, import
+   before the corresponding corrective implementation, no prior imported-tree
+   edits and no combined import/fix commit. This does not claim retrospective
+   tests-first coverage or waive the rule for unrelated new behavior. The gate
+   correction is pending independent publication and Software integration; until
+   then its existing red result remains a merge blocker.
+
    The guarantee moved into CI, it was not dropped.
    `.github/workflows/evidence-integrity.yml` proves the imported subtree is
    byte-identical to the declared publication (`tests/IMPORTS.json`), that every
