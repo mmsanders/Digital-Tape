@@ -19,6 +19,9 @@ on:
       - 'tests/wp14_r1/fixtures.py'
       - 'tests/wp14_r1/oracle.py'
       - 'tests/wp14_r1/catalog.py'
+      - 'tests/be1_binding_r1/**'
+      - 'tests/be1_if3_r1/**'
+      - 'docs/WP17-BE1-INTERFACE.md'
       - '.github/workflows/firmware-bench.yml'
   push:
     branches: [main]
@@ -137,3 +140,50 @@ jobs:
         with:
           name: wp17-host-checks-${{ matrix.cc }}
           path: build/fwhost/checks/summary.json
+
+  bench-evidence:
+    # BE-1 (docs/WP17-BENCH-EVIDENCE.md) with BE1-IF/3: Verification's
+    # independent binding runs against the offline checker and the capture
+    # helper. Both harnesses' own selftests run first, so their controls (denied
+    # network/serial/subprocess/bundle writes, false flags, blanket success,
+    # dropped or rewritten bytes) are shown to go red before the candidate runs.
+    # Simulated bundles and a fake port only; no device, no physical claim.
+    name: "BE-1 offline kit (V382 and IF/3 bindings)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reference package integrity (SHA256SUMS)
+        run: cd tests/golden && sha256sum -c SHA256SUMS
+      - name: Harness selftests (controls must be detected)
+        run: |
+          python3 -B tests/be1_binding_r1/run.py --selftest --golden tests/golden --out build/be1/selftest
+          python3 -B tests/be1_binding_r1/capture.py --selftest --out build/be1/capture-selftest
+          python3 -B tests/be1_if3_r1/run.py --selftest --golden tests/golden --out build/be1/if3-selftest
+          python3 -B tests/be1_if3_r1/capture.py --selftest --out build/be1/if3-capture-selftest
+      - name: Offline checker against both bindings
+        run: |
+          python3 -B tests/be1_binding_r1/run.py --checker firmware/bench/tools/bench_evidence.py --golden tests/golden --out build/be1/checker
+          python3 -B tests/be1_if3_r1/run.py --checker firmware/bench/tools/bench_evidence.py --golden tests/golden --out build/be1/if3-checker
+      - name: Capture helper against both fake-port suites
+        run: |
+          python3 -B tests/be1_binding_r1/capture.py --helper firmware/bench/tools/bench_capture.py --out build/be1/capture
+          python3 -B tests/be1_if3_r1/capture.py --helper firmware/bench/tools/bench_capture.py --out build/be1/if3-capture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp17-bench-evidence
+          path: |
+            build/be1/checker/RESULT.json
+            build/be1/capture/RESULT.json
+            build/be1/selftest/RESULT.json
+            build/be1/capture-selftest/RESULT.json
+            build/be1/if3-checker/RESULT.json
+            build/be1/if3-capture/RESULT.json
+            build/be1/if3-selftest/RESULT.json
+            build/be1/if3-capture-selftest/RESULT.json
