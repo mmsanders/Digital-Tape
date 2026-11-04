@@ -1,0 +1,16 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_cli_review_r1",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "f07495dfa6be2f3284656d0d7d4dfdbf04dae27e",
+  "source_merge_on_main": "2fc2298bdded4a6733f4c939d96aa2eb9e48029d",
+  "source_path": "tests/rig_cli_review_r1",
+  "source_tree": "e52f7a5ce93be5f2d8737319bbc79e31f3672d28",
+  "files": {
+    "README.md": "6cd2e3a4f9b0dc6d6a10c77d79da9d5b9526e841",
+    "run.py": "1be6d3952936e16f6e30245dbf371f8100c83eb1"
+  },
+  "issue": "P3-R2-HW #651 (Verification V392, PR393)",
+  "mode": "unchanged mechanical regression import after V392 clearance of c55e5ad; assertions are Verification's",
+  "covers": "judge CLI parser boundary: valid authenticated run PASS/exit 0; 10,000-level JSON plan and results each refuse with exit 2, no traceback. Negative judge is baf176c. Synthetic only.",
+  "note": "The CLI refusal at c55e5ad predates these cases; no retrospective tests-first claim."
+}
