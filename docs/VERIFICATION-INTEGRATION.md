@@ -1,6 +1,6 @@
 # Independent verification integration
 
-**3 November 2026.** Which independent publications back each accepted package, and where
+**4 November 2026.** Which independent publications back each accepted package, and where
 their evidence is. Imported verifier trees and their source commits are declared in
 [tests/IMPORTS.json](../tests/IMPORTS.json); CI proves byte identity and ordering
 (`.github/workflows/evidence-integrity.yml`, `verifier-publication.yml`).
@@ -36,7 +36,12 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
   Hardware651 to independent review. V380 d23a90f7 publishes 27 aggregation regressions
   (old judge fails six late-corruption cases) and preflight; no repaired-head acceptance.
   [PM655](REVIEW/PM655-P3-R2-2026-11-03.md) receives both declarations and routes executable
-  BE1-IF/2 / R374-2 bindings and exact-head review to V382. No target run authorized.
+  BE1-IF/2 / R374-2 bindings to V382. Published89bc424e (109/4),7df60b14 (71 timing),
+  458be603 (53/47 IF3) and84c95d0e (229 records) bind the ready scopes; old bytes carry.
+  Kit d62e0de0 still needs independent review. Hardware18852b5 passes27/71/229 but
+  review candidate PR387/d474aec3 is HOLD for false setup proof/credit and loader exceptions.
+  CI41876912450 succeeds; publication is pending. PM657 routes V388 and CI-only Software658;
+  scoped protected changes approved, no new target/package acceptance.
 
 - **Q-P2-1 any-subset coverage** (ADR-195 §4). The model is published (`tests/wp10_subset_r1`)
   and bounded campaigns found no violation (Verification #186, #210). Verification `41995965`

@@ -5041,3 +5041,40 @@ unapproved. DRAFT-11, target, media, batching and fabrication/charging holds car
 completed-write rollback visible without confusing method uncertainty with tearing.
 **Reversal cost.** Low for interface/test binding; rollback policy changes the judge's
 summary decision and requires explicit independent regression coverage before code.
+
+## ADR-205 — Approve scoped protected changes; defer macOS CI to manual runs
+**Date:** 2026-11-04 PDT
+**Status:** ADOPTED by PM [#657](https://github.com/mmsanders/Digital-Tape/issues/657)
+on Michael's latest review/assignment request and explicit CODEOWNERS approval.
+
+**Approval.** Michael: “re: software, I approve CODEOWNERS changes”. Applies to
+Software652's two exact verifier imports/IMPORTS entries, BE-1 workflow additions
+and matching @mmsanders owner lines, plus bounded CI scheduling work in Software658.
+No repeated approval request for these changes; ownership/independence/integrity
+rules remain. No ruleset edit, general waiver or physical/purchase authority.
+
+**CI policy.** Windows11 plus Linux CI remain mandatory. Deferred macOS build,
+package and disk-image checks remain available as a manual-only route, outside
+normal PR/main-push/scheduled required aggregate dependencies. Preserve old evidence
+and runnable commands. Required selected supported-platform/golden/integrity lanes
+remain nonempty and fail closed, with failure/cancel/missing/unexpected-skip and
+classifier-uncertainty controls. No always-green or continue-on-error shortcut.
+
+**Evidence.** Software PR654 d62e0de0 passes bounded self/CI kit tests but awaits
+independent review; both macOS jobs in41857074135 were cancelled with no runner or
+steps. Hardware18852b5 passes independent27/71/229 but is HOLD for false setup-proof/
+credit and loader exception findings. PR387/d474aec3 has successful CI41876912450,
+but is not a publication until Verification merges it. [Review](REVIEW/PM657-P3-2026-11-04.md).
+
+**Issued.** Software658 separate CI-only task first, then existing652 kit integration.
+Fresh Verification388 publishes PR387, reviews exact kit and CI-policy heads and
+later Hardware fixes. Hardware651 keeps the same correction pair/PR646. Ready
+independent review proceeds without waiting for CI policy. Prior evidence carries
+by exact identity, not by repeating accepted campaigns on a new base.
+
+**Holds.** 1/12 criteria; no target/physical/rig/card/output-cap or package clearance.
+CODEOWNERS approval is separate from independent disposition and green required CI.
+**Rationale.** Required CI must reflect the adopted supported-platform scope while
+retaining detecting gates; finish the now-implemented off-target work independently.
+**Reversal cost.** Low: restore macOS required selection/dependencies when resumed;
+historical evidence and manual commands remain available.
