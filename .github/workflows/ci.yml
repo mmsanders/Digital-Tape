@@ -1401,44 +1401,6 @@ jobs:
           rc=0; sudo build/host/tapectl verify "/dev/$root" || rc=$?
           test "$rc" -eq 3
 
-  wp14-macos:
-    # WP-14 on macOS (D2): build with the system clang (the engine archive with
-    # GCC, whose stack-analysis flags the engine Makefile uses), the full host
-    # test suite, then a round trip on a real /dev/diskN: a 64 GiB sparse raw
-    # image attached by hdiutil. Raw I/O goes through /dev/rdiskN and the
-    # durable flush is reported (#384 Q6). On reattach macOS mounts partition 1
-    # itself, so the probe's own-partition-1 exception and README.TXT are real.
-    name: WP-14 tapectl — macOS build, image smoke, disk-image round trip
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: OS build
-        run: sw_vers; uname -a; clang --version | head -1
-      - name: Engine archive (GCC)
-        run: |
-          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
-          test -n "$GCC" && $GCC --version | head -1
-          make -C engine CC="$GCC" all
-      - run: tools/ci/annotate-tail.sh "macOS host tests" make -C host CC=clang test
-      - name: Disk-image round trip
-        run: |
-          mkfile -n 64g "$RUNNER_TEMP/card.raw"
-          sudo -E tools/ci/annotate-tail.sh "macOS disk-image round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
-          cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: wp14-traces-macos
-          path: |
-            ${{ runner.temp }}/e2e/traces
-            build/host/trace/traces
-          if-no-files-found: ignore
-
   wp14-windows:
     # WP-14 on Windows (D2): MinGW-w64 build, the full host test suite in Git
     # Bash, then a round trip on a real \\.\PhysicalDriveN: an 8 GiB expandable
@@ -1487,9 +1449,12 @@ jobs:
     # under tests/IMPORTS.json) run against this head on each named OS:
     #   image   runner.py on the shipped tapectl: 79 image cases + 11 controls;
     #   native  native.py through Software's transport (tests/wp14_adapter):
-    #           owned virtual devices only (Linux loop, macOS raw disk image,
-    #           Windows VHD), tapectl-test traces and iocap capture of the
-    #           shipped binary. No physical disk is touched.
+    #           owned virtual devices only (Linux loop, Windows VHD),
+    #           tapectl-test traces and iocap capture of the shipped binary.
+    #           No physical disk is touched.
+    # macOS is deferred (ADR-191, ADR-205): its leg, the build case below and the
+    # closed three-platform census run only in wp14-macos-manual.yml, whose copy
+    # of this job's steps must stay identical (verify-change-classifier.py).
     # The package owns every expectation and verdict; this job only runs it and
     # keeps the raw evidence. Files over 256 MiB are zstd-compressed in the
     # artifact; their SHA-256 is in each capture's large-artifacts.json.
@@ -1505,8 +1470,6 @@ jobs:
         include:
           - platform: linux
             runner: ubuntu-latest
-          - platform: macos
-            runner: macos-latest
           - platform: windows
             runner: windows-latest
     defaults:
@@ -1671,11 +1634,13 @@ jobs:
           fi
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
 
-  wp14-package-census:
-    # The package's own closed census over all six JSONs (qualification.py) and
-    # its Git-object identity audit (a8_identity.py) against the publication on
-    # Verification main. Neither is acceptance: Verification disposes.
-    name: WP-14 package — closed census and Git identity
+  wp14-package-identity:
+    # The package's Git-object identity audit (a8_identity.py) against the
+    # publication on Verification main. Its closed census (qualification.py)
+    # asserts all three platforms, so with macOS deferred (ADR-205) the census
+    # runs only in wp14-macos-manual.yml. Neither is acceptance: Verification
+    # disposes.
+    name: WP-14 package — Git identity
     needs: wp14-package
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -1691,24 +1656,6 @@ jobs:
           repository: mmsanders/Digital-Tape-Verification
           path: verification-repo
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: wp14-package-*
-          path: ${{ runner.temp }}/bundle
-          merge-multiple: true
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: wp14-native-evidence-*
-          path: ${{ runner.temp }}/native-captures
-      - name: Closed census (tests/wp14_r1/qualification.py)
-        run: |
-          set -euo pipefail
-          b="$RUNNER_TEMP/bundle"
-          for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
-          ls -la "$b"
-          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" \
-            --captures "$RUNNER_TEMP/native-captures" --relocations "$RUNNER_TEMP/relocations.json" \
-            "$b" | tee "$RUNNER_TEMP/census.json"
       - name: Git identity (tests/wp14_r1/a8_identity.py)
         run: |
           set -euo pipefail
@@ -1725,11 +1672,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: wp14-census
-          path: |
-            ${{ runner.temp }}/census.json
-            ${{ runner.temp }}/a8-identity.json
-            ${{ runner.temp }}/relocations.json
+          name: wp14-identity
+          path: ${{ runner.temp }}/a8-identity.json
           if-no-files-found: ignore
 
   wp11-portability:
@@ -1875,7 +1819,6 @@ jobs:
       - history-wp09-package
       - tapectl
       - wp14-linux-device
-      - wp14-macos
       - wp14-windows
       - wp11-portability
       - golden
@@ -1910,7 +1853,7 @@ jobs:
       - respool-full-aggregate
       - wp11-mutation-gate
       - wp14-package
-      - wp14-package-census
+      - wp14-package-identity
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:

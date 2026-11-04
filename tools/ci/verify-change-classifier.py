@@ -19,7 +19,13 @@ silently, so this script shows, each against deliberately broken versions:
    qualification jobs carry the qualify gate naming themselves, or inherit from
    a gated upstream member. Mutated workflows must be rejected;
 5. the lane verdict: unexpected skips, failures, cancellations and runs that
-   should not have happened turn a lane red. Broken verdicts must be rejected.
+   should not have happened turn a lane red. Broken verdicts must be rejected;
+6. deferred macOS (ADR-205, #658): no ci.yml job runs on a macOS runner, every
+   lane aggregate is nonempty, and the macOS jobs, the three-platform WP-14
+   package and its census stay in a workflow_dispatch-only workflow whose
+   package steps equal ci.yml's. lane-verdict.py itself, over the real lanes,
+   goes red on a missing, failed, cancelled or unexpectedly skipped member.
+   Mutated workflows must be rejected.
 
 Exit status 1 if any expectation fails or any broken variant survives.
 """
@@ -423,6 +429,162 @@ VMUTANTS = [skip_always_ok, ignores_cancelled, empty_means_not_selected,
             ran_when_unselected_ok, no_upstream]
 
 
+# --- 6. deferred macOS (ADR-205, #658) ---------------------------------------
+#
+# Normal PR, main-push and scheduled runs of ci.yml must not depend on a macOS
+# runner, and the deferred macOS checks must stay runnable, unchanged, from a
+# workflow_dispatch-only route.
+
+MANUAL = ROOT / ".github/workflows/wp14-macos-manual.yml"
+MANUAL_JOBS = ("wp14-macos", "wp14-package", "wp14-package-census")
+
+
+def _runners(block):
+    return [l.split(":", 1)[1].strip() for l in block.splitlines()
+            if re.match(r"^\s+(runs-on|runner|os):", l)] + \
+        [x.strip() for l in block.splitlines() if re.match(r"^\s+os:\s*\[", l)
+         for x in l.split("[", 1)[1].rstrip("]").split(",")]
+
+
+def _triggers(text):
+    lines = text.splitlines()
+    try:
+        s = lines.index("on:")
+    except ValueError:
+        return None
+    keys = []
+    for l in lines[s + 1:]:
+        if l and not l.startswith(" ") and not l.startswith("#"):
+            break
+        m = re.match(r"^  ([A-Za-z_]+):", l)
+        if m:
+            keys.append(m.group(1))
+    return keys
+
+
+def _steps(block):
+    i = block.find("\n    steps:\n")
+    return None if i < 0 else "\n".join(l.rstrip() for l in block[i:].splitlines()).strip()
+
+
+def macos_failures(ci_text, manual_text):
+    failures = []
+    jobs = L.workflow_jobs(ci_text)
+    for job, block in jobs.items():
+        if any("macos" in r.lower() for r in _runners(block)):
+            failures.append(f"{job}: ci.yml job runs on macOS")
+    lanes = L.lanes(ci_text)
+    for lane in L.LANES:
+        if not lanes.get(lane):
+            failures.append(f"{lane}: lane has no members")
+    if manual_text is None:
+        return failures + ["manual macOS workflow is missing"]
+    trig = _triggers(manual_text)
+    if trig != ["workflow_dispatch"]:
+        failures.append(f"manual workflow triggers are {trig}, not workflow_dispatch only")
+    mjobs = L.workflow_jobs(manual_text)
+    for job in MANUAL_JOBS:
+        if job not in mjobs:
+            failures.append(f"manual workflow lacks {job}")
+    if "wp14-macos" in mjobs and not any("macos" in r for r in _runners(mjobs["wp14-macos"])):
+        failures.append("manual wp14-macos does not run on macOS")
+    if "wp14-package" in mjobs:
+        legs = re.findall(r"^\s+- platform: (\w+)$", mjobs["wp14-package"], flags=re.M)
+        if sorted(legs) != ["linux", "macos", "windows"]:
+            failures.append(f"manual wp14-package legs are {legs}, not linux/macos/windows")
+        if "wp14-package" in jobs and _steps(jobs["wp14-package"]) != _steps(mjobs["wp14-package"]):
+            failures.append("manual wp14-package steps differ from ci.yml's")
+    if "wp14-package-census" in mjobs and "census.py" not in mjobs["wp14-package-census"]:
+        failures.append("manual wp14-package-census does not run the census")
+    for job, block in mjobs.items():
+        if "needs.changes" in block:
+            failures.append(f"manual {job} is gated on ci.yml's classifier")
+    return failures
+
+
+def readd_macos_leg(ci, manual):
+    leg = "          - platform: linux\n            runner: ubuntu-latest\n"
+    return ci.replace(leg, leg + "          - platform: macos\n            runner: macos-latest\n", 1), manual
+
+
+def readd_macos_job(ci, manual):
+    return ci.replace("  wp14-windows:\n", "  wp14-mac:\n    needs: changes\n    runs-on: macos-latest\n"
+                      "    steps:\n      - run: true\n\n  wp14-windows:\n", 1), manual
+
+
+def manual_on_pull_request(ci, manual):
+    return ci, manual.replace("on:\n  workflow_dispatch:\n", "on:\n  pull_request:\n  workflow_dispatch:\n", 1)
+
+
+def manual_on_schedule(ci, manual):
+    return ci, manual.replace("on:\n  workflow_dispatch:\n",
+                              "on:\n  workflow_dispatch:\n  schedule:\n    - cron: '0 0 * * *'\n", 1)
+
+
+def manual_drift(ci, manual):
+    return ci, manual.replace('"$PY" -B tests/wp14_r1/runner.py', '"$PY" -B tests/wp14_r1/runner.py --quick', 1)
+
+
+def manual_drops_macos_leg(ci, manual):
+    return ci, manual.replace("          - platform: macos\n            runner: macos-latest\n", "", 1)
+
+
+def manual_drops_census(ci, manual):
+    return ci, manual.replace("  wp14-package-census:\n", "  wp14-package-tally:\n", 1)
+
+
+def manual_missing(ci, manual):
+    return ci, None
+
+
+def empty_regression(ci, manual):
+    jobs = L.workflow_jobs(ci)
+    for m in L.lanes(ci)["regression"]:
+        ci = ci.replace(f"      - {m}\n", "", 1) if m in jobs else ci
+    return ci, manual
+
+
+MMUTANTS = [
+    (readd_macos_leg, "wp14-package: ci.yml job runs on macOS"),
+    (readd_macos_job, "wp14-mac: ci.yml job runs on macOS"),
+    (manual_on_pull_request, "not workflow_dispatch only"),
+    (manual_on_schedule, "not workflow_dispatch only"),
+    (manual_drift, "steps differ"),
+    (manual_drops_macos_leg, "not linux/macos/windows"),
+    (manual_drops_census, "lacks wp14-package-census"),
+    (manual_missing, "manual macOS workflow is missing"),
+    (empty_regression, "regression: lane has no members"),
+]
+
+
+def verdict_cli(lane, drop=None, set_result=None):
+    """lane-verdict.py over the real ci.yml lane with every member succeeding,
+    except one member removed from needs or given another result."""
+    members = L.lanes(WORKFLOW_TEXT)[lane]
+    needs = {"changes": {"result": S}}
+    needs.update({m: {"result": S} for m in members})
+    if drop:
+        del needs[drop]
+    if set_result:
+        needs[set_result[0]]["result"] = set_result[1]
+    r = subprocess.run([sys.executable, "-B", str(ROOT / "tools/ci/lane-verdict.py")], capture_output=True,
+                       env={**os.environ, "LANE": lane, "NEEDS": __import__("json").dumps(needs),
+                            "DOCS_ONLY": "false", "QUALIFY": "true", "QUALIFY_JOBS": ","})
+    return r.returncode
+
+
+VCLI = [
+    ("regression", None, None, 0, "all required members succeeded"),
+    ("regression", "wp14-windows", None, 1, "missing required result"),
+    ("regression", None, ("wp14-linux-device", F_), 1, "failed required lane"),
+    ("regression", None, ("wp14-windows", X), 1, "cancelled required lane"),
+    ("regression", None, ("golden", K), 1, "unexpectedly skipped required lane"),
+    ("qualification", None, None, 0, "all qualification members succeeded"),
+    ("qualification", None, ("wp14-package", X), 1, "cancelled package lane"),
+    ("qualification", "wp14-package-identity", None, 1, "missing identity result"),
+]
+
+
 # --- 3. CLI ------------------------------------------------------------------
 
 
@@ -510,8 +672,30 @@ def main() -> int:
     bad += bool(vreal)
     bad += report("verdict", VMUTANTS, vtable)
 
+    # 6. deferred macOS (ADR-205)
+    manual_text = MANUAL.read_text(encoding="utf-8") if MANUAL.is_file() else None
+    mf = macos_failures(WORKFLOW_TEXT, manual_text)
+    for f in mf:
+        print("FAIL macOS deferral: " + f)
+    if not mf:
+        print("ok    macOS deferral: no ci.yml job runs on macOS; every lane nonempty; "
+              f"{', '.join(MANUAL_JOBS)} preserved in {MANUAL.name}, workflow_dispatch only, "
+              "wp14-package steps identical")
+    bad += bool(mf)
+    for fn, needle in MMUTANTS:
+        got = macos_failures(*fn(WORKFLOW_TEXT, manual_text))
+        caught = any(needle in g for g in got)
+        print(("killed   " if caught else "SURVIVED ") + f"macOS {fn.__name__}"
+              + (f" -> {next(g for g in got if needle in g)}" if caught else f"; got {got[:2]}"))
+        bad += not caught
+    for lane, drop, setr, want, label in VCLI:
+        rc = verdict_cli(lane, drop, setr)
+        print(f"{'ok  ' if rc == want else 'FAIL'}  lane-verdict.py {lane:<13} exit {rc} (want {want}) {label}")
+        bad += rc != want
+
     print(f"{len(CASES)} docs-only, {len(QCASES)} selection, {len(CLI_CASES)} CLI, "
-          f"{len(VCASES)} verdict cases; {len(MUTANTS) + len(QMUTANTS) + len(WMUTANTS) + len(VMUTANTS)} "
+          f"{len(VCASES)} verdict, {len(VCLI)} verdict-CLI cases; "
+          f"{len(MUTANTS) + len(QMUTANTS) + len(WMUTANTS) + len(VMUTANTS) + len(MMUTANTS)} "
           "broken variants")
     print("== change classifier and lanes: " + ("PASS" if not bad else "FAIL") + " ==")
     return 1 if bad else 0
