@@ -197,4 +197,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-203](DECISIONS.md#adr-203--firmware-integration-recorded-off-target-round-2-issued) | 2026-11-02 PDT | Latest disposition / Round 2 | V378 correction carried to integrated aa472667; BE-1 kit Software652, rig/cart correction Hardware651, independent tests/review V380; parts not ordered, target/physical holds carry |
 
-133 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-204](DECISIONS.md#adr-204--bind-returned-interfaces-fail-unexplained-completed-write-rollback) | 2026-11-03 PDT | Returned schema bindings / rollback rule | V380 ready work recorded; V382 binds executable tests; Hardware651 and Software652 continue; qualified completed-write OLD fails integrity, uncertainty equality ambiguous; 1/12 and physical holds unchanged |
+
+134 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

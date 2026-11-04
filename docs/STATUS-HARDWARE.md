@@ -1,12 +1,12 @@
 # Hardware status
 
-**2 November 2026 PDT.** Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
+**3 November 2026 PDT.** Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 | Area | State |
 |---|---|
-| Hardware Lead | Round 1 returned; fresh [#651](https://github.com/mmsanders/Digital-Tape/issues/651) corrects rig/judge R374-1…5 and reconciles the selected cart; V380 authors regressions and reviews the exact result |
-| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 `67ad581` records the old cart; revised circuit/instrument delta needs explicit review, not assumed approval |
-| Atomicity rig | Method NOT CLEARED by Verification `3d616c14`; no physical run. SPI results would be bounded characterization only, no native SD4 qualification |
+| Hardware Lead | Round 1 returned; fresh [#651](https://github.com/mmsanders/Digital-Tape/issues/651) corrects rig/judge R374-1…5 and reconciles the selected cart; R374-1 returned, R374-2/5 schema declared at 2faa1180; V382 binds/tests/reviews |
+| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 `2faa1180` returns a revised circuit/instrument delta; not approved or ordered |
+| Atomicity rig | Method NOT CLEARED by Verification `3d616c14`; revision-2 circuit analysis and E0–E3 controls still unqualified; no physical run. SPI results would be bounded characterization only, no native SD4 qualification |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |
 | Equipment Michael owns | A1 Mini printer, PLA, headphones, three PNY 64 GB V30 cards, a USB card reader, basic hand tools, likely access to a soldering iron. **No** Teensy, audio board, breadboard, LEDs, logic analyser or sound level meter |
 | Cards | Three PNY 64 GB V30 bought; not characterised to WP-05 A-2 (the earlier method was rejected); atomicity not yet tested |
