@@ -533,6 +533,19 @@
       ]
     },
     {
+      "path": "tests/wp14_supported_r1",
+      "tree": "15afc9e29b802a010b0df9486e241e39babe9683",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "8790e20d0350fefcdf267633d68b5b3ac370a9c3",
+      "attested_in": "Verification394 lanes B/C (PR396, merged 8790e20d; findings/V394-POLICY/DISPOSITION.md)",
+      "attestation": "ADR-206/PM661 supported-platform companion oracle for the adopted Software658 two-platform census interface (comment 6640086870): qualification_supported.audit_platforms applies the unchanged wp14_r1 per-platform body (AST-proved) to a sorted unique selection including linux and windows, default still all three; retained.audit_retained authenticates every named retained capture, index, snapshot and dump byte; run_adapter.py replays 25 actual-adapter cases; dag.py checks the required census DAG and MANUAL-SHA256. Published from source 7ae5f115fb1185d01be0ac0a1ad3cbd0b6152706, CI 41936971089. Imported byte-identically before any adapter/CI change. Depends on the unchanged sibling tests/wp14_r1. Synthetic selftests only; not Product acceptance, a native run or macOS evidence",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp14_supported_r1/selftest.py"
+      ]
+    },
+    {
       "path": "tests/wp15_app1a_r1",
       "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
       "source_repo": "mmsanders/digital-tape-verification",
