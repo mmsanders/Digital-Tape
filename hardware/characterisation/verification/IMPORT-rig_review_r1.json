@@ -1,0 +1,15 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_review_r1",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "d474aec3bd35b094ff69bf818c2bbd1d935f5686",
+  "source_merge_on_main": "45033381d64759fc43d0466d29e0e08198c81a65",
+  "source_path": "tests/rig_review_r1",
+  "source_tree": "a640b1c1f340efa0a7288efa164489a3b648e3ab",
+  "files": {
+    "README.md": "55e98b77c7e203f6ccbb6a8ce7eb79f74791b459",
+    "run.py": "cf10144b8fb2de28df8458692c93cac2d02782dc"
+  },
+  "issue": "P3-R2-HW #651 (Verification V388, PR387)",
+  "mode": "unchanged mechanical import; assertions are Verification's",
+  "covers": "HW651-R1 (no qualifying credit or completed-write proof without an authenticated matching plan-v4 setup) and HW651-R2 (load_manifest returns problems for NUL refs and huge integers). Synthetic records only: no calibration, physical or media evidence."
+}

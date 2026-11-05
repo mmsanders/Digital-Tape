@@ -201,6 +201,28 @@ atomicity-test:
 	  && echo "OK  atomicity judge: 43 checks pass, incl. end-to-end CLI"
 	@cd $(CHAR) && $(PY) test_media_atomicity.py --mutate >/dev/null \
 	  && echo "OK  atomicity judge: proven able to go red"
+	@cd $(CHAR) && $(PY) -B verification/rig_correction_r2/run.py --judge media_atomicity.py \
+	  --out $${TMPDIR:-/tmp}/v380-rig-r2.json >/dev/null \
+	  && echo "OK  atomicity judge: V380 rig_correction_r2 (R374-1) independent regressions pass"
+	@cd $(CHAR) && $(PY) -B verification/rig_timing_r1/run.py --qualifier media_atomicity.py \
+	  --out $${TMPDIR:-/tmp}/v382-rig-timing.json >/dev/null \
+	  && echo "OK  atomicity judge: V382 rig_timing_r1 (rig-r2 row predicate) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-records-r1.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_records_r1/run.py --judge media_atomicity.py \
+	  --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: rig_records_r1 (plan v4, manifest, complete judge, ADR-204) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-review-r1.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_review_r1/run.py --judge media_atomicity.py \
+	  --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: V388 rig_review_r1 (no proof without setup, total loader) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-loader-review-r2.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_loader_review_r2/run.py --judge media_atomicity.py \
+	  --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: V390 rig_loader_review_r2 (loader boundary, damage kept without setup) independent regressions pass"
+	@out=$${TMPDIR:-/tmp}/rig-cli-review-r1.$$$$ && rm -rf $$out \
+	  && cd $(CHAR) && $(PY) -B verification/rig_cli_review_r1/run.py --judge media_atomicity.py \
+	  --negative-judge negative-controls/media_atomicity_baf176c.py --out $$out >/dev/null && rm -rf $$out \
+	  && echo "OK  atomicity judge: V392 rig_cli_review_r1 (CLI refuses deep JSON, exit 2) independent regressions pass"
 
 ## spec-check — spec/hw content and revision must move together
 ##

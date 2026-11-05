@@ -321,26 +321,26 @@
     // as rig design or a host-only check; it never contributes to passed progress.
     // Later contracts have no criteria yet, so no overall Phase 3 % is claimed.
     const PHASE3 = {
-      asOf: "PM657 · 4 November 2026 PDT · kit returned; protected changes approved; CI658 / V388 assigned (ADR-205)",
+      asOf: "PM661 · 4 November 2026 PDT · Hardware tooling cleared, Software663 owns integration; V394 / CI658 corrections (ADR-206)",
       entry: [
         { id: "DRAFT-11", name: "Spec revision", state: "IN ROUND", next: "V380 preflight records wording progress; S2, reverse/depth/mute/source parameters and Michael authorization remain. Not in force." },
         { id: "Q-P2-1", name: "Any-subset crash coverage", state: "BLOCKED", next: "365/365 deferred faults pass (404/404 with prior receipts). Six long cuts unavailable on the three-unit fixture, zero executed. Batching/large-epoch coverage remains held by PM." },
-        { id: "Parts", name: "Bench parts approved and ordered", state: "IN ROUND", next: "Minimum bench + rig selected; Michael confirms NOT ORDERED. Hardware651 reconciles the corrected-rig cart delta; changed items need approval." }
+        { id: "Parts", name: "Bench parts approved and ordered", state: "IN ROUND", next: "Minimum bench + rig selected; Michael confirms NOT ORDERED. Hardware651 returned the corrected-rig cart delta; Software663 integrates it. Changed items need approval." }
       ],
       packages: [
-        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware + Verification", issue: 651,
-          note: "Rig remains NOT CLEARED. Hardware18852b5 independently passes27/71/229 cases but HOLD for false setup proof/credit and loader exceptions. V388 publishes new regressions, then reviews fixes on the same651/PR646 pair. No card qualified.", criteria: [
+        { id: "WP-05", name: "Cards and bench parts", owner: "Software integration + Verification", issue: 663,
+          note: "V392/2fc2298b clears bounded c55e5ad judge corrections; unchanged judge in443a5a53. Software663 owns PR646 current-main integration/CI/merge with conditional PM scope sign-off. Rig remains NOT CLEARED; no card qualified.", criteria: [
             { id: "A-1", name: "Exact card identity", state: "TO DO", next: "Part number, capacity, revision and CID; needs a reader or rig that reads CID." },
             { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "Method re-review, then run." },
             { id: "A-3", name: "Against the C-60 copy requirement", state: "TO DO", next: "After A-2; production copy-time proof remains Phase 5." },
             { id: "A-4", name: "Reader not the bottleneck", state: "TO DO", next: "With A-2." },
-            { id: "A-5", name: "Parts support the bench and rig", state: "IN ROUND", next: "Hardware651 reconciles selected parts with the corrected method. Parts not ordered; no independent acceptance." },
-            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per SKU/revision, zero torn blocks", state: "BLOCKED", next: "Hardware651 / V388: fix HW651-R1/R2 after merged regression publication. E0-E4/dry-run controls are unmeasured; revised circuit remains unqualified. SPI characterization does not qualify SD4; no physical run cleared." }
+            { id: "A-5", name: "Parts support the bench and rig", state: "IN ROUND", next: "Hardware651 returned the corrected cart; Software663 integrates it. Parts not ordered; changed cart unapproved; no independent acceptance." },
+            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per SKU/revision, zero torn blocks", state: "BLOCKED", next: "V392 clears judge artifact consistency only; Software663 owns integration. E0-E4/dry-run controls are unmeasured; revised circuit remains unqualified. SPI characterization does not qualify SD4; no physical run cleared." }
           ] },
         { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software + Verification", issue: 652,
-          note: "V378 correction 98f46c94 clears off-target integration; #647 merged aa472667 after 117 current-base checks. Software652 returned implemented IF/3 kit d62e0de0. Owner approval recorded; V388 independently reviews. CI658 first removes deferred macOS from normal required aggregates while preserving manual checks and required Windows/Linux gates. No target/package acceptance.", criteria: [
-            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 PCM comparisons, 28/28 controls per platform carried onto main. Kit self/CI suites109/4 and53/47 pass; V388 exact-head review pending. Target PCM/I²S still pending." },
-            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. Offline capture kit implemented; independent review/CI platform fix pending. Actual target instance/stack unmeasured." },
+          note: "V378 correction 98f46c94 clears off-target integration; #647 merged aa472667 after 117 current-base checks. Software652 corrected kit0db6ce5c awaits V394 disposition. CI658 remains HOLD for removed Windows/Linux retained census; new independent census and narrow review-regression gate tests precede fixes. Owner approval recorded. No target/package acceptance.", criteria: [
+            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 PCM comparisons, 28/28 controls per platform carried onto main. Kit corrections report8/8 plus detecting controls; V394 exact-head disposition pending. Prior109/4 and53/47 scope carries. Target PCM/I²S still pending." },
+            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. Corrected capture kit awaits V394; supported-platform census and ordering-gate corrections pending. Actual target instance/stack unmeasured." },
             { id: "F3", name: "Warm instant-on <100 ms", state: "TO DO", next: "Needs the logic analyser." },
             { id: "F4", name: "Commit latency <200 ms", state: "TO DO", next: "With recording (WP-19)." },
             { id: "F5", name: "Play, Stop and removal", state: "TO DO", next: "Bench evidence witnessed by Michael." },
@@ -388,11 +388,11 @@
           ${PHASE3.packages.map(pkg => `<li class="stage"><span class="num">${escapeHtml(pkg.id)}</span><span class="nm">${escapeHtml(pkg.name)}</span>
             <p class="why">${escapeHtml(pkg.owner)}${pkg.issue ? ` · <a href="https://github.com/mmsanders/Digital-Tape/issues/${pkg.issue}">#${pkg.issue}</a>` : ""}</p>
             <p class="why">${escapeHtml(pkg.note)}</p>${pkg.criteria.length ? criterionList(pkg.criteria) : `<p class="empty">Not yet assigned · criteria pending</p>`}</li>`).join("")}</ul></details>
-        <p class="why">Round 2: <a href="https://github.com/mmsanders/Digital-Tape/issues/651">Hardware #651</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/652">Software #652</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/388">Verification #388</a>. <a href="https://github.com/mmsanders/Digital-Tape/issues/658">Software #658 CI-only priority</a>, then resume652. Scoped CODEOWNERS changes approved. V388 reviews the ready kit and Hardware/CI corrections; Michael starts issues manually. Parts not ordered; no target session ready.</p>
+        <p class="why">Round 2: <a href="https://github.com/mmsanders/Digital-Tape/issues/663">Software #663 Hardware integration first</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/652">Software #652</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/394">Verification #394</a>. <a href="https://github.com/mmsanders/Digital-Tape/issues/658">Software #658 CI corrections</a>, then resume652. Scoped CODEOWNERS changes approved. V394 reviews the ready corrected kit and binds census/gate-policy tests; Hardware651 is returned; Michael starts issues manually. Parts not ordered; no target session ready.</p>
         <p class="why">Exit: WP-05 and WP-17–WP-21 independently accepted on the bench; firmware goldens byte-identical with earlier regressions green; atomicity passed or a torn block escalated as a format blocker; Q-P2-1 cleared before write batching.</p>
         <p class="rmnote">USB-powered bench only. Fabrication and charging CLOSED; no qualified card. Engine pinned at d96b4245. Production &lt;30 s copy proof belongs to Phase 5. DRAFT-11 remains proposed.</p>
         <p class="rmnote">Snapshot: ${escapeHtml(PHASE3.asOf)} — PM-maintained, not live. Issue queues below refresh separately; closing an issue does not pass a criterion.</p>
-        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-BENCH-EVIDENCE.md">BE-1 evidence contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM657-P3-2026-11-04.md">PM review</a></p>`;
+        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-BENCH-EVIDENCE.md">BE-1 evidence contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM661-P3-2026-11-04.md">PM review</a></p>`;
     }
 
     function rungOf(stage) {

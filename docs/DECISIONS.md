@@ -5078,3 +5078,61 @@ CODEOWNERS approval is separate from independent disposition and green required 
 retaining detecting gates; finish the now-implemented off-target work independently.
 **Reversal cost.** Low: restore macOS required selection/dependencies when resumed;
 historical evidence and manual commands remain available.
+
+## ADR-206 — Own Hardware integration; retain census and review-regression provenance
+**Date:** 2026-11-04 PDT
+**Status:** ADOPTED by PM [#661](https://github.com/mmsanders/Digital-Tape/issues/661),
+disposing technical arbitration [#662](https://github.com/mmsanders/Digital-Tape/issues/662).
+
+**Hardware handoff.** Michael asked to review latest, specifically Hardware's
+statement that bringing PR646 onto main and obtaining CI/PM sign-off belongs to
+Software/PM. Correct. V392 merged2fc2298b clears c55e5ad bounded artifact-consistency
+corrections, not the physical method. Judge blobd4ab1866 is unchanged at443a5a53;
+new CLI regressions/wiring and retained negative control need mechanical integration
+authentication. Software663 owns current-main synchronization, meaningful required
+CI, integration review and merge. PM grants conditional scope sign-off now for
+identical cleared judge/imports plus mechanical wiring; no extra PM round or
+independent re-acceptance solely for a base change. Any substantive behavioral,
+assertion, evidence-identity or coverage delta stops for responsible disposition.
+Hardware651 is complete; no new Hardware issue for integration.
+
+**Required census.** V3905b791e02 holds CI660/e0b6bb02 despite111 green checks:
+Git identity does not replace downloaded supported-platform retained-evidence
+authentication/completeness. Adopt Software658's declared two-platform contract
+(comment6640086870): required Windows/Linux census authenticates retained bytes,
+relocations and closed per-platform cases; the original default three-platform
+manual route and old imported trees remain unchanged. Verification394 publishes
+a new companion oracle/cases before Software658 changes adapter/CI. No coverage
+waiver, fabricated macOS result or assertion edit to ignore missing evidence.
+
+**Review regressions.** PM662 option A, narrowly constrained, preserves reviewed
+lineage. Original tests-first rule stays for new engine/firmware behavior. A late
+import is allowed only for a NEW immutable review-regression path, protected
+IMPORTS metadata with full review_of naming the reviewed implementation ancestor,
+independent published attestation of that candidate, and proven publication/import
+before the corresponding later corrective implementation. No changes to previously
+imported trees, simultaneous import/fix, unrelated late imports or timestamp-only
+lineage claims. Verification394 declares machine-readable provenance/fixtures and
+negative controls before Software658 implements a separate CI-only gate PR.
+Missing/invalid provenance fails closed. Existing identity, publication-main,
+ownership and gate controls remain. No rewrite of d62e0de0's reviewed lineage,
+retrospective tests-first claim or merging the held original to evade the gate.
+Until the tested correction lands, the existing red gate remains blocking.
+
+**Approval and routing.** Michael's explicit CODEOWNERS approval covers matching
+@mmsanders owner entries for these bounded current imports/corrections, including
+/tests/be1_review_r1/ and their protected metadata/workflow additions. Preserve
+owners/protections; no general ruleset waiver or repeat approval request. Software
+does663 first, then existing658's CI corrections, then652 final integration.
+Verification394 disposes ready corrected kit0db6ce5c without waiting for policy;
+it publishes census/gate tests independently and reviews returned exact heads.
+Michael manually starts issues; no kickoff messages, listeners or subworkers.
+
+**Holds.** Phase3 remains1/12. Rig unbuilt/NOT CLEARED, E0-E4 unmeasured, zero cards
+qualified, parts not ordered and changed cart unapproved. Target, batching,
+DRAFT-11, fabrication/charging, physical and purchase holds carry.
+**Evidence:** [PM661 review](REVIEW/PM661-P3-2026-11-04.md).
+**Rationale.** Put integration with its owner, preserve accepted evidence and repair
+two precise CI coverage/provenance conflicts without weakening detecting gates.
+**Reversal cost.** Low for routing; policy changes require new independent controls
+and explicit disposition before relaxing supported-platform or tests-first coverage.

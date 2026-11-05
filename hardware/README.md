@@ -7,11 +7,12 @@ revisions: [spec/hw/VERSION.md](../spec/hw/VERSION.md). Authority: [CLAUDE.md](.
 | Surface | Purpose |
 |---|---|
 | prototypes/ctrl-01/ | Michael's current controls rig: latching keys, Record-on-Play latch, slide lock (owner prototype) |
-| characterisation/ | Sustained-write and media-atomicity tools |
+| characterisation/ | Sustained-write and media-atomicity tools; the card power-cut rig design (`ATOMICITY-RIG.md`, revision 2), its declared revision-2 evidence schema (`ATOMICITY-SCHEMA-R2.md`) and the speaker-limit research (`SPEAKER-LIMIT.md`) |
+| controls/ | Phase 3 control proposals: Rew/FF depth sensing, copy-button placement |
 | measurements/ | Procedure and raw-data template for independent audit |
 | fabrication_gate.py | Returns CLOSED/nonzero while safety qualification is missing |
 | cad/, packets/wp04-01/, mech/, thermal/ | Earlier design (86 × 54 mm cartridge, solenoid transport). Kept as history; not the current design |
-| sourcing/ | The September 2026 parts research; superseded by the Phase 3 bench list |
+| sourcing/ | `PHASE3-BENCH.md`, the Phase 3 bench parts list for Michael's approval; the September 2026 research is superseded history |
 
 Checks:
 - stdlib: `make -C hardware thermal-check mech-check solenoid-test atomicity-test spec-check`

@@ -101,7 +101,7 @@ assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
 assert.match(phase3(), /Fabrication and charging CLOSED/);
 assert.match(phase3(), /DRAFT-11 remains proposed/);
-for (const issue of ['Digital-Tape/issues/651', 'Digital-Tape/issues/652', 'digital-tape-verification/issues/388']) {
+for (const issue of ['Digital-Tape/issues/663', 'Digital-Tape/issues/652', 'digital-tape-verification/issues/394']) {
   assert(phase3().includes(issue));
 }
 const ledger = fs.readFileSync('../../docs/PHASE3-LEDGER.md', 'utf8');

@@ -201,4 +201,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-205](DECISIONS.md#adr-205--approve-scoped-protected-changes-defer-macos-ci-to-manual-runs) | 2026-11-04 PDT | CODEOWNERS approval / CI platform scope | Scoped imports/workflow/owner changes approved; Software658 manual-only deferred macOS, required Windows/Linux gates retained; V388 publishes Hardware HOLD tests and reviews kit/CI; existing651/652 continue |
 
-135 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-206](DECISIONS.md#adr-206--own-hardware-integration-retain-census-and-review-regression-provenance) | 2026-11-04 PDT | Hardware integration / CI census / review-regression provenance | Software663 owns cleared646 integration with conditional PM sign-off; retain mandatory supported-platform retained census; V394 binds new census/gate cases before658 fixes; corrected kit review now; 1/12 and physical holds carry |
+
+136 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

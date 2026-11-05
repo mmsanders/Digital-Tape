@@ -1,0 +1,15 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_timing_r1",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "8879dbacdc036ac4b9eb224e6b73f6f353030b48",
+  "source_merge_on_main": "7df60b1423636dd4eda65cf46a453a1d1769e042",
+  "source_path": "tests/rig_timing_r1",
+  "source_tree": "ccf9bd21860eded07c4a0a6046a4ba644df29262",
+  "files": {
+    "README.md": "51cc9e0f1091bbc22614bb4794f0bcdd9798f9f4",
+    "run.py": "dbc22bde18b57e98e3af31c1db7318fa6e3a7dfe"
+  },
+  "issue": "P3-R2-HW #651 / V#382",
+  "mode": "unchanged mechanical import; assertions are Verification's",
+  "covers": "rig-r2 row predicate qualifies(row) only (71 declared-model cases). Plan v4, manifest loading, complete-judge row validation and completed_write_reverted are unbound and not licensed for implementation."
+}
