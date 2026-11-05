@@ -433,7 +433,8 @@ VMUTANTS = [skip_always_ok, ignores_cancelled, empty_means_not_selected,
 #
 # Normal PR, main-push and scheduled runs of ci.yml must not depend on a macOS
 # runner, and the deferred macOS checks must stay runnable, unchanged, from a
-# workflow_dispatch-only route.
+# workflow_dispatch-only route. ci.yml keeps the required supported census
+# (ADR-206): Linux and Windows completeness plus the retained-byte audit.
 
 MANUAL = ROOT / ".github/workflows/wp14-macos-manual.yml"
 MANUAL_JOBS = ("wp14-macos", "wp14-package", "wp14-package-census")
@@ -477,6 +478,20 @@ def macos_failures(ci_text, manual_text):
     for lane in L.LANES:
         if not lanes.get(lane):
             failures.append(f"{lane}: lane has no members")
+    census = jobs.get("wp14-package-census")
+    if census is None:
+        failures.append("ci.yml lacks the required wp14-package-census")
+    else:
+        if "wp14-package-census" not in lanes.get("qualification", []):
+            failures.append("wp14-package-census is not a qualification member")
+        call = re.search(r"python3 -B tests/wp14_adapter/census\.py (.*?)\| tee", census, flags=re.S)
+        call = call.group(1) if call else ""
+        for need in ("--platforms linux,windows", "--captures", "--relocations"):
+            if need not in call:
+                failures.append(f"required census.py call lacks {need}")
+        for need in ("wp14-native-evidence-", "a8_identity.py", "run_adapter.py"):
+            if need not in census:
+                failures.append(f"required wp14-package-census lacks {need}")
     if manual_text is None:
         return failures + ["manual macOS workflow is missing"]
     trig = _triggers(manual_text)
@@ -537,6 +552,18 @@ def manual_missing(ci, manual):
     return ci, None
 
 
+def ci_drops_census(ci, manual):
+    return ci.replace("  wp14-package-census:\n", "  wp14-package-tally:\n", 1), manual
+
+
+def ci_census_three_platform(ci, manual):
+    return ci.replace(" --platforms linux,windows \\\n", " \\\n", 1), manual
+
+
+def ci_census_git_only(ci, manual):
+    return ci.replace("--captures \"$RUNNER_TEMP/native-captures\" --relocations", "--relocations", 1), manual
+
+
 def empty_regression(ci, manual):
     jobs = L.workflow_jobs(ci)
     for m in L.lanes(ci)["regression"]:
@@ -554,6 +581,9 @@ MMUTANTS = [
     (manual_drops_census, "lacks wp14-package-census"),
     (manual_missing, "manual macOS workflow is missing"),
     (empty_regression, "regression: lane has no members"),
+    (ci_drops_census, "lacks the required wp14-package-census"),
+    (ci_census_three_platform, "call lacks --platforms"),
+    (ci_census_git_only, "call lacks --captures"),
 ]
 
 
@@ -581,7 +611,9 @@ VCLI = [
     ("regression", None, ("golden", K), 1, "unexpectedly skipped required lane"),
     ("qualification", None, None, 0, "all qualification members succeeded"),
     ("qualification", None, ("wp14-package", X), 1, "cancelled package lane"),
-    ("qualification", "wp14-package-identity", None, 1, "missing identity result"),
+    ("qualification", "wp14-package-census", None, 1, "missing census result"),
+    ("qualification", None, ("wp14-package-census", F_), 1, "failed census"),
+    ("qualification", None, ("wp14-package-census", K), 1, "unexpectedly skipped census"),
 ]
 
 

@@ -1453,7 +1453,8 @@ jobs:
     #           tapectl-test traces and iocap capture of the shipped binary.
     #           No physical disk is touched.
     # macOS is deferred (ADR-191, ADR-205): its leg, the build case below and the
-    # closed three-platform census run only in wp14-macos-manual.yml, whose copy
+    # closed three-platform census run only in wp14-macos-manual.yml (Linux and
+    # Windows keep the required supported census below, ADR-206), whose copy
     # of this job's steps must stay identical (verify-change-classifier.py).
     # The package owns every expectation and verdict; this job only runs it and
     # keeps the raw evidence. Files over 256 MiB are zstd-compressed in the
@@ -1634,16 +1635,20 @@ jobs:
           fi
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
 
-  wp14-package-identity:
-    # The package's Git-object identity audit (a8_identity.py) against the
-    # publication on Verification main. Its closed census (qualification.py)
-    # asserts all three platforms, so with macOS deferred (ADR-205) the census
-    # runs only in wp14-macos-manual.yml. Neither is acceptance: Verification
-    # disposes.
-    name: WP-14 package — Git identity
+  wp14-package-census:
+    # ADR-206: the required supported-platform census. The adapter
+    # (tests/wp14_adapter/census.py --platforms linux,windows) authenticates
+    # every retained byte in the downloaded Linux and Windows native evidence
+    # with the imported companion oracle (tests/wp14_supported_r1), then runs
+    # its audit_platforms, which keeps the unchanged wp14_r1 per-platform body.
+    # macOS is deferred (ADR-205): its three-platform census runs only in
+    # wp14-macos-manual.yml, unchanged. Then the package's Git-object identity
+    # audit (a8_identity.py) and Verification394's own replay of the adapter
+    # contract and this DAG. None of it is acceptance: Verification disposes.
+    name: WP-14 package — supported census (Linux, Windows) and Git identity
     needs: wp14-package
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -1656,6 +1661,24 @@ jobs:
           repository: mmsanders/Digital-Tape-Verification
           path: verification-repo
           fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-package-*
+          path: ${{ runner.temp }}/bundle
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-native-evidence-*
+          path: ${{ runner.temp }}/native-captures
+      - name: Supported census (tests/wp14_supported_r1 via tests/wp14_adapter/census.py)
+        run: |
+          set -euo pipefail
+          b="$RUNNER_TEMP/bundle"
+          for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
+          ls -la "$b" "$RUNNER_TEMP/native-captures"
+          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" --platforms linux,windows \
+            --captures "$RUNNER_TEMP/native-captures" --relocations "$RUNNER_TEMP/relocations.json" \
+            "$b" | tee "$RUNNER_TEMP/census.json"
       - name: Git identity (tests/wp14_r1/a8_identity.py)
         run: |
           set -euo pipefail
@@ -1669,11 +1692,32 @@ jobs:
           python3 -B tests/wp14_adapter/a8_identity.py --verification verification-repo --product . \
             --publication "$pub" --candidate "$HEAD_SHA" --import-commit "$imp" \
             --import-path tests/wp14_r1 --golden-path tests/golden | tee "$RUNNER_TEMP/a8-identity.json"
+      - name: Verification394 adapter replay (tests/wp14_supported_r1/run_adapter.py)
+        run: |
+          set -euo pipefail
+          # 25 cases over the actual downloaded evidence: hard-link clones in
+          # RUNNER_TEMP, mutations replace clone entries only.
+          python3 -B tests/wp14_supported_r1/run_adapter.py --adapter tests/wp14_adapter/census.py \
+            --bundle "$RUNNER_TEMP/bundle" --captures "$RUNNER_TEMP/native-captures" \
+            --head "$HEAD_SHA" --out "$RUNNER_TEMP/v394-replay" > "$RUNNER_TEMP/v394-replay.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));[print(('PASS ' if c['passed'] else 'FAIL ')+c['case'],c['exit']) for c in d['cases']];print('passed',d['passed'])" "$RUNNER_TEMP/v394-replay.json"
+      - name: Verification394 DAG replay (tests/wp14_supported_r1/dag.py)
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/yaml"
+          "$RUNNER_TEMP/yaml/bin/pip" install -q pyyaml==6.0.3
+          "$RUNNER_TEMP/yaml/bin/python" -B tests/wp14_supported_r1/dag.py --product . | tee "$RUNNER_TEMP/v394-dag.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: wp14-identity
-          path: ${{ runner.temp }}/a8-identity.json
+          name: wp14-census
+          path: |
+            ${{ runner.temp }}/census.json
+            ${{ runner.temp }}/a8-identity.json
+            ${{ runner.temp }}/relocations.json
+            ${{ runner.temp }}/v394-replay.json
+            ${{ runner.temp }}/v394-replay/RESULT.json
+            ${{ runner.temp }}/v394-dag.json
           if-no-files-found: ignore
 
   wp11-portability:
@@ -1853,7 +1897,7 @@ jobs:
       - respool-full-aggregate
       - wp11-mutation-gate
       - wp14-package
-      - wp14-package-identity
+      - wp14-package-census
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
