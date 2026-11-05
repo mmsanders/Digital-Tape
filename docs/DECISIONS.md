@@ -5136,3 +5136,58 @@ DRAFT-11, fabrication/charging, physical and purchase holds carry.
 two precise CI coverage/provenance conflicts without weakening detecting gates.
 **Reversal cost.** Low for routing; policy changes require new independent controls
 and explicit disposition before relaxing supported-platform or tests-first coverage.
+
+## ADR-207 — Carry integrated Hardware and cleared kit; restore portability runner
+**Date:** 2026-11-05 PST
+**Status:** ADOPTED by PM [#666](https://github.com/mmsanders/Digital-Tape/issues/666)
+on Michael's “see latest work and assign next steps!” within the current Phase3 budget.
+
+**Latest disposition.** Hardware PR646 integrated at60dfe6aa by Software663 after
+current-base CI52 successes/15 classifier skips. V392's bounded judge clearance
+carries by unchanged identity; no physical-method clearance. V394 publication
+80d93c50 independently clears kit0db6ce5c SW652-R1..R3 within off-target behavior;
+CI/metadata integration remains. V394/8790e20d publishes new census/order packages
+before Software658 implementation. Returned660/d8ead444 and665/8ce0fe52 go to
+fresh Verification397 for exact-head disposition; selftests are not clearance.
+
+**Runner decision.** Choose666 option A: Software667 separate CI-only PR pins ONLY
+the existing wp11-portability job to ubuntu-24.04, keeping its3-config matrix,
+script/toolchain install/emulator invocation, independent differential values,
+11,572,876 comparisons, negative controls and fail-closed lanes unchanged.
+Current660/665 fail arm-m3 and regression on Ubuntu26.04 image20261101.186.1;
+main41910086479 on60dfe6aa passed. Mapping refusal is an environment execution
+failure, not an established Product defect or diagnosed kernel/emulator cause.
+The pin restores the OS family, not a byte-frozen image/toolchain. Require actual
+execution and version/image logs plus independent bounded confirmation. No global
+runner pin, privileged/kernel workaround, tolerance/expectation edit or CI waiver.
+Ubuntu26 adaptation is parked until24.04 retirement/support risk or a separately
+scoped reproducible fix warrants it; no speculative diagnosis task now.
+
+**Proof boundary.** Adopt V394's declared independent registry attestation of
+reviewed behavior and publication-before-import/fix chronology. Authenticated Git
+proves identities, tree immutability and ancestry/order; timestamps or Product
+booleans alone do not prove those attested facts. No additional provider-event
+receipt required. Final protected review_of/review_fix/review_attestation metadata
+may land after the fix to avoid a future-SHA cycle; first import's published
+source/tree stays fixed. Existing publication-main and ownership controls remain.
+
+**Routing/sign-off.** Software667 first; V397 reviews ready660/665 without waiting
+and then returned runner restoration. After bounded independent clearance and
+meaningful required current-base CI, Software may merge667 and existing658's
+two CI PRs, then integrate already-cleared kit652 with provenance/owner metadata.
+Carry unchanged evidence through base-only plumbing; no extra PM/independent
+campaign solely for rebase. Substantive behavior/assertion/coverage deltas stop
+for disposition. Michael's matching-owner approval carries for bounded CI repairs;
+no owner removal, ruleset waiver or repeated approval request. No new Hardware
+base-update task. Michael manually activates issues; no listeners/subworkers.
+
+**Ledger.** Still1/12 passed. Parts entry/A-5 now BLOCKED: corrected cart integrated,
+but last owner confirmation is not ordered, changed cart unapproved, physical
+support not independently accepted. No active correction is mislabeled progress.
+Rig unbuilt/NOT CLEARED, E0-E4/dry controls unmeasured, zero cards qualified;
+target, DRAFT11, batching, fabrication/charging and purchase holds remain.
+**Evidence:** [PM666 review](REVIEW/PM666-P3-2026-11-05.md).
+**Rationale.** Finish ready independent review and restore gate execution without
+loosening its oracle or repeating already-cleared campaigns.
+**Reversal cost.** Low for runner label; a future environment migration requires
+actual unchanged-gate execution evidence and bounded independent confirmation.

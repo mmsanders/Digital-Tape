@@ -1,10 +1,10 @@
 # Hardware status
 
-**4 November 2026 PDT.** Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
+**5 November 2026 PST.** Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 | Area | State |
 |---|---|
-| Hardware Lead | #651 returned/closed. V392/2fc2298b clears c55e5ad bounded judge corrections; same judge in PR646/443a5a53. [Software663](https://github.com/mmsanders/Digital-Tape/issues/663) owns current-main integration/CI/merge with conditional PM sign-off; no Hardware base-update task |
+| Hardware Lead | #651 correction and Software663 integration complete. PR646 merged60dfe6aa after current-base CI; V392 clearance carries identical judge/imports. Physical method remains NOT CLEARED; no fresh Hardware base-update assignment |
 | Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 returns revised circuit/instrument delta; changed items/totals not approved or ordered |
 | Atomicity rig | Method NOT CLEARED by Verification `3d616c14`; revision-2 circuit analysis and E0–E4 controls still unqualified; no physical run. SPI results would be bounded characterization only, no native SD4 qualification |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |

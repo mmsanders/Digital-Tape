@@ -1,12 +1,12 @@
 # Human queue
 
-**4 November 2026. Phase 3 is open.**
+**5 November 2026. Phase 3 is open.**
 
-1. **Next lead work** after PM661 is published:
-   - Software [#663](https://github.com/mmsanders/Digital-Tape/issues/663) first: bring Hardware PR646 onto current main, authenticate unchanged cleared evidence, get required CI green and merge under conditional PM scope sign-off;
-   - Verification [V#394](https://github.com/mmsanders/digital-tape-verification/issues/394): review the ready corrected kit now; independently bind the supported-platform census and narrow review-regression gate correction;
-   - Software existing [#658](https://github.com/mmsanders/Digital-Tape/issues/658), then [#652](https://github.com/mmsanders/Digital-Tape/issues/652): finish independently covered CI corrections and kit integration. Hardware651 is complete; no base-update task for Hardware.
-   Your **CODEOWNERS approval is recorded**, including matching @mmsanders ownership for current review-regression imports. No repeat approval is needed. Independent clearance and meaningful required CI still apply.
+1. **Next lead work** after PM666 is published:
+   - Software [#667](https://github.com/mmsanders/Digital-Tape/issues/667) first: restore the unchanged WP-11 portability gate on Ubuntu24.04 in a separate CI-only PR;
+   - Verification [V#397](https://github.com/mmsanders/digital-tape-verification/issues/397): review returned census660 and ordering665 now; independently confirm the runner restoration when returned;
+   - Software existing [#658](https://github.com/mmsanders/Digital-Tape/issues/658), then [#652](https://github.com/mmsanders/Digital-Tape/issues/652): integrate cleared CI corrections, then the already behaviorally cleared kit, with meaningful required CI green.
+   Hardware PR646 is integrated at60dfe6aa; no new Hardware task. Your matching-owner **CODEOWNERS approval remains recorded**; no repeat request. No physical session is ready.
 2. **Parts:** your minimum bench + rig selection is recorded. You confirmed they are **not
    ordered** (2 Nov). Hardware returned the corrected-rig/instrument cart delta; changed
    parts or totals are not automatically approved. No physical session is ready yet; no
