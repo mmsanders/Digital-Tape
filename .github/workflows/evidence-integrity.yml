@@ -40,8 +40,20 @@ jobs:
         # (CLAUDE.md §4). This brings them back and verifies each against its
         # committed .sha256 before the replay check reads them.
         run: ./tools/fetch-evidence.sh
+      - name: Verifier main (independent repository, for the ADR-206 ordering route)
+        uses: actions/checkout@v4
+        with:
+          repository: mmsanders/Digital-Tape-Verification
+          ref: main
+          path: verification-repo
+          fetch-depth: 0
       - name: Evidence integrity
         run: |
+          # Rule 1's review-regression route authenticates against this checkout
+          # of Verification main, never a Product-chosen ref.
+          export VERIFICATION_REPO="$PWD/verification-repo"
+          export VERIFICATION_MAIN="$(git -C verification-repo rev-parse HEAD)"
+          echo "verifier main $VERIFICATION_MAIN"
           BASE="${{ github.event.pull_request.base.sha }}"
           if [ -n "$BASE" ] && git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
             python3 tools/ci/audit-evidence-integrity.py "$BASE"
@@ -76,3 +88,16 @@ jobs:
         run: python3 -B tools/ci/verify-product-evidence-pins-gate.py
       - name: Structural Rule 1 ordering can go red
         run: python3 tools/ci/verify-structural-rule-1.py
+      - name: Review-regression route over Verification394's 25 real histories
+        # tests/review_order_r1 (imported unchanged) generates the histories and
+        # drives the actual gate entry point: 3 must pass, 22 must be refused.
+        run: |
+          python3 -B tests/review_order_r1/run.py --gate tools/ci/review_order_gate.py \
+            --out "$RUNNER_TEMP/review-order" > "$RUNNER_TEMP/review-order.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));[print(('PASS ' if c['passed'] else 'FAIL ')+c['case'],c['exit']) for c in d['cases']];print('passed',d['passed']);sys.exit(0 if d['passed'] else 1)" "$RUNNER_TEMP/review-order.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: review-order-replay
+          path: ${{ runner.temp }}/review-order/RESULT.json
+          if-no-files-found: ignore
