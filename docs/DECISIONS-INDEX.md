@@ -203,4 +203,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-206](DECISIONS.md#adr-206--own-hardware-integration-retain-census-and-review-regression-provenance) | 2026-11-04 PDT | Hardware integration / CI census / review-regression provenance | Software663 owns cleared646 integration with conditional PM sign-off; retain mandatory supported-platform retained census; V394 binds new census/gate cases before658 fixes; corrected kit review now; 1/12 and physical holds carry |
 
-136 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-207](DECISIONS.md#adr-207--carry-integrated-hardware-and-cleared-kit-restore-portability-runner) | 2026-11-05 PST | Integrated Hardware / cleared kit / portability runner | Hardware60dfe6aa integrated, kit0db6ce5c cleared; Software667 restores unchanged gate on24.04; V397 reviews ready660/665; attestations adopted, parts BLOCKED,1/12 holds carry |
+
+137 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

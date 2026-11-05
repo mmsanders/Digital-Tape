@@ -1,6 +1,6 @@
 # Project status
 
-**4 November 2026 PDT. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
+**5 November 2026 PST. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
 Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Completed
@@ -31,35 +31,37 @@ key combination.
 
 ## Current assignments
 
-Round 2 continuation after [PM661 review](REVIEW/PM661-P3-2026-11-04.md)
-and ADR-206 (Michael starts each issue manually):
+Round 2 continuation after [PM666 review](REVIEW/PM666-P3-2026-11-05.md)
+and ADR-207 (Michael manually starts issues):
 
 | Owner | Issue | Outcome |
 |---|---|---|
-| Software | [#663](https://github.com/mmsanders/Digital-Tape/issues/663) | First: own Hardware PR646 current-main integration/CI/merge; conditional PM scope sign-off issued |
-| Software | [#658](https://github.com/mmsanders/Digital-Tape/issues/658) | Restore mandatory Windows/Linux retained census; separate narrow review-regression gate PR after independent tests |
-| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | Corrected kit0db6ce5c awaits independent disposition; preserve original/import/fix lineage |
-| Verification | [V#394](https://github.com/mmsanders/digital-tape-verification/issues/394) | Dispose ready corrected kit; publish new two-platform census and ordering-policy tests before implementation |
+| Software | [#667](https://github.com/mmsanders/Digital-Tape/issues/667) | First: restore wp11-portability job on Ubuntu24.04; unchanged differential and detecting gates |
+| Verification | [V#397](https://github.com/mmsanders/digital-tape-verification/issues/397) | Review ready census660/d8ead444 and ordering665/8ce0fe52 now; review runner pin when returned |
+| Software | [#658](https://github.com/mmsanders/Digital-Tape/issues/658) | After independent clearance/runner repair, integrate both CI corrections with required current-base CI green |
+| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | Kit behavior CLEARED at0db6ce5c; final approved provenance/ownership/base integration after CI prerequisites |
 
-Hardware651 is returned/closed. V392 publication2fc2298b clears the exact c55e5ad
-judge's bounded artifact-consistency corrections (339 published +3 CLI cases).
-PR646 head443a5a53 keeps judge blobd4ab1866 and adds published CLI regressions/wiring;
-CI41907017746 and integrity41907017664 are green, but current-main integration remains.
-Software663 owns that handoff. Carry clearance by identity; no repeat acceptance for
-a base-only change. Physical method remains NOT CLEARED.
-Kit0db6ce5c reports fixed SW652-R1..R3 and passing controls; V394 must dispose it.
-CI660/e0b6bb02 remains HOLD SW658-R1 despite111 green checks: Git identity does not
-replace downloaded Windows/Linux evidence completeness and byte authentication.
-PM retains that mandatory coverage and the unchanged three-platform manual route.
-Review-regression imports get a narrow independently tested provenance/order route;
-ordinary new behavior stays tests-first, no history rewrite or gate bypass.
-Michael's CODEOWNERS approval covers matching @mmsanders entries for these bounded
-imports/corrections, including be1_review_r1; protection and independent review remain.
-No target/package advance: **1/12** (F6); integrated FW-1 aa472667 carries.
-All365 deferred faults pass; six long cuts unavailable/unexecuted; batching held.
-Rig unbuilt/NOT CLEARED; E0-E4/dry controls unmeasured; SPI is not native qualification.
-Target PCM/I2S/instance/stack/timing/removal and DRAFT-11 remain pending. No physical
-session ready. Last owner-confirmed parts status: not ordered; changed cart unapproved.
+Software663 completed Hardware PR646 integration at60dfe6aa (head168b7dc0).
+V392 clearance carries unchanged judge/import identities;52 current-base checks pass,
+15 classifier-unselected qualification skips. Hardware651/663 are complete.
+Physical rig/method remains unbuilt/NOT CLEARED; no new Hardware task for base sync.
+V394 kit publication80d93c50 independently clears SW652-R1..R3 at0db6ce5c:
+109/4/53/47 plus8 review cases,32 old controls plus6 predicates and old-pair negative
+control. This is bounded off-target consistency, not target or package acceptance.
+V394 policy publication8790e20d binds new supported census/order packages before
+Software implementation. Returned PR660/d8ead444 and PR665/8ce0fe52 are ready for
+V397 review; Software25-case replays are readiness, not clearance.
+Current failures are arm-m3 portability and regression aggregate on Ubuntu26.04;
+main41910086479 passed on60dfe6aa. PM adopts narrow job-only Ubuntu24.04 pin.
+No kernel/emulator cause is proven, no CI waiver or comparison change authorized.
+Independent registry attests review/publication chronology; Git proves identity/order.
+Final metadata-only provenance after the fix avoids a future-SHA cycle; old imports
+stay fixed. CODEOWNERS matching-owner approval carries; protections remain.
+No target/package advance: **1/12** (F6); FW-1 aa472667 and engine d96b4245 carry.
+365 deferred faults pass; six long cuts unavailable/unexecuted; batching held.
+E0-E4/dry controls unmeasured; SPI is not native qualification. Target PCM/I2S,
+instance/stack/timing/removal and DRAFT-11 pending. Parts last confirmed not ordered;
+changed cart unapproved. Parts criterion now BLOCKED; no physical session ready.
 
 ## Holds that stand
 

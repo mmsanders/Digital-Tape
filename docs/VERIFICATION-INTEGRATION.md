@@ -1,6 +1,6 @@
 # Independent verification integration
 
-**4 November 2026.** Which independent publications back each accepted package, and where
+**5 November 2026.** Which independent publications back each accepted package, and where
 their evidence is. Imported verifier trees and their source commits are declared in
 [tests/IMPORTS.json](../tests/IMPORTS.json); CI proves byte identity and ordering
 (`.github/workflows/evidence-integrity.yml`, `verifier-publication.yml`).
@@ -40,16 +40,24 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
   458be603 (53/47 IF3) and84c95d0e (229 records) bind the ready scopes; old bytes carry.
   [PM661](REVIEW/PM661-P3-2026-11-04.md) carries the later publications:
   V388 ebe20e08 (source7927f905, be1_review_r1 treea2540d46) holds kit d62e0de0 for
-  SW652-R1..R3; corrected0db6ce5c awaits V394 disposition. V3905b791e02
+  SW652-R1..R3; V394/80d93c50 now clears corrected0db6ce5c bounded behavior. V3905b791e02
   (source5c6a5c1a) holds CI660/e0b6bb02 for removed supported-platform retained census;
   green111 checks authenticate execution, not coverage acceptance. V3922fc2298b
   (sourcef07495df) clears Hardware c55e5ad artifact-consistency correction:339 published
   plus3 CLI scenarios pass. Judge blobd4ab1866324cc8b87a0f80c2f3b48e3d664c33ee carries
   unchanged into443a5a53, which imports CLI treee52f7a5c and wires regression/negative
-  controls. Software663 owns current-base integration/CI; conditional PM scope sign-off
-  carries V392 by identity. Physical method remains NOT CLEARED. V394 binds new
-  supported-platform census and narrow review-regression policy tests before Software658
-  implements; existing imported trees remain immutable. No new target/package acceptance.
+  controls. Software663 integrated unchanged hardware at60dfe6aa (head168b7dc0),
+  after52 current-base successes/15 classifier skips. Physical method stays NOT CLEARED.
+  [PM666](REVIEW/PM666-P3-2026-11-05.md) carries V394/80d93c50 (sourceb457ff75,
+  CI41934691508): kit109/4/53/47 +8 cases and32+6 controls independently pass.
+  V394/8790e20d (source7ae5f115, CI41936971089) publishes wp14_supported_r1
+  tree15afc9e2 and review_order_r1 treebfad9c6b BEFORE Software corrections.
+  Selftests are not returned-candidate acceptance. PR660/d8ead444 and665/8ce0fe52
+  now go to V397 for actual-adapter/history/gate disposition; arm-m3/regression
+  failures remain merge blockers until Software667's unchanged-gate runner repair.
+  Independent registry supplies review/chronology facts; Git proves lineage/identity.
+  Metadata-only final provenance is allowed; existing imported trees stay immutable.
+  No repeat Hardware/kit acceptance solely for base/CI metadata; no target advance.
 
 - **Q-P2-1 any-subset coverage** (ADR-195 §4). The model is published (`tests/wp10_subset_r1`)
   and bounded campaigns found no violation (Verification #186, #210). Verification `41995965`
