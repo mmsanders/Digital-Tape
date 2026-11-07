@@ -797,6 +797,48 @@
         "-c",
         "import pathlib;assert pathlib.Path('tests/c1_volume_query_r2/prepare.py').is_file()"
       ]
+    },
+    {
+      "path": "tests/be1_binding_r1",
+      "tree": "b094d319e184bd6c410d93604e9ec784c60ba490",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "c77a4dfaea7b7d3fe6c69358540a170ebd26e222",
+      "attested_in": "Verification382 ready BE1 lane (PR383, merged 89bc424e; CI 41781423733)",
+      "attestation": "Independent executable binding of BE1-IF/2 (Product 97a55022): 109 generated simulated bundles for bench_evidence.py --offline under an audit-hook offline guard, plus four fake-port raw capture cases for bench_capture.py. Ready subset only: F5 full witness/card/verify combinations, retained-failure aggregation, file-role and capture timeout/info/send behaviour are outside it. Artifact consistency only; never physical, complete or target acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/be1_binding_r1/run.py','--selftest','--golden','tests/golden','--out',os.path.join(d,'s')]) or subprocess.call([sys.executable,'-B','tests/be1_binding_r1/capture.py','--selftest','--out',os.path.join(d,'c')]))"
+      ]
+    },
+    {
+      "path": "tests/be1_if3_r1",
+      "tree": "b8b7ce9f02e6aa551cdd526a91dfe21c2c70e7ae",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "ace75d8f044603f04553f56fc03551e031f0ada9",
+      "attested_in": "Verification IF/3 binding for Software652 on Michael's direct activation (PR385, merged 458be603; CI 41855577922)",
+      "attestation": "Independent executable binding of BE1-IF/3 (Product f9db5832): 53 checker bundles (F5 all-check precedence, witness/card/verify combinations, retained superseded failures in overall/exit, exact firmware.hex identity) and 47 fake-port capture cases (stop modes, info/send/reset/flush, exclusive output, deadlines with a controlled clock, partial-byte retention, all exits). Depends at runtime on tests/be1_binding_r1. Artifact consistency only; never physical, complete or target acceptance.",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/be1_if3_r1/run.py','--selftest','--golden','tests/golden','--out',os.path.join(d,'s')]) or subprocess.call([sys.executable,'-B','tests/be1_if3_r1/capture.py','--selftest','--out',os.path.join(d,'c')]))"
+      ]
+    },
+    {
+      "path": "tests/be1_review_r1",
+      "tree": "a2540d46326bf72f8898b942c47cf14edc665c57",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7927f90589d2fa2432a830337d8c2fc073fcb3a8",
+      "attested_in": "Verification388 HOLD of Software652 d62e0de0 (PR389, merged ebe20e08; CI 41887672546)",
+      "attestation": "Independent review regressions for SW652-R1 (capture deadline under continuous input: digest, info, timed interrupt, plus two before-deadline positives), SW652-R2 (bundle directory alias resolving outside BUNDLE must be INVALID without an outside read) and SW652-R3 (array criterion/superseded_by must give an INVALID report, exit 2). Depends at runtime on tests/be1_binding_r1 and tests/be1_if3_r1. Selftest is the authenticated historical mode against the original d62e0de0 pair (exactly six failures, two positives), never clearance; candidates use default mode. Review-discovered cases, not a retrospective tests-first claim.",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();t=os.path.join(d,'t');os.mkdir(t)\nfor n in ('bench_evidence.py','bench_capture.py'):open(os.path.join(t,n),'wb').write(subprocess.check_output(['git','show','d62e0de07c81dc5abe1c8ffbf378bd077a2a7eab:firmware/bench/tools/'+n]))\nsys.exit(subprocess.call([sys.executable,'-B','tests/be1_review_r1/run.py','--record-known-findings','--checker',os.path.join(t,'bench_evidence.py'),'--helper',os.path.join(t,'bench_capture.py'),'--golden','tests/golden','--out',os.path.join(d,'r')]))"
+      ]
     }
   ],
   "evidence_bundles": [

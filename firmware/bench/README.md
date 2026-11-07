@@ -31,7 +31,10 @@ function, not speed, and is never reported against guardrail 10 (Stream 5's).
 | `host/partition_adapter.py` | Verification's published FW-1 partition-adapter protocol, over the real `fw_part` binding (`fwhost viewio`) |
 | `tools/size_gate.py` | F2 budgets from the linked image's map and symbols |
 | `tools/engine_pin.sh` | F6 check that `engine/` equals `d96b4245` |
-| `tools/golden_serial.py` | F1 on target, over USB serial (bench only) |
+| `tools/golden_serial.py` | F1 on target, over USB serial (bench only, a convenience; its output is not evidence) |
+| `tools/bench_capture.py` | BE-1 raw serial capture for evidence bundles (bench only) |
+| `tools/bench_evidence.py` | BE-1 offline evidence checker ([BE1-IF/3](../../docs/WP17-BE1-INTERFACE.md)) |
+| `BENCH-KIT.md` | The first bench session's capture packet: inputs, wiring, first start, captures, return checklist |
 | `controls/` | F2 `.rodata` negative-control header (control build only) |
 
 ## Toolchain (pinned)
@@ -85,8 +88,11 @@ or open `firmware.hex` in the PJRC Teensy Loader and press the board's button.
 ## Behaviour
 
 - **Card in:** the firmware polls every 250 ms, reads the MBR, and mounts
-  partition 2 Side A only if the card is exactly the WP-14 §3.1 layout. Any other
-  card is refused (`CARD REFUSED NOT_PROVISIONED`) and never written.
+  partition 2 Side A only if the card passes WP-14 §2 recognition, the same
+  `mbr_is_layout` test `tapectl` uses (FW-1 §4, ADR-202). That test checks the `55 AA` signature, partition entries
+  1/2, zero entries 3/4 and safe view bounds. Bootstrap, disk-signature and reserved bytes are not part of it; full
+  `tapectl verify` still reports those as `MBR_LAYOUT`. Any other card is refused
+  (`CARD REFUSED NOT_PROVISIONED`) and never written.
 - **Play** prefills the play ring, then renders from the current position at 1.0×.
 - **Stop** stops rendering; the position is kept (`POSITION n` is printed).
 - **End of side:** audio stops at `at_end` (`END OF SIDE`). LEDs come with WP-20.
@@ -150,6 +156,15 @@ bare fixtures, refusals, one-block writes); all seven WP-11 goldens at 1.0×
 (`play-1x-quiet`, `play-1x-fortissimo`, `splice`, `overdub`, `overwrite`,
 `reset-b` and `promote`), each in the deterministic and the live loop, byte-exact;
 and the F1 negative controls (one altered sample, rate 1.0× + 1), which must fail.
+
+## Bench evidence kit (BE-1, offline)
+
+[BENCH-KIT.md](BENCH-KIT.md) is the capture packet for the first scoped bench
+session. `bench_evidence.py --offline BUNDLE --out REPORT.json` checks a saved
+bundle without touching a device or the network. Its `CONSISTENT` is artifact
+consistency, never target acceptance; simulated evidence never sets
+`physical_run` or `complete`. CI runs Verification's independent bindings
+(`tests/be1_binding_r1` and `tests/be1_if3_r1`) against both tools.
 
 ## Not run without the bench
 
