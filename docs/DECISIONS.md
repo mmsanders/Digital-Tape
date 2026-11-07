@@ -5292,7 +5292,8 @@ authority. Their limits are unchanged.
 
 **Routing.** Hardware revises the bench cart and the power-cut test to this method.
 Verification preflights the DRAFT-11 delta and adapts the firmware acceptance tests.
-Both issues are posted for Michael to start. The live CI issues (#652, #658, #667, V#397)
+Both issues are posted for Michael to start: Hardware #671 and Verification V#398
+(PM #669). The live CI issues (#652, #658, #667, V#397)
 are unaffected.
 
 **Rationale.** Prove what matters to a family device, cheaply. Michael's perception for

@@ -7,8 +7,8 @@
    enforced in the codec; you check them with a phone app (≤ 80 dB on the kids' headphones).
    Instruments are about $30. The CID is no longer needed. Your sign-offs go in
    [MICHAEL-CHECKS](MICHAEL-CHECKS.md). Two new issues are waiting for you to start:
-   Hardware (revised cart and power-cut test) and Verification (DRAFT-11 delta and firmware
-   tests). When convenient, photograph your three PNY cards and their packaging.
+   Hardware [#671](https://github.com/mmsanders/Digital-Tape/issues/671) (revised cart and power-cut test) and Verification
+   [V#398](https://github.com/mmsanders/digital-tape-verification/issues/398) (DRAFT-11 delta and firmware tests). When convenient, photograph your three PNY cards and their packaging.
 
 1. **Next lead work** after PM666 is published:
    - Software [#667](https://github.com/mmsanders/Digital-Tape/issues/667) first: restore the unchanged WP-11 portability gate on Ubuntu24.04 in a separate CI-only PR;

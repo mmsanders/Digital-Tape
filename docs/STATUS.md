@@ -33,7 +33,8 @@ firmware-timed and judged by Michael, recorded in [MICHAEL-CHECKS](MICHAEL-CHECK
 stay enforced in the codec and are checked with a phone app with a 5 dB margin. Instruments
 are about $30; there is no lab gear. CID is no longer required. The power-cut test is
 Teensy self-run. Next: Hardware revises the cart and the test, and Verification preflights
-the DRAFT-11 delta (issues posted for Michael to start). Still open: the copy button and the promote-B-to-A
+the DRAFT-11 delta: [#671](https://github.com/mmsanders/Digital-Tape/issues/671) and
+[V#398](https://github.com/mmsanders/digital-tape-verification/issues/398), posted for Michael to start (PM [#669](https://github.com/mmsanders/Digital-Tape/issues/669)). Still open: the copy button and the promote-B-to-A
 key combination.
 
 ## Current assignments
