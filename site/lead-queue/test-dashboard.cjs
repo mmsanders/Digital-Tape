@@ -93,9 +93,9 @@ const phase3 = () => nodes.roadmap.innerHTML;
 const baseline3 = phase3();
 assert.match(phase3(), /Roadmap · Phase 3 · open/);
 assert.match(phase3(), />1\/12</);
-assert.match(phase3(), /<b>2<\/b> in round/);
+assert.match(phase3(), /<b>3<\/b> in round/);
 assert.match(phase3(), /<b>2<\/b> blocked/);
-assert.match(phase3(), /<b>7<\/b> to do/);
+assert.match(phase3(), /<b>6<\/b> to do/);
 assert.match(phase3(), /entry items · 0 of 3 passed/);
 assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
@@ -133,7 +133,7 @@ for (const invalid of [null, 'DONE', '']) {
 vm.runInContext('PHASE3.packages[0].criteria[0].state = "TO DO"; PHASE3.packages[0].criteria[0].name = "<img src=x> & card"; renderPhase3();', ctx);
 assert.match(phase3(), /&lt;img src=x&gt; &amp; card/);
 assert(!phase3().includes('<img'));
-vm.runInContext('PHASE3.packages[0].criteria[0].name = "Exact card identity"; renderPhase3();', ctx);
+vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; PHASE3.packages[0].criteria[0].name = "Card identity"; renderPhase3();', ctx);
 assert.equal(phase3(), baseline3);
 
 (async()=>{

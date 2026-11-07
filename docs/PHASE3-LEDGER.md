@@ -27,7 +27,7 @@ States cite independent results; candidate evidence is not merged implementation
 
 | # | State | Next |
 |---|---|---|
-| A-1 Identity (brand, part number, capacity, photo per card) | TO DO | Michael photographs cards and packages; firmware logs CID once the bench runs (not required, ADR-208) |
+| A-1 Identity (brand, part number, capacity, photo per card) | IN ROUND | Recorded 7 Nov in [evidence/cards](evidence/cards/README.md): PNY Elite-X 64 GB microSDXC U3 V30 A1, photos hashed; retail part number unknown (packaging gone). Verification checks the record with WP-05 |
 | A-2 Sustained write on 80%-filled media | TO DO | Method re-review, then run |
 | A-3 Against the C-60 copy requirement | TO DO | After A-2 |
 | A-4 Reader not the bottleneck | TO DO | With A-2 |
