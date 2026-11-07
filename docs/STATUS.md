@@ -1,6 +1,6 @@
 # Project status
 
-**5 November 2026 PST. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
+**6 November 2026 PST. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
 Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Completed
@@ -26,7 +26,15 @@ The device design has moved:
 - a speaker with its own loudness cap;
 - a microphone, aux in, and aux out shared with the headphone jack.
 
-See [DEVICE-DESIGN](DEVICE-DESIGN.md). Still open: the copy button and the promote-B-to-A
+See [DEVICE-DESIGN](DEVICE-DESIGN.md).
+
+**Acceptance method changed (ADR-208, 6 Nov).** Physical and timing criteria are now
+firmware-timed and judged by Michael, recorded in [MICHAEL-CHECKS](MICHAEL-CHECKS.md). The caps
+stay enforced in the codec and are checked with a phone app with a 5 dB margin. Instruments
+are about $30; there is no lab gear. CID is no longer required. The power-cut test is
+Teensy self-run. Next: Hardware revises the cart and the test, and Verification preflights
+the DRAFT-11 delta: [#671](https://github.com/mmsanders/Digital-Tape/issues/671) and
+[V#398](https://github.com/mmsanders/digital-tape-verification/issues/398), posted for Michael to start (PM [#669](https://github.com/mmsanders/Digital-Tape/issues/669)). Still open: the copy button and the promote-B-to-A
 key combination.
 
 ## Current assignments

@@ -15,12 +15,12 @@ resumes near where it stopped.
 
 | Package | Delivers | Key criteria |
 |---|---|---|
-| WP-05 Cards and bench parts | Bench parts list (Michael approves); card power-cut rig; card characterisation | Atomicity: ≥ 1,000 qualifying cuts per exact SKU/revision, zero torn blocks (a torn block is a format blocker); sustained-write on 80%-filled media |
-| WP-17 Firmware skeleton, engine integration | Teensy port (SD read/write/flush, I²S out), shared engine unchanged | Goldens bit-identical to desktop at 1.0× (divergence blocks release); RAM/stack/.rodata budgets measured on target (G08); warm instant-on < 100 ms on a logic analyser (G04); commit latency < 200 ms; resume position |
+| WP-05 Cards and bench parts | Bench parts list (Michael approves); Teensy self-run power-cut test; card characterisation | Atomicity: ≥ 1,000 qualifying cuts per card model, zero torn blocks (a torn block is a format blocker); sustained-write on 80%-filled media with the existing reader. Identity from the card label and photo; CID logged by firmware when available, not required |
+| WP-17 Firmware skeleton, engine integration | Teensy port (SD read/write/flush, I²S out), shared engine unchanged | Goldens bit-identical to desktop at 1.0× (divergence blocks release); RAM/stack/.rodata budgets measured on target (G08); warm instant-on < 100 ms and commit latency < 200 ms, firmware-timed and judged by Michael (G04, ADR-208); resume position |
 | WP-18 Second slot, insert detect, copy | Rear-slot source, front-slot destination, copy with LED-ring progress | Copy correctness; progress from the callback, never a timer. Copy *time* is not provable on the bench (SPI second slot); guardrail 10 stays a Phase 5 measurement |
-| WP-19 Audio paths and caps | Codec; headphone/aux-out jack; aux in; speaker amplifier; microphone. Speaker mutes with headphones and while recording; aux in wins over mic as record source | Headphone cap 85 dB SPL (G11) and a separate speaker cap, both set in hardware/codec, re-asserted at boot, unreachable from controls; measured with an SPL meter, **witnessed by Michael** |
+| WP-19 Audio paths and caps | Codec; headphone/aux-out jack; aux in; speaker amplifier; microphone. Speaker mutes with headphones and while recording; aux in wins over mic as record source | Headphone cap 85 dB SPL (G11) and a separate speaker cap, both set in hardware/codec, re-asserted at boot, unreachable from controls; checked with a phone sound-level app at ≤ limit − 5 dB on the headphones in use and the speaker, recorded by Michael (ADR-208) |
 | WP-20 Transport reading and status | Read the mechanical keys; depth-sensitive Rew/FF; copy button; LED-ring status; record light | No solenoid: firmware never moves a key. End of tape and cartridge-full shown on the LED ring; Rew/FF scrub speed follows press depth and works while Play is latched (spec revision at kickoff); record light per spec |
-| WP-21 Bench acceptance demo | The firmware criteria run end to end | Michael-witnessed record; Verification audits method and raw data |
+| WP-21 Bench acceptance demo | The firmware criteria run end to end | Michael's verdicts in [MICHAEL-CHECKS](MICHAEL-CHECKS.md) with firmware logs; Verification checks records against the candidate |
 
 **Exit gate:**
 1. WP-05 and WP-17 to WP-21 independently accepted on the bench build.
@@ -49,8 +49,10 @@ Contract: [FW-1](WP17-FIRMWARE-CONTRACT.md). Spec draft: [DRAFT-11](SPEC-DRAFT-1
 - **Hardware:**
   - the bench parts list for Michael's approval: Teensy 4.1, audio board, breadboard and
     wiring, keys and LEDs, second microSD breakout, small speaker and amplifier, MEMS mic,
-    aux jacks, logic analyser, and SPL meter plus coupler;
-  - the atomicity rig design;
+    aux jacks, and the power-cut test's load switch. *Revised by ADR-208:* no bench logic
+    analyser, SPL meter or coupler; instruments are about $30 in total (multimeter, optional
+    clone logic analyser for debugging);
+  - the power-cut test, simplified to a Teensy self-run test (ADR-208);
   - toy-safety acoustic limits for the speaker cap;
   - a depth-sensing approach for Rew/FF;
   - a copy-button placement.
@@ -70,9 +72,14 @@ ADR-195 carries over:
 - same-issue stage continuation;
 - a criterion ledger as the progress record.
 
+**Hands-on acceptance (ADR-208).** For physical and timing criteria, the firmware measures
+itself and logs the values; Michael tries the behaviour and records a verdict in
+[MICHAEL-CHECKS](MICHAEL-CHECKS.md). Limits stay as targets. The output caps stay enforced in
+the codec; a phone app checks them with a 5 dB margin. No lab instruments are bought.
+
 Structural Rule 1 governs engine code. Firmware is a port and consumer: it must not fork seek,
-mixing or any other engine behaviour (CLAUDE.md §6). Physical safety measurements are witnessed
-by Michael and audited by Verification.
+mixing or any other engine behaviour (CLAUDE.md §6). Physical safety checks are done and recorded by
+Michael; Verification checks the records, not instruments.
 
 ## 4. Carried in
 
