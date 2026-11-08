@@ -1741,7 +1741,7 @@ jobs:
     name: WP-11 portability (${{ matrix.config }})
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
