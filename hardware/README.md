@@ -7,7 +7,7 @@ revisions: [spec/hw/VERSION.md](../spec/hw/VERSION.md). Authority: [CLAUDE.md](.
 | Surface | Purpose |
 |---|---|
 | prototypes/ctrl-01/ | Michael's current controls rig: latching keys, Record-on-Play latch, slide lock (owner prototype) |
-| characterisation/ | Sustained-write and media-atomicity tools; the card power-cut rig design (`ATOMICITY-RIG.md`, revision 2), its declared revision-2 evidence schema (`ATOMICITY-SCHEMA-R2.md`) and the speaker-limit research (`SPEAKER-LIMIT.md`) |
+| characterisation/ | Sustained-write and media-atomicity tools; the Teensy self-run power-cut method (`POWER-CUT-SELFRUN.md`, ADR-208), the superseded comparator rig (`ATOMICITY-RIG.md`, revision 2) and its revision-2 evidence schema (`ATOMICITY-SCHEMA-R2.md`) and the speaker-limit research (`SPEAKER-LIMIT.md`) |
 | controls/ | Phase 3 control proposals: Rew/FF depth sensing, copy-button placement |
 | measurements/ | Procedure and raw-data template for independent audit |
 | fabrication_gate.py | Returns CLOSED/nonzero while safety qualification is missing |

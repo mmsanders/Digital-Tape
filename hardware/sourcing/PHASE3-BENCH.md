@@ -9,6 +9,88 @@ for [P3-R1-HW (#641)](https://github.com/mmsanders/Digital-Tape/issues/641).
 > Michael's to approve, edit, place and pay for. A parts order never opens board fabrication or cell
 > charging.
 
+## Revision 3: the ADR-208 cart, 8 November 2026 ([#671](https://github.com/mmsanders/Digital-Tape/issues/671) stage 1)
+
+**Base:** main `978efb2`. **For Michael to approve. Nobody orders; every line is yours to edit, place
+and pay for.** [ADR-208](../../docs/DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)
+replaces lab instruments with firmware self-measurement and your verdict, and caps instruments at
+about $30. This cart **replaces** the 2 November selection and the round 2 delta below, which stay
+as history.
+
+**What changed from the round 2 delta:**
+- **Removed:** the bench logic analyser (line 18, $26.95), the SPL meter, calibrator and coupler
+  (M1–M2), the true-RMS meter (M3), both scope options, and the whole comparator half of the rig:
+  TLV3202, LM4040 reference, 0.1 % resistors, trimmer, 2.2 MΩ hysteresis resistor, SOIC adapter and
+  the SN74LVC1G125 buffers. None of these is needed by any ADR-208 method.
+- **Kept:** every prototype part (lines 1–17) and the rig's load switch with its passives.
+- **Added:** a basic multimeter, and an optional clone logic analyser marked debugging-only.
+
+### Prototype parts
+
+| # | Part | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| 1 | Teensy 4.1, headers fitted | SparkFun DEV-16996 | 1 | $35.95 | The bench MCU; built-in SDIO slot is the work slot |
+| 2 | Teensy 4 audio board Rev D (SGTL5000) | SparkFun DEV-15845 | 1 | $9.80 | Codec: headphone out, line in/out, mic input; where the output cap lives |
+| 3 | 40-pin male header | SparkFun PRT-00116 | 2 | $3.90 | Puts the audio board on the breadboard |
+| 4 | 830-point breadboard | Adafruit 239 | 2 | $11.90 | One for the Teensy, one for audio, keys and the power-cut circuit |
+| 5 | Jumper wire bundle | Adafruit 153 | 1 | $4.95 | Wiring |
+| 6 | 12 mm tactile buttons, 10-pack | Adafruit 1119 | 1 | $2.50 | Bench keys until the latching keys are fitted |
+| 7 | USB A to micro-B data cable | Adafruit 592 | 1 | $2.95 | Power, flashing and the serial log. Skip if you have a data cable |
+| 8 | microSD breakout, 3 V only | Adafruit 4682 | 2 | $7.00 | One is the second (source) slot; one is the power-cut test's switched slot |
+| 9 | Class-D amplifier, 2.5 W | Adafruit 2130 (PAM8302) | 1 | $3.95 | Speaker amp; shutdown pin mutes the speaker, gain trim sets a hardware ceiling |
+| 10 | 40 mm 4 Ω speaker | Adafruit 3968 | 1 | $4.95 | The device's speaker size. Out of stock 1 Nov; any 40 mm 4–8 Ω ≥ 1 W will do |
+| 11 | Analog MEMS mic breakout | Adafruit 2716 | 1 | $4.95 | Record source when no aux plug |
+| 12 | 3.5 mm stereo jack with switch | Adafruit 1699 | 3 | $2.85 | Aux in, headphone/aux out (plug detect), one spare |
+| 13 | NeoPixel stick, 8 LEDs | Adafruit 1426 | 2 | $11.90 | The 16-LED status array |
+| 14 | 3 V → 5 V buffer for the LED data line | SN74AHCT125N | 1 | ≈$0.60 | NeoPixel data from a 3.3 V pin |
+| 15 | Linear Hall sensor ±169 mT | TI DRV5055A4QLPG | 4 | $3.08 | Rew/FF press depth, main variant |
+| 16 | Linear Hall sensor ±85 mT | TI DRV5055A3QLPG | 4 | $3.08 | Rew/FF press depth, sensitive variant; the bench picks one |
+| 17 | N52 disc magnet 4.76 × 3.18 mm | K&J D32-N52 | 10 | $3.50 | In the Rew/FF keys. **Swallowing hazard: keep away from the kids** |
+| | | | | **$117.81** | |
+
+### Power-cut test parts ([POWER-CUT-SELFRUN](../characterisation/POWER-CUT-SELFRUN.md) §1)
+
+| # | Part | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| P1 | Load switch with built-in output discharge | TI TPS22918DBVR (SOT-23-6) | 2 | ≈$1.20 | Switches the card's 3.3 V and pulls it to 0 V on the cut, so the card really resets. One spare |
+| P2 | SOT-23-6 to DIP adapter | SparkFun BOB-00717 | 2 | $2.50 | Puts P1 on the breadboard (one soldering job). One spare |
+| P3 | 1 nF C0G capacitor | any 50 V C0G, 0.1" leads | 2 | ≈$0.40 | P1's soft start, so the card rail doesn't pull the Teensy down at power-up |
+| P4 | Resistor kit, 1/4 W | SparkFun COM-10969 | 1 | $9.95 | 100 kΩ pull-down on the switch, 100 Ω discharge and series resistors, 10 kΩ to the ADC; also bench LEDs and keys. Backordered 1 Nov; any assortment |
+| P5 | Capacitor kit | SparkFun KIT-13698 | 1 | $11.50 | 10 µF bulk and 100 nF / 1 µF decoupling at the card and the switch |
+| | | | | **$25.55** | |
+
+### Instruments (ADR-208 §4, about $30)
+
+| # | Instrument | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| I1 | Basic digital multimeter | SparkFun TOL-12966 | 1 | $21.50 | Checks the card rail is 0 V when cut and 3.3 V when on, and that the firmware's own reading agrees. Skip it if you already own any multimeter |
+| I2 | *Optional.* 24 MHz 8-channel clone USB logic analyser | any FX2 clone (e.g. HiLetgo), works with PulseView | 1 | ≈$12.00 | **Debugging only. Never an acceptance requirement.** Lets us look at the SPI wires if the firmware misbehaves |
+| | | | | **$33.50** | $21.50 without the optional analyser |
+
+### Totals (parts only, before tax and shipping)
+
+| | Total |
+|---|---:|
+| Prototype parts | $117.81 |
+| Power-cut test parts | $25.55 |
+| **Parts subtotal** | **$143.36** |
+| Instruments | $33.50 |
+| **Cart total** | **$176.86** |
+| Cart total without the optional analyser | $164.86 |
+
+- **Instrument subtotal $33.50**, or $21.50 required. That is ADR-208's "about $30".
+- **Prices:** lines 1–17, P2, P4 and P5 were read on the vendors' pages on 1–2 November (stock was as
+  shown then); I1 is SparkFun's listed price seen in search results on 8 November, not a page read.
+  **≈ means estimated, not read** (DigiKey's bot check blocks part pages; the clone analyser's price
+  varies by listing, ≈$12–17 seen 8 Nov). Confirm everything in the cart.
+- **Smaller first order:** lines 1–7 alone ($71.95) still play an app-made cartridge. Lines 8–17
+  and P1–P5 can follow when WP-18–20 and the power-cut test start.
+- **Soldering:** the audio board's headers and the P1 adapter. Everything else is breadboard.
+
+## Superseded history: the 2 November selection and the round 2 delta
+
+> Kept unchanged below for the record. Revision 3 above replaces it.
+
 ## Decision: 2 November 2026
 
 Michael approved **"Minimum bench + rig"** (on the #641 thread). That is:

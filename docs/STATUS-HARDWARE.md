@@ -1,12 +1,12 @@
 # Hardware status
 
-**6 November 2026 PST.** ADR-208: hands-on acceptance, ~$30 instruments, Teensy self-run power-cut test, CID not required. Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
+**8 November 2026 PST.** ADR-208: hands-on acceptance, ~$30 instruments, Teensy self-run power-cut test, CID not required. Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 | Area | State |
 |---|---|
 | Hardware Lead | #651 correction and Software663 integration complete. PR646 merged60dfe6aa after current-base CI; V392 clearance carries identical judge/imports. Physical method remains NOT CLEARED; no fresh Hardware base-update assignment |
-| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 returns revised circuit/instrument delta; changed items/totals not approved or ordered |
-| Atomicity rig | Replaced by a Teensy self-run power-cut test (ADR-208); the earlier externally traced rig and its E0–E4 instrument controls are no longer required. Hardware revises the method; no physical run yet |
+| Parts | **Revision 3 cart (ADR-208, #671)** in [PHASE3-BENCH](../hardware/sourcing/PHASE3-BENCH.md): prototype parts $117.81 + power-cut parts $25.55 + instruments $33.50 (multimeter $21.50, optional clone analyser ≈$12, debugging only) = **$176.86** before tax and shipping. Awaiting Michael's approval; **nothing ordered**. Replaces the 2 Nov selection and the round 2 delta |
+| Atomicity rig | **Teensy self-run method drafted** (#671): [POWER-CUT-SELFRUN](../hardware/characterisation/POWER-CUT-SELFRUN.md). TPS22918 switched card rail with discharge, SPI at 4 MHz, cut only straight after a busy byte, per-row ADC check that the card was off, revision-3 rows read by the unchanged judge; planted-tear control N1; four judge changes P1–P4 proposed, not implemented (P4 needs PM). Comparator rig revision 2 superseded. Next: Verification method review. Not built or run |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |
 | Instruments planned (ADR-208) | Multimeter; optional ~$12 clone logic analyser for debugging only; phone sound-level app. No bench logic analyser, SPL meter, coupler or thermal camera |
 | Equipment Michael owns | A1 Mini printer, PLA, headphones, three PNY 64 GB V30 cards, a USB card reader, basic hand tools, likely access to a soldering iron. **No** Teensy, audio board, breadboard, LEDs, logic analyser or sound level meter |
