@@ -5136,3 +5136,169 @@ DRAFT-11, fabrication/charging, physical and purchase holds carry.
 two precise CI coverage/provenance conflicts without weakening detecting gates.
 **Reversal cost.** Low for routing; policy changes require new independent controls
 and explicit disposition before relaxing supported-platform or tests-first coverage.
+
+## ADR-207 — Carry integrated Hardware and cleared kit; restore portability runner
+**Date:** 2026-11-05 PST
+**Status:** ADOPTED by PM [#666](https://github.com/mmsanders/Digital-Tape/issues/666)
+on Michael's “see latest work and assign next steps!” within the current Phase3 budget.
+
+**Latest disposition.** Hardware PR646 integrated at60dfe6aa by Software663 after
+current-base CI52 successes/15 classifier skips. V392's bounded judge clearance
+carries by unchanged identity; no physical-method clearance. V394 publication
+80d93c50 independently clears kit0db6ce5c SW652-R1..R3 within off-target behavior;
+CI/metadata integration remains. V394/8790e20d publishes new census/order packages
+before Software658 implementation. Returned660/d8ead444 and665/8ce0fe52 go to
+fresh Verification397 for exact-head disposition; selftests are not clearance.
+
+**Runner decision.** Choose666 option A: Software667 separate CI-only PR pins ONLY
+the existing wp11-portability job to ubuntu-24.04, keeping its3-config matrix,
+script/toolchain install/emulator invocation, independent differential values,
+11,572,876 comparisons, negative controls and fail-closed lanes unchanged.
+Current660/665 fail arm-m3 and regression on Ubuntu26.04 image20261101.186.1;
+main41910086479 on60dfe6aa passed. Mapping refusal is an environment execution
+failure, not an established Product defect or diagnosed kernel/emulator cause.
+The pin restores the OS family, not a byte-frozen image/toolchain. Require actual
+execution and version/image logs plus independent bounded confirmation. No global
+runner pin, privileged/kernel workaround, tolerance/expectation edit or CI waiver.
+Ubuntu26 adaptation is parked until24.04 retirement/support risk or a separately
+scoped reproducible fix warrants it; no speculative diagnosis task now.
+
+**Proof boundary.** Adopt V394's declared independent registry attestation of
+reviewed behavior and publication-before-import/fix chronology. Authenticated Git
+proves identities, tree immutability and ancestry/order; timestamps or Product
+booleans alone do not prove those attested facts. No additional provider-event
+receipt required. Final protected review_of/review_fix/review_attestation metadata
+may land after the fix to avoid a future-SHA cycle; first import's published
+source/tree stays fixed. Existing publication-main and ownership controls remain.
+
+**Routing/sign-off.** Software667 first; V397 reviews ready660/665 without waiting
+and then returned runner restoration. After bounded independent clearance and
+meaningful required current-base CI, Software may merge667 and existing658's
+two CI PRs, then integrate already-cleared kit652 with provenance/owner metadata.
+Carry unchanged evidence through base-only plumbing; no extra PM/independent
+campaign solely for rebase. Substantive behavior/assertion/coverage deltas stop
+for disposition. Michael's matching-owner approval carries for bounded CI repairs;
+no owner removal, ruleset waiver or repeated approval request. No new Hardware
+base-update task. Michael manually activates issues; no listeners/subworkers.
+
+**Ledger.** Still1/12 passed. Parts entry/A-5 now BLOCKED: corrected cart integrated,
+but last owner confirmation is not ordered, changed cart unapproved, physical
+support not independently accepted. No active correction is mislabeled progress.
+Rig unbuilt/NOT CLEARED, E0-E4/dry controls unmeasured, zero cards qualified;
+target, DRAFT11, batching, fabrication/charging and purchase holds remain.
+**Evidence:** [PM666 review](REVIEW/PM666-P3-2026-11-05.md).
+**Rationale.** Finish ready independent review and restore gate execution without
+loosening its oracle or repeating already-cleared campaigns.
+**Reversal cost.** Low for runner label; a future environment migration requires
+actual unchanged-gate execution evidence and bounded independent confirmation.
+
+## ADR-208 — Hands-on acceptance for physical and timing criteria
+**Date:** 2026-11-06 PST
+**Status:** ADOPTED by PM on Michael's direction, 6 November 2026 PST: “I'm not going
+to buy a $500 logic analyzer … I'm going to test things using my human body and senses,
+and that will have to be good enough”, and “please go ahead”. Michael approved an
+instrument budget of **about $30 total**. Prototype parts are still bought as planned,
+each order with his approval.
+
+**Why.** Phase 3 was heading toward lab instruments (a bench logic analyser, an SPL meter
+and coupler, calibrated-instrument audits, a CID-capable reader, an externally traced
+power-cut rig). That cost does not fit a family device built on a household budget.
+Michael's judgement, backed by numbers the firmware reports about itself, is the
+acceptance method for physical and timing criteria. The numeric limits stay as targets.
+
+**1. Timing and feel** (warm and cold instant-on, commit latency, end of tape, speaker
+mute, scrub feel, resume position). The firmware measures itself with the MCU's own
+timer and prints the values on the serial log, for example wake → first non-silent
+frame, `tape_commit` duration and ring underrun count. That log is the measurement. A
+firmware timestamp is acceptance evidence, not only a development aid. Michael then
+tries the behaviour and records a verdict: *acceptable* or *too slow / too loud / wrong*.
+- His verdict decides. A target that is met but feels wrong fails. A target that is
+  missed but feels fine passes, with the miss recorded. A miss of more than 20% still
+  goes to PM (CLAUDE.md §4) before it is accepted.
+- Facts that need no perception stay strict, because the firmware can count them: zero
+  ring underruns during commit, resume within the specified window of the last logged
+  position, and copy progress taken from the callback.
+
+**2. Output caps.** The mechanism does not change. The cap lives in the codec/amplifier
+configuration, is re-asserted at every boot and cannot be reached from any user control.
+Only the measurement does. Ears adapt within minutes and hearing damage depends on dose,
+so “sounds fine” is never the cap test.
+- **Headphones:** at maximum volume, Michael measures with a phone sound-level app
+  (NIOSH SLM or similar), phone microphone sealed against the ear cup, on the headphones
+  the kids actually use. The setting must read **≤ 80 dB** on that method. The 5 dB below
+  the 85 dB limit is the margin for an uncalibrated phone.
+- **Speaker:** same app at the distance stated with the speaker limit. Hardware's research
+  value (S2) minus the same 5 dB margin.
+- Michael may lower either cap by ear. He may not raise either one above the measured
+  reading.
+
+**3. Battery and heat** (Phase 5; the fabrication and charging gate stays CLOSED). The
+limits stand. They are met by buying protection rather than proving it: a protected cell
+and a charger/protection part whose datasheet guarantees the 0–45 °C charge window and the
+low-voltage cutoff. Evidence is the datasheet, design review, and spot checks with a
+multimeter and a thermometer, witnessed by Michael. Individually reported junction
+temperatures and calibrated thermal instruments are no longer required. Surface
+temperature is checked by touch and thermometer.
+
+**4. Instruments.** About $30: a basic multimeter, plus an optional ~$12 clone USB
+logic analyser (sigrok/PulseView) for debugging only. It is never an acceptance
+requirement. No bench logic analyser, SPL meter, coupler, thermal camera or new card
+reader. The power-cut test's switch part (a MOSFET or load switch, a few dollars) goes
+with the prototype parts.
+
+**5. Card identity, CID dropped as a host requirement.** Identity is the brand, model or
+part number, and capacity from the card and its package, plus a photo. USB readers do not
+expose the CID, so no checklist asks for it and no reader is bought. Once the bench
+build exists, the firmware reads the CID over the native SD interface at every mount and
+prints it to the serial log. It is recorded when available and gates nothing.
+
+**6. Power-cut (atomicity) test, kept and simplified.** It stays because the format
+rests on it, and it now costs a few dollars. The Teensy runs it on itself:
+- it switches the card's power through the small switch, writes single blocks, sees
+  the card busy on its own bus, cuts power, re-powers, and reads the target and its
+  neighbours back;
+- it logs each result as old, new or torn;
+- it needs ≥ 1,000 qualifying cuts per card model, where a cut qualifies when the
+  firmware saw busy at the moment it opened the switch;
+- one torn block still escalates as a format blocker.
+
+External rail traces, instrument-qualified timing and the uncertainty-U analysis in WP-05
+are no longer required. Verification checks the logic with a negative control (a planted
+torn block must be caught), off-target and for free. Residual risk, recorded rather than
+proven: timing that is only self-observed, and the bus mode actually used.
+
+**7. Sign-off record.** Each hands-on check gets one entry in
+[MICHAEL-CHECKS](MICHAEL-CHECKS.md): date, firmware build hash, what was tried, the
+numbers the firmware logged, and the verdict. For these criteria, Verification confirms
+that the entry exists, that its build hash and log match the candidate, and that the cap
+values are what the codec configuration and boot path set. It no longer audits
+instruments, calibration, ambient conditions or uncertainty.
+
+**Unchanged:**
+- engine, format and goldens;
+- crash injection, mutation testing and CI gates;
+- Structural Rule 1 and Verification independence for code;
+- F1 byte-identical goldens on target (streamed over USB, free) and F2 budgets;
+- copy correctness;
+- every guardrail limit;
+- the fabrication and charging gate;
+- Michael's approval of every purchase.
+
+**Spec.** The hashed DRAFT-10 `spec/acceptance.md` stays byte-identical. The row changes
+are folded into the [DRAFT-11 proposal](SPEC-DRAFT-11-PROPOSAL.md) and issue with it.
+Until then, this ADR governs the Phase 3 acceptance *method* for the rows it names.
+CLAUDE.md guardrails 04 and 11 and §5 change their method wording now, on Michael's
+authority. Their limits are unchanged.
+
+**Routing.** Hardware revises the bench cart and the power-cut test to this method.
+Verification preflights the DRAFT-11 delta and adapts the firmware acceptance tests.
+Both issues are posted for Michael to start: Hardware #671 and Verification V#398
+(PM #669). The live CI issues (#652, #658, #667, V#397)
+are unaffected.
+
+**Rationale.** Prove what matters to a family device, cheaply. Michael's perception for
+feel, firmware self-measurement for numbers, bought-in protection for the battery, and a
+5 dB margin wherever a cheap measurement guards a safety limit.
+
+**Reversal cost.** Low. Buying instruments later restores stricter methods without
+redesign; the firmware's self-reported timings stay useful either way.
