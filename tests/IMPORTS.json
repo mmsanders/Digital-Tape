@@ -533,6 +533,19 @@
       ]
     },
     {
+      "path": "tests/wp14_supported_r1",
+      "tree": "15afc9e29b802a010b0df9486e241e39babe9683",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "8790e20d0350fefcdf267633d68b5b3ac370a9c3",
+      "attested_in": "Verification394 lanes B/C (PR396, merged 8790e20d; findings/V394-POLICY/DISPOSITION.md)",
+      "attestation": "ADR-206/PM661 supported-platform companion oracle for the adopted Software658 two-platform census interface (comment 6640086870): qualification_supported.audit_platforms applies the unchanged wp14_r1 per-platform body (AST-proved) to a sorted unique selection including linux and windows, default still all three; retained.audit_retained authenticates every named retained capture, index, snapshot and dump byte; run_adapter.py replays 25 actual-adapter cases; dag.py checks the required census DAG and MANUAL-SHA256. Published from source 7ae5f115fb1185d01be0ac0a1ad3cbd0b6152706, CI 41936971089. Imported byte-identically before any adapter/CI change. Depends on the unchanged sibling tests/wp14_r1. Synthetic selftests only; not Product acceptance, a native run or macOS evidence",
+      "selftest": [
+        "python3",
+        "-B",
+        "tests/wp14_supported_r1/selftest.py"
+      ]
+    },
+    {
       "path": "tests/wp15_app1a_r1",
       "tree": "bdd861b693516db2e5244660b3e99ee400d506de",
       "source_repo": "mmsanders/digital-tape-verification",
@@ -796,6 +809,20 @@
         "python3",
         "-c",
         "import pathlib;assert pathlib.Path('tests/c1_volume_query_r2/prepare.py').is_file()"
+      ]
+    },
+    {
+      "path": "tests/review_order_r1",
+      "tree": "bfad9c6bed00cc3fba7bd99ef8df01bd6a8c12a2",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "8790e20d0350fefcdf267633d68b5b3ac370a9c3",
+      "attested_in": "Verification394 lanes B/C (PR396, merged 8790e20d; findings/V394-POLICY/DISPOSITION.md)",
+      "attestation": "ADR-206/PM662 narrow review-regression ordering fixtures: 25 real fsck-checked Git histories (3 allowed, 22 refused) with identical timestamps, always-green/always-red harness controls, CONTRACT.md declaring the bounded gate CLI and the protected review_of/review_fix/review_attestation metadata, and REVIEW-ATTESTATIONS.json independently sealing the be1_review_r1 lineage (d62e0de0, 7927f905/a2540d46, ceb36177, 0b450903, 0db6ce5c). Published from source 7ae5f115fb1185d01be0ac0a1ad3cbd0b6152706, CI 41936971089. Imported byte-identically before any gate change. The selftest generates the fixtures and executes no Product gate; not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;sys.exit(subprocess.call([sys.executable,'-B','tests/review_order_r1/run.py','--selftest','--out',os.path.join(tempfile.mkdtemp(),'out')]))"
       ]
     },
     {

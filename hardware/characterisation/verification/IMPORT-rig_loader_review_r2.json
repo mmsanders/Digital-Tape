@@ -1,0 +1,15 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_loader_review_r2",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "5c6a5c1a8b1f4b1f1deefe29124869d52a377116",
+  "source_merge_on_main": "5b791e02a092c25d0758159cea2b931693800e99",
+  "source_path": "tests/rig_loader_review_r2",
+  "source_tree": "a5bfeb54a15f68878054611f5f3a89f6e95ef764",
+  "files": {
+    "README.md": "1ccac2e381af822779daafa4bd7c8fa8c47cbfbc",
+    "run.py": "ec32f0e97cd292ec0e735bbbe53a90957ad441ec"
+  },
+  "issue": "P3-R2-HW #651 (Verification V390, PR391)",
+  "mode": "unchanged mechanical import; assertions are Verification's",
+  "covers": "HW651-R3: load_manifest returns problems, never raises, for a NUL manifest filename and deeply nested JSON; failed-E0 setup keeps TORN/CORRUPT/neighbour damage with no proof or credit. Synthetic only."
+}

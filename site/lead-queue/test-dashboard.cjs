@@ -94,14 +94,14 @@ const baseline3 = phase3();
 assert.match(phase3(), /Roadmap · Phase 3 · open/);
 assert.match(phase3(), />1\/12</);
 assert.match(phase3(), /<b>3<\/b> in round/);
-assert.match(phase3(), /<b>1<\/b> blocked/);
-assert.match(phase3(), /<b>7<\/b> to do/);
+assert.match(phase3(), /<b>2<\/b> blocked/);
+assert.match(phase3(), /<b>6<\/b> to do/);
 assert.match(phase3(), /entry items · 0 of 3 passed/);
 assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
 assert.match(phase3(), /Fabrication and charging CLOSED/);
 assert.match(phase3(), /DRAFT-11 remains proposed/);
-for (const issue of ['Digital-Tape/issues/651', 'Digital-Tape/issues/652', 'digital-tape-verification/issues/380']) {
+for (const issue of ['Digital-Tape/issues/667', 'Digital-Tape/issues/652', 'digital-tape-verification/issues/397']) {
   assert(phase3().includes(issue));
 }
 const ledger = fs.readFileSync('../../docs/PHASE3-LEDGER.md', 'utf8');
@@ -125,7 +125,7 @@ vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; renderPhase3
 assert.match(phase3(), />1\/12</);
 vm.runInContext('PHASE3.packages[0].criteria[0].state = "BLOCKED"; renderPhase3();', ctx);
 assert.match(phase3(), />1\/12</);
-assert.match(phase3(), /<b>2<\/b> blocked/);
+assert.match(phase3(), /<b>3<\/b> blocked/);
 for (const invalid of [null, 'DONE', '']) {
   vm.runInContext('PHASE3.packages[0].criteria[0].state = ' + JSON.stringify(invalid), ctx);
   assert.throws(() => vm.runInContext('renderPhase3()', ctx), /A-1 has no valid state/);
@@ -133,7 +133,7 @@ for (const invalid of [null, 'DONE', '']) {
 vm.runInContext('PHASE3.packages[0].criteria[0].state = "TO DO"; PHASE3.packages[0].criteria[0].name = "<img src=x> & card"; renderPhase3();', ctx);
 assert.match(phase3(), /&lt;img src=x&gt; &amp; card/);
 assert(!phase3().includes('<img'));
-vm.runInContext('PHASE3.packages[0].criteria[0].name = "Exact card identity"; renderPhase3();', ctx);
+vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; PHASE3.packages[0].criteria[0].name = "Card identity"; renderPhase3();', ctx);
 assert.equal(phase3(), baseline3);
 
 (async()=>{

@@ -16,7 +16,8 @@ Checks, all declared in tests/IMPORTS.json:
      embedded spec copy sits in a declared root and matches that root's revision
   5. manifest adapter kind/ID equals observation adapter kind/ID
   6. Structural Rule 1 ordering: on a branch carrying both an import and an
-     implementation, every verifier-tree change precedes every engine change
+     implementation, every verifier-tree change precedes every engine change,
+     except an attested review-regression import (ADR-206, review_order_gate.py)
 
 Usage: audit-evidence-integrity.py [BASE_REF]
 Exit 0 green, 1 red, 2 harness error.
@@ -405,11 +406,28 @@ def check_structural_rule_1(base):
         ok("rule-1", "branch carries an import or an implementation, not both")
         return
     if last_pkg > first_impl:
+        # ADR-206 (PM662): the one narrow exception, an attested review-regression
+        # import, decided by review_order_gate.py against the authenticated
+        # verifier main (VERIFICATION_REPO/VERIFICATION_MAIN, set by CI from its
+        # own checkout of the independent repository). Without both it fails closed.
+        reasons = ["no authenticated verifier main (VERIFICATION_REPO/VERIFICATION_MAIN)"]
+        vrepo, vmain = os.environ.get("VERIFICATION_REPO"), os.environ.get("VERIFICATION_MAIN")
+        if vrepo and vmain and not os.environ.get("EVIDENCE_MANIFEST"):
+            sys.path.insert(0, str(ROOT / "tools/ci"))
+            import review_order_gate
+            reasons, notes = review_order_gate.evaluate(ROOT, base, "HEAD", vrepo, vmain)
+            if not reasons:
+                for n in notes:
+                    ok("rule-1", n)
+                ok("rule-1", "every package change after implementation is an attested "
+                             "review-regression import; all other ordering holds")
+                return
         fail("rule-1",
              f"commit {commits[last_pkg][:12]} changes a verifier package tree "
              f"after implementation landed at {commits[first_impl][:12]}. Tests "
              f"land before implementation (CLAUDE.md §3.1); a package change "
-             f"made after the code is how an assertion gets tuned to fit it.")
+             f"made after the code is how an assertion gets tuned to fit it. "
+             f"Not an attested review-regression import (ADR-206): {'; '.join(reasons)}")
     else:
         ok("rule-1", f"import at commit {last_pkg + 1} precedes implementation "
                      f"at commit {first_impl + 1} of {len(commits)}")

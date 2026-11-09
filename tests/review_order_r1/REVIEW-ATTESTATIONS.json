@@ -1,0 +1,25 @@
+{
+  "schema": "verification/review-lineage/1",
+  "entries": {
+    "be1_review_r1": {
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "7927f90589d2fa2432a830337d8c2fc073fcb3a8",
+      "source_path": "tests/be1_review_r1",
+      "tree": "a2540d46326bf72f8898b942c47cf14edc665c57",
+      "review_of": "d62e0de07c81dc5abe1c8ffbf378bd077a2a7eab",
+      "import_commit": "ceb36177b59131404f9495fb9020582167ea9b56",
+      "fix_commit": "0b450903f329d7bda0bb0f3cdcd45f426e5d42f0",
+      "reviewed_head": "0db6ce5c58f2c389499d511ef84074e99deef2ce",
+      "publication_before_import_and_fix": true,
+      "covered_paths": [
+        "firmware/bench/tools/bench_evidence.py",
+        "firmware/bench/tools/bench_capture.py"
+      ],
+      "review_disposition": {
+        "source_commit": "b457ff757353f4e293127bb3fdca91fadad21443",
+        "merge": "80d93c508ab1156e044d9ad26765e661811b03a9",
+        "path": "findings/V394-KIT/DISPOSITION.md"
+      }
+    }
+  }
+}

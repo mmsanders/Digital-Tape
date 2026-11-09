@@ -1,0 +1,16 @@
+{
+  "imported_path": "hardware/characterisation/verification/rig_records_r1",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "45a6dda095545a437cf65fdd3c6f77d35adcee3c",
+  "source_merge_on_main": "84c95d0eda9f6f6c98fa1203edb58ecac5f8d3ad",
+  "source_path": "tests/rig_records_r1",
+  "source_tree": "0d38fbe24031a142d54a63b4fae3dccb0a7fbf62",
+  "files": {
+    "README.md": "ef1841d39130e90dbc752ea95f23f8eda107ac49",
+    "fixtures.py": "3ac056fdc38021835530f6f085169eb2332f77cd",
+    "run.py": "5305e69760459b5eebd8aec8802a89798757b5d2"
+  },
+  "issue": "P3-R2-HW #651 (Verification continuation, PR386)",
+  "mode": "unchanged mechanical import; assertions are Verification's",
+  "covers": "plan v4 CLI, load_manifest, complete rig-r2 judge, ADR-204 completed_write_reverted, rail-high/chatter predicate cases and the interim v3 refusal. Synthetic records only: no calibration, physical or media evidence."
+}

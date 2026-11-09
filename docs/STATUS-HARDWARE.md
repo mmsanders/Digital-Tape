@@ -1,13 +1,14 @@
 # Hardware status
 
-**2 November 2026 PDT.** Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
+**6 November 2026 PST.** ADR-208: hands-on acceptance, ~$30 instruments, Teensy self-run power-cut test, CID not required. Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 | Area | State |
 |---|---|
-| Hardware Lead | Round 1 returned; fresh [#651](https://github.com/mmsanders/Digital-Tape/issues/651) corrects rig/judge R374-1…5 and reconciles the selected cart; V380 authors regressions and reviews the exact result |
-| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 `67ad581` records the old cart; revised circuit/instrument delta needs explicit review, not assumed approval |
-| Atomicity rig | Method NOT CLEARED by Verification `3d616c14`; no physical run. SPI results would be bounded characterization only, no native SD4 qualification |
+| Hardware Lead | #651 correction and Software663 integration complete. PR646 merged60dfe6aa after current-base CI; V392 clearance carries identical judge/imports. Physical method remains NOT CLEARED; no fresh Hardware base-update assignment |
+| Parts | Michael selected minimum bench + rig; confirms **not ordered** (2 Nov). PR646 returns revised circuit/instrument delta; changed items/totals not approved or ordered |
+| Atomicity rig | Replaced by a Teensy self-run power-cut test (ADR-208); the earlier externally traced rig and its E0–E4 instrument controls are no longer required. Hardware revises the method; no physical run yet |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |
+| Instruments planned (ADR-208) | Multimeter; optional ~$12 clone logic analyser for debugging only; phone sound-level app. No bench logic analyser, SPL meter, coupler or thermal camera |
 | Equipment Michael owns | A1 Mini printer, PLA, headphones, three PNY 64 GB V30 cards, a USB card reader, basic hand tools, likely access to a soldering iron. **No** Teensy, audio board, breadboard, LEDs, logic analyser or sound level meter |
 | Cards | Three PNY 64 GB V30 bought; not characterised to WP-05 A-2 (the earlier method was rejected); atomicity not yet tested |
 | Fabrication and charging | **CLOSED** (`make -C hardware fabrication-gate` returns nonzero). Phase 3 is bench-only: USB power, no cells, no boards |

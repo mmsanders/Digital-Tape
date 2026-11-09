@@ -1401,44 +1401,6 @@ jobs:
           rc=0; sudo build/host/tapectl verify "/dev/$root" || rc=$?
           test "$rc" -eq 3
 
-  wp14-macos:
-    # WP-14 on macOS (D2): build with the system clang (the engine archive with
-    # GCC, whose stack-analysis flags the engine Makefile uses), the full host
-    # test suite, then a round trip on a real /dev/diskN: a 64 GiB sparse raw
-    # image attached by hdiutil. Raw I/O goes through /dev/rdiskN and the
-    # durable flush is reported (#384 Q6). On reattach macOS mounts partition 1
-    # itself, so the probe's own-partition-1 exception and README.TXT are real.
-    name: WP-14 tapectl — macOS build, image smoke, disk-image round trip
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: OS build
-        run: sw_vers; uname -a; clang --version | head -1
-      - name: Engine archive (GCC)
-        run: |
-          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
-          test -n "$GCC" && $GCC --version | head -1
-          make -C engine CC="$GCC" all
-      - run: tools/ci/annotate-tail.sh "macOS host tests" make -C host CC=clang test
-      - name: Disk-image round trip
-        run: |
-          mkfile -n 64g "$RUNNER_TEMP/card.raw"
-          sudo -E tools/ci/annotate-tail.sh "macOS disk-image round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
-          cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: wp14-traces-macos
-          path: |
-            ${{ runner.temp }}/e2e/traces
-            build/host/trace/traces
-          if-no-files-found: ignore
-
   wp14-windows:
     # WP-14 on Windows (D2): MinGW-w64 build, the full host test suite in Git
     # Bash, then a round trip on a real \\.\PhysicalDriveN: an 8 GiB expandable
@@ -1487,9 +1449,13 @@ jobs:
     # under tests/IMPORTS.json) run against this head on each named OS:
     #   image   runner.py on the shipped tapectl: 79 image cases + 11 controls;
     #   native  native.py through Software's transport (tests/wp14_adapter):
-    #           owned virtual devices only (Linux loop, macOS raw disk image,
-    #           Windows VHD), tapectl-test traces and iocap capture of the
-    #           shipped binary. No physical disk is touched.
+    #           owned virtual devices only (Linux loop, Windows VHD),
+    #           tapectl-test traces and iocap capture of the shipped binary.
+    #           No physical disk is touched.
+    # macOS is deferred (ADR-191, ADR-205): its leg, the build case below and the
+    # closed three-platform census run only in wp14-macos-manual.yml (Linux and
+    # Windows keep the required supported census below, ADR-206), whose copy
+    # of this job's steps must stay identical (verify-change-classifier.py).
     # The package owns every expectation and verdict; this job only runs it and
     # keeps the raw evidence. Files over 256 MiB are zstd-compressed in the
     # artifact; their SHA-256 is in each capture's large-artifacts.json.
@@ -1505,8 +1471,6 @@ jobs:
         include:
           - platform: linux
             runner: ubuntu-latest
-          - platform: macos
-            runner: macos-latest
           - platform: windows
             runner: windows-latest
     defaults:
@@ -1672,13 +1636,19 @@ jobs:
           test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
 
   wp14-package-census:
-    # The package's own closed census over all six JSONs (qualification.py) and
-    # its Git-object identity audit (a8_identity.py) against the publication on
-    # Verification main. Neither is acceptance: Verification disposes.
-    name: WP-14 package — closed census and Git identity
+    # ADR-206: the required supported-platform census. The adapter
+    # (tests/wp14_adapter/census.py --platforms linux,windows) authenticates
+    # every retained byte in the downloaded Linux and Windows native evidence
+    # with the imported companion oracle (tests/wp14_supported_r1), then runs
+    # its audit_platforms, which keeps the unchanged wp14_r1 per-platform body.
+    # macOS is deferred (ADR-205): its three-platform census runs only in
+    # wp14-macos-manual.yml, unchanged. Then the package's Git-object identity
+    # audit (a8_identity.py) and Verification394's own replay of the adapter
+    # contract and this DAG. None of it is acceptance: Verification disposes.
+    name: WP-14 package — supported census (Linux, Windows) and Git identity
     needs: wp14-package
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -1700,13 +1670,13 @@ jobs:
         with:
           pattern: wp14-native-evidence-*
           path: ${{ runner.temp }}/native-captures
-      - name: Closed census (tests/wp14_r1/qualification.py)
+      - name: Supported census (tests/wp14_supported_r1 via tests/wp14_adapter/census.py)
         run: |
           set -euo pipefail
           b="$RUNNER_TEMP/bundle"
           for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
-          ls -la "$b"
-          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" \
+          ls -la "$b" "$RUNNER_TEMP/native-captures"
+          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" --platforms linux,windows \
             --captures "$RUNNER_TEMP/native-captures" --relocations "$RUNNER_TEMP/relocations.json" \
             "$b" | tee "$RUNNER_TEMP/census.json"
       - name: Git identity (tests/wp14_r1/a8_identity.py)
@@ -1722,6 +1692,21 @@ jobs:
           python3 -B tests/wp14_adapter/a8_identity.py --verification verification-repo --product . \
             --publication "$pub" --candidate "$HEAD_SHA" --import-commit "$imp" \
             --import-path tests/wp14_r1 --golden-path tests/golden | tee "$RUNNER_TEMP/a8-identity.json"
+      - name: Verification394 adapter replay (tests/wp14_supported_r1/run_adapter.py)
+        run: |
+          set -euo pipefail
+          # 25 cases over the actual downloaded evidence: hard-link clones in
+          # RUNNER_TEMP, mutations replace clone entries only.
+          python3 -B tests/wp14_supported_r1/run_adapter.py --adapter tests/wp14_adapter/census.py \
+            --bundle "$RUNNER_TEMP/bundle" --captures "$RUNNER_TEMP/native-captures" \
+            --head "$HEAD_SHA" --out "$RUNNER_TEMP/v394-replay" > "$RUNNER_TEMP/v394-replay.json"
+          python3 -c "import json,sys;d=json.load(open(sys.argv[1]));[print(('PASS ' if c['passed'] else 'FAIL ')+c['case'],c['exit']) for c in d['cases']];print('passed',d['passed'])" "$RUNNER_TEMP/v394-replay.json"
+      - name: Verification394 DAG replay (tests/wp14_supported_r1/dag.py)
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/yaml"
+          "$RUNNER_TEMP/yaml/bin/pip" install -q pyyaml==6.0.3
+          "$RUNNER_TEMP/yaml/bin/python" -B tests/wp14_supported_r1/dag.py --product . | tee "$RUNNER_TEMP/v394-dag.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -1730,6 +1715,9 @@ jobs:
             ${{ runner.temp }}/census.json
             ${{ runner.temp }}/a8-identity.json
             ${{ runner.temp }}/relocations.json
+            ${{ runner.temp }}/v394-replay.json
+            ${{ runner.temp }}/v394-replay/RESULT.json
+            ${{ runner.temp }}/v394-dag.json
           if-no-files-found: ignore
 
   wp11-portability:
@@ -1741,7 +1729,7 @@ jobs:
     name: WP-11 portability (${{ matrix.config }})
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -1875,7 +1863,6 @@ jobs:
       - history-wp09-package
       - tapectl
       - wp14-linux-device
-      - wp14-macos
       - wp14-windows
       - wp11-portability
       - golden

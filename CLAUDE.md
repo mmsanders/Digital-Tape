@@ -1,6 +1,6 @@
 # Digital Tape — working agreement
 
-**Current agreement: 1 November 2026 PDT.** Applies to every lead, regardless of model or app.
+**Current agreement: 6 November 2026 PST.** Applies to every lead, regardless of model or app.
 Spec revisions and hashes are in spec/VERSION.md; phase and gate state is in docs/STATUS.md.
 A fresh context starts at [START-HERE](docs/START-HERE.md). Rationale is in docs/DECISIONS.md
 and Git history.
@@ -15,14 +15,14 @@ seven-year-old can understand without instruction, not maximum capability.
 | 01 | Raw 44.1 kHz / 16-bit stereo PCM. No compressed audio storage format. |
 | 02 | Scrub changes rate without anti-alias filtering, pitch preservation or smoothing crossfades. |
 | 03 | No screen, lists, tracks, metadata browsing or music-library-management scope. |
-| 04 | Warm wake-to-audio <100 ms, measured on hardware. Retained warm buffers belong to the caller; do not resurrect the removed on-card preroll cache. |
+| 04 | Warm wake-to-audio <100 ms target on hardware, timed by the firmware itself and judged by Michael (ADR-208). Retained warm buffers belong to the caller; do not resurrect the removed on-card preroll cache. |
 | 05 | Side A ownership is structural. Ordinary Side-B allocations/writes stay at or above a_high_water; lawful references below it remain allowed. Privileged operations obey their exact spec exceptions. |
 | 06 | Source-slot devices have a NULL write callback. Effective mount writability also includes the version barrier; runtime checks do not replace callback separation. |
 | 07 | Every media update follows its specified durability protocol and permitted crash outcomes. Raw destructive operations have their own outcomes; no universal “old card unchanged” oracle. |
 | 08 | No allocation or libc file I/O in the engine, including init. Caller owns storage. RAM (.data + .bss + instance) ≤200 KiB, stack ≤8 KiB, .rodata ≤32 KiB; gates print measured values. |
 | 09 | Portable C99 engine, no board/OS knowledge, clock or timeout. Device coupling is read/write/flush; indirect calls follow the specified exemptions and dev.h funnel. |
 | 10 | Whole C-60 copy <30 s on the target system. Bench function and PC card throughput are not proof of production end-to-end time. |
-| 11 | 85 dB output cap against specified reference headphones, enforced in the codec and reasserted at boot, unreachable from user controls. |
+| 11 | 85 dB output cap on the headphones in use, enforced in the codec and reasserted at boot, unreachable from user controls. Checked with a phone sound-level app at ≤80 dB to allow for its error (ADR-208); never raised above the measured reading. |
 | 12 | One engine shared by CLI, GUI and firmware; do not reimplement engine behaviour in a consumer. |
 | 13 | Kid-resistant mechanical design is a first-order requirement. The assembled player and cartridge must tolerate foreseeable drops, shaking and rough handling without exposing or loosening the battery, creating sharp or hazardous detached parts, ejecting the cartridge, exposing live conductors, or silently losing the basic playback controls. Ruggedization is designed and tested before final enclosure CAD, not added afterward. |
 
@@ -64,6 +64,16 @@ messages and no active listener. Details are in §7.
    Verification publishes → Software returns that branch → CI proves it → Verification
    disposes blind → PM disposes. What disappears is a round whose only product was a
    separate merge commit; what does not disappear is blindness.
+
+   Review-discovered regressions on a held branch preserve the original reviewed
+   lineage (ADR-206). A new, immutable review package may follow the reviewed
+   implementation only under the independently tested provenance/order contract:
+   full reviewed-ancestor identity, independent publication attestation, import
+   before the corresponding corrective implementation, no prior imported-tree
+   edits and no combined import/fix commit. This does not claim retrospective
+   tests-first coverage or waive the rule for unrelated new behavior. The gate
+   correction is pending independent publication and Software integration; until
+   then its existing red result remains a merge blocker.
 
    The guarantee moved into CI, it was not dropped.
    `.github/workflows/evidence-integrity.yml` proves the imported subtree is
@@ -164,19 +174,22 @@ of a retained bundle is not done: the fetch-and-verify step ships with it.
 Hardware specs are versioned, not frozen with the byte format. Board interface
 changes notify Software with a change list; PM approval is needed only if a product
 limit/guardrail changes. PM owns safety limits in spec/acceptance.md. Michael
-witnesses measurements; Verification audits method, calibrated instruments, ambient,
-raw data, derivation and uncertainty. Estimates are not measurements.
+witnesses measurements. Physical and timing criteria use the hands-on method of ADR-208:
+firmware self-measurement plus Michael's recorded verdict in docs/MICHAEL-CHECKS.md, about
+$30 of instruments, no calibrated-instrument audit. Verification checks that the record and
+logs match the candidate. Estimates are not measurements; a firmware timer reading is one.
 
 No board fabrication or cell charging while make -C hardware fabrication-gate returns
 CLOSED/nonzero. Green thermal/CAD/regression jobs do not open it. Never fill acceptance
 fields with the response author’s own sign-off. Media atomicity must be established
-per exact card SKU/revision before qualification; paper review qualifies no card.
+per card model (brand, part number, capacity) before qualification, by the Teensy
+self-run power-cut test (ADR-208); paper review qualifies no card.
 A torn block is a blocker, not a firmware workaround.
 
-Michael owns three PNY 64 GB V30 cards. The retail family and speed marks are not exact
-card identity: every result and any later qualification must bind manufacturer part
-number, capacity, revision and CID. No media is qualified without the independent
-sustained-write and atomicity evidence required by WP-05.
+Michael owns three PNY 64 GB V30 cards. Card identity is brand, part number and capacity
+from the card and package, plus a photo. The CID is logged by the firmware over native SD
+when available and gates nothing; no reader is bought for it (ADR-208). No media is
+qualified without the sustained-write and atomicity evidence required by WP-05.
 
 ## 6. Implementation boundaries
 

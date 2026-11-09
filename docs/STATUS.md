@@ -1,6 +1,6 @@
 # Project status
 
-**2 November 2026 PDT. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
+**6 November 2026 PST. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
 Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Completed
@@ -26,30 +26,50 @@ The device design has moved:
 - a speaker with its own loudness cap;
 - a microphone, aux in, and aux out shared with the headphone jack.
 
-See [DEVICE-DESIGN](DEVICE-DESIGN.md). Still open: the copy button and the promote-B-to-A
+See [DEVICE-DESIGN](DEVICE-DESIGN.md).
+
+**Acceptance method changed (ADR-208, 6 Nov).** Physical and timing criteria are now
+firmware-timed and judged by Michael, recorded in [MICHAEL-CHECKS](MICHAEL-CHECKS.md). The caps
+stay enforced in the codec and are checked with a phone app with a 5 dB margin. Instruments
+are about $30; there is no lab gear. CID is no longer required. The power-cut test is
+Teensy self-run. Next: Hardware revises the cart and the test, and Verification preflights
+the DRAFT-11 delta: [#671](https://github.com/mmsanders/Digital-Tape/issues/671) and
+[V#398](https://github.com/mmsanders/digital-tape-verification/issues/398), posted for Michael to start (PM [#669](https://github.com/mmsanders/Digital-Tape/issues/669)). Still open: the copy button and the promote-B-to-A
 key combination.
 
 ## Current assignments
 
-Round 2 (Michael starts each; parts not ordered):
+Round 2 continuation after [PM666 review](REVIEW/PM666-P3-2026-11-05.md)
+and ADR-207 (Michael manually starts issues):
 
 | Owner | Issue | Outcome |
 |---|---|---|
-| Hardware | [#651](https://github.com/mmsanders/Digital-Tape/issues/651) | Correct rig method/judge R374-1…5 and reconcile the selected cart on existing PR646; no physical run |
-| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | [BE-1](WP17-BENCH-EVIDENCE.md) offline bench-evidence kit; public schema first, independent tests before covered behavior |
-| Verification | [V#380](https://github.com/mmsanders/digital-tape-verification/issues/380) | Author rig/kit expectations, publish, then review exact Hardware/Software heads; no physical acceptance |
+| Software | [#667](https://github.com/mmsanders/Digital-Tape/issues/667) | First: restore wp11-portability job on Ubuntu24.04; unchanged differential and detecting gates |
+| Verification | [V#397](https://github.com/mmsanders/digital-tape-verification/issues/397) | Review ready census660/d8ead444 and ordering665/8ce0fe52 now; review runner pin when returned |
+| Software | [#658](https://github.com/mmsanders/Digital-Tape/issues/658) | After independent clearance/runner repair, integrate both CI corrections with required current-base CI green |
+| Software | [#652](https://github.com/mmsanders/Digital-Tape/issues/652) | Kit behavior CLEARED at0db6ce5c; final approved provenance/ownership/base integration after CI prerequisites |
 
-Latest [PM650 review](REVIEW/PM650-P3-R2-2026-11-02.md) / ADR-203: V378 `98f46c94`
-cleared the admission correction (28 cases / four controls). Software integrated at
-`aa472667` with unchanged cleared implementation and 117 current-base checks passing.
-F6 remains PASSED (**1/12** defined criteria); target/package acceptance is pending.
-V41995965 passes all 365 deferred faults;
-six long cuts are unavailable on the issued fixture, not executed. Batching stays held.
-V3d616c14: rig method NOT CLEARED (R374-1…5); Hardware #651 owns corrections. SPI
-characterization is not native SD4 qualification. DRAFT-11 preflight requires revision;
-proposal remains unissued. Target PCM/I²S, stack, timing and controls/removal await the bench.
-Michael's minimum bench + rig selection stands; parts **not ordered** (2 November).
-No fresh physical session is ready. A corrected-rig cart delta is not an approved purchase.
+Software663 completed Hardware PR646 integration at60dfe6aa (head168b7dc0).
+V392 clearance carries unchanged judge/import identities;52 current-base checks pass,
+15 classifier-unselected qualification skips. Hardware651/663 are complete.
+Physical rig/method remains unbuilt/NOT CLEARED; no new Hardware task for base sync.
+V394 kit publication80d93c50 independently clears SW652-R1..R3 at0db6ce5c:
+109/4/53/47 plus8 review cases,32 old controls plus6 predicates and old-pair negative
+control. This is bounded off-target consistency, not target or package acceptance.
+V394 policy publication8790e20d binds new supported census/order packages before
+Software implementation. Returned PR660/d8ead444 and PR665/8ce0fe52 are ready for
+V397 review; Software25-case replays are readiness, not clearance.
+Current failures are arm-m3 portability and regression aggregate on Ubuntu26.04;
+main41910086479 passed on60dfe6aa. PM adopts narrow job-only Ubuntu24.04 pin.
+No kernel/emulator cause is proven, no CI waiver or comparison change authorized.
+Independent registry attests review/publication chronology; Git proves identity/order.
+Final metadata-only provenance after the fix avoids a future-SHA cycle; old imports
+stay fixed. CODEOWNERS matching-owner approval carries; protections remain.
+No target/package advance: **1/12** (F6); FW-1 aa472667 and engine d96b4245 carry.
+365 deferred faults pass; six long cuts unavailable/unexecuted; batching held.
+E0-E4/dry controls unmeasured; SPI is not native qualification. Target PCM/I2S,
+instance/stack/timing/removal and DRAFT-11 pending. Parts last confirmed not ordered;
+changed cart unapproved. Parts criterion now BLOCKED; no physical session ready.
 
 ## Holds that stand
 
@@ -60,7 +80,7 @@ No fresh physical session is ready. A corrected-rig cart delta is not an approve
 - Fabrication and charging CLOSED. No card is qualified yet.
 - Deferred, not waived:
   - G2: run [the protocol](WP15-G2-PROTOCOL.md) before the app goes to anyone else for real use;
-  - macOS;
+  - macOS (ADR-205: retained manual checks, excluded from normal required aggregates);
   - the ADR-196 limitations.
 
 [Hardware status](STATUS-HARDWARE.md) · [human queue](FOR-MICHAEL.md) · [decisions index](DECISIONS-INDEX.md)

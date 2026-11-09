@@ -1,7 +1,7 @@
 # Spec revision DRAFT-11 — proposal
 
 **PROPOSED by PM, 2 November 2026 PDT ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)).
-Not in force.**
+Not in force.** ADR-208 (6 Nov) adds hands-on method changes, below; until issuance ADR-208 governs those methods for Phase 3.
 
 Issuance needs:
 1. Verification's preflight (P3-R1 Verification issue);
@@ -27,10 +27,33 @@ closed independent preflight. Hashed DRAFT-10 files remain unchanged.
 | **End of tape** | `at_end` releases the play button within 50 ms | At `at_end`, audio stops within 50 ms and the LED ring shows the end state until Stop is pressed. Firmware never moves a key; Play stays latched |
 | **Cartridge full mid-record** | On `TAPE_ERR_CARTRIDGE_FULL`, firmware stops the transport, releases the buttons, and commits. The recording up to that point is present on the next mount | On `TAPE_ERR_CARTRIDGE_FULL`, firmware stops the transport and commits; the LED ring shows red until Stop. Keys stay where they are. After successful commit, the recording up to that point is present on the next mount. Commit failure retains the existing `FAULTED`/I/O and remount outcomes; it does not promise preservation after failed commit |
 | **Scrub ramp** → **Scrub** | Old text describes 4.0×→12.0× over 1.5 s; its claim that the goldens use that table is inaccurate | Rew/FF rate follows **press depth**: a monotonic mapping from the lightest detected press to full depth. Full depth gives 12.0×; the lightest press and curve are set in WP-20 with Michael. Reverse mirrors. Both pressed gives no scrub; works with Play latched or not. Preserve the actual `tests/golden/MANIFEST`: forward `0.25:32000,0.5:32000,1:32000,2:32000,4:16000`, reverse -1× and -2×. No golden bytes, rates or hashes change |
-| **Output cap** | Codec output limited … 85 dB SPL on the specified reference headphones, re-asserted every boot, unreachable from any user control. Witnessed by Michael | **Two caps.** (H) Headphone/aux-out jack: unchanged, 85 dB SPL on the reference headphones. (S) Speaker: maximum **[S2 value, from Hardware's toy-safety research]** at the stated distance and weighting, enforced in the amplifier/codec configuration, re-asserted every boot, unreachable from any user control. Both measured with SPL meter and coupler or microphone as stated, witnessed by Michael, audited by Verification |
+| **Output cap** | Codec output limited … 85 dB SPL on the specified reference headphones, re-asserted every boot, unreachable from any user control. Witnessed by Michael | **Two caps.** (H) Headphone/aux-out jack: unchanged, 85 dB SPL on the reference headphones. (S) Speaker: maximum **[S2 value, from Hardware's toy-safety research]** at the stated distance and weighting, enforced in the amplifier/codec configuration, re-asserted every boot, unreachable from any user control. Both checked by the ADR-208 method: a phone sound-level app at maximum volume (headphones: phone mic sealed to the ear cup of the headphones in use; speaker: at the stated distance), reading ≤ limit − 5 dB, recorded by Michael in MICHAEL-CHECKS; never raised above the measured reading. Verification checks the record and that the codec/amplifier configuration and boot path set the cap |
 | *(new)* **Speaker mute** | — | Speaker is silent while headphones are inserted and while recording. Headphones continue to play during recording |
 | *(new)* **Record source** | — | Aux in when a plug is detected, otherwise the microphone |
 | **Record light** | Remaining-space indication includes “at 0 the record button does not hold” | Preserve the remaining-space indication, but remove the auto-release/non-holding claim. At full, recording stops/commits and the LED ring shows red; mechanical keys stay where they are until Stop |
+
+## ADR-208 hands-on method — further `spec/acceptance.md` row changes
+
+Added 6 November 2026 PST on Michael's direction ([ADR-208](DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)).
+Every limit below keeps its number as the target. Only the method changes: the firmware
+times itself on the MCU timer and logs the values, and Michael's verdict in
+[MICHAEL-CHECKS](MICHAEL-CHECKS.md) decides. A miss of more than 20% goes to PM.
+
+| Row | Current method | Proposed method |
+|---|---|---|
+| **Commit latency** | Measured on the bench build against the slowest candidate card | Firmware-timed `tape_commit` at `TAPE_MAX_ENTRIES` on Michael's cards, logged; **zero ring underruns during commit** stays strict (firmware-counted); Michael judges no audible dropout |
+| **Instant-on, warm** | Measured with a logic analyser on I²S | Firmware-timed wake → first non-silent frame handed to I²S, logged; Michael's verdict |
+| **Instant-on, cold** | 20 ms / 100 ms, method unstated | Firmware-timed detect → card init and Play → first frame, logged; Michael's verdict |
+| **Resume position** | `[T − 12 s, T − 2 s]` against true position T | Unchanged window; T is the last position the firmware logged over serial before removal |
+| **End of tape** (as revised above) | 50 ms | Firmware-timed, logged; Michael's verdict |
+| **Output cap** | SPL meter and coupler | As in the revised row above |
+| **Media atomicity** | Switched supply, ≥ 1,000 cuts per SKU with revision | Teensy self-run: firmware switches card power through a small load switch, observes card busy on its own bus, cuts, re-powers, reads target and neighbours; ≥ 1,000 cuts per card model in which firmware saw busy at the cut; zero torn. Identity = brand, part number, capacity, photo; CID logged by firmware when available. Torn block remains a format blocker |
+| **Hardware safety limits — independent audit paragraph** | Procedure, instrument model, calibration, ambient, raw data, derivation, uncertainty | Michael witnesses; evidence is design review, the protection part's datasheet, and multimeter/thermometer spot checks. Limits unchanged |
+| **Worst-case thermal** | Junction temperatures of charger, regulator and MCU reported individually | Surface and cell temperature by thermometer/touch; junction temperatures from datasheet thermal resistance × measured current. Limits unchanged |
+| **Charge window / deep-discharge latch** | Verified by sweeping cell temperature | Met by a protected cell and a charger/protection part whose datasheet guarantees the window and cutoff; spot-checked. Phase 5; charging gate stays CLOSED |
+
+These are method changes to rows already in this proposal's scope (firmware criteria and
+safety limits). No TAPEFS byte, engine API, error code, crash outcome or golden changes.
 
 ## Descriptive corrections to `spec/engine-api.md`
 
