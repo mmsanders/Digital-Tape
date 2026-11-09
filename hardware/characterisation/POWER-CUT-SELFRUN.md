@@ -4,6 +4,12 @@
 bought or run.** Drafted 8 November 2026 for [#671](https://github.com/mmsanders/Digital-Tape/issues/671),
 stage 2. Base: main `978efb2`.
 
+> **Correction 1, 9 November 2026 (after V398 stage 3, Verification `321c5236`).** The claim that
+> the unchanged plan-v3 judge reads this method's rows holds only when a CID was read: plan v3
+> requires one (H398-1). The rows and judge rules are now declared as a new route, `selfrun-r1` with
+> plan version 5, in [POWER-CUT-SCHEMA-R1.md](POWER-CUT-SCHEMA-R1.md). That file supersedes §3's
+> field table and §4's proposals where they differ. P3, P4 and the SPI scope wait on PM.
+
 This replaces [ATOMICITY-RIG.md](ATOMICITY-RIG.md) revision 2 (blob `322dfa8e` before its superseded banner) as the method to
 build, because [ADR-208 §6](../../docs/DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)
 drops external rail traces, instrument-qualified timing and the uncertainty-U analysis. Revision 2
@@ -79,7 +85,7 @@ at 150 MHz; the firmware prints which, once, at boot). SPI clock 400 kHz for ini
 | 4 | Read target −2, −1, +1, +2 | `neighbour_baseline` |
 | 5 | CMD24 with `pattern(N)`: R1, start token 0xFE, 512 bytes, CRC16 | `payload_complete` |
 | 6 | Read the data-response token; accepted when `token & 0x1F == 0x05` | `data_response_accepted` |
-| 7 | Clock 0xFF one byte at a time. The first byte that reads 0x00 is busy entry; the timer is read when that byte finishes | `busy_entry_us` |
+| 7 | Clock 0xFF one byte at a time. The first byte that reads 0x00 is busy entry; the timer is read when that byte finishes. If no 0x00 byte arrives within 2 × T_sched, cut anyway and record `busy_entry_us: null` (a miss, never dropped) | `busy_entry_us` |
 | 8 | Keep clocking. Each byte: if it reads **0x00**, read the timer (`busy_sampled_us`); if that time is ≥ `busy_entry_us + f × T_sched`, then **in this order and with nothing between them**: drive CUT low, CS/SCK/MOSI low (pins switched from the SPI peripheral to GPIO-low), read the timer (`cut_us`). If a byte reads anything other than 0x00 before the cut time, busy has ended: read the timer (`busy_deassert_us`), still cut, and finish the row | `busy_sampled_us`, `cut_us`, `busy_deassert_us` |
 | 9 | Hold the card off for 50 ms. In the last millisecond read VMON (average of 8 ADC samples) | `vcard_off_mv` |
 | 10 | Release the lines to the SPI peripheral, CUT high, initialise as step 1, **CMD10 again** | `card_cid_after_cut` |
@@ -141,9 +147,14 @@ firmware has read it, else the package revision text (ADR-208 §5; card identity
 1,100 attempts: a clean log gives **PASS** with 1,100 qualifying, exit 0; the same log with one
 planted tear (iteration 501 read back as half `pattern(N−1)`, half `pattern(N)`) gives **FAIL**,
 `torn_iterations: [501]`, exit 2. `make -C hardware atomicity-test` is green on the same base.
-This shows the mapping needs no code change to run; it says nothing about a card.
+This shows the mapping runs on the existing code **when a CID is present**; it says nothing about a
+card. Without a CID, plan v3 refuses the run (H398-1), which is why the new route exists.
 
 ## 4. Minimal judge changes proposed (not implemented)
+
+> Superseded in detail by [POWER-CUT-SCHEMA-R1.md](POWER-CUT-SCHEMA-R1.md) §3–§6, which turns P1–P4
+> into exact rules on a new `selfrun-r1` route and leaves plan v3 untouched. The table below is the
+> original proposal V398 reviewed.
 
 The plan-v3 judge already does the old/new/torn classification, the neighbour checks, the fixed
 1,000 minimum, one-card identity and keep-every-result. It has four gaps for this method. Each is
