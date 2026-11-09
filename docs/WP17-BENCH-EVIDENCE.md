@@ -19,8 +19,8 @@ charging, power-cut rig or automatic destructive card preparation in this kit.
 
 Keep a session manifest with input Product commit, firmware binary hash, toolchain
 pins, target/board revision, card identity as actually available, capture tool/version,
-timestamp, operator/witness and per-file SHA-256. Missing CID is explicitly unknown;
-this kit does not claim WP-05 identity qualification through a USB reader.
+timestamp, operator/witness and per-file SHA-256. Missing CID is explicitly unknown
+and is not required (ADR-208); once firmware runs it logs the CID at mount.
 
 Preserve raw serial bytes/transcripts and every failed attempt alongside results.
 Separate actual captures, simulated fixtures and absent observations. A simulated
@@ -32,7 +32,7 @@ with hashes under the standing evidence policy.
 | F1 target | Seven normal-rate cases with exact reference identity, side/start/frame count/mode, raw returned PCM or digest, and matching extracted reference PCM | Check byte/digest and exact frame count; report malformed, truncated, wrong-reference or mismatching output. No whole-WAV/raw-PCM confusion. A digest/serial result alone does not observe analogue/I²S behavior |
 | F2 target | Static engine terms and reserve separately from board/core totals; actual `tape_instance_size()` and painted-stack high-water from a target transcript | Reserve must fit actual size; existing RAM/.rodata/8192-byte stack limits stand. Missing actual/stack observations remain NOT RUN, never zero or inferred from a static map |
 | F5 | Raw Play/Stop/position and removal record witnessed by Michael; exact before/after card identity and manual `tapectl verify` result | Missing witness, continuity or post-removal verify is incomplete. A transcript checker alone cannot establish a safe physical removal or card preservation |
-| F3 | Wake GPIO and I²S timing with instrument/timebase identity | Remains NOT RUN until the dedicated witnessed timing method exists; firmware timestamps are development aids only |
+| F3 | Firmware-timed wake → first non-silent frame from the serial log, plus Michael's MICHAEL-CHECKS verdict (ADR-208) | NOT RUN until the bench build exists; the firmware timestamp is the measurement |
 | F4 | Recording/commit-latency evidence at the required entry count and card | Remains deferred to WP-18/19 |
 
 ## Offline checker interface

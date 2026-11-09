@@ -56,7 +56,7 @@ unchanged: firmware maps press depth to `tape_set_rate`.
 
 | Path | Baseline |
 |---|---|
-| Headphones / aux out | One 3.5 mm jack that serves as both headphones and line out. Output cap **85 dB SPL** on reference headphones, set in the codec, re-asserted at boot, unreachable from controls (guardrail 11) |
+| Headphones / aux out | One 3.5 mm jack that serves as both headphones and line out. Output cap **85 dB SPL** on the headphones in use, set in the codec, re-asserted at boot, unreachable from controls (guardrail 11). Checked with a phone app at ≤ 80 dB (ADR-208) |
 | **Speaker (new requirement)** | About Ø40 driver with its own amplifier. **It gets its own loudness cap**, enforced in hardware/codec and unreachable from controls, like the headphone cap. The value is set at Phase 3 kickoff from toy-safety acoustic limits that Hardware researches |
 | Microphone | MEMS mic, top-left |
 | Aux | Two ports: **aux in** (right side) and **aux out**, which is the headphone jack |
