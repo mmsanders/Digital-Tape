@@ -1,0 +1,304 @@
+name: WP-14 macOS (deferred, manual only)
+
+# ADR-205 (PM #657, Software #658): macOS is deferred (ADR-191), so normal pull
+# requests, main pushes and the scheduled qualification run in ci.yml no longer
+# depend on a macOS runner. The deferred macOS checks stay runnable here, by
+# workflow_dispatch only, exactly as ci.yml ran them before the deferral:
+#   wp14-macos           tapectl macOS build, host tests, hdiutil disk-image round trip;
+#   wp14-package         Verification's WP-14 package on linux, macos and windows,
+#                        same steps as ci.yml's job (tools/ci/verify-change-classifier.py
+#                        fails if the two drift), artifacts wp14-package-<platform>;
+#   wp14-package-census  the package's closed three-platform census and Git identity.
+# A run of this workflow is also the run id wp14-release.yml takes, because that
+# release needs all three platforms from one run. Restoring macOS to required CI
+# is a deliberate PM decision, not an edit to this file's triggers.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wp14-macos:
+    # WP-14 on macOS (D2): build with the system clang (the engine archive with
+    # GCC, whose stack-analysis flags the engine Makefile uses), the full host
+    # test suite, then a round trip on a real /dev/diskN: a 64 GiB sparse raw
+    # image attached by hdiutil. Raw I/O goes through /dev/rdiskN and the
+    # durable flush is reported (#384 Q6). On reattach macOS mounts partition 1
+    # itself, so the probe's own-partition-1 exception and README.TXT are real.
+    name: WP-14 tapectl — macOS build, image smoke, disk-image round trip
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: OS build
+        run: sw_vers; uname -a; clang --version | head -1
+      - name: Engine archive (GCC)
+        run: |
+          GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+          test -n "$GCC" && $GCC --version | head -1
+          make -C engine CC="$GCC" all
+      - run: tools/ci/annotate-tail.sh "macOS host tests" make -C host CC=clang test
+      - name: Disk-image round trip
+        run: |
+          mkfile -n 64g "$RUNNER_TEMP/card.raw"
+          sudo -E tools/ci/annotate-tail.sh "macOS disk-image round trip" host/device_e2e.sh build/host/tapectl build/host/tapectl-test "$RUNNER_TEMP/e2e" host/hdiutil_macos.sh "$RUNNER_TEMP/card.raw"
+          cat /Volumes/DIGITALTAPE/README.TXT 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-traces-macos
+          path: |
+            ${{ runner.temp }}/e2e/traces
+            build/host/trace/traces
+          if-no-files-found: ignore
+
+  wp14-package:
+    # Verification's WP-14 package (tests/wp14_r1, #146; imported byte-identically
+    # under tests/IMPORTS.json) run against this head on each named OS:
+    #   image   runner.py on the shipped tapectl: 79 image cases + 11 controls;
+    #   native  native.py through Software's transport (tests/wp14_adapter):
+    #           owned virtual devices only (Linux loop, macOS raw disk image,
+    #           Windows VHD), tapectl-test traces and iocap capture of the
+    #           shipped binary. No physical disk is touched.
+    # The package owns every expectation and verdict; this job only runs it and
+    # keeps the raw evidence. Files over 256 MiB are zstd-compressed in the
+    # artifact; their SHA-256 is in each capture's large-artifacts.json.
+    # Windows here is Server 2025: supplemental, never Windows 10 acceptance.
+    name: WP-14 package (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            runner: ubuntu-latest
+          - platform: macos
+            runner: macos-latest
+          - platform: windows
+            runner: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Build tapectl, tapectl-test and the capture shim
+        run: |
+          set -euo pipefail
+          case "$PLATFORM" in
+            linux)
+              uname -a; . /etc/os-release && echo "$PRETTY_NAME"; cc --version | head -1
+              tools/ci/annotate-tail.sh "Linux host build" make -C host
+              tools/ci/annotate-tail.sh "Linux iocap build" cc -shared -fPIC -O2 -Wall -o build/host/iocap.so tests/wp14_adapter/iocap_posix.c -ldl
+              PY=python3 ;;
+            macos)
+              sw_vers; uname -a; clang --version | head -1
+              GCC=$( (ls /opt/homebrew/bin/gcc-[0-9]* /usr/local/bin/gcc-[0-9]* 2>/dev/null || true) | grep -E 'gcc-[0-9]+$' | sort -V | tail -1)
+              test -n "$GCC" && $GCC --version | head -1
+              tools/ci/annotate-tail.sh "macOS engine build" make -C engine CC="$GCC" all
+              tools/ci/annotate-tail.sh "macOS host build" make -C host CC=clang
+              tools/ci/annotate-tail.sh "macOS iocap build" clang -dynamiclib -O2 -Wall -o build/host/iocap.dylib tests/wp14_adapter/iocap_posix.c
+              PY=python3 ;;
+            windows)
+              export PATH="/c/mingw64/bin:$PATH"
+              cmd //c ver; gcc --version | head -1
+              MAKE=$(command -v mingw32-make || command -v make)
+              tools/ci/annotate-tail.sh "Windows engine build" "$MAKE" -C engine CC=gcc all
+              tools/ci/annotate-tail.sh "Windows host build" "$MAKE" -C host CC=gcc test-bins
+              tools/ci/annotate-tail.sh "Windows iocap build" gcc -O2 -Wall -DIOCAP_DLL -shared -o build/host/iocap.dll tests/wp14_adapter/iocap_win.c
+              tools/ci/annotate-tail.sh "Windows iocap build" gcc -O2 -Wall -municode -o build/host/iocap.exe tests/wp14_adapter/iocap_win.c
+              echo "/c/mingw64/bin" >> "$GITHUB_PATH"
+              PY=python ;;
+          esac
+          echo "PY=$(command -v $PY)" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/wp14-out"
+          tools/ci/annotate-tail.sh "build identity" "$PY" - "$RUNNER_TEMP/wp14-out/build-info-$PLATFORM.json" <<'PYEOF'
+          import hashlib, json, os, platform, sys
+          b = 'build/host'
+          info = {'head_sha': os.environ['HEAD_SHA'], 'platform': os.environ['PLATFORM'],
+                  'run': f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}/attempts/{os.environ['GITHUB_RUN_ATTEMPT']}",
+                  'runner_os': os.environ.get('ImageOS', ''), 'runner_image': os.environ.get('ImageVersion', ''),
+                  'machine': platform.platform(), 'binaries': {}}
+          for f in sorted(os.listdir(b)):
+              p = os.path.join(b, f)
+              if os.path.isfile(p) and (f.startswith(('tapectl', 'iocap'))):
+                  info['binaries'][f] = hashlib.sha256(open(p, 'rb').read()).hexdigest()
+          open(sys.argv[1], 'w').write(json.dumps(info, indent=1) + '\n')
+          print(json.dumps(info, indent=1))
+          PYEOF
+      - name: Windows — no automatic drive letters for attached test VHDs
+        if: matrix.platform == 'windows'
+        run: powershell -NoProfile -Command "mountvol /N"
+      - name: Image cases (runner.py, shipped tapectl)
+        id: image
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          root=$(pwd); [ "$PLATFORM" = windows ] && root=$(cygpath -m "$root")
+          exe=; [ "$PLATFORM" = windows ] && exe=.exe
+          export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP"
+          "$PY" -B tests/wp14_r1/runner.py "$root/build/host/tapectl$exe" --head "$HEAD_SHA" \
+            > "$RUNNER_TEMP/wp14-out/image-$PLATFORM.json" 2> >(tee "$RUNNER_TEMP/wp14-out/image-$PLATFORM.stderr" >&2)
+      - name: Native cases (native.py through tests/wp14_adapter/transport.py)
+        id: native
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          root=$(pwd); ev="$RUNNER_TEMP/wp14-evidence"; out="$RUNNER_TEMP/wp14-out"
+          if [ "$PLATFORM" = windows ]; then
+            root=$(cygpath -m "$root"); ev=$(cygpath -m "$ev"); SUDO=
+          else
+            SUDO="sudo -E env PATH=$PATH"
+          fi
+          export TMPDIR="$RUNNER_TEMP" TEMP="$RUNNER_TEMP" TMP="$RUNNER_TEMP" WP14_BUILD_INFO="$out/build-info-$PLATFORM.json"
+          $SUDO "$PY" -B tests/wp14_r1/native.py --platform "$PLATFORM" --head "$HEAD_SHA" --evidence-dir "$ev" \
+            -- "$PY" -B "$root/tests/wp14_adapter/transport.py" --build "$root/build/host" \
+            > "$out/native-$PLATFORM.json" 2> >(tee "$out/native-$PLATFORM.stderr" >&2)
+      - name: Compress raw files over 256 MiB (hashes stay in large-artifacts.json)
+        if: always()
+        run: |
+          set -uo pipefail
+          mkdir -p "$RUNNER_TEMP/wp14-out"
+          [ "$PLATFORM" = windows ] || sudo chown -R "$(id -u)" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
+          # A sparse device snapshot is kept in its compact form beside it
+          # (IMAGE.blocks + IMAGE.extents.json; tests/wp14_adapter/unsparse.py
+          # rebuilds and hash-checks it), so the full image is not uploaded.
+          find "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" -type f -size +256M 2>/dev/null | while read -r f; do
+            if [ -f "$f.extents.json" ]; then echo "compact form kept: $f"; rm -f "$f"
+            else echo "zstd $f"; zstd -q -T0 -3 --rm "$f" || true; fi
+          done
+          find "$RUNNER_TEMP/wp14-evidence" -type d -name work -prune -exec rm -rf {} + 2>/dev/null || true
+          du -sh "$RUNNER_TEMP/wp14-out" "$RUNNER_TEMP/wp14-evidence" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-package-${{ matrix.platform }}
+          path: ${{ runner.temp }}/wp14-out
+          compression-level: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-native-evidence-${{ matrix.platform }}
+          path: ${{ runner.temp }}/wp14-evidence
+          compression-level: 1
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-binaries-${{ matrix.platform }}
+          path: |
+            build/host/tapectl
+            build/host/tapectl.exe
+          if-no-files-found: ignore
+      - name: Verdict (a failing half is raised as an annotation with its stderr tail)
+        run: |
+          set -uo pipefail
+          out="$RUNNER_TEMP/wp14-out"
+          echo "image: ${{ steps.image.outcome }}  native: ${{ steps.native.outcome }}"
+          for half in image native; do
+            [ "$half" = image ] && o="${{ steps.image.outcome }}" || o="${{ steps.native.outcome }}"
+            [ "$o" = success ] && continue
+            msg=$(tail -n 45 "$out/$half-$PLATFORM.stderr" 2>/dev/null | tr -d '\r' | cut -c1-200 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=WP-14 $half cases on $PLATFORM ($o)::${msg}"
+          done
+          if [ "${{ steps.native.outcome }}" != success ]; then
+            # The last response written names the case native.py stopped on.
+            "$PY" - "$RUNNER_TEMP/wp14-evidence" <<'PYEOF' || true
+          import json, pathlib, sys
+          rs = sorted(pathlib.Path(sys.argv[1]).glob('*-response.json'), key=lambda p: p.stat().st_mtime)
+          if rs:
+              r = json.loads(rs[-1].read_text())
+              t = r.get('trace') or {}
+              msg = (f"case {r.get('case')}: exit {r.get('exit')}, refusal {t.get('refusal')}\n"
+                     f"stdout: {r.get('stdout', '')[-1500:]}\nstderr: {r.get('stderr', '')[-1500:]}")
+              print('::error title=WP-14 last native response::' + msg.replace('%', '%25').replace('\r', '').replace('\n', '%0A'))
+              # Time spent per case: each response's mtime after the previous one.
+              times, prev = [], None
+              for p in rs:
+                  m = p.stat().st_mtime
+                  if prev is not None:
+                      times.append((m - prev, p.name.replace('-response.json', '')))
+                  prev = m
+              top = sorted(times, reverse=True)[:12]
+              print('::warning title=WP-14 slowest native cases::' + '%0A'.join(f'{t:7.1f}s {n}' for t, n in top))
+          ts = sorted(pathlib.Path(sys.argv[1]).glob('capture-*/transcript.jsonl'), key=lambda p: p.stat().st_mtime)
+          if ts:
+              lines = []
+              for x in ts[-1].read_text().splitlines()[-25:]:
+                  e = json.loads(x)
+                  lines.append(f"{e.get('t')} {e.get('kind')} {e.get('label') or ''} exit={e.get('exit')} "
+                               f"seconds={e.get('seconds')} events={e.get('events')}")
+              print(f'::warning title=WP-14 transcript of {ts[-1].parent.name}::' + '%0A'.join(lines))
+          PYEOF
+          fi
+          test "${{ steps.image.outcome }}" = success && test "${{ steps.native.outcome }}" = success
+
+  wp14-package-census:
+    # The package's own closed census over all six JSONs (qualification.py) and
+    # its Git-object identity audit (a8_identity.py) against the publication on
+    # Verification main. Neither is acceptance: Verification disposes.
+    name: WP-14 package — closed census and Git identity
+    needs: wp14-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: mmsanders/Digital-Tape-Verification
+          path: verification-repo
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-package-*
+          path: ${{ runner.temp }}/bundle
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wp14-native-evidence-*
+          path: ${{ runner.temp }}/native-captures
+      - name: Closed census (tests/wp14_r1/qualification.py)
+        run: |
+          set -euo pipefail
+          b="$RUNNER_TEMP/bundle"
+          for z in "$b"/*.zst; do [ -e "$z" ] && zstd -q -d --rm "$z"; done
+          ls -la "$b"
+          python3 -B tests/wp14_adapter/census.py --head "$HEAD_SHA" \
+            --captures "$RUNNER_TEMP/native-captures" --relocations "$RUNNER_TEMP/relocations.json" \
+            "$b" | tee "$RUNNER_TEMP/census.json"
+      - name: Git identity (tests/wp14_r1/a8_identity.py)
+        run: |
+          set -euo pipefail
+          # The import commit is the last commit that touched the imported tree
+          # (binding commits never do); the publication is its declared source.
+          imp=$(git log --format=%H -1 -- tests/wp14_r1)
+          pub=$(python3 -c "import json;print(next(p['source_commit'] for p in json.load(open('tests/IMPORTS.json'))['packages'] if p['path']=='tests/wp14_r1'))")
+          echo "import commit $imp, publication $pub, candidate $HEAD_SHA"
+          # ADR-175 changes only the mechanical pin operand; the immutable
+          # imported audit and all its assertions still run unchanged.
+          python3 -B tests/wp14_adapter/a8_identity.py --verification verification-repo --product . \
+            --publication "$pub" --candidate "$HEAD_SHA" --import-commit "$imp" \
+            --import-path tests/wp14_r1 --golden-path tests/golden | tee "$RUNNER_TEMP/a8-identity.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wp14-census
+          path: |
+            ${{ runner.temp }}/census.json
+            ${{ runner.temp }}/a8-identity.json
+            ${{ runner.temp }}/relocations.json
+          if-no-files-found: ignore

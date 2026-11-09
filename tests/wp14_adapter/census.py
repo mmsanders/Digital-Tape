@@ -3,6 +3,12 @@
 
 Original request/response JSON, hashes, observations and assertions stay intact.
 Only file IO resolves relocated runner paths to downloaded capture artifacts.
+
+Without --platforms the three-platform census runs exactly as before. With
+--platforms (ADR-206, Software658 comment 6640086870) the named platforms are
+validated by the imported companion oracle (tests/wp14_supported_r1) before
+any evidence is read (usage errors exit 64); its retained-byte audit and
+audit_platforms then run unchanged over the named platforms only.
 """
 import argparse
 import hashlib
@@ -13,6 +19,7 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / 'wp14_r1'))
+sys.path.append(str(HERE.parent / 'wp14_supported_r1'))
 import native
 import oracle
 import qualification
@@ -37,18 +44,23 @@ def retained(original, captures, platform, checked):
     if not path.is_relative_to(root):
         raise ValueError('capture path escapes artifact root')
     if not path.exists():
-        compressed = Path(str(path) + '.zst')
-        extents = Path(str(path) + '.extents.json')
-        if compressed.exists():
-            subprocess.run(['zstd', '-q', '-d', str(compressed), '-o', str(path)], check=True)
-        elif extents.exists():
-            subprocess.run([sys.executable, str(HERE / 'unsparse.py'),
-                            str(extents), str(path)], check=True, stdout=sys.stderr)
-            # unsparse authenticated the full logical bytes, not only extents.
-            checked[path] = json.loads(extents.read_text())['sha256']
+        restore(path, checked)
     if not path.is_file():
         raise FileNotFoundError(path)
     return path
+
+
+def restore(path, checked):
+    """Mechanically restore a logical file from its retained .zst or sparse form."""
+    compressed = Path(str(path) + '.zst')
+    extents = Path(str(path) + '.extents.json')
+    if compressed.exists():
+        subprocess.run(['zstd', '-q', '-d', str(compressed), '-o', str(path)], check=True)
+    elif extents.exists():
+        subprocess.run([sys.executable, str(HERE / 'unsparse.py'),
+                        str(extents), str(path)], check=True, stdout=sys.stderr)
+        # unsparse authenticated the full logical bytes, not only extents.
+        checked[path] = json.loads(extents.read_text())['sha256']
 
 
 def main():
@@ -56,12 +68,31 @@ def main():
     parser.add_argument('--head', required=True)
     parser.add_argument('--captures', required=True, type=Path)
     parser.add_argument('--relocations', required=True, type=Path)
+    parser.add_argument('--platforms', nargs='?', const='',
+                        help='sorted unique list including linux and windows; '
+                             'omitted means the original linux,macos,windows census')
     parser.add_argument('bundle', type=Path)
     args = parser.parse_args()
-    platforms = ('linux', 'macos', 'windows')
+    selected = None
+    if args.platforms is not None:
+        # Validated before any evidence is read; never a fallback to fewer platforms.
+        import qualification_supported
+        import retained as retained_oracle
+        try:
+            selected = qualification_supported.parse_platforms(args.platforms)
+        except ValueError as error:
+            print('usage: --platforms: ' + str(error), file=sys.stderr)
+            raise SystemExit(64)
+    platforms = selected or ('linux', 'macos', 'windows')
     images = {p: json.loads((args.bundle / ('image-' + p + '.json')).read_text()) for p in platforms}
     natives = {p: json.loads((args.bundle / ('native-' + p + '.json')).read_text()) for p in platforms}
     paths, proof, checked = {}, [], {}
+    if selected is not None:
+        # The companion oracle's retained-byte audit over every named capture,
+        # index, snapshot and dump; this adapter only restores files for it.
+        proof.extend(retained_oracle.audit_retained(
+            natives, args.captures, selected, resolver=lambda path: restore(path, checked)))
+        ignored = retained_oracle.ignored_inputs(args.bundle, args.captures, selected)
     c60 = args.bundle / 'authenticated-c60.wav'
 
     def bind(original, path, expected, platform):
@@ -118,7 +149,12 @@ def main():
     compare = runner.compare_wav
     runner.compare_wav = lambda source, output: compare(paths[str(source)], paths[str(output)])
     args.relocations.write_text(json.dumps(proof, indent=2) + '\n')
-    print(json.dumps(qualification.audit(images, natives, args.head), indent=2))
+    if selected is None:
+        print(json.dumps(qualification.audit(images, natives, args.head), indent=2))
+    else:
+        result = qualification_supported.audit_platforms(images, natives, args.head, selected)
+        result['ignored'] = ignored
+        print(json.dumps(result, indent=2))
 
 
 if __name__ == '__main__':
