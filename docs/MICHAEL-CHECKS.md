@@ -16,8 +16,15 @@ following:
 - **not acceptable**, with a note: too slow, too loud, too quiet, wrong, and so on.
 
 **How the verdict decides:**
-- The verdict decides, whatever the firmware's numbers say.
-- A miss of more than 20% against a target goes to PM before it is accepted.
+- For the perceptual/timing criteria ADR-208 names, a met target with an unacceptable
+  verdict fails; an acceptable recorded timing miss may pass under that method.
+- A miss of more than 20% needs a recorded PM disposition before acceptance.
+- The verdict never waives strict zero commit underruns, the inclusive resume window
+  against the last logged position, callback-derived copy progress, atomicity/count/
+  record-integrity requirements, or the output-cap margin.
+- Preserve failed attempts and actual numbers. The record must match the candidate,
+  exact raw log and source-build/binary linkage declared for its method. Simulations
+  and injected-delay controls are not physical acceptance entries.
 
 **Output caps:**
 - Record the phone app, the headphones or speaker distance, and the reading at maximum

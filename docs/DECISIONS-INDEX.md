@@ -207,4 +207,6 @@ purchase, CLAUDE.md §5) · 132 and 131's infrastructure assignment → 133 · 1
 
 | [ADR-208](DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria) | 2026-11-06 PST | Hands-on acceptance | Michael's verdict plus firmware self-timing for feel/timing; caps kept, phone-app measurement with 5 dB margin; bought-in battery protection; ~$30 instruments; CID dropped as host requirement; self-run Teensy power-cut test; MICHAEL-CHECKS log; DRAFT-11 carries row changes |
 
-138 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.
+| [ADR-209](DECISIONS.md#adr-209--finish-pre-parts-interfaces-and-put-the-first-board-on-the-critical-path) | 2026-11-08 PST | Pre-parts executable work / first-board critical path | Runner/census/order/kit integrated; Software674, Hardware675 and V405 bind then implement new timing/selfrun routes; CID diagnostics/P4 fail-closed/SPI residual scope; F398 wording fixed; Teensy now blocks target validation |
+
+139 entries. Regenerate after appending an ADR; never edit existing `DECISIONS.md` entries.

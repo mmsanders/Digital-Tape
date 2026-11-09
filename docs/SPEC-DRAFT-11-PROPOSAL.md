@@ -27,7 +27,7 @@ closed independent preflight. Hashed DRAFT-10 files remain unchanged.
 | **End of tape** | `at_end` releases the play button within 50 ms | At `at_end`, audio stops within 50 ms and the LED ring shows the end state until Stop is pressed. Firmware never moves a key; Play stays latched |
 | **Cartridge full mid-record** | On `TAPE_ERR_CARTRIDGE_FULL`, firmware stops the transport, releases the buttons, and commits. The recording up to that point is present on the next mount | On `TAPE_ERR_CARTRIDGE_FULL`, firmware stops the transport and commits; the LED ring shows red until Stop. Keys stay where they are. After successful commit, the recording up to that point is present on the next mount. Commit failure retains the existing `FAULTED`/I/O and remount outcomes; it does not promise preservation after failed commit |
 | **Scrub ramp** → **Scrub** | Old text describes 4.0×→12.0× over 1.5 s; its claim that the goldens use that table is inaccurate | Rew/FF rate follows **press depth**: a monotonic mapping from the lightest detected press to full depth. Full depth gives 12.0×; the lightest press and curve are set in WP-20 with Michael. Reverse mirrors. Both pressed gives no scrub; works with Play latched or not. Preserve the actual `tests/golden/MANIFEST`: forward `0.25:32000,0.5:32000,1:32000,2:32000,4:16000`, reverse -1× and -2×. No golden bytes, rates or hashes change |
-| **Output cap** | Codec output limited … 85 dB SPL on the specified reference headphones, re-asserted every boot, unreachable from any user control. Witnessed by Michael | **Two caps.** (H) Headphone/aux-out jack: unchanged, 85 dB SPL on the reference headphones. (S) Speaker: maximum **[S2 value, from Hardware's toy-safety research]** at the stated distance and weighting, enforced in the amplifier/codec configuration, re-asserted every boot, unreachable from any user control. Both checked by the ADR-208 method: a phone sound-level app at maximum volume (headphones: phone mic sealed to the ear cup of the headphones in use; speaker: at the stated distance), reading ≤ limit − 5 dB, recorded by Michael in MICHAEL-CHECKS; never raised above the measured reading. Verification checks the record and that the codec/amplifier configuration and boot path set the cap |
+| **Output cap** | Codec output limited … 85 dB SPL on the specified reference headphones, re-asserted every boot, unreachable from any user control. Witnessed by Michael | **Two caps.** (H) Headphone/aux-out jack: unchanged, 85 dB SPL on the headphones actually in use (identity recorded). (S) Speaker: maximum **[S2 value, from Hardware's toy-safety research]** at the stated distance and weighting, enforced in the amplifier/codec configuration, re-asserted every boot, unreachable from any user control. Both checked by the ADR-208 method: a phone sound-level app at maximum volume (headphones: phone mic sealed to the ear cup of the headphones in use; speaker: at the stated distance), reading ≤ limit − 5 dB, recorded by Michael in MICHAEL-CHECKS; never raised above the measured reading. Verification checks the record and that the codec/amplifier configuration and boot path set the cap |
 | *(new)* **Speaker mute** | — | Speaker is silent while headphones are inserted and while recording. Headphones continue to play during recording |
 | *(new)* **Record source** | — | Aux in when a plug is detected, otherwise the microphone |
 | **Record light** | Remaining-space indication includes “at 0 the record button does not hold” | Preserve the remaining-space indication, but remove the auto-release/non-holding claim. At full, recording stops/commits and the LED ring shows red; mechanical keys stay where they are until Stop |
@@ -35,9 +35,13 @@ closed independent preflight. Hashed DRAFT-10 files remain unchanged.
 ## ADR-208 hands-on method — further `spec/acceptance.md` row changes
 
 Added 6 November 2026 PST on Michael's direction ([ADR-208](DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)).
-Every limit below keeps its number as the target. Only the method changes: the firmware
-times itself on the MCU timer and logs the values, and Michael's verdict in
-[MICHAEL-CHECKS](MICHAEL-CHECKS.md) decides. A miss of more than 20% goes to PM.
+Timing/feel rows keep their numeric targets. The firmware times itself on the MCU
+timer and logs the values; Michael's matched verdict decides those judgments.
+A miss greater than20% requires recorded PM disposition BEFORE acceptance. Strict
+counted/structural facts remain requirements: zero commit underruns, inclusive resume
+window against the last logged live position, callback-derived progress, >=1000
+distinct qualifying cuts with no torn/corrupt/neighbour damage, valid build/log
+records, and the cap's5dB margin. An acceptable verdict cannot erase their failure.
 
 | Row | Current method | Proposed method |
 |---|---|---|
@@ -49,7 +53,7 @@ times itself on the MCU timer and logs the values, and Michael's verdict in
 | **Output cap** | SPL meter and coupler | As in the revised row above |
 | **Media atomicity** | Switched supply, ≥ 1,000 cuts per SKU with revision | Teensy self-run: firmware switches card power through a small load switch, observes card busy on its own bus, cuts, re-powers, reads target and neighbours; ≥ 1,000 cuts per card model in which firmware saw busy at the cut; zero torn. Identity = brand, part number, capacity, photo; CID logged by firmware when available. Torn block remains a format blocker |
 | **Hardware safety limits — independent audit paragraph** | Procedure, instrument model, calibration, ambient, raw data, derivation, uncertainty | Michael witnesses; evidence is design review, the protection part's datasheet, and multimeter/thermometer spot checks. Limits unchanged |
-| **Worst-case thermal** | Junction temperatures of charger, regulator and MCU reported individually | Surface and cell temperature by thermometer/touch; junction temperatures from datasheet thermal resistance × measured current. Limits unchanged |
+| **Worst-case thermal** | Junction temperatures of charger, regulator and MCU reported individually | Surface and cell temperature by thermometer/touch, plus protection-part datasheet/design evidence. No individual junction-report prerequisite. Any optional thermal-rise design estimate uses applicable thermal resistance and dissipated POWER with stated conditions, not current alone. Limits unchanged |
 | **Charge window / deep-discharge latch** | Verified by sweeping cell temperature | Met by a protected cell and a charger/protection part whose datasheet guarantees the window and cutoff; spot-checked. Phase 5; charging gate stays CLOSED |
 
 These are method changes to rows already in this proposal's scope (firmware criteria and
@@ -74,7 +78,7 @@ safety limits). No TAPEFS byte, engine API, error code, crash outcome or golden 
 - WP-19 must define source-selection behavior on plug transitions, including
   settling/debounce. Steady-state aux preference is already decided.
 - S2 still needs an exact source-supported limit, distance/weighting, signal/duration,
-  uncertainty and independent method review. Hardware's recommendation is an input,
+  source-backed research/design review under the phone method (threshold S2 minus5dB), not a retired uncertainty audit. Hardware's recommendation is an input,
   not an issued safety limit. Michael's authorization remains required.
 
 ## Changes to "Hardware safety limits"
@@ -88,11 +92,20 @@ safety limits). No TAPEFS byte, engine API, error code, crash outcome or golden 
 ## Change to guardrail 11 (CLAUDE.md §1)
 
 > 11 — Output caps, enforced in the codec/amplifier and re-asserted at boot, unreachable from
-> user controls: 85 dB on the specified reference headphones; the speaker cap in
-> spec/acceptance.md.
+> user controls:85dB on the headphones actually in use, checked at <=80dB by the
+> ADR-208 phone-app method; speaker limit S2 checked at <=S2-5dB and its stated
+> distance. Values/identity/method are recorded; no subjective increase beyond the
+> measured cap. Speaker value still awaits issue in spec/acceptance.md.
 
 ## Not changed
 
-Guardrail 02 (scrub without filtering or pitch preservation), the play ring, warm instant-on,
-cold instant-on, resume position, record-light remaining-space meaning, copy progress and
-media atomicity stay as written, except for the explicitly proposed no-auto-release wording above.
+Engine/format semantics, guardrail02, play-ring requirements, actual golden bytes
+and numeric targets remain unchanged. The explicitly proposed firmware policies
+and ADR-208 timing/feel/cap/thermal/card methods change as described above; resume
+window/callback progress/zero-underrun/atomicity facts remain strict. No new engine
+API/error/crash behavior or automatic physical acceptance is issued here.
+
+**8 November PM revision (ADR-209):** applies V398 F398-1..4 wording findings.
+Optional CID/legacy examples are delimited in WP-05; new selfrun-r1/plan5 follows
+the issued method decision and independent binding, not a quiet edit of old tests.
+DRAFT-10 remains byte-identical; this proposal is not in force.
