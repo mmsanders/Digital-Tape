@@ -93,15 +93,15 @@ const phase3 = () => nodes.roadmap.innerHTML;
 const baseline3 = phase3();
 assert.match(phase3(), /Roadmap · Phase 3 · open/);
 assert.match(phase3(), />1\/12</);
-assert.match(phase3(), /<b>3<\/b> in round/);
+assert.match(phase3(), /<b>4<\/b> in round/);
 assert.match(phase3(), /<b>2<\/b> blocked/);
-assert.match(phase3(), /<b>6<\/b> to do/);
+assert.match(phase3(), /<b>5<\/b> to do/);
 assert.match(phase3(), /entry items · 0 of 3 passed/);
 assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
 assert.match(phase3(), /Fabrication and charging CLOSED/);
 assert.match(phase3(), /DRAFT-11 remains proposed/);
-for (const issue of ['Digital-Tape/issues/667', 'Digital-Tape/issues/652', 'digital-tape-verification/issues/397']) {
+for (const issue of ['Digital-Tape/issues/674', 'Digital-Tape/issues/675', 'digital-tape-verification/issues/405']) {
   assert(phase3().includes(issue));
 }
 const ledger = fs.readFileSync('../../docs/PHASE3-LEDGER.md', 'utf8');

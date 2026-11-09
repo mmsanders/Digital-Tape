@@ -5302,3 +5302,83 @@ feel, firmware self-measurement for numbers, bought-in protection for the batter
 
 **Reversal cost.** Low. Buying instruments later restores stricter methods without
 redesign; the firmware's self-reported timings stay useful either way.
+
+## ADR-209 — Finish pre-parts interfaces and put the first board on the critical path
+**Date:** 2026-11-08 PST
+**Status:** ADOPTED by PM [#669](https://github.com/mmsanders/Digital-Tape/issues/669)
+on Michael's explicit latest review/pre-parts assignment request.
+
+**Latest evidence.** V397 independently clears runnera4ed3e71, census78f1631f and
+orderdbaa5a03. Software integrations3558a88a/211f8a9d/c30881d9 pass113/111/111
+current-base checks; kit8893c99 from4976cad0 passes119/119, carrying V394 unchanged
+checker/helper/import scope. These merge blockers are resolved. No target rung
+advances from them. V398 publications200ecef7/9aa2716a/321c5236 supply preflight
+findings,41/10 unbound timing semantics and11 planted-tear judge cases. PR673's
+latestc32f1a56 declares new selfrun-r1/plan5 before implementation.
+
+**P3/CID.** Select declaration optionB. Missing CID and observed CID disagreements
+are retained diagnostics, never a CID presence/equality gate or fabricated value.
+Brand/model or part/capacity/photo, labeled unit, plan/run and build/raw-log links
+establish required identity. Unknown retail part number with unavailable packaging
+is recorded unknown; no invented SKU. Malformed required records/identity still fail.
+
+**P4/completed OLD.** Under the declared self-observed route, a fully validated
+matched/preconditioned row with complete accepted payload, busy entry and observed
+busy_deassert_us<=cut_us that reads OLD gives run-integrity FAIL and no qualifying
+credit. Equality counts as observed ended, as declared. Always list/preserve it in
+completed_before_old; do not call it TORN or a proven card defect. Completed NEW
+is a retained late miss. No external-U proof or retired calibration requirement.
+
+**P1/P2.** Bind declared fixed logical constants: busy-sample gap<=5.0us qualifies
+(greater is retained miss); observed card-off voltage<=200mV lawful (greater is
+run problem), with finite/nonboolean types and strict build/log identity. These
+are the firmware's observations, not a claim of externally proved rail timing.
+
+**SPI scope.** Authorize SPI4MHz selfrun-r1 as ADR208's Phase3 card-MODEL atomicity
+evidence route. Preserve qualification_scope:spi-characterisation and actual bus/
+speed/one-unit-per-model residual limitations. A later complete independently
+checked >=1000-distinct-qualifying-cut run, all damage/controls/records and Michael
+entry may satisfy A-6 under this method. This does not prove nativeSD4 equivalence,
+production-copy speed, other modes/cards or lifetime reliability. No physical run
+is cleared today; no native-mode rig or retired instruments are required now.
+
+**Pre-parts outcomes.** Software674 declares exact F3 timing/serial/build/binary/
+150ms-control/record interfaces, then implements only after V405's executable
+binding. Hardware675 completes public selfrun slots, verified staged small cart
+and S2 research, then new host-side checker after V405 binding in the same673 PR.
+Existingc32 declaration plus this decision is ready for independent binding now;
+no repeated declaration-only arbitration. Characterisation drive firmware needs
+its own declared/bound interface; no implementation by inference. F4 remains
+reserved/WP18-19; no recording/copy scope. New versions/imports, old trees fixed.
+V405 publishes ready lanes separately and reviews returned exact heads; no third
+campaign for accepted kit/Hardware artifacts. Software owns shared CI/integration;
+conditional scope sign-off applies only after independent clearance and meaningful
+required current-base CI. Michael manually starts issues; no listeners/subworkers.
+
+**Words and strict facts.** Apply F398-1..4: human timing/feel judgment cannot waive
+zero underruns, strict resume window/callback progress/atomicity/count/record facts
+or cap margins. >20% timing miss needs recorded PM disposition BEFORE acceptance.
+Use in-use headphones/phone threshold80dB and pending S2 minus5dB. Delimit old
+mandatory-CID/rail/U examples as legacy-only. Remove retired junction-report gate;
+optional design thermal rise uses applicable resistance and dissipated POWER, not
+current alone. DRAFT11 proposal changes, DRAFT10 stays frozen. S2 and Michael's
+authorization remain prerequisites to issuance; no new numeric speaker cap here.
+
+**Critical path.** Missing Teensy now blocks real-board boot/USB/nativeSD bring-up;
+missing audio adapter/connections blocks I2S/headphone testing. Target PCM, actual
+instance/stack/timing/removal/card cuts cannot be proved off-target. Recommend the
+small Teensy4.1/RevD-D2 audio/basic connections order now, independently of later
+speaker/mic/LED/Hall/second-slot/rig purchases. Hardware verifies live SKU/stock/
+fit/price; historical$71.95/$176.86 figures are estimates, not confirmed checkout.
+No order or new spending approval inferred; Michael places/pays. Useful bounded
+674/675/405 preparation remains, not an excuse to call target work unblocked.
+
+**Holds.** Still1/12 passed; F3 preparation now IN ROUND, actual target unmeasured.
+Selfrun method not fully cleared, zero real cards qualified. No physical/device/
+flash/energizing action in these assignments; no batching, DRAFT11 issuance,
+fabrication/charging or purchase authority. Limits/engine/goldens unchanged.
+**Evidence:** [PM669 review](REVIEW/PM669-PREPARTS-2026-11-08.md).
+**Rationale.** Convert ready semantics/declarations into executable work while
+calling out the actual hardware dependency and honoring the affordable method.
+**Reversal cost.** New route/oracles are versioned; stronger native-mode evidence
+can be added later without falsifying the scope of existing SPI results.
