@@ -223,6 +223,15 @@ atomicity-test:
 	  && cd $(CHAR) && $(PY) -B verification/rig_cli_review_r1/run.py --judge media_atomicity.py \
 	  --negative-judge negative-controls/media_atomicity_baf176c.py --out $$out >/dev/null && rm -rf $$out \
 	  && echo "OK  atomicity judge: V392 rig_cli_review_r1 (CLI refuses deep JSON, exit 2) independent regressions pass"
+	@out=$$(mktemp -d) && cd $(CHAR) && $(PY) -B verification/selfrun_plan5_r1/run.py --judge media_atomicity.py \
+	  --out $$out/run >/dev/null && rm -rf "$$out" \
+	  && echo "OK  atomicity judge: V405 selfrun_plan5_r1 (plan v5 / selfrun-r1, 180 CLI cases) independent regressions pass"
+	@neg=$$(mktemp -d) \
+	  && sed 's/if why == SR_COMPLETED_BEFORE and v == "OLD":/if False:/' $(CHAR)/media_atomicity.py > $$neg/media_atomicity.py \
+	  && ! cmp -s $(CHAR)/media_atomicity.py $$neg/media_atomicity.py \
+	  && cd $(CHAR) && ! $(PY) -B verification/selfrun_plan5_r1/run.py --judge $$neg/media_atomicity.py \
+	  --out $$neg/run >/dev/null && rm -rf "$$neg" \
+	  && echo "OK  atomicity judge: selfrun-r1 suite proven able to go red (P4 completed-OLD rule removed)"
 
 ## spec-check — spec/hw content and revision must move together
 ##

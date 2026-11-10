@@ -1,6 +1,9 @@
 # Power-cut self-run evidence schema, revision 1 (declaration, correction 2)
 
-**Owner:** Hardware Lead · **Status:** PUBLIC INTERFACE DECLARATION. **Not implemented.**
+**Owner:** Hardware Lead · **Status:** PUBLIC INTERFACE DECLARATION. **Host side implemented** in
+`media_atomicity.py` after importing V405 `tests/selfrun_plan5_r1` (merge `843981f2`, tree
+`77fa80c6`) unchanged in a separate earlier commit. 180/180 bound CLI cases pass; awaiting V405's
+independent disposition. The cut firmware is **not** implemented.
 - **First declared** 9 November 2026 at PR #673 head `c32f1a56`, after Verification's V398 stage 3
   review (disposition at Verification `321c5236`, package `tests/power_cut_selfrun_r1` tree
   `20dde468`).

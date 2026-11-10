@@ -57,6 +57,12 @@ qualified completed write that reads back OLD fails run integrity
 (V382, 8879dbac) and verification/rig_records_r1 (45a6dda0). A rig-r2 row under
 a plan-v3 run is refused.
 
+selfrun-r1 (plan version 5, POWER-CUT-SCHEMA-R1 correction 2, ADR-209): the
+Teensy self-run route. Card model and unit identity, optional diagnostic CID,
+P1/P2 fixed in code, a completed write that reads OLD fails the run, and the
+judge reads the raw serial log and checks the build record and hex bytes.
+Imported regressions first: verification/selfrun_plan5_r1 (V405, 843981f2).
+
     ./media_atomicity.py plan --sku S --revision R --cid C --attempts 1500 --out plan.json
     ./media_atomicity.py judge --plan plan.json [--plan ext.json] --results run.jsonl
 
@@ -381,6 +387,10 @@ def _check_manifest(m, c: _Manifest, policy: Policy) -> None:
 
 def cmd_plan(a) -> int:
     prior = strict_loads(Path(a.extend).read_text(encoding="utf-8")) if a.extend else None
+    if a.method is not None or (prior is not None and prior.get("plan_version") == 5):
+        return cmd_plan_selfrun(a, prior)
+    if a.card or a.build_record or a.t_sched_us is not None:
+        sys.exit("plan: --card, --build-record and --t-sched-us need --method selfrun-r1")
     rig_r2 = bool(a.manifest) or (prior is not None and prior.get("plan_version") == 4)
     if rig_r2:
         # Schema R2 section 3: a v4 plan binds the exact manifest bytes, and a
@@ -811,9 +821,18 @@ def judge(plans: list[dict], rows: list[dict], policy: Policy = PRODUCTION,
 def cmd_judge(a) -> int:
     try:
         plans = [strict_loads(Path(p).read_text(encoding="utf-8")) for p in a.plan]
+        if any(isinstance(p, dict) and p.get("plan_version") == 5 for p in plans):
+            return cmd_judge_selfrun(a, plans)
+        if a.serial or a.build_record or a.hex or a.run_jsonl:
+            print("judge: --serial, --build-record, --hex and --run-jsonl are for plan-v5 runs",
+                  file=sys.stderr)
+            return 2
+        if not a.results:
+            print("judge: --results is required", file=sys.stderr)
+            return 2
         rows = [strict_loads(l) for l in Path(a.results).read_text(encoding="utf-8").splitlines()
                 if l.strip()]
-    except (UnicodeDecodeError, ValueError, RecursionError) as e:
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as e:
         print(f"judge: refused, not strict JSON: {e}", file=sys.stderr)
         return 2
     manifest = None
@@ -871,6 +890,494 @@ def cmd_judge(a) -> int:
     return 0 if res["verdict"] == "PASS" else 2
 
 
+# --------------------------------------------------------------------------
+# selfrun-r1 (plan version 5): POWER-CUT-SCHEMA-R1, correction 2, ADR-209
+# --------------------------------------------------------------------------
+# Imported regressions first: verification/selfrun_plan5_r1 (V405, 843981f2,
+# tree 77fa80c6). This route is separate from v3/v4/rig-r2, which are unchanged.
+
+METHOD_SELFRUN = "selfrun-r1"
+SAMPLE_TO_CUT_MAX_US = 5.0          # P1: equality qualifies
+VCARD_OFF_MAX_MV = 200              # P2: equality is lawful
+VCARD_OFF_RANGE_MV = (0, 4000)
+SELFRUN_RESIDUAL = ["bus: SPI at the logged sck_hz, not SD 4-bit",
+                    "busy timing and card-off voltage are self-observed",
+                    "one card unit per model"]
+SELFRUN_DIGEST_KEYS = ("run_id", "method", "card_model", "card_unit", "card_cid",
+                       "firmware_build", "hex_sha256", "t_sched_us", "block",
+                       "neighbour_offsets")
+SELFRUN_ROW_KEYS = frozenset((
+    "method", "iteration", "run_id", "plan_digest", "card_unit", "firmware_build",
+    "card_cid", "card_cid_after_cut", "bus_mode", "busy_line", "sck_hz",
+    "precondition_ok", "precondition_readback_hex", "readback_hex",
+    "neighbour_baseline", "neighbours", "payload_complete", "data_response_accepted",
+    "busy_entry_us", "busy_sampled_us", "busy_deassert_us", "cut_us",
+    "vcard_off_mv", "init_ms"))
+SR_COMPLETED_BEFORE = "busy ended before the cut"
+SR_INHERITED = ("run_id", "method", "card_model", "card_unit", "card_cid",
+                "firmware_build", "hex_sha256", "t_sched_us", "block", "neighbour_offsets")
+
+
+def selfrun_digest(plan: dict) -> str:
+    core = {k: plan[k] for k in SELFRUN_DIGEST_KEYS}
+    core["trials"] = [[t["iteration"], t["cut_offset_fraction"]] for t in plan["trials"]]
+    return _sha256(json.dumps(core, sort_keys=True, separators=(",", ":")).encode())
+
+
+def _int(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _t(v) -> bool:
+    """A time: finite JSON number >= 0, not a boolean. Never raises."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return v >= 0 if isinstance(v, int) else (math.isfinite(v) and v >= 0)
+
+
+def _t_or_none(v) -> bool:
+    return v is None or _t(v)
+
+
+def _cid_ok(v) -> bool:
+    return v is None or _is_hex(v, 32)
+
+
+def _card_problems(c) -> list[str]:
+    """CARD.json grammar (schema section 2). Empty list means valid."""
+    bad = []
+    if not isinstance(c, dict) or set(c) != {"card_model", "card_unit"}:
+        return ["card: exactly the keys card_model and card_unit"]
+    m, u = c["card_model"], c["card_unit"]
+    if not isinstance(m, dict) or set(m) != {"brand_line", "capacity_label", "part_number", "photos"}:
+        bad.append("card_model: exactly brand_line, capacity_label, part_number, photos")
+    else:
+        for k in ("brand_line", "capacity_label"):
+            if not _text(m[k]):
+                bad.append(f"card_model.{k}: non-empty string")
+        if m["part_number"] is not None and not _text(m["part_number"]):
+            bad.append("card_model.part_number: non-empty string or null")
+        ph = m["photos"]
+        if not isinstance(ph, list) or not ph:
+            bad.append("card_model.photos: one or more photos")
+        else:
+            for i, x in enumerate(ph):
+                if (not isinstance(x, dict) or set(x) != {"path", "sha256"}
+                        or not _text(x["path"]) or not _is_hex(x["sha256"], 64)):
+                    bad.append(f"card_model.photos[{i}]: exactly path and 64-hex sha256")
+    if not isinstance(u, dict) or set(u) != {"label", "back_print"}:
+        bad.append("card_unit: exactly label and back_print")
+    else:
+        if not _text(u["label"]):
+            bad.append("card_unit.label: non-empty string")
+        if not isinstance(u["back_print"], list) or not all(isinstance(x, str) for x in u["back_print"]):
+            bad.append("card_unit.back_print: list of strings")
+    return bad
+
+
+def _build_problems(b) -> list[str]:
+    if (not isinstance(b, dict) or set(b) != {"firmware_build", "hex_sha256"}
+            or not _is_hex(b["firmware_build"], 40) or not _is_hex(b["hex_sha256"], 64)):
+        return ["build record: exactly firmware_build (40 hex) and hex_sha256 (64 hex)"]
+    return []
+
+
+def _parse_t_sched(text: str):
+    try:
+        v = int(text)
+    except ValueError:
+        try:
+            v = float(text)
+        except ValueError:
+            return None
+    if isinstance(v, float) and not math.isfinite(v):
+        return None
+    return v if v > 0 else None
+
+
+def _plan_trials(rng, start: int, attempts: int) -> list:
+    return [{"iteration": n, "cut_offset_fraction": round(rng.random() * 1.5, 4)}
+            for n in range(start, start + attempts)]
+
+
+def cmd_plan_selfrun(a, prior) -> int:
+    """Plan version 5 (schema section 2). Refuses before writing anything."""
+    def refuse(why):
+        sys.exit(f"plan: refused: {why}")
+
+    if a.sku or a.revision or a.manifest or a.evidence:
+        refuse("--sku, --revision, --manifest and --evidence don't apply to selfrun-r1")
+    if a.method not in (None, METHOD_SELFRUN):
+        refuse(f"--method must be {METHOD_SELFRUN}")
+    rng = random.Random(a.seed)
+    if prior is not None:
+        if a.card or a.build_record or a.cid is not None or a.t_sched_us is not None:
+            refuse("a continuation inherits card, build, CID and t_sched; "
+                   "a new card unit or build needs a new run")
+        if (prior.get("plan_version") != 5 or prior.get("method") != METHOD_SELFRUN
+                or not all(k in prior for k in SR_INHERITED) or "trials" not in prior):
+            refuse("the plan being extended is not a selfrun-r1 plan")
+        try:
+            ok = prior.get("plan_digest") == selfrun_digest(prior)
+        except (KeyError, TypeError):
+            ok = False
+        if not ok:
+            refuse("the plan being extended doesn't match its own digest")
+        attempts = a.attempts if a.attempts is not None else 1
+        if attempts < 1:
+            refuse("--attempts must be at least 1 for a continuation")
+        start = max(t["iteration"] for t in prior["trials"]) + 1
+        plan = {k: prior[k] for k in ("plan_version",) + SR_INHERITED}
+        plan.update(planned_attempts=attempts, extends=prior["run_id"])
+    else:
+        if not (a.card and a.build_record):
+            refuse("--card and --build-record are required")
+        try:
+            card = strict_loads(Path(a.card).read_text(encoding="utf-8"))
+            build = strict_loads(Path(a.build_record).read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError, RecursionError) as e:
+            refuse(f"card or build record unreadable: {e}")
+        bad = _card_problems(card) + _build_problems(build)
+        if bad:
+            refuse("; ".join(bad))
+        for ph in card["card_model"]["photos"]:
+            try:
+                data = Path(ph["path"]).read_bytes()
+            except OSError:
+                refuse(f"photo {ph['path']} not found")
+            if _sha256(data) != ph["sha256"]:
+                refuse(f"photo {ph['path']} doesn't match its sha256")
+        if a.cid is not None and not _is_hex(a.cid, 32):
+            refuse("--cid must be 32 lowercase hex")
+        t_sched = _parse_t_sched(a.t_sched_us) if a.t_sched_us is not None else None
+        if t_sched is None:
+            refuse("--t-sched-us must be a finite number > 0")
+        attempts = (int(REQUIRED_QUALIFYING * DEFAULT_SURPLUS)
+                    if a.attempts is None else a.attempts)
+        if attempts < REQUIRED_QUALIFYING:
+            refuse(f"--attempts must be at least {REQUIRED_QUALIFYING}")
+        start = 1
+        label = card["card_unit"]["label"]
+        plan = {"plan_version": 5, "method": METHOD_SELFRUN,
+                "run_id": f"selfrun-{label.replace(' ', '-')}-{secrets.token_hex(8)}",
+                "card_model": card["card_model"], "card_unit": card["card_unit"],
+                "card_cid": a.cid, "firmware_build": build["firmware_build"],
+                "hex_sha256": build["hex_sha256"], "t_sched_us": t_sched,
+                "block": a.block, "neighbour_offsets": list(NEIGHBOUR_OFFSETS),
+                "planned_attempts": attempts, "extends": None}
+    plan.update(
+        required_qualifying=REQUIRED_QUALIFYING,
+        note=("required_qualifying is informational. The judge enforces its own "
+              "minimum and ignores this field (IR-018-06)."),
+        created=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        trials=_plan_trials(rng, start, attempts))
+    plan["plan_digest"] = selfrun_digest(plan)
+    out = json.dumps(plan, indent=2) + "\n"
+    if a.out:
+        Path(a.out).write_text(out)
+        print(f"wrote {a.out}\n  run_id  {plan['run_id']}\n  trials  {attempts} attempts, "
+              f"iterations {start}..{start + attempts - 1}")
+    else:
+        print(out)
+    return 0
+
+
+def normalise_serial(raw: bytes):
+    """Schema section 7. Returns (build_obj or None, rows_text list, run_jsonl bytes, problems).
+    Raises UnicodeDecodeError on non-UTF-8 input (the caller refuses)."""
+    raw.decode("utf-8")
+    parts = raw.split(b"\n")
+    tail = parts.pop()                       # bytes after the last \n
+    problems, build_lines, rows, out = [], [], [], []
+    if tail.startswith(b"ATOM") or tail.startswith(b"BUILD"):
+        problems.append("truncated tagged line")
+    for i, line in enumerate(parts):
+        if line.endswith(b"\r"):
+            line = line[:-1]
+        if line.startswith(b"BUILD") or line.startswith(b"ATOM"):
+            tag = b"BUILD " if line.startswith(b"BUILD") else b"ATOM "
+            body = line[len(tag):]
+            obj = None
+            if line.startswith(tag) and body[:1] not in (b" ", b""):
+                try:
+                    obj = strict_loads(body.decode("utf-8"))
+                except (ValueError, RecursionError):
+                    obj = None
+            if not isinstance(obj, dict):
+                problems.append(f"serial line {i + 1}: malformed tagged line")
+                continue
+            if tag == b"BUILD ":
+                build_lines.append((i, obj))
+            else:
+                rows.append((i, obj))
+                out.append(body + b"\n")
+    if len(build_lines) != 1:
+        problems.append(f"serial: expected exactly one BUILD line, found {len(build_lines)}")
+    elif rows and build_lines[0][0] > rows[0][0]:
+        problems.append("serial: the BUILD line comes after the first ATOM line")
+    build = build_lines[0][1] if len(build_lines) == 1 else None
+    if build is not None and (set(build) != {"firmware_build", "timer", "timer_hz"}
+                              or not _is_hex(build["firmware_build"], 40)
+                              or not _text(build["timer"]) or not _pos_int(build["timer_hz"])):
+        problems.append("serial: BUILD line must be exactly firmware_build, timer, timer_hz")
+        build = None
+    return build, [o for _, o in rows], b"".join(out), problems
+
+
+def _validate_selfrun(r: dict, n: int, plan: dict) -> str:
+    """Schema section 3.2. Returns the problem, or '' if the row is valid."""
+    if set(r) != SELFRUN_ROW_KEYS:
+        extra, missing = sorted(set(r) - SELFRUN_ROW_KEYS), sorted(SELFRUN_ROW_KEYS - set(r))
+        return f"row keys wrong (unknown {extra}, missing {missing})"
+    for k, want in (("method", METHOD_SELFRUN), ("run_id", plan["run_id"]),
+                    ("plan_digest", plan["plan_digest"]),
+                    ("card_unit", plan["card_unit"]["label"]),
+                    ("firmware_build", plan["firmware_build"]),
+                    ("bus_mode", "spi"), ("busy_line", "MISO")):
+        if r[k] != want or not isinstance(r[k], str):
+            return f"{k} does not match"
+    if not _pos_int(r["sck_hz"]):
+        return "sck_hz must be a positive integer"
+    for k in ("card_cid", "card_cid_after_cut"):
+        if not _cid_ok(r[k]):
+            return f"{k} must be null or 32 lowercase hex"
+    v = r["vcard_off_mv"]
+    if not _int(v) or not VCARD_OFF_RANGE_MV[0] <= v <= VCARD_OFF_RANGE_MV[1]:
+        return "vcard_off_mv must be an integer from 0 to 4000"
+    if v > VCARD_OFF_MAX_MV:
+        return "card not unpowered during the off-time (vcard_off_mv > 200)"
+    for k in ("payload_complete", "data_response_accepted", "precondition_ok"):
+        if not isinstance(r[k], bool):
+            return f"{k} must be a boolean"
+    if r["precondition_ok"] is not True:
+        return "precondition_ok is not true"
+    if _hex(r["precondition_readback_hex"]) != pattern(n - 1):
+        return "precondition readback is not exactly pattern N-1"
+    if _hex(r["readback_hex"]) is None or not _is_hex(r["readback_hex"], 2 * BLOCK):
+        return "readback missing or not 512 bytes"
+    for k in ("neighbours", "neighbour_baseline"):
+        d = r[k]
+        if not isinstance(d, dict) or set(d) != set(NEIGHBOUR_OFFSETS):
+            return f"{k} must have exactly {list(NEIGHBOUR_OFFSETS)}"
+        if not all(_is_hex(x, 2 * BLOCK) for x in d.values()):
+            return f"{k} entries must be 512 bytes of lowercase hex"
+    be, bs, de, cut = (r["busy_entry_us"], r["busy_sampled_us"],
+                       r["busy_deassert_us"], r["cut_us"])
+    if not _t(cut) or not all(_t_or_none(x) for x in (be, bs, de)):
+        return "busy/cut times must be finite numbers >= 0 (or null where allowed)"
+    if r["init_ms"] is not None and not _t(r["init_ms"]):
+        return "init_ms must be null or a finite number >= 0"
+    if (be is None) != (bs is None):
+        return "busy_sampled_us must be null exactly when busy_entry_us is null"
+    if be is not None and not (be <= bs <= cut):
+        return "busy times out of order (entry <= sampled <= cut)"
+    if de is not None and (be is None or not bs < de):
+        return "busy_deassert_us must follow the last busy sample"
+    if r["data_response_accepted"] is False and be is not None:
+        return "busy entry recorded without an accepted data response"
+    return ""
+
+
+def _qualifies_selfrun(r: dict) -> tuple[bool, str]:
+    """Schema section 3.3, on a validated row."""
+    if not r["payload_complete"]:
+        return False, "single-block payload not proven complete"
+    if not r["data_response_accepted"]:
+        return False, "data-response token not accepted"
+    if r["busy_entry_us"] is None:
+        return False, "busy entry not observed"
+    de = r["busy_deassert_us"]
+    if de is not None and de <= r["cut_us"]:
+        return False, SR_COMPLETED_BEFORE
+    if r["cut_us"] - r["busy_sampled_us"] > SAMPLE_TO_CUT_MAX_US:
+        return False, "busy sample older than 5 us at the cut"
+    return True, ""
+
+
+def judge_selfrun(plans: list, rows: list, *, serial_problems=(), build=None,
+                  build_record=None, hex_sha=None, hashes=None,
+                  policy: Policy = PRODUCTION) -> dict:
+    head = plans[0]
+    problems: list[str] = list(serial_problems)
+    for p in plans:
+        if p.get("plan_version") != 5 or p.get("method") != METHOD_SELFRUN:
+            problems.append(f"plan {p.get('run_id')}: not a plan-v5 selfrun-r1 plan "
+                            f"(a run can't mix plan versions)")
+            continue
+        try:
+            if p.get("plan_digest") != selfrun_digest(p):
+                problems.append(f"plan {p.get('run_id')}: digest does not match its contents")
+        except (KeyError, TypeError):
+            problems.append(f"plan {p.get('run_id')}: malformed")
+        if any(p.get(k) != head.get(k) for k in SR_INHERITED):
+            problems.append(f"plan {p.get('run_id')}: not a continuation of {head.get('run_id')}")
+    if problems and any("not a plan-v5" in x or "malformed" in x for x in problems):
+        return _selfrun_verdict(head, problems, {}, hashes)
+    # Build linkage (schema section 7).
+    if build is not None and build["firmware_build"] != head["firmware_build"]:
+        problems.append("BUILD line firmware_build differs from the plan")
+    if build_record is not None:
+        if build_record["firmware_build"] != head["firmware_build"]:
+            problems.append("build record firmware_build differs from the plan")
+        if build_record["hex_sha256"] != head["hex_sha256"]:
+            problems.append("build record hex_sha256 differs from the plan")
+        if hex_sha != build_record["hex_sha256"]:
+            problems.append("hex file bytes don't match the build record's hex_sha256")
+
+    trials: dict[int, dict] = {}
+    for p in plans:
+        for t in p["trials"]:
+            trials[t["iteration"]] = p
+    seen: dict[int, dict] = {}
+    for r in rows:
+        n = r.get("iteration")
+        if not _int(n) or n not in trials:
+            problems.append(f"trial {n!r}: malformed or not in any committed plan")
+            continue
+        if n in seen:
+            problems.append(f"trial {n}: duplicate result")
+            continue
+        seen[n] = r
+    for n in sorted(set(trials) - set(seen)):
+        problems.append(f"trial {n}: planned but not reported")
+
+    acc = dict(qualifying=0, non_qualifying=Counter(), verdicts=Counter(),
+               verdicts_nq=Counter(), tears=[], corrupt=[], neigh=[], damage_nq=[],
+               completed=[], cids=set(), cid_diff=[], vmax=None, gaps=[], sck=set())
+    plan_cid = head.get("card_cid")
+    if plan_cid is not None:
+        acc["cids"].add(plan_cid)
+    for n in sorted(seen):
+        r, p = seen[n], trials[n]
+        bad = _validate_selfrun(r, n, p)
+        if bad:
+            problems.append(f"trial {n}: {bad}")
+            continue
+        q, why = _qualifies_selfrun(r)
+        acc["sck"].add(r["sck_hz"])
+        acc["vmax"] = r["vcard_off_mv"] if acc["vmax"] is None else max(acc["vmax"], r["vcard_off_mv"])
+        if r["busy_sampled_us"] is not None:
+            acc["gaps"].append(r["cut_us"] - r["busy_sampled_us"])
+        a_, b_ = r["card_cid"], r["card_cid_after_cut"]
+        acc["cids"].update(x for x in (a_, b_) if x is not None)
+        if a_ is not None and b_ is not None and a_ != b_:
+            acc["cid_diff"].append({"iteration": n, "kind": "before_after", "values": [a_, b_]})
+        for x in (a_, b_):
+            if plan_cid is not None and x is not None and x != plan_cid:
+                acc["cid_diff"].append({"iteration": n, "kind": "vs_plan", "values": [plan_cid, x]})
+        if q:
+            acc["qualifying"] += 1
+        else:
+            acc["non_qualifying"][why] += 1
+        v = classify(bytes.fromhex(r["readback_hex"]), n)
+        (acc["verdicts"] if q else acc["verdicts_nq"])[v] += 1
+        if why == SR_COMPLETED_BEFORE and v == "OLD":      # P4, ADR-209
+            acc["completed"].append(n)
+            problems.append(f"trial {n}: completed write reads OLD (busy ended before the cut)")
+        damaged = False
+        if v == "TORN":
+            acc["tears"].append(n); damaged = True
+        elif v == "CORRUPT":
+            acc["corrupt"].append(n); damaged = True
+        for off in NEIGHBOUR_OFFSETS:
+            if r["neighbours"][off] != r["neighbour_baseline"][off]:
+                acc["neigh"].append([n, off]); damaged = True
+        if damaged and not q:
+            acc["damage_nq"].append(n)
+    if len(acc["sck"]) > 1:
+        problems.append("results span more than one SCK")
+    acc["planned"], acc["reported"] = len(trials), len(seen)
+    return _selfrun_verdict(head, problems, acc, hashes, policy)
+
+
+def _selfrun_verdict(head, problems, acc, hashes, policy: Policy = PRODUCTION) -> dict:
+    q = acc.get("qualifying", 0)
+    ok = (not problems and not acc.get("tears") and not acc.get("corrupt")
+          and not acc.get("neigh") and not acc.get("completed")
+          and q >= policy.min_qualifying)
+    cids = sorted(acc.get("cids", ()))
+    sck = sorted(acc.get("sck", ()))
+    gaps = acc.get("gaps", [])
+    return {
+        "method": head.get("method"), "run_id": head.get("run_id"),
+        "plan_digest": head.get("plan_digest"),
+        **{k: head.get(k) for k in ("card_model", "card_unit", "firmware_build",
+                                    "hex_sha256", "t_sched_us")},
+        "cids_seen": cids, "card_cid": cids[0] if len(cids) == 1 else None,
+        "cid_disagreements": acc.get("cid_diff", []),
+        "bus_mode": "spi" if sck else None, "sck_hz": sck[0] if len(sck) == 1 else None,
+        "qualification_scope": "spi-characterisation",
+        "residual_limits": list(SELFRUN_RESIDUAL),
+        "planned_attempts": acc.get("planned", 0), "reported": acc.get("reported", 0),
+        "qualifying": q, "required_qualifying": policy.min_qualifying,
+        "non_qualifying": dict(acc.get("non_qualifying", {})),
+        "verdicts": dict(acc.get("verdicts", {})),
+        "verdicts_non_qualifying": dict(acc.get("verdicts_nq", {})),
+        "torn_iterations": acc.get("tears", []), "corrupt_iterations": acc.get("corrupt", []),
+        "neighbour_damage": acc.get("neigh", []),
+        "damage_on_non_qualifying": acc.get("damage_nq", []),
+        "completed_before_old": acc.get("completed", []),
+        "vcard_off_mv_max": acc.get("vmax"),
+        "sample_to_cut_us_max": max(gaps) if gaps else None,
+        **(hashes or {"serial_sha256": None, "run_jsonl_sha256": None,
+                      "build_record_sha256": None}),
+        "problems": problems,
+        "verdict": "PASS" if ok else "FAIL",
+    }
+
+
+def cmd_judge_selfrun(a, plans) -> int:
+    def refuse(why):
+        print(f"judge: refused: {why}", file=sys.stderr)
+        return 2
+    if a.results or a.manifest or a.evidence:
+        return refuse("a plan-v5 run is judged from --serial; --results, --manifest "
+                      "and --evidence don't apply")
+    if not (a.serial and a.build_record and a.hex):
+        return refuse("a plan-v5 run needs --serial, --build-record and --hex")
+    try:
+        raw = Path(a.serial).read_bytes()
+        brec_bytes = Path(a.build_record).read_bytes()
+        hex_bytes = Path(a.hex).read_bytes()
+        brec = strict_loads(brec_bytes.decode("utf-8"))
+        build, rows, run_jsonl, sprob = normalise_serial(raw)
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as e:
+        return refuse(str(e))
+    bprob = _build_problems(brec)
+    if bprob:
+        return refuse(bprob[0])
+    if a.run_jsonl:
+        Path(a.run_jsonl).write_bytes(run_jsonl)
+    hashes = {"serial_sha256": _sha256(raw), "run_jsonl_sha256": _sha256(run_jsonl),
+              "build_record_sha256": _sha256(brec_bytes)}
+    res = judge_selfrun(plans, rows, serial_problems=sprob, build=build, build_record=brec,
+                        hex_sha=_sha256(hex_bytes), hashes=hashes)
+    print(f"run        {res['run_id']}  ({res['method']})")
+    print(f"card unit  {res['card_unit'] and res['card_unit'].get('label')}  "
+          f"CID {res['card_cid']}  ({len(res['cid_disagreements'])} CID disagreements, diagnostic)")
+    print(f"build      {res['firmware_build']}  hex {res['hex_sha256']}")
+    print(f"attempts   {res['planned_attempts']} planned, {res['reported']} reported")
+    print(f"QUALIFYING {res['qualifying']}   (criterion needs >= {res['required_qualifying']})")
+    for why, k in sorted(res["non_qualifying"].items(), key=lambda kv: -kv[1]):
+        print(f"  not counted: {k:>6}  {why}")
+    print(f"scope      {res['qualification_scope']}: " + "; ".join(res["residual_limits"]))
+    if res["problems"]:
+        print(f"run integrity problems: {len(res['problems'])}")
+        for x in res["problems"][:8]:
+            print(f"  - {x}")
+    print(f"\nVERDICT    {res['verdict']}")
+    if res["torn_iterations"]:
+        print("  *** TORN blocks. BLOCKER: this forces a format change, not a firmware workaround.")
+    if res["completed_before_old"]:
+        print(f"  *** completed write reads OLD {res['completed_before_old'][:8]}: run-integrity "
+              "FAIL; review the rows before any card conclusion.")
+    if a.json:
+        Path(a.json).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.json).write_text(json.dumps(res, indent=2) + "\n")
+        print(f"\nwrote {a.json}")
+    return 0 if res["verdict"] == "PASS" else 2
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -886,13 +1393,21 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=20260903)
     p.add_argument("--manifest", help="rig-r2 manifest; makes a plan-v4 run")
     p.add_argument("--evidence", help="directory holding the manifest's evidence files")
+    p.add_argument("--method", help="selfrun-r1 makes a plan-v5 run (POWER-CUT-SCHEMA-R1)")
+    p.add_argument("--card", help="selfrun-r1: CARD.json (card_model, card_unit)")
+    p.add_argument("--build-record", dest="build_record", help="selfrun-r1: build.json")
+    p.add_argument("--t-sched-us", dest="t_sched_us", help="selfrun-r1: median busy time, us")
     p.add_argument("--out")
     p.set_defaults(fn=cmd_plan)
 
     j = sub.add_parser("judge", help="classify a run against its committed plan(s)")
     j.add_argument("--plan", action="append", required=True,
                    help="repeat for continuation plans")
-    j.add_argument("--results", required=True)
+    j.add_argument("--results", help="rows (plan v3/v4); refused for plan v5")
+    j.add_argument("--serial", help="plan v5: raw serial capture")
+    j.add_argument("--build-record", dest="build_record", help="plan v5: build.json")
+    j.add_argument("--hex", help="plan v5: the exact .hex image flashed")
+    j.add_argument("--run-jsonl", dest="run_jsonl", help="plan v5: write the normalised rows here")
     j.add_argument("--manifest", help="rig-r2 manifest (required for a plan-v4 run)")
     j.add_argument("--evidence", help="directory holding the manifest's evidence files")
     j.add_argument("--json")
