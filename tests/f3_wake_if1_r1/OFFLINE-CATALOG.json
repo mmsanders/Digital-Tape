@@ -1,0 +1,207 @@
+[
+  {
+    "case": "single-build-actual-artifact-consistency",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "simulation-no-Michael-record",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "met-target-human-declines",
+    "expected_exit": 1,
+    "reason": null
+  },
+  {
+    "case": "target-equality-is-recorded-miss",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "exact-twenty-percent-miss",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "over-twenty-percent-needs-PM",
+    "expected_exit": 1,
+    "reason": null
+  },
+  {
+    "case": "PM-fields-match-is-consistency-only",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "PM-fields-mismatch",
+    "expected_exit": 1,
+    "reason": null
+  },
+  {
+    "case": "actual-missing-record-stays-NOT-RUN",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "Michael-mismatch-build_id",
+    "expected_exit": 2,
+    "reason": "michael_record_mismatch"
+  },
+  {
+    "case": "Michael-mismatch-firmware_hex_sha256",
+    "expected_exit": 2,
+    "reason": "michael_record_mismatch"
+  },
+  {
+    "case": "Michael-mismatch-log_sha256",
+    "expected_exit": 2,
+    "reason": "michael_record_mismatch"
+  },
+  {
+    "case": "Michael-numbers-mismatch",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "bad-verdict",
+    "expected_exit": 2,
+    "reason": "verdict_value"
+  },
+  {
+    "case": "negative-verdict-without-note",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "control-149999",
+    "expected_exit": 2,
+    "reason": "injected_delay_underreported"
+  },
+  {
+    "case": "control-150000",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "control-150001",
+    "expected_exit": 0,
+    "reason": null
+  },
+  {
+    "case": "build-record-mismatch-engine_tree",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "build-record-mismatch-id",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "build-record-mismatch-firmware_hex_sha256",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "toolchain-mismatch",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "candidate-image-hash-mismatch",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "hex-byte-mismatch-with-rehashed-file-table",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-serial-trigger",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-duplicate-BUILD",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-missing-WAKE",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-wrong-order",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-truncated-line",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-non-ASCII",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-unknown-line",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "capture-bad-timer-crosscheck",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "control-offered-as-candidate",
+    "expected_exit": 2,
+    "reason": "control_build_as_candidate"
+  },
+  {
+    "case": "decoded-image-marker-missing",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "decoded-image-marker-duplicate",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "simulation-session-actual-conflict",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "manifest-unknown-key",
+    "expected_exit": 2,
+    "reason": "field_unknown"
+  },
+  {
+    "case": "duplicate-observation-id",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "observation-sequence-duplicate",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "simulation-cannot-carry-Michael-entry",
+    "expected_exit": 2,
+    "reason": null
+  },
+  {
+    "case": "cold-wake-stays-observed",
+    "expected_exit": 0,
+    "reason": null
+  }
+]

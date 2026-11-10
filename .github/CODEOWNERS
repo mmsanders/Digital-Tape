@@ -68,6 +68,7 @@
 /tests/be1_binding_r1/                @mmsanders
 /tests/be1_if3_r1/                    @mmsanders
 /tests/be1_review_r1/                 @mmsanders
+/tests/f3_wake_if1_r1/                @mmsanders
 
 # The frozen spec bundle and its manifest.
 /spec/tapefs-v1.md     @mmsanders
