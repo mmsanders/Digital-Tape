@@ -72,15 +72,16 @@ messages and no active listener. Details are in §7.
    before the corresponding corrective implementation, no prior imported-tree
    edits and no combined import/fix commit. This does not claim retrospective
    tests-first coverage or waive the rule for unrelated new behavior. The gate
-   correction is pending independent publication and Software integration; until
-   then its existing red result remains a merge blocker.
+   correction is independently disposed and integrated through PR665/ADR-209.
+   The current gate authenticates that narrow route; all other ordering stays strict.
 
    The guarantee moved into CI, it was not dropped.
    `.github/workflows/evidence-integrity.yml` proves the imported subtree is
-   byte-identical to the declared publication (`tests/IMPORTS.json`), that every
-   verifier-tree change precedes every `engine/`/`firmware/` change and that no commit
-   does both, that package self-tests and offline replay are green, and that spec bytes
-   in evidence trees match `spec/VERSION.md`.
+   byte-identical to the declared publication (`tests/IMPORTS.json`), that ordinary
+   verifier-tree changes precede `engine/`/`firmware/` changes, that late review imports
+   satisfy the independently attested exception, and that no commit does both.
+   Package self-tests/offline replay are green, and spec bytes in evidence trees
+   match `spec/VERSION.md`.
    `tools/ci/verify-structural-rule-1.py` proves that ordering check goes red.
    The implementer still cannot tune an assertion: the tree it imported is fixed by a
    hash Verification published first, and `tests/IMPORTS.json` is Michael-owned in

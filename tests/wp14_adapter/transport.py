@@ -120,7 +120,11 @@ class Case:
         return r
 
     def keep(self, path):
-        self.artifacts.append(Path(path))
+        # A file kept twice (facts.txt is rewritten after a mount) is listed
+        # once: capture_artifacts names each retained file exactly once, and
+        # its hash is taken at finish, after the last write (ADR-206 census).
+        if Path(path) not in self.artifacts:
+            self.artifacts.append(Path(path))
         return Path(path)
 
     def finish_artifacts(self):
@@ -794,7 +798,11 @@ def handle(request, bins):
     case.keep(req_copy)
     build_info = Path(os.environ.get('WP14_BUILD_INFO', '')) if os.environ.get('WP14_BUILD_INFO') else None
     if build_info and build_info.exists():
-        case.keep(build_info)
+        # Retained inside the case's evidence directory, so the uploaded
+        # native evidence carries the exact bytes every capture path names.
+        copy = case.dir / build_info.name
+        shutil.copyfile(build_info, copy)
+        case.keep(copy)
     cmd = request['command']
     device = None
     try:

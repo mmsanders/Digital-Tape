@@ -14,6 +14,7 @@ unrelated commit, and nothing here may risk repeating it.
 """
 import hashlib
 import json
+import os
 import pathlib
 import shutil
 import subprocess
@@ -22,6 +23,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GATE = ROOT / "tools/ci/audit-evidence-integrity.py"
+ROUTE = ROOT / "tools/ci/review_order_gate.py"
 
 passed = failed = 0
 
@@ -45,6 +47,7 @@ def build_repo(tmp):
     repo = pathlib.Path(tmp) / "repo"
     (repo / "tools/ci").mkdir(parents=True)
     shutil.copy(GATE, repo / "tools/ci/audit-evidence-integrity.py")
+    shutil.copy(ROUTE, repo / "tools/ci/review_order_gate.py")
 
     # Stand-ins for the three frozen files, so the spec-copies check has
     # something consistent to verify and only the ordering check can speak.
@@ -82,19 +85,22 @@ def build_repo(tmp):
     return repo
 
 
-def run_gate(repo, base):
+def run_gate(repo, base, verifier=None):
+    env = {k: v for k, v in os.environ.items() if k not in ("VERIFICATION_REPO", "VERIFICATION_MAIN")}
+    if verifier:
+        env["VERIFICATION_REPO"], env["VERIFICATION_MAIN"] = verifier
     r = subprocess.run([sys.executable, str(repo / "tools/ci/audit-evidence-integrity.py"), base],
-                       cwd=repo, capture_output=True, text=True)
+                       cwd=repo, capture_output=True, text=True, env=env)
     return r.returncode, r.stdout + r.stderr
 
 
-def expect(want, name, repo, base):
+def expect(want, name, repo, base, verifier=None):
     global passed, failed
-    rc, out = run_gate(repo, base)
+    rc, out = run_gate(repo, base, verifier)
     red = rc != 0
     good = (want == "red" and red) or (want == "green" and not red)
-    if good and want == "red" and "[rule-1]" not in out:
-        good, why = False, "went red but never named [rule-1]"
+    if good and want == "red" and "FAIL  [rule-1]" not in out:
+        good, why = False, "went red but [rule-1] never failed"
     else:
         why = f"expected {want}, gate exited {rc}"
     if good:
@@ -106,6 +112,61 @@ def expect(want, name, repo, base):
             if "FAIL" in line or "rule-1" in line:
                 print(f"         {line}")
         failed += 1
+
+
+def review_repo(root, attested=True):
+    """A held implementation, an independent regression package published after
+    review and imported before the correction, then final protected metadata."""
+    repo = build_repo(root)
+    base = git(repo, "rev-parse", "HEAD").stdout.strip()
+    commit(repo, "firmware/bench/tool.py", "value = 1\n", "held implementation")
+    reviewed = git(repo, "rev-parse", "HEAD").stdout.strip()
+
+    ver = root / "verifier"
+    ver.mkdir(parents=True)
+    git(ver, "init", "-q", "-b", "main")
+    commit(ver, "tests/review_pkg/run.py", "assert True\n", "regression publication")
+    pub = git(ver, "rev-parse", "HEAD").stdout.strip()
+    tree = git(ver, "rev-parse", "HEAD:tests/review_pkg").stdout.strip()
+
+    m = json.loads((repo / "tests/IMPORTS.json").read_text(encoding="utf-8"))
+    entry = {"path": "tests/review_pkg", "tree": tree, "source_repo": "mmsanders/digital-tape-verification",
+             "source_commit": pub, "attested_in": "control", "selftest": ["true"]}
+    m["packages"].append(entry)
+    (repo / "tests/IMPORTS.json").write_text(json.dumps(m), encoding="utf-8")
+    commit(repo, "tests/review_pkg/run.py", "assert True\n", "import")
+    imp = git(repo, "rev-parse", "HEAD").stdout.strip()
+    commit(repo, "firmware/bench/tool.py", "value = 2\n", "correction")
+    fix = git(repo, "rev-parse", "HEAD").stdout.strip()
+
+    record = {"source_repo": entry["source_repo"], "source_commit": pub, "source_path": entry["path"],
+              "tree": tree, "review_of": reviewed, "import_commit": imp, "fix_commit": fix,
+              "reviewed_head": fix, "publication_before_import_and_fix": attested,
+              "covered_paths": ["firmware/bench/tool.py"]}
+    commit(ver, "attestations/reviews.json",
+           json.dumps({"schema": "verification/review-lineage/1", "entries": {"case": record}}), "attestation")
+    registry = git(ver, "rev-parse", "HEAD").stdout.strip()
+
+    entry.update(review_of=reviewed, review_fix=fix,
+                 review_attestation={"source_commit": registry, "path": "attestations/reviews.json", "entry": "case"})
+    m["packages"][-1] = entry
+    (repo / "tests/IMPORTS.json").write_text(json.dumps(m), encoding="utf-8")
+    git(repo, "add", "-A")
+    git(repo, "-c", "user.email=c@local", "-c", "user.name=control", "commit", "-q", "-m", "final metadata")
+    return repo, base, ver, pub, registry
+
+
+def review_cases(root):
+    repo, base, ver, pub, registry = review_repo(root / "a")
+    expect("green", "attested review-regression import (ADR-206)", repo, base, (str(ver), registry))
+    expect("red", "review-regression route without an authenticated verifier main", repo, base)
+    expect("red", "attestation not reachable from the verifier main given", repo, base, (str(ver), pub))
+    repo, base, ver, _, registry = review_repo(root / "b", attested=False)
+    expect("red", "attestation that does not state publication before the fix", repo, base, (str(ver), registry))
+    # A later edit of the imported tree is an ordinary late change again.
+    repo, base, ver, _, registry = review_repo(root / "c")
+    commit(repo, "tests/review_pkg/run.py", "assert False\n", "tune the imported test")
+    expect("red", "imported review package edited after the correction", repo, base, (str(ver), registry))
 
 
 def main():
@@ -198,6 +259,11 @@ def main():
         commit(repo, "tests/golden/MANIFEST", "case ref cmd\n", "import, declared")
         settle(repo)
         expect("red", "engine/src before a declared import", repo, base)
+
+        # ADR-206: the review-regression route, end to end through this gate.
+        # Verification's 25-history replay (tests/review_order_r1/run.py) drives
+        # review_order_gate.py directly; these prove the integration here.
+        review_cases(pathlib.Path(tmp) / "review")
 
     print(f"  {passed} passed, {failed} broken")
     return 1 if failed else 0

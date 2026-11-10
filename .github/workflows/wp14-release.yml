@@ -6,12 +6,13 @@ name: wp14 tested release
 # wp14-binaries-* artifacts of the named engine run, refused unless each one
 # hashes to the value that run's build identity recorded, and unless all
 # three platforms tested the same head. A release is not acceptance: run it
-# only for a head Verification has disposed under #146.
+# only for a head Verification has disposed under #146. Since ADR-205 only the
+# manual workflow wp14-macos-manual.yml runs all three platforms in one run.
 on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: engine workflow run id whose WP-14 package jobs tested the head
+        description: run id of a wp14-macos-manual.yml run whose WP-14 package jobs tested the head (all three platforms)
         required: true
 
 permissions:

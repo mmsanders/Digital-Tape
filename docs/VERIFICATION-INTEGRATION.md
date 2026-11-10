@@ -1,6 +1,6 @@
 # Independent verification integration
 
-**5 November 2026.** Which independent publications back each accepted package, and where
+**8 November 2026.** Which independent publications back each accepted package, and where
 their evidence is. Imported verifier trees and their source commits are declared in
 [tests/IMPORTS.json](../tests/IMPORTS.json); CI proves byte identity and ordering
 (`.github/workflows/evidence-integrity.yml`, `verifier-publication.yml`).
@@ -52,12 +52,19 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
   CI41934691508): kit109/4/53/47 +8 cases and32+6 controls independently pass.
   V394/8790e20d (source7ae5f115, CI41936971089) publishes wp14_supported_r1
   tree15afc9e2 and review_order_r1 treebfad9c6b BEFORE Software corrections.
-  Selftests are not returned-candidate acceptance. PR660/d8ead444 and665/8ce0fe52
-  now go to V397 for actual-adapter/history/gate disposition; arm-m3/regression
-  failures remain merge blockers until Software667's unchanged-gate runner repair.
-  Independent registry supplies review/chronology facts; Git proves lineage/identity.
-  Metadata-only final provenance is allowed; existing imported trees stay immutable.
-  No repeat Hardware/kit acceptance solely for base/CI metadata; no target advance.
+  V397 independently clears actual candidates: runnera4ed3e71 (source79249702,
+  CI42537055265), census78f1631f (source8b5ab22b, replay42537381508/carry42539949450),
+  orderdbaa5a03 (sourcefc451fbc, CI42537752419). Source/trust boundary ADR207 carries.
+  Software integrated runner3558a88a, census211f8a9d and orderc30881d9 after113/111/111
+  successful current-base checks. Kit integrated8893c99 (head4976cad0,119/119) with
+  unchanged V394-cleared checker/helper, union imports and metadata-only provenance.
+  [PM669 latest](REVIEW/PM669-PREPARTS-2026-11-08.md) records V398 preflight200ecef7
+  (sourcefd4eda0d, CI42540061704), UNBOUND41/10 timing semantics9aa2716a
+  (source32d621dd, CI42540230620) and11 judge logic cases321c5236
+  (sourcedb3851e5, CI42540611549). No physical/card clearance. New selfrun declaration
+  c32f1a56 plus ADR209 decisions goes to V405 for binding before Hardware675 code;
+  Software674 supplies the exact timing interface before its new executable binding.
+  Preserve old package bytes; no broad campaign re-acceptance for base/metadata.
 
 - **Q-P2-1 any-subset coverage** (ADR-195 §4). The model is published (`tests/wp10_subset_r1`)
   and bounded campaigns found no violation (Verification #186, #210). Verification `41995965`
@@ -67,7 +74,10 @@ Engine tree pinned at `d96b4245` (A8, ADR-175); goldens and replays green on the
 - **Media atomicity** (WP-05 A-6) has no physical result yet. The judge
   (`hardware/characterisation/media_atomicity.py`) has its own negative controls, but
   Verification `3d616c14` finds skipped non-qualifying tears/stale-busy admission plus
-  electrical/timing and SPI-to-SD4 scope gaps. Method NOT CLEARED; no physical tear claimed.
+  electrical/timing and SPI-to-SD4 scope gaps in that old method. ADR208 supersedes
+  its instrument gates; ADR209 authorizes explicitly scoped SPI self-run evidence
+  with residual bus risk, not SD4 equivalence. New route still unimplemented/not
+  physically cleared; no real cut or card qualification claimed.
 
 ## Where the history is
 
