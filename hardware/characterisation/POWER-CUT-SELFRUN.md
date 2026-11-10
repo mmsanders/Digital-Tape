@@ -8,7 +8,13 @@ stage 2. Base: main `978efb2`.
 > the unchanged plan-v3 judge reads this method's rows holds only when a CID was read: plan v3
 > requires one (H398-1). The rows and judge rules are now declared as a new route, `selfrun-r1` with
 > plan version 5, in [POWER-CUT-SCHEMA-R1.md](POWER-CUT-SCHEMA-R1.md). That file supersedes §3's
-> field table and §4's proposals where they differ. P3, P4 and the SPI scope wait on PM.
+> field table and §4's proposals where they differ.
+>
+> **Correction 2, 10 November 2026 (#675).** PM settled the open items in ADR-209: P3 option B
+> (CID diagnostic only), P4 fails the run, P1 ≤ 5.0 µs and P2 ≤ 200 mV adopted, and SPI at 4 MHz is
+> the Phase 3 card-model route with `spi-characterisation` scope. The schema's correction 2 records
+> them with the exact CLI, normalisation and build boundaries. §4 and §7 below are kept as V398 reviewed
+> them; where they differ, the schema governs.
 
 This replaces [ATOMICITY-RIG.md](ATOMICITY-RIG.md) revision 2 (blob `322dfa8e` before its superseded banner) as the method to
 build, because [ADR-208 §6](../../docs/DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)
@@ -211,9 +217,9 @@ serial logs kept. A failed control is kept and blocks the campaign until the cau
 - **Bus mode used: SPI at 4 MHz on MISO.** The product reads cards in SD 4-bit mode on the Teensy's
   built-in SDIO slot, whose power can't be switched without modifying the board. A card's internal
   programming after a single-block write is the same operation either way, but nothing here proves
-  the controller behaves identically in both modes. A PASS is SPI-mode evidence; whether it
-  qualifies the card for the product stays PM's scope decision (ATOMICITY-RIG revision 2 §6, still
-  open).
+  the controller behaves identically in both modes. A PASS is SPI-mode evidence; ADR-209 accepts it
+  as the Phase 3 card-model evidence route (WP-05 A-6), with this limit recorded in every verdict. It
+  says nothing about SD 4-bit equivalence or production copy speed.
 - **One card per model.** ADR-208 asks for ≥ 1,000 qualifying cuts per card model, which one card
   supplies. Unit-to-unit variation within the model is not covered.
 
