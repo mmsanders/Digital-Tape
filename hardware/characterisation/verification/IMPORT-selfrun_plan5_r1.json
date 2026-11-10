@@ -1,0 +1,21 @@
+{
+  "imported_path": "hardware/characterisation/verification/selfrun_plan5_r1",
+  "source_repository": "mmsanders/digital-tape-verification",
+  "source_commit": "2a47cdf1d09c8747a5b168cd14c2f3952e5607ef",
+  "source_merge_on_main": "843981f2acaf0c4ac0b04e09f898e46dce0a6a8e",
+  "source_path": "tests/selfrun_plan5_r1",
+  "source_tree": "77fa80c6e0507fe23f020b5bc05577fb79c21043",
+  "files": {
+    "CATALOG.json": "96e013a8e0b38521f4bff61480012e97e2d61e52",
+    "README.md": "3e7ffe9bfc5005c50334e5f903538547d9c2d462",
+    "RECORD-CHECK.md": "832f2bce10b68bc063d5f892e2c330463895f173",
+    "fixtures.py": "401baef6eea79e10a64000b5bb69abd4bfe2ffae",
+    "oracle.py": "77f41c7a3b7af2255cda6e99e0b81f7a19bd700c",
+    "plan_cli.py": "368521f3888474e21a5ae1daac91277ea168be3e",
+    "run.py": "ced87b0e5cbc0079ebcd0c663339863a3663f2bf"
+  },
+  "issue": "#675 (Verification V405 lane A, PR406)",
+  "mode": "unchanged import before implementation; assertions are Verification's",
+  "covers": "plan v5 / selfrun-r1 host route declared in POWER-CUT-SCHEMA-R1 correction 2 (PR673 8f31d589) with ADR-209: 180 actual-CLI cases (111 row/qualification/verdict, 41 plan/continuation, 23 serial/build/normalization, 5 plan-integrity/mixed-version) and six predicate controls. Synthetic only.",
+  "note": "Imported before any selfrun-r1 judge code. oracle.py is Verification's and is not Product implementation."
+}

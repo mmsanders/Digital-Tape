@@ -1,0 +1,1079 @@
+{
+  "row_cases": [
+    {
+      "case": "all-null-CID-unknown-part-number",
+      "expected": {
+        "verdict": "PASS",
+        "qualifying": 1000,
+        "card_cid": null,
+        "cids_seen": [],
+        "cid_disagreements": []
+      }
+    },
+    {
+      "case": "gap-equality-5us",
+      "expected": {
+        "verdict": "PASS",
+        "qualifying": 1000
+      }
+    },
+    {
+      "case": "gap-over-5us",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999,
+        "non_qualifying": {
+          "busy sample older than 5 us at the cut": 1,
+          "busy ended before the cut": 1
+        }
+      }
+    },
+    {
+      "case": "old-busy-sample-50ms",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999
+      }
+    },
+    {
+      "case": "voltage-equality-200",
+      "expected": {
+        "verdict": "PASS",
+        "qualifying": 1000,
+        "vcard_off_mv_max": 200
+      }
+    },
+    {
+      "case": "voltage-201",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-3300",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-4001",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage--1",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-200.0",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-None",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "voltage-'200'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "completed-OLD-equality",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999,
+        "completed_before_old": [
+          1
+        ],
+        "torn_iterations": [],
+        "problem_text": "completed write reads OLD"
+      }
+    },
+    {
+      "case": "completed-OLD-strict-before",
+      "expected": {
+        "verdict": "FAIL",
+        "completed_before_old": [
+          1
+        ]
+      }
+    },
+    {
+      "case": "completed-NEW-retained-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999,
+        "completed_before_old": [],
+        "torn_iterations": []
+      }
+    },
+    {
+      "case": "completed-OLD-among-1000-other-qualifying",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 1000,
+        "completed_before_old": [
+          1001
+        ],
+        "torn_iterations": []
+      }
+    },
+    {
+      "case": "deassert-equals-last-sample-invalid",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "CID-before-after-diagnostic",
+      "expected": {
+        "verdict": "PASS",
+        "qualifying": 1000,
+        "cids_seen": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        ],
+        "card_cid": null,
+        "cid_disagreements": [
+          {
+            "iteration": 1,
+            "kind": "before_after",
+            "values": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "CID-disagrees-with-plan-only-diagnostic",
+      "expected": {
+        "verdict": "PASS",
+        "qualifying": 1000,
+        "cids_seen": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "cccccccccccccccccccccccccccccccc"
+        ],
+        "card_cid": null,
+        "cid_disagreements": [
+          {
+            "iteration": 1,
+            "kind": "before_after",
+            "values": [
+              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "cccccccccccccccccccccccccccccccc"
+            ]
+          },
+          {
+            "iteration": 1,
+            "kind": "vs_plan",
+            "values": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            ]
+          },
+          {
+            "iteration": 1,
+            "kind": "vs_plan",
+            "values": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "cccccccccccccccccccccccccccccccc"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "only-one-observed-CID",
+      "expected": {
+        "verdict": "PASS",
+        "card_cid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cids_seen": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ]
+      }
+    },
+    {
+      "case": "card_cid-malformed-''",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid-malformed-'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid-malformed-'fake'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid-malformed-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid-malformed-0",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid_after_cut-malformed-''",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid_after_cut-malformed-'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid_after_cut-malformed-'fake'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid_after_cut-malformed-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "card_cid_after_cut-malformed-0",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "planted-tear-busy",
+      "expected": {
+        "verdict": "FAIL",
+        "torn_iterations": [
+          1
+        ]
+      }
+    },
+    {
+      "case": "planted-tear-on-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "torn_iterations": [
+          1001
+        ],
+        "damage_on_non_qualifying": [
+          1001
+        ]
+      }
+    },
+    {
+      "case": "neighbour-on-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "neighbour_damage": [
+          [
+            1001,
+            "+1"
+          ]
+        ],
+        "damage_on_non_qualifying": [
+          1001
+        ]
+      }
+    },
+    {
+      "case": "corrupt-target",
+      "expected": {
+        "verdict": "FAIL",
+        "corrupt_iterations": [
+          1
+        ]
+      }
+    },
+    {
+      "case": "identity-method",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "identity-run_id",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "identity-plan_digest",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "identity-card_unit",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "identity-firmware_build",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-method",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-iteration",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-run_id",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-plan_digest",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-card_unit",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-firmware_build",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-card_cid",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-card_cid_after_cut",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-bus_mode",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-busy_line",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-sck_hz",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-precondition_ok",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-precondition_readback_hex",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-readback_hex",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-neighbour_baseline",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-neighbours",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-payload_complete",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-data_response_accepted",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-busy_entry_us",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-busy_sampled_us",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-cut_us",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-busy_deassert_us",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-vcard_off_mv",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-row-init_ms",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "unknown-row-field",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "busy_entry_us-bool",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_entry_us-negative",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_entry_us-string",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_entry_us-nan",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_entry_us-inf",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_sampled_us-bool",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_sampled_us-negative",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_sampled_us-string",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_sampled_us-nan",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_sampled_us-inf",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_deassert_us-bool",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_deassert_us-negative",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_deassert_us-string",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_deassert_us-nan",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "busy_deassert_us-inf",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "cut_us-bool",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "cut_us-negative",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "cut_us-string",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "cut_us-nan",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "cut_us-inf",
+      "expected": {
+        "verdict": "FAIL"
+      }
+    },
+    {
+      "case": "nonboolean-payload_complete",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "nonboolean-data_response_accepted",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "nonboolean-precondition_ok",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "entry-without-sample",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "sample-without-entry",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "busy-order-backwards",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "sample-after-cut",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "no-busy-entry-retained-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999,
+        "completed_before_old": []
+      }
+    },
+    {
+      "case": "unaccepted-response-retained-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999
+      }
+    },
+    {
+      "case": "payload-incomplete-retained-miss",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999
+      }
+    },
+    {
+      "case": "malformed-bus_mode-'sd4'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-busy_line-'DAT0'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-sck_hz-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-sck_hz-0",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-init_ms--1",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-init_ms-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-precondition_ok-False",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-precondition_readback_hex-'01000000010",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-readback_hex-'00'",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "malformed-iteration-True",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "mixed-sck",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-neighbour",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "duplicate-attempt",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 1000,
+        "problem": true
+      }
+    },
+    {
+      "case": "missing-attempt",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "extra-attempt",
+      "expected": {
+        "verdict": "FAIL",
+        "problem": true
+      }
+    },
+    {
+      "case": "operator-minimum-zero",
+      "expected": {
+        "verdict": "FAIL",
+        "qualifying": 999,
+        "required_qualifying": 1000
+      }
+    }
+  ],
+  "plan_cases": [
+    {
+      "case": "new-run-without-CID",
+      "positive": true
+    },
+    {
+      "case": "new-run-with-CID",
+      "positive": true
+    },
+    {
+      "case": "known-part-and-unit-back-print",
+      "positive": true
+    },
+    {
+      "case": "bad-t-sched-zero",
+      "positive": false
+    },
+    {
+      "case": "bad-t-sched-negative",
+      "positive": false
+    },
+    {
+      "case": "bad-t-sched-nan",
+      "positive": false
+    },
+    {
+      "case": "bad-t-sched-infinite",
+      "positive": false
+    },
+    {
+      "case": "bad-t-sched-nonnumeric",
+      "positive": false
+    },
+    {
+      "case": "999-new-attempts",
+      "positive": false
+    },
+    {
+      "case": "malformed-CID-wrong",
+      "positive": false
+    },
+    {
+      "case": "malformed-CID-",
+      "positive": false
+    },
+    {
+      "case": "malformed-CID-AAAAA",
+      "positive": false
+    },
+    {
+      "case": "unknown-card-key",
+      "positive": false
+    },
+    {
+      "case": "missing-card_model",
+      "positive": false
+    },
+    {
+      "case": "missing-card_unit",
+      "positive": false
+    },
+    {
+      "case": "missing-model-brand_line",
+      "positive": false
+    },
+    {
+      "case": "missing-model-capacity_label",
+      "positive": false
+    },
+    {
+      "case": "missing-model-photos",
+      "positive": false
+    },
+    {
+      "case": "empty-model-brand_line",
+      "positive": false
+    },
+    {
+      "case": "empty-model-capacity_label",
+      "positive": false
+    },
+    {
+      "case": "empty-photo-array",
+      "positive": false
+    },
+    {
+      "case": "photo-missing",
+      "positive": false
+    },
+    {
+      "case": "photo-bytes-mismatch",
+      "positive": false
+    },
+    {
+      "case": "photo-unknown-key",
+      "positive": false
+    },
+    {
+      "case": "unit-empty-label",
+      "positive": false
+    },
+    {
+      "case": "unit-back-print-not-list",
+      "positive": false
+    },
+    {
+      "case": "unit-back-print-number",
+      "positive": false
+    },
+    {
+      "case": "build-unknown-key",
+      "positive": false
+    },
+    {
+      "case": "build-missing-firmware_build",
+      "positive": false
+    },
+    {
+      "case": "build-malformed-firmware_build",
+      "positive": false
+    },
+    {
+      "case": "build-missing-hex_sha256",
+      "positive": false
+    },
+    {
+      "case": "build-malformed-hex_sha256",
+      "positive": false
+    },
+    {
+      "case": "legacy-flag---sku",
+      "positive": false
+    },
+    {
+      "case": "legacy-flag---revision",
+      "positive": false
+    },
+    {
+      "case": "legacy-flag---manifest",
+      "positive": false
+    },
+    {
+      "case": "legacy-flag---evidence",
+      "positive": false
+    }
+  ],
+  "continuations": 5,
+  "serial_cases": [
+    {
+      "case": "CRLF-normalization",
+      "positive": true
+    },
+    {
+      "case": "row-JSON-spacing-preserved",
+      "positive": true
+    },
+    {
+      "case": "debug-text-retained",
+      "positive": true
+    },
+    {
+      "case": "final-untagged-fragment-ignored",
+      "positive": true
+    },
+    {
+      "case": "invalid-UTF8",
+      "positive": false
+    },
+    {
+      "case": "missing-BUILD",
+      "positive": false
+    },
+    {
+      "case": "duplicate-BUILD",
+      "positive": false
+    },
+    {
+      "case": "BUILD-after-first-ATOM",
+      "positive": false
+    },
+    {
+      "case": "truncated-ATOM",
+      "positive": false
+    },
+    {
+      "case": "truncated-BUILD",
+      "positive": false
+    },
+    {
+      "case": "tag-without-space",
+      "positive": false
+    },
+    {
+      "case": "tag-extra-space",
+      "positive": false
+    },
+    {
+      "case": "malformed-tagged-JSON",
+      "positive": false
+    },
+    {
+      "case": "tagged-array",
+      "positive": false
+    },
+    {
+      "case": "duplicate-JSON-key",
+      "positive": false
+    },
+    {
+      "case": "wrong-BUILD-identity",
+      "positive": false
+    },
+    {
+      "case": "BUILD-unknown-key",
+      "positive": false
+    },
+    {
+      "case": "BUILD-boolean-clock",
+      "positive": false
+    },
+    {
+      "case": "BUILD-zero-clock",
+      "positive": false
+    }
+  ],
+  "build_and_results_controls": 4,
+  "plan_integrity_controls": 5
+}

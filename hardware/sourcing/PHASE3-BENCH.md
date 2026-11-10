@@ -9,6 +9,157 @@ for [P3-R1-HW (#641)](https://github.com/mmsanders/Digital-Tape/issues/641).
 > Michael's to approve, edit, place and pay for. A parts order never opens board fabrication or cell
 > charging.
 
+## Revision 4: staged cart, 10 November 2026 ([#675](https://github.com/mmsanders/Digital-Tape/issues/675) stage 1)
+
+**Base:** main `21b2da3`. **For Michael to approve, edit, place and pay for. Nobody else orders.**
+ADR-209 puts the first board on the critical path, so the cart is now split into four groups.
+**Only group 1 is needed now.** Revision 3 below stays as history; its totals were estimates, not
+a checkout.
+
+### Group 1 — buy first (verified 10 November 2026)
+
+These are enough for USB bring-up, boot, native SD on the Teensy's own slot, the build-to-log link
+and stack measurement. Audio over I²S needs the audio board as well.
+
+| # | Part | SKU | Vendor | Qty | Price | Stock | Why |
+|---|---|---|---|---:|---:|---|---|
+| 1 | Teensy 4.1 **without Ethernet**, headers soldered | DEV-20360 | [SparkFun](https://www.sparkfun.com/teensy-4-1-without-ethernet-headers.html) | 1 | $33.60 | In stock | The bench MCU; its built-in SDIO slot is the work slot. Ethernet isn't used. The with-Ethernet headers version (DEV-16996, $35.95) shows **Backorder** |
+| 2 | Teensy 4 Audio Shield Rev D (SGTL5000) | DEV-15845 | [SparkFun](https://www.sparkfun.com/teensy-4-audio-shield-rev-d.html) | 1 | $9.80 | In stock | Codec and headphone out. PJRC's page says Rev D/D2 fits Teensy 4.0 and 4.1, using pins 7, 8, 20, 21, 23 (audio), 18, 19 (I²C) and 10–13 (its own SD) |
+| 3 | Male header, 40-pin breakaway | PRT-00116 | [SparkFun](https://www.sparkfun.com/straight-header-male-pth-0-1in-40-pin.html) | 1 | $1.95 | In stock | 28 pins for the audio board's two 14-pin rows, so it sits on the breadboard beside the Teensy (**28 solder joints**) |
+| 4 | Full-size breadboard, 830 points | 239 | [Adafruit](https://www.adafruit.com/product/239) | 1 | $5.95 | In stock | Teensy (24 rows), audio board (14 rows) and two buttons fit on one board |
+| 5 | Breadboard wire bundle | 153 | [Adafruit](https://www.adafruit.com/product/153) | 1 | $4.95 | In stock | About nine jumpers to the audio board, plus buttons |
+| 6 | Tactile buttons, 12 mm, 10-pack | 1119 | [Adafruit](https://www.adafruit.com/product/1119) | 1 | $2.50 | In stock | Bench Play and Stop |
+| 7 | USB A to micro-B cable, 3 ft | 592 | [Adafruit](https://www.adafruit.com/product/592) | 1 | $2.95 | In stock | Power, flashing and the serial log. **Skip it if you already have a micro-B cable that carries data**, not just charging |
+| | | | | | **$61.70** | | SparkFun $45.35 + Adafruit $16.35 |
+
+- **How this was checked:** each vendor page was read on 10 November 2026. The price and stock are
+  the ones the page showed then. **Tax and shipping weren't quoted** (they need a checkout), so
+  expect two shipments. If SparkFun has the breadboard, wires, buttons and cable in the same order,
+  one shipment is cheaper; I didn't check those SparkFun SKUs.
+- **Wiring, not stacking.** The audio board goes beside the Teensy with jumpers: MCLK 23, BCLK 21,
+  LRCLK 20, TX 7, RX 8, SDA 18, SCL 19, 3.3 V and GND. Stacking on a Teensy whose pins are already
+  in the breadboard would need extended headers (SparkFun PRT-17152, $1.80, **Backorder** on
+  10 Nov), and it would hide the built-in SD slot.
+- **Soldering:** only the 28 audio-board header pins. A Teensy without headers (DEV-20359, $29.60,
+  in stock) saves $4 but adds 48 joints and two more header strips ($3.90), so it's not worth it.
+- **Before using headphones:** keep the output at a fixed low level, and check the volume with the
+  headphones off the ear (FW-1 §5).
+
+### Group 2 — later, WP-18 to WP-20 (estimates; prices read 1–2 Nov, not rechecked)
+
+| Lines (revision 3) | What | Total |
+|---|---|---:|
+| 8 (qty 1) | microSD breakout for the second (source) slot, Adafruit 4682 | $3.50 |
+| 9–10 | Speaker amplifier PAM8302 and 40 mm speaker | $8.90 |
+| 11–12 | MEMS mic and three 3.5 mm jacks | $7.80 |
+| 13–14 | Two NeoPixel sticks and the level shifter | ≈$12.50 |
+| 15–17 | Hall sensors (two variants) and magnets. **Magnets are a swallowing hazard** | $9.66 |
+| 4 (second) | Second breadboard | $5.95 |
+| | | **≈$48.31** |
+
+### Group 3 — later, the self-run power-cut test (estimates)
+
+| Lines (revision 3) | What | Total |
+|---|---|---:|
+| 8 (qty 1) | microSD breakout for the switched card, Adafruit 4682 | $3.50 |
+| P1–P5 | TPS22918 ×2, SOT-23-6 adapter ×2, 1 nF C0G ×2, resistor kit, capacitor kit | ≈$25.55 |
+| I1 | Basic multimeter, SparkFun TOL-12966 (search snapshot 8 Nov). **Buy it with group 1 if you have no meter at all;** it's handy for bring-up | $21.50 |
+| | | **≈$50.55** |
+
+Don't order group 3 until V405 has reviewed the self-run checker and the cut firmware has its own
+reviewed interface. Nothing physical is cleared today.
+
+### Group 4 — optional, never an acceptance dependency
+
+| What | Total |
+|---|---:|
+| 24 MHz 8-channel clone USB logic analyser, debugging only | ≈$12.00 |
+
+**All four groups:** ≈$172.56 before tax and shipping. Only group 1's $61.70 is a checked quote.
+Not bought: a lab analyser, sound-level meter, coupler, reader or anything for the CID.
+
+## Revision 3: the ADR-208 cart, 8 November 2026 (history; estimates, superseded by revision 4) ([#671](https://github.com/mmsanders/Digital-Tape/issues/671) stage 1)
+
+**Base:** main `978efb2`. **For Michael to approve. Nobody orders; every line is yours to edit, place
+and pay for.** [ADR-208](../../docs/DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)
+replaces lab instruments with firmware self-measurement and your verdict, and caps instruments at
+about $30. This cart **replaces** the 2 November selection and the round 2 delta below, which stay
+as history.
+
+**What changed from the round 2 delta:**
+- **Removed:** the bench logic analyser (line 18, $26.95), the SPL meter, calibrator and coupler
+  (M1–M2), the true-RMS meter (M3), both scope options, and the whole comparator half of the rig:
+  TLV3202, LM4040 reference, 0.1 % resistors, trimmer, 2.2 MΩ hysteresis resistor, SOIC adapter and
+  the SN74LVC1G125 buffers. None of these is needed by any ADR-208 method.
+- **Kept:** every prototype part (lines 1–17) and the rig's load switch with its passives.
+- **Added:** a basic multimeter, and an optional clone logic analyser marked debugging-only.
+
+### Prototype parts
+
+| # | Part | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| 1 | Teensy 4.1, headers fitted | SparkFun DEV-16996 | 1 | $35.95 | The bench MCU; built-in SDIO slot is the work slot |
+| 2 | Teensy 4 audio board Rev D (SGTL5000) | SparkFun DEV-15845 | 1 | $9.80 | Codec: headphone out, line in/out, mic input; where the output cap lives |
+| 3 | 40-pin male header | SparkFun PRT-00116 | 2 | $3.90 | Puts the audio board on the breadboard |
+| 4 | 830-point breadboard | Adafruit 239 | 2 | $11.90 | One for the Teensy, one for audio, keys and the power-cut circuit |
+| 5 | Jumper wire bundle | Adafruit 153 | 1 | $4.95 | Wiring |
+| 6 | 12 mm tactile buttons, 10-pack | Adafruit 1119 | 1 | $2.50 | Bench keys until the latching keys are fitted |
+| 7 | USB A to micro-B data cable | Adafruit 592 | 1 | $2.95 | Power, flashing and the serial log. Skip if you have a data cable |
+| 8 | microSD breakout, 3 V only | Adafruit 4682 | 2 | $7.00 | One is the second (source) slot; one is the power-cut test's switched slot |
+| 9 | Class-D amplifier, 2.5 W | Adafruit 2130 (PAM8302) | 1 | $3.95 | Speaker amp; shutdown pin mutes the speaker, gain trim sets a hardware ceiling |
+| 10 | 40 mm 4 Ω speaker | Adafruit 3968 | 1 | $4.95 | The device's speaker size. Out of stock 1 Nov; any 40 mm 4–8 Ω ≥ 1 W will do |
+| 11 | Analog MEMS mic breakout | Adafruit 2716 | 1 | $4.95 | Record source when no aux plug |
+| 12 | 3.5 mm stereo jack with switch | Adafruit 1699 | 3 | $2.85 | Aux in, headphone/aux out (plug detect), one spare |
+| 13 | NeoPixel stick, 8 LEDs | Adafruit 1426 | 2 | $11.90 | The 16-LED status array |
+| 14 | 3 V → 5 V buffer for the LED data line | SN74AHCT125N | 1 | ≈$0.60 | NeoPixel data from a 3.3 V pin |
+| 15 | Linear Hall sensor ±169 mT | TI DRV5055A4QLPG | 4 | $3.08 | Rew/FF press depth, main variant |
+| 16 | Linear Hall sensor ±85 mT | TI DRV5055A3QLPG | 4 | $3.08 | Rew/FF press depth, sensitive variant; the bench picks one |
+| 17 | N52 disc magnet 4.76 × 3.18 mm | K&J D32-N52 | 10 | $3.50 | In the Rew/FF keys. **Swallowing hazard: keep away from the kids** |
+| | | | | **$117.81** | |
+
+### Power-cut test parts ([POWER-CUT-SELFRUN](../characterisation/POWER-CUT-SELFRUN.md) §1)
+
+| # | Part | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| P1 | Load switch with built-in output discharge | TI TPS22918DBVR (SOT-23-6) | 2 | ≈$1.20 | Switches the card's 3.3 V and pulls it to 0 V on the cut, so the card really resets. One spare |
+| P2 | SOT-23-6 to DIP adapter | SparkFun BOB-00717 | 2 | $2.50 | Puts P1 on the breadboard (one soldering job). One spare |
+| P3 | 1 nF C0G capacitor | any 50 V C0G, 0.1" leads | 2 | ≈$0.40 | P1's soft start, so the card rail doesn't pull the Teensy down at power-up |
+| P4 | Resistor kit, 1/4 W | SparkFun COM-10969 | 1 | $9.95 | 100 kΩ pull-down on the switch, 100 Ω discharge and series resistors, 10 kΩ to the ADC; also bench LEDs and keys. Backordered 1 Nov; any assortment |
+| P5 | Capacitor kit | SparkFun KIT-13698 | 1 | $11.50 | 10 µF bulk and 100 nF / 1 µF decoupling at the card and the switch |
+| | | | | **$25.55** | |
+
+### Instruments (ADR-208 §4, about $30)
+
+| # | Instrument | SKU | Qty | Price | Why |
+|---|---|---|---:|---:|---|
+| I1 | Basic digital multimeter | SparkFun TOL-12966 | 1 | $21.50 | Checks the card rail is 0 V when cut and 3.3 V when on, and that the firmware's own reading agrees. Skip it if you already own any multimeter |
+| I2 | *Optional.* 24 MHz 8-channel clone USB logic analyser | any FX2 clone (e.g. HiLetgo), works with PulseView | 1 | ≈$12.00 | **Debugging only. Never an acceptance requirement.** Lets us look at the SPI wires if the firmware misbehaves |
+| | | | | **$33.50** | $21.50 without the optional analyser |
+
+### Totals (parts only, before tax and shipping)
+
+| | Total |
+|---|---:|
+| Prototype parts | $117.81 |
+| Power-cut test parts | $25.55 |
+| **Parts subtotal** | **$143.36** |
+| Instruments | $33.50 |
+| **Cart total** | **$176.86** |
+| Cart total without the optional analyser | $164.86 |
+
+- **Instrument subtotal $33.50**, or $21.50 required. That is ADR-208's "about $30".
+- **Prices:** lines 1–17, P2, P4 and P5 were read on the vendors' pages on 1–2 November (stock was as
+  shown then); I1 is SparkFun's listed price seen in search results on 8 November, not a page read.
+  **≈ means estimated, not read** (DigiKey's bot check blocks part pages; the clone analyser's price
+  varies by listing, ≈$12–17 seen 8 Nov). Confirm everything in the cart.
+- **Smaller first order:** lines 1–7 alone ($71.95) still play an app-made cartridge. Lines 8–17
+  and P1–P5 can follow when WP-18–20 and the power-cut test start.
+- **Soldering:** the audio board's headers and the P1 adapter. Everything else is breadboard.
+
+## Superseded history: the 2 November selection and the round 2 delta
+
+> Kept unchanged below for the record. Revision 3 above replaces it.
+
 ## Decision: 2 November 2026
 
 Michael approved **"Minimum bench + rig"** (on the #641 thread). That is:

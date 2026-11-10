@@ -1,5 +1,9 @@
 # Card power-cut rig — design, revision 2 (WP-05 A-6)
 
+> **Superseded for building by [POWER-CUT-SELFRUN.md](POWER-CUT-SELFRUN.md) (ADR-208, 8 Nov 2026).**
+> ADR-208 dropped external rail traces, comparator timing and U. This revision stays as history and
+> as the record the imported rig-r2 regressions and the judge's plan-v4 path were written against.
+
 **Owner:** Hardware Lead · **Status:** DESIGN for independent method review. **Nothing is built,
 energised, bought or run.** Revision 2 drafted 2 November 2026 for
 [P3-R2-HW (#651)](https://github.com/mmsanders/Digital-Tape/issues/651). Base: main `cc23b87`.

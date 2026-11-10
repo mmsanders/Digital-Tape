@@ -1,12 +1,12 @@
 # Hardware status
 
-**8 November 2026 PST.** ADR-208: hands-on acceptance, ~$30 instruments, Teensy self-run power-cut test, CID not required. Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
+**10 November 2026 PST.** ADR-208: hands-on acceptance, ~$30 instruments, Teensy self-run power-cut test, CID not required. Current design: [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
 | Area | State |
 |---|---|
-| Hardware Lead | #671 returned PR673/c32f1a56, a declaration only. Fresh [#675](https://github.com/mmsanders/Digital-Tape/issues/675) finishes selfrun-r1 host checker after V405 binding, staged first-order cart and S2 gap. Earlier646 integration complete |
-| Parts | Missing Teensy/audio board now blocks target validation. PR673 revised full cart estimate$176.86 (unverified current checkout); first-order lines1-7 old estimate$71.95. #675 verifies small cart/vendor stock/header fit. Nothing ordered or newly approved |
-| Atomicity rig | ADR208 self-run method; V398 planted-tear logic11 cases pass, complete method NOT CLEARED. New plan5/selfrun-r1 declaration + ADR209 P3/P4/SPI decisions go to V405 before code. No external-U/calibrated-instrument gate; no physical run/card qualified |
+| Hardware Lead | [#675](https://github.com/mmsanders/Digital-Tape/issues/675): stage 1 returned (schema correction 2, staged cart, S2 proposal). Stage 2: V405 `selfrun_plan5_r1` (843981f2) imported unchanged, then the plan-v5 host checker implemented on PR673; 180/180 bound cases pass, with a negative control that goes red. Awaiting V405 disposition |
+| Parts | **Group 1, buy first: $61.70** before tax/shipping, read on vendor pages 10 Nov ([PHASE3-BENCH](../hardware/sourcing/PHASE3-BENCH.md) rev 4): Teensy 4.1 no-Ethernet with headers DEV-20360, audio shield Rev D, header, breadboard, wires, buttons, cable; all in stock. Groups 2–4 (WP-18–20, self-run parts with multimeter, optional analyser) ≈$110.86 more, estimates. Michael approves and orders; **nothing ordered** |
+| Atomicity rig | ADR-208 self-run method. Host-side plan/judge for selfrun-r1 is implemented and passes V405's 180 bound cases on PR673; **not yet independently disposed**. Cut firmware has no declared interface yet; no physical run, card qualified or purchase |
 | Owner prototypes | CTRL-01 controls rig filed in `hardware/prototypes/ctrl-01/` (owner-directed; not acceptance). Earlier FIT-01/LADDER-01/02 results are recorded in docs/archive/hardware/ |
 | Instruments planned (ADR-208) | Multimeter; optional ~$12 clone logic analyser for debugging only; phone sound-level app. No bench logic analyser, SPL meter, coupler or thermal camera |
 | Equipment Michael owns | A1 Mini printer, PLA, headphones, three PNY 64 GB V30 cards, a USB card reader, basic hand tools, likely access to a soldering iron. **No** Teensy, audio board, breadboard, LEDs, logic analyser or sound level meter |
