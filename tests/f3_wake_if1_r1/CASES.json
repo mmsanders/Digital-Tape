@@ -1,0 +1,761 @@
+[
+  {
+    "name": "warm-button-99ms",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 59401000,
+          "ms": 199,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "99000",
+      "cycles": "59400000",
+      "cpu_hz": "600000000",
+      "millis": "99",
+      "engine_us": "99000"
+    }
+  },
+  {
+    "name": "serial-trigger-stays-diagnostic",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "serial",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 59401000,
+          "ms": 199,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "serial",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "99000"
+    }
+  },
+  {
+    "name": "cold-fallback-remains-observed",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 0,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 59401000,
+          "ms": 199,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "0",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "99000"
+    }
+  },
+  {
+    "name": "first-engine-block-is-not-first-nonsilent",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 6001000,
+          "ms": 110,
+          "engine_frames": 0,
+          "nonzero": false
+        },
+        {
+          "cycles": 12001000,
+          "ms": 120,
+          "engine_frames": 128,
+          "nonzero": false
+        },
+        {
+          "cycles": 58801600,
+          "ms": 198,
+          "engine_frames": 128,
+          "nonzero": true
+        },
+        {
+          "cycles": 60001000,
+          "ms": 200,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "98001",
+      "cycles": "58800600",
+      "millis": "98",
+      "engine_us": "20000"
+    }
+  },
+  {
+    "name": "one-cycle",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 1001,
+          "ms": 100,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1",
+      "cycles": "1",
+      "millis": "0",
+      "engine_us": "1"
+    }
+  },
+  {
+    "name": "exact-microsecond",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 1600,
+          "ms": 100,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1",
+      "cycles": "600",
+      "millis": "0",
+      "engine_us": "1"
+    }
+  },
+  {
+    "name": "ceil-not-floor",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 1601,
+          "ms": 100,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "2",
+      "cycles": "601",
+      "millis": "0",
+      "engine_us": "2"
+    }
+  },
+  {
+    "name": "100ms-target-equality",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 60001000,
+          "ms": 200,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "100000",
+      "cycles": "60000000",
+      "millis": "100",
+      "engine_us": "100000"
+    }
+  },
+  {
+    "name": "120ms-exact-twenty-percent",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 72001000,
+          "ms": 220,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "120000",
+      "cycles": "72000000",
+      "millis": "120",
+      "engine_us": "120000"
+    }
+  },
+  {
+    "name": "120001us-over-twenty-percent",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 72001600,
+          "ms": 220,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "120001",
+      "cycles": "72000600",
+      "millis": "120",
+      "engine_us": "120001"
+    }
+  },
+  {
+    "name": "clock-24000000",
+    "scenario": {
+      "cpu_hz": 24000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 25000,
+          "ms": 101,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1000",
+      "cycles": "24000",
+      "cpu_hz": "24000000",
+      "millis": "1"
+    }
+  },
+  {
+    "name": "clock-150000000",
+    "scenario": {
+      "cpu_hz": 150000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 151000,
+          "ms": 101,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1000",
+      "cycles": "150000",
+      "cpu_hz": "150000000",
+      "millis": "1"
+    }
+  },
+  {
+    "name": "clock-600000000",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 601000,
+          "ms": 101,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1000",
+      "cycles": "600000",
+      "cpu_hz": "600000000",
+      "millis": "1"
+    }
+  },
+  {
+    "name": "short-counter-rollover-modulo-not-negative",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 4294967200,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 599904,
+          "ms": 101,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1000",
+      "cycles": "600000",
+      "millis": "1",
+      "engine_us": "1000"
+    }
+  },
+  {
+    "name": "millis-short-rollover-modulo",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 4294967295,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 601000,
+          "ms": 0,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "1000",
+      "millis": "1"
+    }
+  },
+  {
+    "name": "control-observed-149999",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 150000,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 90000400,
+          "ms": 249,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "150000",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "149999",
+      "cycles": "89999400",
+      "engine_us": "149999"
+    }
+  },
+  {
+    "name": "control-observed-150000",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 150000,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 90001000,
+          "ms": 250,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "150000",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "150000",
+      "cycles": "90000000",
+      "engine_us": "150000"
+    }
+  },
+  {
+    "name": "control-observed-150001",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 150000,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 90001600,
+          "ms": 250,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "150000",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "150001",
+      "cycles": "90000600",
+      "engine_us": "150001"
+    }
+  },
+  {
+    "name": "control-ceil-149999-point5",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 150000,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 90000700,
+          "ms": 250,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "150000",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "ok",
+      "elapsed_us": "150000",
+      "cycles": "89999700"
+    }
+  },
+  {
+    "name": "no-nonsilent-block-times-out",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 1200001000,
+          "ms": 2100,
+          "engine_frames": 128,
+          "nonzero": false
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "timeout"
+    }
+  },
+  {
+    "name": "fault-wrap-cannot-report-short-ok",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": 0,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "cycles": 1000,
+          "ms": 7100,
+          "engine_frames": 128,
+          "nonzero": true
+        }
+      ]
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "0",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "wrap",
+      "elapsed_us": "-",
+      "cycles": "-"
+    }
+  },
+  {
+    "name": "mount-failed-is-not-ok",
+    "scenario": {
+      "cpu_hz": 600000000,
+      "t0_cycles": 1000,
+      "t0_ms": 100,
+      "inject_us": 0,
+      "trigger": "button",
+      "mount": -1,
+      "warm": 1,
+      "position": 44100,
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": []
+    },
+    "expected": {
+      "trigger": "button",
+      "warm": "1",
+      "mount": "-1",
+      "position": "44100",
+      "inject_us": "0",
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "mount_failed"
+    }
+  }
+]

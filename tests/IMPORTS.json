@@ -873,6 +873,20 @@
         "-c",
         "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();t=os.path.join(d,'t');os.mkdir(t)\nfor n in ('bench_evidence.py','bench_capture.py'):open(os.path.join(t,n),'wb').write(subprocess.check_output(['git','show','d62e0de07c81dc5abe1c8ffbf378bd077a2a7eab:firmware/bench/tools/'+n]))\nsys.exit(subprocess.call([sys.executable,'-B','tests/be1_review_r1/run.py','--record-known-findings','--checker',os.path.join(t,'bench_evidence.py'),'--helper',os.path.join(t,'bench_capture.py'),'--golden','tests/golden','--out',os.path.join(d,'r')]))"
       ]
+    },
+    {
+      "path": "tests/f3_wake_if1_r1",
+      "tree": "9a42b494cc2a68bf552558fe0f5b42339c1ddbaa",
+      "source_repo": "mmsanders/digital-tape-verification",
+      "source_commit": "bff7453b73e2803e47d2e7535f1202650fac8fba",
+      "attested_in": "Verification405 lane B ready publication (PR407, merged bff7453b; source 7dc107fa; CI 42858191854; findings/V405-F3/DISPOSITION.md)",
+      "attestation": "Independent ready bindings of Software674 F3-IF/1 (Product afdc9b79, declaration only): 22 fwhost wake-sim scenarios (first-engine versus first-non-silent event, ceil/modulo/clock boundaries, 100/120 ms thresholds, 150 ms control underreport/rounding, cold/serial diagnostics, failure outputs) with mutation and grammar controls; 43 single-build f3_evidence.py offline CLI vectors (41 materialized bundles) with an inert-reporter driver control; 2 unchanged-helper fake-port cases. BINDING-GAPS.md reserves multi-build association, report layout/state precedence, clock-change host input and the build/ELF inspection boundary. Imported byte-identically before any covered implementation. Selftests are wire-predicate and fixture-materialization only; no Product tool executed; not Product acceptance",
+      "selftest": [
+        "python3",
+        "-B",
+        "-c",
+        "import os,subprocess,sys,tempfile;d=tempfile.mkdtemp();sys.exit(subprocess.call([sys.executable,'-B','tests/f3_wake_if1_r1/run.py','--selftest','--out',os.path.join(d,'w')]) or subprocess.call([sys.executable,'-B','tests/f3_wake_if1_r1/checker.py','--selftest','--out',os.path.join(d,'c')]))"
+      ]
     }
   ],
   "evidence_bundles": [
