@@ -65,6 +65,16 @@ tape_result fw_player_play(struct fw_player *p)
     return TAPE_OK;
 }
 
+tape_result fw_player_play_now(struct fw_player *p)
+{
+    tape_result r = tape_set_rate(p->t, FW_RATE_1X);
+    if (r != TAPE_OK) { return r; }
+    p->ended = 0;
+    p->failed = 0;
+    p->playing = 1;
+    return TAPE_OK;
+}
+
 tape_result fw_player_stop(struct fw_player *p)
 {
     p->playing = 0;

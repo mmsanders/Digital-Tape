@@ -12,6 +12,11 @@
  * audio interrupt around each one while the player is rendering. While it is
  * not rendering, the interrupt never enters the engine, so no masking is needed.
  *
+ * F3 warm wake (FW-1 §6, ADR-208): `sleep` retains a little audio and unmounts;
+ * the next Play press mounts warm and the firmware times, on its own cycle
+ * counter, from that press to the first non-silent block it hands to I2S.
+ * `WAKE us <n>` on serial is the measurement Michael judges.
+ *
  * Output level: FIXED LOW until the WP-19 headphone cap lands (FW-1 §5). Not
  * reachable from any control. Nobody wears headphones on the bench without a
  * volume check.
@@ -27,6 +32,7 @@ extern "C" {
 #include "fw_sd.h"
 #include "fw_sha256.h"
 #include "fw_storage.h"
+#include "fw_wake.h"
 #if FW_SIZE_GATE_RODATA_CONTROL
 extern const unsigned char tape_gate_control_rodata[];   /* controls/gate_rodata.h */
 #endif
@@ -73,6 +79,36 @@ static uint32_t stack_high_water(void)
 
 static struct fw_player g_player;
 
+/* ---- F3 warm wake: what the two contexts share ---------------------------
+   The pin interrupt stamps t0. The audio interrupt stamps the first block the
+   engine produced (te) and the first block with any non-zero sample (t1). */
+static volatile uint8_t g_wake_edge = 0;
+static volatile uint8_t g_wake_timing = 0;
+static volatile uint8_t g_wake_done = 0;
+static volatile uint8_t g_wake_have_engine = 0;
+static volatile uint32_t g_wake_t0 = 0, g_wake_te = 0, g_wake_t1 = 0, g_wake_t1_ms = 0;
+
+static void wake_isr(void)
+{
+    if (!g_wake_edge) { g_wake_t0 = ARM_DWT_CYCCNT; g_wake_edge = 1; }
+}
+
+/* Audio interrupt, only while a wake is being timed. */
+static void wake_observe(const int16_t *pcm)
+{
+    uint32_t now = ARM_DWT_CYCCNT;
+    if (!g_wake_have_engine && g_player.rendered > 0u) { g_wake_te = now; g_wake_have_engine = 1; }
+    for (uint32_t i = 0; i < FW_AUDIO_FRAMES * TAPE_CHANNELS; i++) {
+        if (pcm[i] != 0) {
+            g_wake_t1 = now;
+            g_wake_t1_ms = millis();
+            g_wake_timing = 0;
+            g_wake_done = 1;
+            return;
+        }
+    }
+}
+
 class AudioTapeSource : public AudioStream {
 public:
     AudioTapeSource() : AudioStream(0, nullptr) {}
@@ -86,6 +122,7 @@ public:
             return;
         }
         fw_player_render(&g_player, pcm_, FW_AUDIO_FRAMES);
+        if (g_wake_timing) { wake_observe(pcm_); }
         for (uint32_t i = 0; i < FW_AUDIO_FRAMES; i++) {
             l->data[i] = pcm_[2u * i];
             r->data[i] = pcm_[2u * i + 1u];
@@ -107,7 +144,7 @@ static AudioControlSGTL5000 g_codec;
 
 /* ---- engine state -------------------------------------------------------- */
 
-enum fw_state { NO_CARD, REFUSED, MOUNTED };
+enum fw_state { NO_CARD, REFUSED, MOUNTED, ASLEEP };
 
 static enum fw_state g_state = NO_CARD;
 static tape_dev g_card;
@@ -138,6 +175,7 @@ static void report(const char *what, int code)
 static void drop_card(const char *why)
 {
     g_player.playing = 0;
+    g_wake_timing = 0;
     if (g_t != nullptr) {
         uint64_t pos = 0;
         /* Best effort: after a pull this usually fails, and that is fine. Play
@@ -252,6 +290,96 @@ static tape_result select_side(char c)
 
 static int16_t g_golden_pcm[FW_AUDIO_FRAMES * TAPE_CHANNELS];
 
+/* ---- F3 warm wake: sleep, wake, report ------------------------------------ */
+
+#ifndef FW_BUILD_ID
+#define FW_BUILD_ID "unknown"      /* set by tools/build_id.py from git */
+#endif
+
+/* How long a wake may stay silent before it is reported as a setup fault
+   (stopped inside a silent passage, or no audio at all). Well under the 7 s
+   the 32-bit cycle counter takes to wrap at 600 MHz. */
+static const uint32_t FW_WAKE_TIMEOUT_MS = 2000;
+/* The F3 negative control: `wake150` adds this before the mount, and the
+   reported time must then be at least 150 000 us. */
+static const uint32_t FW_WAKE_CONTROL_MS = 150;
+
+static struct fw_wake g_wake;
+static uint32_t g_wake_t0_ms = 0;
+static const char *g_wake_trigger = "";
+static bool g_wake_control = false;
+
+static void do_sleep(void)
+{
+    if (g_state != MOUNTED) { Serial.println("ERR usage or no mounted card"); return; }
+    if (g_player.playing) { Serial.println("SLEEP REFUSED playing"); return; }
+    tape_result r = fw_wake_sleep(&g_wake, g_t, g_side, fw_warm_pcm, g_golden_pcm);
+    if (r != TAPE_OK) {
+        report("SLEEP FAILED", r);
+        drop_card("sleep failed");
+        return;
+    }
+    fw_player_bind(&g_player, nullptr);
+    g_wake_edge = 0;
+    g_wake_done = 0;
+    g_state = ASLEEP;
+    attachInterrupt(digitalPinToInterrupt(PIN_PLAY), wake_isr, FALLING);
+    Serial.print("SLEEP position ");
+    Serial.print((unsigned long long)g_wake.position);
+    Serial.print(" warm_frames ");
+    Serial.println((unsigned long)(g_wake.have_warm ? g_wake.warm.valid_frames : 0u));
+}
+
+/* t0 is already stamped. Mount warm and start rendering at once: no seek, no
+   prefill. The audio interrupt closes the measurement; loop() prints it. */
+static void do_wake(const char *trigger, uint32_t t0, bool control)
+{
+    detachInterrupt(digitalPinToInterrupt(PIN_PLAY));
+    g_wake_edge = 0;
+    g_wake_t0 = t0;
+    g_wake_t0_ms = millis();
+    g_wake_trigger = trigger;
+    g_wake_control = control;
+    if (control) { delay(FW_WAKE_CONTROL_MS); }
+
+    tape_result r = fw_wake_wake(&g_wake, g_t);
+    if (r != TAPE_OK) {
+        /* The card went away or changed while asleep. Start over from the slot. */
+        g_t = nullptr;
+        g_state = NO_CARD;
+        report("WAKE FAILED", r);
+        return;
+    }
+    g_state = MOUNTED;
+    fw_player_bind(&g_player, g_t);
+    g_wake_have_engine = 0;
+    g_wake_done = 0;
+    g_wake_timing = 1;
+    r = fw_player_play_now(&g_player);
+    if (r != TAPE_OK) { g_wake_timing = 0; report("WAKE FAILED", r); }
+}
+
+static void print_wake(void)
+{
+    uint32_t hz = F_CPU_ACTUAL;
+    Serial.print("WAKE us ");
+    Serial.print((unsigned long)fw_wake_us(g_wake_t1 - g_wake_t0, hz));
+    Serial.print(" engine_us ");
+    Serial.print((unsigned long)(g_wake_have_engine ? fw_wake_us(g_wake_te - g_wake_t0, hz) : 0u));
+    Serial.print(" ms ");
+    Serial.print((unsigned long)(g_wake_t1_ms - g_wake_t0_ms));
+    Serial.print(" warm ");
+    Serial.print((int)g_wake.warm_used);
+    Serial.print(" trigger ");
+    Serial.print(g_wake_trigger);
+    Serial.print(" control ");
+    Serial.print(g_wake_control ? 1 : 0);
+    Serial.print(" underruns ");
+    Serial.print((unsigned long)g_player.underruns);
+    Serial.print(" build ");
+    Serial.println(FW_BUILD_ID);
+}
+
 /* golden|stream SIDE FROM FRAMES: deterministic render, engine-api §6.3 order.
    live SIDE FROM: render in the audio interrupt exactly as heard, to the end
    of the side, hashing every frame the interrupt renders. */
@@ -277,6 +405,13 @@ static void command(char *line)
         Serial.print((unsigned long)stack_high_water());
         Serial.print(" underruns ");
         Serial.println((unsigned long)g_player.underruns);
+        return;
+    }
+    if (n >= 1 && strcmp(verb, "build") == 0) { Serial.print("BUILD "); Serial.println(FW_BUILD_ID); return; }
+    if (n >= 1 && strcmp(verb, "sleep") == 0) { do_sleep(); return; }
+    if (n >= 1 && (strcmp(verb, "wake") == 0 || strcmp(verb, "wake150") == 0)) {
+        if (g_state != ASLEEP) { Serial.println("ERR not asleep"); return; }
+        do_wake("serial", ARM_DWT_CYCCNT, verb[4] != '\0');
         return;
     }
     if (n < 3 || g_state != MOUNTED) { Serial.println("ERR usage or no mounted card"); return; }
@@ -368,6 +503,12 @@ void loop()
     uint32_t now = millis();
     poll_serial();
 
+    if (g_state == ASLEEP) {
+        /* Nothing touches the card while asleep; a pulled card shows up as a
+           failed wake. */
+        if (g_wake_edge) { do_wake("button", g_wake_t0, false); }
+        return;
+    }
     if (g_state != MOUNTED) {
         if (now - g_last_poll >= FW_CARD_POLL_MS) {
             g_last_poll = now;
@@ -399,6 +540,13 @@ void loop()
         g_player.ended = 0;
         (void)tape_set_rate(g_t, 0);
         Serial.println("END OF SIDE");
+    }
+    if (g_wake_done) {
+        g_wake_done = 0;
+        print_wake();
+    } else if (g_wake_timing && now - g_wake_t0_ms > FW_WAKE_TIMEOUT_MS) {
+        g_wake_timing = 0;
+        Serial.println("WAKE TIMEOUT no non-silent audio (stop inside audible material and retry)");
     }
     if (g_player.failed) {
         g_player.failed = 0;

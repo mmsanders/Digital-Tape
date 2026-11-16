@@ -16,7 +16,7 @@ CFLAGS ?= -O2
 INC := -I$(ROOT)/engine/include -I$(ROOT)/engine/port -I$(ROOT)/host/port -I../src
 
 ENGINE := $(wildcard $(ROOT)/engine/src/*.c)
-FW     := ../src/fw_part.c ../src/fw_play.c ../src/fw_sha256.c
+FW     := ../src/fw_part.c ../src/fw_play.c ../src/fw_sha256.c ../src/fw_wake.c
 OTHER  := $(ROOT)/engine/port/dev_file.c $(ROOT)/host/port/mbr.c
 
 .PHONY: all clean

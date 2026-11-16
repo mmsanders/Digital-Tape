@@ -29,6 +29,7 @@
 #include "dev_file.h"
 #include "fw_part.h"
 #include "fw_play.h"
+#include "fw_wake.h"
 #include "fw_sha256.h"
 
 static union { uint64_t u; long double ld; void *p; unsigned char b[256u * 1024u]; } g_mem;
@@ -386,8 +387,99 @@ static int cmd_golden(int argc, char **argv)
     return r == TAPE_OK ? 0 : 3;
 }
 
+/* ---- F3 warm wake -------------------------------------------------------
+   The sequence main.cpp runs: stop at --from, sleep (render ahead, unmount),
+   wake (warm mount, rate 1.0x), then the audio interrupt renders one block
+   BEFORE the main loop has serviced anything. That first block is the whole
+   point: with a warm buffer it is full and costs no card read. Playback then
+   continues as the live path does, and the caller compares every byte with
+   the golden. --control uuid alters the retained descriptor's cartridge id,
+   so the engine must decline it and the first block must come up empty. */
+static int cmd_wake(int argc, char **argv)
+{
+    static int16_t warm[FW_WARM_FRAMES * TAPE_CHANNELS];
+    static int16_t block[FW_AUDIO_FRAMES * TAPE_CHANNELS];
+    static struct fw_player p;
+    static struct fw_wake w;
+    const char *side = opt(argc, argv, "--side"), *from = opt(argc, argv, "--from");
+    const char *frames = opt(argc, argv, "--frames"), *out = opt(argc, argv, "-o");
+    const char *control = opt(argc, argv, "--control");
+    struct out_state o;
+    tape *t = NULL;
+    tape_result r;
+    tape_side sd;
+    uint64_t want, first = 0;
+    uint32_t reads_before = 0, wake_reads = 0, first_underruns = 0;
+    uint8_t d[32];
+    char hex[65];
+    int rc;
+
+    if (!side || !from || !frames || !out) { return 64; }
+    sd = side[0] == 'B' ? TAPE_SIDE_B : TAPE_SIDE_A;
+    want = strtoull(frames, NULL, 10);
+    memset(&o, 0, sizeof o);
+    o.fp = fopen(out, "wb");
+    if (o.fp == NULL) { return 66; }
+    fw_sha256_init(&o.sha);
+
+    rc = open_whole(argv[2], 0);
+    if (rc != 0) { fclose(o.fp); tape_dev_file_close(&g_file); return rc; }
+    r = tape_init(g_mem.b, sizeof g_mem.b, &g_dev, g_play, sizeof g_play, g_rec, sizeof g_rec, &t);
+    if (r == TAPE_OK) { r = tape_mount(t, sd, 0, NULL); }
+    if (r == TAPE_OK) { r = tape_seek(t, strtoull(from, NULL, 10)); }
+    if (r == TAPE_OK) { r = fw_wake_sleep(&w, t, sd, warm, block); }
+    if (r == TAPE_OK && control && strcmp(control, "uuid") == 0) { w.warm.uuid[0] ^= 1u; }
+    /* Whatever the ring held before sleep must not be what plays after it. */
+    memset(g_play, 0, sizeof g_play);
+    if (r == TAPE_OK) {
+        reads_before = g_part.reads;
+        r = fw_wake_wake(&w, t);
+        wake_reads = g_part.reads - reads_before;
+    }
+    if (r == TAPE_OK) {
+        fw_player_bind(&p, t);
+        r = fw_player_play_now(&p);
+    }
+    if (r == TAPE_OK) {
+        reads_before = g_part.reads;
+        fw_player_render(&p, block, FW_AUDIO_FRAMES);          /* no service yet */
+        first = p.rendered;
+        first_underruns = p.underruns;
+        wake_reads += g_part.reads - reads_before;
+        if (first > 0u) { sink(&o, block, (uint32_t)(first > want ? want : first)); }
+    }
+    while (r == TAPE_OK && p.playing && p.rendered < want) {
+        uint64_t before = p.rendered;
+        uint32_t got;
+        bool more = false;
+        r = fw_player_service(&p, &more);
+        if (r != TAPE_OK) { break; }
+        fw_player_render(&p, block, FW_AUDIO_FRAMES);
+        got = (uint32_t)(p.rendered - before);
+        if (before + got > want) { got = (uint32_t)(want - before); }
+        if (got > 0u) { sink(&o, block, got); }
+    }
+    if (r == TAPE_OK && p.failed) { r = TAPE_ERR_IO; }
+    if (t != NULL) { uint64_t pos; (void)tape_unmount(t, &pos); }
+    fclose(o.fp);
+    fw_sha256_final(&o.sha, d);
+    fw_sha256_hex(d, hex);
+    printf(",\"result\":%d,\"position\":%" PRIu64 ",\"warm_frames\":%" PRIu32 ",\"warm_used\":%d"
+           ",\"first_block_frames\":%" PRIu64 ",\"first_block_underruns\":%" PRIu32
+           ",\"mount_reads\":%" PRIu32 ",\"underruns\":%" PRIu32 ",\"card_writes\":%" PRIu32 ",\"sha256\":\"%s\"}\n",
+           (int)r, w.position, w.have_warm ? w.warm.valid_frames : 0u, (int)w.warm_used,
+           first, first_underruns, wake_reads, p.underruns, g_count.writes, hex);
+    tape_dev_file_close(&g_file);
+    return r == TAPE_OK ? 0 : 3;
+}
+
 int main(int argc, char **argv)
 {
+    if (argc >= 4 && strcmp(argv[1], "wake-us") == 0) {
+        printf("%" PRIu32 "\n", fw_wake_us((uint32_t)strtoul(argv[2], NULL, 10), (uint32_t)strtoul(argv[3], NULL, 10)));
+        return 0;
+    }
+    if (argc >= 3 && strcmp(argv[1], "wake") == 0) { return cmd_wake(argc, argv); }
     if (argc >= 2 && strcmp(argv[1], "sha-selftest") == 0) { return cmd_sha_selftest(); }
     if (argc >= 3 && strcmp(argv[1], "part") == 0) { return cmd_part(argc, argv); }
     if (argc >= 3 && strcmp(argv[1], "bare") == 0) { return cmd_bare(argc, argv); }

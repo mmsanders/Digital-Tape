@@ -23,12 +23,14 @@ function, not speed, and is never reported against guardrail 10 (Stream 5's).
 | `lib/tape_layout/` | Builds `host/port/mbr.c` in place, so the firmware recognises a card exactly as `tapectl` does |
 | `src/fw_part.c` | Partition 2 of a whole card as the engine's `tape_dev` (portable C) |
 | `src/fw_play.c` | The render loop over the public API: audio-interrupt render, main-loop service, the F1 deterministic render (portable C) |
+| `src/fw_wake.c` | Warm sleep and wake over the engine's own warm start (portable C); the F3 timing lives in `main.cpp` |
 | `src/fw_sha256.c` | SHA-256 for the golden hook (portable C) |
 | `src/fw_sd.cpp` | The built-in microSD slot (SDIO) as a whole-card `tape_dev` |
 | `src/fw_storage.c` | Static, caller-owned engine storage in OCRAM: instance, play ring, record ring |
 | `src/main.cpp` | Teensy glue: audio graph, buttons, card attach/removal, serial commands |
 | `host/` | `fwhost` and `run_checks.py`: the portable modules run off target, in CI |
 | `host/partition_adapter.py` | Verification's published FW-1 partition-adapter protocol, over the real `fw_part` binding (`fwhost viewio`) |
+| `tools/build_id.py` | Build pre-script: bakes `git describe` into the image so the firmware can name its own build |
 | `tools/size_gate.py` | F2 budgets from the linked image's map and symbols |
 | `tools/engine_pin.sh` | F6 check that `engine/` equals `d96b4245` |
 | `tools/golden_serial.py` | F1 on target, over USB serial (bench only, a convenience; its output is not evidence) |
@@ -104,6 +106,47 @@ or open `firmware.hex` in the PJRC Teensy Loader and press the board's button.
   while the player is rendering, so the engine never sees a preempted call.
 
 Serial status lines are at 115200 on the USB serial port.
+
+## Warm wake timing (F3)
+
+This is how the "press Play, hear music in under 100 ms" target is measured
+(guardrail 04, FW-1 §6, ADR-208). The firmware times itself; Michael judges.
+
+1. Insert a cartridge, press **Play**, let it run into audible music, press **Stop**.
+2. Send `sleep` over serial. The firmware keeps about 186 ms of audio from the
+   stop position in its own memory, unmounts, and replies
+   `SLEEP position <frame> warm_frames <n>`.
+3. Press **Play**. Audio starts from the kept buffer while the card catches up,
+   and the firmware prints one line:
+
+   `WAKE us <n> engine_us <n> ms <n> warm <0|1> trigger <button|serial> control <0|1> underruns <n> build <id>`
+
+| Field | Meaning |
+|---|---|
+| `us` | Microseconds from the Play edge to the first non-silent audio block handed to I²S, from the CPU cycle counter, rounded up. **This is the F3 number** |
+| `engine_us` | The same, to the first block the engine produced at all. Much smaller than `us` means the stop position was in a quiet passage |
+| `ms` | The same interval from the millisecond tick: a coarse cross-check of `us` |
+| `warm` | 1 if the engine used the kept audio; 0 is a cold wake (it declined the buffer) |
+| `control` | 1 only for the `wake150` check below |
+| `build` | `git describe` of the source the image was built from (also printed by `build`) |
+
+Not included: about 6 ms of I²S and codec delay after the block is handed
+over, and button bounce. Add them when judging against 100 ms.
+
+**Check the timer can read slow.** `sleep`, then send `wake150` instead of
+pressing Play. It waits 150 ms before waking, so `us` must be at least 150000.
+`wake` (no delay) is the same trigger over serial, for testing without a hand
+on the button.
+
+`WAKE TIMEOUT` means two seconds passed with no non-silent audio: stop inside
+music and try again. Record the result as a row in
+[MICHAEL-CHECKS](../../docs/MICHAEL-CHECKS.md): the `WAKE` line, and whether it
+felt instant.
+
+The part that needs no hardware runs in CI (`host/run_checks.py`, `wake/*`):
+after sleep and wake the first audio block is full without touching the card,
+the audio matches the golden from the stop position on, and audio kept from a
+different cartridge is declined.
 
 ## Golden mode (F1)
 

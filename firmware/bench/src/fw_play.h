@@ -53,6 +53,11 @@ void fw_player_render(struct fw_player *p, int16_t *out, uint32_t frames);
    start rendering from the current position. */
 tape_result fw_player_play(struct fw_player *p);
 
+/* Main loop. Rate 1.0x and start rendering at once, with no prefill: the ring
+   already holds audio (a warm wake). After a cold mount the first blocks
+   underrun until the loop services. */
+tape_result fw_player_play_now(struct fw_player *p);
+
 /* Main loop. Stop rendering; the position is kept (rate 0 renders nothing). */
 tape_result fw_player_stop(struct fw_player *p);
 
