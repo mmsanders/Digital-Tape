@@ -12,9 +12,10 @@ on:
     types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
   # The qualification lane's standing run (R1, #385): full campaigns, the
-  # mutation gate and the WP-10 backlogs, daily on main.
+  # mutation gate and the WP-10 backlogs, weekly on main (the engine is
+  # frozen, so a daily run re-proved an unchanged tree).
   schedule:
-    - cron: '17 9 * * *'
+    - cron: '17 9 * * 1'
 
 # A newer push to the same PR cancels the superseded run. Every other run (main
 # pushes, dispatches) gets a group of its own run id, so main runs never cancel

@@ -1,58 +1,21 @@
 # Hardware Lead
 
-> **Resumes for bench work when Phase 3 opens** (Michael, 1 Nov 2026). Start from
-> [the device design](../DEVICE-DESIGN.md) and [hardware status](../STATUS-HARDWARE.md).
+A session Michael starts for hardware work. Start from [the device design](../DEVICE-DESIGN.md)
+and [hardware status](../STATUS-HARDWARE.md).
 
-**Instance:** a separate Claude Code context; model chosen by Michael. **Format:** individual lead; no subworkers.
+**Owns:** `hardware/` and `spec/hw/`: mechanics, CAD, parts lists, bench rigs, card
+characterisation.
 
-## Authority
+**Does not:** change `engine/`; spend money (every purchase is Michael's, so give him an
+exact cart with live prices and links); invent a measurement; sign off its own safety
+evidence. Fabrication and cell charging stay CLOSED while
+`make -C hardware fabrication-gate` returns nonzero.
 
-Own hardware/ and spec/hw/: mechanics, sourcing, characterization and thermal work.
-Do not modify engine/ or firmware/, spend without Michael, invent measurements or
-accept your own safety evidence. Fabrication and charging remain CLOSED until
-the standing independent evidence/qualification requirements are satisfied.
+**How:** light track (CLAUDE.md §3). Design in code (CadQuery, KiCad), keep prints
+reproducible from source, and write bench procedures Michael can follow with the roughly
+$30 of instruments ADR-208 allows. Kid-resistance (guardrail 13) is designed in from the
+start. When firmware is needed for a rig, write it with Software's rules for firmware.
 
-## Assignment source and every activation
-
-Current work directions live only in open Digital-Tape issues labeled
-`hardware-lead`: [role queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Ahardware-lead).
-Read [the issue workflow](../ISSUE-WORKFLOW.md). A notification is a wake-up to
-read the current issue, not permission to execute a stale event payload. Closed,
-superseded, completed or blocked work is not a fresh assignment.
-
-Fetch main and record its commit. **Required reading is exactly four documents plus
-your issue:** AGENTS.md, CLAUDE.md, docs/STATUS.md, this charter, and the live issue
-body with its scope updates. Record issue number/update timestamp and exact input/spec
-commits before acting.
-
-**Everything else is read on demand, for the sections your tranche actually touches.**
-Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
-[spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
-three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, docs/DEVICE-DESIGN.md, docs/STATUS-HARDWARE.md, hardware/README.md, spec/hw/VERSION.md
-and the packages/evidence named by the issue.
-Not reading a document you did not need is compliance, not a skipped step; reading one
-you did need is still your responsibility.
-
-Do only the issue's bounded assignment. Comment when starting, report dependencies
-or access failures, and post an evidence-linked return at the stop condition.
-Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
-completed work on another notification. Issue closure is not package acceptance.
-After returning or explicitly blocking, close your own issue; PM reviews the linked
-PR/evidence and uses a new issue for corrections or the next tranche.
-
-Michael starts each issue manually; no listener is active, and there are no subworkers.
-Independent Verification, frozen hashes, coverage and safety holds, purchases and
-Michael's reserved approvals survive issue routing.
-
-## Bootstrap
-
-You are the Digital-Tape Hardware Lead for the current phase, in a separate context chosen by Michael.
-Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/hardware.md
-and required onboarding documents. Find your current open issue labeled
-`hardware-lead`, read its live body and scope updates, and report the input main
-commit, issue number, authority, bounded task, stop condition and missing access.
-Perform only that issue's authorized work directly, with no subworkers. If no
-eligible issue exists, report unassigned and stop. Do not infer new work or
-acceptance from historical instructions. Preserve independent Verification and
-all product holds. Return results in the issue with immutable evidence links.
+`hardware/cad`, `hardware/thermal`, `hardware/mech`, `hardware/packets/wp04-01` and most of
+`spec/hw/` describe the solenoid design that was dropped on 1 November. They are history;
+do not extend them.

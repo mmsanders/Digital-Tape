@@ -1,36 +1,27 @@
-# Human queue
+# For Michael
 
-**8 November 2026 PST. Phase 3 is open.**
+**16 November 2026.** What needs you, most important first.
 
-**Parts now block real-board development.** The CI corrections and baseline evidence
-kit are integrated; another software-only cycle cannot prove target audio, stack,
-first-start timing or removal. Useful bounded preparation remains, but order lead
-time is now on that validation path. No delivery date has been assumed.
+1. **Order the first parts** (about $62 plus tax and shipping). Group 1 in
+   [the bench parts list](../hardware/sourcing/PHASE3-BENCH.md) has the SKUs and links,
+   checked 10 November; glance at stock before paying. Skip the USB cable if you have a
+   micro-B cable that carries data. If you own no multimeter, add one now. Everything else
+   on that page can wait until music plays on the bench.
+2. **Decide the speaker loudness limit.** Hardware proposes **80 dB(A) at 50 cm**, checked
+   with a phone app reading **75 dB or less**
+   ([research](../hardware/characterisation/SPEAKER-LIMIT.md)). It is the strictest toy
+   limit found, taken from a 2014 standard text that could not be re-read in its current
+   edition. Saying yes lets the spec revision
+   ([DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md)) be finished.
+3. **Close two stale pull requests** after merging the 16 November cleanup: PR 677 (the
+   warm-wake interface documents, replaced by working code) and PR 673 (its parts list and
+   speaker research were carried over; the rest pre-specified the power-cut test).
+4. **When the parts arrive:** follow "When the parts arrive" in [STATUS](STATUS.md). Your
+   verdicts go in [MICHAEL-CHECKS](MICHAEL-CHECKS.md).
 
-1. **Recommended first order:** Teensy4.1 (headers fitted preferred), compatible
-   Audio Adapter RevD/D2, the required headers/sockets, breadboard/jumpers/two
-   buttons, and a USB micro-B **data** cable if you do not have one. Existing cards
-   and headphones can be reused. Teensy alone unblocks boot/USB/native-SD bring-up;
-   adapter plus connections unlock headphone/I2S checks. Hardware675 verifies exact
-   fitting, live vendor price/stock and subtotal. Old cart estimates are not quotes.
-   Do not wait for the full speaker/mic/LED/Hall/rig order to get the ordinary bench.
-2. **Next manual lead starts:**
-   - Software [#674](https://github.com/mmsanders/Digital-Tape/issues/674): F3 declaration, then independently bound timing/capture tooling and first-board packet;
-   - Hardware [#675](https://github.com/mmsanders/Digital-Tape/issues/675): new-route checker, staged verified cart and outstanding speaker-limit research;
-   - Verification [V#405](https://github.com/mmsanders/digital-tape-verification/issues/405): ready selfrun bindings now, timing bindings when declared, then exact-head reviews.
-3. **Parts status:** last owner confirmation remains not ordered. The revised
-   whole cart is a candidate, not approved spending. Every purchase is yours;
-   no lead orders. Buy-first bench and later power-cut circuit remain separate.
-4. **DRAFT-11** remains proposed. PM applied V398 wording findings; S2's exact
-   source-backed speaker value/distance/method and your authorization still precede
-   issuance. Copy-button placement and promote-B-to-A key combination remain open.
+Still open, no rush: where the copy button goes, and which key combination promotes
+Side B to Side A ([device design §6](DEVICE-DESIGN.md)). Pinned for later: the unaided app
+test ([G2](WP15-G2-PROTOCOL.md)) before anyone else uses the desktop app.
 
-ADR-208 stays adopted: your timing/feel verdict with firmware numbers; strict facts
-and cap margins cannot be waived. Sign-offs go in [MICHAEL-CHECKS](MICHAEL-CHECKS.md).
-No CID/reader or calibrated lab instrument purchase is required. Matching-owner
-CODEOWNERS approval carries; no repeat request for the same protected additions.
-No actual bench/physical/charging/fabrication session is authorized by this review.
-
-Pinned for later: G2 unaided app test ([protocol](WP15-G2-PROTOCOL.md)).
-
-[Status](STATUS.md) · [Phase 3 ledger](PHASE3-LEDGER.md) · [Device design](DEVICE-DESIGN.md)
+To start work, open a session and say what you want. Issues are optional
+([how](ISSUE-WORKFLOW.md)).

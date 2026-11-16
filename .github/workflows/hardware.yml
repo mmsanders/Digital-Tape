@@ -10,6 +10,12 @@ on:
 
 # For the Hardware Lead (PM Decisions 002-HW §2). Runs only when hardware/
 # changes, so board checks do not gate engine work and vice versa.
+#
+# The solenoid, thermal, clasp, library-print-packet and old cartridge-shell
+# CAD checks were retired from CI on 16 November 2026: they guarded the design
+# superseded on 1-2 November (docs/DEVICE-DESIGN.md §7). Their make targets
+# remain in hardware/Makefile and still run by hand. The fabrication gate and
+# the atomicity judge stay.
 jobs:
   erc-drc:
     name: KiCad ERC / DRC
@@ -33,13 +39,9 @@ jobs:
           if-no-files-found: ignore
 
   packet:
-    name: print packet is printable
+    name: hardware gates
     runs-on: ubuntu-latest
-    # Deliberately NOT the KiCad container: this gate is pure stdlib and should
-    # stay fast. It catches the two ways a packet can be broken on arrival --
-    # a 3MF no slicer will open, and geometry off the edge of the bed. Both
-    # shipped once. A packet that will not open is exactly as broken as a
-    # schematic that fails ERC, and only one of those was checked before.
+    # Deliberately NOT the KiCad container: these gates are pure stdlib and fast.
     steps:
       - uses: actions/checkout@v4
       # PINNED, and it is not cosmetic. Python 3.12 changed `sum()` to
@@ -52,52 +54,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Plate opens and sits on the bed
-        run: make -C hardware packet-validate
       - name: Media-atomicity judge, and proof it can go red
         run: make -C hardware atomicity-test
-      - name: Clasp tables in spec/hw/cartridge-shell.md are not stale
-        run: make -C hardware mech-check
-      # IR-018-14: hardware CI did not run the thermal analyses AT ALL, so the
-      # solenoid safety criteria and the charger/JEITA tables were unguarded on
-      # every push. thermal-check now fails on the criteria first and on
-      # staleness second; solenoid-test proves the criteria can go red.
-      - name: Thermal and solenoid analyses hold and are not stale
-        run: make -C hardware thermal-check
-      - name: Solenoid safety criteria, and proof they can go red
-        run: make -C hardware solenoid-test
       - name: Fabrication gate preserves CLOSED at the Make boundary
         run: make -C hardware fabrication-gate-test
       - name: spec/hw content and revision agree
         run: make -C hardware spec-check
-
-  cad:
-    name: CAD rebuilds, and the geometry matches the analysis
-    runs-on: ubuntu-latest
-    # Split from `packet` because it needs CadQuery, which is a large install.
-    # Keeping it separate means the fast stdlib gates stay fast and a CadQuery
-    # packaging problem cannot hide a real packet failure behind it.
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install CadQuery
-        run: pip install --quiet cadquery
-      # The plate is a COMMITTED artefact -- Michael downloads it and cannot run
-      # `make`. That only works if it is reproducible from source, and until now
-      # nothing checked it: a hand-edited plate, or a source change nobody
-      # rebuilt, would both have gone unnoticed.
-      - name: Committed plate is what the source produces
-        run: make -C hardware packet-check
-      # cartridge-shell.md makes three claims that are geometric, not textual --
-      # the sweep is blind, the bead seats free when closed, and it still
-      # retains when withdrawn. --mutate proves the checks can go red, per
-      # CLAUDE.md section 1: adding a gate means adding its red case.
-      - name: Shell geometry realises the analysis, and can go red
-        run: make -C hardware shell-test
-      # PM Decisions 007 §1. Compares the swept parameter and the mechanism with
-      # the blind label suppressed -- comparing the solids as shipped runs green
-      # on the very plate that prompted this, and --mutate proves it.
-      - name: No undeclared duplicate parts, and can go red
-        run: make -C hardware packet-duplicates

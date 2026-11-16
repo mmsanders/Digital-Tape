@@ -1,19 +1,15 @@
-# Start a lead
+# Roles
 
-Read the relevant charter and common onboarding, then find the role's current open
-assignment issue. Main stores enduring charters, not round work directions.
-Michael assigns roles; opening this index or receiving a label event grants no role.
+Michael assigns roles; opening this page grants none. The rules for all of them are in
+[CLAUDE.md](../../CLAUDE.md). These pages only add what is specific to a role.
 
-| Role | Chat/model | Charter | Issue label |
-|---|---|---|---|
-| PM | Any — Michael assigns (ADR-162) | [PM](pm.md) | pm |
-| Software | Local Windows Claude Code; Michael selects model | [Software](software.md) | software-lead |
-| Hardware | Separate context; Michael selects model | [Hardware](hardware.md) | hardware-lead |
-| Verification | Separate independent context, runtime chosen by Michael | [Verification](verification.md) | verification-lead in `digital-tape-verification` |
-| Surge | Grok | [Surge](surge.md) | surge |
-| Michael | Human reserved decisions | [Queue locator](../FOR-MICHAEL.md) | michael |
+| Role | Page | Used for |
+|---|---|---|
+| Software | [software.md](software.md) | Firmware, desktop tools, CI, repo upkeep |
+| Hardware | [hardware.md](hardware.md) | Mechanics, parts, bench rigs, `hardware/` and `spec/hw/` |
+| Verification | [verification.md](verification.md) | Independent tests for engine and format changes; reviews Michael asks for |
+| PM | [pm.md](pm.md) | Planning and spec revisions, when Michael asks |
+| Surge | [surge.md](surge.md) | Small tasks from Michael (Grok) |
 
-[Issue workflow and queue links](../ISSUE-WORKFLOW.md) define assignment, return and
-closure. Michael starts each issue manually; PM sends no kickoff messages. Leads do their
-own work with no subworkers; unassigned leads need not act.
-Leads close their own returned/blocked issues. Closure is a stop marker, not acceptance.
+One lead does one task end to end. No subworkers unless Michael asks. Work arrives from
+Michael, in a session or an [issue](../ISSUE-WORKFLOW.md).

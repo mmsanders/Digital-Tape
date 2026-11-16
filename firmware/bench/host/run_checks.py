@@ -15,6 +15,11 @@ judges it:
             render loop plays it in both its deterministic and its live
             (interrupt + main loop) form, and the PCM must equal the reference
             WAV's data bytes exactly.
+  wake      F3 warm wake, the part that needs no hardware: after sleep and
+            wake the first audio block is full and costs no card read, the
+            audio from the stop position on equals the golden, and a retained
+            buffer from a different cartridge is declined (the first block is
+            then empty: the control). Timing itself is measured on the bench.
   controls  F1 negative controls: one altered sample, and rate 1.0x + 1, must
             each FAIL the same comparison, in both forms.
 
@@ -236,6 +241,41 @@ def golden_checks(out):
                           fwhost=cres)
 
 
+# ---- F3 warm wake ----------------------------------------------------------
+
+def wake_checks(out):
+    d = os.path.join(out, "golden")
+    img = os.path.join(d, "play-1x-fortissimo.img")      # built by golden_checks
+    want = wav_data(os.path.join(GOLDEN, "ref", "play-1x-fortissimo.wav"))
+    total = len(want) // 4
+    cases = [("mid", 44100, 30000), ("start", 0, 30000), ("near-end", total - 3000, 3000)]
+    for name, frm, frames in cases:
+        pcm = os.path.join(d, "wake-%s.pcm" % name)
+        res, _ = fwhost(["wake", img, "--side", "A", "--from", str(frm), "--frames", str(frames), "-o", pcm])
+        got = open(pcm, "rb").read()
+        check("wake/%s" % name,
+              res.get("result") == 0 and res.get("warm_used") == 1 and res.get("position") == frm
+              and res.get("warm_frames") == min(8192, total - frm)
+              and res.get("first_block_frames") == 128 and res.get("first_block_underruns") == 0
+              and res.get("underruns") == 0 and res.get("card_writes") == 0
+              and got == want[frm * 4:(frm + frames) * 4],
+              fwhost=res)
+    # Control: a buffer retained from another cartridge must not be played.
+    pcm = os.path.join(d, "wake-control-uuid.pcm")
+    res, _ = fwhost(["wake", img, "--side", "A", "--from", "44100", "--frames", "30000",
+                     "-o", pcm, "--control", "uuid"])
+    got = open(pcm, "rb").read()
+    check("control/wake/foreign-buffer-declined",
+          res.get("result") == 0 and res.get("warm_used") == 0 and res.get("first_block_frames") == 0
+          and res.get("first_block_underruns") == 1 and got == want[44100 * 4:(44100 + 30000) * 4],
+          fwhost=res)
+    # Microseconds are rounded up, so the 150 ms control can never read as 149 999.
+    def us(c, hz):
+        return int(subprocess.run([A.fwhost, "wake-us", str(c), str(hz)], capture_output=True, text=True).stdout)
+    check("wake/us-rounds-up", us(600000000, 600000000) == 1000000 and us(89999701, 600000000) == 150000
+          and us(1, 600000000) == 1 and us(0, 600000000) == 0 and us(5, 0) == 0)
+
+
 def main():
     global A
     ap = argparse.ArgumentParser()
@@ -250,6 +290,7 @@ def main():
         check("sha256/selftest", p.returncode == 0, out=p.stdout.strip())
         part_checks(A.out)
         golden_checks(A.out)
+        wake_checks(A.out)
     except Exception as e:  # a harness that cannot run is never a pass
         print("FAIL  harness could not run: %r" % e)
         return 2

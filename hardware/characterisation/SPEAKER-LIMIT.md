@@ -7,7 +7,44 @@ input main `3826018`.
 This is research and a recommendation, not a safety acceptance. Hardware can't accept its own
 safety response (CLAUDE.md §2).
 
-## Recommendation
+## S2 proposal under the ADR-208 phone method (10 November 2026, [#675](https://github.com/mmsanders/Digital-Tape/issues/675))
+
+This finishes the S2 gap named in the DRAFT-11 proposal: the limit, distance, weighting, signal,
+duration and method. It is a **proposal**. PM folds it into DRAFT-11, Verification reviews the
+method, and Michael authorises issuance. Hardware doesn't issue or accept a safety limit.
+
+| Parameter | Proposed value | Source / reason |
+|---|---|---|
+| **Limit (S2)** | **LpA ≤ 80 dB**, A-weighted, time-averaged | EN 71-1 §4.20.2.4 hand-held and §4.20.2.3 table-top, exposure category 1 (§1 below). Stricter than ASTM F963-23's 85 dB |
+| **Check threshold** | Phone app reads **≤ 75 dB** | 80 dB minus ADR-208's 5 dB margin for an uncalibrated phone. Replaces the 77 dB Class 2 bench target in §4 |
+| **Distance** | **50 cm** from the nearest surface of the player | EN 71-1 §8.28.1.5 (50 cm from the reference box); F963-23 also measures at 50 cm |
+| **Position** | Move the phone at 50 cm over the front, sides and top; measure fully at the loudest | Simplified from EN 71-1's six positions on the box surface |
+| **Weighting and averaging** | A-weighting, Leq (LAeq) | EN 71-1 §4.20.2; F963 LAeq |
+| **Duration** | 15 s per measurement | EN 71-1 §8.28.1.3 (15 ± 1 s) |
+| **Mode and signals** | Maximum volume, speaker path (no headphones). Three runs, report the maximum: (a) the loudest golden fixture; (b) the same at full-depth FF scrub; (c) a full-scale 1 kHz tone cartridge made with the desktop app | §8.28.1.3: "the mode … which produces the highest sound pressure level". Scrub is foreseeable use |
+| **Setup** | Player held at an adult's arm's length, or on a stand ≥ 1 m up, away from walls. Room background ≥ 10 dB below the reading (≤ 65 dB on the app) | §8.28.2.3.1 mounting; background rule from §4 |
+| **Instrument** | Phone sound-level app with A-weighting and Leq (NIOSH SLM on iOS, or similar) | ADR-208 §2 |
+| **Peak** | LCpeak ≤ 110 dB is **not measured by phone**. It is met by design | EN 71-1 §4.20.2.4. A phone app's peak reading isn't credible. The amplifier's maximum output at the cap is about 75–80 dB(A) at 50 cm, which leaves about 30 dB to the peak limit even for a full-scale square wave (crest factor 0 dB). That is analysis, not a measurement. Verification checks the codec/amplifier configuration, as for the headphone cap |
+| **Record** | One MICHAEL-CHECKS entry: date, firmware build, gain register and trim setting, distance, position, the three readings and background | ADR-208 §7 |
+| **Enforcement** | SGTL5000 line-out level set and re-asserted at boot; volume range clamped under it; PAM8302 gain trim set during the check, then sealed. Michael may lower it by ear, never raise it above the measured reading | ADR-208 §2; §4 below |
+
+**Standards status, checked 10 November 2026 (secondary sources only; the texts are paywalled):**
+- **EN 71-1:2014+A1:2018.** The amendment summaries from SGS and STC list projectile, cord and
+  flying-toy changes, and no acoustics change. So §4.20 is probably unchanged from the 2014 text I
+  read, but that's **not confirmed against the text**.
+- **EU Toy Safety Regulation (EU) 2025/2509.** Published in the Official Journal on 12 December
+  2025; it repeals Directive 2009/48/EC. Most sources say it applies from 2030; one says August
+  2026. Summaries mention sound-level provisions, but **its numbers aren't confirmed**.
+- **EN 71-1:2026.** Reported as published; its acoustics clause is **not confirmed**.
+
+PM should treat the 80 dB value as resting on the 2014 text until one of these is read. It is the
+strictest value in every source I have seen, and the residual risk is a stricter future number.
+
+**Unchanged risk notes (§5):**
+- close-to-the-ear misuse, where a 60 dB limit would apply if PM classifies the device that way;
+- the shared headphone/aux jack.
+
+## Recommendation (1 November, Class 2 bench method; superseded for method by the section above)
 
 > **S2 (speaker): LpA ≤ 80 dB** (A-weighted, time-averaged over 15 s) at **50 cm** from the
 > player's reference box, at the microphone position giving the highest level, in the loudest

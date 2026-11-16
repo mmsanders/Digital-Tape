@@ -4,7 +4,7 @@
 It combines:
 - Michael's layout (intake #569, 24 Oct);
 - the CTRL-01 controls rig (`hardware/prototypes/ctrl-01/`, 26 Oct–1 Nov);
-- his decisions of 1–2 November ([ADR-199](DECISIONS.md#adr-199--phase-25-cleanout-device-design-baseline-and-phase-3-answers), [ADR-200](DECISIONS.md#adr-200--device-behaviour-answers)).
+- his decisions of 1–2 November ([ADR-199](archive/DECISIONS-ADR-001-209.md#adr-199--phase-25-cleanout-device-design-baseline-and-phase-3-answers), [ADR-200](archive/DECISIONS-ADR-001-209.md#adr-200--device-behaviour-answers)).
 
 It is a design reference, not released CAD or qualification. Items marked **OPEN** are listed
 in §6. Guardrail 13 (kid-resistant mechanics) governs everything here.

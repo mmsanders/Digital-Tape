@@ -32,5 +32,6 @@
 FW_DMAMEM uint8_t fw_engine_instance[FW_RESERVE];
 FW_DMAMEM uint8_t fw_play_ring[TAPE_PLAY_RING_MIN];
 FW_DMAMEM uint8_t fw_rec_ring[TAPE_REC_RING_MIN];
+FW_DMAMEM int16_t fw_warm_pcm[FW_WARM_FRAMES * TAPE_CHANNELS];
 
 const size_t fw_engine_instance_len = sizeof fw_engine_instance;

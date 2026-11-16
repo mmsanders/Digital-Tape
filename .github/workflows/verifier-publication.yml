@@ -4,7 +4,7 @@ name: verifier publication
 # digital-tape-verification/main, not when it sits on an open PR branch.
 # Every source_commit cited in tests/IMPORTS.json must be an ancestor of that
 # main with its declared tree. The verification repo is public, so this needs
-# no token. The daily run catches a verification main that was rewritten after
+# no token. The weekly run catches a verification main that was rewritten after
 # the fact. The gate accepts nothing; it authenticates where evidence lives.
 
 on:
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "17 6 * * *"
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 jobs:

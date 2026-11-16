@@ -92,48 +92,45 @@ assert.match(settled, new RegExp('>' + expected + '%<'));
 const phase3 = () => nodes.roadmap.innerHTML;
 const baseline3 = phase3();
 assert.match(phase3(), /Roadmap · Phase 3 · open/);
-assert.match(phase3(), />1\/12</);
-assert.match(phase3(), /<b>4<\/b> in round/);
-assert.match(phase3(), /<b>2<\/b> blocked/);
+assert.match(phase3(), />2\/12</);
+assert.match(phase3(), /<b>4<\/b> ready for the bench/);
+assert.match(phase3(), /<b>1<\/b> blocked/);
 assert.match(phase3(), /<b>5<\/b> to do/);
 assert.match(phase3(), /entry items · 0 of 3 passed/);
 assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
 assert.match(phase3(), /Fabrication and charging CLOSED/);
 assert.match(phase3(), /DRAFT-11 remains proposed/);
-for (const issue of ['Digital-Tape/issues/674', 'Digital-Tape/issues/675', 'digital-tape-verification/issues/405']) {
-  assert(phase3().includes(issue));
-}
 const ledger = fs.readFileSync('../../docs/PHASE3-LEDGER.md', 'utf8');
-const packageLedger = [...ledger.matchAll(/^\| (A-[1-6]|F[1-6])\b[^|]*\| (TO DO|IN ROUND(?: \(rig design\))?|PASSED|BLOCKED) \|/gm)]
-  .map(m => [m[1], m[2].replace(' (rig design)', '')]);
+const packageLedger = [...ledger.matchAll(/^\| (A-[1-6]|F[1-6])\b[^|]*\| (TO DO|READY|PASSED|BLOCKED) \|/gm)]
+  .map(m => [m[1], m[2]]);
 const snapshot = JSON.parse(vm.runInContext('JSON.stringify(PHASE3.packages.flatMap(p => p.criteria).map(c => [c.id, c.state]))', ctx));
 assert.equal(packageLedger.length, 12);
 assert.deepEqual(snapshot, packageLedger);
-const entries = [...ledger.split('## WP-05')[0].matchAll(/^\| [^|]+\| (PASSED|IN ROUND|TO DO|BLOCKED) \|/gm)].map(m => m[1]);
+const entries = [...ledger.split('## WP-05')[0].matchAll(/^\| [^|]+\| (PASSED|READY|TO DO|BLOCKED) \|/gm)].map(m => m[1]);
 assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(PHASE3.entry.map(c => c.state))', ctx)), entries);
 const packageIndex3 = fs.readFileSync('../../docs/PACKAGES/README.md', 'utf8').split(/^## /m)
   .find(section => section.startsWith('Phase 3'));
 const ids3 = [...packageIndex3.matchAll(/^\| (WP-\d+) \|/gm)].map(m => m[1]);
 assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(PHASE3.packages.map(p => p.id))', ctx)), ids3);
-// Prove that a passed row changes the count and only that segment; assigned does not.
-vm.runInContext('PHASE3.packages[0].criteria[0].state = "PASSED"; renderPhase3();', ctx);
+// Prove that a passed row changes the count and only that segment; ready does not.
+vm.runInContext('PHASE3.packages[0].criteria[1].state = "PASSED"; renderPhase3();', ctx);
+assert.match(phase3(), />3\/12</);
+assert.match(phase3(), /aria-valuenow="3"/);
+assert.equal((phase3().match(/class="seg done"/g)||[]).length, 3);
+vm.runInContext('PHASE3.packages[0].criteria[1].state = "READY"; renderPhase3();', ctx);
 assert.match(phase3(), />2\/12</);
-assert.match(phase3(), /aria-valuenow="2"/);
-assert.equal((phase3().match(/class="seg done"/g)||[]).length, 2);
-vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; renderPhase3();', ctx);
-assert.match(phase3(), />1\/12</);
-vm.runInContext('PHASE3.packages[0].criteria[0].state = "BLOCKED"; renderPhase3();', ctx);
-assert.match(phase3(), />1\/12</);
-assert.match(phase3(), /<b>3<\/b> blocked/);
-for (const invalid of [null, 'DONE', '']) {
-  vm.runInContext('PHASE3.packages[0].criteria[0].state = ' + JSON.stringify(invalid), ctx);
-  assert.throws(() => vm.runInContext('renderPhase3()', ctx), /A-1 has no valid state/);
+vm.runInContext('PHASE3.packages[0].criteria[1].state = "BLOCKED"; renderPhase3();', ctx);
+assert.match(phase3(), />2\/12</);
+assert.match(phase3(), /<b>2<\/b> blocked/);
+for (const invalid of [null, 'DONE', 'IN ROUND', '']) {
+  vm.runInContext('PHASE3.packages[0].criteria[1].state = ' + JSON.stringify(invalid), ctx);
+  assert.throws(() => vm.runInContext('renderPhase3()', ctx), /A-2 has no valid state/);
 }
-vm.runInContext('PHASE3.packages[0].criteria[0].state = "TO DO"; PHASE3.packages[0].criteria[0].name = "<img src=x> & card"; renderPhase3();', ctx);
+vm.runInContext('PHASE3.packages[0].criteria[1].state = "TO DO"; PHASE3.packages[0].criteria[1].name = "<img src=x> & card"; renderPhase3();', ctx);
 assert.match(phase3(), /&lt;img src=x&gt; &amp; card/);
 assert(!phase3().includes('<img'));
-vm.runInContext('PHASE3.packages[0].criteria[0].state = "IN ROUND"; PHASE3.packages[0].criteria[0].name = "Card identity"; renderPhase3();', ctx);
+vm.runInContext('PHASE3.packages[0].criteria[1].name = "Sustained write on 80%-filled media"; renderPhase3();', ctx);
 assert.equal(phase3(), baseline3);
 
 (async()=>{

@@ -11,7 +11,9 @@ manifests and dispositions that cite them still resolve.
 | intake/ | Verbatim intake snapshots |
 | pre-phase0/, phase1-pre-kickoff/ | Early round traffic and charters |
 | status-history/ | Earlier STATUS revisions |
+| DECISIONS-ADR-001-209.md, DECISIONS-INDEX-ADR-001-209.md | The decision log up to 8 November 2026 and its one-line index, closed by ADR-210. Still in force unless superseded |
 | verification-integration-*.md | Earlier versions of the verification integration file, cited by tests/IMPORTS.json |
 
 Round-by-round PM reviews and lead returns are in docs/REVIEW/. Product-side evidence
-bundles are in docs/verification/.
+bundles are in docs/verification/. Both are closed history too. They stay at their paths
+because `tests/IMPORTS.json` and the evidence-integrity gate cite them there.
