@@ -1,7 +1,5 @@
 name: READ-1 exact-head qualification
 on:
-  push:
-    branches: ['software/415-readopt-binding']
   pull_request:
     paths:
       - 'engine/**'

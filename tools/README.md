@@ -34,7 +34,6 @@ The table above is the original guardrail set. The gates added during Phase 1:
 | `classify-changes.py`, `ci_lanes.py`, `lane-verdict.py` | CI lanes (#347, R1 #385): `cheap` on every change, `regression` on non-docs changes, `qualification` on schedule, dispatch, the `qualification` PR label, engine-affecting changes and changed packages. Each lane's aggregate job is its required check |
 | `mutation-gate`, `mutation-suites.txt`, `mutations/` | WP-11 mutation testing: each planted engine mutation must be caught |
 | `wp11-portability.sh`, `wp11-narrow-int-check.py` | WP-11 §8 differential across host GCC, `arm-none-eabi` and the static-assert configuration |
-| `stream-age.py` | Daily escalation of streams held more than three days (CLAUDE.md §4) |
 
 Each has a negative control proving it can go red: `verify-evidence-integrity-gate.py`,
 `verify-structural-rule-1.py`, `verify-verifier-publications-gate.py`,

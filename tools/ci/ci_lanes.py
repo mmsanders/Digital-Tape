@@ -7,7 +7,7 @@ whose check name is the lane name, and whose `needs:` list IS the lane:
   cheap          docs, spec, build and guardrails.   Runs on every change.
   regression     current-engine replays, goldens,    Runs on every change that
                  package self-checks, tapectl.       is not docs-only.
-  qualification  full campaigns, mutation, the WP-10 Runs on the daily schedule,
+  qualification  full campaigns, mutation, the WP-10 Runs on the weekly schedule
                  crash backlogs, the re-spool crash  workflow_dispatch, a PR
                  matrix.                             labelled `qualification`
                                                      (phase gates), and any change
@@ -53,7 +53,7 @@ def qualify_job_gate(job: str) -> str:
 # host/ is deliberately inert: tapectl is not linked by any qualification
 # campaign. The mutation gate's `golden` suite does run through tapectl, so
 # that one dependency is covered by `regression` (golden, tapectl) on every
-# change and by the daily qualification run, not per PR (#385 inventory).
+# change and by the weekly qualification run, not per PR (#385 inventory).
 QUALIFICATION_INERT_PREFIXES = (
     "host/",
     "site/",
