@@ -317,44 +317,42 @@
       exit: "The Phase 2 ledger records the completed scope and deferrals. Phase 1 goldens and replays remain required. Q-P2-1 completion carries into Phase 3 and gates firmware write batching."
     };
 
-    // Criterion states mirror PHASE3-LEDGER.md. IN ROUND includes partial work such
-    // as rig design or a host-only check; it never contributes to passed progress.
-    // Later contracts have no criteria yet, so no overall Phase 3 % is claimed.
+    // Criterion states mirror docs/PHASE3-LEDGER.md; test-dashboard.cjs fails if they drift.
     const PHASE3 = {
-      asOf: "PM669 · 8 November 2026 PST · CI and kit integrated; Software674/Hardware675/V405 pre-parts work; missing Teensy blocks target validation (ADR-209)",
+      asOf: "16 November 2026 · waiting on the first parts order · process simplified by ADR-210",
       entry: [
-        { id: "DRAFT-11", name: "Spec revision", state: "IN ROUND", next: "V398 preflight findings corrected in proposal; S2, open firmware parameters, exact-bundle review and Michael authorization remain. Not in force." },
-        { id: "Q-P2-1", name: "Any-subset crash coverage", state: "BLOCKED", next: "365/365 deferred faults pass (404/404 with prior receipts). Six long cuts unavailable on the three-unit fixture, zero executed. Batching/large-epoch coverage remains held by PM." },
-        { id: "Parts", name: "Bench parts approved and ordered", state: "BLOCKED", next: "Missing Teensy now blocks target validation. Hardware675 verifies small Teensy/audio/connections first order; Michael approves/orders. Full rig/features can follow." }
+        { id: "Parts", name: "First parts order", state: "BLOCKED", next: "Michael orders group 1 of the bench parts list (about $62): Teensy 4.1, audio shield, breadboard kit." },
+        { id: "DRAFT-11", name: "Spec revision", state: "BLOCKED", next: "Waiting on Michael's decision on the speaker limit (80 dB(A) at 50 cm proposed). Not in force." },
+        { id: "Q-P2-1", name: "Crash coverage before write batching", state: "BLOCKED", next: "365 of 365 deferred load faults pass. Six long cuts could not be run on the fixture. Write batching stays off." }
       ],
       packages: [
-        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware + Verification", issue: 675,
-          note: "V398 planted-tear logic11 cases pass; PR673/c32f1a56 declares new selfrun-r1/plan5. Hardware675 and V405 bind/implement before parts; ADR209 resolves CID/completed-OLD/SPI scope. Complete method/card campaign not cleared.", criteria: [
-            { id: "A-1", name: "Card identity", state: "IN ROUND", next: "Recorded 7 Nov: PNY Elite-X 64 GB microSDXC U3 V30 A1, photos hashed in docs/evidence/cards. Retail part number unknown (packaging gone); CID optional (ADR-208)." },
-            { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "Method re-review, then run." },
+        { id: "WP-05", name: "Cards and bench parts", owner: "Hardware, then Michael at the bench",
+          note: "Parts list staged in four groups; only group 1 is needed now. The power-cut test follows once playback works.", criteria: [
+            { id: "A-1", name: "Card identity", state: "PASSED", next: "Three PNY Elite-X 64 GB microSDXC U3 V30 A1, photos kept in docs/evidence/cards. Retail part number unknown (packaging gone)." },
+            { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "On the bench, with the Teensy and the existing reader." },
             { id: "A-3", name: "Against the C-60 copy requirement", state: "TO DO", next: "After A-2; production copy-time proof remains Phase 5." },
             { id: "A-4", name: "Reader not the bottleneck", state: "TO DO", next: "With A-2." },
-            { id: "A-5", name: "Parts support the bench and rig", state: "BLOCKED", next: "Hardware675 stages verified small first-board order. Parts not confirmed ordered; changed cart unapproved; no physical support acceptance." },
-            { id: "A-6", name: "Atomicity: ≥1,000 qualifying cuts per card model, zero torn blocks", state: "BLOCKED", next: "V398 planted-tear11 cases pass; Hardware675/V405 bind new selfrun route after ADR209 P3/P4/SPI decisions. Complete method/physical cuts pending parts; no external-U/calibration gate." }
+            { id: "A-5", name: "Bench parts in hand", state: "BLOCKED", next: "Blocked on the order. Group 1 first; groups 2 and 3 when their work starts." },
+            { id: "A-6", name: "Power-cut test: 1,000 or more qualifying cuts per card model, zero torn blocks", state: "TO DO", next: "After playback works; needs group 3 parts. The host-side judge exists; the Teensy cut firmware does not. A torn block is a format blocker." }
           ] },
-        { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software + Verification", issue: 674,
-          note: "V397 cleared runner/census/order corrections, integrated3558a88a/211f8a9d/c30881d9; V394-cleared kit integrated8893c99 with119/119 CI checks. Software674/V405 now prepare bound F3 timing and capture hooks without parts. No target/package acceptance.", criteria: [
-            { id: "F1", name: "Goldens byte-identical on target", state: "IN ROUND", next: "Host: 14/14 PCM comparisons, 28/28 controls per platform carried onto main. V394 independently clears corrected kit:109/4/53/47 plus8 cases and32+6 controls. Kit integrated8893c99; target PCM/I2S now awaits Teensy+audio adapter." },
-            { id: "F2", name: "RAM, stack and .rodata budgets", state: "IN ROUND", next: "Static RAM 191600/204800; engine .rodata 1040/32768 PASS. Cleared kit integrated8893c99; new timing/build/log preparation674 is off-target only. Actual target instance/stack unmeasured." },
-            { id: "F3", name: "Warm instant-on <100 ms", state: "IN ROUND", next: "Software674 declares timing/serial/build interface; V405 binds tests before hooks/checker. Actual MCU timing and Michael verdict need the bench." },
-            { id: "F4", name: "Commit latency <200 ms", state: "TO DO", next: "Firmware-timed, zero underruns; Michael's verdict (ADR-208). With recording (WP-19)." },
-            { id: "F5", name: "Play, Stop and removal", state: "TO DO", next: "Bench evidence witnessed by Michael." },
-            { id: "F6", name: "Engine unchanged", state: "PASSED", next: "Vd7540127 / V98f46c94 confirm engine d96b4245; PM650 authenticates unchanged integration aa472667. This is not WP-17 package acceptance." }
+        { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software, then Michael at the bench",
+          note: "Play path, card binding and the warm-wake timer are written and pass off-target. Nothing has run on a Teensy yet.", criteria: [
+            { id: "F1", name: "Goldens byte-identical on target", state: "READY", next: "Passes off-target against all seven 1.0x goldens. Run golden_serial.py on the Teensy." },
+            { id: "F2", name: "RAM, stack and .rodata budgets", state: "READY", next: "Static sizes pass in CI (RAM 191,600 of 204,800 bytes; engine .rodata 1,040 of 32,768). Stack high-water needs the board." },
+            { id: "F3", name: "Warm wake under 100 ms", state: "READY", next: "Implemented and tested off-target. On the bench: sleep, Play, read the WAKE line, run wake150; Michael's verdict." },
+            { id: "F4", name: "Commit latency under 200 ms", state: "TO DO", next: "With recording (WP-19). Zero underruns is strict." },
+            { id: "F5", name: "Play, Stop and card removal", state: "READY", next: "Implemented. Bench: pull the card mid-play, then tapectl verify." },
+            { id: "F6", name: "Engine unchanged", state: "PASSED", next: "CI checks the engine tree against d96b4245 on every firmware PR." }
           ] },
-        { id: "WP-18", name: "Second slot and copy", owner: "Contract after Round 1", note: "Read-only source slot, copy correctness and LED progress from the callback. Criteria pending contract.", criteria: [] },
-        { id: "WP-19", name: "Audio paths and output caps", owner: "Contract after Round 1", note: "Codec, microphone, aux and speaker; two output caps, speaker mute and record-source selection. Criteria pending contract.", criteria: [] },
-        { id: "WP-20", name: "Transport keys and LED status", owner: "Contract after Round 1", note: "Mechanical keys, depth-sensitive Rew/FF, copy button and record light. No solenoid. Criteria pending contract.", criteria: [] },
-        { id: "WP-21", name: "Witnessed bench demo", owner: "Contract after Round 1", note: "Michael makes a cartridge in the app, plays it on the bench, scrubs, stops and records. Michael records verdicts in MICHAEL-CHECKS; Verification checks the records. Criteria pending contract.", criteria: [] }
+        { id: "WP-18", name: "Second slot and copy", owner: "Not started", note: "Read-only source slot, copy correctness and LED progress from the callback.", criteria: [] },
+        { id: "WP-19", name: "Audio paths and output caps", owner: "Not started", note: "Recording, codec, microphone, aux and speaker; two output caps, speaker mute and record-source selection.", criteria: [] },
+        { id: "WP-20", name: "Transport keys and LED status", owner: "Not started", note: "Mechanical keys, depth-sensitive Rew/FF, copy button and record light. No solenoid.", criteria: [] },
+        { id: "WP-21", name: "Bench demo", owner: "Not started", note: "Michael makes a cartridge in the app, plays it on the bench, scrubs, stops and records, and records his verdicts in MICHAEL-CHECKS.", criteria: [] }
       ]
     };
 
     function criterionState(row) {
-      if (!["PASSED", "IN ROUND", "TO DO", "BLOCKED"].includes(row.state)) {
+      if (!["PASSED", "READY", "TO DO", "BLOCKED"].includes(row.state)) {
         throw new Error("Roadmap criterion " + row.id + " has no valid state; progress is unknown.");
       }
       return row.state;
@@ -371,7 +369,7 @@
       const rows = PHASE3.packages.flatMap(pkg => pkg.criteria);
       const count = (items, state) => items.filter(row => criterionState(row) === state).length;
       const passed = count(rows, "PASSED");
-      const inRound = count(rows, "IN ROUND");
+      const inRound = count(rows, "READY");
       const blocked = count(rows, "BLOCKED");
       const entryPassed = count(PHASE3.entry, "PASSED");
       document.getElementById("roadmap").innerHTML = `
@@ -381,18 +379,18 @@
         <p class="why">Teensy 4.1 · shared engine · keys, LED status, headphones and speaker.</p>
         <div class="track" role="progressbar" aria-label="Phase 3 currently defined package criteria passed" aria-valuemin="0" aria-valuemax="${rows.length}" aria-valuenow="${passed}">
           ${rows.map(row => `<div class="seg${criterionState(row) === "PASSED" ? " done" : ""}" title="${escapeHtml(row.id + " · " + row.name + " — " + row.state)}"><i style="width:${row.state === "PASSED" ? 100 : 0}%"></i></div>`).join("")}</div>
-        <div class="legend"><span class="pill acc"><b>${passed}</b> passed</span><span class="pill"><b>${inRound}</b> in round</span><span class="pill"><b>${blocked}</b> blocked</span><span class="pill off"><b>${rows.length - passed - inRound - blocked}</b> to do</span></div>
-        <p class="rmnote">Counts cover the ${rows.length} currently defined WP-05 / WP-17 criteria. WP-18–WP-21 criteria arrive with their contracts after Round 1; this is not an overall phase percentage. Assigned work and partial checks do not count as passed.</p>
+        <div class="legend"><span class="pill acc"><b>${passed}</b> passed</span><span class="pill"><b>${inRound}</b> ready for the bench</span><span class="pill"><b>${blocked}</b> blocked</span><span class="pill off"><b>${rows.length - passed - inRound - blocked}</b> to do</span></div>
+        <p class="rmnote">Counts cover the ${rows.length} currently defined WP-05 / WP-17 criteria. WP-18–WP-21 criteria are written when that work starts; this is not an overall phase percentage. Ready means written and waiting for hardware, not passed.</p>
         <details open><summary>Spec and entry items · ${entryPassed} of ${PHASE3.entry.length} passed</summary>${criterionList(PHASE3.entry)}</details>
         <details open><summary>6 packages · criteria and next steps</summary><ul class="stages">
           ${PHASE3.packages.map(pkg => `<li class="stage"><span class="num">${escapeHtml(pkg.id)}</span><span class="nm">${escapeHtml(pkg.name)}</span>
             <p class="why">${escapeHtml(pkg.owner)}${pkg.issue ? ` · <a href="https://github.com/mmsanders/Digital-Tape/issues/${pkg.issue}">#${pkg.issue}</a>` : ""}</p>
-            <p class="why">${escapeHtml(pkg.note)}</p>${pkg.criteria.length ? criterionList(pkg.criteria) : `<p class="empty">Not yet assigned · criteria pending</p>`}</li>`).join("")}</ul></details>
-        <p class="why">Pre-parts work: <a href="https://github.com/mmsanders/Digital-Tape/issues/674">Software #674 timing/capture</a> · <a href="https://github.com/mmsanders/Digital-Tape/issues/675">Hardware #675 checker/first-order cart</a> · <a href="https://github.com/mmsanders/digital-tape-verification/issues/405">Verification #405 binding/review</a>. Michael starts issues manually. CI and baseline kit integrations are complete; missing Teensy/audio now blocks actual target validation. Do not wait for the full rig/features order to start ordinary bench bring-up.</p>
-        <p class="why">Exit: WP-05 and WP-17–WP-21 independently accepted on the bench; firmware goldens byte-identical with earlier regressions green; atomicity passed or a torn block escalated as a format blocker; Q-P2-1 cleared before write batching.</p>
+            <p class="why">${escapeHtml(pkg.note)}</p>${pkg.criteria.length ? criterionList(pkg.criteria) : `<p class="empty">Not started · criteria pending</p>`}</li>`).join("")}</ul></details>
+        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/FOR-MICHAEL.md">What is waiting on Michael</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/hardware/sourcing/PHASE3-BENCH.md">Bench parts list</a>. Nothing has run on hardware yet.</p>
+        <p class="why">Exit: WP-05 and WP-17–WP-21 pass on the bench with Michael's recorded verdicts; firmware goldens byte-identical with earlier regressions green; atomicity passed or a torn block escalated as a format blocker; Q-P2-1 cleared before write batching.</p>
         <p class="rmnote">USB-powered bench only. Fabrication and charging CLOSED; no qualified card. Engine pinned at d96b4245. Production &lt;30 s copy proof belongs to Phase 5. DRAFT-11 remains proposed.</p>
-        <p class="rmnote">Snapshot: ${escapeHtml(PHASE3.asOf)} — PM-maintained, not live. Issue queues below refresh separately; closing an issue does not pass a criterion.</p>
-        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/WP17-BENCH-EVIDENCE.md">BE-1 evidence contract</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/REVIEW/PM669-PREPARTS-2026-11-08.md">PM review</a></p>`;
+        <p class="rmnote">Snapshot: ${escapeHtml(PHASE3.asOf)} — maintained by hand, not live. Issue queues below refresh separately; closing an issue does not pass a criterion.</p>
+        <p class="why"><a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-LEDGER.md">Criterion ledger</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/PHASE3-PLAN.md">Phase 3 plan</a> · <a href="https://github.com/mmsanders/Digital-Tape/blob/main/docs/STATUS.md">Status</a></p>`;
     }
 
     function rungOf(stage) {

@@ -1,6 +1,6 @@
 # WP-17 bench firmware — contract FW-1
 
-**Status:** ISSUED by PM, 2 November 2026 PDT ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)).
+**Status:** ISSUED by PM, 2 November 2026 PDT ([ADR-201](archive/DECISIONS-ADR-001-209.md#adr-201--phase-3-opened-round-1-issued)).
 Changes after issue are PM decisions recorded here and in both lead issues.
 **2 November clarification (ADR-202 / PM #648):** admission follows WP-14 §2;
 F1 compares the seven normal-rate golden PCM payloads, not whole-WAV hashes.
@@ -101,7 +101,8 @@ storage; static accounting does not pass the target stack criterion.
 
 ## 7. Independence
 
-This is a port and consumer, not engine code. As with the desktop tools (ADR-158), Verification
-authors the WP-17 acceptance tests from this contract in parallel, without reading the firmware,
-and disposes Software's exact head. Structural Rule 1 still governs any engine change, and none
-is licensed here.
+This is a port and consumer, not engine code. The independent WP-17 package Verification
+authored from this contract (admission cases, host goldens, static sizes) is imported and
+runs in CI. **From 16 November 2026 (ADR-210) further WP-17 work is light track:** the
+author tests it and Michael judges the bench result. Structural Rule 1 still governs any
+engine change, and none is licensed here.

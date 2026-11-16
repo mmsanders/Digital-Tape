@@ -1,6 +1,6 @@
 # Spec revision DRAFT-11 — proposal
 
-**PROPOSED by PM, 2 November 2026 PDT ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)).
+**PROPOSED by PM, 2 November 2026 PDT ([ADR-201](archive/DECISIONS-ADR-001-209.md#adr-201--phase-3-opened-round-1-issued)).
 Not in force.** ADR-208 (6 Nov) adds hands-on method changes, below; until issuance ADR-208 governs those methods for Phase 3.
 
 Issuance needs:
@@ -34,7 +34,7 @@ closed independent preflight. Hashed DRAFT-10 files remain unchanged.
 
 ## ADR-208 hands-on method — further `spec/acceptance.md` row changes
 
-Added 6 November 2026 PST on Michael's direction ([ADR-208](DECISIONS.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)).
+Added 6 November 2026 PST on Michael's direction ([ADR-208](archive/DECISIONS-ADR-001-209.md#adr-208--hands-on-acceptance-for-physical-and-timing-criteria)).
 Timing/feel rows keep their numeric targets. The firmware times itself on the MCU
 timer and logs the values; Michael's matched verdict decides those judgments.
 A miss greater than20% requires recorded PM disposition BEFORE acceptance. Strict

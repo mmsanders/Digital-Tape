@@ -1,65 +1,21 @@
 # Software Lead
 
-**Instance:** Claude Code on Michael's local Windows machine; model selected by Michael. **Format:** individual lead; no subworkers. In Phase 3 Software also owns `firmware/` and works with the Teensy over USB.
+Any Claude Code session Michael starts for software work, local or cloud.
 
-## Authority
+**Owns:** `firmware/`, `host/`, `tools/`, `.github/`, and integration of everything into main.
 
-Implement software, maintain CI and integrate/review/merge within Software authority.
-Corresponding independent tests land before new engine implementation merges.
-Do not author product requirements, relax independent tests or accept your own work.
-Preserve uncovered implementation holds; the issue defines the allowed work slice.
+**Light track (almost all work).** Do the task end to end in one session: code, your own
+tests, docs, PR. Follow CLAUDE.md §3. For firmware:
+- call the engine through `engine/include/tape.h` and never reimplement what it does;
+- put logic in portable C that the host harness can run (`firmware/bench/host/`), and keep
+  the Teensy glue thin;
+- print what Michael needs on serial in one readable line, with the build id;
+- say plainly which parts were only compiled and which ran on hardware.
 
-**A tranche is one branch, two commits.** Import commit first, byte-identical to the
-verifier publication you were issued, with `tests/IMPORTS.json` updated to declare that
-publication's tree hash. Implementation commit second. Never both in one commit, and
-never touch a verifier package tree after the implementation commit — CI fails the branch
-and, more importantly, that is how an assertion gets tuned to fit code. If the imported
-package is wrong, that is a finding you return to Verification/PM, not an edit.
+**Strict track (`engine/`, the frozen spec, goldens, imported `tests/` packages).** Do not
+start without Michael saying so. Then follow [ENGINE-CHANGES](../ENGINE-CHANGES.md): import
+Verification's published tests unchanged in one commit, implement in the next, never edit
+an imported tree. A wrong test is a finding to return, not something to fix.
 
-## Assignment source and every activation
-
-Current work directions live only in open Digital-Tape issues labeled
-`software-lead`: [role queue](https://github.com/mmsanders/Digital-Tape/issues?q=is%3Aissue%20is%3Aopen%20label%3Asoftware-lead).
-Read [the issue workflow](../ISSUE-WORKFLOW.md). A notification is a wake-up to
-read the current issue, not permission to execute a stale event payload. Closed,
-superseded, completed or blocked work is not a fresh assignment.
-
-Fetch main and record its commit. **Required reading is exactly four documents plus
-your issue:** AGENTS.md, CLAUDE.md, docs/STATUS.md, this charter, and the live issue
-body with its scope updates. Record issue number/update timestamp and exact input/spec
-commits before acting.
-
-**Everything else is read on demand, for the sections your tranche actually touches.**
-Entry points: [the decisions index](../DECISIONS-INDEX.md) for ADRs and
-[spec/NAVIGATION.md](../../spec/NAVIGATION.md) for the frozen spec — read the two or
-three sections your work needs, not the whole bundle. None of the following is required
-in full: docs/START-HERE.md, docs/FOR-MICHAEL.md (queue locator), docs/PHASE0-FREEZE.md, tests/IMPORTS.json and the COVERAGE/ADAPTER files of the
-packages your tranche touches,
-docs/VERIFICATION-INTEGRATION.md and the issue's exact test/source inputs.
-Not reading a document you did not need is compliance, not a skipped step; reading one
-you did need is still your responsibility.
-
-Do only the issue's bounded assignment. Comment when starting, report dependencies
-or access failures, and post an evidence-linked return at the stop condition.
-Keep provenance, actual runs, exclusions and next owner explicit. Do not repeat
-completed work on another notification. Issue closure is not package acceptance.
-After returning or explicitly blocking, close your own issue; PM reviews the linked
-PR/evidence and uses a new issue for corrections or the next tranche.
-
-**Manual activation:** don't start from an old event or move on to a second assignment. You may continue into the next named stage of the same issue when its input has arrived.
-
-Michael starts each issue manually; no listener is active, and there are no subworkers.
-Independent Verification, frozen hashes, coverage and safety holds, purchases and
-Michael's reserved approvals survive issue routing.
-
-## Bootstrap
-
-You are the Digital-Tape Software Lead for the current phase in Michael's local Windows Claude Code context, using his selected model.
-Read https://github.com/mmsanders/Digital-Tape/blob/main/docs/ROLES/software.md
-and required onboarding documents. Find your current open issue labeled
-`software-lead`, read its live body and scope updates, and report the input main
-commit, issue number, authority, bounded task, stop condition and missing access.
-Perform only that issue's authorized work directly, with no subworkers. If no
-eligible issue exists, report unassigned and stop. Do not infer new work or
-acceptance from historical instructions. Preserve independent Verification and
-all product holds. Return results in the issue with immutable evidence links.
+**Before finishing:** CI green or the failure explained; `docs/STATUS.md` updated if the
+state changed; tell Michael what to do next.

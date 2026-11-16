@@ -1,6 +1,6 @@
 # Phase 3 plan — bench firmware
 
-**OPEN since 2 November 2026** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Work is assigned in
+**OPEN since 2 November 2026** ([ADR-201](archive/DECISIONS-ADR-001-209.md#adr-201--phase-3-opened-round-1-issued)). Work is assigned in
 role-labeled issues; progress is in [the Phase 3 ledger](PHASE3-LEDGER.md). The device is described
 in [DEVICE-DESIGN.md](DEVICE-DESIGN.md).
 
@@ -35,51 +35,34 @@ resumes near where it stopped.
 - any engine or format change;
 - desktop app changes, except the deferred G2 work.
 
-## 2. Round 1 (issued 2 Nov)
+## 2. Order of work
 
+Updated 16 November ([ADR-210](DECISIONS.md#adr-210--light-process-outside-the-engine)).
 Contract: [FW-1](WP17-FIRMWARE-CONTRACT.md). Spec draft: [DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md).
 
-- **PM:** a spec revision covering
-  - the speaker cap value (guardrail 11 revision);
-  - end-of-tape and cartridge-full behaviour without a solenoid;
-  - removal of the coil limits.
-  
-  Also the depth-sensitive scrub behaviour (ADR-200), and the WP-17 contract (port interface,
-  bench pin map, golden-on-target method).
-- **Hardware:**
-  - the bench parts list for Michael's approval: Teensy 4.1, audio board, breadboard and
-    wiring, keys and LEDs, second microSD breakout, small speaker and amplifier, MEMS mic,
-    aux jacks, and the power-cut test's load switch. *Revised by ADR-208:* no bench logic
-    analyser, SPL meter or coupler; instruments are about $30 in total (multimeter, optional
-    clone logic analyser for debugging);
-  - the power-cut test, simplified to a Teensy self-run test (ADR-208);
-  - toy-safety acoustic limits for the speaker cap;
-  - a depth-sensing approach for Rew/FF;
-  - a copy-button placement.
-- **Verification:**
-  - the Q-P2-1 any-subset completion;
-  - WP-17 acceptance authored from the contract;
-  - review of the atomicity rig method.
-- **Software:** firmware skeleton and engine-on-port tests off-target until parts arrive.
-- **Michael:** approve and order the parts list.
+1. **Michael orders group 1** of [the parts list](../hardware/sourcing/PHASE3-BENCH.md).
+2. **Bring-up and WP-17** on the bench: play a real cartridge, then goldens, warm wake,
+   stack and removal ([ledger](PHASE3-LEDGER.md)).
+3. **WP-19 recording and the headphone cap**, then **WP-18 second slot and copy** (group 2
+   parts).
+4. **WP-20 keys, depth-sensitive scrub and LEDs.** Hardware proposes the depth sensor.
+5. **WP-05 power-cut test** on the PNY cards (group 3 parts), any time after step 2.
+6. **WP-21 bench demo.**
+
+DRAFT-11 (speaker cap, end-of-tape and cartridge-full without a solenoid, depth-sensitive
+scrub) is finished once Michael approves the speaker limit. It is needed before WP-19 and
+WP-20 are judged, not before bring-up.
 
 ## 3. How the work runs
 
-ADR-195 carries over:
-- outcome tests plus a negative control;
-- no separate method rounds;
-- outcome-sized issues;
-- same-issue stage continuation;
-- a criterion ledger as the progress record.
+Light track (CLAUDE.md §3): one lead, one session, one PR per step, with the author's own
+tests and a host-side check where one is possible. The firmware measures itself and prints
+the numbers; Michael tries the behaviour and records a verdict in
+[MICHAEL-CHECKS](MICHAEL-CHECKS.md) (ADR-208). Limits stay as targets. The output caps stay
+enforced in the codec, and a phone app checks them with a 5 dB margin. No lab instruments.
 
-**Hands-on acceptance (ADR-208).** For physical and timing criteria, the firmware measures
-itself and logs the values; Michael tries the behaviour and records a verdict in
-[MICHAEL-CHECKS](MICHAEL-CHECKS.md). Limits stay as targets. The output caps stay enforced in
-the codec; a phone app checks them with a 5 dB margin. No lab instruments are bought.
-
-Structural Rule 1 governs engine code. Firmware is a port and consumer: it must not fork seek,
-mixing or any other engine behaviour (CLAUDE.md §6). Physical safety checks are done and recorded by
-Michael; Verification checks the records, not instruments.
+Firmware is a consumer of the engine: it must not fork seek, mixing or any other engine
+behaviour (CLAUDE.md §6). No engine change is planned; one would be strict track.
 
 ## 4. Carried in
 

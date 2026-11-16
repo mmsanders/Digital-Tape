@@ -1,93 +1,69 @@
 # Project status
 
-**8 November 2026 PST. Phase 3 OPEN** ([ADR-201](DECISIONS.md#adr-201--phase-3-opened-round-1-issued)). Phases 1 and 2 are complete.
-Progress: [Phase 3 ledger](PHASE3-LEDGER.md).
+**16 November 2026.** Phases 1 and 2 are complete. Phase 3 (bench firmware) is open and
+**waiting on parts**.
 
-## Completed
+## Where things stand
 
-| Phase | Result |
+| Phase | State |
 |---|---|
-| 1 Audio engine | 36/36 accepted (3 Oct 2026) |
-| 2 Desktop tooling | 12/12, with the G2 unaided test deferred (1 Nov 2026). `tapectl` on real cards, ingest and the one-window app are accepted for Windows 11. Michael made real cartridges through the app |
+| 1 Audio engine | Done (3 Oct). Frozen at engine tree `d96b4245`; format frozen |
+| 2 Desktop tools | Done for Windows 11 (1 Nov). Michael has made real cartridges with the app. Scope frozen: it loads cartridges, nothing more |
+| 3 Bench firmware | Open since 2 Nov. Play path, card binding and warm-wake timer are written and pass off-target. **Nothing has run on a Teensy yet, because there is no Teensy** |
 
-Package detail: [packages](PACKAGES/README.md) and [verification integration](VERIFICATION-INTEGRATION.md).
-The desktop tool's scope is frozen (ADR-198): it loads cartridges, nothing more.
+## What blocks progress
 
-## Phase 3
+**The first parts order.** About $62 before tax and shipping: Teensy 4.1 with headers, audio
+shield, header strip, breadboard, jumpers, buttons, USB cable. The checked list with links
+is group 1 in [the bench parts list](../hardware/sourcing/PHASE3-BENCH.md). Michael is
+ordering it. Until it arrives, no firmware number is real.
 
-[Phase 3 plan](PHASE3-PLAN.md):
-- the shared engine on a Teensy 4.1 bench build, with keys, LED status, headphones and speaker;
-- the card power-cut test on the PNY cards;
-- the deferred crash coverage before firmware write batching.
+## When the parts arrive
 
-The device design has moved:
-- mechanical latching side keys and no solenoid (LED status instead);
-- depth-sensitive Rew/FF;
-- a speaker with its own loudness cap;
-- a microphone, aux in, and aux out shared with the headphone jack.
+In this order. Each step is one session plus Michael at the bench.
 
-See [DEVICE-DESIGN](DEVICE-DESIGN.md).
+1. **Bring-up.** Solder the audio-board header, wire it, flash, insert a cartridge made
+   with the desktop app, press Play. Steps are in
+   [the firmware README](../firmware/bench/README.md). Keep the volume low and check it
+   with the headphones off your ears first.
+2. **Listen for clicks.** The firmware blocks the audio interrupt while it reads the card
+   (`loop_call` in `firmware/bench/src/main.cpp`). A slow card read may be audible as a
+   click that the underrun counter does not see. If so, the fix is a small FIFO in
+   firmware between the engine and the interrupt; the engine does not change.
+3. **Goldens on target** (F1): `firmware/bench/tools/golden_serial.py` compares the
+   Teensy's audio with the reference, byte for byte.
+4. **Warm wake** (F3): `sleep`, press Play, read the `WAKE us …` line, then the `wake150`
+   check. Add a row to [MICHAEL-CHECKS](MICHAEL-CHECKS.md).
+5. **Stack and removal** (F2, F5): `info` prints the stack high-water mark; pull the card
+   mid-play and run `tapectl verify` on it afterwards.
 
-**ADR-208 governs hands-on methods.** Firmware self-timing plus Michael's matched
-[record](MICHAEL-CHECKS.md); phone-app cap margin, optional CID, no retired laboratory
-instrument/uncertainty gate. Strict counted/structural facts and cap margins remain.
+Then recording and the second slot (WP-18/19), keys and LEDs (WP-20), and the power-cut
+test on the PNY cards. Criteria are in [the Phase 3 ledger](PHASE3-LEDGER.md).
 
-## Current assignments
+## Waiting on Michael
 
-[PM669 latest review](REVIEW/PM669-PREPARTS-2026-11-08.md) / ADR-209:
+See [FOR-MICHAEL](FOR-MICHAEL.md): the parts order, the speaker loudness limit, and two
+open pull requests to close.
 
-| Owner | Issue | Outcome before parts |
-|---|---|---|
-| Software | [#674](https://github.com/mmsanders/Digital-Tape/issues/674) | Declare F3 serial/timer/build/record interface; after independent binding implement hooks/offline capture and first-board packet |
-| Hardware | [#675](https://github.com/mmsanders/Digital-Tape/issues/675) | Finish declared selfrun-r1 host checker after tests; verify small first-order cart and resolve S2 research gap; same PR673 |
-| Verification | [V#405](https://github.com/mmsanders/digital-tape-verification/issues/405) | Bind ready selfrun declaration now, timing declaration when returned; publish tests before code and review exact heads |
+## How work runs now
 
-Michael manually starts each issue; no listeners or subworkers. Closed667/658/652,
-V397/V398 are completed inputs, not new work.
-
-## Latest disposed work
-
-Hardware646 integrated60dfe6aa carries V392 unchanged. V397 clears runnera4ed3e71,
-census78f1631f and orderdbaa5a03. Software integrated PR672 at3558a88a (113 checks),
-PR660 at211f8a9d and PR665 atc30881d9 (111/111 each). Earlier CI blockers are fixed.
-BE-1 kit PR654 integrated8893c99 from4976cad0 after119/119 successes; V394 clearance
-carries unchanged checker/helper/imports, with protected metadata-only provenance.
-No target/package acceptance follows. Engine remains d96b4245.
-V398 publishes DRAFT11 wording findings200ecef7,41/10 UNBOUND timing semantics
-9aa2716a and11 planted-tear judge cases321c5236. PR673/c32f1a56 declares new plan5
-selfrun-r1; not implemented. Complete self-run method remains NOT CLEARED.
-PM resolves CID disagreement diagnostic-only (P3B), completed-before OLD run FAIL
-(P4), declared5us/200mV logical boundaries, and SPI model-atomicity scope with
-explicit residual bus risk. No native-SD4 equivalence or physical qualification.
-F398 wording corrected; old DRAFT10/engine/goldens stay frozen. S2 and owner
-authorization still precede DRAFT11 issuance. No retired calibrated rig gate returns.
-
-## Parts and critical path
-
-**The missing Teensy now blocks actual target bring-up and validation.** Useful
-pre-parts work remains in674/675/405, but cannot establish target PCM/I2S, stack,
-timing, removal or real card cuts. Buy-first recommendation: Teensy4.1, compatible
-RevD/D2 audio adapter, required headers/connections, basic breadboard/wires/buttons,
-USB data cable if not owned. Teensy alone enables boot/USB/native-SD preparation;
-audio needs the adapter. Ordinary playback does not wait for the rig or speaker.
-Hardware675 verifies the small cart; no current price/stock guarantee from old totals.
-Later speaker/mic/LED/Hall/second-slot and power-cut parts are separate purchases.
-No order has been confirmed; changed cart remains Michael's approval/payment.
-Still **1/12 passed (F6)**. A1 identity review, F1/F2 preparation and F3 off-target
-work are in round; A5/A6 blocked by parts/remaining method work. No bench session
-is executed/authorized here.365 deferred faults pass; six long cuts unavailable;
-batching held. Physical controls, cards, target/caps and DRAFT11 remain pending.
+[ADR-210](DECISIONS.md#adr-210--light-process-outside-the-engine), 16 November: the
+tests-first, independently verified process applies to the engine and the format only.
+Firmware, tools and hardware are one lead, one session, one PR, judged by Michael on the
+bench. Rules are in [CLAUDE.md](../CLAUDE.md) §3.
 
 ## Holds that stand
 
-- Guardrails 01–13; engine pinned at `d96b4245`; format frozen; Structural Rule 1 for engine
-  code; Verification independence.
-- Host scope frozen. The app and ingest never run elevated; WP-14 A4 disk safety outranks
-  everything.
-- Fabrication and charging CLOSED. No card is qualified yet.
-- Deferred, not waived:
-  - G2: run [the protocol](WP15-G2-PROTOCOL.md) before the app goes to anyone else for real use;
-  - macOS (ADR-205: retained manual checks, excluded from normal required aggregates);
-  - the ADR-196 limitations.
+- Guardrails 01 to 13. Engine pinned, format frozen.
+- Output: fixed low level until the headphone cap (WP-19) lands. Nobody wears headphones
+  on the bench without a volume check.
+- One block per card write call; write batching stays off (six long crash-test cases could
+  not be run; see the ledger).
+- Fabrication and cell charging CLOSED. No card is qualified yet.
+- The desktop app and ingest never run elevated; `tapectl` never writes a disk the user
+  did not pick.
+- Deferred, not dropped: the unaided app test ([G2](WP15-G2-PROTOCOL.md)) before anyone
+  else uses the app; macOS; the ADR-196 limitations.
 
-[Hardware status](STATUS-HARDWARE.md) · [human queue](FOR-MICHAEL.md) · [decisions index](DECISIONS-INDEX.md)
+[Hardware status](STATUS-HARDWARE.md) · [Device design](DEVICE-DESIGN.md) ·
+[Phase 3 plan](PHASE3-PLAN.md) · [previous status](archive/status-history/2026-11-08-before-ADR-210.md)
