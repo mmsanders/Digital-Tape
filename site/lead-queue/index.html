@@ -319,9 +319,9 @@
 
     // Criterion states mirror docs/PHASE3-LEDGER.md; test-dashboard.cjs fails if they drift.
     const PHASE3 = {
-      asOf: "16 November 2026 · waiting on the first parts order · process simplified by ADR-210",
+      asOf: "18 November 2026 · minimal bench parts ordered and in transit · waiting for delivery and first bring-up",
       entry: [
-        { id: "Parts", name: "First parts order", state: "BLOCKED", next: "Michael orders group 1 of the bench parts list (about $62): Teensy 4.1, audio shield, breadboard kit." },
+        { id: "Parts", name: "First parts order", state: "PASSED", next: "Michael confirmed the minimal bench order is in transit (18 Nov). Check contents against group 1 on arrival, then start bring-up." },
         { id: "DRAFT-11", name: "Spec revision", state: "BLOCKED", next: "Waiting on Michael's decision on the speaker limit (80 dB(A) at 50 cm proposed). Not in force." },
         { id: "Q-P2-1", name: "Crash coverage before write batching", state: "BLOCKED", next: "365 of 365 deferred load faults pass. Six long cuts could not be run on the fixture. Write batching stays off." }
       ],
@@ -332,7 +332,7 @@
             { id: "A-2", name: "Sustained write on 80%-filled media", state: "TO DO", next: "On the bench, with the Teensy and the existing reader." },
             { id: "A-3", name: "Against the C-60 copy requirement", state: "TO DO", next: "After A-2; production copy-time proof remains Phase 5." },
             { id: "A-4", name: "Reader not the bottleneck", state: "TO DO", next: "With A-2." },
-            { id: "A-5", name: "Bench parts in hand", state: "BLOCKED", next: "Blocked on the order. Group 1 first; groups 2 and 3 when their work starts." },
+            { id: "A-5", name: "Bench parts in hand", state: "BLOCKED", next: "Minimal bench order is in transit; waiting for delivery. Groups 2 and 3 follow when their work starts." },
             { id: "A-6", name: "Power-cut test: 1,000 or more qualifying cuts per card model, zero torn blocks", state: "TO DO", next: "After playback works; needs group 3 parts. The host-side judge exists; the Teensy cut firmware does not. A torn block is a format blocker." }
           ] },
         { id: "WP-17", name: "Firmware skeleton and engine integration", owner: "Software, then Michael at the bench",

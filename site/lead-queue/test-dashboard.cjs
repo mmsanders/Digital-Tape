@@ -96,7 +96,7 @@ assert.match(phase3(), />2\/12</);
 assert.match(phase3(), /<b>4<\/b> ready for the bench/);
 assert.match(phase3(), /<b>1<\/b> blocked/);
 assert.match(phase3(), /<b>5<\/b> to do/);
-assert.match(phase3(), /entry items · 0 of 3 passed/);
+assert.match(phase3(), /entry items · 1 of 3 passed/);
 assert.match(phase3(), /not an overall phase percentage/);
 assert.match(phase3(), /criteria pending/);
 assert.match(phase3(), /Fabrication and charging CLOSED/);

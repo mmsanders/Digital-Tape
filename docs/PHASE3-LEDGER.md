@@ -3,6 +3,9 @@
 Opened 2 November 2026. Plan: [PHASE3-PLAN](PHASE3-PLAN.md). Updated 16 November for
 [ADR-210](DECISIONS.md#adr-210--light-process-outside-the-engine).
 
+18 November: Michael confirmed the minimal bench order is in transit. The order entry
+is complete; parts-in-hand and all bench results still await delivery.
+
 **States:** PASSED · READY (written, waiting for hardware) · TO DO · BLOCKED (says on what).
 The [dashboard](../site/lead-queue/index.html) mirrors this table and its test fails if they differ.
 
@@ -15,7 +18,7 @@ checked by a test or a log. Timing and feel are firmware-timed and judged by Mic
 
 | Item | State | Next |
 |---|---|---|
-| First parts order | BLOCKED | Michael orders group 1 of [the parts list](../hardware/sourcing/PHASE3-BENCH.md), about $62 |
+| First parts order | PASSED | Minimal bench parts ordered and in transit, confirmed by Michael 18 Nov; check contents against group 1 of [the parts list](../hardware/sourcing/PHASE3-BENCH.md) on arrival |
 | DRAFT-11 spec revision ([proposal](SPEC-DRAFT-11-PROPOSAL.md)) | BLOCKED | Waiting on Michael: approve the speaker limit (80 dB(A) at 50 cm proposed), then PM finishes the text for his sign-off |
 | Crash coverage before write batching (Q-P2-1) | BLOCKED | 365 of 365 deferred load faults pass. Six long cuts could not be run on the fixture. **Write batching stays off.** Revisit only if one-block writes prove too slow on the bench |
 
@@ -27,7 +30,7 @@ checked by a test or a log. Timing and feel are firmware-timed and judged by Mic
 | A-2 Sustained write on 80%-filled media | TO DO | On the bench, with the Teensy and the existing reader |
 | A-3 Against the C-60 copy requirement | TO DO | After A-2 |
 | A-4 Reader not the bottleneck | TO DO | With A-2 |
-| A-5 Bench parts in hand | BLOCKED | Blocked on the order. Group 1 first; groups 2 and 3 when their work starts |
+| A-5 Bench parts in hand | BLOCKED | Minimal bench order is in transit; waiting for delivery. Groups 2 and 3 follow when their work starts |
 | A-6 Power-cut test: 1,000 or more qualifying cuts per card model, zero torn | TO DO | After playback works. Needs group 3 parts. The host-side judge and its planted-tear tests exist in `hardware/characterisation/`; the Teensy cut firmware does not. A torn block is a format blocker |
 
 ## WP-17 — firmware skeleton ([FW-1](WP17-FIRMWARE-CONTRACT.md))

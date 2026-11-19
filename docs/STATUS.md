@@ -1,7 +1,7 @@
 # Project status
 
-**16 November 2026.** Phases 1 and 2 are complete. Phase 3 (bench firmware) is open and
-**waiting on parts**.
+**18 November 2026.** Phases 1 and 2 are complete. Phase 3 (bench firmware) is open and
+**waiting for delivery**. Michael has ordered the minimal bench parts; they are in transit.
 
 ## Where things stand
 
@@ -9,14 +9,15 @@
 |---|---|
 | 1 Audio engine | Done (3 Oct). Frozen at engine tree `d96b4245`; format frozen |
 | 2 Desktop tools | Done for Windows 11 (1 Nov). Michael has made real cartridges with the app. Scope frozen: it loads cartridges, nothing more |
-| 3 Bench firmware | Open since 2 Nov. Play path, card binding and warm-wake timer are written and pass off-target. **Nothing has run on a Teensy yet, because there is no Teensy** |
+| 3 Bench firmware | Open since 2 Nov. Play path, card binding and warm-wake timer are written and pass off-target. **Nothing has run on a Teensy yet; the board is in transit** |
 
 ## What blocks progress
 
-**The first parts order.** About $62 before tax and shipping: Teensy 4.1 with headers, audio
-shield, header strip, breadboard, jumpers, buttons, USB cable. The checked list with links
-is group 1 in [the bench parts list](../hardware/sourcing/PHASE3-BENCH.md). Michael is
-ordering it. Until it arrives, no firmware number is real.
+**Delivery of the minimal bench parts.** Michael confirmed the order is on its way
+(18 November). Group 1 in [the bench parts list](../hardware/sourcing/PHASE3-BENCH.md)
+is the first-bench reference; check the contents when it arrives. The software is ready
+for bring-up, and no target measurement has been made. Main development is waiting
+for delivery.
 
 ## When the parts arrive
 
@@ -42,8 +43,9 @@ test on the PNY cards. Criteria are in [the Phase 3 ledger](PHASE3-LEDGER.md).
 
 ## Waiting on Michael
 
-See [FOR-MICHAEL](FOR-MICHAEL.md): the parts order, the speaker loudness limit, and two
-open pull requests to close.
+See [FOR-MICHAEL](FOR-MICHAEL.md): first bring-up after delivery and the speaker
+loudness decision. The stale PRs are closed; neither repository has an open task or PR
+at this review. The speaker decision does not block first headphone playback.
 
 ## How work runs now
 
