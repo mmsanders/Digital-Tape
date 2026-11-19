@@ -40,7 +40,8 @@ resumes near where it stopped.
 Updated 16 November ([ADR-210](DECISIONS.md#adr-210--light-process-outside-the-engine)).
 Contract: [FW-1](WP17-FIRMWARE-CONTRACT.md). Spec draft: [DRAFT-11](SPEC-DRAFT-11-PROPOSAL.md).
 
-1. **Michael orders group 1** of [the parts list](../hardware/sourcing/PHASE3-BENCH.md).
+1. **Receive the minimal bench order**, confirmed in transit by Michael on 18 November;
+   check it against group 1 of [the parts list](../hardware/sourcing/PHASE3-BENCH.md).
 2. **Bring-up and WP-17** on the bench: play a real cartridge, then goldens, warm wake,
    stack and removal ([ledger](PHASE3-LEDGER.md)).
 3. **WP-19 recording and the headphone cap**, then **WP-18 second slot and copy** (group 2
